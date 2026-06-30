@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs on the same branch to save minutes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─── Quality gate ─────────────────────────────────────────────────────────
+  # Type check + lint + format + unit tests. Fails fast — no point building
+  # if the code doesn't compile or violates the style rules.
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Unit tests
+        run: npm test
+
+  # ─── Build + E2E ──────────────────────────────────────────────────────────
+  # Build the Next.js app then run Playwright E2E against the production build.
+  # NEXT_PUBLIC_* vars are inlined by Turbopack at build time — they must be
+  # present here, not injected at docker run time.
+  build-and-e2e:
+    name: Build + E2E
+    runs-on: ubuntu-latest
+    needs: quality
+    env:
+      CI: 'true'
+      NEXT_PUBLIC_API_BASE_URL: ${{ vars.STAGING_API_BASE_URL }}
+      NEXT_PUBLIC_WS_URL: ${{ vars.STAGING_WS_URL }}
+      NEXT_PUBLIC_APP_ENV: staging
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: E2E tests
+        run: npm run e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.sha }}
+          path: playwright-report/
+          retention-days: 7

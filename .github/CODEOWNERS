@@ -1,0 +1,31 @@
+# CODEOWNERS — defines required reviewers for changed files.
+# Update team slugs to match your actual GitHub organisation and teams.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# ── Default ────────────────────────────────────────────────────────────────
+# Every file not matched below requires a frontend-team review.
+*                                   @myhxcare/frontend-team
+
+# ── Clinical-critical features ─────────────────────────────────────────────
+# These modules affect direct patient care and must be co-reviewed by the
+# clinical lead alongside the frontend team.
+src/features/clinicals/             @myhxcare/clinical-leads @myhxcare/frontend-team
+src/features/pharmacy/              @myhxcare/clinical-leads @myhxcare/frontend-team
+src/features/laboratory/            @myhxcare/clinical-leads @myhxcare/frontend-team
+src/features/emergency/             @myhxcare/clinical-leads @myhxcare/frontend-team
+src/features/wards/                 @myhxcare/clinical-leads @myhxcare/frontend-team
+
+# ── Security-sensitive files ────────────────────────────────────────────────
+# Auth, env config, security headers, proxy layer.
+next.config.ts                      @myhxcare/security-team @myhxcare/frontend-team
+src/env.ts                          @myhxcare/security-team @myhxcare/frontend-team
+src/lib/auth/                       @myhxcare/security-team @myhxcare/frontend-team
+src/app/proxy.ts                    @myhxcare/security-team @myhxcare/frontend-team
+
+# ── Infrastructure and CI/CD ────────────────────────────────────────────────
+.github/                            @myhxcare/devops @myhxcare/frontend-team
+Dockerfile                          @myhxcare/devops @myhxcare/frontend-team
+.dockerignore                       @myhxcare/devops @myhxcare/frontend-team
+
+# ── Compliance and clinical standards ──────────────────────────────────────
+docs/                               @myhxcare/clinical-leads @myhxcare/frontend-team

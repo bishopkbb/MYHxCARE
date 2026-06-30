@@ -1,0 +1,4187 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>MYHxCARE Phase 1 Backend Architecture Constitution</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --g900:#14532d;--g700:#15803d;--g600:#16a34a;--g100:#dcfce7;--g50:#f0fdf4;
+    --b900:#1e3a5f;--b700:#1d4ed8;--b100:#dbeafe;
+    --a600:#d97706;--a100:#fef3c7;
+    --r600:#dc2626;--r100:#fee2e2;
+    --gray-900:#111827;--gray-800:#1f2937;--gray-700:#374151;--gray-600:#4b5563;
+    --gray-500:#6b7280;--gray-400:#9ca3af;--gray-300:#d1d5db;--gray-200:#e5e7eb;
+    --gray-100:#f3f4f6;--gray-50:#f9fafb;
+    --font-sans:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    --font-display:'Poppins',sans-serif;
+    --font-mono:'JetBrains Mono','Courier New',monospace;
+  }
+  html{font-size:16px}
+  body{font-family:var(--font-sans);color:var(--gray-900);background:#fff;line-height:1.7;-webkit-font-smoothing:antialiased}
+  @media print{
+    .page-break{page-break-before:always}
+    .no-print{display:none}
+    .cover-page{page-break-after:always}
+    h1.section-title{page-break-before:always}
+    body{font-size:10pt}
+  }
+
+  /* COVER */
+  .cover-page{min-height:100vh;background:linear-gradient(160deg,var(--b900) 0%,var(--g900) 60%,#0f4c2a 100%);display:flex;flex-direction:column;justify-content:space-between;padding:64px 80px;position:relative;overflow:hidden}
+  .cover-page::before{content:'';position:absolute;top:-120px;right:-120px;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,0.04)}
+  .cover-logo-area{display:flex;align-items:center;gap:20px}
+  .cover-logo-badge{width:64px;height:64px;background:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--g700);flex-shrink:0}
+  .cover-logo-text{color:rgba(255,255,255,0.9);font-size:14px;font-weight:500;line-height:1.4}
+  .cover-logo-text strong{display:block;font-size:16px;color:#fff;font-weight:600}
+  .cover-main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:80px 0 40px}
+  .cover-eyebrow{font-size:12px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:24px}
+  .cover-title{font-family:var(--font-display);font-size:56px;font-weight:800;line-height:1.1;color:#fff;margin-bottom:12px}
+  .cover-subtitle{font-family:var(--font-display);font-size:28px;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:48px}
+  .cover-divider{width:80px;height:4px;background:var(--g600);border-radius:2px;margin-bottom:40px}
+  .cover-meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;max-width:700px}
+  .cover-meta-item label{display:block;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:6px}
+  .cover-meta-item span{font-size:15px;font-weight:500;color:#fff}
+  .cover-badges{display:flex;gap:12px;flex-wrap:wrap;margin-top:40px}
+  .cover-badge{padding:6px 16px;border:1px solid rgba(255,255,255,0.25);border-radius:100px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.8)}
+  .cover-footer{display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(255,255,255,0.15);padding-top:32px}
+  .cover-footer-left{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6}
+  .cover-footer-right{font-size:12px;color:rgba(255,255,255,0.4);text-align:right}
+  .cover-confidential{display:inline-block;padding:4px 12px;background:rgba(220,38,38,0.3);border:1px solid rgba(220,38,38,0.5);border-radius:4px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#fca5a5;margin-bottom:8px}
+
+  /* PAGE HEADER */
+  .page-header{background:#fff;border-bottom:2px solid var(--g600);padding:16px 80px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+  .page-header-logo{font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--g700);display:flex;align-items:center;gap:10px}
+  .page-header-logo span{width:32px;height:32px;background:var(--g600);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-weight:800}
+  .page-header-info{font-size:12px;color:var(--gray-500);text-align:right}
+
+  /* TOC */
+  .toc-page{padding:80px;background:#fff}
+  .toc-page h2{font-family:var(--font-display);font-size:36px;font-weight:700;margin-bottom:8px}
+  .toc-page > p{color:var(--gray-500);font-size:15px;margin-bottom:48px}
+  .toc-section{margin-bottom:28px}
+  .toc-section-header{display:flex;align-items:center;gap:16px;padding:10px 0;border-bottom:2px solid var(--gray-200);margin-bottom:10px}
+  .toc-num{width:38px;height:38px;color:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+  .toc-section-title{font-size:15px;font-weight:600;flex:1}
+  .toc-items{list-style:none;padding-left:54px}
+  .toc-items li{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:var(--gray-600);border-bottom:1px dotted var(--gray-200)}
+
+  /* DOCUMENT BODY */
+  .document-body{max-width:1100px;margin:0 auto;padding:0 80px}
+  .section{padding:72px 0;border-bottom:1px solid var(--gray-200)}
+  .section:last-child{border-bottom:none}
+  .section-eyebrow{font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--g600);margin-bottom:10px}
+  .section-number{font-family:var(--font-display);font-size:13px;font-weight:600;color:var(--gray-400);margin-bottom:5px}
+  h1.section-title{font-family:var(--font-display);font-size:40px;font-weight:700;color:var(--gray-900);line-height:1.15;margin-bottom:6px}
+  .section-intro{font-size:16px;color:var(--gray-600);line-height:1.8;max-width:740px;margin-top:14px;margin-bottom:44px}
+  h2.subsection-title{font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--gray-900);margin-top:52px;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--gray-200);display:flex;align-items:center;gap:10px}
+  h2.subsection-title .num{font-size:12px;font-weight:600;color:var(--g600);background:var(--g50);padding:3px 10px;border-radius:100px}
+  h3.sub-subsection{font-size:17px;font-weight:600;color:var(--gray-800);margin-top:32px;margin-bottom:12px}
+  p{margin-bottom:14px;font-size:15px;line-height:1.75;color:var(--gray-700)}
+
+  /* CALLOUTS */
+  .callout{border-radius:10px;padding:22px 26px;margin:28px 0;border-left:4px solid}
+  .callout-executive{background:var(--b100);border-color:var(--b700)}
+  .callout-executive .callout-label{color:var(--b700);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:7px}
+  .callout-executive p{color:#1e3a5f;font-size:15px}
+  .callout-technical{background:var(--g50);border-color:var(--g600)}
+  .callout-technical .callout-label{color:var(--g700);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:7px}
+  .callout-warning{background:var(--a100);border-color:var(--a600)}
+  .callout-warning .callout-label{color:var(--a600);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:7px}
+  .callout-critical{background:var(--r100);border-color:var(--r600)}
+  .callout-critical .callout-label{color:var(--r600);font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:7px}
+
+  /* STATS */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:28px 0}
+  .stat-card{background:linear-gradient(135deg,var(--g900),var(--b900));border-radius:12px;padding:22px;text-align:center;color:#fff}
+  .stat-card .stat-value{font-family:var(--font-display);font-size:30px;font-weight:800;display:block;margin-bottom:4px}
+  .stat-card .stat-label{font-size:11px;color:rgba(255,255,255,0.7);font-weight:500;text-transform:uppercase;letter-spacing:0.08em}
+
+  /* INFO CARDS */
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:28px 0}
+  .info-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:12px;padding:22px}
+  .info-card .icon{font-size:26px;margin-bottom:10px;display:block}
+  .info-card h4{font-size:14px;font-weight:600;color:var(--gray-900);margin-bottom:7px}
+  .info-card p{font-size:13px;color:var(--gray-600);margin:0;line-height:1.6}
+
+  /* TABLES */
+  .table-wrapper{margin:28px 0;border-radius:10px;overflow:hidden;border:1px solid var(--gray-200)}
+  .table-wrapper table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .table-wrapper th{background:var(--gray-900);color:#fff;padding:12px 16px;text-align:left;font-weight:600;font-size:11px;letter-spacing:0.05em;text-transform:uppercase}
+  .table-wrapper td{padding:11px 16px;border-bottom:1px solid var(--gray-100);color:var(--gray-700);vertical-align:top;line-height:1.5}
+  .table-wrapper tr:last-child td{border-bottom:none}
+  .table-wrapper tr:nth-child(even) td{background:var(--gray-50)}
+
+  /* CODE BLOCKS */
+  .code-block{background:var(--gray-900);border-radius:10px;overflow:hidden;margin:22px 0;border:1px solid var(--gray-700)}
+  .code-block-header{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:var(--gray-800);border-bottom:1px solid var(--gray-700)}
+  .code-block-header .lang-badge{font-size:10px;font-weight:600;color:var(--g600);text-transform:uppercase;letter-spacing:0.1em}
+  .code-block-header .file-path{font-size:11px;color:var(--gray-400);font-family:var(--font-mono)}
+  .code-block pre{padding:22px;overflow-x:auto;font-family:var(--font-mono);font-size:12.5px;line-height:1.6;color:#e2e8f0;margin:0}
+
+  /* SQL BLOCKS */
+  .sql-block{background:#0d1117;border-radius:10px;border:1px solid #30363d;margin:22px 0;overflow:hidden}
+  .sql-block-header{background:#161b22;padding:9px 18px;border-bottom:1px solid #30363d;font-size:10px;font-weight:600;color:#58a6ff;text-transform:uppercase;letter-spacing:0.1em}
+  .sql-block pre{padding:18px;font-family:var(--font-mono);font-size:12px;line-height:1.65;color:#e6edf3;margin:0;overflow-x:auto;white-space:pre}
+
+  /* WIREFRAMES */
+  .wireframe-container{background:var(--gray-50);border:2px solid var(--gray-300);border-radius:10px;overflow:hidden;margin:28px 0}
+  .wireframe-header{background:var(--gray-200);padding:10px 18px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--gray-300)}
+  .wireframe-header .dot{width:11px;height:11px;border-radius:50%}
+  .dot-red{background:#ef4444}.dot-yellow{background:#f59e0b}.dot-green{background:#10b981}
+  .wireframe-header .wireframe-title{font-size:11px;color:var(--gray-600);font-weight:500;margin-left:6px}
+  .wireframe-body{padding:20px;font-family:var(--font-mono);font-size:11.5px;line-height:1.5;color:var(--gray-700);white-space:pre;overflow-x:auto;background:#fff}
+  .wireframe-caption{background:var(--gray-100);padding:14px 18px;border-top:1px solid var(--gray-200);font-size:13px;color:var(--gray-600);line-height:1.6}
+
+  /* DIAGRAM CONTAINERS */
+  .diagram-container{background:#fff;border:2px solid var(--gray-200);border-radius:14px;overflow:hidden;margin:36px 0}
+  .diagram-header{background:linear-gradient(135deg,var(--b900),var(--g900));padding:18px 26px;display:flex;align-items:center;justify-content:space-between}
+  .diagram-header h3{font-family:var(--font-display);font-size:17px;font-weight:700;color:#fff}
+  .diagram-type-badge{font-size:10px;font-weight:600;color:rgba(255,255,255,0.8);background:rgba(255,255,255,0.15);padding:4px 11px;border-radius:100px;text-transform:uppercase;letter-spacing:0.1em}
+  .diagram-body{padding:28px;background:var(--gray-50)}
+  .diagram-body pre{font-family:var(--font-mono);font-size:12px;line-height:1.65;color:var(--gray-700);white-space:pre;overflow-x:auto;width:100%}
+  .diagram-footer{padding:18px 26px;border-top:1px solid var(--gray-200);display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .diagram-footer-item label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-400);display:block;margin-bottom:4px}
+  .diagram-footer-item p{font-size:13px;color:var(--gray-600);margin:0;line-height:1.5}
+
+  /* PILLS */
+  .pill{display:inline-block;padding:3px 11px;border-radius:100px;font-size:11px;font-weight:600;white-space:nowrap}
+  .pill-green{background:var(--g100);color:var(--g700)}
+  .pill-red{background:var(--r100);color:var(--r600)}
+  .pill-amber{background:var(--a100);color:var(--a600)}
+  .pill-blue{background:var(--b100);color:var(--b700)}
+  .pill-gray{background:var(--gray-100);color:var(--gray-600)}
+
+  /* SEVERITY */
+  .sev-critical{color:var(--r600);font-weight:700}
+  .sev-high{color:var(--a600);font-weight:600}
+  .sev-medium{color:var(--b700);font-weight:500}
+  .sev-low{color:var(--gray-500)}
+
+  /* CHECKLISTS */
+  .checklist{list-style:none;padding:0;margin:18px 0}
+  .checklist li{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid var(--gray-100);font-size:14px;color:var(--gray-700);line-height:1.5}
+  .checklist li::before{content:'✓';color:var(--g600);font-weight:700;font-size:14px;flex-shrink:0}
+  .checklist-x li::before{content:'✕';color:var(--r600)}
+
+  /* PHASE CARDS */
+  .phase-card{border:2px solid var(--gray-200);border-radius:14px;overflow:hidden;margin:28px 0}
+  .phase-card-header{padding:22px 28px;display:flex;align-items:center;gap:18px}
+  .phase-number{width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:20px;font-weight:800;color:#fff;flex-shrink:0;background:rgba(255,255,255,0.2)}
+  .phase-card-title h3{font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:3px}
+  .phase-card-title p{font-size:13px;margin:0}
+  .phase-card-body{padding:0 28px 28px}
+
+  /* WEEK PLANS */
+  .week-plan{border-left:3px solid var(--g600);margin:14px 0;padding-left:17px}
+  .week-plan h4{font-size:14px;font-weight:600;color:var(--gray-900);margin-bottom:7px}
+  .week-plan ul{list-style:none;padding:0}
+  .week-plan ul li{font-size:13px;color:var(--gray-600);padding:3px 0;display:flex;align-items:flex-start;gap:7px;line-height:1.5}
+  .week-plan ul li::before{content:'□';color:var(--g600);font-size:13px;flex-shrink:0;margin-top:1px}
+
+  /* ROLE BADGES */
+  .role-badge{display:inline-block;padding:2px 9px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-right:4px}
+  .role-be{background:#dbeafe;color:#1d4ed8}
+  .role-fe{background:#dcfce7;color:#15803d}
+  .role-fl{background:#f3e8ff;color:#7e22ce}
+
+  /* NON-NEGOTIABLE */
+  .non-negotiable{background:linear-gradient(135deg,#fff5f5,#fef2f2);border:2px solid var(--r600);border-radius:12px;padding:26px;margin:28px 0}
+  .non-negotiable h3{color:var(--r600);font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+  .non-negotiable ul{list-style:none;padding:0}
+  .non-negotiable ul li{font-size:14px;color:var(--gray-700);padding:8px 0;border-bottom:1px solid rgba(220,38,38,0.1);display:flex;gap:9px;line-height:1.5}
+  .non-negotiable ul li:last-child{border-bottom:none}
+  .non-negotiable ul li .li-num{color:var(--r600);font-weight:700;font-size:14px;flex-shrink:0;min-width:18px}
+
+  /* TIMELINE */
+  .timeline{position:relative;padding-left:36px;margin:28px 0}
+  .timeline::before{content:'';position:absolute;left:14px;top:0;bottom:0;width:2px;background:var(--gray-200)}
+  .timeline-item{position:relative;margin-bottom:28px}
+  .timeline-item::before{content:'';position:absolute;left:-29px;top:5px;width:15px;height:15px;border-radius:50%;background:var(--g600);border:3px solid #fff;box-shadow:0 0 0 2px var(--g600)}
+  .timeline-item h4{font-size:15px;font-weight:600;margin-bottom:3px}
+  .timeline-item .timeline-meta{font-size:12px;color:var(--g600);font-weight:600;margin-bottom:6px}
+  .timeline-item p{font-size:13.5px;color:var(--gray-600);margin:0}
+
+  /* STAKEHOLDER */
+  .stakeholder-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:28px 0}
+  .stakeholder-card{border:1px solid var(--gray-200);border-radius:12px;padding:18px;background:#fff}
+  .stakeholder-card .s-header{display:flex;align-items:center;gap:11px;margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid var(--gray-100)}
+  .stakeholder-card .s-icon{font-size:22px;width:42px;height:42px;background:var(--g50);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .stakeholder-card .s-title{font-weight:700;font-size:14px;color:var(--gray-900)}
+  .stakeholder-card .s-subtitle{font-size:11px;color:var(--gray-500)}
+  .stakeholder-card ul{list-style:none;padding:0}
+  .stakeholder-card ul li{font-size:13px;color:var(--gray-600);padding:3px 0;display:flex;align-items:center;gap:5px}
+  .stakeholder-card ul li::before{content:'→';color:var(--g600);font-size:11px}
+
+  /* GLOSSARY */
+  .glossary-entry{padding:14px 0;border-bottom:1px solid var(--gray-100);display:grid;grid-template-columns:190px 1fr;gap:18px}
+  .glossary-term{font-weight:700;color:var(--gray-900);font-size:14px}
+  .glossary-abbr{font-size:11px;color:var(--g600);font-weight:600;display:block;margin-top:2px}
+  .glossary-def{font-size:13.5px;color:var(--gray-600);line-height:1.6}
+
+  /* DOC FOOTER */
+  .doc-footer{background:var(--gray-900);color:var(--gray-400);padding:36px 80px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:36px;margin-top:60px}
+  .doc-footer h4{color:#fff;font-size:13px;font-weight:600;margin-bottom:10px}
+  .doc-footer p,.doc-footer li{font-size:12px;color:var(--gray-500);line-height:1.6;margin-bottom:3px}
+  .doc-footer ul{list-style:none;padding:0}
+  .footer-bottom{background:#000;padding:18px 80px;display:flex;justify-content:space-between;align-items:center}
+  .footer-bottom p{font-size:11px;color:var(--gray-600);margin:0}
+
+  @media(max-width:768px){
+    .cover-page{padding:40px}
+    .cover-title{font-size:36px}
+    .cover-meta-grid{grid-template-columns:1fr}
+    .document-body{padding:0 22px}
+    .toc-page{padding:40px 22px}
+    .stat-grid{grid-template-columns:repeat(2,1fr)}
+    .stakeholder-grid{grid-template-columns:1fr}
+    .info-grid{grid-template-columns:1fr}
+    .diagram-footer{grid-template-columns:1fr}
+    .doc-footer{grid-template-columns:1fr}
+    .glossary-entry{grid-template-columns:1fr}
+  }
+  </style>
+  <style>
+    body {
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff !important;
+    }
+
+    .document-body > h1 {
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 700;
+      color: var(--gray-900);
+      line-height: 1.15;
+      margin: 72px 0 20px;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--g600);
+    }
+
+    .document-body > h1:first-child {
+      margin-top: 72px;
+    }
+
+    .document-body > h2 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-top: 52px;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .document-body > h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin-top: 32px;
+      margin-bottom: 12px;
+    }
+
+    .document-body > h4,
+    .document-body > h5,
+    .document-body > h6 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+
+    .document-body > p {
+      margin-bottom: 14px;
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--gray-700);
+    }
+
+    .document-body > ul,
+    .document-body > ol {
+      margin: 12px 0 22px 24px;
+      color: var(--gray-700);
+      font-size: 14.5px;
+      line-height: 1.7;
+    }
+
+    .document-body li + li {
+      margin-top: 4px;
+    }
+
+    .document-body table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      margin: 28px 0;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .document-body th {
+      background: var(--gray-900);
+      color: #fff;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .document-body td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-700);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .document-body tr:nth-child(even) td {
+      background: var(--gray-50);
+    }
+
+    .document-body code {
+      font-family: var(--font-mono);
+      font-size: .9em;
+      color: var(--g700);
+      background: var(--g50);
+      border: 1px solid var(--g100);
+      border-radius: 5px;
+      padding: 1px 5px;
+    }
+
+    .document-body pre {
+      background: var(--gray-900);
+      color: #e2e8f0;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 22px 0;
+      padding: 22px;
+      border: 1px solid var(--gray-700);
+    }
+
+    .document-body pre code {
+      color: #e2e8f0;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+
+    .document-body blockquote {
+      border-radius: 10px;
+      padding: 22px 26px;
+      margin: 28px 0;
+      border-left: 4px solid var(--b700);
+      background: var(--b100);
+      color: var(--b900);
+    }
+
+    .document-body hr {
+      border: 0;
+      border-top: 1px solid var(--gray-200);
+      margin: 42px 0;
+    }
+
+    .document-body strong {
+      color: var(--gray-900);
+      font-weight: 700;
+    }
+
+    .constitution-summary {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 46px 80px 0;
+    }
+
+    .constitution-summary .stat-grid {
+      margin-top: 0;
+    }
+
+    .document-body {
+      padding-bottom: 72px;
+    }
+  </style>
+</head>
+<body>
+<div class="cover-page">
+  <div class="cover-logo-area">
+    <div class="cover-logo-badge">MHx</div>
+    <div class="cover-logo-text">
+      <strong>MYHxCARE</strong>
+      UniZik Medical Centre Backend Programme
+    </div>
+  </div>
+
+  <div class="cover-main">
+    <div class="cover-eyebrow">Backend Architecture Constitution</div>
+    <div class="cover-title">MYHxCARE Phase 1</div>
+    <div class="cover-subtitle">UniZik Backend Architecture Specification</div>
+    <div class="cover-divider"></div>
+
+    <div class="cover-meta-grid">
+      <div class="cover-meta-item"><label>Deployment Target</label><span>Nnamdi Azikiwe University Medical Centre</span></div>
+      <div class="cover-meta-item"><label>Backend Stack</label><span>Go · PostgreSQL · Redis · Docker</span></div>
+      <div class="cover-meta-item"><label>Architecture</label><span>Secure Modular Monolith</span></div>
+    </div>
+
+    <div class="cover-badges">
+      <span class="cover-badge">Phase 1</span>
+      <span class="cover-badge">Multi-Tenant Ready</span>
+      <span class="cover-badge">Audit by Design</span>
+      <span class="cover-badge">DigitalOcean Deployment</span>
+      <span class="cover-badge">FCM + In-App Notifications</span>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <div class="cover-footer-left">
+      <span class="cover-confidential">Confidential</span><br>
+      Prepared for backend engineering, DevOps, QA, security, product, and university stakeholders.
+    </div>
+    <div class="cover-footer-right">
+      Phase 1 Constitution<br>
+      Generated June 2026
+    </div>
+  </div>
+</div>
+
+<div class="page-header">
+  <div class="page-header-logo"><span>MHx</span> MYHxCARE Backend Constitution</div>
+  <div class="page-header-info">Phase 1 · UniZik Medical Centre<br><span style="color:var(--r600);font-weight:600">CONFIDENTIAL</span></div>
+</div>
+
+<div class="constitution-summary">
+  <div class="stat-grid">
+    <div class="stat-card"><span class="stat-value">Go</span><span class="stat-label">Backend Runtime</span></div>
+    <div class="stat-card"><span class="stat-value">60k</span><span class="stat-label">Personnel/User Scale</span></div>
+    <div class="stat-card"><span class="stat-value">$650</span><span class="stat-label">Recommended Monthly Hosting Budget</span></div>
+    <div class="stat-card"><span class="stat-value">FCM</span><span class="stat-label">Notification Delivery</span></div>
+  </div>
+
+  <div class="callout callout-executive">
+    <div class="callout-label">Architecture Mandate</div>
+    <p>MYHxCARE Phase 1 is implemented as a secure, auditable, multi-tenant-ready Go modular monolith for UniZik Medical Centre. SMS and paid email services are excluded; notifications use in-app delivery, WebSockets, and Firebase Cloud Messaging.</p>
+  </div>
+</div>
+
+<div class="document-body">
+<header id="title-block-header">
+<h1 class="title">MYHxCARE Phase 1 Backend Architecture
+Constitution</h1>
+</header>
+<h1 id="myhxcare-phase-1-backend-architecture-constitution">MYHxCARE
+Phase 1 Backend Architecture Constitution</h1>
+<p><strong>Deployment Target:</strong> Nnamdi Azikiwe University Medical
+Centre, UniZik<br />
+<strong>Phase:</strong> Phase 1<br />
+<strong>Backend Stack:</strong> Go, PostgreSQL, Redis, S3-compatible
+storage, WebSockets, FCM, Docker<br />
+<strong>Architecture Style:</strong> Clean Architecture, Domain Driven
+Design, Modular Monolith, Secure by Design, Audit by Design, Privacy by
+Design, Multi-Tenant Ready<br />
+<strong>Notification Policy:</strong> In-app notifications and Firebase
+Cloud Messaging only. SMS and paid email services are excluded from
+Phase 1.<br />
+<strong>Event Policy:</strong> PostgreSQL outbox and background workers
+for Phase 1. Kafka is deferred until event volume, integrations, or
+multi-institution deployment justify it.</p>
+<hr />
+<h2 id="executive-summary">1. Executive Summary</h2>
+<h3 id="business-purpose">Business Purpose</h3>
+<p>MYHxCARE Phase 1 provides a secure, auditable, institution-ready
+healthcare backend for UniZik Medical Centre. It supports patient
+records, clinical workflows, wards, pharmacy, laboratory, billing,
+emergency alerts, collaboration, mobile access, administration, audit
+logging, and reporting.</p>
+<p>The backend must serve approximately 60,000 users/personnel while
+remaining maintainable enough for a 10-week delivery timeline.</p>
+<h3 id="technical-design">Technical Design</h3>
+<p>The system is a Go modular monolith deployed on DigitalOcean Droplets
+using Docker. PostgreSQL is the source of truth. Redis supports caching,
+rate limiting, distributed locks, session state, and notification state.
+Object files are stored in S3-compatible storage, preferably
+DigitalOcean Spaces for Phase 1. WebSockets support real-time
+collaboration, read receipts, presence, in-app notifications, and
+emergency alerts. FCM supports push notification delivery to mobile
+devices.</p>
+<h3 id="implementation-guidance">Implementation Guidance</h3>
+<p>Build one deployable backend application with internal domain
+modules. Each domain owns its business rules, repository interfaces,
+service/use-case layer, HTTP handlers, validation, and audit emission.
+Shared infrastructure is kept behind interfaces.</p>
+<h3 id="risks">Risks</h3>
+<ul>
+<li>Overengineering could delay the 10-week go-live.</li>
+<li>Underengineering clinical immutability, audit, and permissions could
+create compliance and safety risks.</li>
+<li>Running too many services separately increases cost and operational
+load.</li>
+</ul>
+<h3 id="mitigation-strategies">Mitigation Strategies</h3>
+<ul>
+<li>Use a modular monolith instead of microservices.</li>
+<li>Use PostgreSQL outbox instead of Kafka for Phase 1.</li>
+<li>Make every critical action auditable from day one.</li>
+<li>Keep tenant columns in all tables even though only UniZik is
+deployed initially.</li>
+</ul>
+<h3 id="best-practices">Best Practices</h3>
+<ul>
+<li>Prefer boring, reliable technology.</li>
+<li>Use strict boundaries between domain, application, infrastructure,
+and transport layers.</li>
+<li>Never allow HTTP handlers to access database code directly.</li>
+<li>Treat clinical records, audit records, collaboration messages, and
+financial records as append-only or versioned.</li>
+</ul>
+<hr />
+<h2 id="core-architecture-decisions">2. Core Architecture Decisions</h2>
+<h3 id="business-purpose-1">Business Purpose</h3>
+<p>The architecture must let the team ship Phase 1 quickly without
+blocking future expansion to other institutions.</p>
+<h3 id="technical-design-1">Technical Design</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Area</th>
+<th>Decision</th>
+<th>Justification</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Backend language</td>
+<td>Go latest stable</td>
+<td>Strong performance, low memory use, simple deployment, excellent
+concurrency</td>
+</tr>
+<tr class="even">
+<td>HTTP framework</td>
+<td>Gin</td>
+<td>Mature ecosystem, fast routing, common team familiarity, enough
+middleware support</td>
+</tr>
+<tr class="odd">
+<td>Database</td>
+<td>PostgreSQL</td>
+<td>Strong consistency, relational integrity, JSONB support,
+transactions, reporting</td>
+</tr>
+<tr class="even">
+<td>Cache/locks</td>
+<td>Redis</td>
+<td>Fast cache, rate limits, distributed locks, ephemeral state</td>
+</tr>
+<tr class="odd">
+<td>Events</td>
+<td>PostgreSQL outbox</td>
+<td>Reliable, simple, transactional, cheaper than Kafka for Phase 1</td>
+</tr>
+<tr class="even">
+<td>Future events</td>
+<td>Kafka</td>
+<td>Add later for multi-campus/multi-tenant event streaming</td>
+</tr>
+<tr class="odd">
+<td>Object storage</td>
+<td>DigitalOcean Spaces or S3-compatible storage</td>
+<td>Cloud-portable object storage API</td>
+</tr>
+<tr class="even">
+<td>Notifications</td>
+<td>In-app + FCM</td>
+<td>Eliminates SMS/email recurring cost while supporting mobile
+alerts</td>
+</tr>
+<tr class="odd">
+<td>Deployment</td>
+<td>Docker on DigitalOcean Droplets</td>
+<td>Predictable cost, simpler operations</td>
+</tr>
+<tr class="even">
+<td>Architecture</td>
+<td>Modular monolith</td>
+<td>Faster delivery, simpler debugging, fewer distributed failure
+modes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="implementation-guidance-1">Implementation Guidance</h3>
+<p>Use Gin for routing, request binding, middleware, and response
+handling. Keep Gin-specific code in
+<code>internal/interfaces/http</code>. Domain and application layers
+must not import Gin.</p>
+<h3 id="risks-1">Risks</h3>
+<ul>
+<li>Gin can encourage handler-heavy code if boundaries are not
+enforced.</li>
+<li>PostgreSQL outbox can become a bottleneck if not indexed and drained
+properly.</li>
+<li>DigitalOcean self-hosting requires operational discipline.</li>
+</ul>
+<h3 id="mitigation-strategies-1">Mitigation Strategies</h3>
+<ul>
+<li>Enforce package dependency rules in code review.</li>
+<li>Use outbox partitioning or status/date indexes.</li>
+<li>Configure backups, metrics, log retention, and restore drills before
+go-live.</li>
+</ul>
+<h3 id="best-practices-1">Best Practices</h3>
+<ul>
+<li>Use <code>context.Context</code> everywhere.</li>
+<li>Use transactions explicitly for state-changing workflows.</li>
+<li>Use UUID primary keys only.</li>
+<li>Use structured logs and correlation IDs on every request.</li>
+</ul>
+<hr />
+<h2 id="modular-monolith-rationale">3. Modular Monolith Rationale</h2>
+<h3 id="business-purpose-2">Business Purpose</h3>
+<p>Phase 1 must deliver hospital functionality rapidly and reliably. The
+team should not spend the first release solving microservice networking,
+deployment, distributed transactions, and observability complexity.</p>
+<h3 id="technical-design-2">Technical Design</h3>
+<p>The backend is one application containing domain modules:</p>
+<ul>
+<li>Identity and Access</li>
+<li>Admissions and Records</li>
+<li>Clinicals</li>
+<li>Clinical Collaboration</li>
+<li>Duty Roster</li>
+<li>Ward Management</li>
+<li>Pharmacy</li>
+<li>Multi-Campus Pharmacy Extension</li>
+<li>Laboratory</li>
+<li>Billing and Finance</li>
+<li>Department Revenue Accounting</li>
+<li>NHIA/NHIS</li>
+<li>Emergency</li>
+<li>Student Mobile App Backend</li>
+<li>HMS Administration</li>
+<li>Audit</li>
+<li>Notifications</li>
+<li>Reporting</li>
+</ul>
+<p>Each module has its own application services, domain models,
+repository interfaces, infrastructure repository implementation, HTTP
+handlers, DTOs, and tests.</p>
+<h3 id="implementation-guidance-2">Implementation Guidance</h3>
+<p>Do not create separate services in Phase 1. Instead, create package
+boundaries strict enough that future extraction is possible.</p>
+<p>Future extraction candidates:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Future Service</th>
+<th>Extraction Trigger</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Notifications</td>
+<td>Very high real-time or FCM volume</td>
+</tr>
+<tr class="even">
+<td>Pharmacy</td>
+<td>Multi-campus inventory complexity grows</td>
+</tr>
+<tr class="odd">
+<td>Laboratory</td>
+<td>External lab equipment integrations increase</td>
+</tr>
+<tr class="even">
+<td>Billing</td>
+<td>External payment/insurance integrations increase</td>
+</tr>
+<tr class="odd">
+<td>Reporting</td>
+<td>Heavy analytics affects transactional database</td>
+</tr>
+<tr class="even">
+<td>Audit</td>
+<td>Audit volume requires separate write-optimized store</td>
+</tr>
+</tbody>
+</table>
+<h3 id="risks-2">Risks</h3>
+<ul>
+<li>Poor module boundaries can turn the system into a tangled
+monolith.</li>
+<li>Premature service extraction could delay delivery.</li>
+</ul>
+<h3 id="mitigation-strategies-2">Mitigation Strategies</h3>
+<ul>
+<li>Use domain interfaces, not cross-module database calls.</li>
+<li>Enforce package-level dependency checks in code review.</li>
+<li>Store outbox events with clear domain event names.</li>
+</ul>
+<h3 id="best-practices-2">Best Practices</h3>
+<ul>
+<li>One process, many internal modules.</li>
+<li>Shared kernel must be tiny.</li>
+<li>Cross-domain communication should happen through application
+services or domain events, not direct table writes.</li>
+</ul>
+<hr />
+<h2 id="multi-tenancy-foundation">4. Multi-Tenancy Foundation</h2>
+<h3 id="business-purpose-3">Business Purpose</h3>
+<p>Phase 1 serves UniZik only, but the backend must support future
+universities, polytechnics, colleges, and teaching hospitals without
+redesign.</p>
+<h3 id="technical-design-3">Technical Design</h3>
+<p>Every tenant-owned table must contain:</p>
+<ul>
+<li><code>tenant_id uuid not null</code></li>
+<li><code>id uuid not null</code></li>
+<li><code>created_at timestamptz not null</code></li>
+<li><code>updated_at timestamptz not null</code></li>
+<li><code>deleted_at timestamptz null</code></li>
+<li><code>created_by uuid null</code></li>
+<li><code>updated_by uuid null</code></li>
+<li><code>version integer not null default 1</code></li>
+</ul>
+<p>Phase 1 uses one preconfigured tenant row for UniZik. No tenant
+onboarding UI or SaaS administration is included.</p>
+<h3 id="tenant-context-strategy">Tenant Context Strategy</h3>
+<p>The authenticated access token contains <code>tenant_id</code>. The
+request middleware extracts and validates it, then stores it in request
+context.</p>
+<p>Required context values:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Context Key</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>tenant_id</code></td>
+<td>JWT claim</td>
+</tr>
+<tr class="even">
+<td><code>actor_id</code></td>
+<td>JWT subject</td>
+</tr>
+<tr class="odd">
+<td><code>role_ids</code></td>
+<td>JWT/session claims</td>
+</tr>
+<tr class="even">
+<td><code>request_id</code></td>
+<td>Gateway/API middleware</td>
+</tr>
+<tr class="odd">
+<td><code>correlation_id</code></td>
+<td>Client header or generated</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tenant-resolution-strategy">Tenant Resolution Strategy</h3>
+<p>For Phase 1:</p>
+<ol type="1">
+<li>Resolve tenant from JWT.</li>
+<li>Reject requests without <code>tenant_id</code> except login,
+refresh, health checks, and public metadata endpoints.</li>
+<li>Validate tenant status is <code>active</code>.</li>
+</ol>
+<p>Future strategies may include subdomain, institution code, or
+enterprise SSO mapping, but these are not implemented in Phase 1.</p>
+<h3 id="tenant-isolation-strategy">Tenant Isolation Strategy</h3>
+<ul>
+<li>All queries must include <code>tenant_id</code>.</li>
+<li>Composite indexes must usually start with
+<code>tenant_id</code>.</li>
+<li>Foreign keys should include tenant consistency through application
+validation and, where practical, composite references.</li>
+<li>Background workers must process events using the
+<code>tenant_id</code> stored in the outbox row.</li>
+</ul>
+<h3 id="risks-3">Risks</h3>
+<ul>
+<li>Missing <code>tenant_id</code> filters can leak data between
+institutions later.</li>
+<li>Developers may forget tenant scope in raw SQL.</li>
+</ul>
+<h3 id="mitigation-strategies-3">Mitigation Strategies</h3>
+<ul>
+<li>Repository methods must require
+<code>tenantID uuid.UUID</code>.</li>
+<li>Use static analysis/code review checklist for tenant filters.</li>
+<li>Add integration tests proving tenant isolation.</li>
+</ul>
+<h3 id="best-practices-3">Best Practices</h3>
+<ul>
+<li>Never infer tenant from request body.</li>
+<li>Never allow client-supplied tenant IDs to override JWT tenant
+context.</li>
+<li>Never create tenant onboarding functionality in Phase 1.</li>
+</ul>
+<hr />
+<h2 id="golang-project-structure">5. Golang Project Structure</h2>
+<h3 id="business-purpose-4">Business Purpose</h3>
+<p>The codebase must be understandable for backend engineers, technical
+leads, AI coding assistants, QA, and DevOps.</p>
+<h3 id="technical-design-4">Technical Design</h3>
+<pre class="text"><code>cmd/
+  api/
+    main.go
+  worker/
+    main.go
+internal/
+  app/
+    bootstrap/
+    config/
+    server/
+  domain/
+    identity/
+    records/
+    clinicals/
+    collaboration/
+    dutyroster/
+    wards/
+    pharmacy/
+    laboratory/
+    billing/
+    revenue/
+    insurance/
+    emergency/
+    mobile/
+    admin/
+    audit/
+    notifications/
+  application/
+    identity/
+    records/
+    clinicals/
+    collaboration/
+    dutyroster/
+    wards/
+    pharmacy/
+    laboratory/
+    billing/
+    revenue/
+    insurance/
+    emergency/
+    mobile/
+    admin/
+    audit/
+    notifications/
+  infrastructure/
+    postgres/
+    redis/
+    storage/
+    fcm/
+    websocket/
+    outbox/
+    observability/
+    auth/
+  interfaces/
+    http/
+      middleware/
+      handlers/
+      dto/
+      routes/
+    websocket/
+pkg/
+  errors/
+  logger/
+  validator/
+  pagination/
+  ids/
+  timeutil/
+api/
+  openapi/
+configs/
+  local.yaml
+  staging.yaml
+  production.yaml
+scripts/
+  migrate.sh
+  backup.sh
+  restore.sh
+docs/
+  architecture/
+  adr/
+  runbooks/
+deployments/
+  docker/
+  compose/
+  nginx/
+  systemd/
+  terraform/
+tests/
+  integration/
+  api/
+  contract/
+  performance/</code></pre>
+<h3 id="implementation-guidance-3">Implementation Guidance</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Folder</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>cmd/</code></td>
+<td>Entry points only. No business logic.</td>
+</tr>
+<tr class="even">
+<td><code>internal/domain/</code></td>
+<td>Entities, value objects, domain services, domain errors.</td>
+</tr>
+<tr class="odd">
+<td><code>internal/application/</code></td>
+<td>Use cases, transaction orchestration, authorization checks.</td>
+</tr>
+<tr class="even">
+<td><code>internal/infrastructure/</code></td>
+<td>PostgreSQL, Redis, object storage, FCM, outbox, external
+services.</td>
+</tr>
+<tr class="odd">
+<td><code>internal/interfaces/</code></td>
+<td>HTTP/WebSocket transport, DTOs, middleware, routes.</td>
+</tr>
+<tr class="even">
+<td><code>pkg/</code></td>
+<td>Small generic utilities allowed outside <code>internal</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>api/openapi/</code></td>
+<td>OpenAPI 3.1 specs.</td>
+</tr>
+<tr class="even">
+<td><code>configs/</code></td>
+<td>Environment templates only. Secrets are never committed.</td>
+</tr>
+<tr class="odd">
+<td><code>deployments/</code></td>
+<td>Docker, reverse proxy, infra definitions.</td>
+</tr>
+<tr class="even">
+<td><code>tests/</code></td>
+<td>Black-box and cross-module tests.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dependency-rules">Dependency Rules</h3>
+<ul>
+<li><code>domain</code> imports only standard library and approved value
+packages.</li>
+<li><code>application</code> may import <code>domain</code> and
+repository interfaces.</li>
+<li><code>infrastructure</code> implements application/domain
+interfaces.</li>
+<li><code>interfaces</code> calls application services.</li>
+<li><code>domain</code> must never import <code>application</code>,
+<code>infrastructure</code>, or <code>interfaces</code>.</li>
+<li>No circular dependencies.</li>
+</ul>
+<h3 id="risks-4">Risks</h3>
+<ul>
+<li>Shared utilities can become a dumping ground.</li>
+<li>Cross-domain direct imports can create hidden coupling.</li>
+</ul>
+<h3 id="mitigation-strategies-4">Mitigation Strategies</h3>
+<ul>
+<li>Keep <code>pkg/</code> small.</li>
+<li>Use architectural linting and PR review.</li>
+<li>Enforce domain APIs through application services.</li>
+</ul>
+<h3 id="best-practices-4">Best Practices</h3>
+<ul>
+<li>Name packages by domain purpose, not technical layer alone.</li>
+<li>Keep DTOs separate from entities.</li>
+<li>Use constructor functions for services with explicit
+dependencies.</li>
+</ul>
+<hr />
+<h2 id="api-governance">6. API Governance</h2>
+<h3 id="business-purpose-5">Business Purpose</h3>
+<p>APIs must be predictable for web, mobile, QA, and future
+integrations.</p>
+<h3 id="technical-design-5">Technical Design</h3>
+<p>All routes are under:</p>
+<pre class="text"><code>/api/v1/</code></pre>
+<p>Resource naming uses plural nouns:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Bad</th>
+<th>Good</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>/createPatient</code></td>
+<td><code>POST /api/v1/patients</code></td>
+</tr>
+<tr class="even">
+<td><code>/getWardBeds</code></td>
+<td><code>GET /api/v1/wards/{ward_id}/beds</code></td>
+</tr>
+<tr class="odd">
+<td><code>/approveTransfer</code></td>
+<td><code>POST /api/v1/pharmacy/transfers/{id}/approve</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="implementation-guidance-4">Implementation Guidance</h3>
+<p>Standard query parameters:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Pagination</td>
+<td><code>page</code>, <code>page_size</code></td>
+</tr>
+<tr class="even">
+<td>Sorting</td>
+<td><code>sort=created_at:desc</code></td>
+</tr>
+<tr class="odd">
+<td>Filtering</td>
+<td><code>status=active&amp;department_id=...</code></td>
+</tr>
+<tr class="even">
+<td>Search</td>
+<td><code>q=...</code></td>
+</tr>
+<tr class="odd">
+<td>Date range</td>
+<td><code>from=2026-01-01&amp;to=2026-01-31</code></td>
+</tr>
+<tr class="even">
+<td>Idempotency</td>
+<td><code>Idempotency-Key</code> header for unsafe retryable
+operations</td>
+</tr>
+</tbody>
+</table>
+<p>Default pagination:</p>
+<ul>
+<li><code>page=1</code></li>
+<li><code>page_size=20</code></li>
+<li>maximum <code>page_size=100</code></li>
+</ul>
+<h3 id="risks-5">Risks</h3>
+<ul>
+<li>Inconsistent route names slow frontend/mobile development.</li>
+<li>Missing idempotency can duplicate payments, dispensing, admissions,
+or emergency acknowledgements.</li>
+</ul>
+<h3 id="mitigation-strategies-5">Mitigation Strategies</h3>
+<ul>
+<li>OpenAPI spec is required before endpoint implementation.</li>
+<li>Contract tests must validate request/response shape.</li>
+<li>Idempotency keys are mandatory for payments, dispensing, admissions,
+transfers, and emergency acknowledgements.</li>
+</ul>
+<h3 id="best-practices-5">Best Practices</h3>
+<ul>
+<li>Use HTTP status codes consistently.</li>
+<li>Do not expose internal IDs from third-party systems as primary
+identifiers.</li>
+<li>Include <code>request_id</code> in every response.</li>
+</ul>
+<hr />
+<h2 id="request-and-response-governance">7. Request and Response
+Governance</h2>
+<h3 id="business-purpose-6">Business Purpose</h3>
+<p>Clients need consistent success, error, validation, authorization,
+and business-rule responses.</p>
+<h3 id="technical-design-6">Technical Design</h3>
+<p>Success response:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="fu">{},</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;meta&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;request_id&quot;</span><span class="fu">:</span> <span class="st">&quot;req_123&quot;</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-06-22T10:00:00Z&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Paginated response:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[]</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;pagination&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;page&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;page_size&quot;</span><span class="fu">:</span> <span class="dv">20</span><span class="fu">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;total_items&quot;</span><span class="fu">:</span> <span class="dv">100</span><span class="fu">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;total_pages&quot;</span><span class="fu">:</span> <span class="dv">5</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;meta&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;request_id&quot;</span><span class="fu">:</span> <span class="st">&quot;req_123&quot;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Error response:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;error&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;code&quot;</span><span class="fu">:</span> <span class="st">&quot;WARD_BED_ALREADY_OCCUPIED&quot;</span><span class="fu">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;The selected bed is no longer available.&quot;</span><span class="fu">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;details&quot;</span><span class="fu">:</span> <span class="fu">{}</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;meta&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;request_id&quot;</span><span class="fu">:</span> <span class="st">&quot;req_123&quot;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Validation error:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;error&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;code&quot;</span><span class="fu">:</span> <span class="st">&quot;VALIDATION_FAILED&quot;</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;One or more fields are invalid.&quot;</span><span class="fu">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fields&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;field&quot;</span><span class="fu">:</span> <span class="st">&quot;date_of_birth&quot;</span><span class="fu">,</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;Date of birth cannot be in the future.&quot;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="implementation-guidance-5">Implementation Guidance</h3>
+<ul>
+<li>Map domain errors to stable API error codes.</li>
+<li>Do not expose SQL errors, stack traces, or internal package
+names.</li>
+<li>Use <code>409 Conflict</code> for version conflicts and duplicate
+state transitions.</li>
+</ul>
+<h3 id="risks-6">Risks</h3>
+<ul>
+<li>Leaking internals can create security risk.</li>
+<li>Unstable error formats break mobile/web clients.</li>
+</ul>
+<h3 id="mitigation-strategies-6">Mitigation Strategies</h3>
+<ul>
+<li>Centralize error mapping middleware.</li>
+<li>Add API tests for error responses.</li>
+</ul>
+<h3 id="best-practices-6">Best Practices</h3>
+<ul>
+<li>Error messages should be clear but not reveal sensitive
+details.</li>
+<li>Use stable error codes for frontend behavior.</li>
+</ul>
+<hr />
+<h2 id="database-governance">8. Database Governance</h2>
+<h3 id="business-purpose-7">Business Purpose</h3>
+<p>PostgreSQL stores clinical, operational, financial, audit, and
+administrative data with strong consistency.</p>
+<h3 id="technical-design-7">Technical Design</h3>
+<p>Use UUID primary keys. Never use auto-increment IDs.</p>
+<p>Every table includes:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">id</span> uuid <span class="kw">primary</span> <span class="kw">key</span>,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>tenant_id uuid <span class="kw">not</span> <span class="kw">null</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>created_at timestamptz <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> now(),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>updated_at timestamptz <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> now(),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>deleted_at timestamptz <span class="kw">null</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>created_by uuid <span class="kw">null</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>updated_by uuid <span class="kw">null</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>version <span class="dt">integer</span> <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="dv">1</span></span></code></pre></div>
+<h3 id="standards">Standards</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Table names</td>
+<td>plural snake_case, e.g. <code>patients</code>,
+<code>ward_beds</code></td>
+</tr>
+<tr class="even">
+<td>Columns</td>
+<td>snake_case</td>
+</tr>
+<tr class="odd">
+<td>Primary keys</td>
+<td><code>id uuid</code></td>
+</tr>
+<tr class="even">
+<td>Foreign keys</td>
+<td><code>{resource}_id uuid</code></td>
+</tr>
+<tr class="odd">
+<td>Timestamps</td>
+<td><code>timestamptz</code></td>
+</tr>
+<tr class="even">
+<td>Soft delete</td>
+<td><code>deleted_at</code></td>
+</tr>
+<tr class="odd">
+<td>Optimistic locking</td>
+<td><code>version</code></td>
+</tr>
+<tr class="even">
+<td>Money</td>
+<td><code>numeric(12,2)</code> plus currency column if needed</td>
+</tr>
+<tr class="odd">
+<td>Clinical text</td>
+<td>structured columns plus JSONB only where flexible content is
+required</td>
+</tr>
+</tbody>
+</table>
+<h3 id="indexing-strategy">Indexing Strategy</h3>
+<ul>
+<li>Add indexes on all foreign keys.</li>
+<li>Add composite indexes beginning with <code>tenant_id</code>.</li>
+<li>Add partial indexes for active rows:
+<code>where deleted_at is null</code>.</li>
+<li>Use unique indexes with tenant scope.</li>
+</ul>
+<p>Example:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> <span class="kw">unique</span> <span class="kw">index</span> ux_beds_active_code</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">on</span> ward_beds (tenant_id, ward_id, bed_code)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">where</span> deleted_at <span class="kw">is</span> <span class="kw">null</span>;</span></code></pre></div>
+<h3 id="migration-strategy">Migration Strategy</h3>
+<ul>
+<li>Use a migration tool such as Goose or golang-migrate.</li>
+<li>All migrations must be reversible unless destructive archival is
+explicitly approved.</li>
+<li>Schema migrations must run in CI against an empty database and an
+upgraded existing database.</li>
+</ul>
+<h3 id="backup-strategy">Backup Strategy</h3>
+<ul>
+<li>Daily DigitalOcean Droplet backups.</li>
+<li>Nightly logical PostgreSQL dumps to Spaces.</li>
+<li>Weekly full backup restore test in staging.</li>
+<li>Retain daily backups for 14 days, weekly for 8 weeks, monthly for 12
+months.</li>
+</ul>
+<h3 id="archival-strategy">Archival Strategy</h3>
+<ul>
+<li>Clinical, audit, collaboration, billing, and inventory records are
+not physically deleted.</li>
+<li>Use soft delete only for administrative lookup data when
+allowed.</li>
+<li>Archive old reporting snapshots to object storage when database
+growth affects performance.</li>
+</ul>
+<h3 id="risks-7">Risks</h3>
+<ul>
+<li>Missing constraints can corrupt clinical and financial data.</li>
+<li>Heavy reports can slow transactional workloads.</li>
+</ul>
+<h3 id="mitigation-strategies-7">Mitigation Strategies</h3>
+<ul>
+<li>Use transactions for admissions, bed allocation, dispensing,
+billing, and result verification.</li>
+<li>Use read replica for reports.</li>
+<li>Add materialized views for dashboards where needed.</li>
+</ul>
+<h3 id="best-practices-7">Best Practices</h3>
+<ul>
+<li>Do not use application-only uniqueness when database uniqueness is
+required.</li>
+<li>Use <code>SELECT ... FOR UPDATE</code> for critical allocation and
+stock operations.</li>
+<li>Store audit and outbox entries in the same transaction as the
+business change.</li>
+</ul>
+<hr />
+<h2 id="redis-governance">9. Redis Governance</h2>
+<h3 id="business-purpose-8">Business Purpose</h3>
+<p>Redis supports fast ephemeral operations but is not the system of
+record.</p>
+<h3 id="technical-design-8">Technical Design</h3>
+<p>Redis is used for:</p>
+<ul>
+<li>Session revocation state</li>
+<li>Refresh token family state</li>
+<li>Rate limiting counters</li>
+<li>Distributed locks</li>
+<li>Short-lived cache</li>
+<li>WebSocket presence</li>
+<li>Notification delivery state</li>
+</ul>
+<h3 id="key-naming-conventions">Key Naming Conventions</h3>
+<pre class="text"><code>myhxcare:{env}:{tenant_id}:auth:session:{session_id}
+myhxcare:{env}:{tenant_id}:auth:revoked:{token_id}
+myhxcare:{env}:{tenant_id}:rate:{scope}:{identifier}
+myhxcare:{env}:{tenant_id}:lock:{resource}:{id}
+myhxcare:{env}:{tenant_id}:presence:user:{user_id}
+myhxcare:{env}:{tenant_id}:notification:unread:{user_id}</code></pre>
+<h3 id="implementation-guidance-6">Implementation Guidance</h3>
+<ul>
+<li>Locks must have TTL.</li>
+<li>Cache keys must have explicit TTL.</li>
+<li>Redis failure must degrade gracefully for non-critical caches.</li>
+<li>Redis failure must fail closed for authentication/session revocation
+checks if security depends on it.</li>
+</ul>
+<h3 id="risks-8">Risks</h3>
+<ul>
+<li>Redis memory exhaustion can affect sessions and locks.</li>
+<li>Incorrect lock handling can cause deadlocks.</li>
+</ul>
+<h3 id="mitigation-strategies-8">Mitigation Strategies</h3>
+<ul>
+<li>Set max memory policy.</li>
+<li>Monitor memory and eviction.</li>
+<li>Use lock tokens and safe unlock scripts.</li>
+</ul>
+<h3 id="best-practices-8">Best Practices</h3>
+<ul>
+<li>Never store permanent clinical records only in Redis.</li>
+<li>Never store plaintext secrets.</li>
+<li>Keep Redis access behind an interface.</li>
+</ul>
+<hr />
+<h2 id="security-governance">10. Security Governance</h2>
+<h3 id="business-purpose-9">Business Purpose</h3>
+<p>MYHxCARE handles sensitive health, identity, financial, and
+operational data. Security must be built into every layer.</p>
+<h3 id="technical-design-9">Technical Design</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Area</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Authentication</td>
+<td>JWT access token + refresh token</td>
+</tr>
+<tr class="even">
+<td>Access token TTL</td>
+<td>10-15 minutes</td>
+</tr>
+<tr class="odd">
+<td>Refresh token TTL</td>
+<td>7-30 days, configurable</td>
+</tr>
+<tr class="even">
+<td>Password hashing</td>
+<td>Argon2id preferred, bcrypt acceptable</td>
+</tr>
+<tr class="odd">
+<td>Authorization</td>
+<td>RBAC with permissions</td>
+</tr>
+<tr class="even">
+<td>Session revocation</td>
+<td>Redis + persisted session table</td>
+</tr>
+<tr class="odd">
+<td>MFA</td>
+<td>Schema and flow readiness, optional in Phase 1</td>
+</tr>
+<tr class="even">
+<td>Transport</td>
+<td>TLS everywhere</td>
+</tr>
+<tr class="odd">
+<td>Secrets</td>
+<td>Environment variables or secret manager, never committed</td>
+</tr>
+<tr class="even">
+<td>Audit</td>
+<td>All critical actions logged</td>
+</tr>
+<tr class="odd">
+<td>Rate limiting</td>
+<td>Per IP, user, route, and auth action</td>
+</tr>
+</tbody>
+</table>
+<h3 id="authorization-model">Authorization Model</h3>
+<p>Use permissions, not hardcoded role names. Roles are collections of
+permissions.</p>
+<p>Example permissions:</p>
+<pre class="text"><code>patients.read
+patients.write
+clinical_notes.create
+clinical_notes.read_assigned
+prescriptions.create
+pharmacy.dispense
+ward_beds.allocate
+billing.refund
+audit.read
+admin.staff.manage</code></pre>
+<h3 id="implementation-guidance-7">Implementation Guidance</h3>
+<ul>
+<li>Middleware authenticates token and loads session.</li>
+<li>Application service checks permission and resource-level
+access.</li>
+<li>Clinical access must be purpose-bound: a user must be assigned, on
+duty, referred, or explicitly authorized.</li>
+<li>Administrators cannot access clinical records unless clinically
+authorized.</li>
+</ul>
+<h3 id="risks-9">Risks</h3>
+<ul>
+<li>Role sprawl can create excessive privileges.</li>
+<li>Admin bypass of clinical privacy could violate trust and
+policy.</li>
+<li>Weak token revocation can leave stolen sessions active.</li>
+</ul>
+<h3 id="mitigation-strategies-9">Mitigation Strategies</h3>
+<ul>
+<li>Use least privilege.</li>
+<li>Review roles before go-live.</li>
+<li>Store refresh token hashes, not raw tokens.</li>
+<li>Rotate refresh token families on use.</li>
+</ul>
+<h3 id="best-practices-9">Best Practices</h3>
+<ul>
+<li>Validate input at DTO and domain layers.</li>
+<li>Use parameterized SQL only.</li>
+<li>Set secure HTTP headers.</li>
+<li>Use CSRF protection for cookie-based browser flows.</li>
+<li>Use CORS allowlist.</li>
+<li>Apply OWASP Top 10 controls.</li>
+</ul>
+<hr />
+<h2 id="observability-governance">11. Observability Governance</h2>
+<h3 id="business-purpose-10">Business Purpose</h3>
+<p>The operations team must detect incidents before users report them
+and investigate clinical, emergency, and financial issues quickly.</p>
+<h3 id="technical-design-10">Technical Design</h3>
+<p>Use:</p>
+<ul>
+<li>Structured JSON logs</li>
+<li>Prometheus metrics</li>
+<li>Grafana dashboards</li>
+<li>Loki logs</li>
+<li>OpenTelemetry traces</li>
+<li>Health, readiness, and liveness endpoints</li>
+</ul>
+<h3 id="implementation-guidance-8">Implementation Guidance</h3>
+<p>Required headers:</p>
+<pre class="text"><code>X-Request-ID
+X-Correlation-ID
+Traceparent</code></pre>
+<p>Required log fields:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-06-22T10:00:00Z&quot;</span><span class="fu">,</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;level&quot;</span><span class="fu">:</span> <span class="st">&quot;info&quot;</span><span class="fu">,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;service&quot;</span><span class="fu">:</span> <span class="st">&quot;myhxcare-api&quot;</span><span class="fu">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;env&quot;</span><span class="fu">:</span> <span class="st">&quot;production&quot;</span><span class="fu">,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;tenant_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;actor_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;request_id&quot;</span><span class="fu">:</span> <span class="st">&quot;req_123&quot;</span><span class="fu">,</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;correlation_id&quot;</span><span class="fu">:</span> <span class="st">&quot;corr_123&quot;</span><span class="fu">,</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;method&quot;</span><span class="fu">:</span> <span class="st">&quot;POST&quot;</span><span class="fu">,</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;path&quot;</span><span class="fu">:</span> <span class="st">&quot;/api/v1/wards/admissions&quot;</span><span class="fu">,</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;status&quot;</span><span class="fu">:</span> <span class="dv">201</span><span class="fu">,</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;latency_ms&quot;</span><span class="fu">:</span> <span class="dv">87</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="dashboards">Dashboards</h3>
+<ul>
+<li>API latency by route</li>
+<li>Error rate by route</li>
+<li>Login failures</li>
+<li>Database latency</li>
+<li>Redis latency</li>
+<li>Outbox backlog</li>
+<li>WebSocket connections</li>
+<li>FCM delivery attempts/failures</li>
+<li>Emergency alert response time</li>
+<li>Ward occupancy</li>
+<li>Pharmacy stock alerts</li>
+<li>Billing totals</li>
+</ul>
+<h3 id="risks-10">Risks</h3>
+<ul>
+<li>Logging PHI can create privacy breaches.</li>
+<li>Missing outbox metrics can hide failed notifications.</li>
+</ul>
+<h3 id="mitigation-strategies-10">Mitigation Strategies</h3>
+<ul>
+<li>Redact clinical text, diagnosis details, tokens, passwords, and raw
+identifiers where unnecessary.</li>
+<li>Alert on outbox age and retry failures.</li>
+</ul>
+<h3 id="best-practices-10">Best Practices</h3>
+<ul>
+<li>Do not log request bodies by default.</li>
+<li>Use sampling for traces but always trace emergency workflows.</li>
+<li>Define incident runbooks before launch.</li>
+</ul>
+<hr />
+<h2 id="testing-governance">12. Testing Governance</h2>
+<h3 id="business-purpose-11">Business Purpose</h3>
+<p>Testing must protect clinical safety, financial correctness, access
+control, inventory accuracy, and emergency response.</p>
+<h3 id="technical-design-11">Technical Design</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Test Type</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Unit tests</td>
+<td>Domain rules and application services</td>
+</tr>
+<tr class="even">
+<td>Integration tests</td>
+<td>PostgreSQL, Redis, outbox, repositories</td>
+</tr>
+<tr class="odd">
+<td>API tests</td>
+<td>HTTP status, response schema, auth behavior</td>
+</tr>
+<tr class="even">
+<td>Contract tests</td>
+<td>Web/mobile API compatibility</td>
+</tr>
+<tr class="odd">
+<td>E2E tests</td>
+<td>Critical hospital workflows</td>
+</tr>
+<tr class="even">
+<td>Performance tests</td>
+<td>Latency targets and concurrency</td>
+</tr>
+<tr class="odd">
+<td>Load tests</td>
+<td>Expected Phase 1 traffic</td>
+</tr>
+<tr class="even">
+<td>Stress tests</td>
+<td>Failure and saturation behavior</td>
+</tr>
+<tr class="odd">
+<td>Security tests</td>
+<td>Auth, RBAC, injection, rate limits</td>
+</tr>
+</tbody>
+</table>
+<h3 id="minimum-coverage">Minimum Coverage</h3>
+<ul>
+<li>Domain/application services: 80%</li>
+<li>Critical domains: 90% for ward allocation, pharmacy dispensing,
+clinical records, billing, emergency, auth</li>
+<li>Repository integration tests for every critical query</li>
+</ul>
+<h3 id="release-gates">Release Gates</h3>
+<p>No production release unless:</p>
+<ul>
+<li>All migrations pass.</li>
+<li>All critical tests pass.</li>
+<li>No high/critical security findings remain.</li>
+<li>Backup/restore verified.</li>
+<li>OpenAPI spec is updated.</li>
+<li>Observability dashboards exist for changed functionality.</li>
+</ul>
+<h3 id="risks-11">Risks</h3>
+<ul>
+<li>Tests that only validate happy paths will miss hospital-critical
+failures.</li>
+</ul>
+<h3 id="mitigation-strategies-11">Mitigation Strategies</h3>
+<ul>
+<li>Add race-condition tests for beds and inventory.</li>
+<li>Add permission denial tests for clinical records.</li>
+<li>Add idempotency tests for payments and dispensing.</li>
+</ul>
+<h3 id="best-practices-11">Best Practices</h3>
+<ul>
+<li>Use test containers or isolated PostgreSQL databases.</li>
+<li>Use fixed clocks in tests.</li>
+<li>Use realistic healthcare workflow fixtures.</li>
+</ul>
+<hr />
+<h2 id="performance-requirements">13. Performance Requirements</h2>
+<h3 id="business-purpose-12">Business Purpose</h3>
+<p>Hospital operations require fast authentication, clinical access,
+emergency alerts, bed allocation, inventory actions, and dashboards.</p>
+<h3 id="technical-design-12">Technical Design</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Workflow</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Authentication</td>
+<td>P95 &lt; 150ms</td>
+</tr>
+<tr class="even">
+<td>General APIs</td>
+<td>P95 &lt; 200ms</td>
+</tr>
+<tr class="odd">
+<td>Critical APIs</td>
+<td>P99 &lt; 500ms</td>
+</tr>
+<tr class="even">
+<td>Dashboard reports</td>
+<td>&lt; 2 seconds</td>
+</tr>
+<tr class="odd">
+<td>Emergency alerts</td>
+<td>&lt; 1.5 seconds</td>
+</tr>
+<tr class="even">
+<td>Ward allocation</td>
+<td>Strong consistency</td>
+</tr>
+<tr class="odd">
+<td>Inventory operations</td>
+<td>Atomic consistency</td>
+</tr>
+<tr class="even">
+<td>Clinical records</td>
+<td>Strong consistency</td>
+</tr>
+</tbody>
+</table>
+<h3 id="implementation-guidance-9">Implementation Guidance</h3>
+<ul>
+<li>Use indexes for all list and lookup queries.</li>
+<li>Use database transactions for critical writes.</li>
+<li>Cache lookup tables and permission maps.</li>
+<li>Use read replica/materialized views for reporting.</li>
+<li>Keep emergency alert path short and priority queued.</li>
+</ul>
+<h3 id="risks-12">Risks</h3>
+<ul>
+<li>Dashboard reports can degrade transactional performance.</li>
+<li>WebSocket fanout can affect API latency.</li>
+</ul>
+<h3 id="mitigation-strategies-12">Mitigation Strategies</h3>
+<ul>
+<li>Separate reporting queries to replica.</li>
+<li>Use outbox workers and WebSocket hubs with backpressure.</li>
+<li>Monitor P95/P99 continuously.</li>
+</ul>
+<h3 id="best-practices-12">Best Practices</h3>
+<ul>
+<li>Avoid N+1 queries.</li>
+<li>Use keyset pagination for large datasets.</li>
+<li>Load test before launch.</li>
+</ul>
+<hr />
+<h2 id="domain-architecture-standards">14. Domain Architecture
+Standards</h2>
+<p>Each domain below follows this structure:</p>
+<ol type="1">
+<li>Executive Summary</li>
+<li>Business Purpose</li>
+<li>Technical Design</li>
+<li>Implementation Guidance</li>
+<li>Risks</li>
+<li>Mitigation Strategies</li>
+<li>Best Practices</li>
+</ol>
+<hr />
+<h2 id="identity-and-access-domain">15. Identity and Access Domain</h2>
+<h3 id="executive-summary-1">Executive Summary</h3>
+<p>Identity controls login, authorization, sessions, device
+registration, token refresh, password reset, MFA readiness, and device
+revocation.</p>
+<h3 id="business-purpose-13">Business Purpose</h3>
+<p>Only verified users should access MYHxCARE, and each user should see
+only the workflows and records they are authorized to access.</p>
+<h3 id="technical-design-13">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>User</code></li>
+<li><code>Role</code></li>
+<li><code>Session</code></li>
+<li><code>Device</code></li>
+<li><code>PasswordResetRequest</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>User profile</li>
+<li>Role</li>
+<li>Permission</li>
+<li>Session</li>
+<li>Refresh token family</li>
+<li>Registered device</li>
+<li>Login attempt</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>EmailAddress</li>
+<li>PhoneNumber, optional, not used for SMS delivery</li>
+<li>PasswordHash</li>
+<li>DeviceFingerprint</li>
+<li>JWTClaims</li>
+<li>PermissionCode</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>UserRepository</code></li>
+<li><code>RoleRepository</code></li>
+<li><code>SessionRepository</code></li>
+<li><code>DeviceRepository</code></li>
+<li><code>PasswordResetRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>AuthService</code></li>
+<li><code>AuthorizationService</code></li>
+<li><code>SessionService</code></li>
+<li><code>PasswordResetService</code></li>
+<li><code>DeviceService</code></li>
+<li><code>MFAReadinessService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST   /api/v1/auth/login
+POST   /api/v1/auth/refresh
+POST   /api/v1/auth/logout
+POST   /api/v1/auth/password-reset-requests
+POST   /api/v1/auth/password-resets/confirm
+GET    /api/v1/me
+GET    /api/v1/me/sessions
+DELETE /api/v1/me/sessions/{session_id}
+POST   /api/v1/me/devices
+GET    /api/v1/me/devices
+DELETE /api/v1/me/devices/{device_id}
+GET    /api/v1/roles
+POST   /api/v1/roles
+PATCH  /api/v1/roles/{role_id}
+GET    /api/v1/permissions</code></pre>
+<h3 id="implementation-guidance-10">Implementation Guidance</h3>
+<ul>
+<li>Store password hashes with Argon2id or bcrypt.</li>
+<li>Store refresh token hashes only.</li>
+<li>Rotate refresh tokens on every refresh.</li>
+<li>Persist sessions in PostgreSQL and store hot revocation state in
+Redis.</li>
+<li>Device registration stores device ID, platform, FCM token
+hash/reference, last seen timestamp, and revocation status.</li>
+<li>MFA-ready schema includes <code>mfa_enabled</code>,
+<code>mfa_method</code>, <code>mfa_secret_encrypted</code>,
+<code>recovery_codes_hash</code>.</li>
+</ul>
+<h3 id="validation-rules">Validation Rules</h3>
+<ul>
+<li>Password minimum length: 12 characters for staff/admin,
+configurable.</li>
+<li>Lock account temporarily after repeated failed attempts.</li>
+<li>Refresh token must belong to a valid token family and session.</li>
+<li>Device registration requires authenticated user.</li>
+</ul>
+<h3 id="security-rules">Security Rules</h3>
+<ul>
+<li>Login is rate-limited by IP and username.</li>
+<li>Admin role changes require elevated permission.</li>
+<li>Staff cannot assign permissions they do not possess unless
+super-admin equivalent policy allows it.</li>
+</ul>
+<h3 id="audit-requirements">Audit Requirements</h3>
+<p>Audit login success/failure, logout, refresh token rotation failure,
+password reset request, password reset completion, role change,
+permission change, device registration, and device revocation.</p>
+<h3 id="reporting-requirements">Reporting Requirements</h3>
+<ul>
+<li>Active users</li>
+<li>Failed login trends</li>
+<li>Session counts</li>
+<li>Privileged users</li>
+<li>Device registration counts</li>
+</ul>
+<h3 id="error-handling">Error Handling</h3>
+<p>Use generic login error: <code>INVALID_CREDENTIALS</code>. Do not
+reveal whether username or password failed.</p>
+<h3 id="performance-considerations">Performance Considerations</h3>
+<p>Cache permission maps briefly in Redis. Keep login P95 under 150ms
+excluding password hashing cost; hashing cost must remain secure and
+acceptable.</p>
+<h3 id="risks-13">Risks</h3>
+<ul>
+<li>Token theft</li>
+<li>Excess privileges</li>
+<li>Weak passwords</li>
+</ul>
+<h3 id="mitigation-strategies-13">Mitigation Strategies</h3>
+<ul>
+<li>Refresh token rotation</li>
+<li>Session revocation</li>
+<li>Least privilege roles</li>
+<li>Rate limits and lockouts</li>
+</ul>
+<h3 id="best-practices-13">Best Practices</h3>
+<ul>
+<li>Never log tokens or passwords.</li>
+<li>Use short-lived access tokens.</li>
+<li>Use resource-level authorization for clinical data.</li>
+</ul>
+<hr />
+<h2 id="admissions-and-records-domain">16. Admissions and Records
+Domain</h2>
+<h3 id="executive-summary-2">Executive Summary</h3>
+<p>Admissions and Records manages student/staff registration,
+dependents, master patient index, demographics, folders, and patient
+identity resolution.</p>
+<h3 id="business-purpose-14">Business Purpose</h3>
+<p>The medical centre needs a single reliable patient identity record
+for students, staff, dependents, and other authorized patient
+categories.</p>
+<h3 id="technical-design-14">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>Patient</code></li>
+<li><code>MedicalFolder</code></li>
+<li><code>Dependent</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Student patient</li>
+<li>Staff patient</li>
+<li>Dependent</li>
+<li>Demographics</li>
+<li>Contact details</li>
+<li>Next of kin</li>
+<li>Folder</li>
+<li>Patient identifier</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>PatientNumber</li>
+<li>MatricNumber</li>
+<li>StaffNumber</li>
+<li>DateOfBirth</li>
+<li>Gender</li>
+<li>Address</li>
+<li>BloodGroup</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>PatientRepository</code></li>
+<li><code>FolderRepository</code></li>
+<li><code>DependentRepository</code></li>
+<li><code>MPIRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>PatientRegistrationService</code></li>
+<li><code>MasterPatientIndexService</code></li>
+<li><code>FolderManagementService</code></li>
+<li><code>DemographicsService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST   /api/v1/patients
+GET    /api/v1/patients
+GET    /api/v1/patients/{patient_id}
+PATCH  /api/v1/patients/{patient_id}
+GET    /api/v1/patients/search
+POST   /api/v1/patients/{patient_id}/dependents
+GET    /api/v1/patients/{patient_id}/dependents
+POST   /api/v1/patients/{patient_id}/folders
+GET    /api/v1/patients/{patient_id}/folders
+PATCH  /api/v1/folders/{folder_id}</code></pre>
+<h3 id="implementation-guidance-11">Implementation Guidance</h3>
+<ul>
+<li>Generate patient numbers server-side.</li>
+<li>Use MPI matching on institutional ID, name, date of birth, phone,
+and gender.</li>
+<li>Do not physically delete patients.</li>
+<li>Folder numbers must be unique per tenant.</li>
+</ul>
+<h3 id="validation-rules-1">Validation Rules</h3>
+<ul>
+<li>Date of birth cannot be in the future.</li>
+<li>Student registration requires matric number if patient category is
+student.</li>
+<li>Staff registration requires staff number if patient category is
+staff.</li>
+<li>Dependent requires sponsor relationship.</li>
+</ul>
+<h3 id="security-rules-1">Security Rules</h3>
+<ul>
+<li>Records staff can create/update demographics.</li>
+<li>Clinical users can view demographics only when clinically
+authorized.</li>
+<li>Admin users cannot browse clinical history through demographic
+access.</li>
+</ul>
+<h3 id="audit-requirements-1">Audit Requirements</h3>
+<p>Audit patient creation, demographic changes, folder creation, folder
+reassignment, and MPI merges.</p>
+<h3 id="reporting-requirements-1">Reporting Requirements</h3>
+<ul>
+<li>Patient counts by category</li>
+<li>New registrations by period</li>
+<li>Folder utilization</li>
+<li>Duplicate candidate report</li>
+</ul>
+<h3 id="error-handling-1">Error Handling</h3>
+<p>Return <code>PATIENT_DUPLICATE_CANDIDATE</code> when strong MPI match
+exists and manual review is required.</p>
+<h3 id="performance-considerations-1">Performance Considerations</h3>
+<p>Index patient identifiers, names, matric numbers, staff numbers, and
+folder numbers with tenant scope.</p>
+<h3 id="risks-14">Risks</h3>
+<ul>
+<li>Duplicate patient records</li>
+<li>Incorrect demographic changes</li>
+</ul>
+<h3 id="mitigation-strategies-14">Mitigation Strategies</h3>
+<ul>
+<li>MPI duplicate detection</li>
+<li>Audit all demographic changes</li>
+<li>Require review for high-confidence duplicates</li>
+</ul>
+<h3 id="best-practices-14">Best Practices</h3>
+<ul>
+<li>Keep clinical notes separate from demographics.</li>
+<li>Do not use patient names as identifiers.</li>
+</ul>
+<hr />
+<h2 id="clinicals-domain">17. Clinicals Domain</h2>
+<h3 id="executive-summary-3">Executive Summary</h3>
+<p>Clinicals supports doctors, nurses, dentists, optometrists,
+specialists, physiotherapists, and mental health practitioners through
+consultations, diagnoses, treatment plans, prognosis, referrals, orders,
+notes, and prescriptions.</p>
+<h3 id="business-purpose-15">Business Purpose</h3>
+<p>Clinical records must accurately preserve the care journey while
+protecting privacy and preventing unauthorized edits or deletion.</p>
+<h3 id="technical-design-15">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>Encounter</code></li>
+<li><code>ClinicalRecord</code></li>
+<li><code>Prescription</code></li>
+<li><code>ClinicalOrder</code></li>
+<li><code>Referral</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Consultation</li>
+<li>Diagnosis</li>
+<li>Treatment plan</li>
+<li>Prognosis</li>
+<li>Clinical note</li>
+<li>Prescription item</li>
+<li>Referral</li>
+<li>Order</li>
+<li>Attachment reference</li>
+<li>Clinical record version</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>EncounterType</li>
+<li>DiagnosisCode</li>
+<li>ClinicalNoteText</li>
+<li>MedicationInstruction</li>
+<li>Dosage</li>
+<li>Frequency</li>
+<li>Duration</li>
+<li>PractitionerRole</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>EncounterRepository</code></li>
+<li><code>ClinicalRecordRepository</code></li>
+<li><code>PrescriptionRepository</code></li>
+<li><code>OrderRepository</code></li>
+<li><code>ReferralRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>ConsultationService</code></li>
+<li><code>DiagnosisService</code></li>
+<li><code>TreatmentPlanService</code></li>
+<li><code>PrescriptionService</code></li>
+<li><code>ReferralService</code></li>
+<li><code>ClinicalVersioningService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/encounters
+GET  /api/v1/encounters
+GET  /api/v1/encounters/{encounter_id}
+POST /api/v1/encounters/{encounter_id}/clinical-notes
+GET  /api/v1/patients/{patient_id}/clinical-timeline
+POST /api/v1/encounters/{encounter_id}/diagnoses
+POST /api/v1/encounters/{encounter_id}/treatment-plans
+POST /api/v1/encounters/{encounter_id}/prognoses
+POST /api/v1/encounters/{encounter_id}/prescriptions
+POST /api/v1/encounters/{encounter_id}/orders
+POST /api/v1/encounters/{encounter_id}/referrals</code></pre>
+<h3 id="implementation-guidance-12">Implementation Guidance</h3>
+<ul>
+<li>Clinical records are immutable.</li>
+<li>Corrections create new versions or amendment records.</li>
+<li>No physical deletion.</li>
+<li>Every clinical write stores author, role, timestamp, encounter,
+patient, version, and reason when amending.</li>
+<li>Use PostgreSQL transactions for encounter creation plus related
+clinical entries.</li>
+</ul>
+<h3 id="validation-rules-2">Validation Rules</h3>
+<ul>
+<li>Clinical note cannot be empty.</li>
+<li>Prescription requires medication, dose, route, frequency, duration,
+and prescriber.</li>
+<li>Referral requires destination department/practitioner role and
+reason.</li>
+<li>Amendment requires amendment reason.</li>
+</ul>
+<h3 id="security-rules-2">Security Rules</h3>
+<ul>
+<li>Clinical access requires assignment, referral, duty-based
+authorization, or explicit permission.</li>
+<li>Mental health notes may require stricter access classification.</li>
+<li>Admin users cannot access clinical content through admin
+permissions.</li>
+</ul>
+<h3 id="audit-requirements-2">Audit Requirements</h3>
+<p>Audit all record views, additions, amendments, prescription creation,
+referrals, and order creation.</p>
+<h3 id="reporting-requirements-2">Reporting Requirements</h3>
+<ul>
+<li>Encounter counts by department</li>
+<li>Diagnosis trends</li>
+<li>Prescription trends</li>
+<li>Referral volumes</li>
+<li>Practitioner workload</li>
+</ul>
+<h3 id="error-handling-2">Error Handling</h3>
+<ul>
+<li><code>CLINICAL_RECORD_IMMUTABLE</code> for update/delete
+attempts.</li>
+<li><code>CLINICAL_ACCESS_DENIED</code> for unauthorized access.</li>
+<li><code>ENCOUNTER_CLOSED</code> when adding disallowed entries.</li>
+</ul>
+<h3 id="performance-considerations-2">Performance Considerations</h3>
+<p>Use indexed timeline queries by <code>tenant_id</code>,
+<code>patient_id</code>, <code>encounter_date</code>, and
+<code>record_type</code>.</p>
+<h3 id="risks-15">Risks</h3>
+<ul>
+<li>Unauthorized clinical access</li>
+<li>Incorrect amendment behavior</li>
+<li>Large clinical timeline queries</li>
+</ul>
+<h3 id="mitigation-strategies-15">Mitigation Strategies</h3>
+<ul>
+<li>Purpose-bound access control</li>
+<li>Immutable version model</li>
+<li>Keyset pagination and timeline indexes</li>
+</ul>
+<h3 id="best-practices-15">Best Practices</h3>
+<ul>
+<li>Prefer structured data for diagnoses, prescriptions, and
+orders.</li>
+<li>Keep free-text notes auditable and immutable.</li>
+</ul>
+<hr />
+<h2 id="clinical-collaboration-domain">18. Clinical Collaboration
+Domain</h2>
+<h3 id="executive-summary-4">Executive Summary</h3>
+<p>Clinical Collaboration provides case-based, patient-linked, auditable
+communication. It is not general chat.</p>
+<h3 id="business-purpose-16">Business Purpose</h3>
+<p>Departments and practitioners need secure case communication tied to
+patient care, duty routing, referrals, and escalation.</p>
+<h3 id="technical-design-16">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>CaseThread</code></li>
+<li><code>CaseMessage</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Thread participant</li>
+<li>Message</li>
+<li>Read receipt</li>
+<li>Attachment</li>
+<li>Escalation</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>ThreadPurpose</li>
+<li>MessageBody</li>
+<li>ReadStatus</li>
+<li>EscalationLevel</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>CaseThreadRepository</code></li>
+<li><code>CaseMessageRepository</code></li>
+<li><code>ReadReceiptRepository</code></li>
+<li><code>EscalationRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>CaseCommunicationService</code></li>
+<li><code>ReadReceiptService</code></li>
+<li><code>DutyRoutingService</code></li>
+<li><code>EscalationService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/case-threads
+GET  /api/v1/case-threads
+GET  /api/v1/case-threads/{thread_id}
+POST /api/v1/case-threads/{thread_id}/messages
+POST /api/v1/case-threads/{thread_id}/read-receipts
+POST /api/v1/case-threads/{thread_id}/attachments
+POST /api/v1/case-threads/{thread_id}/escalations</code></pre>
+<h3 id="implementation-guidance-13">Implementation Guidance</h3>
+<ul>
+<li>Every thread must have a patient, encounter, department, referral,
+or operational case reference.</li>
+<li>Messages are retained permanently.</li>
+<li>Messages are not physically deleted.</li>
+<li>Attachments are stored in object storage with metadata in
+PostgreSQL.</li>
+<li>WebSockets deliver live messages and read receipts.</li>
+</ul>
+<h3 id="validation-rules-3">Validation Rules</h3>
+<ul>
+<li>Message body or attachment is required.</li>
+<li>Thread must have clinical or operational purpose.</li>
+<li>Sender must be a participant or duty-routed authorized actor.</li>
+</ul>
+<h3 id="security-rules-3">Security Rules</h3>
+<ul>
+<li>No general social chat.</li>
+<li>Patient-linked discussions inherit clinical access
+restrictions.</li>
+<li>Attachments require authorization checks.</li>
+</ul>
+<h3 id="audit-requirements-3">Audit Requirements</h3>
+<p>Audit thread creation, message send, message read, attachment
+upload/download, escalation, and participant changes.</p>
+<h3 id="reporting-requirements-3">Reporting Requirements</h3>
+<ul>
+<li>Thread volume by department</li>
+<li>Average response time</li>
+<li>Escalation counts</li>
+<li>Unread critical discussions</li>
+</ul>
+<h3 id="error-handling-3">Error Handling</h3>
+<ul>
+<li><code>CASE_THREAD_PURPOSE_REQUIRED</code></li>
+<li><code>CASE_MESSAGE_ACCESS_DENIED</code></li>
+<li><code>DUTY_ROUTE_UNAVAILABLE</code></li>
+</ul>
+<h3 id="performance-considerations-3">Performance Considerations</h3>
+<p>Use keyset pagination for messages. Store unread counts in Redis and
+reconcile from PostgreSQL.</p>
+<h3 id="risks-16">Risks</h3>
+<ul>
+<li>Collaboration becomes general chat.</li>
+<li>Sensitive messages leak to unauthorized departments.</li>
+</ul>
+<h3 id="mitigation-strategies-16">Mitigation Strategies</h3>
+<ul>
+<li>Enforce case linkage.</li>
+<li>Enforce participant and duty-based access.</li>
+<li>Permanent audit trail.</li>
+</ul>
+<h3 id="best-practices-16">Best Practices</h3>
+<ul>
+<li>Use WebSocket for live updates and REST for persistence.</li>
+<li>Keep message retention permanent.</li>
+</ul>
+<hr />
+<h2 id="duty-roster-domain">19. Duty Roster Domain</h2>
+<h3 id="executive-summary-5">Executive Summary</h3>
+<p>Duty Roster manages shifts, duty assignments, active duty detection,
+and escalation rules used by Clinical Collaboration and Emergency.</p>
+<h3 id="business-purpose-17">Business Purpose</h3>
+<p>The system must know who is currently responsible for a department,
+ward, or role.</p>
+<h3 id="technical-design-17">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>Roster</code></li>
+<li><code>Shift</code></li>
+<li><code>DutyAssignment</code></li>
+<li><code>EscalationRule</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Staff duty</li>
+<li>Department shift</li>
+<li>Role coverage</li>
+<li>Escalation target</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>ShiftTimeRange</li>
+<li>DutyStatus</li>
+<li>CoverageRole</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>RosterRepository</code></li>
+<li><code>DutyAssignmentRepository</code></li>
+<li><code>EscalationRuleRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>ShiftSchedulingService</code></li>
+<li><code>ActiveDutyService</code></li>
+<li><code>EscalationResolutionService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/rosters
+GET  /api/v1/rosters
+POST /api/v1/duty-assignments
+GET  /api/v1/duty-assignments/active
+PATCH /api/v1/duty-assignments/{assignment_id}
+POST /api/v1/escalation-rules
+GET  /api/v1/escalation-rules</code></pre>
+<h3 id="implementation-guidance-14">Implementation Guidance</h3>
+<ul>
+<li>Store shifts with timezone-aware timestamps.</li>
+<li>Active duty query must be indexed by tenant, department, role, start
+time, and end time.</li>
+<li>Prevent overlapping duty assignments where exclusive coverage is
+required.</li>
+</ul>
+<h3 id="validation-rules-4">Validation Rules</h3>
+<ul>
+<li>Shift end must be after start.</li>
+<li>Staff must be active.</li>
+<li>Department must exist.</li>
+<li>Escalation chain must not loop.</li>
+</ul>
+<h3 id="security-rules-4">Security Rules</h3>
+<ul>
+<li>Only authorized roster managers can edit rosters.</li>
+<li>Staff can view their own assignments.</li>
+</ul>
+<h3 id="audit-requirements-4">Audit Requirements</h3>
+<p>Audit roster creation, assignment changes, escalation rule changes,
+and active duty override.</p>
+<h3 id="reporting-requirements-4">Reporting Requirements</h3>
+<ul>
+<li>Coverage gaps</li>
+<li>Staff workload</li>
+<li>Duty attendance readiness</li>
+</ul>
+<h3 id="error-handling-4">Error Handling</h3>
+<ul>
+<li><code>DUTY_OVERLAP_NOT_ALLOWED</code></li>
+<li><code>ESCALATION_RULE_LOOP</code></li>
+<li><code>NO_ACTIVE_DUTY_FOUND</code></li>
+</ul>
+<h3 id="performance-considerations-4">Performance Considerations</h3>
+<p>Cache active duty lookups briefly in Redis.</p>
+<h3 id="risks-17">Risks</h3>
+<ul>
+<li>Incorrect duty routing affects emergency response.</li>
+</ul>
+<h3 id="mitigation-strategies-17">Mitigation Strategies</h3>
+<ul>
+<li>Validate coverage gaps.</li>
+<li>Add dashboard warnings for unassigned critical roles.</li>
+</ul>
+<h3 id="best-practices-17">Best Practices</h3>
+<ul>
+<li>Keep duty roster data current.</li>
+<li>Integrate emergency routing with active duty service.</li>
+</ul>
+<hr />
+<h2 id="ward-management-domain">20. Ward Management Domain</h2>
+<h3 id="executive-summary-6">Executive Summary</h3>
+<p>Ward Management controls wards, beds, admissions, transfers,
+discharges, rounds, nursing assignments, and occupancy analytics.</p>
+<h3 id="business-purpose-18">Business Purpose</h3>
+<p>The medical centre must allocate beds safely, prevent double
+allocation, and track occupancy accurately.</p>
+<h3 id="technical-design-18">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>Ward</code></li>
+<li><code>Bed</code></li>
+<li><code>WardAdmission</code></li>
+<li><code>Transfer</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Ward category</li>
+<li>Bed type</li>
+<li>Bed status</li>
+<li>Admission</li>
+<li>Transfer</li>
+<li>Discharge</li>
+<li>Ward round</li>
+<li>Nursing assignment</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>BedCode</li>
+<li>BedStatus</li>
+<li>AdmissionStatus</li>
+<li>TransferReason</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>WardRepository</code></li>
+<li><code>BedRepository</code></li>
+<li><code>AdmissionRepository</code></li>
+<li><code>TransferRepository</code></li>
+<li><code>WardRoundRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>BedAllocationService</code></li>
+<li><code>AdmissionService</code></li>
+<li><code>TransferService</code></li>
+<li><code>DischargeService</code></li>
+<li><code>OccupancyAnalyticsService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/wards
+GET  /api/v1/wards
+POST /api/v1/wards/{ward_id}/beds
+GET  /api/v1/wards/{ward_id}/beds
+POST /api/v1/ward-admissions
+POST /api/v1/ward-admissions/{admission_id}/transfers
+POST /api/v1/ward-admissions/{admission_id}/discharge
+GET  /api/v1/wards/{ward_id}/occupancy
+POST /api/v1/ward-rounds
+POST /api/v1/nursing-assignments</code></pre>
+<h3 id="implementation-guidance-15">Implementation Guidance</h3>
+<ul>
+<li>Use database transaction and row-level locking during bed
+allocation.</li>
+<li>Use <code>SELECT ... FOR UPDATE</code> on target bed.</li>
+<li>Add uniqueness constraint for active admission per bed.</li>
+<li>Admission, bed status update, billing charge, and audit record must
+commit atomically.</li>
+</ul>
+<h3 id="validation-rules-5">Validation Rules</h3>
+<ul>
+<li>Bed must be available before admission.</li>
+<li>Patient cannot have two active ward admissions.</li>
+<li>Transfer target bed must be available.</li>
+<li>Discharge requires active admission.</li>
+</ul>
+<h3 id="security-rules-5">Security Rules</h3>
+<ul>
+<li>Ward nurses and authorized clinicians can view ward patients.</li>
+<li>Bed allocation requires ward/admission permission.</li>
+</ul>
+<h3 id="audit-requirements-5">Audit Requirements</h3>
+<p>Audit bed creation, status change, admission, transfer, discharge,
+nursing assignment, and ward round.</p>
+<h3 id="reporting-requirements-5">Reporting Requirements</h3>
+<ul>
+<li>Occupancy by ward</li>
+<li>Average length of stay</li>
+<li>Bed turnover</li>
+<li>Transfer counts</li>
+<li>Discharge counts</li>
+</ul>
+<h3 id="error-handling-5">Error Handling</h3>
+<ul>
+<li><code>BED_ALREADY_OCCUPIED</code></li>
+<li><code>PATIENT_ALREADY_ADMITTED</code></li>
+<li><code>ADMISSION_NOT_ACTIVE</code></li>
+</ul>
+<h3 id="performance-considerations-5">Performance Considerations</h3>
+<p>Use materialized occupancy snapshots for dashboards. Keep allocation
+strongly consistent.</p>
+<h3 id="risks-18">Risks</h3>
+<ul>
+<li>Double bed allocation</li>
+<li>Race conditions during transfers</li>
+</ul>
+<h3 id="mitigation-strategies-18">Mitigation Strategies</h3>
+<ul>
+<li>Row locks</li>
+<li>Unique partial indexes</li>
+<li>Transactional service boundary</li>
+</ul>
+<h3 id="best-practices-18">Best Practices</h3>
+<ul>
+<li>Never compute active occupancy from cached state during
+allocation.</li>
+<li>Use database as source of truth.</li>
+</ul>
+<hr />
+<h2 id="pharmacy-domain">21. Pharmacy Domain</h2>
+<h3 id="executive-summary-7">Executive Summary</h3>
+<p>Pharmacy handles inventory, dispensing, procurement, FEFO, batch
+tracking, disposal, and stock adjustment.</p>
+<h3 id="business-purpose-19">Business Purpose</h3>
+<p>The medical centre must dispense medication safely, track stock
+accurately, and prevent duplicate or invalid inventory movement.</p>
+<h3 id="technical-design-19">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>Medication</code></li>
+<li><code>InventoryBatch</code></li>
+<li><code>DispenseTransaction</code></li>
+<li><code>ProcurementOrder</code></li>
+<li><code>StockAdjustment</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Medication</li>
+<li>Batch</li>
+<li>Stock ledger entry</li>
+<li>Dispense item</li>
+<li>Supplier</li>
+<li>Disposal record</li>
+<li>Procurement item</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>BatchNumber</li>
+<li>ExpiryDate</li>
+<li>Quantity</li>
+<li>UnitOfMeasure</li>
+<li>MovementType</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>MedicationRepository</code></li>
+<li><code>InventoryRepository</code></li>
+<li><code>DispenseRepository</code></li>
+<li><code>ProcurementRepository</code></li>
+<li><code>StockLedgerRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>InventoryService</code></li>
+<li><code>DispensingService</code></li>
+<li><code>FEFOService</code></li>
+<li><code>ProcurementService</code></li>
+<li><code>DisposalService</code></li>
+<li><code>StockAdjustmentService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/pharmacy/medications
+GET  /api/v1/pharmacy/medications
+POST /api/v1/pharmacy/inventory/batches
+GET  /api/v1/pharmacy/inventory
+POST /api/v1/pharmacy/dispenses
+GET  /api/v1/pharmacy/dispenses
+POST /api/v1/pharmacy/procurements
+POST /api/v1/pharmacy/stock-adjustments
+POST /api/v1/pharmacy/disposals
+GET  /api/v1/pharmacy/stock-ledger</code></pre>
+<h3 id="implementation-guidance-16">Implementation Guidance</h3>
+<ul>
+<li>Use stock ledger as source of truth for movements.</li>
+<li>Use transaction and row locks on inventory batches during
+dispensing.</li>
+<li>FEFO selects earliest expiry eligible batch first.</li>
+<li>Dispensing must be idempotent using
+<code>Idempotency-Key</code>.</li>
+</ul>
+<h3 id="validation-rules-6">Validation Rules</h3>
+<ul>
+<li>Quantity must be positive.</li>
+<li>Cannot dispense expired batch.</li>
+<li>Cannot dispense more than available quantity.</li>
+<li>Disposal requires reason and approver if threshold exceeded.</li>
+</ul>
+<h3 id="security-rules-6">Security Rules</h3>
+<ul>
+<li>Only pharmacy-authorized users can dispense or adjust stock.</li>
+<li>Adjustment approval required for sensitive stock changes.</li>
+</ul>
+<h3 id="audit-requirements-6">Audit Requirements</h3>
+<p>Audit procurement, batch creation, dispensing, disposal, adjustment,
+and stock transfer.</p>
+<h3 id="reporting-requirements-6">Reporting Requirements</h3>
+<ul>
+<li>Current stock</li>
+<li>Low stock</li>
+<li>Expiring stock</li>
+<li>Dispensing volume</li>
+<li>Stock movement ledger</li>
+<li>Disposal report</li>
+</ul>
+<h3 id="error-handling-6">Error Handling</h3>
+<ul>
+<li><code>INSUFFICIENT_STOCK</code></li>
+<li><code>BATCH_EXPIRED</code></li>
+<li><code>DISPENSE_ALREADY_PROCESSED</code></li>
+</ul>
+<h3 id="performance-considerations-6">Performance Considerations</h3>
+<p>Index medication, location, batch expiry, and stock status. Keep
+ledger append-only.</p>
+<h3 id="risks-19">Risks</h3>
+<ul>
+<li>Double dispensing</li>
+<li>Inventory race conditions</li>
+<li>Expired medication dispensing</li>
+</ul>
+<h3 id="mitigation-strategies-19">Mitigation Strategies</h3>
+<ul>
+<li>Row locks</li>
+<li>FEFO enforcement</li>
+<li>Idempotency</li>
+<li>Ledger reconciliation</li>
+</ul>
+<h3 id="best-practices-19">Best Practices</h3>
+<ul>
+<li>Never update stock without ledger entry.</li>
+<li>Reconcile physical stock against system stock periodically.</li>
+</ul>
+<hr />
+<h2 id="multi-campus-pharmacy-extension">22. Multi-Campus Pharmacy
+Extension</h2>
+<h3 id="executive-summary-8">Executive Summary</h3>
+<p>The pharmacy model supports main medical centre, Nnewi, Adult
+Education Campus, Mbaukwu, and Ifite-Ogwari inventory locations.</p>
+<h3 id="business-purpose-20">Business Purpose</h3>
+<p>UniZik can manage distributed medication stock while retaining
+central visibility and procurement control.</p>
+<h3 id="technical-design-20">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>InventoryLocation</code></li>
+<li><code>StockTransfer</code></li>
+<li><code>CentralProcurement</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Location inventory</li>
+<li>Transfer request</li>
+<li>Transfer approval</li>
+<li>Transfer dispatch</li>
+<li>Transfer receipt</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>LocationCode</li>
+<li>TransferStatus</li>
+<li>ApprovalDecision</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>InventoryLocationRepository</code></li>
+<li><code>StockTransferRepository</code></li>
+<li><code>CentralProcurementRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>LocationInventoryService</code></li>
+<li><code>StockTransferService</code></li>
+<li><code>TransferApprovalService</code></li>
+<li><code>CentralProcurementService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/pharmacy/locations
+GET  /api/v1/pharmacy/locations
+GET  /api/v1/pharmacy/locations/{location_id}/inventory
+POST /api/v1/pharmacy/transfers
+POST /api/v1/pharmacy/transfers/{transfer_id}/approve
+POST /api/v1/pharmacy/transfers/{transfer_id}/dispatch
+POST /api/v1/pharmacy/transfers/{transfer_id}/receive
+GET  /api/v1/pharmacy/transfers</code></pre>
+<h3 id="implementation-guidance-17">Implementation Guidance</h3>
+<ul>
+<li>Inventory is tracked per location.</li>
+<li>Transfer approval reserves stock at source.</li>
+<li>Dispatch moves stock to in-transit state.</li>
+<li>Receipt increases stock at destination.</li>
+<li>All movements write ledger entries.</li>
+</ul>
+<h3 id="validation-rules-7">Validation Rules</h3>
+<ul>
+<li>Source and destination cannot be the same.</li>
+<li>Source must have sufficient stock.</li>
+<li>Only approved transfers can be dispatched.</li>
+<li>Only dispatched transfers can be received.</li>
+</ul>
+<h3 id="security-rules-7">Security Rules</h3>
+<ul>
+<li>Location staff can view their location.</li>
+<li>Central pharmacy can view all locations.</li>
+<li>Transfer approvals require authorized role.</li>
+</ul>
+<h3 id="audit-requirements-7">Audit Requirements</h3>
+<p>Audit request, approval, rejection, dispatch, receipt,
+cancellation.</p>
+<h3 id="reporting-requirements-7">Reporting Requirements</h3>
+<ul>
+<li>Stock by campus</li>
+<li>Pending transfers</li>
+<li>Transfer turnaround time</li>
+<li>Central procurement allocation</li>
+</ul>
+<h3 id="risks-20">Risks</h3>
+<ul>
+<li>Stock mismatch across campuses</li>
+<li>In-transit loss</li>
+</ul>
+<h3 id="mitigation-strategies-20">Mitigation Strategies</h3>
+<ul>
+<li>Ledger-based transfer lifecycle</li>
+<li>Mandatory receipt confirmation</li>
+<li>Periodic reconciliation</li>
+</ul>
+<h3 id="best-practices-20">Best Practices</h3>
+<ul>
+<li>Treat in-transit stock as unavailable.</li>
+<li>Use immutable transfer events.</li>
+</ul>
+<hr />
+<h2 id="laboratory-domain">23. Laboratory Domain</h2>
+<h3 id="executive-summary-9">Executive Summary</h3>
+<p>Laboratory manages orders, sample tracking, barcode workflow, result
+entry, result verification, and blood bank.</p>
+<h3 id="business-purpose-21">Business Purpose</h3>
+<p>The lab must track samples reliably from order to verified result,
+preventing misidentification and unauthorized result changes.</p>
+<h3 id="technical-design-21">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>LabOrder</code></li>
+<li><code>Sample</code></li>
+<li><code>LabResult</code></li>
+<li><code>BloodBankUnit</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Test catalog</li>
+<li>Order item</li>
+<li>Barcode</li>
+<li>Sample collection</li>
+<li>Result entry</li>
+<li>Result verification</li>
+<li>Blood unit</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>BarcodeValue</li>
+<li>SampleStatus</li>
+<li>ResultStatus</li>
+<li>BloodGroup</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>LabOrderRepository</code></li>
+<li><code>SampleRepository</code></li>
+<li><code>LabResultRepository</code></li>
+<li><code>BloodBankRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>LabOrderService</code></li>
+<li><code>SampleTrackingService</code></li>
+<li><code>ResultEntryService</code></li>
+<li><code>ResultVerificationService</code></li>
+<li><code>BloodBankService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/lab/orders
+GET  /api/v1/lab/orders
+POST /api/v1/lab/orders/{order_id}/samples
+POST /api/v1/lab/samples/{sample_id}/collect
+POST /api/v1/lab/samples/{sample_id}/receive
+POST /api/v1/lab/results
+POST /api/v1/lab/results/{result_id}/verify
+GET  /api/v1/patients/{patient_id}/lab-results
+POST /api/v1/lab/blood-bank/units
+GET  /api/v1/lab/blood-bank/units</code></pre>
+<h3 id="implementation-guidance-18">Implementation Guidance</h3>
+<ul>
+<li>Generate barcode at sample creation.</li>
+<li>Result entry and verification are separate actions.</li>
+<li>Verified results are immutable; corrections create amended
+versions.</li>
+<li>Notify patient/mobile app through in-app and FCM after verification
+if allowed.</li>
+</ul>
+<h3 id="validation-rules-8">Validation Rules</h3>
+<ul>
+<li>Sample must be collected before received.</li>
+<li>Result must be entered before verification.</li>
+<li>Verifier cannot be the same actor where separation-of-duty policy
+applies.</li>
+</ul>
+<h3 id="security-rules-8">Security Rules</h3>
+<ul>
+<li>Lab users manage samples/results.</li>
+<li>Clinicians can view results only when clinically authorized.</li>
+<li>Students can view released results through mobile API.</li>
+</ul>
+<h3 id="audit-requirements-8">Audit Requirements</h3>
+<p>Audit order creation, sample collection, sample receive, result
+entry, verification, amendment, and result access.</p>
+<h3 id="reporting-requirements-8">Reporting Requirements</h3>
+<ul>
+<li>Test volumes</li>
+<li>Turnaround time</li>
+<li>Pending samples</li>
+<li>Verified results</li>
+<li>Blood stock</li>
+</ul>
+<h3 id="risks-21">Risks</h3>
+<ul>
+<li>Sample misidentification</li>
+<li>Unauthorized result edit</li>
+</ul>
+<h3 id="mitigation-strategies-21">Mitigation Strategies</h3>
+<ul>
+<li>Barcode workflow</li>
+<li>Immutable verified results</li>
+<li>Separation of result entry and verification</li>
+</ul>
+<h3 id="best-practices-21">Best Practices</h3>
+<ul>
+<li>Use barcode scanning in UI.</li>
+<li>Never overwrite verified results.</li>
+</ul>
+<hr />
+<h2 id="billing-and-finance-domain">24. Billing and Finance Domain</h2>
+<h3 id="executive-summary-10">Executive Summary</h3>
+<p>Billing handles charges, invoices, payments, adjustments, and
+refunds.</p>
+<h3 id="business-purpose-22">Business Purpose</h3>
+<p>The medical centre needs transparent financial records linked to
+services while preventing duplicate charges and unauthorized
+refunds.</p>
+<h3 id="technical-design-22">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>Charge</code></li>
+<li><code>Invoice</code></li>
+<li><code>Payment</code></li>
+<li><code>Refund</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Invoice item</li>
+<li>Payment allocation</li>
+<li>Adjustment</li>
+<li>Refund approval</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>Money</li>
+<li>PaymentStatus</li>
+<li>InvoiceStatus</li>
+<li>AdjustmentReason</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>ChargeRepository</code></li>
+<li><code>InvoiceRepository</code></li>
+<li><code>PaymentRepository</code></li>
+<li><code>RefundRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>ChargeService</code></li>
+<li><code>InvoiceService</code></li>
+<li><code>PaymentService</code></li>
+<li><code>AdjustmentService</code></li>
+<li><code>RefundService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/billing/charges
+GET  /api/v1/billing/charges
+POST /api/v1/billing/invoices
+GET  /api/v1/billing/invoices
+POST /api/v1/billing/payments
+POST /api/v1/billing/adjustments
+POST /api/v1/billing/refunds
+GET  /api/v1/billing/accounts/{patient_id}</code></pre>
+<h3 id="implementation-guidance-19">Implementation Guidance</h3>
+<ul>
+<li>Use idempotency for payments.</li>
+<li>Link charges to source domain and cost centre.</li>
+<li>Refunds require approval.</li>
+<li>Financial records are never physically deleted.</li>
+</ul>
+<h3 id="validation-rules-9">Validation Rules</h3>
+<ul>
+<li>Amount must be positive except approved adjustments.</li>
+<li>Invoice must be open before payment allocation.</li>
+<li>Refund cannot exceed paid amount.</li>
+</ul>
+<h3 id="security-rules-9">Security Rules</h3>
+<ul>
+<li>Finance users manage billing.</li>
+<li>Clinical users should not adjust financial records unless explicitly
+authorized.</li>
+</ul>
+<h3 id="audit-requirements-9">Audit Requirements</h3>
+<p>Audit charge creation, invoice creation, payment, adjustment, refund
+request, approval, and rejection.</p>
+<h3 id="reporting-requirements-9">Reporting Requirements</h3>
+<ul>
+<li>Revenue by period</li>
+<li>Outstanding invoices</li>
+<li>Refunds</li>
+<li>Adjustments</li>
+<li>Payment methods</li>
+</ul>
+<h3 id="risks-22">Risks</h3>
+<ul>
+<li>Duplicate payments</li>
+<li>Unauthorized refunds</li>
+</ul>
+<h3 id="mitigation-strategies-22">Mitigation Strategies</h3>
+<ul>
+<li>Idempotency keys</li>
+<li>Approval workflow</li>
+<li>Immutable financial ledger</li>
+</ul>
+<h3 id="best-practices-22">Best Practices</h3>
+<ul>
+<li>Use ledger-style accounting records.</li>
+<li>Keep pricing history for audit.</li>
+</ul>
+<hr />
+<h2 id="department-revenue-accounting-domain">25. Department Revenue
+Accounting Domain</h2>
+<h3 id="executive-summary-11">Executive Summary</h3>
+<p>Revenue Accounting attributes revenue to cost centres such as
+records, consultations, specialist clinics, dialysis, laboratory,
+pharmacy, ward services, and emergency services.</p>
+<h3 id="business-purpose-23">Business Purpose</h3>
+<p>Management needs accurate department-level revenue analytics.</p>
+<h3 id="technical-design-23">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>CostCentre</code></li>
+<li><code>RevenueAttribution</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Revenue line</li>
+<li>Service category</li>
+<li>Department mapping</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>CostCentreCode</li>
+<li>RevenueSource</li>
+<li>AttributionRule</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>CostCentreRepository</code></li>
+<li><code>RevenueAttributionRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>RevenueAttributionService</code></li>
+<li><code>RevenueAnalyticsService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/revenue/cost-centres
+GET  /api/v1/revenue/cost-centres
+GET  /api/v1/revenue/analytics
+GET  /api/v1/revenue/by-department
+GET  /api/v1/revenue/by-service</code></pre>
+<h3 id="implementation-guidance-20">Implementation Guidance</h3>
+<ul>
+<li>Charges must include service source and cost centre.</li>
+<li>Revenue attribution occurs when charge/invoice/payment events are
+created.</li>
+<li>Reports use read replica or materialized views.</li>
+</ul>
+<h3 id="validation-rules-10">Validation Rules</h3>
+<ul>
+<li>Cost centre code unique per tenant.</li>
+<li>Revenue source must map to valid service domain.</li>
+</ul>
+<h3 id="security-rules-10">Security Rules</h3>
+<ul>
+<li>Revenue reports require finance/admin reporting permissions.</li>
+<li>Clinical details must not be exposed in financial analytics.</li>
+</ul>
+<h3 id="audit-requirements-10">Audit Requirements</h3>
+<p>Audit cost centre changes and attribution rule changes.</p>
+<h3 id="reporting-requirements-10">Reporting Requirements</h3>
+<ul>
+<li>Revenue by department</li>
+<li>Revenue by service</li>
+<li>Revenue by period</li>
+<li>Revenue by campus/location</li>
+</ul>
+<h3 id="risks-23">Risks</h3>
+<ul>
+<li>Incorrect attribution</li>
+<li>Exposing patient details in finance reports</li>
+</ul>
+<h3 id="mitigation-strategies-23">Mitigation Strategies</h3>
+<ul>
+<li>Use explicit cost centre mapping.</li>
+<li>Aggregate reports without clinical text.</li>
+</ul>
+<h3 id="best-practices-23">Best Practices</h3>
+<ul>
+<li>Version service pricing and attribution rules.</li>
+<li>Reconcile revenue with billing ledger.</li>
+</ul>
+<hr />
+<h2 id="nhia-nhis-domain">26. NHIA / NHIS Domain</h2>
+<h3 id="executive-summary-12">Executive Summary</h3>
+<p>NHIA/NHIS supports eligibility checks, coverage validation, and
+co-pay calculation, with integration readiness.</p>
+<h3 id="business-purpose-24">Business Purpose</h3>
+<p>The system must support insured patients and calculate coverage
+responsibilities correctly.</p>
+<h3 id="technical-design-24">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>InsuranceEnrollment</code></li>
+<li><code>EligibilityCheck</code></li>
+<li><code>CoverageValidation</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Payer</li>
+<li>Plan</li>
+<li>Coverage rule</li>
+<li>Co-pay rule</li>
+<li>Eligibility response</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>PolicyNumber</li>
+<li>CoverageStatus</li>
+<li>CoPayAmount</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>InsuranceRepository</code></li>
+<li><code>EligibilityRepository</code></li>
+<li><code>CoverageRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>EligibilityService</code></li>
+<li><code>CoverageValidationService</code></li>
+<li><code>CoPayCalculationService</code></li>
+<li><code>InsuranceIntegrationService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/insurance/eligibility-checks
+GET  /api/v1/insurance/eligibility-checks/{check_id}
+POST /api/v1/insurance/coverage-validations
+POST /api/v1/insurance/copay-calculations
+GET  /api/v1/patients/{patient_id}/insurance</code></pre>
+<h3 id="implementation-guidance-21">Implementation Guidance</h3>
+<ul>
+<li>Phase 1 can support internal/manual eligibility records if live NHIA
+integration is not available.</li>
+<li>External integration must be isolated behind an interface.</li>
+<li>Store integration request/response metadata but avoid storing
+unnecessary sensitive payloads.</li>
+</ul>
+<h3 id="validation-rules-11">Validation Rules</h3>
+<ul>
+<li>Patient must exist.</li>
+<li>Coverage plan must be active.</li>
+<li>Co-pay rules must be effective for service date.</li>
+</ul>
+<h3 id="security-rules-11">Security Rules</h3>
+<ul>
+<li>Insurance access limited to billing/records/authorized staff.</li>
+<li>Clinical users see only coverage indicators needed for care
+workflow.</li>
+</ul>
+<h3 id="audit-requirements-11">Audit Requirements</h3>
+<p>Audit eligibility checks, coverage overrides, and co-pay
+calculations.</p>
+<h3 id="reporting-requirements-11">Reporting Requirements</h3>
+<ul>
+<li>Covered patients</li>
+<li>Co-pay totals</li>
+<li>Coverage denials</li>
+<li>Payer activity</li>
+</ul>
+<h3 id="risks-24">Risks</h3>
+<ul>
+<li>External system downtime</li>
+<li>Incorrect co-pay calculation</li>
+</ul>
+<h3 id="mitigation-strategies-24">Mitigation Strategies</h3>
+<ul>
+<li>Manual fallback workflow</li>
+<li>Versioned coverage rules</li>
+<li>Integration retry and circuit breaker</li>
+</ul>
+<h3 id="best-practices-24">Best Practices</h3>
+<ul>
+<li>Keep integration adapters replaceable.</li>
+<li>Do not couple billing domain directly to external API payloads.</li>
+</ul>
+<hr />
+<h2 id="emergency-domain">27. Emergency Domain</h2>
+<h3 id="executive-summary-13">Executive Summary</h3>
+<p>Emergency supports Code Red, escalation, acknowledgement, GPS data,
+and rapid alerting with a target response below 1.5 seconds.</p>
+<h3 id="business-purpose-25">Business Purpose</h3>
+<p>Emergency workflows must notify active responders quickly and track
+acknowledgement.</p>
+<h3 id="technical-design-25">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>EmergencyAlert</code></li>
+<li><code>EmergencyAcknowledgement</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Code red event</li>
+<li>GPS location</li>
+<li>Escalation step</li>
+<li>Responder assignment</li>
+<li>Alert delivery attempt</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>EmergencyType</li>
+<li>GeoPoint</li>
+<li>AlertStatus</li>
+<li>AcknowledgementStatus</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>EmergencyAlertRepository</code></li>
+<li><code>EmergencyAcknowledgementRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>EmergencyAlertService</code></li>
+<li><code>EmergencyEscalationService</code></li>
+<li><code>EmergencyNotificationService</code></li>
+<li><code>ResponderResolutionService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/emergencies/code-red
+GET  /api/v1/emergencies
+GET  /api/v1/emergencies/{emergency_id}
+POST /api/v1/emergencies/{emergency_id}/acknowledgements
+POST /api/v1/emergencies/{emergency_id}/resolve</code></pre>
+<h3 id="implementation-guidance-22">Implementation Guidance</h3>
+<ul>
+<li>Emergency write path persists alert, audit, and outbox event in one
+transaction.</li>
+<li>WebSocket push goes to active responders.</li>
+<li>FCM push goes to registered devices.</li>
+<li>Duty roster resolves active responders.</li>
+<li>If no responder acknowledges within configured interval,
+escalate.</li>
+</ul>
+<h3 id="validation-rules-12">Validation Rules</h3>
+<ul>
+<li>Emergency type required.</li>
+<li>GPS data must include latitude and longitude when available.</li>
+<li>Acknowledgement requires active alert.</li>
+</ul>
+<h3 id="security-rules-12">Security Rules</h3>
+<ul>
+<li>Authenticated students/mobile users may raise emergency reports if
+policy allows.</li>
+<li>Staff acknowledgement requires responder authorization.</li>
+</ul>
+<h3 id="audit-requirements-12">Audit Requirements</h3>
+<p>Audit alert creation, delivery attempt, acknowledgement, escalation,
+and resolution.</p>
+<h3 id="reporting-requirements-12">Reporting Requirements</h3>
+<ul>
+<li>Response time</li>
+<li>Acknowledgement time</li>
+<li>Emergency volume</li>
+<li>Escalation counts</li>
+</ul>
+<h3 id="risks-25">Risks</h3>
+<ul>
+<li>Slow alert fanout</li>
+<li>FCM delay outside system control</li>
+<li>Duty roster gaps</li>
+</ul>
+<h3 id="mitigation-strategies-25">Mitigation Strategies</h3>
+<ul>
+<li>Prioritized outbox queue</li>
+<li>WebSocket first for active dashboards</li>
+<li>Duty coverage dashboard</li>
+<li>Emergency route performance testing</li>
+</ul>
+<h3 id="best-practices-25">Best Practices</h3>
+<ul>
+<li>Keep emergency payload small.</li>
+<li>Always persist before notification.</li>
+<li>Alert response target is measured from API acceptance to local
+in-app/WebSocket delivery attempt.</li>
+</ul>
+<hr />
+<h2 id="student-mobile-app-backend-domain">28. Student Mobile App
+Backend Domain</h2>
+<h3 id="executive-summary-14">Executive Summary</h3>
+<p>The mobile backend supports Flutter app authentication, device
+management, profile, medical history, lab results, prescriptions,
+appointments, pharmacy pickups, emergency reporting, notifications, and
+health timeline.</p>
+<h3 id="business-purpose-26">Business Purpose</h3>
+<p>Students need secure access to their own health information and
+mobile workflows.</p>
+<h3 id="technical-design-26">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>StudentMobileProfile</code></li>
+<li><code>MobileDevice</code></li>
+<li><code>HealthTimeline</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Device registration</li>
+<li>Mobile session</li>
+<li>Notification preference</li>
+<li>Timeline item</li>
+<li>Offline sync cursor</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>DevicePlatform</li>
+<li>SyncCursor</li>
+<li>FCMToken</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>MobileProfileRepository</code></li>
+<li><code>MobileDeviceRepository</code></li>
+<li><code>TimelineRepository</code></li>
+<li><code>SyncRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>StudentAuthService</code></li>
+<li><code>MobileDeviceService</code></li>
+<li><code>HealthTimelineService</code></li>
+<li><code>OfflineSyncService</code></li>
+<li><code>MobileNotificationService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/mobile/auth/login
+POST /api/v1/mobile/auth/refresh
+POST /api/v1/mobile/devices
+DELETE /api/v1/mobile/devices/{device_id}
+GET  /api/v1/mobile/profile
+GET  /api/v1/mobile/medical-history
+GET  /api/v1/mobile/lab-results
+GET  /api/v1/mobile/prescriptions
+GET  /api/v1/mobile/appointments
+GET  /api/v1/mobile/pharmacy-pickups
+POST /api/v1/mobile/emergencies
+GET  /api/v1/mobile/notifications
+POST /api/v1/mobile/notifications/{notification_id}/read
+GET  /api/v1/mobile/health-timeline
+GET  /api/v1/mobile/sync</code></pre>
+<h3 id="offline-synchronization-approach">Offline Synchronization
+Approach</h3>
+<ul>
+<li>Mobile client stores read-only cached data locally.</li>
+<li>Server exposes sync endpoint with <code>since_cursor</code>.</li>
+<li>Server returns changed timeline items, notification changes, and
+version metadata.</li>
+<li>Writes are limited online-first for Phase 1, except emergency report
+draft retries.</li>
+<li>Conflict resolution uses server version as authority.</li>
+</ul>
+<h3 id="mobile-api-security">Mobile API Security</h3>
+<ul>
+<li>Device registration required for push.</li>
+<li>FCM token tied to user session and device.</li>
+<li>Access tokens short-lived.</li>
+<li>Refresh tokens rotated.</li>
+<li>Jailbreak/root detection signals can be accepted but not trusted as
+sole control.</li>
+<li>Rate limit mobile auth and emergency endpoints.</li>
+</ul>
+<h3 id="validation-rules-13">Validation Rules</h3>
+<ul>
+<li>Student must be linked to patient record.</li>
+<li>Device platform must be known.</li>
+<li>Sync cursor must be server-issued.</li>
+</ul>
+<h3 id="security-rules-13">Security Rules</h3>
+<ul>
+<li>Students can access only their own released records.</li>
+<li>Mental health or sensitive results may require release policy.</li>
+</ul>
+<h3 id="audit-requirements-13">Audit Requirements</h3>
+<p>Audit mobile login, device registration, record access, emergency
+report, and notification read.</p>
+<h3 id="reporting-requirements-13">Reporting Requirements</h3>
+<ul>
+<li>Active mobile users</li>
+<li>Device counts</li>
+<li>Notification delivery/read rates</li>
+<li>Emergency reports from mobile</li>
+</ul>
+<h3 id="risks-26">Risks</h3>
+<ul>
+<li>Lost/stolen devices</li>
+<li>Offline stale data</li>
+</ul>
+<h3 id="mitigation-strategies-26">Mitigation Strategies</h3>
+<ul>
+<li>Device revocation</li>
+<li>Token rotation</li>
+<li>Cache expiry and sync metadata</li>
+</ul>
+<h3 id="best-practices-26">Best Practices</h3>
+<ul>
+<li>Minimize PHI in push notification payloads.</li>
+<li>Use generic push title and fetch details after authentication.</li>
+</ul>
+<hr />
+<h2 id="hms-administration-domain">29. HMS Administration Domain</h2>
+<h3 id="executive-summary-15">Executive Summary</h3>
+<p>HMS Administration supports staff management, service pricing,
+operational reports, inventory reports, revenue reports, audit reports,
+and dashboard analytics.</p>
+<h3 id="business-purpose-27">Business Purpose</h3>
+<p>Administrators need to manage operations without violating clinical
+privacy.</p>
+<h3 id="technical-design-27">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>Staff</code></li>
+<li><code>ServicePrice</code></li>
+<li><code>AdminReport</code></li>
+<li><code>Dashboard</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Staff profile</li>
+<li>Department</li>
+<li>Service catalog</li>
+<li>Price version</li>
+<li>Report request</li>
+<li>Dashboard widget</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>StaffNumber</li>
+<li>PriceAmount</li>
+<li>ReportType</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>StaffRepository</code></li>
+<li><code>ServicePriceRepository</code></li>
+<li><code>AdminReportRepository</code></li>
+<li><code>DashboardRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>StaffManagementService</code></li>
+<li><code>ServicePricingService</code></li>
+<li><code>OperationalReportService</code></li>
+<li><code>DashboardAnalyticsService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>POST /api/v1/admin/staff
+GET  /api/v1/admin/staff
+PATCH /api/v1/admin/staff/{staff_id}
+POST /api/v1/admin/service-prices
+GET  /api/v1/admin/service-prices
+GET  /api/v1/admin/reports/operations
+GET  /api/v1/admin/reports/inventory
+GET  /api/v1/admin/reports/revenue
+GET  /api/v1/admin/reports/audit
+GET  /api/v1/admin/dashboard</code></pre>
+<h3 id="implementation-guidance-23">Implementation Guidance</h3>
+<ul>
+<li>Price changes create new price versions.</li>
+<li>Admin dashboards must aggregate clinical counts without exposing
+clinical details unless clinically authorized.</li>
+<li>Staff management must integrate with Identity domain through
+application service calls.</li>
+</ul>
+<h3 id="validation-rules-14">Validation Rules</h3>
+<ul>
+<li>Staff must have valid department and role.</li>
+<li>Service price amount cannot be negative.</li>
+<li>Effective date required for pricing.</li>
+</ul>
+<h3 id="security-rules-14">Security Rules</h3>
+<ul>
+<li>Administrators cannot access clinical records by default.</li>
+<li>Audit reports require explicit audit permission.</li>
+</ul>
+<h3 id="audit-requirements-14">Audit Requirements</h3>
+<p>Audit staff creation/update, pricing changes, report generation,
+dashboard access.</p>
+<h3 id="reporting-requirements-14">Reporting Requirements</h3>
+<ul>
+<li>Operational reports</li>
+<li>Inventory reports</li>
+<li>Revenue reports</li>
+<li>Audit reports</li>
+<li>Dashboard analytics</li>
+</ul>
+<h3 id="risks-27">Risks</h3>
+<ul>
+<li>Admin overreach into clinical data</li>
+<li>Incorrect pricing affects billing</li>
+</ul>
+<h3 id="mitigation-strategies-27">Mitigation Strategies</h3>
+<ul>
+<li>Separate admin permissions from clinical permissions.</li>
+<li>Version all pricing.</li>
+</ul>
+<h3 id="best-practices-27">Best Practices</h3>
+<ul>
+<li>Use aggregated reporting by default.</li>
+<li>Require reason for privileged report access.</li>
+</ul>
+<hr />
+<h2 id="audit-domain">30. Audit Domain</h2>
+<h3 id="executive-summary-16">Executive Summary</h3>
+<p>Audit tracks every critical action including login, logout, record
+access, record changes, billing, inventory, and administrative
+actions.</p>
+<h3 id="business-purpose-28">Business Purpose</h3>
+<p>The institution must prove who accessed or changed sensitive data,
+when, where, and why.</p>
+<h3 id="technical-design-28">Technical Design</h3>
+<p>Aggregate roots:</p>
+<ul>
+<li><code>AuditEvent</code></li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>Audit actor</li>
+<li>Audit target</li>
+<li>Audit metadata</li>
+<li>Audit context</li>
+</ul>
+<p>Value objects:</p>
+<ul>
+<li>AuditAction</li>
+<li>AuditSeverity</li>
+<li>ResourceType</li>
+</ul>
+<p>Repositories:</p>
+<ul>
+<li><code>AuditRepository</code></li>
+</ul>
+<p>Services:</p>
+<ul>
+<li><code>AuditService</code></li>
+<li><code>AuditQueryService</code></li>
+<li><code>AuditRetentionService</code></li>
+</ul>
+<p>Core endpoints:</p>
+<pre class="text"><code>GET /api/v1/audit/events
+GET /api/v1/audit/events/{event_id}
+GET /api/v1/audit/reports</code></pre>
+<h3 id="implementation-guidance-24">Implementation Guidance</h3>
+<ul>
+<li>Audit records are immutable.</li>
+<li>Audit writes must happen in the same transaction for critical
+database changes where possible.</li>
+<li>For read events, write asynchronously but reliably through
+outbox/worker if needed.</li>
+<li>Audit payloads must avoid storing full clinical text unless
+required.</li>
+</ul>
+<h3 id="required-audit-events">Required Audit Events</h3>
+<ul>
+<li>Logins</li>
+<li>Logouts</li>
+<li>Failed logins</li>
+<li>Record access</li>
+<li>Record changes</li>
+<li>Billing actions</li>
+<li>Inventory actions</li>
+<li>Administrative actions</li>
+<li>Emergency actions</li>
+<li>Role/permission changes</li>
+<li>Device changes</li>
+</ul>
+<h3 id="validation-rules-15">Validation Rules</h3>
+<ul>
+<li>Audit event must include tenant, actor if known, action, resource
+type, resource ID, timestamp, request ID.</li>
+</ul>
+<h3 id="security-rules-15">Security Rules</h3>
+<ul>
+<li>Audit access is highly restricted.</li>
+<li>Audit records cannot be edited or deleted through application
+APIs.</li>
+</ul>
+<h3 id="reporting-requirements-15">Reporting Requirements</h3>
+<ul>
+<li>User access history</li>
+<li>Patient record access history</li>
+<li>Privileged activity</li>
+<li>Failed login trends</li>
+<li>Administrative change report</li>
+</ul>
+<h3 id="risks-28">Risks</h3>
+<ul>
+<li>Audit table growth</li>
+<li>Missing read-access logs</li>
+</ul>
+<h3 id="mitigation-strategies-28">Mitigation Strategies</h3>
+<ul>
+<li>Partition audit table by time.</li>
+<li>Use async audit pipeline for high-volume read events.</li>
+<li>Monitor audit write failures.</li>
+</ul>
+<h3 id="best-practices-28">Best Practices</h3>
+<ul>
+<li>Make audit boring and unavoidable.</li>
+<li>Add audit tests for every critical use case.</li>
+</ul>
+<hr />
+<h2 id="real-time-communication-architecture">31. Real-Time
+Communication Architecture</h2>
+<h3 id="executive-summary-17">Executive Summary</h3>
+<p>WebSockets deliver live collaboration, read receipts, presence,
+notifications, and emergency alerts.</p>
+<h3 id="business-purpose-29">Business Purpose</h3>
+<p>Hospital users need immediate visibility for case communication and
+emergencies.</p>
+<h3 id="technical-design-29">Technical Design</h3>
+<ul>
+<li>REST persists state.</li>
+<li>WebSocket delivers live state changes.</li>
+<li>PostgreSQL outbox records notification events.</li>
+<li>Worker dispatches to WebSocket hub and FCM.</li>
+<li>Redis stores presence and unread counters.</li>
+</ul>
+<h3 id="implementation-guidance-25">Implementation Guidance</h3>
+<p>WebSocket channels:</p>
+<pre class="text"><code>tenant:{tenant_id}:user:{user_id}
+tenant:{tenant_id}:department:{department_id}
+tenant:{tenant_id}:case_thread:{thread_id}
+tenant:{tenant_id}:emergency</code></pre>
+<p>Message envelope:</p>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;event&quot;</span><span class="fu">:</span> <span class="st">&quot;notification.created&quot;</span><span class="fu">,</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;tenant_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;resource_type&quot;</span><span class="fu">:</span> <span class="st">&quot;notification&quot;</span><span class="fu">,</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;resource_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-06-22T10:00:00Z&quot;</span><span class="fu">,</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;payload&quot;</span><span class="fu">:</span> <span class="fu">{}</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="scaling-strategy">Scaling Strategy</h3>
+<ul>
+<li>Phase 1 can run WebSocket hubs on app servers.</li>
+<li>Redis pub/sub or streams can coordinate multiple app nodes.</li>
+<li>Sticky sessions at load balancer may simplify Phase 1.</li>
+<li>Future scale can extract notification service.</li>
+</ul>
+<h3 id="risks-29">Risks</h3>
+<ul>
+<li>Lost WebSocket messages</li>
+<li>Presence inconsistency</li>
+</ul>
+<h3 id="mitigation-strategies-29">Mitigation Strategies</h3>
+<ul>
+<li>Persist notifications before delivery.</li>
+<li>Clients fetch missed notifications via REST.</li>
+<li>Presence TTL refresh.</li>
+</ul>
+<h3 id="best-practices-29">Best Practices</h3>
+<ul>
+<li>WebSocket is delivery acceleration, not source of truth.</li>
+<li>Never put full sensitive clinical data in push payloads.</li>
+</ul>
+<hr />
+<h2 id="notification-architecture">32. Notification Architecture</h2>
+<h3 id="executive-summary-18">Executive Summary</h3>
+<p>Phase 1 uses in-app notifications and FCM push only. SMS and paid
+transactional email are excluded.</p>
+<h3 id="business-purpose-30">Business Purpose</h3>
+<p>Reduce recurring cost while still providing operational alerts to web
+and mobile users.</p>
+<h3 id="technical-design-30">Technical Design</h3>
+<p>Notification channels:</p>
+<ul>
+<li>In-app notification stored in PostgreSQL</li>
+<li>WebSocket real-time delivery</li>
+<li>FCM push notification to registered devices</li>
+</ul>
+<h3 id="implementation-guidance-26">Implementation Guidance</h3>
+<ul>
+<li>Create notification row in PostgreSQL.</li>
+<li>Create outbox event in same transaction.</li>
+<li>Worker reads outbox, sends WebSocket event, sends FCM push if device
+exists.</li>
+<li>FCM payload must be minimal.</li>
+</ul>
+<h3 id="risks-30">Risks</h3>
+<ul>
+<li>FCM delivery is not guaranteed or instant.</li>
+<li>Users may disable push notifications.</li>
+</ul>
+<h3 id="mitigation-strategies-30">Mitigation Strategies</h3>
+<ul>
+<li>In-app notification centre is source of truth.</li>
+<li>Emergency dashboards use WebSocket and visible in-app state.</li>
+<li>Retry failed FCM attempts with backoff.</li>
+</ul>
+<h3 id="best-practices-30">Best Practices</h3>
+<ul>
+<li>Store delivery attempts.</li>
+<li>Allow notification preferences where clinically safe.</li>
+</ul>
+<hr />
+<h2 id="production-digitalocean-phase-1-deployment">33. Production
+DigitalOcean Phase 1 Deployment</h2>
+<h3 id="executive-summary-19">Executive Summary</h3>
+<p>Phase 1 uses a merged but sensible DigitalOcean deployment to control
+monthly cost.</p>
+<h3 id="business-purpose-31">Business Purpose</h3>
+<p>Provide production-grade infrastructure without the cost and
+complexity of AWS or Kubernetes in Phase 1.</p>
+<h3 id="technical-design-31">Technical Design</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Node</th>
+<th>Services</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>app-01</code></td>
+<td>Go API, workers, FCM worker</td>
+</tr>
+<tr class="even">
+<td><code>app-02</code></td>
+<td>Go API, workers, FCM worker</td>
+</tr>
+<tr class="odd">
+<td><code>web-01</code></td>
+<td>Web frontend, admin portal, reverse proxy</td>
+</tr>
+<tr class="even">
+<td><code>db-01</code></td>
+<td>PostgreSQL primary</td>
+</tr>
+<tr class="odd">
+<td><code>db-02</code></td>
+<td>PostgreSQL replica/reporting</td>
+</tr>
+<tr class="even">
+<td><code>ops-01</code></td>
+<td>Redis, Prometheus, Grafana, Loki, Alertmanager, bastion/admin
+utilities</td>
+</tr>
+<tr class="odd">
+<td>DigitalOcean Load Balancer</td>
+<td>Routes public traffic</td>
+</tr>
+<tr class="even">
+<td>DigitalOcean Spaces</td>
+<td>Object files, exports, backup archives</td>
+</tr>
+<tr class="odd">
+<td>Block Storage</td>
+<td>DB/log/backup working storage</td>
+</tr>
+</tbody>
+</table>
+<h3 id="monthly-cost">Monthly Cost</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th style="text-align: right;">Monthly Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>App servers, 2 x 4 vCPU / 8 GB</td>
+<td style="text-align: right;">$96</td>
+</tr>
+<tr class="even">
+<td>Web server, 1 x 2 vCPU / 4 GB</td>
+<td style="text-align: right;">$24</td>
+</tr>
+<tr class="odd">
+<td>PostgreSQL primary, 8 vCPU / 16 GB</td>
+<td style="text-align: right;">$96</td>
+</tr>
+<tr class="even">
+<td>PostgreSQL replica, 8 vCPU / 16 GB</td>
+<td style="text-align: right;">$96</td>
+</tr>
+<tr class="odd">
+<td>Ops server, 4 vCPU / 8 GB</td>
+<td style="text-align: right;">$48</td>
+</tr>
+<tr class="even">
+<td>Load balancer</td>
+<td style="text-align: right;">$12</td>
+</tr>
+<tr class="odd">
+<td>Block storage, 600 GiB</td>
+<td style="text-align: right;">$60</td>
+</tr>
+<tr class="even">
+<td>Spaces object storage buffer</td>
+<td style="text-align: right;">$20</td>
+</tr>
+<tr class="odd">
+<td>Daily Droplet backups, 30% of compute</td>
+<td style="text-align: right;">$108</td>
+</tr>
+<tr class="even">
+<td><strong>Base Monthly Total</strong></td>
+<td style="text-align: right;"><strong>$560</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Recommended Monthly Budget with Buffer</strong></td>
+<td style="text-align: right;"><strong>$650</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Approximate naira communication figure:
+<strong>₦875,000/month</strong>, depending on exchange rate.</p>
+<h3 id="implementation-guidance-27">Implementation Guidance</h3>
+<ul>
+<li>Use Docker Compose or systemd-managed Docker containers for Phase
+1.</li>
+<li>Use private networking for database and Redis.</li>
+<li>Expose only load balancer/reverse proxy publicly.</li>
+<li>Use automatic TLS certificate renewal.</li>
+</ul>
+<h3 id="risks-31">Risks</h3>
+<ul>
+<li>Ops server combines Redis and monitoring.</li>
+<li>DigitalOcean region outage affects service.</li>
+</ul>
+<h3 id="mitigation-strategies-31">Mitigation Strategies</h3>
+<ul>
+<li>Keep PostgreSQL replica.</li>
+<li>Maintain off-server backups in Spaces.</li>
+<li>Document restore process.</li>
+<li>Separate Redis later if load grows.</li>
+</ul>
+<h3 id="best-practices-31">Best Practices</h3>
+<ul>
+<li>Start lean but monitor aggressively.</li>
+<li>Use infrastructure-as-code for reproducibility.</li>
+</ul>
+<hr />
+<h2 id="code-quality-governance">34. Code Quality Governance</h2>
+<h3 id="business-purpose-32">Business Purpose</h3>
+<p>Code quality prevents clinical, financial, and operational defects
+from accumulating during fast delivery.</p>
+<h3 id="technical-design-32">Technical Design</h3>
+<h3 id="naming-standards">Naming Standards</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Variables</td>
+<td>Short but meaningful Go names</td>
+</tr>
+<tr class="even">
+<td>Functions</td>
+<td>Verb-based, e.g. <code>CreateAdmission</code></td>
+</tr>
+<tr class="odd">
+<td>Methods</td>
+<td>Domain action names</td>
+</tr>
+<tr class="even">
+<td>Interfaces</td>
+<td>Consumer-owned, small</td>
+</tr>
+<tr class="odd">
+<td>Packages</td>
+<td>lowercase, no underscores</td>
+</tr>
+<tr class="even">
+<td>Constants</td>
+<td>CamelCase</td>
+</tr>
+<tr class="odd">
+<td>Enums</td>
+<td>Typed constants</td>
+</tr>
+<tr class="even">
+<td>DTOs</td>
+<td>Request/Response suffix</td>
+</tr>
+<tr class="odd">
+<td>Entities</td>
+<td>Domain names</td>
+</tr>
+<tr class="even">
+<td>Repositories</td>
+<td><code>{Aggregate}Repository</code></td>
+</tr>
+<tr class="odd">
+<td>Services</td>
+<td><code>{UseCase}Service</code></td>
+</tr>
+<tr class="even">
+<td>Routes</td>
+<td>plural REST resources</td>
+</tr>
+<tr class="odd">
+<td>Tables</td>
+<td>plural snake_case</td>
+</tr>
+<tr class="even">
+<td>Columns</td>
+<td>snake_case</td>
+</tr>
+<tr class="odd">
+<td>Redis keys</td>
+<td>structured colon-separated</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-standards">PR Standards</h3>
+<ul>
+<li>PR must reference requirement/task.</li>
+<li>Include migration notes.</li>
+<li>Include tests or explain why not.</li>
+<li>Include OpenAPI changes for API changes.</li>
+<li>Include observability/audit notes for critical workflows.</li>
+</ul>
+<h3 id="review-standards">Review Standards</h3>
+<p>Reviewers check:</p>
+<ul>
+<li>Tenant isolation</li>
+<li>Authorization</li>
+<li>Audit logging</li>
+<li>Transaction boundaries</li>
+<li>Error mapping</li>
+<li>Tests</li>
+<li>Migration safety</li>
+<li>Performance impact</li>
+</ul>
+<h3 id="branching-standards">Branching Standards</h3>
+<ul>
+<li><code>main</code> is production-ready.</li>
+<li><code>develop</code> or release branches may be used if team
+prefers.</li>
+<li>Feature branches use <code>feature/{short-name}</code>.</li>
+<li>Hotfix branches use <code>hotfix/{short-name}</code>.</li>
+</ul>
+<h3 id="commit-standards">Commit Standards</h3>
+<p>Use conventional commits:</p>
+<pre class="text"><code>feat(wards): add atomic bed allocation
+fix(auth): revoke refresh token family on reuse
+test(pharmacy): add concurrent dispense test
+docs(api): update admissions endpoints</code></pre>
+<h3 id="risks-32">Risks</h3>
+<ul>
+<li>Fast development can create inconsistent patterns.</li>
+</ul>
+<h3 id="mitigation-strategies-32">Mitigation Strategies</h3>
+<ul>
+<li>Enforce PR checklist.</li>
+<li>Use linters and formatters.</li>
+<li>Maintain architecture decision records.</li>
+</ul>
+<h3 id="best-practices-32">Best Practices</h3>
+<ul>
+<li>Small PRs.</li>
+<li>Domain tests before handler tests.</li>
+<li>No business logic in handlers.</li>
+</ul>
+<hr />
+<h2 id="production-readiness-checklists">35. Production Readiness
+Checklists</h2>
+<h3 id="functional-review">Functional Review</h3>
+<ul>
+<li>All Phase 1 workflows implemented.</li>
+<li>Critical workflows tested end-to-end.</li>
+<li>Mobile APIs tested with Flutter app.</li>
+<li>Web admin APIs tested with frontend.</li>
+<li>OpenAPI documentation complete.</li>
+</ul>
+<h3 id="security-review">Security Review</h3>
+<ul>
+<li>RBAC reviewed.</li>
+<li>Clinical access rules tested.</li>
+<li>Admin clinical access restrictions verified.</li>
+<li>Password hashing verified.</li>
+<li>Token rotation verified.</li>
+<li>Rate limits enabled.</li>
+<li>Secrets not committed.</li>
+<li>TLS enabled.</li>
+<li>OWASP Top 10 checklist completed.</li>
+</ul>
+<h3 id="performance-review">Performance Review</h3>
+<ul>
+<li>Auth P95 under 150ms.</li>
+<li>General APIs P95 under 200ms.</li>
+<li>Critical APIs P99 under 500ms.</li>
+<li>Emergency alert path under 1.5 seconds for local delivery
+attempt.</li>
+<li>Dashboard reports under 2 seconds.</li>
+<li>Bed allocation concurrency tested.</li>
+<li>Pharmacy dispensing concurrency tested.</li>
+</ul>
+<h3 id="compliance-review">Compliance Review</h3>
+<ul>
+<li>Audit events implemented.</li>
+<li>Clinical records immutable.</li>
+<li>Financial records immutable/versioned.</li>
+<li>Collaboration messages retained permanently.</li>
+<li>Patient access logs available.</li>
+</ul>
+<h3 id="documentation-review">Documentation Review</h3>
+<ul>
+<li>Architecture document approved.</li>
+<li>API docs published.</li>
+<li>Runbooks created.</li>
+<li>Backup and restore documentation complete.</li>
+<li>Incident response documentation complete.</li>
+</ul>
+<h3 id="backup-review">Backup Review</h3>
+<ul>
+<li>Daily backups enabled.</li>
+<li>Logical PostgreSQL dumps configured.</li>
+<li>Backups copied to Spaces.</li>
+<li>Restore test completed.</li>
+<li>Retention policy configured.</li>
+</ul>
+<h3 id="disaster-recovery-review">Disaster Recovery Review</h3>
+<ul>
+<li>PostgreSQL replica working.</li>
+<li>Restore procedure tested.</li>
+<li>Infrastructure rebuild documented.</li>
+<li>Emergency contacts documented.</li>
+</ul>
+<h3 id="monitoring-review">Monitoring Review</h3>
+<ul>
+<li>Dashboards configured.</li>
+<li>Alerts configured.</li>
+<li>Logs searchable.</li>
+<li>Metrics scraped.</li>
+<li>Outbox backlog monitored.</li>
+<li>Disk usage monitored.</li>
+<li>Database replication monitored.</li>
+</ul>
+<h3 id="go-live-rule">Go-Live Rule</h3>
+<p>Nothing goes live until all checklists pass or a written risk
+acceptance is approved by the technical lead and project
+stakeholders.</p>
+<hr />
+<h2 id="final-implementation-mandate">36. Final Implementation
+Mandate</h2>
+<p>MYHxCARE Phase 1 must be implemented as a secure, auditable,
+multi-tenant-ready Go modular monolith. The deployment remains
+single-tenant for UniZik. PostgreSQL is the source of truth. Redis is
+used for ephemeral state. DigitalOcean hosts the production
+infrastructure. Notifications use in-app delivery and FCM only. SMS and
+paid email services are not part of Phase 1. Kafka is deferred;
+PostgreSQL outbox is the Phase 1 event backbone.</p>
+<p>This constitution is binding for backend implementation, QA planning,
+DevOps preparation, security review, and AI-assisted code
+generation.</p>
+</div><!-- /document-body -->
+
+<div class="doc-footer">
+  <div>
+    <h4>Document Scope</h4>
+    <p>Backend architecture constitution for MYHxCARE Phase 1 at UniZik Medical Centre.</p>
+  </div>
+  <div>
+    <h4>Primary Stack</h4>
+    <ul>
+      <li>Go · Gin · PostgreSQL · Redis</li>
+      <li>Docker · DigitalOcean · S3-compatible storage</li>
+      <li>WebSockets · FCM · OpenTelemetry</li>
+    </ul>
+  </div>
+  <div>
+    <h4>Governance</h4>
+    <p>Secure by design, audit by design, privacy by design, and multi-tenant ready.</p>
+  </div>
+</div>
+
+<div class="footer-bottom">
+  <p>MYHxCARE Phase 1 Backend Architecture Constitution</p>
+  <p>Confidential · Implementation Blueprint</p>
+</div>
+</body>
+</html>

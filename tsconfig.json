@@ -1,0 +1,63 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+
+    // --- Core strict mode (enables 8 checks) ---
+    "strict": true,
+
+    // --- Additional strict checks not in "strict" ---
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    // --- Module & output ---
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+
+    // --- Next.js plugin (provides intellisense for Next.js APIs) ---
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+
+    // --- Path aliases ---
+    // @/* is the catch-all (used by ShadCN and Next.js conventions).
+    // Named aliases are shorter and make import intent explicit in large modules.
+    // @types/* is intentionally omitted — it would shadow the @types/ DefinitelyTyped
+    // ecosystem (@types/node, @types/react, etc.) which TypeScript loads implicitly.
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@features/*": ["./src/features/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@providers/*": ["./src/providers/*"],
+      "@constants/*": ["./src/constants/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}

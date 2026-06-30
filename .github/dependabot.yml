@@ -1,0 +1,42 @@
+version: 2
+
+updates:
+  # ── npm ────────────────────────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '02:00'
+      timezone: Africa/Lagos
+    open-pull-requests-limit: 5
+    groups:
+      # Group all minor and patch updates into a single PR per week.
+      # Major bumps are ignored here (see below) and require a manual decision.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # Major version bumps break APIs — never auto-update. Review manually.
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+    labels:
+      - dependencies
+      - automated
+    commit-message:
+      prefix: 'chore(deps)'
+
+  # ── GitHub Actions ──────────────────────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '02:00'
+      timezone: Africa/Lagos
+    labels:
+      - dependencies
+      - automated
+    commit-message:
+      prefix: 'chore(ci)'
