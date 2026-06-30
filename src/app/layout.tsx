@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import { ServiceWorkerRegistrar } from '@lib/pwa/ServiceWorkerRegistrar';
+import { AuthProvider } from '@providers/AuthProvider';
 
 import './globals.css';
 
@@ -33,7 +34,7 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <ServiceWorkerRegistrar />
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

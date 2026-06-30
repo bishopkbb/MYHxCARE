@@ -23,7 +23,18 @@ import {
   Users,
 } from 'lucide-react';
 
+import { useAuth } from '@hooks/useAuth';
 import { cn } from '@lib/utils';
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0] ?? '')
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
 
 interface NavItem {
   label: string;
@@ -65,13 +76,6 @@ const BOTTOM_NAV: NavItem[] = [
   { label: 'Settings', href: '/settings', icon: Settings },
 ];
 
-// TODO(Task 2): Replace with real auth context
-const MOCK_USER = {
-  name: 'Dr. Adaeze Okonkwo',
-  role: 'Consultant Physician',
-  initials: 'AO',
-} as const;
-
 export interface AppSidebarProps {
   collapsed: boolean;
   onCollapsedChange: (value: boolean) => void;
@@ -79,6 +83,7 @@ export interface AppSidebarProps {
 
 export function AppSidebar({ collapsed, onCollapsedChange }: AppSidebarProps) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   return (
     <aside
@@ -153,14 +158,14 @@ export function AppSidebar({ collapsed, onCollapsedChange }: AppSidebarProps) {
           )}
         >
           <div className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
-            {MOCK_USER.initials}
+            {getInitials(user?.name ?? '')}
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="text-foreground truncate text-sm leading-none font-medium">
-                {MOCK_USER.name}
+                {user?.name ?? '—'}
               </p>
-              <p className="text-muted-foreground mt-0.5 truncate text-xs">{MOCK_USER.role}</p>
+              <p className="text-muted-foreground mt-0.5 truncate text-xs">{user?.role ?? ''}</p>
             </div>
           )}
         </div>
@@ -173,6 +178,9 @@ export function AppSidebar({ collapsed, onCollapsedChange }: AppSidebarProps) {
           )}
           aria-label="Sign out"
           title="Sign out"
+          onClick={() => {
+            void logout();
+          }}
         >
           <LogOut className="size-4 shrink-0" />
           {!collapsed && <span>Sign out</span>}

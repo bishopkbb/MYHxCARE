@@ -50,8 +50,10 @@ jobs:
     needs: quality
     env:
       CI: 'true'
-      NEXT_PUBLIC_API_BASE_URL: ${{ vars.STAGING_API_BASE_URL }}
-      NEXT_PUBLIC_WS_URL: ${{ vars.STAGING_WS_URL }}
+      # Fall back to localhost so next build doesn't fail when the staging
+      # repository variables haven't been created in GitHub yet.
+      NEXT_PUBLIC_API_BASE_URL: ${{ vars.STAGING_API_BASE_URL || 'http://localhost:8080' }}
+      NEXT_PUBLIC_WS_URL: ${{ vars.STAGING_WS_URL || 'ws://localhost:8080' }}
       NEXT_PUBLIC_APP_ENV: staging
 
     steps:

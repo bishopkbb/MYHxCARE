@@ -1,8 +1,10 @@
 name: CD — Staging
 
 on:
-  push:
-    branches: [main]
+  # Push trigger is disabled until DOCR, web-01, and SSH credentials are
+  # configured as GitHub repo secrets. Enable it then by adding:
+  #   push:
+  #     branches: [main]
   workflow_dispatch:
 
 concurrency:
