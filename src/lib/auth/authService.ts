@@ -4,6 +4,7 @@ import type { LoginCredentials, LoginResponse, User } from '@/types/auth.types';
 import { apiClient } from '@lib/api/client';
 import type { ApiSuccessResponse } from '@lib/api/types';
 
+import { decodeJwt } from './jwt';
 import { tokenStore } from './tokenStore';
 
 const IS_MOCK = process.env['NEXT_PUBLIC_APP_ENV'] === 'development';
@@ -43,7 +44,8 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 export const authService = {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     if (IS_MOCK) {
-      const { createMockLoginResponse } = await import('@features/auth/__mocks__/authFixtures');
+      const { getMockUser, createMockLoginResponse } =
+        await import('@features/auth/__mocks__/authFixtures');
       await sleep(700);
       const id = credentials.identifier.toLowerCase();
       if (id.includes('locked')) {
@@ -58,7 +60,8 @@ export const authService = {
       if (credentials.password !== 'password') {
         throw new AuthError('INVALID_CREDENTIALS', 'Invalid staff ID or password.');
       }
-      return createMockLoginResponse();
+      const user = getMockUser(credentials.identifier);
+      return createMockLoginResponse(user.id, user.workspaceRole);
     }
     try {
       const res = await authAxios.post<LoginResponse>('/auth/login', credentials);
@@ -71,7 +74,12 @@ export const authService = {
   async refreshToken(): Promise<string> {
     if (IS_MOCK) {
       const { createMockAccessToken } = await import('@features/auth/__mocks__/authFixtures');
-      return createMockAccessToken();
+      // Preserve the actor and workspace across refresh so the user doesn't change
+      const current = tokenStore.getAccessToken();
+      const claims = current ? decodeJwt(current) : null;
+      const actorId = claims?.actor_id ?? 'usr_001';
+      const workspaceRole = claims?.workspace_role ?? 'CONSULTANT';
+      return createMockAccessToken(actorId, workspaceRole);
     }
     const refreshToken = tokenStore.getRefreshToken();
     if (!refreshToken) {
@@ -113,9 +121,11 @@ export const authService = {
 
   async getMe(): Promise<User> {
     if (IS_MOCK) {
-      const { MOCK_USER } = await import('@features/auth/__mocks__/authFixtures');
+      const { getMockUserById } = await import('@features/auth/__mocks__/authFixtures');
       await sleep(200);
-      return MOCK_USER;
+      const current = tokenStore.getAccessToken();
+      const claims = current ? decodeJwt(current) : null;
+      return getMockUserById(claims?.actor_id ?? 'usr_001');
     }
     const res = await apiClient.get<ApiSuccessResponse<User>>('/me');
     return res.data.data;

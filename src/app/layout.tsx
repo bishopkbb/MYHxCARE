@@ -5,6 +5,7 @@ import { ServiceWorkerRegistrar } from '@lib/pwa/ServiceWorkerRegistrar';
 import { OfflineBanner } from '@components/shared/OfflineBanner';
 import { AuthProvider } from '@providers/AuthProvider';
 import { FeatureFlagsProvider } from '@providers/FeatureFlagsProvider';
+import { ReactQueryProvider } from '@providers/ReactQueryProvider';
 
 import './globals.css';
 
@@ -37,9 +38,11 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col">
         <ServiceWorkerRegistrar />
         <OfflineBanner />
-        <FeatureFlagsProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </FeatureFlagsProvider>
+        <ReactQueryProvider>
+          <FeatureFlagsProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </FeatureFlagsProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );
