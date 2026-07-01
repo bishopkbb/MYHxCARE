@@ -1,4 +1,8 @@
+import axios, { isAxiosError } from 'axios';
+
 import type { LoginCredentials, LoginResponse, User } from '@/types/auth.types';
+import { apiClient } from '@lib/api/client';
+import type { SuccessEnvelope } from '@lib/api/types';
 
 import { tokenStore } from './tokenStore';
 
@@ -14,28 +18,24 @@ export class AuthError extends Error {
   }
 }
 
-type ErrorEnvelope = { error?: { code?: string; message?: string } };
-type SuccessEnvelope<T> = { data: T };
+// Dedicated axios instance for auth endpoints — no 401-retry interceptor to
+// avoid a circular import with apiClient (which calls authService for refresh).
+const authAxios = axios.create({
+  baseURL: `${process.env['NEXT_PUBLIC_API_BASE_URL'] ?? ''}/api/v1`,
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 15_000,
+});
 
-async function apiFetch<T>(method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  const token = tokenStore.getAccessToken();
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-
-  const res = await fetch(`/api/v1${path}`, {
-    method,
-    headers,
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-  });
-
-  if (!res.ok) {
-    const envelope = (await res.json().catch(() => null)) as ErrorEnvelope | null;
-    const code = envelope?.error?.code ?? 'UNKNOWN_ERROR';
-    const message = envelope?.error?.message ?? 'An unexpected error occurred.';
-    throw new AuthError(code, message);
+function toAuthError(error: unknown): AuthError {
+  if (isAxiosError(error)) {
+    const body = error.response?.data as
+      { error?: { code?: string; message?: string } } | undefined;
+    const code = body?.error?.code ?? 'UNKNOWN_ERROR';
+    const message = body?.error?.message ?? error.message ?? 'An unexpected error occurred.';
+    return new AuthError(code, message);
   }
-
-  return res.json() as Promise<T>;
+  if (error instanceof Error) return new AuthError('NETWORK_ERROR', error.message);
+  return new AuthError('UNKNOWN_ERROR', 'An unexpected error occurred.');
 }
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -60,7 +60,12 @@ export const authService = {
       }
       return createMockLoginResponse();
     }
-    return apiFetch<LoginResponse>('POST', '/auth/login', credentials);
+    try {
+      const res = await authAxios.post<LoginResponse>('/auth/login', credentials);
+      return res.data;
+    } catch (error) {
+      throw toAuthError(error);
+    }
   },
 
   async refreshToken(): Promise<string> {
@@ -69,17 +74,27 @@ export const authService = {
       return createMockAccessToken();
     }
     const refreshToken = tokenStore.getRefreshToken();
-    if (!refreshToken)
+    if (!refreshToken) {
       throw new AuthError('NO_REFRESH_TOKEN', 'Session expired. Please sign in again.');
-    const data = await apiFetch<{ access_token: string }>('POST', '/auth/refresh', {
-      refresh_token: refreshToken,
-    });
-    return data.access_token;
+    }
+    try {
+      const res = await authAxios.post<{ access_token: string }>('/auth/refresh', {
+        refresh_token: refreshToken,
+      });
+      return res.data.access_token;
+    } catch (error) {
+      throw toAuthError(error);
+    }
   },
 
   async logout(): Promise<void> {
     if (!IS_MOCK) {
-      await apiFetch<void>('POST', '/auth/logout').catch(() => undefined);
+      const token = tokenStore.getAccessToken();
+      await authAxios
+        .post('/auth/logout', null, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
+        .catch(() => undefined);
     }
     tokenStore.clearAll();
   },
@@ -89,7 +104,11 @@ export const authService = {
       await sleep(700);
       return;
     }
-    await apiFetch<void>('POST', '/auth/password-reset', { identifier });
+    try {
+      await authAxios.post('/auth/password-reset', { identifier });
+    } catch (error) {
+      throw toAuthError(error);
+    }
   },
 
   async getMe(): Promise<User> {
@@ -98,7 +117,7 @@ export const authService = {
       await sleep(200);
       return MOCK_USER;
     }
-    const envelope = await apiFetch<SuccessEnvelope<User>>('GET', '/me');
-    return envelope.data;
+    const res = await apiClient.get<SuccessEnvelope<User>>('/me');
+    return res.data.data;
   },
 };
