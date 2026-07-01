@@ -18,6 +18,7 @@ export type User = {
 export type AuthState =
   | { status: 'loading' }
   | { status: 'authenticated'; user: User; claims: JwtClaims }
+  | { status: 'session-expired'; user: User }
   | { status: 'unauthenticated' };
 
 export type LoginCredentials = {

@@ -8,7 +8,24 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { loginSchema, type LoginFormValues } from '@features/auth/schemas/loginSchema';
+import { AuthError } from '@lib/auth/authService';
 import { useAuth } from '@hooks/useAuth';
+
+function getLoginErrorMessage(err: unknown): string {
+  if (err instanceof AuthError) {
+    switch (err.code) {
+      case 'INVALID_CREDENTIALS':
+        return 'Invalid staff ID/email or password.';
+      case 'ACCOUNT_LOCKED':
+        return 'Your account has been locked. Contact IT support to unlock it.';
+      case 'CONCURRENT_SESSION':
+        return 'Another active session exists for this account. Sign out there first or contact IT.';
+      default:
+        return err.message;
+    }
+  }
+  return 'Unable to sign in. Please try again.';
+}
 
 export function LoginForm() {
   const { login, isLoading, isAuthenticated } = useAuth();
@@ -37,7 +54,7 @@ export function LoginForm() {
       await login(values);
       router.replace('/dashboard');
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : 'Unable to sign in. Please try again.');
+      setServerError(getLoginErrorMessage(err));
     }
   }
 

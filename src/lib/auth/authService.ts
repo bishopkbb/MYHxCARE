@@ -45,6 +45,16 @@ export const authService = {
     if (IS_MOCK) {
       const { createMockLoginResponse } = await import('@features/auth/__mocks__/authFixtures');
       await sleep(700);
+      const id = credentials.identifier.toLowerCase();
+      if (id.includes('locked')) {
+        throw new AuthError('ACCOUNT_LOCKED', 'Account locked after too many failed attempts.');
+      }
+      if (id.includes('conflict')) {
+        throw new AuthError(
+          'CONCURRENT_SESSION',
+          'Another active session exists for this account.',
+        );
+      }
       if (credentials.password !== 'password') {
         throw new AuthError('INVALID_CREDENTIALS', 'Invalid staff ID or password.');
       }
@@ -72,6 +82,14 @@ export const authService = {
       await apiFetch<void>('POST', '/auth/logout').catch(() => undefined);
     }
     tokenStore.clearAll();
+  },
+
+  async passwordResetRequest(identifier: string): Promise<void> {
+    if (IS_MOCK) {
+      await sleep(700);
+      return;
+    }
+    await apiFetch<void>('POST', '/auth/password-reset', { identifier });
   },
 
   async getMe(): Promise<User> {
