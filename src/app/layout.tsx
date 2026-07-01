@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import { ServiceWorkerRegistrar } from '@lib/pwa/ServiceWorkerRegistrar';
+import { OfflineBanner } from '@components/shared/OfflineBanner';
 import { AuthProvider } from '@providers/AuthProvider';
 import { FeatureFlagsProvider } from '@providers/FeatureFlagsProvider';
 
@@ -35,6 +36,7 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <ServiceWorkerRegistrar />
+        <OfflineBanner />
         <FeatureFlagsProvider>
           <AuthProvider>{children}</AuthProvider>
         </FeatureFlagsProvider>
