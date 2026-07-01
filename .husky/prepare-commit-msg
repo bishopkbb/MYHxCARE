@@ -1,0 +1,6 @@
+#!/bin/sh
+# Strip leading blank lines before commitlint sees the message.
+# Prevents blank-header failures caused by PowerShell paste artifacts.
+MSG_FILE="$1"
+CLEAN=$(sed '/./,$!d' "$MSG_FILE")
+printf '%s\n' "$CLEAN" > "$MSG_FILE"
