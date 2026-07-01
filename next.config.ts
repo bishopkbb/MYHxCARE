@@ -20,7 +20,7 @@ const csp = [
   // Next.js requires 'unsafe-inline' for hydration scripts and ShadCN/Tailwind
   // needs it for style-src. Replace both with per-request nonces via proxy.ts
   // in Phase 3 once the auth layer is in place.
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self'",
