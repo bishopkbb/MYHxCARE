@@ -1,28 +1,12 @@
 'use client';
 
-import type { LucideIcon } from 'lucide-react';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  BedDouble,
-  Bell,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  FlaskConical,
-  LayoutDashboard,
-  LogOut,
-  MessageSquare,
-  Pill,
-  Receipt,
-  Settings,
-  Settings2,
-  Siren,
-  Stethoscope,
-  Users,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 
+import { resolveWorkspace } from '@/types/auth.types';
+import { UNIVERSAL_BOTTOM_NAV, WORKSPACE_NAV } from '@/config/workspaces';
+import type { NavItem } from '@/config/workspaces';
 import { useAuth } from '@hooks/useAuth';
 import { cn } from '@lib/utils';
 
@@ -36,46 +20,6 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-}
-
-interface NavSection {
-  label: string;
-  items: NavItem[];
-}
-
-const NAV_SECTIONS: NavSection[] = [
-  {
-    label: 'Clinical',
-    items: [
-      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'Patients', href: '/patients', icon: Users },
-      { label: 'Clinicals', href: '/encounters', icon: Stethoscope },
-      { label: 'Pharmacy', href: '/pharmacy', icon: Pill },
-      { label: 'Laboratory', href: '/lab', icon: FlaskConical },
-      { label: 'Billing', href: '/billing', icon: Receipt },
-      { label: 'Emergency', href: '/emergency', icon: Siren },
-      { label: 'Wards', href: '/wards', icon: BedDouble },
-    ],
-  },
-  {
-    label: 'Management',
-    items: [
-      { label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays },
-      { label: 'Administration', href: '/admin', icon: Settings2 },
-    ],
-  },
-];
-
-const BOTTOM_NAV: NavItem[] = [
-  { label: 'Notifications', href: '/notifications', icon: Bell },
-  { label: 'Collaboration', href: '/collaboration', icon: MessageSquare },
-  { label: 'Settings', href: '/settings', icon: Settings },
-];
-
 export interface AppSidebarProps {
   collapsed: boolean;
   onCollapsedChange: (value: boolean) => void;
@@ -85,6 +29,9 @@ export function AppSidebar({ collapsed, onCollapsedChange }: AppSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
+  const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
+  const { workspaceLabel, sections } = WORKSPACE_NAV[workspaceId];
+
   return (
     <aside
       aria-label="Application sidebar"
@@ -93,7 +40,7 @@ export function AppSidebar({ collapsed, onCollapsedChange }: AppSidebarProps) {
         collapsed ? 'w-16' : 'w-64',
       )}
     >
-      {/* Header: logo + collapse toggle */}
+      {/* Header: logo + workspace label + collapse toggle */}
       <div
         className={cn(
           'flex h-14 shrink-0 items-center border-b px-3',
@@ -101,16 +48,19 @@ export function AppSidebar({ collapsed, onCollapsedChange }: AppSidebarProps) {
         )}
       >
         {!collapsed && (
-          <span className="text-foreground text-sm font-semibold tracking-tight select-none">
-            MYHxCare HMS
-          </span>
+          <div className="min-w-0">
+            <span className="text-foreground block text-sm font-semibold tracking-tight select-none">
+              MYHxCare HMS
+            </span>
+            <span className="text-muted-foreground block truncate text-xs">{workspaceLabel}</span>
+          </div>
         )}
         <button
           type="button"
           onClick={() => {
             onCollapsedChange(!collapsed);
           }}
-          className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex size-8 items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex size-8 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
@@ -118,14 +68,14 @@ export function AppSidebar({ collapsed, onCollapsedChange }: AppSidebarProps) {
         </button>
       </div>
 
-      {/* Navigation sections */}
+      {/* Workspace navigation */}
       <nav
         aria-label="Main navigation"
         className="flex flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto py-4"
       >
-        {NAV_SECTIONS.map((section) => (
-          <div key={section.label} className="px-2">
-            {!collapsed && (
+        {sections.map((section, idx) => (
+          <div key={section.label ?? idx} className="px-2">
+            {!collapsed && section.label && (
               <p className="text-muted-foreground mb-1 px-2 text-xs font-medium tracking-wider uppercase">
                 {section.label}
               </p>
@@ -134,7 +84,12 @@ export function AppSidebar({ collapsed, onCollapsedChange }: AppSidebarProps) {
               {section.items.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(item.href + '/');
                 return (
-                  <NavLink key={item.href} item={item} active={active} collapsed={collapsed} />
+                  <NavLink
+                    key={`${item.href}-${item.label}`}
+                    item={item}
+                    active={active}
+                    collapsed={collapsed}
+                  />
                 );
               })}
             </ul>
@@ -142,10 +97,10 @@ export function AppSidebar({ collapsed, onCollapsedChange }: AppSidebarProps) {
         ))}
       </nav>
 
-      {/* Footer: utility nav + user card + sign-out */}
+      {/* Footer: universal nav + user card + sign-out */}
       <div className="shrink-0 border-t px-2 py-3">
         <ul role="list" className="space-y-0.5">
-          {BOTTOM_NAV.map((item) => {
+          {UNIVERSAL_BOTTOM_NAV.map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + '/');
             return <NavLink key={item.href} item={item} active={active} collapsed={collapsed} />;
           })}
