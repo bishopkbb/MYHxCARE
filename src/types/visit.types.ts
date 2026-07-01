@@ -1,6 +1,8 @@
 // Visit (encounter) entity, state machine, and display config.
 // The backend resource is "encounter" — "visit" is the clinical UI term.
 
+import type { TriagePriority } from '@utils/triage';
+
 // ─── Enumerations ──────────────────────────────────────────────────────────
 
 export type VisitStatus =
@@ -129,6 +131,7 @@ export type Encounter = {
   attendingPhysicianId?: string;
   attendingPhysicianName?: string;
   chiefComplaint?: string;
+  triagePriority?: TriagePriority;
   checkedInAt?: string; // ISO 8601
   completedAt?: string; // ISO 8601
   createdAt: string; // ISO 8601
