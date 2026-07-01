@@ -2,7 +2,7 @@ import axios, { isAxiosError } from 'axios';
 
 import type { LoginCredentials, LoginResponse, User } from '@/types/auth.types';
 import { apiClient } from '@lib/api/client';
-import type { SuccessEnvelope } from '@lib/api/types';
+import type { ApiSuccessResponse } from '@lib/api/types';
 
 import { tokenStore } from './tokenStore';
 
@@ -117,7 +117,7 @@ export const authService = {
       await sleep(200);
       return MOCK_USER;
     }
-    const res = await apiClient.get<SuccessEnvelope<User>>('/me');
+    const res = await apiClient.get<ApiSuccessResponse<User>>('/me');
     return res.data.data;
   },
 };
