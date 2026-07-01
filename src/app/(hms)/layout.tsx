@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
-import { AuthGuard } from '@components/shared/AuthGuard';
 import { AppShell } from '@components/shared/AppShell';
+import { AuthGuard } from '@components/shared/AuthGuard';
 
 export default function HmsLayout({ children }: { children: ReactNode }) {
   return (
