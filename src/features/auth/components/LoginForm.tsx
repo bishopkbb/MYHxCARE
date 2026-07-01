@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 
 import { loginSchema, type LoginFormValues } from '@features/auth/schemas/loginSchema';
 import { AuthError } from '@lib/auth/authService';
+import { getWorkspaceHomeRoute } from '@/config/workspaces';
 import { useAuth } from '@hooks/useAuth';
 
 function getLoginErrorMessage(err: unknown): string {
@@ -28,16 +29,16 @@ function getLoginErrorMessage(err: unknown): string {
 }
 
 export function LoginForm() {
-  const { login, isLoading, isAuthenticated } = useAuth();
+  const { login, isLoading, isAuthenticated, user } = useAuth();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace('/dashboard');
+    if (!isLoading && isAuthenticated && user) {
+      router.replace(getWorkspaceHomeRoute(user.workspaceRole));
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, user, router]);
 
   const {
     register,
@@ -52,7 +53,7 @@ export function LoginForm() {
     setServerError(null);
     try {
       await login(values);
-      router.replace('/dashboard');
+      // Redirect is handled by the useEffect above once isAuthenticated + user are set
     } catch (err) {
       setServerError(getLoginErrorMessage(err));
     }

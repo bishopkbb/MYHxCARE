@@ -22,7 +22,8 @@ import {
 
 import type { LucideIcon } from 'lucide-react';
 
-import type { WorkspaceId } from '@/types/auth.types';
+import { resolveWorkspace } from '@/types/auth.types';
+import type { WorkspaceId, WorkspaceRole } from '@/types/auth.types';
 
 export type NavItem = {
   label: string;
@@ -37,6 +38,8 @@ export type NavSection = {
 
 export type WorkspaceNavConfig = {
   workspaceLabel: string;
+  // Landing route after login. Update here as each Phase 6 workspace page is built.
+  homeRoute: string;
   sections: NavSection[];
 };
 
@@ -47,6 +50,7 @@ export type WorkspaceNavConfig = {
 export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
   records: {
     workspaceLabel: 'Medical Records',
+    homeRoute: '/patients',
     sections: [
       {
         items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
@@ -63,6 +67,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 
   clinical: {
     workspaceLabel: 'Clinical Services',
+    homeRoute: '/encounters',
     sections: [
       {
         items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
@@ -81,6 +86,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 
   nursing: {
     workspaceLabel: 'Nursing',
+    homeRoute: '/wards',
     sections: [
       {
         items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
@@ -98,6 +104,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 
   'ward-management': {
     workspaceLabel: 'Ward Management',
+    homeRoute: '/wards',
     sections: [
       {
         items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
@@ -114,6 +121,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 
   pharmacy: {
     workspaceLabel: 'Pharmacy',
+    homeRoute: '/pharmacy',
     sections: [
       {
         items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
@@ -130,6 +138,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 
   laboratory: {
     workspaceLabel: 'Laboratory',
+    homeRoute: '/lab',
     sections: [
       {
         items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
@@ -147,6 +156,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 
   finance: {
     workspaceLabel: 'Finance',
+    homeRoute: '/billing',
     sections: [
       {
         items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
@@ -164,6 +174,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 
   emergency: {
     workspaceLabel: 'Emergency',
+    homeRoute: '/emergency',
     sections: [
       {
         items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
@@ -181,6 +192,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 
   administration: {
     workspaceLabel: 'Administration',
+    homeRoute: '/admin',
     sections: [
       {
         items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
@@ -195,6 +207,15 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
     ],
   },
 };
+
+// ─── Workspace home route resolver ────────────────────────────────────────
+// Used by LoginForm and any component that needs to redirect to the
+// authenticated user's workspace home (e.g. after session resume).
+
+export function getWorkspaceHomeRoute(workspaceRole: WorkspaceRole): string {
+  const workspaceId = resolveWorkspace(workspaceRole);
+  return WORKSPACE_NAV[workspaceId].homeRoute;
+}
 
 // ─── Universal bottom nav (every workspace) ────────────────────────────────
 
