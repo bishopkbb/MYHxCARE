@@ -48,10 +48,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# docs
-docs/myhxcare_architecture (1).html
-docs/myhxcare_frontend_development_constitution.md
-docs/myhxcare_hms_frontend_reliability_constitution.md
+# docs — all internal documentation stays local only
+docs/
 
-# claude
+# claude and agent config — internal tooling, never published
+CLAUDE.md
+AGENTS.md
 .claude
