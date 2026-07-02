@@ -101,6 +101,20 @@ export type Session = {
   isCurrent: boolean;
 };
 
+// ─── Trusted Device ────────────────────────────────────────────────────────
+
+export type TrustedDevice = {
+  id: string;
+  deviceName: string;
+  browser: string;
+  os: string;
+  ipAddress: string;
+  location?: string;
+  trustedAt: string;
+  lastUsedAt: string;
+  isCurrent: boolean;
+};
+
 // ─── Login ─────────────────────────────────────────────────────────────────
 
 export type LoginCredentials = {
