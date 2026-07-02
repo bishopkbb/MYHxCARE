@@ -1,7 +1,7 @@
 # MYHxCare HMS — Frontend Engineering Handbook
 
-> **Hospital Management System** for Nnamdi Azikiwe University Medical Centre (UniZik), Awka, Anambra State, Nigeria.
-> Built to grow into a multi-tenant SaaS platform serving university teaching hospitals across Nigeria.
+> **Multi-tenant SaaS Hospital Management System** for Nigerian university teaching hospitals.
+> Currently live at Nnamdi Azikiwe University Medical Centre (UniZik), Awka — Tenant #1.
 
 ---
 
@@ -42,23 +42,25 @@
 
 ### Purpose
 
-MYHxCare HMS is the official hospital management system for **Nnamdi Azikiwe University Medical Centre (NAUTH)**, one of Nigeria's foremost tertiary teaching hospitals. The system digitises and unifies every clinical and administrative workflow across the hospital: patient registration, outpatient and inpatient encounters, laboratory, pharmacy, billing, emergency care, ward management, duty rostering, and system administration.
+MYHxCare HMS is a **multi-tenant SaaS Hospital Management System** built for Nigerian university teaching hospitals. Each hospital operates as an isolated tenant on a shared platform, with its own staff roster, patient data, billing configuration, and feature set. The platform digitises and unifies every clinical and administrative workflow: patient registration, outpatient and inpatient encounters, laboratory, pharmacy, billing, emergency care, ward management, duty rostering, and system administration.
 
-The frontend is a **role-scoped, workspace-driven** web application. Every staff member who logs in sees only the screens, data, and actions permitted by their clinical role. A consultant physician never sees the billing officer's revenue reports. A pharmacist never sees the ward manager's bed allocation controls. This is not just a UX concern — it is a patient safety and data governance requirement.
+**Nnamdi Azikiwe University Medical Centre (NAUTH)**, Awka, is Tenant #1 — the first hospital live on the platform.
+
+The frontend is a **role-scoped, workspace-driven** web application. Every staff member who logs in sees only the screens, data, and actions permitted by their clinical role and their hospital's configuration. A consultant physician never sees the billing officer's revenue reports. A pharmacist never sees the ward manager's bed allocation controls. This is not just a UX concern — it is a patient safety and data governance requirement.
 
 ### Vision
 
-The immediate deployment is a single-tenant installation at NAUTH. The architectural vision is a **multi-tenant SaaS platform** where each university teaching hospital in Nigeria operates as an isolated tenant with its own staff roster, patient data, billing configuration, and feature set — all served from a single shared infrastructure.
+MYHxCare is a platform product — not a bespoke installation. Every university teaching hospital in Nigeria is a potential tenant. Each tenant runs on the same codebase and infrastructure, with full data isolation and per-tenant configuration (feature flags, pharmacy locations, department structure, pricing).
 
-Every architectural decision made today — from the JWT claim structure to the workspace routing system to the query key naming conventions — is made with multi-tenancy in mind.
+Every architectural decision — from the `tenant_id` JWT claim to the workspace routing system to the query key naming conventions — is a platform-level decision, not a single-hospital one.
 
 ### Business Goals
 
-- Eliminate paper-based patient folders and manual charge tickets at NAUTH
+- Operate as a subscription SaaS platform serving multiple Nigerian university teaching hospitals
+- Digitise and unify clinical workflows for each onboarded hospital tenant
 - Reduce prescription errors through digital prescribing with allergy cross-checking
 - Accelerate patient flow through real-time OPD queue management
-- Provide management with live operational dashboards and financial reports
-- Establish a replicable digital infrastructure model for Nigerian teaching hospitals
+- Provide hospital management with live operational dashboards and financial reports
 
 ### Target Users
 
@@ -293,7 +295,7 @@ myhxcare-hms/
 │   │   ├── permissions.ts           # Typed PERMISSIONS constant object
 │   │   ├── queryKeys.ts             # QK factory — typed TanStack Query keys
 │   │   ├── routes.ts                # ROUTES constant — all app paths in one place
-│   │   └── pharmacyLocations.ts     # NAUTH pharmacy campus location definitions
+│   │   └── pharmacyLocations.ts     # Pharmacy campus location definitions (seeded per tenant)
 │   │
 │   ├── features/                    # Domain feature modules
 │   │   ├── auth/
@@ -600,7 +602,7 @@ Feature flags gate entire modules that are not yet production-ready. Use `FlagGa
 </FlagGate>
 ```
 
-Flag defaults are defined in `FeatureFlagsProvider`. In a future multi-tenant version, flags will be fetched per-tenant from the API.
+Flag defaults are defined in `FeatureFlagsProvider`. The roadmap moves this to a per-tenant API endpoint (`/tenants/{id}/flags`) so each hospital can have a different feature set without a code deploy.
 
 ---
 
@@ -658,7 +660,7 @@ Test order worklist, sample reception and tracking, result entry, critical value
 
 ### Pharmacy
 
-Prescription dispensing queue, drug inventory management, batch/expiry tracking, multi-location stock transfers, and dispense ledger. Supports 5 NAUTH campus locations.
+Prescription dispensing queue, drug inventory management, batch/expiry tracking, multi-location stock transfers, and dispense ledger. Pharmacy locations are tenant-configured — NAUTH (Tenant #1) has 5 campus locations defined in `src/constants/pharmacyLocations.ts`.
 
 **Key constants**: `PHARMACY_LOCATIONS` in `src/constants/pharmacyLocations.ts`
 
@@ -1546,13 +1548,14 @@ Build one screen at a time. Do not start a new screen until the current screen h
 
 ## 24. Future Roadmap
 
-### Multi-Tenancy
+### Multi-Tenancy (Expanding Tenant Base)
 
-Each hospital tenant will have an isolated data partition. The JWT `tenant_id` claim is already baked into the token structure. Planned changes:
+MYHxCare is already a multi-tenant platform — NAUTH (UniZik) is Tenant #1. The JWT `tenant_id` claim is baked into the token structure from day one. Near-term platform work to onboard additional hospital tenants:
 
-- Tenant-scoped query key prefixes
-- Per-tenant feature flag API (`/tenants/{id}/flags`)
-- Tenant branding (logo, accent colour) loaded on first authenticated request
+- Tenant-scoped query key prefixes (`[tenantId, 'patients', ...]`) to ensure cross-tenant cache isolation in shared browser sessions
+- Per-tenant feature flag API (`/tenants/{id}/flags`) — replacing `DEFAULT_FLAGS` in `FeatureFlagsProvider` with a remote fetch on authentication
+- Tenant branding (logo, primary colour) loaded on the first authenticated request and applied via CSS variables
+- Tenant onboarding flow in the administration module (department structure, pharmacy locations, pricing catalogue)
 
 ### Advanced Workforce Management
 
@@ -1665,7 +1668,7 @@ Server state (API data) belongs in TanStack Query. Form state belongs in React H
 
 **Q: Why is the refresh token in `sessionStorage` and not `localStorage`?**
 
-`localStorage` persists across browser sessions. On a shared hospital workstation (and NAUTH has many), a staff member closing a browser tab must not leave their session accessible to the next person. `sessionStorage` is tab-scoped and is cleared when the tab closes.
+`localStorage` persists across browser sessions. Hospital workstations are shared — a staff member closing a browser tab must not leave their session accessible to the next person. `sessionStorage` is tab-scoped and is cleared when the tab closes.
 
 **Q: Why are mutations configured with `retry: 0`?**
 
