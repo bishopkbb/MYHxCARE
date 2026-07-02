@@ -3,9 +3,11 @@ import { Geist, Geist_Mono } from 'next/font/google';
 
 import { ServiceWorkerRegistrar } from '@lib/pwa/ServiceWorkerRegistrar';
 import { OfflineBanner } from '@components/shared/OfflineBanner';
+import { Toaster } from '@components/shared/Toaster';
 import { AuthProvider } from '@providers/AuthProvider';
 import { FeatureFlagsProvider } from '@providers/FeatureFlagsProvider';
 import { ReactQueryProvider } from '@providers/ReactQueryProvider';
+import { ToastProvider } from '@providers/ToastProvider';
 
 import './globals.css';
 
@@ -40,7 +42,12 @@ export default function RootLayout({
         <OfflineBanner />
         <ReactQueryProvider>
           <FeatureFlagsProvider>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <ToastProvider>
+                {children}
+                <Toaster />
+              </ToastProvider>
+            </AuthProvider>
           </FeatureFlagsProvider>
         </ReactQueryProvider>
       </body>
