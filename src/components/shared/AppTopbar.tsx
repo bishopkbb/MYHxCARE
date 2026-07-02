@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell } from 'lucide-react';
+import { Bell, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -87,13 +87,27 @@ function NotificationBell({ unreadCount = 0 }: NotificationBellProps) {
   );
 }
 
-export function AppTopbar() {
+interface AppTopbarProps {
+  onMenuToggle: () => void;
+}
+
+export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
   const breadcrumbs = buildBreadcrumbs(pathname);
 
   return (
-    <header className="bg-background flex h-14 shrink-0 items-center gap-4 border-b px-4">
+    <header className="bg-background flex h-14 shrink-0 items-center gap-3 border-b px-4">
+      {/* Hamburger — mobile only, opens the sidebar drawer */}
+      <button
+        type="button"
+        onClick={onMenuToggle}
+        className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex size-8 shrink-0 items-center justify-center rounded-md transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none lg:hidden"
+        aria-label="Open navigation menu"
+      >
+        <Menu className="size-5" />
+      </button>
+
       {/* Breadcrumb / page title */}
       <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
         {breadcrumbs.length <= 1 ? (
