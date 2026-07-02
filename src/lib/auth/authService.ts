@@ -119,6 +119,24 @@ export const authService = {
     }
   },
 
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    if (IS_MOCK) {
+      await sleep(700);
+      if (token === 'invalid') {
+        throw new AuthError('INVALID_TOKEN', 'This password reset link is invalid or has expired.');
+      }
+      return;
+    }
+    try {
+      await authAxios.post('/auth/password-reset/confirm', {
+        token,
+        new_password: newPassword,
+      });
+    } catch (error) {
+      throw toAuthError(error);
+    }
+  },
+
   async getMe(): Promise<User> {
     if (IS_MOCK) {
       const { getMockUserById } = await import('@features/auth/__mocks__/authFixtures');

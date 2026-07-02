@@ -1,9 +1,21 @@
 import type { Metadata } from 'next';
 
-import { PasswordResetForm } from '@features/auth/components/PasswordResetForm';
+import { PasswordResetRequestForm } from '@features/auth/components/PasswordResetRequestForm';
+import { PasswordResetSetForm } from '@features/auth/components/PasswordResetSetForm';
 
-export const metadata: Metadata = { title: 'Reset password' };
+type SearchParams = Promise<{ token?: string }>;
 
-export default function PasswordResetPage() {
-  return <PasswordResetForm />;
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}): Promise<Metadata> {
+  const { token } = await searchParams;
+  return { title: token ? 'Set new password' : 'Reset password' };
+}
+
+export default async function PasswordResetPage({ searchParams }: { searchParams: SearchParams }) {
+  const { token } = await searchParams;
+
+  return token ? <PasswordResetSetForm token={token} /> : <PasswordResetRequestForm />;
 }
