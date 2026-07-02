@@ -81,6 +81,10 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Lab & Results', href: '/lab', icon: FlaskConical },
         ],
       },
+      {
+        label: 'Scheduling',
+        items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
+      },
     ],
   },
 
@@ -99,6 +103,10 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Vitals & Notes', href: '/encounters', icon: Activity },
         ],
       },
+      {
+        label: 'Scheduling',
+        items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
+      },
     ],
   },
 
@@ -115,6 +123,10 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Bed Management', href: '/wards', icon: BedDouble },
           { label: 'Patients', href: '/patients', icon: Users },
         ],
+      },
+      {
+        label: 'Scheduling',
+        items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
       },
     ],
   },
@@ -133,6 +145,10 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Drug Inventory', href: '/pharmacy/inventory', icon: Package },
         ],
       },
+      {
+        label: 'Scheduling',
+        items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
+      },
     ],
   },
 
@@ -150,6 +166,10 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Sample Tracking', href: '/lab/samples', icon: FlaskConical },
           { label: 'Result Entry', href: '/lab/results', icon: FileCheck2 },
         ],
+      },
+      {
+        label: 'Scheduling',
+        items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
       },
     ],
   },
