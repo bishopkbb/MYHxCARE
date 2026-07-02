@@ -87,6 +87,22 @@ export type AuthState =
   | { status: 'session-expired'; user: User }
   | { status: 'unauthenticated' };
 
+// ─── Session ───────────────────────────────────────────────────────────────
+
+export type Session = {
+  id: string;
+  deviceName: string;
+  browser: string;
+  os: string;
+  ipAddress: string;
+  location?: string;
+  lastActiveAt: string;
+  createdAt: string;
+  isCurrent: boolean;
+};
+
+// ─── Login ─────────────────────────────────────────────────────────────────
+
 export type LoginCredentials = {
   identifier: string;
   password: string;
