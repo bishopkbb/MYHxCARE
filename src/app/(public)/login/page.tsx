@@ -10,7 +10,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen bg-[#F7FAFC]">
       {/* ── Left brand panel ─────────────────────────────────────────── */}
       <aside
-        className="hidden min-h-screen w-[41.5%] shrink-0 flex-col px-12.5 pt-[259px] lg:flex"
+        className="hidden min-h-screen w-[41.5%] shrink-0 flex-col px-12.5 pt-64.75 lg:flex"
         style={{ background: '#25464D' }}
       >
         {/* "SECURE CLINICAL PLATFORM" badge */}
@@ -30,14 +30,14 @@ export default function LoginPage() {
           One Platform.
         </h2>
 
-        <p className="mt-5 max-w-[380px] text-base leading-6.5 text-white/60">
+        <p className="mt-5 max-w-95 text-base leading-6.5 text-white/60">
           MYHxCare HMS connects every clinical role from bedside to boardroom with real-time patient
           data, seamless workflows, and enterprise-grade security.
         </p>
       </aside>
 
       {/* ── Right content panel ───────────────────────────────────────── */}
-      <main className="flex flex-1 flex-col items-center px-4 pt-[63px] pb-5">
+      <main className="flex flex-1 flex-col items-center px-4 pt-15.75 pb-5">
         {/* Logo */}
         <Image
           src="/logo.png"
