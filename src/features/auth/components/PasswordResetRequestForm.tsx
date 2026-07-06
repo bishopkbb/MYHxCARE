@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, UserRound } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -43,99 +43,118 @@ export function PasswordResetRequestForm() {
     }
   }
 
-  return (
-    <div className="w-full max-w-sm">
-      <div className="mb-8 text-center">
-        <h1 className="text-foreground text-2xl font-semibold tracking-tight">MYHxCare HMS</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Nnamdi Azikiwe University Medical Centre
+  const inputClass = cn(
+    'w-full h-12.5 rounded-[12px] border px-4 text-sm leading-5.5',
+    'bg-[#0E2D3A]/4 border-[#006482]/18',
+    'text-[#0D2630] placeholder:text-[#0D2630]/50',
+    'focus:outline-none focus:ring-2 focus:ring-[#00B4D8]/40 focus:border-[#00B4D8]',
+    'disabled:opacity-50 transition-colors',
+  );
+
+  if (formState === 'success') {
+    return (
+      <div className="animate-in fade-in slide-in-from-bottom-2 w-full py-6 text-center duration-300">
+        <div
+          className="mx-auto mb-5 flex size-14 items-center justify-center rounded-full"
+          style={{ background: 'rgba(0, 180, 216, 0.12)' }}
+        >
+          <CheckCircle2 className="size-7 text-[#00B4D8]" />
+        </div>
+        <h2 className="font-display text-2xl font-semibold text-[#0D2630]">Check your email</h2>
+        <p className="mt-2 text-sm leading-5.5 text-[#8A98A3]">
+          We&apos;ve sent password reset instructions to your registered email. The link expires in
+          30 minutes.
         </p>
-      </div>
-
-      {formState === 'success' ? (
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="bg-card rounded-lg border p-6 text-center">
-            <div className="bg-primary/10 mx-auto mb-4 flex size-12 items-center justify-center rounded-full">
-              <CheckCircle2 className="text-primary size-6" />
-            </div>
-            <h2 className="text-foreground text-base font-semibold">Check your email</h2>
-            <p className="text-muted-foreground mt-2 text-sm">
-              We&apos;ve sent password reset instructions to your registered email address. The link
-              expires in 30 minutes.
-            </p>
-            <p className="text-muted-foreground mt-3 text-xs">
-              Didn&apos;t receive it? Check your spam folder or{' '}
-              <button
-                type="button"
-                onClick={() => setFormState('idle')}
-                className="text-primary underline-offset-4 hover:underline"
-              >
-                try again
-              </button>
-              .
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="animate-in fade-in duration-200">
-          <div className="mb-6">
-            <h2 className="text-foreground text-base font-semibold">Reset your password</h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Enter your staff ID or registered email address.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-            {serverError && (
-              <div
-                role="alert"
-                className="bg-destructive/10 text-destructive animate-in fade-in rounded-md px-4 py-3 text-sm duration-200"
-              >
-                {serverError}
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <label htmlFor="identifier" className="text-foreground text-sm font-medium">
-                Staff ID or Email
-              </label>
-              <div className="relative">
-                <UserRound className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                <input
-                  id="identifier"
-                  type="text"
-                  autoComplete="username"
-                  autoFocus
-                  disabled={isSubmitting}
-                  placeholder="e.g. ADM-001 or dr.adaeze@unizik.edu.ng"
-                  {...register('identifier')}
-                  className={cn(
-                    'bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 pr-4 pl-9 text-sm focus:ring-2 focus:outline-none disabled:opacity-50',
-                    errors.identifier && 'border-destructive focus:ring-destructive',
-                  )}
-                />
-              </div>
-              {errors.identifier && (
-                <p className="text-destructive text-xs">{errors.identifier.message}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring mt-2 w-full rounded-md px-4 py-2 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isSubmitting ? 'Sending…' : 'Send reset link'}
-            </button>
-          </form>
-        </div>
-      )}
-
-      <p className="text-muted-foreground mt-6 text-center text-sm">
-        <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+        <p className="mt-3 text-xs leading-4.5 text-[#8A98A3]">
+          Didn&apos;t receive it? Check your spam folder or{' '}
+          <button
+            type="button"
+            onClick={() => setFormState('idle')}
+            className="text-[#00B4D8] underline-offset-4 hover:underline"
+          >
+            try again
+          </button>
+          .
+        </p>
+        <Link
+          href="/login"
+          className="mt-6 inline-flex items-center gap-1.5 text-xs leading-4.5 text-[#00B4D8] underline-offset-4 hover:underline"
+        >
           Back to sign in
         </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="animate-in fade-in w-full duration-200">
+      <h1 className="font-display text-center text-3xl leading-9.5 font-semibold text-[#0D2630]">
+        Reset password
+      </h1>
+      <p className="mt-1.5 text-center text-sm leading-5.5 text-[#8A98A3]">
+        Enter your staff ID or registered email and we&apos;ll send you reset instructions.
       </p>
+
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-8">
+        {serverError && (
+          <div
+            role="alert"
+            className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {serverError}
+          </div>
+        )}
+
+        <div>
+          <label
+            htmlFor="identifier"
+            className="block text-sm leading-5.5 font-medium text-[#0D2630]"
+          >
+            Staff ID or Email
+          </label>
+          <input
+            id="identifier"
+            type="text"
+            autoComplete="username"
+            autoFocus
+            disabled={isSubmitting}
+            placeholder="e.g. EMP-00142 or dr.obi@nauth.gov.ng"
+            {...register('identifier')}
+            className={cn(inputClass, 'mt-1.5')}
+          />
+          {errors.identifier && (
+            <p className="mt-1 text-xs text-red-500">{errors.identifier.message}</p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="mt-6 flex h-13 w-full items-center justify-center gap-2.5 rounded-[12px] text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+          style={{
+            background: 'linear-gradient(135deg, #00B4D8 0%, #0077A8 100%)',
+            boxShadow: '0px 4px 20px 0px rgba(0, 180, 216, 0.30)',
+          }}
+        >
+          {isSubmitting ? (
+            'Sending…'
+          ) : (
+            <>
+              Send reset link
+              <ArrowRight className="size-4" />
+            </>
+          )}
+        </button>
+      </form>
+
+      <div className="mt-6 text-center">
+        <Link
+          href="/login"
+          className="text-xs leading-4.5 text-[#00B4D8] underline-offset-4 hover:underline"
+        >
+          Back to sign in
+        </Link>
+      </div>
     </div>
   );
 }

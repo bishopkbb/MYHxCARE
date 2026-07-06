@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, EyeIcon, EyeOffIcon, LockKeyhole, XCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Eye, EyeOff, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -32,7 +32,6 @@ export function PasswordResetSetForm({ token }: PasswordResetSetFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Redirect to login 2s after success so the user can read the confirmation
   useEffect(() => {
     if (formState !== 'success') return;
     const timer = setTimeout(() => router.replace('/login'), 2000);
@@ -62,162 +61,179 @@ export function PasswordResetSetForm({ token }: PasswordResetSetFormProps) {
     }
   }
 
-  return (
-    <div className="w-full max-w-sm">
-      <div className="mb-8 text-center">
-        <h1 className="text-foreground text-2xl font-semibold tracking-tight">MYHxCare HMS</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Nnamdi Azikiwe University Medical Centre
+  const inputClass = cn(
+    'w-full h-12.5 rounded-[12px] border px-4 text-sm leading-5.5',
+    'bg-[#0E2D3A]/4 border-[#006482]/18',
+    'text-[#0D2630] placeholder:text-[#0D2630]/50',
+    'focus:outline-none focus:ring-2 focus:ring-[#00B4D8]/40 focus:border-[#00B4D8]',
+    'disabled:opacity-50 transition-colors',
+  );
+
+  if (formState === 'success') {
+    return (
+      <div className="animate-in fade-in slide-in-from-bottom-2 w-full py-6 text-center duration-300">
+        <div
+          className="mx-auto mb-5 flex size-14 items-center justify-center rounded-full"
+          style={{ background: 'rgba(0, 180, 216, 0.12)' }}
+        >
+          <CheckCircle2 className="size-7 text-[#00B4D8]" />
+        </div>
+        <h2 className="font-display text-2xl font-semibold text-[#0D2630]">Password updated</h2>
+        <p className="mt-2 text-sm leading-5.5 text-[#8A98A3]">
+          Your password has been changed successfully. Redirecting you to sign in…
         </p>
       </div>
+    );
+  }
 
-      {formState === 'success' && (
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="bg-card rounded-lg border p-6 text-center">
-            <div className="bg-primary/10 mx-auto mb-4 flex size-12 items-center justify-center rounded-full">
-              <CheckCircle2 className="text-primary size-6" />
-            </div>
-            <h2 className="text-foreground text-base font-semibold">Password updated</h2>
-            <p className="text-muted-foreground mt-2 text-sm">
-              Your password has been changed successfully. Redirecting you to sign in…
-            </p>
-          </div>
+  if (formState === 'invalid-token') {
+    return (
+      <div className="animate-in fade-in slide-in-from-bottom-2 w-full py-6 text-center duration-300">
+        <div
+          className="mx-auto mb-5 flex size-14 items-center justify-center rounded-full"
+          style={{ background: 'rgba(239, 68, 68, 0.10)' }}
+        >
+          <XCircle className="size-7 text-red-500" />
         </div>
-      )}
+        <h2 className="font-display text-2xl font-semibold text-[#0D2630]">Link expired</h2>
+        <p className="mt-2 text-sm leading-5.5 text-[#8A98A3]">
+          This password reset link is invalid or has expired. Reset links are valid for 30 minutes.
+        </p>
+        <Link
+          href="/password-reset"
+          className="mt-6 flex h-13 items-center justify-center gap-2.5 rounded-[12px] text-sm font-medium text-white transition-opacity"
+          style={{
+            background: 'linear-gradient(135deg, #00B4D8 0%, #0077A8 100%)',
+            boxShadow: '0px 4px 20px 0px rgba(0, 180, 216, 0.30)',
+          }}
+        >
+          Request a new link
+          <ArrowRight className="size-4" />
+        </Link>
+      </div>
+    );
+  }
 
-      {formState === 'invalid-token' && (
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="bg-card rounded-lg border p-6 text-center">
-            <div className="bg-destructive/10 mx-auto mb-4 flex size-12 items-center justify-center rounded-full">
-              <XCircle className="text-destructive size-6" />
-            </div>
-            <h2 className="text-foreground text-base font-semibold">Link expired</h2>
-            <p className="text-muted-foreground mt-2 text-sm">
-              This password reset link is invalid or has expired. Reset links are valid for 30
-              minutes.
-            </p>
-            <Link
-              href="/password-reset"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring mt-4 inline-flex w-full items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none"
-            >
-              Request a new link
-            </Link>
+  return (
+    <div className="animate-in fade-in w-full duration-200">
+      <h1 className="font-display text-center text-3xl leading-9.5 font-semibold text-[#0D2630]">
+        Set new password
+      </h1>
+      <p className="mt-1.5 text-center text-sm leading-5.5 text-[#8A98A3]">
+        Choose a strong password of at least 8 characters.
+      </p>
+
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-8">
+        {serverError && (
+          <div
+            role="alert"
+            className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {serverError}
           </div>
-        </div>
-      )}
+        )}
 
-      {formState === 'idle' && (
-        <div className="animate-in fade-in duration-200">
-          <div className="mb-6">
-            <h2 className="text-foreground text-base font-semibold">Set a new password</h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Choose a strong password of at least 8 characters.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-            {serverError && (
-              <div
-                role="alert"
-                className="bg-destructive/10 text-destructive animate-in fade-in rounded-md px-4 py-3 text-sm duration-200"
-              >
-                {serverError}
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <label htmlFor="password" className="text-foreground text-sm font-medium">
-                New password
-              </label>
-              <div className="relative">
-                <LockKeyhole className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  autoFocus
-                  disabled={isSubmitting}
-                  placeholder="At least 8 characters"
-                  {...register('password')}
-                  aria-describedby={errors.password ? 'password-error' : undefined}
-                  className={cn(
-                    'bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 pr-10 pl-9 text-sm focus:ring-2 focus:outline-none disabled:opacity-50',
-                    errors.password && 'border-destructive focus:ring-destructive',
-                  )}
-                />
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors duration-150"
-                >
-                  {showPassword ? (
-                    <EyeOffIcon className="size-4" />
-                  ) : (
-                    <EyeIcon className="size-4" />
-                  )}
-                </button>
-              </div>
-              {errors.password && (
-                <p id="password-error" className="text-destructive text-xs">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="confirmPassword" className="text-foreground text-sm font-medium">
-                Confirm new password
-              </label>
-              <div className="relative">
-                <LockKeyhole className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                <input
-                  id="confirmPassword"
-                  type={showConfirm ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  disabled={isSubmitting}
-                  placeholder="Re-enter your new password"
-                  {...register('confirmPassword')}
-                  aria-describedby={errors.confirmPassword ? 'confirm-error' : undefined}
-                  className={cn(
-                    'bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-md border py-2 pr-10 pl-9 text-sm focus:ring-2 focus:outline-none disabled:opacity-50',
-                    errors.confirmPassword && 'border-destructive focus:ring-destructive',
-                  )}
-                />
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  aria-label={showConfirm ? 'Hide password' : 'Show password'}
-                  onClick={() => setShowConfirm((v) => !v)}
-                  className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors duration-150"
-                >
-                  {showConfirm ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p id="confirm-error" className="text-destructive text-xs">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-
-            <button
-              type="submit"
+        {/* New password */}
+        <div>
+          <label
+            htmlFor="password"
+            className="block text-sm leading-5.5 font-medium text-[#0D2630]"
+          >
+            New password
+          </label>
+          <div className="relative mt-1.5">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="new-password"
+              autoFocus
               disabled={isSubmitting}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring mt-2 w-full rounded-md px-4 py-2 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="At least 8 characters"
+              {...register('password')}
+              aria-describedby={errors.password ? 'password-error' : undefined}
+              className={cn(inputClass, 'pr-12')}
+            />
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute top-1/2 right-4 -translate-y-1/2 text-[#8A98A3] transition-colors hover:text-[#0D2630]"
             >
-              {isSubmitting ? 'Updating password…' : 'Set new password'}
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
-          </form>
+          </div>
+          {errors.password && (
+            <p id="password-error" className="mt-1 text-xs text-red-500">
+              {errors.password.message}
+            </p>
+          )}
         </div>
-      )}
 
-      <p className="text-muted-foreground mt-6 text-center text-sm">
-        <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+        {/* Confirm password */}
+        <div className="mt-4">
+          <label
+            htmlFor="confirmPassword"
+            className="block text-sm leading-5.5 font-medium text-[#0D2630]"
+          >
+            Confirm new password
+          </label>
+          <div className="relative mt-1.5">
+            <input
+              id="confirmPassword"
+              type={showConfirm ? 'text' : 'password'}
+              autoComplete="new-password"
+              disabled={isSubmitting}
+              placeholder="Re-enter your new password"
+              {...register('confirmPassword')}
+              aria-describedby={errors.confirmPassword ? 'confirm-error' : undefined}
+              className={cn(inputClass, 'pr-12')}
+            />
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label={showConfirm ? 'Hide password' : 'Show password'}
+              onClick={() => setShowConfirm((v) => !v)}
+              className="absolute top-1/2 right-4 -translate-y-1/2 text-[#8A98A3] transition-colors hover:text-[#0D2630]"
+            >
+              {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
+          {errors.confirmPassword && (
+            <p id="confirm-error" className="mt-1 text-xs text-red-500">
+              {errors.confirmPassword.message}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="mt-6 flex h-13 w-full items-center justify-center gap-2.5 rounded-[12px] text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+          style={{
+            background: 'linear-gradient(135deg, #00B4D8 0%, #0077A8 100%)',
+            boxShadow: '0px 4px 20px 0px rgba(0, 180, 216, 0.30)',
+          }}
+        >
+          {isSubmitting ? (
+            'Updating…'
+          ) : (
+            <>
+              Update password
+              <ArrowRight className="size-4" />
+            </>
+          )}
+        </button>
+      </form>
+
+      <div className="mt-6 text-center">
+        <Link
+          href="/login"
+          className="text-xs leading-4.5 text-[#00B4D8] underline-offset-4 hover:underline"
+        >
           Back to sign in
         </Link>
-      </p>
+      </div>
     </div>
   );
 }
