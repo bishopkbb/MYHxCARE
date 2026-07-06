@@ -17,5 +17,9 @@ export async function generateMetadata({
 export default async function PasswordResetPage({ searchParams }: { searchParams: SearchParams }) {
   const { token } = await searchParams;
 
-  return token ? <PasswordResetSetForm token={token} /> : <PasswordResetRequestForm />;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#F7FAFC] p-4">
+      {token ? <PasswordResetSetForm token={token} /> : <PasswordResetRequestForm />}
+    </div>
+  );
 }

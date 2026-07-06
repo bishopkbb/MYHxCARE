@@ -20,18 +20,26 @@ export const tokenStore = {
 
   getRefreshToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return sessionStorage.getItem(REFRESH_TOKEN_KEY);
+    // Session storage takes precedence; fall back to persistent storage.
+    return sessionStorage.getItem(REFRESH_TOKEN_KEY) ?? localStorage.getItem(REFRESH_TOKEN_KEY);
   },
 
-  setRefreshToken(token: string): void {
+  setRefreshToken(token: string, persistent = false): void {
     if (typeof window === 'undefined') return;
-    sessionStorage.setItem(REFRESH_TOKEN_KEY, token);
+    if (persistent) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, token);
+      sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+    } else {
+      sessionStorage.setItem(REFRESH_TOKEN_KEY, token);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
   },
 
   clearAll(): void {
     _accessToken = null;
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
     }
   },
 };

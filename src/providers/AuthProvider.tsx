@@ -23,7 +23,7 @@ export type AuthContextValue = {
   isSessionExpired: boolean;
   user: User | null;
   claims: JwtClaims | null;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials, rememberMe?: boolean) => Promise<void>;
   logout: () => Promise<void>;
   resumeSession: (password: string) => Promise<void>;
 };
@@ -110,9 +110,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [hydrateUser]);
 
   const login = useCallback(
-    async (credentials: LoginCredentials) => {
+    async (credentials: LoginCredentials, rememberMe = false) => {
       const response = await authService.login(credentials);
-      tokenStore.setRefreshToken(response.refresh_token);
+      tokenStore.setRefreshToken(response.refresh_token, rememberMe);
       await hydrateUser(response.access_token);
     },
     [hydrateUser],
