@@ -648,7 +648,7 @@ export default function DashboardPage() {
                   <div className="shrink-0 pl-1">
                     <button
                       type="button"
-                      className="h-9 rounded-[8px] px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors hover:bg-[#00B4D8] hover:text-white"
+                      className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors hover:bg-[#00B4D8] hover:text-white"
                       style={{ border: '1px solid #00B4D8' }}
                     >
                       Consult
