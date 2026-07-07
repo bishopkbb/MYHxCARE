@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect } from 'react';
 
 import { resolveWorkspace } from '@/types/auth.types';
@@ -25,9 +25,16 @@ function getInitials(name: string): string {
 export interface AppSidebarProps {
   mobileOpen: boolean;
   onMobileClose: () => void;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
+export function AppSidebar({
+  mobileOpen,
+  onMobileClose,
+  collapsed,
+  onToggleCollapse,
+}: AppSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
@@ -69,7 +76,8 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
       <aside
         aria-label="Application sidebar"
         className={cn(
-          'flex w-[242px] shrink-0 flex-col',
+          'flex shrink-0 flex-col overflow-hidden transition-[width] duration-[250ms] ease-in-out',
+          collapsed ? 'w-[72px]' : 'w-[280px]',
           // Mobile: fixed viewport-height overlay drawer with its own scroll
           'fixed inset-y-0 left-0 z-50 h-screen transition-transform duration-[250ms] ease-in-out',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
@@ -80,8 +88,9 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
       >
         {/* ── Header ───────────────────────────────────────────────────── */}
         <div className="shrink-0 p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.078)' }}>
-          {/* Logo + brand */}
-          <div className="flex items-center gap-2.5">
+          {/* Logo + brand + toggle */}
+          <div className={cn('flex items-center gap-2.5', collapsed && 'flex-col')}>
+            {/* Logo */}
             <div
               className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[12px]"
               style={{ background: '#25464D' }}
@@ -94,36 +103,62 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
                 className="size-10 object-contain"
               />
             </div>
-            <div className="min-w-0">
-              <p className="font-display truncate text-base leading-6 font-semibold text-white">
-                MyHxCare HMS
-              </p>
-              <p className="truncate text-xs leading-4.5" style={{ color: '#0098CC' }}>
-                UNIZIK Medical Centre
-              </p>
+
+            {/* Brand text — hidden when collapsed */}
+            {!collapsed && (
+              <div className="min-w-0 flex-1">
+                <p className="font-display truncate text-base leading-6 font-semibold text-white">
+                  MyHxCare HMS
+                </p>
+                <p className="truncate text-xs leading-4.5" style={{ color: '#0098CC' }}>
+                  UNIZIK Medical Centre
+                </p>
+              </div>
+            )}
+
+            {/* Toggle container — own separate container beside the brand name */}
+            <div className={cn('shrink-0', !collapsed && 'ml-auto')}>
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                className="flex size-8 items-center justify-center rounded-[8px] transition-colors hover:bg-white/20"
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                }}
+              >
+                {collapsed ? (
+                  <ChevronRight style={{ width: 16, height: 16, color: '#FFFFFF' }} />
+                ) : (
+                  <ChevronLeft style={{ width: 16, height: 16, color: '#FFFFFF' }} />
+                )}
+              </button>
             </div>
           </div>
 
-          {/* Doctor info card */}
-          <div className="pt-4">
-            <div
-              className="flex items-center gap-2.5 rounded-[12px] p-2.5"
-              style={{ background: 'rgba(255,255,255,0.059)' }}
-            >
+          {/* Doctor info card — hidden when collapsed */}
+          {!collapsed && (
+            <div className="pt-4">
               <div
-                className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                style={{ background: '#00B4D8' }}
+                className="flex items-center gap-2.5 rounded-[12px] p-2.5"
+                style={{ background: 'rgba(255,255,255,0.059)' }}
               >
-                {getInitials(user?.name ?? '')}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm leading-5.5 text-white">{user?.name ?? '—'}</p>
-                <p className="truncate text-xs leading-4.5" style={{ color: '#0098CC' }}>
-                  {user?.role ?? ''}
-                </p>
+                <div
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                  style={{ background: '#00B4D8' }}
+                >
+                  {getInitials(user?.name ?? '')}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm leading-5.5 text-white">{user?.name ?? '—'}</p>
+                  <p className="truncate text-xs leading-4.5" style={{ color: '#0098CC' }}>
+                    {user?.role ?? ''}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* ── Navigation ───────────────────────────────────────────────── */}
@@ -133,7 +168,7 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
         >
           {sections.map((section, idx) => (
             <div key={section.label ?? idx} className="mb-3 px-2">
-              {section.label && (
+              {section.label && !collapsed && (
                 <p
                   className="px-3 text-[11px] leading-4.5 font-normal uppercase"
                   style={{ color: '#0098CC' }}
@@ -149,6 +184,7 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
                       key={`${item.href}-${item.label}`}
                       item={item}
                       active={active}
+                      collapsed={collapsed}
                     />
                   );
                 })}
@@ -166,7 +202,11 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
                 void logout();
               }}
               aria-label="Sign out"
-              className="flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2 transition-colors hover:bg-white/5"
+              title={collapsed ? 'Sign out' : undefined}
+              className={cn(
+                'flex w-full items-center rounded-[8px] transition-colors hover:bg-white/5',
+                collapsed ? 'justify-center px-2 py-2' : 'gap-2.5 px-3 py-2',
+              )}
             >
               <Image
                 src="/icons/signout.png"
@@ -176,9 +216,11 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
                 aria-hidden
                 className="shrink-0"
               />
-              <span className="text-sm leading-5.5" style={{ color: 'rgba(255,255,255,0.38)' }}>
-                Sign Out
-              </span>
+              {!collapsed && (
+                <span className="text-sm leading-5.5" style={{ color: 'rgba(255,255,255,0.38)' }}>
+                  Sign Out
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -190,9 +232,10 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
 interface SidebarNavItemProps {
   item: NavItem;
   active: boolean;
+  collapsed: boolean;
 }
 
-function SidebarNavItem({ item, active }: SidebarNavItemProps) {
+function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
   const Icon = item.icon;
 
   return (
@@ -200,8 +243,10 @@ function SidebarNavItem({ item, active }: SidebarNavItemProps) {
       <Link
         href={item.href}
         aria-current={active ? 'page' : undefined}
+        title={collapsed ? item.label : undefined}
         className={cn(
-          'flex items-center gap-2.5 rounded-[8px] px-3 py-2 transition-colors',
+          'flex items-center rounded-[8px] transition-colors',
+          collapsed ? 'justify-center px-2 py-2' : 'gap-2.5 px-3 py-2',
           active ? 'text-white' : 'text-white/70 hover:bg-white/5 hover:text-white',
         )}
         style={active ? { background: '#1F3D43' } : undefined}
@@ -220,23 +265,26 @@ function SidebarNavItem({ item, active }: SidebarNavItemProps) {
           <Icon className="size-3.5 shrink-0" />
         )}
 
-        {/* Label */}
-        <span className="flex-1 truncate text-sm leading-5.5">{item.label}</span>
+        {/* Label + badge/arrow — hidden when collapsed */}
+        {!collapsed && (
+          <>
+            <span className="flex-1 truncate text-sm leading-5.5">{item.label}</span>
 
-        {/* Badge or arrow */}
-        {item.badge !== undefined ? (
-          <span
-            className="flex size-4 shrink-0 items-center justify-center rounded-full leading-none font-black text-white"
-            style={{ background: '#FB2C36', fontSize: 9 }}
-          >
-            {item.badge}
-          </span>
-        ) : (
-          <ChevronRight
-            className={cn('shrink-0', active ? 'text-white' : 'text-white/30')}
-            style={{ width: 11, height: 11 }}
-            strokeWidth={2}
-          />
+            {item.badge !== undefined ? (
+              <span
+                className="flex size-4 shrink-0 items-center justify-center rounded-full leading-none font-black text-white"
+                style={{ background: '#FB2C36', fontSize: 9 }}
+              >
+                {item.badge}
+              </span>
+            ) : (
+              <ChevronRight
+                className={cn('shrink-0', active ? 'text-white' : 'text-white/30')}
+                style={{ width: 11, height: 11 }}
+                strokeWidth={2}
+              />
+            )}
+          </>
         )}
       </Link>
     </li>

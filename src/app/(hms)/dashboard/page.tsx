@@ -136,7 +136,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Quick Actions ─────────────────────────────────────────────── */}
-      <div className="mt-10">
+      <div className="mt-14">
         <p className="text-sm leading-[22px]" style={{ color: '#4A7080' }}>
           Quick Actions
         </p>
