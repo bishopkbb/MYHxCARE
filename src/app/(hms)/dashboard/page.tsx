@@ -4,6 +4,7 @@ import {
   Activity,
   AlertTriangle,
   ArrowRight,
+  Bell,
   Calendar,
   CheckCircle2,
   ChevronRight,
@@ -11,6 +12,7 @@ import {
   Clock,
   FlaskConical,
   MapPin,
+  MessageSquare,
   Share2,
   Stethoscope,
   Users,
@@ -71,6 +73,17 @@ type QueuePatient = {
   symptoms: string;
   status: QueueStatus;
   waitTime: string | null; // null → "In progress" (patient is already being seen)
+};
+
+type Alert = {
+  id: string;
+  icon: LucideIcon;
+  iconBg: string;
+  iconColor: string;
+  title: string;
+  body: string;
+  time: string;
+  unread: boolean;
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
@@ -234,6 +247,50 @@ const MOCK_QUEUE: QueuePatient[] = [
     symptoms: 'Irregular menstrual cycle and pelvic pain',
     status: 'in-consultation',
     waitTime: null,
+  },
+];
+
+// Mock alerts — will be replaced with real API data in Phase 6
+const MOCK_ALERTS: Alert[] = [
+  {
+    id: 'al1',
+    icon: AlertTriangle,
+    iconBg: 'rgba(239,68,68,0.1)',
+    iconColor: '#EF4444',
+    title: 'Critical Lab Result',
+    body: 'FBC for Adaeze Okonkwo requires immediate attention. WBC: 18.4 — CRITICAL HIGH.',
+    time: '10 min ago',
+    unread: true,
+  },
+  {
+    id: 'al2',
+    icon: FlaskConical,
+    iconBg: 'rgba(34,197,94,0.1)',
+    iconColor: '#22C55E',
+    title: 'New Patient Assigned',
+    body: 'Ngozi Adeyemi assigned to you as emergency. Chief complaint: Chest pain and difficulty breathing.',
+    time: '23 min ago',
+    unread: true,
+  },
+  {
+    id: 'al3',
+    icon: Share2,
+    iconBg: 'rgba(139,92,246,0.1)',
+    iconColor: '#8B5CF6',
+    title: 'Referral Accepted',
+    body: 'Dr. Chidi Anyanwu (Cardiology) accepted your referral for Ibrahim Musa. Appointment: Jul 3, 2026.',
+    time: '1 hr ago',
+    unread: true,
+  },
+  {
+    id: 'al4',
+    icon: MessageSquare,
+    iconBg: 'rgba(99,102,241,0.1)',
+    iconColor: '#6366F1',
+    title: 'Clinical Message — Dr. Okafor',
+    body: 'Regarding Chinwe Okafor: Please review the dermatology consult notes attached to her record.',
+    time: '3 hrs ago',
+    unread: false,
   },
 ];
 
@@ -543,11 +600,16 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* ── Two-panel section: Patient Queue + Right Panel ───────────── */}
-      <div className="mt-6 flex flex-col gap-6 xl:flex-row xl:items-start">
+      {/* ── Two-panel section: Patient Queue + Alerts ────────────────── */}
+      {/*
+        2xl: breakpoint rationale — both panels together are ~1139px.
+        At 2xl (1536px) with an expanded sidebar + page padding the available
+        width is 1160px, just enough to seat them side by side without overflow.
+      */}
+      <div className="mt-6 flex flex-col gap-6 2xl:flex-row 2xl:items-start">
         {/* ── Patient Queue card ────────────────────────────────────────── */}
         <div
-          className="overflow-hidden rounded-[12px] xl:w-[696px] xl:shrink-0"
+          className="overflow-hidden rounded-[12px] 2xl:w-[696px] 2xl:shrink-0"
           style={{
             background: '#FFFFFF',
             border: '1px solid rgba(0,180,216,0.2)',
@@ -660,8 +722,110 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right panel — to be built next */}
-        <div className="xl:flex-1" />
+        {/* ── Alerts card ───────────────────────────────────────────────── */}
+        <div
+          className="overflow-hidden rounded-[12px] 2xl:flex-1"
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid rgba(0,180,216,0.2)',
+            boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.05)',
+          }}
+        >
+          {/* Card header */}
+          <div
+            className="flex items-center justify-between px-4 py-3"
+            style={{ borderBottom: '1px solid rgba(0,100,130,0.12)' }}
+          >
+            {/* Left: bell + title + "N new" badge */}
+            <div className="flex items-center gap-2">
+              <Bell style={{ width: 18, height: 18, color: '#00B4D8' }} />
+              <span
+                className="font-display text-[20px] leading-7 font-semibold"
+                style={{ color: '#00B4D8' }}
+              >
+                Alerts
+              </span>
+              <div
+                className="inline-flex items-center rounded-full border px-2 py-0.5"
+                style={{ background: '#FEF2F2', borderColor: '#FFC9C9' }}
+              >
+                <span className="text-sm leading-5.5 font-medium" style={{ color: '#EF4444' }}>
+                  {MOCK_ALERTS.filter((a) => a.unread).length} new
+                </span>
+              </div>
+            </div>
+
+            {/* Right: View All */}
+            <button
+              type="button"
+              className="flex items-center gap-0.5 transition-opacity hover:opacity-70"
+            >
+              <span className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
+                View All
+              </span>
+              <ChevronRight style={{ width: 12, height: 12, color: '#00B4D8' }} />
+            </button>
+          </div>
+
+          {/* Alert rows */}
+          <div>
+            {MOCK_ALERTS.map((alert, idx) => {
+              const Icon = alert.icon;
+              const isLast = idx === MOCK_ALERTS.length - 1;
+              return (
+                <div
+                  key={alert.id}
+                  className="p-3.5"
+                  style={{
+                    background: 'rgba(239,246,255,0.4)',
+                    borderBottom: isLast ? undefined : '1px solid rgba(0,180,216,0.25)',
+                  }}
+                >
+                  <div className="flex gap-2.5">
+                    {/* Icon box — 2px top offset to align with title baseline */}
+                    <div className="shrink-0 pt-0.5">
+                      <div
+                        className="flex size-7 items-center justify-center rounded-[8px]"
+                        style={{ background: alert.iconBg }}
+                      >
+                        <Icon style={{ width: 18, height: 18, color: alert.iconColor }} />
+                      </div>
+                    </div>
+
+                    {/* Text content */}
+                    <div className="min-w-0 flex-1">
+                      {/* Title + unread dot */}
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="text-sm leading-5.5 font-medium"
+                          style={{ color: '#00B4D8' }}
+                        >
+                          {alert.title}
+                        </span>
+                        {alert.unread && (
+                          <span
+                            className="size-1.5 shrink-0 rounded-full"
+                            style={{ background: '#00B4D8' }}
+                          />
+                        )}
+                      </div>
+
+                      {/* Body — two lines */}
+                      <p className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+                        {alert.body}
+                      </p>
+
+                      {/* Timestamp */}
+                      <p className="text-xs leading-[18px]" style={{ color: '#25464D' }}>
+                        {alert.time}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
