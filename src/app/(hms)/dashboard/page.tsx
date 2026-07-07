@@ -1,6 +1,9 @@
 'use client';
 
-import { Activity, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowRight, ClipboardList, FlaskConical } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 import { useAuth } from '@hooks/useAuth';
 
@@ -30,6 +33,26 @@ function parseName(fullName: string): { title: string; lastName: string } {
   const lastName = parts[parts.length - 1] ?? (hasTitle ? parts[1] : parts[0]) ?? 'Doctor';
   return { title, lastName };
 }
+
+type QuickAction = { label: string; href: string; active?: boolean } & (
+  { iconSrc: string; icon?: never } | { icon: LucideIcon; iconSrc?: never }
+);
+
+const QUICK_ACTIONS: QuickAction[] = [
+  {
+    label: 'Start Consultation',
+    href: '/encounters',
+    iconSrc: '/icons/consultation.png',
+    active: true,
+  },
+  { label: 'Write Clinical Note', href: '/encounters', icon: ClipboardList },
+  {
+    label: 'Create Prescription',
+    href: '/encounters/prescriptions',
+    iconSrc: '/icons/create%20prescription.png',
+  },
+  { label: 'Request Laboratory Test', href: '/lab/orders', icon: FlaskConical },
+];
 
 // Mock emergency — will be replaced with real API data in Phase 6
 const MOCK_EMERGENCY = {
@@ -111,6 +134,62 @@ export default function DashboardPage() {
           </button>
         </div>
       )}
+
+      {/* ── Quick Actions ─────────────────────────────────────────────── */}
+      <div className="mt-10">
+        <p className="text-sm leading-[22px]" style={{ color: '#4A7080' }}>
+          Quick Actions
+        </p>
+
+        <div className="mt-[7px] grid grid-cols-4 gap-9">
+          {QUICK_ACTIONS.map((action) => {
+            const Icon = 'icon' in action ? action.icon : null;
+            return (
+              <Link
+                key={action.label}
+                href={action.href}
+                className="flex items-center gap-3 rounded-[12px] p-[14px] transition-opacity hover:opacity-90"
+                style={
+                  action.active
+                    ? { background: '#00B4D8', border: '1px solid rgba(0,0,0,0.1)' }
+                    : { background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }
+                }
+              >
+                <div
+                  className="flex size-9 shrink-0 items-center justify-center rounded-[12px]"
+                  style={{ background: action.active ? 'rgba(255,255,255,0.2)' : '#E2EDF1' }}
+                >
+                  {'iconSrc' in action ? (
+                    <Image
+                      src={action.iconSrc}
+                      alt=""
+                      width={16}
+                      height={16}
+                      aria-hidden
+                      className="shrink-0"
+                      style={action.active ? { filter: 'brightness(0) invert(1)' } : undefined}
+                    />
+                  ) : Icon ? (
+                    <Icon
+                      style={{
+                        width: 16,
+                        height: 16,
+                        color: action.active ? '#FFFFFF' : '#00B4D8',
+                      }}
+                    />
+                  ) : null}
+                </div>
+                <span
+                  className="text-sm leading-[22px] font-medium"
+                  style={{ color: action.active ? '#FFFFFF' : '#00B4D8' }}
+                >
+                  {action.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
