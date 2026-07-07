@@ -116,33 +116,6 @@ export function AppSidebar({
             </div>
           </div>
 
-          {/* Collapse/Expand toggle — desktop only, own row below brand text */}
-          <div
-            className={cn('hidden pt-2.5 lg:flex', collapsed ? 'justify-center' : 'justify-end')}
-          >
-            <button
-              type="button"
-              onClick={() => onCollapsedChange(!collapsed)}
-              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-[#0098CC]/20"
-              style={{ background: 'rgba(0, 152, 204, 0.07)', border: '0.92px solid #0098CC' }}
-            >
-              {collapsed ? (
-                <ChevronRight
-                  className="text-[#0098CC]"
-                  style={{ width: 16, height: 16 }}
-                  strokeWidth={2}
-                />
-              ) : (
-                <ChevronLeft
-                  className="text-[#0098CC]"
-                  style={{ width: 16, height: 16 }}
-                  strokeWidth={2}
-                />
-              )}
-            </button>
-          </div>
-
           {/* Doctor info card — full, hidden on desktop when collapsed */}
           <div className={cn('pt-4', collapsed && 'lg:hidden')}>
             <div
@@ -172,6 +145,33 @@ export function AppSidebar({
             >
               {getInitials(user?.name ?? '')}
             </div>
+          </div>
+
+          {/* Collapse/Expand toggle — desktop only, below doctor container */}
+          <div
+            className={cn('hidden pt-2.5 lg:flex', collapsed ? 'justify-center' : 'justify-end')}
+          >
+            <button
+              type="button"
+              onClick={() => onCollapsedChange(!collapsed)}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-[#0098CC]/20"
+              style={{ background: 'rgba(0, 152, 204, 0.07)', border: '0.92px solid #0098CC' }}
+            >
+              {collapsed ? (
+                <ChevronRight
+                  className="text-[#0098CC]"
+                  style={{ width: 16, height: 16 }}
+                  strokeWidth={2}
+                />
+              ) : (
+                <ChevronLeft
+                  className="text-[#0098CC]"
+                  style={{ width: 16, height: 16 }}
+                  strokeWidth={2}
+                />
+              )}
+            </button>
           </div>
         </div>
 
