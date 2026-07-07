@@ -299,7 +299,7 @@ export default function DashboardPage() {
   const { title, lastName } = parseName(user?.name ?? '');
 
   return (
-    <div className="px-12 pt-10">
+    <div className="px-12 pt-10 pb-16">
       {/* ── Greeting row ─────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
