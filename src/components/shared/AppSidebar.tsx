@@ -263,9 +263,20 @@ function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
             height={18}
             aria-hidden
             className="shrink-0"
+            style={
+              active
+                ? {
+                    filter:
+                      'brightness(0) saturate(100%) invert(39%) sepia(96%) saturate(780%) hue-rotate(163deg) brightness(102%)',
+                  }
+                : undefined
+            }
           />
         ) : (
-          <Icon className="size-[18px] shrink-0" />
+          <Icon
+            className="size-[18px] shrink-0"
+            style={active ? { color: '#0098CC' } : undefined}
+          />
         )}
 
         {/* Label + badge/arrow — hidden when collapsed */}
