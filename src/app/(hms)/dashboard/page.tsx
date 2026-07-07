@@ -216,12 +216,16 @@ export default function DashboardPage() {
         className="mt-8 overflow-hidden rounded-[12px]"
         style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
       >
-        {/* Content row — items-stretch so border-right separators span full height */}
-        <div className="flex items-stretch">
+        {/*
+          Mobile: flex-col — sections stack vertically, border-b between each.
+          xl+:    flex-row  — single horizontal strip, border-r between each.
+          items-stretch on xl keeps border-r dividers spanning the full row height.
+        */}
+        <div className="flex flex-col xl:flex-row xl:items-stretch">
           {/* Current shift: icon + two-line label */}
           <div
-            className="flex shrink-0 items-center gap-1.5 px-4 py-3"
-            style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
+            className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
+            style={{ borderColor: 'rgba(0,100,130,0.12)' }}
           >
             <div
               className="flex size-9 shrink-0 items-center justify-center rounded-[12px]"
@@ -241,8 +245,8 @@ export default function DashboardPage() {
 
           {/* Location */}
           <div
-            className="flex shrink-0 items-center gap-1.5 px-4"
-            style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
+            className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
+            style={{ borderColor: 'rgba(0,100,130,0.12)' }}
           >
             <MapPin style={{ width: 18, height: 18, color: '#25464D' }} />
             <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
@@ -252,8 +256,8 @@ export default function DashboardPage() {
 
           {/* Acknowledgement status */}
           <div
-            className="flex shrink-0 items-center gap-1.5 px-4"
-            style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
+            className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
+            style={{ borderColor: 'rgba(0,100,130,0.12)' }}
           >
             <CheckCircle2 style={{ width: 18, height: 18, color: '#22C55E' }} />
             <span className="text-sm leading-5.5 font-medium" style={{ color: '#22C55E' }}>
@@ -263,8 +267,8 @@ export default function DashboardPage() {
 
           {/* Next shift */}
           <div
-            className="flex shrink-0 items-center gap-1.5 px-4"
-            style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
+            className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
+            style={{ borderColor: 'rgba(0,100,130,0.12)' }}
           >
             <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
               Next shift:
@@ -275,7 +279,10 @@ export default function DashboardPage() {
           </div>
 
           {/* On-call pending: icon + two-line label */}
-          <div className="flex shrink-0 items-center gap-1.5 px-4 py-3">
+          <div
+            className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-b-0"
+            style={{ borderColor: 'rgba(0,100,130,0.12)' }}
+          >
             <AlertTriangle style={{ width: 18, height: 18, color: '#F59E0B' }} />
             <div>
               <p className="text-sm leading-5.5 font-medium uppercase" style={{ color: '#F59E0B' }}>
@@ -287,8 +294,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* View My Schedule — pinned to the right */}
-          <div className="ml-auto flex shrink-0 items-center px-4">
+          {/* View My Schedule — full width on mobile, pinned right on xl */}
+          <div className="flex shrink-0 items-center px-4 py-3 xl:ml-auto">
             <button
               type="button"
               className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-sm leading-5.5 font-medium transition-opacity hover:opacity-70"
