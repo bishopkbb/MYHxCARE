@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect } from 'react';
 
 import { resolveWorkspace } from '@/types/auth.types';
@@ -25,9 +25,16 @@ function getInitials(name: string): string {
 export interface AppSidebarProps {
   mobileOpen: boolean;
   onMobileClose: () => void;
+  collapsed: boolean;
+  onCollapsedChange: (value: boolean) => void;
 }
 
-export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
+export function AppSidebar({
+  mobileOpen,
+  onMobileClose,
+  collapsed,
+  onCollapsedChange,
+}: AppSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
@@ -70,6 +77,9 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
         aria-label="Application sidebar"
         className={cn(
           'flex w-[242px] shrink-0 flex-col',
+          // Width transition on desktop only
+          'lg:transition-[width] lg:duration-200 lg:ease-in-out',
+          collapsed && 'lg:w-[72px]',
           // Mobile: fixed viewport-height overlay drawer with its own scroll
           'fixed inset-y-0 left-0 z-50 h-screen transition-transform duration-[250ms] ease-in-out',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
@@ -80,8 +90,8 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
       >
         {/* ── Header ───────────────────────────────────────────────────── */}
         <div className="shrink-0 p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.078)' }}>
-          {/* Logo + brand name */}
-          <div className="flex items-center gap-2.5">
+          {/* Logo + brand row */}
+          <div className={cn('flex items-center gap-2.5', collapsed && 'lg:justify-center')}>
             <div
               className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[12px]"
               style={{ background: '#25464D' }}
@@ -94,7 +104,9 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
                 className="size-10 object-contain"
               />
             </div>
-            <div className="min-w-0">
+
+            {/* Brand text — hidden on desktop when collapsed */}
+            <div className={cn('min-w-0 flex-1', collapsed && 'lg:hidden')}>
               <p className="font-display truncate text-base leading-6 font-semibold text-white">
                 MyHxCare HMS
               </p>
@@ -102,10 +114,35 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
                 UNIZIK Medical Centre
               </p>
             </div>
+
+            {/* Collapse button — desktop only, shown when expanded */}
+            <button
+              type="button"
+              onClick={() => onCollapsedChange(true)}
+              aria-label="Collapse sidebar"
+              className={cn(
+                'hidden size-7 shrink-0 items-center justify-center rounded-md text-white/50 transition-colors hover:bg-white/5 hover:text-white lg:flex',
+                collapsed && 'lg:hidden',
+              )}
+            >
+              <ChevronLeft style={{ width: 14, height: 14 }} />
+            </button>
           </div>
 
-          {/* Doctor info card */}
-          <div className="pt-4">
+          {/* Expand button — desktop only, shown when collapsed */}
+          <div className={cn('mt-2 hidden justify-center', collapsed && 'lg:flex')}>
+            <button
+              type="button"
+              onClick={() => onCollapsedChange(false)}
+              aria-label="Expand sidebar"
+              className="flex size-7 items-center justify-center rounded-md text-white/50 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              <ChevronRight style={{ width: 14, height: 14 }} />
+            </button>
+          </div>
+
+          {/* Doctor info card — full, hidden on desktop when collapsed */}
+          <div className={cn('pt-4', collapsed && 'lg:hidden')}>
             <div
               className="flex items-center gap-2.5 rounded-[12px] p-2.5"
               style={{ background: 'rgba(255,255,255,0.059)' }}
@@ -124,6 +161,16 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
               </div>
             </div>
           </div>
+
+          {/* Avatar only — desktop only, shown when collapsed */}
+          <div className={cn('hidden justify-center pt-3', collapsed && 'lg:flex')}>
+            <div
+              className="flex size-8 items-center justify-center rounded-full text-xs font-semibold text-white"
+              style={{ background: '#00B4D8' }}
+            >
+              {getInitials(user?.name ?? '')}
+            </div>
+          </div>
         </div>
 
         {/* ── Navigation ───────────────────────────────────────────────── */}
@@ -132,16 +179,19 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
           className="flex-1 overflow-x-hidden overflow-y-auto py-3 lg:overflow-y-visible"
         >
           {sections.map((section, idx) => (
-            <div key={section.label ?? idx} className="mb-3 px-2">
+            <div key={section.label ?? idx} className={cn('mb-3 px-2', collapsed && 'lg:mb-1')}>
               {section.label && (
                 <p
-                  className="px-3 text-[11px] leading-4.5 font-normal uppercase"
+                  className={cn(
+                    'px-3 text-[11px] leading-4.5 font-normal uppercase',
+                    collapsed && 'lg:hidden',
+                  )}
                   style={{ color: '#0098CC' }}
                 >
                   {section.label}
                 </p>
               )}
-              <ul role="list" className="space-y-0.5 pt-1.5">
+              <ul role="list" className={cn('space-y-0.5 pt-1.5', collapsed && 'lg:pt-0')}>
                 {section.items.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(item.href + '/');
                   return (
@@ -149,6 +199,7 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
                       key={`${item.href}-${item.label}`}
                       item={item}
                       active={active}
+                      collapsed={collapsed}
                     />
                   );
                 })}
@@ -159,14 +210,17 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
 
         {/* ── Sign Out ─────────────────────────────────────────────────── */}
         <div className="shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.071)' }}>
-          <div className="px-2 pt-[9px] pb-2">
+          <div className={cn('px-2 pt-[9px] pb-2', collapsed && 'lg:px-0')}>
             <button
               type="button"
               onClick={() => {
                 void logout();
               }}
               aria-label="Sign out"
-              className="flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2 transition-colors hover:bg-white/5"
+              className={cn(
+                'flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2 transition-colors hover:bg-white/5',
+                collapsed && 'lg:justify-center lg:px-0',
+              )}
             >
               <Image
                 src="/icons/signout.png"
@@ -176,7 +230,10 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
                 aria-hidden
                 className="shrink-0"
               />
-              <span className="text-sm leading-5.5" style={{ color: 'rgba(255,255,255,0.38)' }}>
+              <span
+                className={cn('text-sm leading-5.5', collapsed && 'lg:hidden')}
+                style={{ color: 'rgba(255,255,255,0.38)' }}
+              >
                 Sign Out
               </span>
             </button>
@@ -190,9 +247,10 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
 interface SidebarNavItemProps {
   item: NavItem;
   active: boolean;
+  collapsed: boolean;
 }
 
-function SidebarNavItem({ item, active }: SidebarNavItemProps) {
+function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
   const Icon = item.icon;
 
   return (
@@ -200,40 +258,55 @@ function SidebarNavItem({ item, active }: SidebarNavItemProps) {
       <Link
         href={item.href}
         aria-current={active ? 'page' : undefined}
+        title={collapsed ? item.label : undefined}
         className={cn(
           'flex items-center gap-2.5 rounded-[8px] px-3 py-2 transition-colors',
+          collapsed && 'lg:justify-center lg:gap-0 lg:px-2',
           active ? 'text-white' : 'text-white/70 hover:bg-white/5 hover:text-white',
         )}
         style={active ? { background: '#1F3D43' } : undefined}
       >
-        {/* Icon */}
-        {item.iconSrc ? (
-          <Image
-            src={item.iconSrc}
-            alt=""
-            width={14}
-            height={14}
-            aria-hidden
-            className="shrink-0"
-          />
-        ) : (
-          <Icon className="size-3.5 shrink-0" />
-        )}
+        {/* Icon with dot badge indicator in collapsed mode */}
+        <div className="relative shrink-0">
+          {item.iconSrc ? (
+            <Image src={item.iconSrc} alt="" width={14} height={14} aria-hidden />
+          ) : (
+            <Icon className="size-3.5" />
+          )}
+          {item.badge !== undefined && (
+            <span
+              className={cn(
+                'absolute -top-0.5 -right-0.5 hidden size-1.5 rounded-full',
+                collapsed && 'lg:block',
+              )}
+              style={{ background: '#FB2C36' }}
+            />
+          )}
+        </div>
 
-        {/* Label */}
-        <span className="flex-1 truncate text-sm leading-5.5">{item.label}</span>
+        {/* Label — hidden on desktop when collapsed */}
+        <span className={cn('flex-1 truncate text-sm leading-5.5', collapsed && 'lg:hidden')}>
+          {item.label}
+        </span>
 
-        {/* Badge or arrow */}
+        {/* Badge or arrow — hidden on desktop when collapsed */}
         {item.badge !== undefined ? (
           <span
-            className="flex size-4 shrink-0 items-center justify-center rounded-full font-black text-white"
-            style={{ background: '#FB2C36', fontSize: 9, lineHeight: '13.5px' }}
+            className={cn(
+              'flex size-4 shrink-0 items-center justify-center rounded-full leading-none font-black text-white',
+              collapsed && 'lg:hidden',
+            )}
+            style={{ background: '#FB2C36', fontSize: 9 }}
           >
             {item.badge}
           </span>
         ) : (
           <ChevronRight
-            className={cn('shrink-0', active ? 'text-white' : 'text-white/30')}
+            className={cn(
+              'shrink-0',
+              active ? 'text-white' : 'text-white/30',
+              collapsed && 'lg:hidden',
+            )}
             style={{ width: 11, height: 11 }}
             strokeWidth={2}
           />
