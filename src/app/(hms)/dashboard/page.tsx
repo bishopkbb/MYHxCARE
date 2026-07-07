@@ -219,7 +219,10 @@ export default function DashboardPage() {
         {/* Content row — items-stretch so border-right separators span full height */}
         <div className="flex items-stretch">
           {/* Current shift: icon + two-line label */}
-          <div className="flex items-center gap-3 px-4 py-3">
+          <div
+            className="flex shrink-0 items-center gap-1.5 px-4 py-3"
+            style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
+          >
             <div
               className="flex size-9 shrink-0 items-center justify-center rounded-[12px]"
               style={{ background: '#FFFBEB' }}
@@ -238,10 +241,10 @@ export default function DashboardPage() {
 
           {/* Location */}
           <div
-            className="flex items-center gap-1.5 px-4"
+            className="flex shrink-0 items-center gap-1.5 px-4"
             style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
           >
-            <MapPin style={{ width: 14, height: 14, color: '#25464D' }} />
+            <MapPin style={{ width: 18, height: 18, color: '#25464D' }} />
             <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
               {MOCK_SHIFT.location}
             </span>
@@ -249,10 +252,10 @@ export default function DashboardPage() {
 
           {/* Acknowledgement status */}
           <div
-            className="flex items-center gap-1.5 px-4"
+            className="flex shrink-0 items-center gap-1.5 px-4"
             style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
           >
-            <CheckCircle2 style={{ width: 14, height: 14, color: '#22C55E' }} />
+            <CheckCircle2 style={{ width: 18, height: 18, color: '#22C55E' }} />
             <span className="text-sm leading-5.5 font-medium" style={{ color: '#22C55E' }}>
               Acknowledged
             </span>
@@ -260,7 +263,7 @@ export default function DashboardPage() {
 
           {/* Next shift */}
           <div
-            className="flex items-center gap-1.5 px-4"
+            className="flex shrink-0 items-center gap-1.5 px-4"
             style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
           >
             <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
@@ -272,8 +275,8 @@ export default function DashboardPage() {
           </div>
 
           {/* On-call pending: icon + two-line label */}
-          <div className="flex items-center gap-1.5 px-4 py-3">
-            <AlertTriangle style={{ width: 14, height: 14, color: '#F59E0B' }} />
+          <div className="flex shrink-0 items-center gap-1.5 px-4 py-3">
+            <AlertTriangle style={{ width: 18, height: 18, color: '#F59E0B' }} />
             <div>
               <p className="text-sm leading-5.5 font-medium uppercase" style={{ color: '#F59E0B' }}>
                 On-Call Pending
@@ -285,7 +288,7 @@ export default function DashboardPage() {
           </div>
 
           {/* View My Schedule — pinned to the right */}
-          <div className="ml-auto flex items-center px-4">
+          <div className="ml-auto flex shrink-0 items-center px-4">
             <button
               type="button"
               className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-sm leading-5.5 font-medium transition-opacity hover:opacity-70"
@@ -295,7 +298,7 @@ export default function DashboardPage() {
                 color: '#25464D',
               }}
             >
-              <Calendar style={{ width: 14, height: 14 }} />
+              <Calendar style={{ width: 18, height: 18 }} />
               View My Schedule
             </button>
           </div>
