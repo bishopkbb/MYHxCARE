@@ -161,7 +161,7 @@ export default function DashboardPage() {
           Quick Actions
         </p>
 
-        <div className="mt-1.75 grid grid-cols-4 gap-4">
+        <div className="mt-1.75 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {QUICK_ACTIONS.map((action) => {
             const Icon = 'icon' in action ? action.icon : null;
             return (
