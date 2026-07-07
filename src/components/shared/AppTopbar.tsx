@@ -1,94 +1,51 @@
 'use client';
 
-import { Bell, Menu } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Bell, Clock, Menu, RefreshCw, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '@hooks/useAuth';
-import { cn } from '@lib/utils';
 
-// Maps URL path segments to human-readable labels.
-// Dynamic segments (IDs like pat_001, enc_abc) are not in this map and are
-// silently skipped — the breadcrumb shows only named structural segments.
-const SEGMENT_LABELS: Record<string, string> = {
-  dashboard: 'Dashboard',
-  patients: 'Patients',
-  folder: 'Medical Folder',
-  timeline: 'Timeline',
-  encounters: 'OPD Queue',
-  notes: 'Clinical Notes',
-  prescriptions: 'Prescriptions',
-  orders: 'Lab Orders',
-  pharmacy: 'Pharmacy',
-  dispense: 'Dispensing Queue',
-  inventory: 'Drug Inventory',
-  transfers: 'Transfers',
-  lab: 'Laboratory',
-  samples: 'Sample Tracking',
-  results: 'Result Entry',
-  'blood-bank': 'Blood Bank',
-  billing: 'Finance',
-  charges: 'Billing & Charges',
-  payments: 'Payments',
-  emergency: 'Emergency',
-  wards: 'Wards',
-  beds: 'Bed Management',
-  occupancy: 'Occupancy',
-  'duty-roster': 'Duty Roster',
-  roster: 'Duty Roster Calendar',
-  templates: 'Shift Templates',
-  assignments: 'Staff Assignment',
-  'on-call': 'On-Call Schedule',
-  analytics: 'Workforce Analytics',
-  admin: 'Administration',
-  notifications: 'Notifications',
-  collaboration: 'Collaboration',
-  settings: 'Settings',
-  sessions: 'Active Sessions',
-  devices: 'Trusted Devices',
-};
-
-type Breadcrumb = { label: string; href: string };
-
-function buildBreadcrumbs(pathname: string): Breadcrumb[] {
-  const segments = pathname.split('/').filter(Boolean);
-  const crumbs: Breadcrumb[] = [];
-  let path = '';
-
-  for (const segment of segments) {
-    path += `/${segment}`;
-    const label = SEGMENT_LABELS[segment];
-    if (label) crumbs.push({ label, href: path });
-  }
-
-  return crumbs;
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map((p) => p[0] ?? '')
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
 }
 
-interface NotificationBellProps {
-  unreadCount?: number;
+function formatDateTime(date: Date): string {
+  const datePart = date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const timePart = date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+  return `${datePart} — ${timePart}`;
 }
 
-function NotificationBell({ unreadCount = 0 }: NotificationBellProps) {
+function LiveClock() {
+  const [label, setLabel] = useState(() => formatDateTime(new Date()));
+
+  useEffect(() => {
+    const tick = () => setLabel(formatDateTime(new Date()));
+    const id = setInterval(tick, 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
-    <Link
-      href="/notifications"
-      aria-label={unreadCount > 0 ? `Notifications — ${unreadCount} unread` : 'Notifications'}
-      className={cn(
-        'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-        'focus-visible:ring-ring relative flex size-8 items-center justify-center',
-        'rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none',
-      )}
-    >
-      <Bell className="size-4" />
-      {unreadCount > 0 && (
-        <span
-          aria-hidden="true"
-          className="bg-destructive text-destructive-foreground absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full text-[10px] leading-none font-semibold"
-        >
-          {unreadCount > 99 ? '99+' : unreadCount}
-        </span>
-      )}
-    </Link>
+    <div className="flex items-center gap-1.5" suppressHydrationWarning>
+      <Clock className="shrink-0 text-[#25464D]" style={{ width: 12, height: 12 }} />
+      <span className="text-sm leading-[22px] text-[#25464D]" suppressHydrationWarning>
+        {label}
+      </span>
+    </div>
   );
 }
 
@@ -97,69 +54,81 @@ interface AppTopbarProps {
 }
 
 export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
-  const pathname = usePathname();
   const { user } = useAuth();
-  const breadcrumbs = buildBreadcrumbs(pathname);
 
   return (
-    <header className="bg-background flex h-14 shrink-0 items-center gap-3 border-b px-4">
-      {/* Hamburger — mobile only, opens the sidebar drawer */}
+    <header
+      className="flex h-[72px] shrink-0 items-center bg-white"
+      style={{ borderBottom: '1px solid rgba(37, 70, 77, 0.08)' }}
+    >
+      {/* Hamburger — mobile only */}
       <button
         type="button"
         onClick={onMenuToggle}
-        className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex size-8 shrink-0 items-center justify-center rounded-md transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none lg:hidden"
         aria-label="Open navigation menu"
+        className="ml-4 flex size-8 shrink-0 items-center justify-center rounded-md text-[#25464D]/60 transition-colors hover:bg-[#25464D]/5 lg:hidden"
       >
         <Menu className="size-5" />
       </button>
 
-      {/* Breadcrumb / page title */}
-      <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
-        {breadcrumbs.length <= 1 ? (
-          <h1 className="text-foreground truncate text-sm font-semibold">
-            {breadcrumbs[0]?.label ?? 'MYHxCare HMS'}
-          </h1>
-        ) : (
-          <ol className="flex items-center gap-1.5 text-sm">
-            {breadcrumbs.map((crumb, idx) => {
-              const isLast = idx === breadcrumbs.length - 1;
-              return (
-                <li key={crumb.href} className="flex items-center gap-1.5">
-                  {idx > 0 && (
-                    <span className="text-muted-foreground select-none" aria-hidden="true">
-                      /
-                    </span>
-                  )}
-                  {isLast ? (
-                    <span
-                      aria-current="page"
-                      className="text-foreground max-w-[200px] truncate font-semibold"
-                    >
-                      {crumb.label}
-                    </span>
-                  ) : (
-                    <Link
-                      href={crumb.href}
-                      className="text-muted-foreground hover:text-foreground max-w-[150px] truncate transition-colors"
-                    >
-                      {crumb.label}
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        )}
-      </nav>
+      {/* Search bar — 48px from topbar left edge, desktop only */}
+      <div className="ml-12 hidden lg:block">
+        <div className="relative">
+          <Search
+            className="absolute top-1/2 left-3 -translate-y-1/2 text-[#25464D]/40"
+            style={{ width: 12, height: 12 }}
+          />
+          <input
+            type="search"
+            placeholder="Search patients, records, results…"
+            aria-label="Search patients, records and results"
+            className="h-9 w-96 rounded-[10px] pr-4 pl-9 text-xs leading-[18px] text-[#25464D] outline-none placeholder:text-[#25464D]/40 focus:ring-2 focus:ring-[#0098CC]/30"
+            style={{ background: '#E6F8FD' }}
+          />
+        </div>
+      </div>
 
-      {/* Right side: department context + notification bell */}
-      <div className="flex shrink-0 items-center gap-3">
-        {user?.department && (
-          <span className="text-muted-foreground hidden text-xs sm:block">{user.department}</span>
-        )}
+      {/* Spacer */}
+      <div className="flex-1" />
 
-        {/* unreadCount wired to real value when notifications module is built */}
-        <NotificationBell unreadCount={0} />
+      {/* Right group */}
+      <div className="mr-16 flex items-center gap-5">
+        {/* Live date + time */}
+        <LiveClock />
+
+        {/* Separator */}
+        <div className="h-[14px] w-px bg-[#25464D]/15" />
+
+        {/* Refresh */}
+        <button
+          type="button"
+          aria-label="Refresh"
+          className="flex items-center justify-center text-[#25464D]/50 transition-colors hover:text-[#25464D]"
+        >
+          <RefreshCw style={{ width: 14, height: 14 }} />
+        </button>
+
+        {/* Notification bell + red dot */}
+        <button
+          type="button"
+          aria-label="Notifications"
+          className="relative flex items-center justify-center text-[#25464D]/50 transition-colors hover:text-[#25464D]"
+        >
+          <Bell style={{ width: 14, height: 14 }} />
+          <span
+            aria-hidden="true"
+            className="absolute -top-1 -right-1 size-2 rounded-full"
+            style={{ background: '#FB2C36' }}
+          />
+        </button>
+
+        {/* User avatar */}
+        <div
+          className="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+          style={{ background: '#00B4D8' }}
+        >
+          {getInitials(user?.name ?? '')}
+        </div>
       </div>
     </header>
   );
