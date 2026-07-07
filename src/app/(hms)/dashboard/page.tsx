@@ -88,7 +88,7 @@ export default function DashboardPage() {
         {/* 1 Emergency Active badge */}
         {MOCK_EMERGENCY.count > 0 && (
           <div
-            className="flex items-center gap-1.5 rounded-[8px] px-3 pt-1.5 pb-[5px]"
+            className="flex items-center gap-1.5 rounded-[8px] px-3 pt-1.5 pb-1.25"
             style={{ background: '#FEF2F2', border: '1px solid #EF4444' }}
           >
             <Activity className="shrink-0" style={{ width: 12, height: 12, color: '#EF4444' }} />
@@ -141,7 +141,7 @@ export default function DashboardPage() {
           Quick Actions
         </p>
 
-        <div className="mt-[7px] grid grid-cols-4 gap-4">
+        <div className="mt-1.75 grid grid-cols-4 gap-4">
           {QUICK_ACTIONS.map((action) => {
             const Icon = 'icon' in action ? action.icon : null;
             return (
