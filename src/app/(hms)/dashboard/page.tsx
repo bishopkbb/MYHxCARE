@@ -77,7 +77,7 @@ export default function DashboardPage() {
             {getGreeting()}, {title} {lastName}
           </h1>
           <p
-            className="mt-1 text-sm leading-5"
+            className="mt-1 text-sm leading-[22px]"
             style={{ color: '#25464D' }}
             suppressHydrationWarning
           >
@@ -88,11 +88,11 @@ export default function DashboardPage() {
         {/* 1 Emergency Active badge */}
         {MOCK_EMERGENCY.count > 0 && (
           <div
-            className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5"
+            className="flex items-center gap-1.5 rounded-[8px] px-3 pt-[6px] pb-[5px]"
             style={{ background: '#FEF2F2', border: '1px solid #EF4444' }}
           >
             <Activity className="shrink-0" style={{ width: 12, height: 12, color: '#EF4444' }} />
-            <span className="text-xs leading-4 font-semibold" style={{ color: '#EF4444' }}>
+            <span className="text-sm leading-[22px] font-medium" style={{ color: '#EF4444' }}>
               {MOCK_EMERGENCY.count} Emergency Active
             </span>
           </div>
@@ -110,15 +110,15 @@ export default function DashboardPage() {
             className="flex size-9 shrink-0 items-center justify-center rounded-[12px]"
             style={{ background: '#FFE2E2' }}
           >
-            <AlertTriangle style={{ width: 16, height: 16, color: '#EF4444' }} />
+            <AlertTriangle style={{ width: 18, height: 18, color: '#EF4444' }} />
           </div>
 
           {/* Text */}
           <div className="min-w-0 flex-1">
-            <p className="text-sm leading-5 font-bold" style={{ color: '#EF4444' }}>
+            <p className="text-base leading-6 font-semibold" style={{ color: '#EF4444' }}>
               Emergency Patient Requires Immediate Attention
             </p>
-            <p className="text-xs leading-4" style={{ color: '#EF4444' }}>
+            <p className="text-sm leading-[22px]" style={{ color: '#EF4444' }}>
               {MOCK_EMERGENCY.patientName} — {MOCK_EMERGENCY.complaint}
             </p>
           </div>
@@ -126,11 +126,11 @@ export default function DashboardPage() {
           {/* Open Record button */}
           <button
             type="button"
-            className="flex shrink-0 items-center gap-1.5 rounded-[12px] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            className="flex shrink-0 items-center gap-1.5 rounded-[12px] px-4 py-2 text-sm leading-[22px] font-medium text-white transition-opacity hover:opacity-90"
             style={{ background: '#EF4444' }}
           >
             Open Record
-            <ArrowRight style={{ width: 14, height: 14 }} />
+            <ArrowRight style={{ width: 12, height: 12 }} />
           </button>
         </div>
       )}
