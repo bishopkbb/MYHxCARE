@@ -13,6 +13,7 @@ import {
   FlaskConical,
   MapPin,
   MessageSquare,
+  RefreshCcw,
   Share2,
   Stethoscope,
   Users,
@@ -84,6 +85,14 @@ type Alert = {
   body: string;
   time: string;
   unread: boolean;
+};
+
+type RecentActivity = {
+  id: string;
+  header: string;
+  patient: string;
+  time: string;
+  dotColor: string;
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
@@ -294,12 +303,58 @@ const MOCK_ALERTS: Alert[] = [
   },
 ];
 
+// Mock recent activities — will be replaced with real API data in Phase 6
+const MOCK_ACTIVITIES: RecentActivity[] = [
+  {
+    id: 'ra1',
+    header: 'Emergency patient admitted',
+    patient: 'Ngozi Adeyemi',
+    time: '10:38 AM',
+    dotColor: '#EF4444',
+  },
+  {
+    id: 'ra2',
+    header: 'Consultation completed',
+    patient: 'Babatunde Alade',
+    time: '10:22 AM',
+    dotColor: '#22C55E',
+  },
+  {
+    id: 'ra3',
+    header: 'Critical lab result received',
+    patient: 'Adaeze Okonkwo — FBC',
+    time: '10:05 AM',
+    dotColor: '#EF4444',
+  },
+  {
+    id: 'ra4',
+    header: 'Prescription sent to pharmacy',
+    patient: 'Babatunde Alade',
+    time: '09:52 AM',
+    dotColor: '#F59E0B',
+  },
+  {
+    id: 'ra5',
+    header: 'Referral sent to Cardiology',
+    patient: 'Ibrahim Musa',
+    time: '09:30 AM',
+    dotColor: '#8B5CF6',
+  },
+  {
+    id: 'ra6',
+    header: 'Consultation started',
+    patient: 'Ibrahim Musa',
+    time: '09:15 AM',
+    dotColor: '#22C55E',
+  },
+];
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const { title, lastName } = parseName(user?.name ?? '');
 
   return (
-    <div className="px-12 pt-10 pb-16">
+    <div className="px-12 pt-10 pb-24">
       {/* ── Greeting row ─────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
@@ -825,6 +880,51 @@ export default function DashboardPage() {
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* ── Recent Clinical Activities ────────────────────────────────── */}
+      <div className="mt-8">
+        {/* Section label */}
+        <div className="flex items-center gap-2">
+          <RefreshCcw style={{ width: 15, height: 15, color: '#00B4D8' }} />
+          <span
+            className="font-display text-base leading-6 font-semibold"
+            style={{ color: '#00B4D8' }}
+          >
+            Recent Clinical Activities
+          </span>
+        </div>
+
+        {/* 3-column activity grid */}
+        <div className="mt-3 grid grid-cols-1 gap-9 sm:grid-cols-2 xl:grid-cols-3">
+          {MOCK_ACTIVITIES.map((activity) => (
+            <div
+              key={activity.id}
+              className="flex gap-2.5 p-3.5"
+              style={{ background: '#E6F8FD', borderRight: '1px solid #00B4D8' }}
+            >
+              {/* Coloured status dot — 8×8 inside a 20×20 alignment container */}
+              <div className="shrink-0 pt-0.5">
+                <div className="flex size-5 items-center justify-center rounded-full">
+                  <span className="size-2 rounded-full" style={{ background: activity.dotColor }} />
+                </div>
+              </div>
+
+              {/* Text stack */}
+              <div>
+                <p className="text-xs leading-[18px] font-medium" style={{ color: '#00B4D8' }}>
+                  {activity.header}
+                </p>
+                <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                  {activity.patient}
+                </p>
+                <p className="text-xs leading-[18px]" style={{ color: '#25464D' }}>
+                  {activity.time}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
