@@ -90,7 +90,7 @@ export function AppSidebar({
       >
         {/* ── Header ───────────────────────────────────────────────────── */}
         <div className="shrink-0 p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.078)' }}>
-          {/* Logo + brand row */}
+          {/* Logo + brand row — no toggle button here so text has full width */}
           <div className={cn('flex items-center gap-2.5', collapsed && 'lg:justify-center')}>
             <div
               className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[12px]"
@@ -114,40 +114,32 @@ export function AppSidebar({
                 UNIZIK Medical Centre
               </p>
             </div>
-
-            {/* Collapse button — desktop only, shown when expanded */}
-            <button
-              type="button"
-              onClick={() => onCollapsedChange(true)}
-              aria-label="Collapse sidebar"
-              className={cn(
-                'hidden size-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-[#0098CC]/20 lg:flex',
-                collapsed && 'lg:hidden',
-              )}
-              style={{ background: 'rgba(0, 152, 204, 0.07)', border: '0.92px solid #0098CC' }}
-            >
-              <ChevronLeft
-                className="text-[#0098CC]"
-                style={{ width: 16, height: 16 }}
-                strokeWidth={2}
-              />
-            </button>
           </div>
 
-          {/* Expand button — desktop only, shown when collapsed */}
-          <div className={cn('mt-2 hidden justify-center', collapsed && 'lg:flex')}>
+          {/* Collapse/Expand toggle — desktop only, own row below brand text */}
+          <div
+            className={cn('hidden pt-2.5 lg:flex', collapsed ? 'justify-center' : 'justify-end')}
+          >
             <button
               type="button"
-              onClick={() => onCollapsedChange(false)}
-              aria-label="Expand sidebar"
+              onClick={() => onCollapsedChange(!collapsed)}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-[#0098CC]/20"
               style={{ background: 'rgba(0, 152, 204, 0.07)', border: '0.92px solid #0098CC' }}
             >
-              <ChevronRight
-                className="text-[#0098CC]"
-                style={{ width: 16, height: 16 }}
-                strokeWidth={2}
-              />
+              {collapsed ? (
+                <ChevronRight
+                  className="text-[#0098CC]"
+                  style={{ width: 16, height: 16 }}
+                  strokeWidth={2}
+                />
+              ) : (
+                <ChevronLeft
+                  className="text-[#0098CC]"
+                  style={{ width: 16, height: 16 }}
+                  strokeWidth={2}
+                />
+              )}
             </button>
           </div>
 
