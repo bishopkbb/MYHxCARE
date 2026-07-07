@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Calendar,
   CheckCircle2,
+  ChevronRight,
   ClipboardList,
   Clock,
   FlaskConical,
@@ -58,6 +59,18 @@ type StatCard = {
   info: string;
   accent: string;
   iconBg: string;
+};
+
+type QueueStatus = 'emergency' | 'waiting' | 'in-consultation';
+
+type QueuePatient = {
+  id: string;
+  initials: string;
+  avatarBg: string;
+  name: string;
+  symptoms: string;
+  status: QueueStatus;
+  waitTime: string | null; // null → "In progress" (patient is already being seen)
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
@@ -126,6 +139,101 @@ const MOCK_STAT_CARDS: StatCard[] = [
     info: '2 awaiting response',
     accent: '#3B82F6',
     iconBg: 'rgba(59,130,246,0.1)',
+  },
+];
+
+const QUEUE_STATUS_CONFIG: Record<
+  QueueStatus,
+  {
+    label: string;
+    borderLeft: string;
+    rowBg: string;
+    badgeBg: string;
+    badgeBorder: string;
+    badgeText: string;
+  }
+> = {
+  emergency: {
+    label: 'Emergency',
+    borderLeft: '#EF4444',
+    rowBg: 'rgba(239,68,68,0.04)',
+    badgeBg: 'rgba(239,68,68,0.1)',
+    badgeBorder: 'rgba(239,68,68,0.3)',
+    badgeText: '#EF4444',
+  },
+  waiting: {
+    label: 'Waiting',
+    borderLeft: '#F59E0B',
+    rowBg: 'rgba(245,158,11,0.04)',
+    badgeBg: '#FFFBEB',
+    badgeBorder: '#FEE685',
+    badgeText: '#F59E0B',
+  },
+  'in-consultation': {
+    label: 'In Consultation',
+    borderLeft: '#00B4D8',
+    rowBg: 'transparent',
+    badgeBg: 'rgba(0,180,216,0.08)',
+    badgeBorder: 'rgba(0,180,216,0.3)',
+    badgeText: '#00B4D8',
+  },
+};
+
+// Mock patient queue — will be replaced with real API data in Phase 6
+const MOCK_QUEUE: QueuePatient[] = [
+  {
+    id: 'q1',
+    initials: 'NA',
+    avatarBg: '#EF4444',
+    name: 'Ngozi Adeyemi',
+    symptoms: 'Chest pain and difficulty breathing — sudden onset',
+    status: 'emergency',
+    waitTime: '12 min',
+  },
+  {
+    id: 'q2',
+    initials: 'AO',
+    avatarBg: '#F59E0B',
+    name: 'Adaeze Okonkwo',
+    symptoms: 'Persistent headache and fever for 3 days',
+    status: 'waiting',
+    waitTime: '47 min',
+  },
+  {
+    id: 'q3',
+    initials: 'CE',
+    avatarBg: '#00B4D8',
+    name: 'Chukwuemeka Eze',
+    symptoms: 'Abdominal pain and nausea since yesterday',
+    status: 'in-consultation',
+    waitTime: null,
+  },
+  {
+    id: 'q4',
+    initials: 'CO',
+    avatarBg: '#0098CC',
+    name: 'Chinwe Okafor',
+    symptoms: 'Diffuse skin rash and itching for 5 days',
+    status: 'waiting',
+    waitTime: '31 min',
+  },
+  {
+    id: 'q5',
+    initials: 'DO',
+    avatarBg: '#F97316',
+    name: 'David Osei',
+    symptoms: 'Severe throbbing headache, photophobia, neck stiffness',
+    status: 'waiting',
+    waitTime: '58 min',
+  },
+  {
+    id: 'q6',
+    initials: 'AN',
+    avatarBg: '#22C55E',
+    name: 'Amaka Nwosu',
+    symptoms: 'Irregular menstrual cycle and pelvic pain',
+    status: 'in-consultation',
+    waitTime: null,
   },
 ];
 
@@ -433,6 +541,127 @@ export default function DashboardPage() {
             </div>
           );
         })}
+      </div>
+
+      {/* ── Two-panel section: Patient Queue + Right Panel ───────────── */}
+      <div className="mt-6 flex flex-col gap-6 xl:flex-row xl:items-start">
+        {/* ── Patient Queue card ────────────────────────────────────────── */}
+        <div
+          className="overflow-hidden rounded-[12px] xl:w-[696px] xl:shrink-0"
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid rgba(0,180,216,0.2)',
+            boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.05)',
+          }}
+        >
+          {/* Card header */}
+          <div
+            className="flex items-center justify-between px-4 py-3"
+            style={{ borderBottom: '1px solid rgba(0,100,130,0.12)' }}
+          >
+            {/* Left: icon + title + "N waiting" badge */}
+            <div className="flex items-center gap-2">
+              <Users style={{ width: 18, height: 18, color: '#00B4D8' }} />
+              <span
+                className="font-display text-[20px] leading-7 font-semibold"
+                style={{ color: '#00B4D8' }}
+              >
+                Patient Queue
+              </span>
+              <div
+                className="inline-flex items-center rounded-full border px-2 py-0.5"
+                style={{ background: '#FFFBEB', borderColor: '#FEE685' }}
+              >
+                <span className="text-sm leading-5.5 font-medium" style={{ color: '#F59E0B' }}>
+                  {MOCK_QUEUE.filter((p) => p.status !== 'in-consultation').length} waiting
+                </span>
+              </div>
+            </div>
+
+            {/* Right: View All link */}
+            <button
+              type="button"
+              className="flex items-center gap-0.5 transition-opacity hover:opacity-70"
+            >
+              <span className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
+                View All
+              </span>
+              <ChevronRight style={{ width: 12, height: 12, color: '#00B4D8' }} />
+            </button>
+          </div>
+
+          {/* Patient rows */}
+          <div>
+            {MOCK_QUEUE.map((patient, idx) => {
+              const cfg = QUEUE_STATUS_CONFIG[patient.status];
+              const isLast = idx === MOCK_QUEUE.length - 1;
+              return (
+                <div
+                  key={patient.id}
+                  className="flex items-center gap-4.5 py-3 pr-4 pl-4"
+                  style={{
+                    background: cfg.rowBg,
+                    borderLeft: `3px solid ${cfg.borderLeft}`,
+                    borderBottom: isLast ? undefined : '1px solid rgba(0,100,130,0.12)',
+                  }}
+                >
+                  {/* Avatar circle with initials */}
+                  <div
+                    className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                    style={{ background: patient.avatarBg }}
+                  >
+                    {patient.initials}
+                  </div>
+
+                  {/* Name + symptoms */}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-base leading-6" style={{ color: '#00B4D8' }}>
+                      {patient.name}
+                    </p>
+                    <p className="truncate text-sm leading-5.5" style={{ color: '#25464D' }}>
+                      {patient.symptoms}
+                    </p>
+                  </div>
+
+                  {/* Status badge + wait time */}
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <div
+                      className="inline-flex items-center rounded-full border px-2 py-0.5"
+                      style={{ background: cfg.badgeBg, borderColor: cfg.badgeBorder }}
+                    >
+                      <span
+                        className="text-sm leading-5.5 font-medium whitespace-nowrap"
+                        style={{ color: cfg.badgeText }}
+                      >
+                        {cfg.label}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock style={{ width: 9, height: 9, color: '#25464D' }} />
+                      <span className="text-xs leading-[18px]" style={{ color: '#25464D' }}>
+                        {patient.waitTime ?? 'In progress'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Consult button */}
+                  <div className="shrink-0 pl-1">
+                    <button
+                      type="button"
+                      className="h-9 rounded-[8px] px-[10px] text-sm leading-5.5 font-medium transition-colors hover:bg-[#00B4D8] hover:text-white"
+                      style={{ border: '1px solid #00B4D8', color: '#00B4D8' }}
+                    >
+                      Consult
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right panel — to be built next */}
+        <div className="xl:flex-1" />
       </div>
     </div>
   );
