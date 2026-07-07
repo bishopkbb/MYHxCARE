@@ -219,95 +219,106 @@ export default function DashboardPage() {
         {/*
           Mobile: flex-col — sections stack vertically, border-b between each.
           xl+:    flex-row  — single horizontal strip, border-r between each.
-          items-stretch on xl keeps border-r dividers spanning the full row height.
+          overflow-x-auto lets sections scroll on screens narrower than their
+          combined natural width instead of being clipped by overflow-hidden
+          on the outer card. Progress bar lives outside this wrapper so it
+          always spans the full card width regardless of scroll position.
         */}
-        <div className="flex flex-col xl:flex-row xl:items-stretch">
-          {/* Current shift: icon + two-line label */}
-          <div
-            className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
-            style={{ borderColor: 'rgba(0,100,130,0.12)' }}
-          >
+        <div className="overflow-x-auto">
+          <div className="flex flex-col xl:min-w-max xl:flex-row xl:items-stretch">
+            {/* Current shift: icon + two-line label */}
             <div
-              className="flex size-9 shrink-0 items-center justify-center rounded-[12px]"
-              style={{ background: '#FFFBEB' }}
+              className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
+              style={{ borderColor: 'rgba(0,100,130,0.12)' }}
             >
-              <Clock style={{ width: 18, height: 18, color: '#F59E0B' }} />
+              <div
+                className="flex size-9 shrink-0 items-center justify-center rounded-[12px]"
+                style={{ background: '#FFFBEB' }}
+              >
+                <Clock style={{ width: 18, height: 18, color: '#F59E0B' }} />
+              </div>
+              <div>
+                <p
+                  className="text-sm leading-5.5 font-medium uppercase"
+                  style={{ color: '#25464D' }}
+                >
+                  Today&apos;s Shift
+                </p>
+                <p className="text-sm leading-5.5 font-medium" style={{ color: '#0D2630' }}>
+                  {MOCK_SHIFT.type} · {MOCK_SHIFT.time}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm leading-5.5 font-medium uppercase" style={{ color: '#25464D' }}>
-                Today&apos;s Shift
-              </p>
-              <p className="text-sm leading-5.5 font-medium" style={{ color: '#0D2630' }}>
-                {MOCK_SHIFT.type} · {MOCK_SHIFT.time}
-              </p>
-            </div>
-          </div>
 
-          {/* Location */}
-          <div
-            className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
-            style={{ borderColor: 'rgba(0,100,130,0.12)' }}
-          >
-            <MapPin style={{ width: 18, height: 18, color: '#25464D' }} />
-            <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
-              {MOCK_SHIFT.location}
-            </span>
-          </div>
-
-          {/* Acknowledgement status */}
-          <div
-            className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
-            style={{ borderColor: 'rgba(0,100,130,0.12)' }}
-          >
-            <CheckCircle2 style={{ width: 18, height: 18, color: '#22C55E' }} />
-            <span className="text-sm leading-5.5 font-medium" style={{ color: '#22C55E' }}>
-              Acknowledged
-            </span>
-          </div>
-
-          {/* Next shift */}
-          <div
-            className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
-            style={{ borderColor: 'rgba(0,100,130,0.12)' }}
-          >
-            <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
-              Next shift:
-            </span>
-            <span className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
-              {MOCK_SHIFT.nextShift}
-            </span>
-          </div>
-
-          {/* On-call pending: icon + two-line label */}
-          <div
-            className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-b-0"
-            style={{ borderColor: 'rgba(0,100,130,0.12)' }}
-          >
-            <AlertTriangle style={{ width: 18, height: 18, color: '#F59E0B' }} />
-            <div>
-              <p className="text-sm leading-5.5 font-medium uppercase" style={{ color: '#F59E0B' }}>
-                On-Call Pending
-              </p>
-              <p className="text-sm leading-5.5 font-medium" style={{ color: '#F59E0B' }}>
-                {MOCK_SHIFT.onCall.schedule}
-              </p>
-            </div>
-          </div>
-
-          {/* View My Schedule — full width on mobile, pinned right on xl */}
-          <div className="flex shrink-0 items-center px-4 py-3 xl:ml-auto">
-            <button
-              type="button"
-              className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-sm leading-5.5 font-medium transition-opacity hover:opacity-70"
-              style={{
-                background: '#FFFFFF',
-                border: '1px solid rgba(0,100,130,0.12)',
-                color: '#25464D',
-              }}
+            {/* Location */}
+            <div
+              className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
+              style={{ borderColor: 'rgba(0,100,130,0.12)' }}
             >
-              <Calendar style={{ width: 18, height: 18 }} />
-              View My Schedule
-            </button>
+              <MapPin style={{ width: 18, height: 18, color: '#25464D' }} />
+              <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+                {MOCK_SHIFT.location}
+              </span>
+            </div>
+
+            {/* Acknowledgement status */}
+            <div
+              className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
+              style={{ borderColor: 'rgba(0,100,130,0.12)' }}
+            >
+              <CheckCircle2 style={{ width: 18, height: 18, color: '#22C55E' }} />
+              <span className="text-sm leading-5.5 font-medium" style={{ color: '#22C55E' }}>
+                Acknowledged
+              </span>
+            </div>
+
+            {/* Next shift */}
+            <div
+              className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-r xl:border-b-0"
+              style={{ borderColor: 'rgba(0,100,130,0.12)' }}
+            >
+              <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+                Next shift:
+              </span>
+              <span className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
+                {MOCK_SHIFT.nextShift}
+              </span>
+            </div>
+
+            {/* On-call pending: icon + two-line label */}
+            <div
+              className="flex shrink-0 items-center gap-1.5 border-b px-4 py-3 xl:border-b-0"
+              style={{ borderColor: 'rgba(0,100,130,0.12)' }}
+            >
+              <AlertTriangle style={{ width: 18, height: 18, color: '#F59E0B' }} />
+              <div>
+                <p
+                  className="text-sm leading-5.5 font-medium uppercase"
+                  style={{ color: '#F59E0B' }}
+                >
+                  On-Call Pending
+                </p>
+                <p className="text-sm leading-5.5 font-medium" style={{ color: '#F59E0B' }}>
+                  {MOCK_SHIFT.onCall.schedule}
+                </p>
+              </div>
+            </div>
+
+            {/* View My Schedule — full width on mobile, pinned right on xl */}
+            <div className="flex shrink-0 items-center px-4 py-3 xl:ml-auto">
+              <button
+                type="button"
+                className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-sm leading-5.5 font-medium transition-opacity hover:opacity-70"
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,100,130,0.12)',
+                  color: '#25464D',
+                }}
+              >
+                <Calendar style={{ width: 18, height: 18 }} />
+                View My Schedule
+              </button>
+            </div>
           </div>
         </div>
 
