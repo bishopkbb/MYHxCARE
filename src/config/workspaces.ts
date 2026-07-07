@@ -1,21 +1,25 @@
 import {
   Activity,
+  BarChart2,
   BedDouble,
   Bell,
   CalendarDays,
   ClipboardList,
   CreditCard,
   FileCheck2,
+  FileText,
   FlaskConical,
   LayoutDashboard,
   MessageSquare,
   Package,
   Receipt,
   Settings,
+  Share2,
   Shield,
   Siren,
   Stethoscope,
   TrendingUp,
+  User,
   UserPlus,
   Users,
 } from 'lucide-react';
@@ -29,6 +33,8 @@ export type NavItem = {
   label: string;
   href: string;
   icon: LucideIcon;
+  iconSrc?: string;
+  badge?: number;
 };
 
 export type NavSection = {
@@ -67,23 +73,143 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 
   clinical: {
     workspaceLabel: 'Clinical Services',
-    homeRoute: '/encounters',
+    homeRoute: '/dashboard',
     sections: [
       {
-        items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
-      },
-      {
-        label: 'Clinical',
+        label: 'MAIN',
         items: [
-          { label: 'OPD Queue', href: '/encounters', icon: ClipboardList },
-          { label: 'Patients', href: '/patients', icon: Users },
-          { label: 'Encounters', href: '/encounters', icon: Stethoscope },
-          { label: 'Lab & Results', href: '/lab', icon: FlaskConical },
+          {
+            label: 'Dashboard',
+            href: '/dashboard',
+            icon: LayoutDashboard,
+            iconSrc: '/icons/dashboard.png',
+          },
+          {
+            label: 'Patient Queue',
+            href: '/encounters',
+            icon: ClipboardList,
+            iconSrc: '/icons/patient%20queue.png',
+            badge: 6,
+          },
+          {
+            label: 'Patients',
+            href: '/patients',
+            icon: Users,
+            iconSrc: '/icons/patients.png',
+          },
         ],
       },
       {
-        label: 'Scheduling',
-        items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
+        label: 'CLINICAL',
+        items: [
+          {
+            label: 'Consultation',
+            href: '/encounters',
+            icon: Stethoscope,
+            iconSrc: '/icons/consultation.png',
+          },
+          {
+            label: 'Medical Records',
+            href: '/patients',
+            icon: FileText,
+            iconSrc: '/icons/medical%20records.png',
+          },
+          {
+            label: 'Clinical Notes',
+            href: '/encounters',
+            icon: ClipboardList,
+            iconSrc: '/icons/clinical%20notes.png',
+          },
+          {
+            label: 'Prescriptions',
+            href: '/encounters/prescriptions',
+            icon: FileCheck2,
+            iconSrc: '/icons/prescriptions.png',
+          },
+          {
+            label: 'Laboratory Requests',
+            href: '/lab/orders',
+            icon: FlaskConical,
+            iconSrc: '/icons/laboratory%20requests.png',
+          },
+          {
+            label: 'Laboratory Results',
+            href: '/lab/results',
+            icon: FlaskConical,
+            iconSrc: '/icons/laboratory%20results.png',
+            badge: 1,
+          },
+          {
+            label: 'Referrals',
+            href: '/patients',
+            icon: Share2,
+            iconSrc: '/icons/referrals.png',
+          },
+        ],
+      },
+      {
+        label: 'SCHEDULE',
+        items: [
+          {
+            label: 'Appointments',
+            href: '/duty-roster',
+            icon: CalendarDays,
+            iconSrc: '/icons/appointments.png',
+          },
+          {
+            label: 'Workforce Management',
+            href: '/duty-roster',
+            icon: Users,
+            iconSrc: '/icons/workforce%20management.png',
+          },
+          {
+            label: 'Clinical Timeline',
+            href: '/patients',
+            icon: Activity,
+            iconSrc: '/icons/clinical%20timeline.png',
+          },
+        ],
+      },
+      {
+        label: 'COMMUNICATION',
+        items: [
+          {
+            label: 'Messages',
+            href: '/collaboration',
+            icon: MessageSquare,
+            iconSrc: '/icons/messages.png',
+          },
+          {
+            label: 'Reports',
+            href: '/notifications',
+            icon: BarChart2,
+            iconSrc: '/icons/reports.png',
+          },
+          {
+            label: 'Notifications',
+            href: '/notifications',
+            icon: Bell,
+            iconSrc: '/icons/notifications.png',
+            badge: 8,
+          },
+        ],
+      },
+      {
+        label: 'ACCOUNT',
+        items: [
+          {
+            label: 'Profile',
+            href: '/settings',
+            icon: User,
+            iconSrc: '/icons/profile.png',
+          },
+          {
+            label: 'Settings',
+            href: '/settings',
+            icon: Settings,
+            iconSrc: '/icons/settings.png',
+          },
+        ],
       },
     ],
   },

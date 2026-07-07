@@ -10,20 +10,14 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleMobileClose = useCallback(() => setMobileOpen(false), []);
 
   return (
-    <div className="bg-background flex h-screen overflow-hidden">
-      <AppSidebar
-        collapsed={collapsed}
-        onCollapsedChange={setCollapsed}
-        mobileOpen={mobileOpen}
-        onMobileClose={handleMobileClose}
-      />
-      <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-[#F7FAFC]">
+      <AppSidebar mobileOpen={mobileOpen} onMobileClose={handleMobileClose} />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <AppTopbar onMenuToggle={() => setMobileOpen(true)} />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>

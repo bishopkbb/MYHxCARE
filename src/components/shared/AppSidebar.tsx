@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, LogOut, X } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import { useEffect } from 'react';
 
 import { resolveWorkspace } from '@/types/auth.types';
-import { UNIVERSAL_BOTTOM_NAV, WORKSPACE_NAV } from '@/config/workspaces';
+import { WORKSPACE_NAV } from '@/config/workspaces';
 import type { NavItem } from '@/config/workspaces';
 import { useAuth } from '@hooks/useAuth';
 import { cn } from '@lib/utils';
@@ -22,30 +23,21 @@ function getInitials(name: string): string {
 }
 
 export interface AppSidebarProps {
-  collapsed: boolean;
-  onCollapsedChange: (value: boolean) => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
 }
 
-export function AppSidebar({
-  collapsed,
-  onCollapsedChange,
-  mobileOpen,
-  onMobileClose,
-}: AppSidebarProps) {
+export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
   const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
-  const { workspaceLabel, sections } = WORKSPACE_NAV[workspaceId];
+  const { sections } = WORKSPACE_NAV[workspaceId];
 
-  // Close drawer on route change (user tapped a nav link)
   useEffect(() => {
     onMobileClose();
   }, [pathname, onMobileClose]);
 
-  // Escape key closes the mobile drawer
   useEffect(() => {
     if (!mobileOpen) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -55,13 +47,8 @@ export function AppSidebar({
     return () => document.removeEventListener('keydown', handleKey);
   }, [mobileOpen, onMobileClose]);
 
-  // Lock body scroll while mobile drawer is open
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
@@ -69,7 +56,7 @@ export function AppSidebar({
 
   return (
     <>
-      {/* Backdrop — mobile only, fades in/out with the drawer */}
+      {/* Mobile backdrop */}
       <div
         aria-hidden="true"
         onClick={onMobileClose}
@@ -82,67 +69,71 @@ export function AppSidebar({
       <aside
         aria-label="Application sidebar"
         className={cn(
-          'bg-card text-card-foreground flex shrink-0 flex-col border-r',
-          // Mobile: fixed overlay drawer, slides in/out via transform
-          'fixed inset-y-0 left-0 z-50 w-64',
-          'transition-transform duration-[250ms] ease-in-out',
+          'flex h-screen w-[242px] shrink-0 flex-col',
+          // Mobile: overlay drawer
+          'fixed inset-y-0 left-0 z-50 transition-transform duration-[250ms] ease-in-out',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
-          // Desktop: back in layout flow, collapses via width
+          // Desktop: static in layout flow
           'lg:static lg:z-auto lg:translate-x-0',
-          'lg:transition-[width] lg:duration-200 lg:ease-in-out',
-          collapsed ? 'lg:w-16' : 'lg:w-64',
         )}
+        style={{ background: '#25464D', borderRight: '1px solid rgba(255,255,255,0.071)' }}
       >
-        {/* Header */}
-        <div
-          className={cn(
-            'flex h-14 shrink-0 items-center justify-between border-b px-3',
-            collapsed && 'lg:justify-center',
-          )}
-        >
-          {/* Logo + workspace label: always visible on mobile; hidden on desktop when collapsed */}
-          <div className={cn('min-w-0', collapsed && 'lg:hidden')}>
-            <span className="text-foreground block text-sm font-semibold tracking-tight select-none">
-              MYHxCare HMS
-            </span>
-            <span className="text-muted-foreground block truncate text-xs">{workspaceLabel}</span>
+        {/* ── Header ───────────────────────────────────────────────────── */}
+        <div className="shrink-0 p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.078)' }}>
+          {/* Logo + brand name */}
+          <div className="flex items-center gap-2.5">
+            <div
+              className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[12px]"
+              style={{ background: '#25464D' }}
+            >
+              <Image
+                src="/logo.png"
+                alt="MYHxCare"
+                width={40}
+                height={40}
+                className="size-10 object-contain"
+              />
+            </div>
+            <div className="min-w-0">
+              <p className="font-display truncate text-base leading-6 font-semibold text-white">
+                MyHxCare HMS
+              </p>
+              <p className="truncate text-xs leading-4.5" style={{ color: '#0098CC' }}>
+                UNIZIK Medical Centre
+              </p>
+            </div>
           </div>
 
-          {/* Mobile: X close button */}
-          <button
-            type="button"
-            onClick={onMobileClose}
-            className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex size-8 shrink-0 items-center justify-center rounded-md transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none lg:hidden"
-            aria-label="Close navigation menu"
-          >
-            <X className="size-4" />
-          </button>
-
-          {/* Desktop: collapse/expand toggle */}
-          <button
-            type="button"
-            onClick={() => onCollapsedChange(!collapsed)}
-            className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring hidden size-8 shrink-0 items-center justify-center rounded-md transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none lg:flex"
-            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
-          </button>
+          {/* Doctor info card */}
+          <div className="pt-4">
+            <div
+              className="flex items-center gap-2.5 rounded-[12px] p-2.5"
+              style={{ background: 'rgba(255,255,255,0.059)' }}
+            >
+              <div
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                style={{ background: '#00B4D8' }}
+              >
+                {getInitials(user?.name ?? '')}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm leading-5.5 text-white">{user?.name ?? '—'}</p>
+                <p className="truncate text-xs leading-4.5" style={{ color: '#0098CC' }}>
+                  {user?.role ?? ''}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Workspace navigation */}
-        <nav
-          aria-label="Main navigation"
-          className="flex flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto py-4"
-        >
+        {/* ── Navigation ───────────────────────────────────────────────── */}
+        <nav aria-label="Main navigation" className="flex-1 overflow-x-hidden overflow-y-auto py-3">
           {sections.map((section, idx) => (
-            <div key={section.label ?? idx} className="px-2">
+            <div key={section.label ?? idx} className="mb-3 px-2">
               {section.label && (
                 <p
-                  className={cn(
-                    'text-muted-foreground mb-1 px-2 text-xs font-medium tracking-wider uppercase',
-                    collapsed && 'lg:hidden',
-                  )}
+                  className="mb-1.5 px-3 text-[11px] leading-4.5 font-normal uppercase"
+                  style={{ color: '#0098CC' }}
                 >
                   {section.label}
                 </p>
@@ -151,11 +142,10 @@ export function AppSidebar({
                 {section.items.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(item.href + '/');
                   return (
-                    <NavLink
+                    <SidebarNavItem
                       key={`${item.href}-${item.label}`}
                       item={item}
                       active={active}
-                      collapsed={collapsed}
                     />
                   );
                 })}
@@ -164,77 +154,87 @@ export function AppSidebar({
           ))}
         </nav>
 
-        {/* Footer: universal nav + user card + sign-out */}
-        <div className="shrink-0 border-t px-2 py-3">
-          <ul role="list" className="space-y-0.5">
-            {UNIVERSAL_BOTTOM_NAV.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(item.href + '/');
-              return <NavLink key={item.href} item={item} active={active} collapsed={collapsed} />;
-            })}
-          </ul>
-
-          <div
-            className={cn(
-              'mt-3 flex items-center gap-3 rounded-md px-2 py-1.5',
-              collapsed && 'lg:justify-center',
-            )}
-          >
-            <div className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
-              {getInitials(user?.name ?? '')}
-            </div>
-            <div className={cn('min-w-0 flex-1', collapsed && 'lg:hidden')}>
-              <p className="text-foreground truncate text-sm leading-none font-medium">
-                {user?.name ?? '—'}
-              </p>
-              <p className="text-muted-foreground mt-0.5 truncate text-xs">{user?.role ?? ''}</p>
-            </div>
+        {/* ── Sign Out ─────────────────────────────────────────────────── */}
+        <div className="shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.071)' }}>
+          <div className="px-2 py-2">
+            <button
+              type="button"
+              onClick={() => {
+                void logout();
+              }}
+              aria-label="Sign out"
+              className="flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2 transition-colors hover:bg-white/5"
+            >
+              <Image
+                src="/icons/signout.png"
+                alt=""
+                width={14}
+                height={14}
+                aria-hidden
+                className="shrink-0"
+              />
+              <span className="text-sm leading-5.5" style={{ color: 'rgba(255,255,255,0.38)' }}>
+                Sign Out
+              </span>
+            </button>
           </div>
-
-          <button
-            type="button"
-            className={cn(
-              'text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:ring-ring mt-1 flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none',
-              collapsed && 'lg:justify-center',
-            )}
-            aria-label="Sign out"
-            title="Sign out"
-            onClick={() => {
-              void logout();
-            }}
-          >
-            <LogOut className="size-4 shrink-0" />
-            <span className={cn(collapsed && 'lg:hidden')}>Sign out</span>
-          </button>
         </div>
       </aside>
     </>
   );
 }
 
-interface NavLinkProps {
+interface SidebarNavItemProps {
   item: NavItem;
   active: boolean;
-  collapsed: boolean;
 }
 
-function NavLink({ item, active, collapsed }: NavLinkProps) {
+function SidebarNavItem({ item, active }: SidebarNavItemProps) {
   const Icon = item.icon;
+
   return (
     <li>
       <Link
         href={item.href}
         aria-current={active ? 'page' : undefined}
-        title={collapsed ? item.label : undefined}
         className={cn(
-          'focus-visible:ring-ring flex items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none',
-          collapsed && 'lg:justify-center',
-          active
-            ? 'bg-primary/10 text-primary font-medium'
-            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+          'flex items-center gap-2.5 rounded-[8px] px-3 py-2 transition-colors',
+          active ? 'text-white' : 'text-white/70 hover:bg-white/5 hover:text-white',
         )}
+        style={active ? { background: '#1F3D43' } : undefined}
       >
-        <Icon className="size-4 shrink-0" />
-        <span className={cn('truncate', collapsed && 'lg:hidden')}>{item.label}</span>
+        {/* Icon */}
+        {item.iconSrc ? (
+          <Image
+            src={item.iconSrc}
+            alt=""
+            width={14}
+            height={14}
+            aria-hidden
+            className="shrink-0"
+          />
+        ) : (
+          <Icon className="size-3.5 shrink-0" />
+        )}
+
+        {/* Label */}
+        <span className="flex-1 truncate text-sm leading-5.5">{item.label}</span>
+
+        {/* Badge or arrow */}
+        {item.badge !== undefined ? (
+          <span
+            className="flex size-4 shrink-0 items-center justify-center rounded-full font-black text-white"
+            style={{ background: '#FB2C36', fontSize: 9, lineHeight: '13.5px' }}
+          >
+            {item.badge}
+          </span>
+        ) : (
+          <ChevronRight
+            className="shrink-0 text-white/30"
+            style={{ width: 11, height: 11 }}
+            strokeWidth={2}
+          />
+        )}
       </Link>
     </li>
   );
