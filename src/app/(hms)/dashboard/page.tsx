@@ -1,6 +1,16 @@
 'use client';
 
-import { Activity, AlertTriangle, ArrowRight, ClipboardList, FlaskConical } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  Calendar,
+  CheckCircle2,
+  ClipboardList,
+  Clock,
+  FlaskConical,
+  MapPin,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -53,6 +63,16 @@ const QUICK_ACTIONS: QuickAction[] = [
   },
   { label: 'Request Laboratory Test', href: '/lab/orders', icon: FlaskConical },
 ];
+
+// Mock shift — will be replaced with real API data in Phase 6
+const MOCK_SHIFT = {
+  type: 'Morning Shift',
+  time: '07:00 – 13:00',
+  location: 'General OPD, Block C',
+  nextShift: 'Tomorrow · Afternoon 13:00',
+  onCall: { schedule: 'Fri Jul 4 · 19:00 – 07:00' },
+  progressPercent: 38.5,
+};
 
 // Mock emergency — will be replaced with real API data in Phase 6
 const MOCK_EMERGENCY = {
@@ -188,6 +208,105 @@ export default function DashboardPage() {
               </Link>
             );
           })}
+        </div>
+      </div>
+
+      {/* ── Today's Shift strip ──────────────────────────────────────── */}
+      <div
+        className="mt-8 overflow-hidden rounded-[12px]"
+        style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+      >
+        {/* Content row — items-stretch so border-right separators span full height */}
+        <div className="flex items-stretch">
+          {/* Current shift: icon + two-line label */}
+          <div className="flex items-center gap-3 px-4 py-3">
+            <div
+              className="flex size-9 shrink-0 items-center justify-center rounded-[12px]"
+              style={{ background: '#FFFBEB' }}
+            >
+              <Clock style={{ width: 18, height: 18, color: '#F59E0B' }} />
+            </div>
+            <div>
+              <p className="text-sm leading-5.5 font-medium uppercase" style={{ color: '#25464D' }}>
+                Today&apos;s Shift
+              </p>
+              <p className="text-sm leading-5.5 font-medium" style={{ color: '#0D2630' }}>
+                {MOCK_SHIFT.type} · {MOCK_SHIFT.time}
+              </p>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div
+            className="flex items-center gap-1.5 px-4"
+            style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
+          >
+            <MapPin style={{ width: 14, height: 14, color: '#25464D' }} />
+            <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+              {MOCK_SHIFT.location}
+            </span>
+          </div>
+
+          {/* Acknowledgement status */}
+          <div
+            className="flex items-center gap-1.5 px-4"
+            style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
+          >
+            <CheckCircle2 style={{ width: 14, height: 14, color: '#22C55E' }} />
+            <span className="text-sm leading-5.5 font-medium" style={{ color: '#22C55E' }}>
+              Acknowledged
+            </span>
+          </div>
+
+          {/* Next shift */}
+          <div
+            className="flex items-center gap-1.5 px-4"
+            style={{ borderRight: '1px solid rgba(0,100,130,0.12)' }}
+          >
+            <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+              Next shift:
+            </span>
+            <span className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
+              {MOCK_SHIFT.nextShift}
+            </span>
+          </div>
+
+          {/* On-call pending: icon + two-line label */}
+          <div className="flex items-center gap-1.5 px-4 py-3">
+            <AlertTriangle style={{ width: 14, height: 14, color: '#F59E0B' }} />
+            <div>
+              <p className="text-sm leading-5.5 font-medium uppercase" style={{ color: '#F59E0B' }}>
+                On-Call Pending
+              </p>
+              <p className="text-sm leading-5.5 font-medium" style={{ color: '#F59E0B' }}>
+                {MOCK_SHIFT.onCall.schedule}
+              </p>
+            </div>
+          </div>
+
+          {/* View My Schedule — pinned to the right */}
+          <div className="ml-auto flex items-center px-4">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-sm leading-5.5 font-medium transition-opacity hover:opacity-70"
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid rgba(0,100,130,0.12)',
+                color: '#25464D',
+              }}
+            >
+              <Calendar style={{ width: 14, height: 14 }} />
+              View My Schedule
+            </button>
+          </div>
+        </div>
+
+        {/* Progress bar — amber fill showing shift progress */}
+        <div className="h-1" style={{ background: '#E2EDF1' }}>
+          <div
+            className="h-1 rounded-r-full"
+            style={{ background: '#F59E0B', width: `${MOCK_SHIFT.progressPercent}%` }}
+          />
         </div>
       </div>
     </div>
