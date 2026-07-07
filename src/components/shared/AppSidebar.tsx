@@ -87,30 +87,33 @@ export function AppSidebar({
         style={{ background: '#25464D', borderRight: '1px solid rgba(255,255,255,0.071)' }}
       >
         {/* ── Header ───────────────────────────────────────────────────── */}
-        <div className="shrink-0 p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.078)' }}>
+        <div
+          className={cn('shrink-0', collapsed ? 'px-[11px] py-4' : 'p-4')}
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.078)' }}
+        >
           {/* Logo + brand + toggle */}
           <div className={cn('flex items-center gap-2.5', collapsed && 'flex-col')}>
             {/* Logo */}
             <div
-              className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-[12px]"
+              className="flex size-[50px] shrink-0 items-center justify-center overflow-hidden rounded-[12px]"
               style={{ background: '#25464D' }}
             >
               <Image
                 src="/logo.png"
                 alt="MYHxCare"
-                width={40}
-                height={40}
-                className="size-10 object-contain"
+                width={50}
+                height={50}
+                className="size-[50px] object-contain"
               />
             </div>
 
             {/* Brand text — hidden when collapsed */}
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <p className="font-display truncate text-base leading-6 font-semibold text-white">
+                <p className="font-display truncate text-[20px] leading-7 font-semibold text-white">
                   MyHxCare HMS
                 </p>
-                <p className="truncate text-xs leading-4.5" style={{ color: '#0098CC' }}>
+                <p className="truncate text-sm leading-[22px]" style={{ color: '#0098CC' }}>
                   UNIZIK Medical Centre
                 </p>
               </div>
@@ -145,14 +148,14 @@ export function AppSidebar({
                 style={{ background: 'rgba(255,255,255,0.059)' }}
               >
                 <div
-                  className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                  className="flex size-[50px] shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
                   style={{ background: '#00B4D8' }}
                 >
                   {getInitials(user?.name ?? '')}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm leading-5.5 text-white">{user?.name ?? '—'}</p>
-                  <p className="truncate text-xs leading-4.5" style={{ color: '#0098CC' }}>
+                  <p className="truncate text-base leading-6 text-white">{user?.name ?? '—'}</p>
+                  <p className="truncate text-xs leading-[18px]" style={{ color: '#0098CC' }}>
                     {user?.role ?? ''}
                   </p>
                 </div>
@@ -170,7 +173,7 @@ export function AppSidebar({
             <div key={section.label ?? idx} className="mb-3 px-2">
               {section.label && !collapsed && (
                 <p
-                  className="px-3 text-[11px] leading-4.5 font-normal uppercase"
+                  className="px-3 text-xs leading-[18px] font-bold uppercase"
                   style={{ color: '#0098CC' }}
                 >
                   {section.label}
@@ -211,8 +214,8 @@ export function AppSidebar({
               <Image
                 src="/icons/signout.png"
                 alt=""
-                width={14}
-                height={14}
+                width={18}
+                height={18}
                 aria-hidden
                 className="shrink-0"
               />
@@ -256,31 +259,31 @@ function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
           <Image
             src={item.iconSrc}
             alt=""
-            width={14}
-            height={14}
+            width={18}
+            height={18}
             aria-hidden
             className="shrink-0"
           />
         ) : (
-          <Icon className="size-3.5 shrink-0" />
+          <Icon className="size-[18px] shrink-0" />
         )}
 
         {/* Label + badge/arrow — hidden when collapsed */}
         {!collapsed && (
           <>
-            <span className="flex-1 truncate text-sm leading-5.5">{item.label}</span>
+            <span className="flex-1 truncate text-base leading-6">{item.label}</span>
 
             {item.badge !== undefined ? (
               <span
-                className="flex size-4 shrink-0 items-center justify-center rounded-full leading-none font-black text-white"
-                style={{ background: '#FB2C36', fontSize: 9 }}
+                className="flex size-5 shrink-0 items-center justify-center rounded-full leading-none font-black text-white"
+                style={{ background: '#FB2C36', fontSize: 11 }}
               >
                 {item.badge}
               </span>
             ) : (
               <ChevronRight
-                className={cn('shrink-0', active ? 'text-white' : 'text-white/30')}
-                style={{ width: 11, height: 11 }}
+                className="shrink-0"
+                style={{ width: 13, height: 13, color: '#0098CC' }}
                 strokeWidth={2}
               />
             )}
