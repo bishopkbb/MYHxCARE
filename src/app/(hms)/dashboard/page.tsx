@@ -137,7 +137,7 @@ export default function DashboardPage() {
 
       {/* ── Quick Actions ─────────────────────────────────────────────── */}
       <div className="mt-14">
-        <p className="text-sm leading-[22px]" style={{ color: '#4A7080' }}>
+        <p className="text-base leading-6" style={{ color: '#4A7080' }}>
           Quick Actions
         </p>
 
@@ -163,8 +163,8 @@ export default function DashboardPage() {
                     <Image
                       src={action.iconSrc}
                       alt=""
-                      width={16}
-                      height={16}
+                      width={18}
+                      height={18}
                       aria-hidden
                       className="shrink-0"
                       style={action.active ? { filter: 'brightness(0) invert(1)' } : undefined}
@@ -172,15 +172,15 @@ export default function DashboardPage() {
                   ) : Icon ? (
                     <Icon
                       style={{
-                        width: 16,
-                        height: 16,
+                        width: 18,
+                        height: 18,
                         color: action.active ? '#FFFFFF' : '#00B4D8',
                       }}
                     />
                   ) : null}
                 </div>
                 <span
-                  className="text-sm leading-[22px] font-medium"
+                  className="text-base leading-6 font-semibold"
                   style={{ color: action.active ? '#FFFFFF' : '#00B4D8' }}
                 >
                   {action.label}
