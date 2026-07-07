@@ -88,7 +88,7 @@ export default function DashboardPage() {
         {/* 1 Emergency Active badge */}
         {MOCK_EMERGENCY.count > 0 && (
           <div
-            className="flex items-center gap-1.5 rounded-[8px] px-3 pt-[6px] pb-[5px]"
+            className="flex items-center gap-1.5 rounded-[8px] px-3 pt-1.5 pb-[5px]"
             style={{ background: '#FEF2F2', border: '1px solid #EF4444' }}
           >
             <Activity className="shrink-0" style={{ width: 12, height: 12, color: '#EF4444' }} />
@@ -102,7 +102,7 @@ export default function DashboardPage() {
       {/* ── Emergency banner ─────────────────────────────────────────── */}
       {MOCK_EMERGENCY.count > 0 && (
         <div
-          className="mt-3.5 flex items-center gap-3 rounded-[12px] p-[14px]"
+          className="mt-3.5 flex items-center gap-3 rounded-[12px] p-3.5"
           style={{ background: '#FEF2F2', border: '1px solid #EF4444' }}
         >
           {/* Alert icon container */}
@@ -148,7 +148,7 @@ export default function DashboardPage() {
               <Link
                 key={action.label}
                 href={action.href}
-                className="flex items-center gap-3 rounded-[12px] p-[14px] transition-opacity hover:opacity-90"
+                className="flex items-center gap-3 rounded-[12px] p-3.5 transition-opacity hover:opacity-90"
                 style={
                   action.active
                     ? { background: '#00B4D8', border: '1px solid rgba(0,0,0,0.1)' }

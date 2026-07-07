@@ -58,7 +58,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
 
   return (
     <header
-      className="flex h-[72px] shrink-0 items-center bg-white"
+      className="flex h-18 shrink-0 items-center bg-white"
       style={{ borderBottom: '1px solid rgba(37, 70, 77, 0.08)' }}
     >
       {/* Hamburger — mobile only */}
@@ -82,7 +82,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
             type="search"
             placeholder="Search patients, records, results…"
             aria-label="Search patients, records and results"
-            className="h-9 w-96 rounded-[10px] pr-4 pl-9 text-xs leading-[18px] text-[#25464D] outline-none placeholder:text-[#25464D] focus:ring-2 focus:ring-[#0098CC]/30"
+            className="h-9 w-96 rounded-[10px] pr-4 pl-9 text-xs leading-4.5 text-[#25464D] outline-none placeholder:text-[#25464D] focus:ring-2 focus:ring-[#0098CC]/30"
             style={{ background: '#E6F8FD' }}
           />
         </div>
@@ -97,7 +97,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
         <LiveClock />
 
         {/* Separator */}
-        <div className="h-[14px] w-px bg-[#25464D]/15" />
+        <div className="h-3.5 w-px bg-[#25464D]/15" />
 
         {/* Refresh */}
         <button
@@ -124,7 +124,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
 
         {/* User avatar */}
         <div
-          className="flex size-[50px] shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+          className="flex size-12.5 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
           style={{ background: '#00B4D8' }}
         >
           {getInitials(user?.name ?? '')}

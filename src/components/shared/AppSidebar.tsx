@@ -77,7 +77,7 @@ export function AppSidebar({
         aria-label="Application sidebar"
         className={cn(
           'flex shrink-0 flex-col overflow-hidden transition-[width] duration-[250ms] ease-in-out',
-          collapsed ? 'w-[72px]' : 'w-[280px]',
+          collapsed ? 'w-18' : 'w-70',
           // Mobile: fixed viewport-height overlay drawer with its own scroll
           'fixed inset-y-0 left-0 z-50 h-screen transition-transform duration-[250ms] ease-in-out',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
@@ -95,7 +95,7 @@ export function AppSidebar({
           <div className={cn('flex items-center gap-2.5', collapsed && 'flex-col')}>
             {/* Logo */}
             <div
-              className="flex size-[50px] shrink-0 items-center justify-center overflow-hidden rounded-[12px]"
+              className="flex size-12.5 shrink-0 items-center justify-center overflow-hidden rounded-[12px]"
               style={{ background: '#25464D' }}
             >
               <Image
@@ -103,7 +103,7 @@ export function AppSidebar({
                 alt="MYHxCare"
                 width={50}
                 height={50}
-                className="size-[50px] object-contain"
+                className="size-12.5 object-contain"
               />
             </div>
 
@@ -148,14 +148,14 @@ export function AppSidebar({
                 style={{ background: 'rgba(255,255,255,0.059)' }}
               >
                 <div
-                  className="flex size-[50px] shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                  className="flex size-12.5 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
                   style={{ background: '#00B4D8' }}
                 >
                   {getInitials(user?.name ?? '')}
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-base leading-6 text-white">{user?.name ?? '—'}</p>
-                  <p className="truncate text-xs leading-[18px]" style={{ color: '#0098CC' }}>
+                  <p className="truncate text-xs leading-4.5" style={{ color: '#0098CC' }}>
                     {user?.role ?? ''}
                   </p>
                 </div>
@@ -173,7 +173,7 @@ export function AppSidebar({
             <div key={section.label ?? idx} className="mb-3 px-2">
               {section.label && !collapsed && (
                 <p
-                  className="px-3 text-xs leading-[18px] font-bold uppercase"
+                  className="px-3 text-xs leading-4.5 font-bold uppercase"
                   style={{ color: '#0098CC' }}
                 >
                   {section.label}
@@ -273,10 +273,7 @@ function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
             }
           />
         ) : (
-          <Icon
-            className="size-[18px] shrink-0"
-            style={active ? { color: '#0098CC' } : undefined}
-          />
+          <Icon className="size-4.5 shrink-0" style={active ? { color: '#0098CC' } : undefined} />
         )}
 
         {/* Label + badge/arrow — hidden when collapsed */}
