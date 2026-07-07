@@ -10,6 +10,9 @@ import {
   Clock,
   FlaskConical,
   MapPin,
+  Share2,
+  Stethoscope,
+  Users,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Image from 'next/image';
@@ -48,6 +51,15 @@ type QuickAction = { label: string; href: string; active?: boolean } & (
   { iconSrc: string; icon?: never } | { icon: LucideIcon; iconSrc?: never }
 );
 
+type StatCard = {
+  title: string;
+  icon: LucideIcon;
+  count: number;
+  info: string;
+  accent: string;
+  iconBg: string;
+};
+
 const QUICK_ACTIONS: QuickAction[] = [
   {
     label: 'Start Consultation',
@@ -80,6 +92,42 @@ const MOCK_EMERGENCY = {
   patientName: 'Ngozi Adeyemi',
   complaint: 'Chest pain and difficulty breathing — sudden onset',
 };
+
+// Mock stat cards — will be replaced with real API data in Phase 6
+const MOCK_STAT_CARDS: StatCard[] = [
+  {
+    title: 'Assigned Patients',
+    icon: Users,
+    count: 8,
+    info: '2 in session',
+    accent: '#0098CC',
+    iconBg: 'rgba(0,152,204,0.1)',
+  },
+  {
+    title: 'Pending Consultations',
+    icon: Stethoscope,
+    count: 4,
+    info: '1 emergency',
+    accent: '#F59E0B',
+    iconBg: 'rgba(245,158,11,0.1)',
+  },
+  {
+    title: 'Lab Results Ready',
+    icon: FlaskConical,
+    count: 3,
+    info: '1 critical result',
+    accent: '#EF4444',
+    iconBg: 'rgba(239,68,68,0.1)',
+  },
+  {
+    title: 'Active Referrals',
+    icon: Share2,
+    count: 3,
+    info: '2 awaiting response',
+    accent: '#3B82F6',
+    iconBg: 'rgba(59,130,246,0.1)',
+  },
+];
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -341,6 +389,50 @@ export default function DashboardPage() {
             style={{ background: '#F59E0B', width: `${MOCK_SHIFT.progressPercent}%` }}
           />
         </div>
+      </div>
+
+      {/* ── Stat cards ───────────────────────────────────────────────── */}
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-10.5">
+        {MOCK_STAT_CARDS.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={card.title}
+              className="flex flex-col rounded-[12px] p-4"
+              style={{
+                background: '#FFFFFF',
+                border: `1px solid ${card.accent}`,
+                borderTopWidth: '3px',
+              }}
+            >
+              {/* Title row: text left, icon right */}
+              <div className="flex items-start justify-between">
+                <p className="text-base leading-6 font-semibold" style={{ color: '#25464D' }}>
+                  {card.title}
+                </p>
+                <div
+                  className="flex size-10 shrink-0 items-center justify-center rounded-[12px]"
+                  style={{ background: card.iconBg }}
+                >
+                  <Icon style={{ width: 24, height: 24, color: card.accent }} />
+                </div>
+              </div>
+
+              {/* Count — Outfit Black 30 / 36, accent colour */}
+              <p
+                className="font-display mt-1.5 text-[30px] leading-9 font-black"
+                style={{ color: card.accent }}
+              >
+                {card.count}
+              </p>
+
+              {/* Info label — DM Sans Regular 14, muted */}
+              <p className="mt-1 text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                {card.info}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
