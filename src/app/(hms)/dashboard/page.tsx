@@ -13,7 +13,7 @@ import {
   FlaskConical,
   MapPin,
   MessageSquare,
-  RefreshCcw,
+  History,
   Share2,
   Stethoscope,
   Users,
@@ -887,7 +887,7 @@ export default function DashboardPage() {
       <div className="mt-8">
         {/* Section label */}
         <div className="flex items-center gap-2">
-          <RefreshCcw style={{ width: 15, height: 15, color: '#00B4D8' }} />
+          <History style={{ width: 18, height: 18, color: '#00B4D8' }} />
           <span
             className="font-display text-base leading-6 font-semibold"
             style={{ color: '#00B4D8' }}
@@ -901,25 +901,25 @@ export default function DashboardPage() {
           {MOCK_ACTIVITIES.map((activity) => (
             <div
               key={activity.id}
-              className="flex gap-2.5 p-3.5"
+              className="flex gap-3 p-3.5"
               style={{ background: '#E6F8FD', borderRight: '1px solid #00B4D8' }}
             >
-              {/* Coloured status dot — 8×8 inside a 20×20 alignment container */}
-              <div className="shrink-0 pt-0.5">
-                <div className="flex size-5 items-center justify-center rounded-full">
-                  <span className="size-2 rounded-full" style={{ background: activity.dotColor }} />
+              {/* Coloured status dot — 12×12 inside a 24×24 alignment container */}
+              <div className="shrink-0 pt-1">
+                <div className="flex size-6 items-center justify-center rounded-full">
+                  <span className="size-3 rounded-full" style={{ background: activity.dotColor }} />
                 </div>
               </div>
 
               {/* Text stack */}
               <div>
-                <p className="text-xs leading-[18px] font-medium" style={{ color: '#00B4D8' }}>
+                <p className="text-sm leading-5.5 font-medium" style={{ color: '#00B4D8' }}>
                   {activity.header}
                 </p>
                 <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
                   {activity.patient}
                 </p>
-                <p className="text-xs leading-[18px]" style={{ color: '#25464D' }}>
+                <p className="text-sm leading-5.5" style={{ color: '#25464D' }}>
                   {activity.time}
                 </p>
               </div>
