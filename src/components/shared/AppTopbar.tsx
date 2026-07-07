@@ -41,7 +41,7 @@ function LiveClock() {
 
   return (
     <div className="flex items-center gap-1.5" suppressHydrationWarning>
-      <Clock className="shrink-0 text-[#25464D]" style={{ width: 12, height: 12 }} />
+      <Clock className="shrink-0 text-[#25464D]" style={{ width: 18, height: 18 }} />
       <span className="text-sm leading-[22px] text-[#25464D]" suppressHydrationWarning>
         {label}
       </span>
@@ -75,14 +75,14 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
       <div className="ml-12 hidden lg:block">
         <div className="relative">
           <Search
-            className="absolute top-1/2 left-3 -translate-y-1/2 text-[#25464D]/40"
-            style={{ width: 12, height: 12 }}
+            className="absolute top-1/2 left-[9px] -translate-y-1/2 text-[#25464D]/40"
+            style={{ width: 18, height: 18 }}
           />
           <input
             type="search"
             placeholder="Search patients, records, results…"
             aria-label="Search patients, records and results"
-            className="h-9 w-96 rounded-[10px] pr-4 pl-9 text-xs leading-[18px] text-[#25464D] outline-none placeholder:text-[#25464D]/40 focus:ring-2 focus:ring-[#0098CC]/30"
+            className="h-9 w-96 rounded-[10px] pr-4 pl-9 text-xs leading-[18px] text-[#25464D] outline-none placeholder:text-[#25464D] focus:ring-2 focus:ring-[#0098CC]/30"
             style={{ background: '#E6F8FD' }}
           />
         </div>
@@ -105,7 +105,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
           aria-label="Refresh"
           className="flex items-center justify-center text-[#25464D]/50 transition-colors hover:text-[#25464D]"
         >
-          <RefreshCw style={{ width: 14, height: 14 }} />
+          <RefreshCw style={{ width: 18, height: 18 }} />
         </button>
 
         {/* Notification bell + red dot */}
@@ -114,7 +114,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
           aria-label="Notifications"
           className="relative flex items-center justify-center text-[#25464D]/50 transition-colors hover:text-[#25464D]"
         >
-          <Bell style={{ width: 14, height: 14 }} />
+          <Bell style={{ width: 18, height: 18 }} />
           <span
             aria-hidden="true"
             className="absolute -top-1 -right-1 size-2 rounded-full"
@@ -124,7 +124,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
 
         {/* User avatar */}
         <div
-          className="flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+          className="flex size-[50px] shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
           style={{ background: '#00B4D8' }}
         >
           {getInitials(user?.name ?? '')}
