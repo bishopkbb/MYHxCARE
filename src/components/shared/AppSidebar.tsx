@@ -121,11 +121,16 @@ export function AppSidebar({
               onClick={() => onCollapsedChange(true)}
               aria-label="Collapse sidebar"
               className={cn(
-                'hidden size-7 shrink-0 items-center justify-center rounded-md text-white/50 transition-colors hover:bg-white/5 hover:text-white lg:flex',
+                'hidden size-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-[#0098CC]/20 lg:flex',
                 collapsed && 'lg:hidden',
               )}
+              style={{ background: 'rgba(0, 152, 204, 0.07)', border: '0.92px solid #0098CC' }}
             >
-              <ChevronLeft style={{ width: 14, height: 14 }} />
+              <ChevronLeft
+                className="text-[#0098CC]"
+                style={{ width: 16, height: 16 }}
+                strokeWidth={2}
+              />
             </button>
           </div>
 
@@ -135,9 +140,14 @@ export function AppSidebar({
               type="button"
               onClick={() => onCollapsedChange(false)}
               aria-label="Expand sidebar"
-              className="flex size-7 items-center justify-center rounded-md text-white/50 transition-colors hover:bg-white/5 hover:text-white"
+              className="flex size-9 items-center justify-center rounded-full transition-colors hover:bg-[#0098CC]/20"
+              style={{ background: 'rgba(0, 152, 204, 0.07)', border: '0.92px solid #0098CC' }}
             >
-              <ChevronRight style={{ width: 14, height: 14 }} />
+              <ChevronRight
+                className="text-[#0098CC]"
+                style={{ width: 16, height: 16 }}
+                strokeWidth={2}
+              />
             </button>
           </div>
 
