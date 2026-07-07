@@ -113,7 +113,7 @@ export function AppSidebar({
                 <p className="font-display truncate text-[20px] leading-7 font-semibold text-white">
                   MyHxCare HMS
                 </p>
-                <p className="truncate text-sm leading-[22px]" style={{ color: '#0098CC' }}>
+                <p className="truncate text-sm leading-5.5" style={{ color: '#0098CC' }}>
                   UNIZIK Medical Centre
                 </p>
               </div>

@@ -42,7 +42,7 @@ function LiveClock() {
   return (
     <div className="flex items-center gap-1.5" suppressHydrationWarning>
       <Clock className="shrink-0 text-[#25464D]" style={{ width: 18, height: 18 }} />
-      <span className="text-sm leading-[22px] text-[#25464D]" suppressHydrationWarning>
+      <span className="text-sm leading-5.5 text-[#25464D]" suppressHydrationWarning>
         {label}
       </span>
     </div>

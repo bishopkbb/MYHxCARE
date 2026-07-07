@@ -77,7 +77,7 @@ export default function DashboardPage() {
             {getGreeting()}, {title} {lastName}
           </h1>
           <p
-            className="mt-1 text-sm leading-[22px]"
+            className="mt-1 text-sm leading-5.5"
             style={{ color: '#25464D' }}
             suppressHydrationWarning
           >
@@ -92,7 +92,7 @@ export default function DashboardPage() {
             style={{ background: '#FEF2F2', border: '1px solid #EF4444' }}
           >
             <Activity className="shrink-0" style={{ width: 12, height: 12, color: '#EF4444' }} />
-            <span className="text-sm leading-[22px] font-medium" style={{ color: '#EF4444' }}>
+            <span className="text-sm leading-5.5 font-medium" style={{ color: '#EF4444' }}>
               {MOCK_EMERGENCY.count} Emergency Active
             </span>
           </div>
@@ -118,7 +118,7 @@ export default function DashboardPage() {
             <p className="text-base leading-6 font-semibold" style={{ color: '#EF4444' }}>
               Emergency Patient Requires Immediate Attention
             </p>
-            <p className="text-sm leading-[22px]" style={{ color: '#EF4444' }}>
+            <p className="text-sm leading-5.5" style={{ color: '#EF4444' }}>
               {MOCK_EMERGENCY.patientName} — {MOCK_EMERGENCY.complaint}
             </p>
           </div>
@@ -126,7 +126,7 @@ export default function DashboardPage() {
           {/* Open Record button */}
           <button
             type="button"
-            className="flex shrink-0 items-center gap-1.5 rounded-[12px] px-4 py-2 text-sm leading-[22px] font-medium text-white transition-opacity hover:opacity-90"
+            className="flex shrink-0 items-center gap-1.5 rounded-[12px] px-4 py-2 text-sm leading-5.5 font-medium text-white transition-opacity hover:opacity-90"
             style={{ background: '#EF4444' }}
           >
             Open Record
