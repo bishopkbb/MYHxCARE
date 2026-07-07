@@ -230,7 +230,7 @@ function SidebarNavItem({ item, active }: SidebarNavItemProps) {
           </span>
         ) : (
           <ChevronRight
-            className="shrink-0 text-white/30"
+            className={cn('shrink-0', active ? 'text-white' : 'text-white/30')}
             style={{ width: 11, height: 11 }}
             strokeWidth={2}
           />

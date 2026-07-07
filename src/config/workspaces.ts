@@ -178,6 +178,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
             href: '/collaboration',
             icon: MessageSquare,
             iconSrc: '/icons/messages.png',
+            badge: 3,
           },
           {
             label: 'Reports',
