@@ -69,12 +69,12 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
       <aside
         aria-label="Application sidebar"
         className={cn(
-          'flex h-screen w-[242px] shrink-0 flex-col',
-          // Mobile: overlay drawer
-          'fixed inset-y-0 left-0 z-50 transition-transform duration-[250ms] ease-in-out',
+          'flex w-[242px] shrink-0 flex-col',
+          // Mobile: fixed viewport-height overlay drawer with its own scroll
+          'fixed inset-y-0 left-0 z-50 h-screen transition-transform duration-[250ms] ease-in-out',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
-          // Desktop: static in layout flow
-          'lg:static lg:z-auto lg:translate-x-0',
+          // Desktop: in document flow, grows with page content
+          'lg:static lg:z-auto lg:h-auto lg:min-h-screen lg:translate-x-0',
         )}
         style={{ background: '#25464D', borderRight: '1px solid rgba(255,255,255,0.071)' }}
       >
@@ -127,18 +127,21 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
         </div>
 
         {/* ── Navigation ───────────────────────────────────────────────── */}
-        <nav aria-label="Main navigation" className="flex-1 overflow-x-hidden overflow-y-auto py-3">
+        <nav
+          aria-label="Main navigation"
+          className="flex-1 overflow-x-hidden overflow-y-auto py-3 lg:overflow-y-visible"
+        >
           {sections.map((section, idx) => (
             <div key={section.label ?? idx} className="mb-3 px-2">
               {section.label && (
                 <p
-                  className="mb-1.5 px-3 text-[11px] leading-4.5 font-normal uppercase"
+                  className="px-3 text-[11px] leading-4.5 font-normal uppercase"
                   style={{ color: '#0098CC' }}
                 >
                   {section.label}
                 </p>
               )}
-              <ul role="list" className="space-y-0.5">
+              <ul role="list" className="space-y-0.5 pt-1.5">
                 {section.items.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(item.href + '/');
                   return (
@@ -156,7 +159,7 @@ export function AppSidebar({ mobileOpen, onMobileClose }: AppSidebarProps) {
 
         {/* ── Sign Out ─────────────────────────────────────────────────── */}
         <div className="shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.071)' }}>
-          <div className="px-2 py-2">
+          <div className="px-2 pt-[9px] pb-2">
             <button
               type="button"
               onClick={() => {

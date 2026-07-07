@@ -14,7 +14,7 @@ import './globals.css';
 const dmSans = DM_Sans({
   variable: '--font-dm-sans',
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '900'],
 });
 
 const outfit = Outfit({

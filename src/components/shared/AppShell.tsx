@@ -15,11 +15,11 @@ export function AppShell({ children }: AppShellProps) {
   const handleMobileClose = useCallback(() => setMobileOpen(false), []);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F7FAFC]">
+    <div className="flex min-h-screen bg-[#F7FAFC]">
       <AppSidebar mobileOpen={mobileOpen} onMobileClose={handleMobileClose} />
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col">
         <AppTopbar onMenuToggle={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1">{children}</main>
       </div>
     </div>
   );
