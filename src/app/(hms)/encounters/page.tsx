@@ -6,12 +6,14 @@ import {
   Clock,
   Download,
   Eye,
+  FileText,
   Heart,
   ListFilter,
+  Printer,
   Search,
   Thermometer,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -56,6 +58,11 @@ type StatusCfg = {
   pillBorder: string;
   pillColor: string;
   pillBg: string;
+};
+
+type FilterState = {
+  gender: 'all' | 'male' | 'female';
+  allergies: 'all' | 'yes' | 'no';
 };
 
 // ── Status config ──────────────────────────────────────────────────────────────
@@ -661,12 +668,45 @@ const COLS = [
 export default function EncountersPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [search, setSearch] = useState('');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<FilterState>({
+    gender: 'all',
+    allergies: 'all',
+  });
+  const filterRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setFilterOpen(false);
+      }
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
+        setExportOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const activeFilterCount = [
+    activeFilters.gender !== 'all',
+    activeFilters.allergies !== 'all',
+  ].filter(Boolean).length;
 
   const filteredQueue = MOCK_QUEUE.filter((patient) => {
     if (activeTab !== 'all') {
       const status = TAB_STATUS_MAP[activeTab];
       if (!status || patient.status !== status) return false;
     }
+    if (activeFilters.gender !== 'all') {
+      const isFemale = patient.meta.toLowerCase().includes('female');
+      if (activeFilters.gender === 'female' && !isFemale) return false;
+      if (activeFilters.gender === 'male' && isFemale) return false;
+    }
+    if (activeFilters.allergies === 'yes' && patient.allergies.length === 0) return false;
+    if (activeFilters.allergies === 'no' && patient.allergies.length > 0) return false;
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       return (
@@ -677,6 +717,47 @@ export default function EncountersPage() {
     }
     return true;
   });
+
+  const exportCSV = () => {
+    const headers = [
+      'Name',
+      'MRN',
+      'Patient Info',
+      'Chief Complaint',
+      'Allergies',
+      'Heart Rate',
+      'Temperature (°C)',
+      'Blood Pressure',
+      'Status',
+      'Wait / Completion',
+    ];
+    const rows = filteredQueue.map((p) => [
+      p.name,
+      p.mrn,
+      p.meta,
+      p.complaint,
+      p.allergies.join('; ') || 'None',
+      `${p.hr} bpm`,
+      `${p.temp}`,
+      `${p.bp} mmHg`,
+      STATUS_CFG[p.status].label,
+      p.completedAt
+        ? `${p.status === 'discharged' ? 'Discharged' : 'Completed'} ${p.completedAt}`
+        : (p.waitDisplay ?? 'In progress'),
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `patient-queue-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPDF = () => window.print();
 
   return (
     <div className="px-12 pt-10 pb-24">
@@ -695,22 +776,157 @@ export default function EncountersPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors hover:bg-gray-50"
-            style={{ background: '#FFFFFF', border: '1px solid #0064821F', color: '#2F3A40' }}
-          >
-            <ListFilter style={{ width: 16, height: 16, color: '#00B4D8' }} />
-            Filter
-          </button>
-          <button
-            type="button"
-            className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors hover:bg-gray-50"
-            style={{ background: '#FFFFFF', border: '1px solid #0064821F', color: '#2F3A40' }}
-          >
-            <Download style={{ width: 16, height: 16, color: '#00B4D8' }} />
-            Export
-          </button>
+          {/* ── Filter button + panel ─────────────────────────────────── */}
+          <div ref={filterRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setFilterOpen((o) => !o)}
+              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors hover:bg-gray-50"
+              style={{
+                background: filterOpen ? '#E6F8FD' : '#FFFFFF',
+                border: `1px solid ${filterOpen ? '#00B4D8' : '#0064821F'}`,
+                color: '#2F3A40',
+              }}
+            >
+              <ListFilter style={{ width: 16, height: 16, color: '#00B4D8' }} />
+              Filter
+              {activeFilterCount > 0 && (
+                <span
+                  className="inline-flex items-center justify-center rounded-full text-xs font-bold text-white"
+                  style={{ width: 18, height: 18, background: '#00B4D8' }}
+                >
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {filterOpen && (
+              <div
+                className="absolute top-full right-0 z-20 mt-2 w-72 rounded-[12px] bg-white p-4"
+                style={{
+                  border: '1px solid rgba(0,100,130,0.12)',
+                  boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',
+                }}
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <span
+                    className="font-display text-base font-semibold"
+                    style={{ color: '#2F3A40' }}
+                  >
+                    Filters
+                  </span>
+                  {activeFilterCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilters({ gender: 'all', allergies: 'all' })}
+                      className="text-sm font-medium"
+                      style={{ color: '#00B4D8' }}
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <p className="mb-2 text-xs font-bold uppercase" style={{ color: '#4A7080' }}>
+                    Gender
+                  </p>
+                  <div className="flex gap-1.5">
+                    {(['all', 'male', 'female'] as const).map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => setActiveFilters((prev) => ({ ...prev, gender: g }))}
+                        className="flex-1 rounded-[8px] py-1.5 text-sm font-medium capitalize transition-colors"
+                        style={{
+                          background:
+                            activeFilters.gender === g ? '#00B4D8' : 'rgba(0,100,130,0.06)',
+                          color: activeFilters.gender === g ? '#FFFFFF' : '#4A7080',
+                        }}
+                      >
+                        {g === 'all' ? 'All' : g.charAt(0).toUpperCase() + g.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-xs font-bold uppercase" style={{ color: '#4A7080' }}>
+                    Allergies
+                  </p>
+                  <div className="flex gap-1.5">
+                    {(['all', 'yes', 'no'] as const).map((a) => (
+                      <button
+                        key={a}
+                        type="button"
+                        onClick={() => setActiveFilters((prev) => ({ ...prev, allergies: a }))}
+                        className="flex-1 rounded-[8px] py-1.5 text-sm font-medium transition-colors"
+                        style={{
+                          background:
+                            activeFilters.allergies === a ? '#00B4D8' : 'rgba(0,100,130,0.06)',
+                          color: activeFilters.allergies === a ? '#FFFFFF' : '#4A7080',
+                        }}
+                      >
+                        {a === 'all' ? 'Any' : a === 'yes' ? 'Has Allergy' : 'None'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Export button + menu ──────────────────────────────────── */}
+          <div ref={exportRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setExportOpen((o) => !o)}
+              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors hover:bg-gray-50"
+              style={{
+                background: exportOpen ? '#E6F8FD' : '#FFFFFF',
+                border: `1px solid ${exportOpen ? '#00B4D8' : '#0064821F'}`,
+                color: '#2F3A40',
+              }}
+            >
+              <Download style={{ width: 16, height: 16, color: '#00B4D8' }} />
+              Export
+            </button>
+
+            {exportOpen && (
+              <div
+                className="absolute top-full right-0 z-20 mt-2 w-52 overflow-hidden rounded-[12px] bg-white py-1.5"
+                style={{
+                  border: '1px solid rgba(0,100,130,0.12)',
+                  boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    exportCSV();
+                    setExportOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors hover:bg-[#E6F8FD]"
+                  style={{ color: '#2F3A40' }}
+                >
+                  <FileText style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                  Export as CSV
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    exportPDF();
+                    setExportOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors hover:bg-[#E6F8FD]"
+                  style={{ color: '#2F3A40' }}
+                >
+                  <Printer style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                  Export as PDF
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
