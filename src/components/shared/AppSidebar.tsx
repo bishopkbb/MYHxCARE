@@ -281,19 +281,13 @@ function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
           <>
             <span className="flex-1 truncate text-base leading-6">{item.label}</span>
 
-            {item.badge !== undefined ? (
+            {item.badge !== undefined && (
               <span
                 className="flex size-5 shrink-0 items-center justify-center rounded-full leading-none font-black text-white"
                 style={{ background: '#FB2C36', fontSize: 11 }}
               >
                 {item.badge}
               </span>
-            ) : (
-              <ChevronRight
-                className="shrink-0"
-                style={{ width: 13, height: 13, color: '#0098CC' }}
-                strokeWidth={2}
-              />
             )}
           </>
         )}
