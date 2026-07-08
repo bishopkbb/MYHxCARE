@@ -147,7 +147,7 @@ export default function EncountersPage() {
 
       {/* ── Quick-filter tab strip ──────────────────────────────────────── */}
       <div
-        className="mt-8 flex items-center gap-1 overflow-x-auto rounded-[12px] p-1"
+        className="mt-8 flex flex-wrap items-center gap-1 rounded-[12px] p-1"
         style={{ background: '#E6F8FD' }}
       >
         {QUEUE_TABS.map((tab) => {
@@ -157,7 +157,7 @@ export default function EncountersPage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className="flex shrink-0 items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-base leading-6 font-medium whitespace-nowrap transition-colors"
+              className="flex shrink-0 items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-base leading-6 font-medium transition-colors"
               style={{
                 background: isActive ? '#FFFFFF' : 'transparent',
                 color: '#2F3A40',
