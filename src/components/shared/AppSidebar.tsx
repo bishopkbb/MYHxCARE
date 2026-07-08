@@ -179,7 +179,7 @@ export function AppSidebar({
                   {section.label}
                 </p>
               )}
-              <ul role="list" className="space-y-0.5 pt-1.5">
+              <ul role="list" className="space-y-1 pt-1.5">
                 {section.items.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(item.href + '/');
                   return (
