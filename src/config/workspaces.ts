@@ -89,7 +89,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
             href: '/encounters',
             icon: ClipboardList,
             iconSrc: '/icons/patient%20queue.png',
-            badge: 6,
+            badge: 26,
           },
           {
             label: 'Patients',
