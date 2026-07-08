@@ -354,9 +354,9 @@ export default function DashboardPage() {
   const { title, lastName } = parseName(user?.name ?? '');
 
   return (
-    <div className="px-12 pt-10 pb-24">
+    <div className="px-4 pt-6 pb-24 sm:px-6 lg:px-12 lg:pt-10">
       {/* ── Greeting row ─────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-y-3 sm:items-center">
         <div>
           <h1
             className="font-display text-2xl leading-8 font-semibold"
@@ -376,7 +376,7 @@ export default function DashboardPage() {
         {/* 1 Emergency Active badge */}
         {MOCK_EMERGENCY.count > 0 && (
           <div
-            className="flex items-center gap-1.5 rounded-[8px] px-3 pt-1.5 pb-1.25"
+            className="flex shrink-0 items-center gap-1.5 rounded-[8px] px-3 pt-1.5 pb-1.25"
             style={{ background: '#FEF2F2', border: '1px solid #EF4444' }}
           >
             <Activity className="shrink-0" style={{ width: 12, height: 12, color: '#EF4444' }} />
@@ -390,7 +390,7 @@ export default function DashboardPage() {
       {/* ── Emergency banner ─────────────────────────────────────────── */}
       {MOCK_EMERGENCY.count > 0 && (
         <div
-          className="mt-3.5 flex items-center gap-3 rounded-[12px] p-3.5"
+          className="mt-3.5 flex items-start gap-3 rounded-[12px] p-3.5 sm:items-center"
           style={{ background: '#FEF2F2', border: '1px solid #EF4444' }}
         >
           {/* Alert icon container */}
@@ -424,7 +424,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Quick Actions ─────────────────────────────────────────────── */}
-      <div className="mt-14">
+      <div className="mt-8 lg:mt-14">
         <p className="text-base leading-6" style={{ color: '#4A7080' }}>
           Quick Actions
         </p>
@@ -481,7 +481,7 @@ export default function DashboardPage() {
 
       {/* ── Today's Shift strip ──────────────────────────────────────── */}
       <div
-        className="mt-8 overflow-hidden rounded-[12px]"
+        className="mt-6 overflow-hidden rounded-[12px] lg:mt-8"
         style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
       >
         {/*
@@ -715,7 +715,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={patient.id}
-                  className="flex items-center gap-4.5 py-3 pr-4 pl-4"
+                  className="flex items-center gap-2 py-3 pr-4 pl-4 sm:gap-4.5"
                   style={{
                     background: cfg.rowBg,
                     borderLeft: `3px solid ${cfg.borderLeft}`,
@@ -761,8 +761,8 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Consult button */}
-                  <div className="shrink-0 pl-1">
+                  {/* Consult button — hidden on mobile, space too tight */}
+                  <div className="hidden shrink-0 pl-1 sm:block">
                     <button
                       type="button"
                       className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors hover:bg-[#00B4D8] hover:text-white"
@@ -897,7 +897,7 @@ export default function DashboardPage() {
         </div>
 
         {/* 3-column activity grid */}
-        <div className="mt-3 grid grid-cols-1 gap-9 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3 xl:gap-9">
           {MOCK_ACTIVITIES.map((activity) => (
             <div
               key={activity.id}

@@ -92,21 +92,19 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
       <div className="flex-1" />
 
       {/* Right group */}
-      <div className="mr-16 flex items-center gap-5">
-        {/* Live date + time */}
-        <LiveClock />
-
-        {/* Separator */}
-        <div className="h-3.5 w-px bg-[#25464D]/15" />
-
-        {/* Refresh */}
-        <button
-          type="button"
-          aria-label="Refresh"
-          className="flex items-center justify-center text-[#25464D]/50 transition-colors hover:text-[#25464D]"
-        >
-          <RefreshCw style={{ width: 18, height: 18 }} />
-        </button>
+      <div className="mr-4 flex items-center gap-4 lg:mr-16 lg:gap-5">
+        {/* Clock + separator + refresh — desktop only */}
+        <div className="hidden items-center gap-5 lg:flex">
+          <LiveClock />
+          <div className="h-3.5 w-px bg-[#25464D]/15" />
+          <button
+            type="button"
+            aria-label="Refresh"
+            className="flex items-center justify-center text-[#25464D]/50 transition-colors hover:text-[#25464D]"
+          >
+            <RefreshCw style={{ width: 18, height: 18 }} />
+          </button>
+        </div>
 
         {/* Notification bell + red dot */}
         <button
@@ -124,7 +122,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
 
         {/* User avatar */}
         <div
-          className="flex size-12.5 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white lg:size-12.5"
           style={{ background: '#00B4D8' }}
         >
           {getInitials(user?.name ?? '')}
