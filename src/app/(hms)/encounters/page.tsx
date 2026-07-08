@@ -1,26 +1,81 @@
 'use client';
 
-import { Download, Filter, Search } from 'lucide-react';
+import { Download, ListFilter, Search } from 'lucide-react';
 import { useState } from 'react';
 
 type QueueTab = {
   id: string;
   label: string;
   count: number;
-  danger?: boolean;
+  badgeBg: string;
+  badgeColor: string;
 };
 
 // Mock tab counts — will be replaced with real API data in Phase 6
 const QUEUE_TABS: QueueTab[] = [
-  { id: 'all', label: 'All Patients', count: 8 },
-  { id: 'waiting', label: 'Waiting', count: 3 },
-  { id: 'in-consultation', label: 'In Consultation', count: 2 },
-  { id: 'completed', label: 'Completed', count: 2 },
-  { id: 'emergency', label: 'Emergency', count: 1, danger: true },
-  { id: 'follow-up', label: 'Follow-up Needed', count: 4 },
-  { id: 'new-admissions', label: 'New Admissions', count: 5 },
-  { id: 'discharged', label: 'Discharged', count: 6 },
-  { id: 'under-observation', label: 'Under Observation', count: 3 },
+  {
+    id: 'all',
+    label: 'All Patients',
+    count: 8,
+    badgeBg: 'rgba(0,180,216,0.12)',
+    badgeColor: '#00B4D8',
+  },
+  {
+    id: 'waiting',
+    label: 'Waiting',
+    count: 3,
+    badgeBg: 'rgba(245,158,11,0.12)',
+    badgeColor: '#F59E0B',
+  },
+  {
+    id: 'in-consultation',
+    label: 'In Consultation',
+    count: 2,
+    badgeBg: 'rgba(0,180,216,0.12)',
+    badgeColor: '#00B4D8',
+  },
+  {
+    id: 'completed',
+    label: 'Completed',
+    count: 2,
+    badgeBg: 'rgba(34,197,94,0.12)',
+    badgeColor: '#22C55E',
+  },
+  {
+    id: 'emergency',
+    label: 'Emergency',
+    count: 1,
+    badgeBg: 'rgba(239,68,68,0.12)',
+    badgeColor: '#EF4444',
+  },
+  {
+    id: 'follow-up',
+    label: 'Follow-up Needed',
+    count: 4,
+    badgeBg: 'rgba(245,158,11,0.12)',
+    badgeColor: '#F59E0B',
+  },
+  {
+    id: 'new-admissions',
+    label: 'New Admissions',
+    count: 5,
+    badgeBg: 'rgba(59,130,246,0.12)',
+    badgeColor: '#3B82F6',
+  },
+  {
+    id: 'discharged',
+    label: 'Discharged',
+    count: 6,
+    badgeBg: 'rgba(107,114,128,0.12)',
+    badgeColor: '#6B7280',
+  },
+  {
+    id: 'under-observation',
+    label: 'Under Observation',
+    count: 3,
+    badgeBg: 'rgba(139,92,246,0.12)',
+    badgeColor: '#8B5CF6',
+  },
 ];
 
 function formatQueueDate(): string {
@@ -48,7 +103,7 @@ export default function EncountersPage() {
           >
             Patient Queue
           </h1>
-          <p className="text-sm leading-5.5" style={{ color: '#2F3A40' }}>
+          <p className="mt-0.5 text-base leading-6" style={{ color: '#2F3A40' }}>
             {formatQueueDate()}
           </p>
         </div>
@@ -57,25 +112,25 @@ export default function EncountersPage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-sm leading-5.5 font-medium transition-colors hover:bg-gray-50"
+            className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors hover:bg-gray-50"
             style={{ background: '#FFFFFF', border: '1px solid #0064821F', color: '#2F3A40' }}
           >
-            <Filter style={{ width: 13, height: 13 }} />
+            <ListFilter style={{ width: 16, height: 16, color: '#00B4D8' }} />
             Filter
           </button>
           <button
             type="button"
-            className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-sm leading-5.5 font-medium transition-colors hover:bg-gray-50"
+            className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors hover:bg-gray-50"
             style={{ background: '#FFFFFF', border: '1px solid #0064821F', color: '#2F3A40' }}
           >
-            <Download style={{ width: 13, height: 13 }} />
+            <Download style={{ width: 16, height: 16, color: '#00B4D8' }} />
             Export
           </button>
         </div>
       </div>
 
       {/* ── Search bar ─────────────────────────────────────────────────── */}
-      <div className="relative mt-11">
+      <div className="relative mt-14">
         <Search
           className="pointer-events-none absolute top-1/2 left-[10px] -translate-y-1/2"
           style={{ width: 16, height: 16, color: '#8A98A3' }}
@@ -85,14 +140,14 @@ export default function EncountersPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, MRN, or chief complaint..."
-          className="h-[42px] w-full rounded-[12px] pr-4 pl-9 text-sm leading-5.5 outline-none placeholder:text-[#8A98A3] focus:ring-2 focus:ring-[#0098CC]/30"
+          className="h-[42px] w-full rounded-[12px] pr-4 pl-9 text-base leading-6 outline-none placeholder:text-[#8A98A3] focus:ring-2 focus:ring-[#0098CC]/30"
           style={{ background: '#FFFFFF', border: '1px solid #0064821F', color: '#2F3A40' }}
         />
       </div>
 
       {/* ── Quick-filter tab strip ──────────────────────────────────────── */}
       <div
-        className="mt-5 flex items-center gap-1 overflow-x-auto rounded-[12px] p-1"
+        className="mt-8 flex items-center gap-1 overflow-x-auto rounded-[12px] p-1"
         style={{ background: '#E6F8FD' }}
       >
         {QUEUE_TABS.map((tab) => {
@@ -102,7 +157,7 @@ export default function EncountersPage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className="flex shrink-0 items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-sm leading-5.5 font-medium whitespace-nowrap transition-colors"
+              className="flex shrink-0 items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-base leading-6 font-medium whitespace-nowrap transition-colors"
               style={{
                 background: isActive ? '#FFFFFF' : 'transparent',
                 color: '#2F3A40',
@@ -119,8 +174,8 @@ export default function EncountersPage() {
                   height: 22,
                   paddingLeft: 6,
                   paddingRight: 6,
-                  background: tab.danger ? 'rgba(239,68,68,0.12)' : 'rgba(0,180,216,0.12)',
-                  color: tab.danger ? '#EF4444' : '#00B4D8',
+                  background: tab.badgeBg,
+                  color: tab.badgeColor,
                 }}
               >
                 {tab.count}
