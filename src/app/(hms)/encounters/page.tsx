@@ -654,13 +654,15 @@ function getTabCount(tabId: string): number {
 
 // ── Column definitions (header + body share these widths) ─────────────────────
 
+// lg (4 col):  22 + 35 + 18 + 25 = 100%
+// xl (6 col):  21 + 26 + 13 + 12 + 13 + 15 = 100%
 const COLS = [
-  { key: 'patient', label: 'Patient', width: 'w-[21%]', headerPad: 'pl-5 pr-3' },
-  { key: 'complaint', label: 'Chief Complaint', width: 'w-[26%]', headerPad: 'pr-4' },
-  { key: 'vitals', label: 'Vitals', width: 'w-[13%]', headerPad: 'pr-4' },
-  { key: 'wait', label: 'Wait Time', width: 'w-[12%]', headerPad: 'pr-4' },
-  { key: 'status', label: 'Status', width: 'w-[13%]', headerPad: 'pr-4' },
-  { key: 'actions', label: 'Actions', width: 'w-[15%]', headerPad: 'pr-4' },
+  { key: 'patient', label: 'Patient', width: 'w-[22%] xl:w-[21%]', headerPad: 'pl-5 pr-3' },
+  { key: 'complaint', label: 'Chief Complaint', width: 'w-[35%] xl:w-[26%]', headerPad: 'pr-4' },
+  { key: 'vitals', label: 'Vitals', width: 'hidden xl:block xl:w-[13%]', headerPad: 'pr-4' },
+  { key: 'wait', label: 'Wait Time', width: 'hidden xl:block xl:w-[12%]', headerPad: 'pr-4' },
+  { key: 'status', label: 'Status', width: 'w-[18%] xl:w-[13%]', headerPad: 'pr-4' },
+  { key: 'actions', label: 'Actions', width: 'w-[25%] xl:w-[15%]', headerPad: 'pr-4' },
 ] as const;
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -760,9 +762,9 @@ export default function EncountersPage() {
   const exportPDF = () => window.print();
 
   return (
-    <div className="px-12 pt-10 pb-24">
+    <div className="px-4 pt-6 pb-24 sm:px-6 lg:px-12 lg:pt-10">
       {/* ── Page header ──────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-y-3 sm:items-center">
         <div>
           <h1
             className="font-display text-2xl leading-8 font-semibold"
@@ -931,7 +933,7 @@ export default function EncountersPage() {
       </div>
 
       {/* ── Search bar ───────────────────────────────────────────────────── */}
-      <div className="relative mt-14">
+      <div className="relative mt-6 lg:mt-14">
         <Search
           className="pointer-events-none absolute top-1/2 left-[10px] -translate-y-1/2"
           style={{ width: 16, height: 16, color: '#8A98A3' }}
@@ -948,7 +950,7 @@ export default function EncountersPage() {
 
       {/* ── Quick-filter tab strip ───────────────────────────────────────── */}
       <div
-        className="mt-8 flex flex-wrap items-center gap-1 rounded-[12px] p-1"
+        className="mt-4 flex flex-wrap items-center gap-1 rounded-[12px] p-1 lg:mt-8"
         style={{ background: '#E6F8FD' }}
       >
         {QUEUE_TABS.map((tab) => {
@@ -986,9 +988,176 @@ export default function EncountersPage() {
         })}
       </div>
 
-      {/* ── Patient table ────────────────────────────────────────────────── */}
-      <div className="mt-6 overflow-x-auto">
-        <div className="min-w-[860px]">
+      {/* ── Mobile card view — visible below lg ─────────────────────────── */}
+      <div className="mt-6 space-y-3 lg:hidden">
+        {filteredQueue.length === 0 ? (
+          <div
+            className="flex min-h-[180px] items-center justify-center rounded-[12px]"
+            style={{ background: 'rgba(226,237,241,0.25)' }}
+          >
+            <p className="text-base leading-6" style={{ color: '#8A98A3' }}>
+              No patients match this filter.
+            </p>
+          </div>
+        ) : (
+          filteredQueue.map((patient) => {
+            const cfg = STATUS_CFG[patient.status];
+            return (
+              <div
+                key={patient.id}
+                className="overflow-hidden rounded-[12px] bg-white"
+                style={{
+                  border: '1px solid rgba(0,100,130,0.08)',
+                  borderLeft: `4px solid ${cfg.borderLeft}`,
+                  boxShadow: '0px 1px 3px rgba(0,0,0,0.05)',
+                }}
+              >
+                {/* Identity + status pill */}
+                <div className="flex items-start justify-between p-3">
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                      style={{ background: patient.avatarBg }}
+                    >
+                      {patient.initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-base leading-6 font-semibold" style={{ color: '#2F3A40' }}>
+                        {patient.name}
+                      </p>
+                      <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
+                        {patient.mrn}
+                      </p>
+                      <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                        {patient.meta}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className="ml-2 inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                    style={{
+                      border: `1px solid ${cfg.pillBorder}`,
+                      color: cfg.pillColor,
+                      background: cfg.pillBg,
+                    }}
+                  >
+                    {cfg.label}
+                  </span>
+                </div>
+
+                {/* Complaint + allergy */}
+                <div
+                  className="border-t px-3 py-2.5"
+                  style={{ borderColor: 'rgba(0,100,130,0.06)' }}
+                >
+                  <p className="text-sm leading-5.5" style={{ color: '#2F3A40' }}>
+                    {patient.complaint}
+                  </p>
+                  {patient.allergies.length > 0 && (
+                    <div className="mt-1 flex items-center gap-1">
+                      <AlertTriangle
+                        className="shrink-0"
+                        style={{ width: 12, height: 12, color: '#F59E0B' }}
+                      />
+                      <p className="text-xs leading-5">
+                        <span style={{ color: '#EF4444' }}>ALLERGY: </span>
+                        <span style={{ color: '#00B4D8' }}>{patient.allergies.join(', ')}</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Vitals + wait time */}
+                <div
+                  className="flex items-center justify-between border-t px-3 py-2"
+                  style={{
+                    borderColor: 'rgba(0,100,130,0.06)',
+                    background: 'rgba(226,237,241,0.25)',
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
+                      <Heart
+                        className="shrink-0"
+                        style={{ width: 11, height: 11, fill: '#EF4444', stroke: 'none' }}
+                      />
+                      <span className="text-xs" style={{ color: '#25464D' }}>
+                        {patient.hr} bpm
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Thermometer
+                        className="shrink-0"
+                        style={{ width: 11, height: 11, color: '#F59E0B' }}
+                      />
+                      <span className="text-xs" style={{ color: getTempColor(patient.temp) }}>
+                        {patient.temp}°C
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Activity
+                        className="shrink-0"
+                        style={{ width: 11, height: 11, color: '#00B4D8' }}
+                      />
+                      <span className="text-xs" style={{ color: '#25464D' }}>
+                        {patient.bp}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock
+                      className="shrink-0"
+                      style={{ width: 11, height: 11, color: '#8A98A3' }}
+                    />
+                    <span
+                      className="text-xs"
+                      style={{
+                        color:
+                          patient.completedAt !== null || patient.waitDisplay === null
+                            ? '#8A98A3'
+                            : '#25464D',
+                      }}
+                    >
+                      {patient.completedAt !== null
+                        ? `${patient.status === 'discharged' ? 'Discharged' : 'Completed'} ${patient.completedAt}`
+                        : (patient.waitDisplay ?? 'In progress')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div
+                  className="flex items-center gap-2 border-t px-3 py-3"
+                  style={{ borderColor: 'rgba(0,100,130,0.06)' }}
+                >
+                  <button
+                    type="button"
+                    className="flex shrink-0 items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
+                    style={{ width: 36, height: 36, background: '#E2EDF1' }}
+                    aria-label={`View details for ${patient.name}`}
+                  >
+                    <Eye style={{ width: 14, height: 14, color: '#4A7080' }} />
+                  </button>
+                  <button
+                    type="button"
+                    disabled={patient.status === 'completed'}
+                    className="flex-1 rounded-[8px] py-2.5 text-center text-sm font-medium text-white transition-opacity disabled:cursor-default"
+                    style={{
+                      background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
+                    }}
+                  >
+                    Start Consultation
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* ── Patient table — visible at lg+ ───────────────────────────────── */}
+      <div className="mt-6 hidden overflow-x-auto lg:block">
+        <div>
           {/* Table header */}
           <div
             className="flex"
@@ -1028,7 +1197,7 @@ export default function EncountersPage() {
                   }}
                 >
                   {/* ── PATIENT ── */}
-                  <div className="flex w-[21%] items-start gap-3 py-4 pr-3 pl-3">
+                  <div className="flex w-[22%] items-start gap-3 py-4 pr-3 pl-3 xl:w-[21%]">
                     <div
                       className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
                       style={{ background: patient.avatarBg }}
@@ -1049,7 +1218,7 @@ export default function EncountersPage() {
                   </div>
 
                   {/* ── CHIEF COMPLAINT ── */}
-                  <div className="w-[26%] py-4 pr-4">
+                  <div className="w-[35%] py-4 pr-4 xl:w-[26%]">
                     <p className="text-base leading-6" style={{ color: '#2F3A40' }}>
                       {patient.complaint}
                     </p>
@@ -1068,7 +1237,7 @@ export default function EncountersPage() {
                   </div>
 
                   {/* ── VITALS ── */}
-                  <div className="w-[13%] space-y-0.5 py-4 pr-4">
+                  <div className="hidden w-[13%] space-y-0.5 py-4 pr-4 xl:block">
                     <div className="flex items-center gap-1.5">
                       <Heart
                         className="shrink-0"
@@ -1102,7 +1271,7 @@ export default function EncountersPage() {
                   </div>
 
                   {/* ── WAIT TIME ── */}
-                  <div className="w-[12%] py-4 pr-4">
+                  <div className="hidden w-[12%] py-4 pr-4 xl:block">
                     {patient.completedAt !== null ? (
                       <div className="flex items-start gap-1.5">
                         <Clock
@@ -1142,7 +1311,7 @@ export default function EncountersPage() {
                   </div>
 
                   {/* ── STATUS ── */}
-                  <div className="w-[13%] py-4 pr-4">
+                  <div className="w-[18%] py-4 pr-4 xl:w-[13%]">
                     <span
                       className="inline-flex items-center rounded-full px-2 py-0.5 text-sm leading-5.5 font-medium"
                       style={{
@@ -1156,7 +1325,7 @@ export default function EncountersPage() {
                   </div>
 
                   {/* ── ACTIONS ── */}
-                  <div className="flex w-[15%] items-center gap-1.5 py-4 pr-4">
+                  <div className="flex w-[25%] items-center gap-1.5 py-4 pr-4 xl:w-[15%]">
                     <button
                       type="button"
                       className="flex shrink-0 items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
@@ -1168,9 +1337,8 @@ export default function EncountersPage() {
                     <button
                       type="button"
                       disabled={patient.status === 'completed'}
-                      className="shrink-0 rounded-[8px] px-3 py-1.5 text-center text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-default"
+                      className="flex-1 rounded-[8px] px-3 py-1.5 text-center text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-default"
                       style={{
-                        width: 115,
                         height: 56,
                         background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
                       }}
