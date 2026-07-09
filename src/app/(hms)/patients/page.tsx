@@ -19,6 +19,7 @@ import {
   Users,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -385,6 +386,7 @@ const COLS = [
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function PatientsPage() {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -936,6 +938,7 @@ export default function PatientsPage() {
                   <button
                     type="button"
                     aria-label={`View ${patient.name}`}
+                    onClick={() => router.push(`/patients/${patient.id}`)}
                     className="flex size-9 shrink-0 items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
                     style={{ background: '#E2EDF1' }}
                   >
@@ -1081,6 +1084,7 @@ export default function PatientsPage() {
                       <button
                         type="button"
                         aria-label={`View ${patient.name}`}
+                        onClick={() => router.push(`/patients/${patient.id}`)}
                         className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
                         style={{ color: '#4A7080' }}
                       >
@@ -1120,7 +1124,11 @@ export default function PatientsPage() {
                                 <button
                                   key={action.key}
                                   type="button"
-                                  onClick={() => setActionMenuId(null)}
+                                  onClick={() => {
+                                    setActionMenuId(null);
+                                    if (action.key === 'view')
+                                      router.push(`/patients/${patient.id}`);
+                                  }}
                                   className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm leading-5.5 transition-colors hover:bg-[#E6F8FD]"
                                   style={{ color: action.danger ? '#EF4444' : '#2F3A40' }}
                                 >
