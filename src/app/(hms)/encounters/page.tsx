@@ -1183,172 +1183,176 @@ export default function EncountersPage() {
               </p>
             </div>
           ) : (
-            filteredQueue.map((patient, idx) => {
-              const cfg = STATUS_CFG[patient.status];
-              const isLast = idx === filteredQueue.length - 1;
+            <div className="flex flex-col gap-2 pt-2">
+              {filteredQueue.map((patient) => {
+                const cfg = STATUS_CFG[patient.status];
 
-              return (
-                <div
-                  key={patient.id}
-                  className="flex min-h-[95px] items-center bg-white"
-                  style={{
-                    borderLeft: `3px solid ${cfg.borderLeft}`,
-                    borderBottom: isLast ? undefined : `2px solid ${cfg.borderLeft}`,
-                  }}
-                >
-                  {/* ── PATIENT ── */}
-                  <div className="flex w-[22%] items-start gap-3 py-4 pr-3 pl-3 xl:w-[21%]">
-                    <div
-                      className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-                      style={{ background: patient.avatarBg }}
-                    >
-                      {patient.initials}
+                return (
+                  <div
+                    key={patient.id}
+                    className="flex min-h-[95px] items-center bg-white"
+                    style={{
+                      borderLeft: `3px solid ${cfg.borderLeft}`,
+                      borderBottom: `2px solid ${cfg.borderLeft}`,
+                    }}
+                  >
+                    {/* ── PATIENT ── */}
+                    <div className="flex w-[22%] items-start gap-3 py-4 pr-3 pl-3 xl:w-[21%]">
+                      <div
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                        style={{ background: patient.avatarBg }}
+                      >
+                        {patient.initials}
+                      </div>
+                      <div className="min-w-0">
+                        <p
+                          className="text-base leading-6 font-semibold"
+                          style={{ color: '#2F3A40' }}
+                        >
+                          {patient.name}
+                        </p>
+                        <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
+                          {patient.mrn}
+                        </p>
+                        <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                          {patient.meta}
+                        </p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-base leading-6 font-semibold" style={{ color: '#2F3A40' }}>
-                        {patient.name}
-                      </p>
-                      <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
-                        {patient.mrn}
-                      </p>
-                      <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
-                        {patient.meta}
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* ── CHIEF COMPLAINT ── */}
-                  <div className="w-[35%] py-4 pr-4 xl:w-[26%]">
-                    <p className="text-base leading-6" style={{ color: '#2F3A40' }}>
-                      {patient.complaint}
-                    </p>
-                    {patient.allergies.length > 0 && (
-                      <div className="mt-1 flex items-center gap-1">
-                        <AlertTriangle
+                    {/* ── CHIEF COMPLAINT ── */}
+                    <div className="w-[35%] py-4 pr-4 xl:w-[26%]">
+                      <p className="text-base leading-6" style={{ color: '#2F3A40' }}>
+                        {patient.complaint}
+                      </p>
+                      {patient.allergies.length > 0 && (
+                        <div className="mt-1 flex items-center gap-1">
+                          <AlertTriangle
+                            className="shrink-0"
+                            style={{ width: 13, height: 13, color: '#F59E0B' }}
+                          />
+                          <p className="text-sm leading-5.5">
+                            <span style={{ color: '#EF4444' }}>ALLERGY: </span>
+                            <span style={{ color: '#00B4D8' }}>{patient.allergies.join(', ')}</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ── VITALS ── */}
+                    <div className="hidden w-[13%] space-y-0.5 py-4 pr-4 xl:block">
+                      <div className="flex items-center gap-1.5">
+                        <Heart
+                          className="shrink-0"
+                          style={{ width: 13, height: 13, fill: '#EF4444', stroke: 'none' }}
+                        />
+                        <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+                          {patient.hr} bpm
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Thermometer
                           className="shrink-0"
                           style={{ width: 13, height: 13, color: '#F59E0B' }}
                         />
-                        <p className="text-sm leading-5.5">
-                          <span style={{ color: '#EF4444' }}>ALLERGY: </span>
-                          <span style={{ color: '#00B4D8' }}>{patient.allergies.join(', ')}</span>
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ── VITALS ── */}
-                  <div className="hidden w-[13%] space-y-0.5 py-4 pr-4 xl:block">
-                    <div className="flex items-center gap-1.5">
-                      <Heart
-                        className="shrink-0"
-                        style={{ width: 13, height: 13, fill: '#EF4444', stroke: 'none' }}
-                      />
-                      <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
-                        {patient.hr} bpm
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Thermometer
-                        className="shrink-0"
-                        style={{ width: 13, height: 13, color: '#F59E0B' }}
-                      />
-                      <span
-                        className="text-sm leading-5.5"
-                        style={{ color: getTempColor(patient.temp) }}
-                      >
-                        {patient.temp}°C
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Activity
-                        className="shrink-0"
-                        style={{ width: 13, height: 13, color: '#00B4D8' }}
-                      />
-                      <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
-                        {patient.bp} mmHg
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* ── WAIT TIME ── */}
-                  <div className="hidden w-[12%] py-4 pr-4 xl:block">
-                    {patient.completedAt !== null ? (
-                      <div className="flex items-start gap-1.5">
-                        <Clock
-                          className="mt-[3px] shrink-0"
-                          style={{ width: 14, height: 14, color: '#8A98A3' }}
-                        />
-                        <div>
-                          <p className="text-sm leading-5.5" style={{ color: '#8A98A3' }}>
-                            {patient.status === 'discharged' ? 'Discharged' : 'Completed'}
-                          </p>
-                          <p className="text-sm leading-5.5" style={{ color: '#8A98A3' }}>
-                            {patient.completedAt}
-                          </p>
-                        </div>
-                      </div>
-                    ) : patient.waitDisplay === null ? (
-                      <div className="flex items-center gap-1.5">
-                        <Clock
-                          className="shrink-0"
-                          style={{ width: 14, height: 14, color: '#8A98A3' }}
-                        />
-                        <span className="text-sm leading-5.5" style={{ color: '#8A98A3' }}>
-                          In progress
+                        <span
+                          className="text-sm leading-5.5"
+                          style={{ color: getTempColor(patient.temp) }}
+                        >
+                          {patient.temp}°C
                         </span>
                       </div>
-                    ) : (
                       <div className="flex items-center gap-1.5">
-                        <Clock
+                        <Activity
                           className="shrink-0"
-                          style={{ width: 14, height: 14, color: '#8A98A3' }}
+                          style={{ width: 13, height: 13, color: '#00B4D8' }}
                         />
                         <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
-                          {patient.waitDisplay}
+                          {patient.bp} mmHg
                         </span>
                       </div>
-                    )}
-                  </div>
+                    </div>
 
-                  {/* ── STATUS ── */}
-                  <div className="w-[18%] py-4 pr-4 xl:w-[13%]">
-                    <span
-                      className="inline-flex items-center rounded-full px-2 py-0.5 text-sm leading-5.5 font-medium"
-                      style={{
-                        border: `1px solid ${cfg.pillBorder}`,
-                        color: cfg.pillColor,
-                        background: cfg.pillBg,
-                      }}
-                    >
-                      {cfg.label}
-                    </span>
-                  </div>
+                    {/* ── WAIT TIME ── */}
+                    <div className="hidden w-[12%] py-4 pr-4 xl:block">
+                      {patient.completedAt !== null ? (
+                        <div className="flex items-start gap-1.5">
+                          <Clock
+                            className="mt-[3px] shrink-0"
+                            style={{ width: 14, height: 14, color: '#8A98A3' }}
+                          />
+                          <div>
+                            <p className="text-sm leading-5.5" style={{ color: '#8A98A3' }}>
+                              {patient.status === 'discharged' ? 'Discharged' : 'Completed'}
+                            </p>
+                            <p className="text-sm leading-5.5" style={{ color: '#8A98A3' }}>
+                              {patient.completedAt}
+                            </p>
+                          </div>
+                        </div>
+                      ) : patient.waitDisplay === null ? (
+                        <div className="flex items-center gap-1.5">
+                          <Clock
+                            className="shrink-0"
+                            style={{ width: 14, height: 14, color: '#8A98A3' }}
+                          />
+                          <span className="text-sm leading-5.5" style={{ color: '#8A98A3' }}>
+                            In progress
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5">
+                          <Clock
+                            className="shrink-0"
+                            style={{ width: 14, height: 14, color: '#8A98A3' }}
+                          />
+                          <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+                            {patient.waitDisplay}
+                          </span>
+                        </div>
+                      )}
+                    </div>
 
-                  {/* ── ACTIONS ── */}
-                  <div className="flex w-[25%] items-center gap-1.5 py-4 pr-4 xl:w-[15%]">
-                    <button
-                      type="button"
-                      className="flex shrink-0 items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
-                      style={{ width: 26, height: 28, background: '#E2EDF1' }}
-                      aria-label={`View details for ${patient.name}`}
-                    >
-                      <Eye style={{ width: 14, height: 14, color: '#4A7080' }} />
-                    </button>
-                    <button
-                      type="button"
-                      disabled={patient.status === 'completed'}
-                      className="flex-1 rounded-[8px] px-3 py-1.5 text-center text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-default"
-                      style={{
-                        height: 56,
-                        background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
-                      }}
-                    >
-                      Start Consultation
-                    </button>
+                    {/* ── STATUS ── */}
+                    <div className="w-[18%] py-4 pr-4 xl:w-[13%]">
+                      <span
+                        className="inline-flex items-center rounded-full px-2 py-0.5 text-sm leading-5.5 font-medium"
+                        style={{
+                          border: `1px solid ${cfg.pillBorder}`,
+                          color: cfg.pillColor,
+                          background: cfg.pillBg,
+                        }}
+                      >
+                        {cfg.label}
+                      </span>
+                    </div>
+
+                    {/* ── ACTIONS ── */}
+                    <div className="flex w-[25%] items-center gap-1.5 py-4 pr-4 xl:w-[15%]">
+                      <button
+                        type="button"
+                        className="flex shrink-0 items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
+                        style={{ width: 26, height: 28, background: '#E2EDF1' }}
+                        aria-label={`View details for ${patient.name}`}
+                      >
+                        <Eye style={{ width: 14, height: 14, color: '#4A7080' }} />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={patient.status === 'completed'}
+                        className="flex-1 rounded-[8px] px-3 py-1.5 text-center text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-default"
+                        style={{
+                          height: 56,
+                          background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
+                        }}
+                      >
+                        Start Consultation
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
       </div>

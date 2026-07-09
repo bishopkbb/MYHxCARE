@@ -985,160 +985,164 @@ export default function PatientsPage() {
               </p>
             </div>
           ) : (
-            filteredPatients.map((patient, idx) => {
-              const cfg = STATUS_CFG[patient.status];
-              const isLast = idx === filteredPatients.length - 1;
+            <div className="flex flex-col gap-2 pt-2">
+              {filteredPatients.map((patient) => {
+                const cfg = STATUS_CFG[patient.status];
 
-              return (
-                <div
-                  key={patient.id}
-                  className="flex min-h-[95px] items-center bg-white"
-                  style={{
-                    borderLeft: `3px solid ${cfg.borderLeft}`,
-                    borderBottom: isLast ? undefined : `2px solid ${cfg.borderLeft}`,
-                  }}
-                >
-                  {/* ── PATIENT ── */}
-                  <div className="flex w-[26%] items-start gap-3 py-4 pr-3 pl-5">
-                    <div
-                      className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-                      style={{ background: patient.avatarBg }}
-                    >
-                      {patient.initials}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-base leading-6 font-semibold" style={{ color: '#2F3A40' }}>
-                        {patient.name}
-                      </p>
-                      <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
-                        {patient.mrn}
-                      </p>
-                      <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
-                        {patient.meta}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* ── CHIEF COMPLAINT ── */}
-                  <div className="w-[26%] py-4 pr-4">
-                    <p className="text-base leading-6" style={{ color: '#2F3A40' }}>
-                      {patient.complaint}
-                    </p>
-                    {patient.allergies.length > 0 && (
-                      <div className="mt-1 flex items-center gap-1">
-                        <AlertTriangle
-                          className="shrink-0"
-                          style={{ width: 13, height: 13, color: '#F59E0B' }}
-                        />
-                        <p className="text-sm leading-5.5">
-                          <span style={{ color: '#EF4444' }}>ALLERGY: </span>
-                          <span style={{ color: '#00B4D8' }}>{patient.allergies.join(', ')}</span>
+                return (
+                  <div
+                    key={patient.id}
+                    className="flex min-h-[95px] items-center bg-white"
+                    style={{
+                      borderLeft: `3px solid ${cfg.borderLeft}`,
+                      borderBottom: `2px solid ${cfg.borderLeft}`,
+                    }}
+                  >
+                    {/* ── PATIENT ── */}
+                    <div className="flex w-[26%] items-start gap-3 py-4 pr-3 pl-5">
+                      <div
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                        style={{ background: patient.avatarBg }}
+                      >
+                        {patient.initials}
+                      </div>
+                      <div className="min-w-0">
+                        <p
+                          className="text-base leading-6 font-semibold"
+                          style={{ color: '#2F3A40' }}
+                        >
+                          {patient.name}
+                        </p>
+                        <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
+                          {patient.mrn}
+                        </p>
+                        <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                          {patient.meta}
                         </p>
                       </div>
-                    )}
-                  </div>
+                    </div>
 
-                  {/* ── LAST VISIT ── */}
-                  <div className="w-[12%] py-4 pr-4 text-center">
-                    <p className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
-                      {patient.lastVisitDate}
-                    </p>
-                    <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
-                      {patient.lastVisitTime}
-                    </p>
-                  </div>
-
-                  {/* ── STATUS ── */}
-                  <div className="w-[12%] py-4 pr-4">
-                    <span
-                      className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
-                      style={{
-                        border: `1px solid ${cfg.pillBorder}`,
-                        color: cfg.pillColor,
-                        background: cfg.pillBg,
-                      }}
-                    >
-                      {cfg.label}
-                    </span>
-                  </div>
-
-                  {/* ── NEXT APPOINTMENT ── */}
-                  <div className="w-[16%] py-4 pr-4 text-center">
-                    <p className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
-                      {patient.nextApptDate}
-                    </p>
-                    <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
-                      {patient.nextApptTime}
-                    </p>
-                  </div>
-
-                  {/* ── ACTIONS ── */}
-                  <div className="flex w-[8%] items-center gap-2 py-4 pr-4">
-                    {/* View record */}
-                    <button
-                      type="button"
-                      aria-label={`View ${patient.name}`}
-                      className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
-                      style={{ color: '#4A7080' }}
-                    >
-                      <Eye style={{ width: 16, height: 16 }} />
-                    </button>
-
-                    {/* Context menu */}
-                    <div
-                      className="relative"
-                      ref={actionMenuId === patient.id ? actionMenuRef : undefined}
-                    >
-                      <button
-                        type="button"
-                        aria-label={`More actions for ${patient.name}`}
-                        onClick={() =>
-                          setActionMenuId((prev) => (prev === patient.id ? null : patient.id))
-                        }
-                        className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
-                        style={{ color: '#4A7080' }}
-                      >
-                        <MoreVertical style={{ width: 16, height: 16 }} />
-                      </button>
-
-                      {actionMenuId === patient.id && (
-                        <div
-                          className="absolute top-full right-0 z-30 mt-1 w-52 overflow-hidden rounded-[12px] bg-white py-1.5"
-                          style={{
-                            border: '1px solid rgba(0,100,130,0.12)',
-                            boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',
-                          }}
-                        >
-                          {DOCTOR_ACTIONS.filter(
-                            (action) => !action.hideFor?.includes(patient.status),
-                          ).map((action) => {
-                            const ActionIcon = action.icon;
-                            return (
-                              <button
-                                key={action.key}
-                                type="button"
-                                onClick={() => setActionMenuId(null)}
-                                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm leading-5.5 transition-colors hover:bg-[#E6F8FD]"
-                                style={{ color: action.danger ? '#EF4444' : '#2F3A40' }}
-                              >
-                                <ActionIcon
-                                  style={{
-                                    width: 14,
-                                    height: 14,
-                                    color: action.danger ? '#EF4444' : '#00B4D8',
-                                  }}
-                                />
-                                {action.label}
-                              </button>
-                            );
-                          })}
+                    {/* ── CHIEF COMPLAINT ── */}
+                    <div className="w-[26%] py-4 pr-4">
+                      <p className="text-base leading-6" style={{ color: '#2F3A40' }}>
+                        {patient.complaint}
+                      </p>
+                      {patient.allergies.length > 0 && (
+                        <div className="mt-1 flex items-center gap-1">
+                          <AlertTriangle
+                            className="shrink-0"
+                            style={{ width: 13, height: 13, color: '#F59E0B' }}
+                          />
+                          <p className="text-sm leading-5.5">
+                            <span style={{ color: '#EF4444' }}>ALLERGY: </span>
+                            <span style={{ color: '#00B4D8' }}>{patient.allergies.join(', ')}</span>
+                          </p>
                         </div>
                       )}
                     </div>
+
+                    {/* ── LAST VISIT ── */}
+                    <div className="w-[12%] py-4 pr-4 text-center">
+                      <p className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
+                        {patient.lastVisitDate}
+                      </p>
+                      <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                        {patient.lastVisitTime}
+                      </p>
+                    </div>
+
+                    {/* ── STATUS ── */}
+                    <div className="w-[12%] py-4 pr-4">
+                      <span
+                        className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+                        style={{
+                          border: `1px solid ${cfg.pillBorder}`,
+                          color: cfg.pillColor,
+                          background: cfg.pillBg,
+                        }}
+                      >
+                        {cfg.label}
+                      </span>
+                    </div>
+
+                    {/* ── NEXT APPOINTMENT ── */}
+                    <div className="w-[16%] py-4 pr-4 text-center">
+                      <p className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
+                        {patient.nextApptDate}
+                      </p>
+                      <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                        {patient.nextApptTime}
+                      </p>
+                    </div>
+
+                    {/* ── ACTIONS ── */}
+                    <div className="flex w-[8%] items-center gap-2 py-4 pr-4">
+                      {/* View record */}
+                      <button
+                        type="button"
+                        aria-label={`View ${patient.name}`}
+                        className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
+                        style={{ color: '#4A7080' }}
+                      >
+                        <Eye style={{ width: 16, height: 16 }} />
+                      </button>
+
+                      {/* Context menu */}
+                      <div
+                        className="relative"
+                        ref={actionMenuId === patient.id ? actionMenuRef : undefined}
+                      >
+                        <button
+                          type="button"
+                          aria-label={`More actions for ${patient.name}`}
+                          onClick={() =>
+                            setActionMenuId((prev) => (prev === patient.id ? null : patient.id))
+                          }
+                          className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
+                          style={{ color: '#4A7080' }}
+                        >
+                          <MoreVertical style={{ width: 16, height: 16 }} />
+                        </button>
+
+                        {actionMenuId === patient.id && (
+                          <div
+                            className="absolute top-full right-0 z-30 mt-1 w-52 overflow-hidden rounded-[12px] bg-white py-1.5"
+                            style={{
+                              border: '1px solid rgba(0,100,130,0.12)',
+                              boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',
+                            }}
+                          >
+                            {DOCTOR_ACTIONS.filter(
+                              (action) => !action.hideFor?.includes(patient.status),
+                            ).map((action) => {
+                              const ActionIcon = action.icon;
+                              return (
+                                <button
+                                  key={action.key}
+                                  type="button"
+                                  onClick={() => setActionMenuId(null)}
+                                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm leading-5.5 transition-colors hover:bg-[#E6F8FD]"
+                                  style={{ color: action.danger ? '#EF4444' : '#2F3A40' }}
+                                >
+                                  <ActionIcon
+                                    style={{
+                                      width: 14,
+                                      height: 14,
+                                      color: action.danger ? '#EF4444' : '#00B4D8',
+                                    }}
+                                  />
+                                  {action.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
