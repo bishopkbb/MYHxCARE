@@ -1,0 +1,286 @@
+/**
+ * Mock fixtures for the patients domain.
+ * These replace the real API responses during Phase 1–5 development.
+ * Swap out by pointing the hooks to real endpoints in Phase 6.
+ */
+
+import { Activity, Share2, Stethoscope, Users } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
+import type { Allergy } from '@/types/patient.types';
+
+// ── Patients list view ────────────────────────────────────────────────────────
+
+export type PatientRecordStatus = 'admitted' | 'active' | 'follow-up' | 'referred' | 'discharged';
+
+export type PatientRecord = {
+  id: string;
+  initials: string;
+  avatarBg: string;
+  name: string;
+  mrn: string;
+  meta: string;
+  complaint: string;
+  allergies: string[];
+  lastVisitDate: string; // DD/MM/YYYY
+  lastVisitTime: string; // HH:MM (24 h)
+  nextApptDate: string; // DD/MM/YYYY
+  nextApptTime: string; // HH:MM (24 h)
+  status: PatientRecordStatus;
+  faculty: string;
+};
+
+export type PatientStatCard = {
+  title: string;
+  icon: LucideIcon;
+  count: string;
+  label: string;
+  accent: string;
+  iconBg: string;
+};
+
+export const PATIENT_STAT_CARDS: PatientStatCard[] = [
+  {
+    title: 'Total Patients',
+    icon: Users,
+    count: '1,240',
+    label: 'All time',
+    accent: '#0098CC',
+    iconBg: 'rgba(0,152,204,0.1)',
+  },
+  {
+    title: 'Active Patients',
+    icon: Stethoscope,
+    count: '890',
+    label: 'Under your care',
+    accent: '#22C55E',
+    iconBg: 'rgba(34,197,94,0.1)',
+  },
+  {
+    title: 'Assigned Patients',
+    icon: Stethoscope,
+    count: '4',
+    label: 'This week',
+    accent: '#F59E0B',
+    iconBg: 'rgba(245,158,11,0.1)',
+  },
+  {
+    title: 'Emergency',
+    icon: Activity,
+    count: '3',
+    label: 'Chronic Care',
+    accent: '#EF4444',
+    iconBg: 'rgba(239,68,68,0.1)',
+  },
+  {
+    title: 'Active Referrals',
+    icon: Share2,
+    count: '3',
+    label: '2 awaiting response',
+    accent: '#3B82F6',
+    iconBg: 'rgba(59,130,246,0.1)',
+  },
+];
+
+export const MOCK_PATIENTS: PatientRecord[] = [
+  {
+    id: 'p1',
+    initials: 'AO',
+    avatarBg: '#EF4444',
+    name: 'Adaeze Okonkwo',
+    mrn: 'MRN-2024-00451',
+    meta: '21y Female · Medicine & Surgery',
+    complaint: 'Persistent headache and fever for 3 days',
+    allergies: ['Penicillin', 'Sulfonamides'],
+    lastVisitDate: '28/06/2026',
+    lastVisitTime: '09:15',
+    nextApptDate: '12/07/2026',
+    nextApptTime: '10:00',
+    status: 'admitted',
+    faculty: 'Medicine & Surgery',
+  },
+  {
+    id: 'p2',
+    initials: 'IE',
+    avatarBg: '#EF4444',
+    name: 'Ifeanyi Eze',
+    mrn: 'MRN-2024-00592',
+    meta: '20y Male · Computer Science',
+    complaint: 'Suspected typhoid — high fever, abdominal pain, rose spots',
+    allergies: ['Penicillin'],
+    lastVisitDate: '28/06/2026',
+    lastVisitTime: '09:15',
+    nextApptDate: '14/07/2026',
+    nextApptTime: '09:00',
+    status: 'admitted',
+    faculty: 'Computer Science',
+  },
+  {
+    id: 'p3',
+    initials: 'NA',
+    avatarBg: '#22C55E',
+    name: 'Ngozi Adeyemi',
+    mrn: 'MRN-2024-00512',
+    meta: '23y Female · Law',
+    complaint: 'Diffuse skin rash and itching for 5 days',
+    allergies: ['Penicillin', 'Sulfonamides'],
+    lastVisitDate: '28/06/2026',
+    lastVisitTime: '09:15',
+    nextApptDate: '15/07/2026',
+    nextApptTime: '11:00',
+    status: 'active',
+    faculty: 'Law',
+  },
+  {
+    id: 'p4',
+    initials: 'BA',
+    avatarBg: '#F59E0B',
+    name: 'Babatunde Alade',
+    mrn: 'MRN-2024-00356',
+    meta: '20y Male · Business Administration',
+    complaint: 'Follow-up for treated malaria — monitoring recovery',
+    allergies: [],
+    lastVisitDate: '28/06/2026',
+    lastVisitTime: '09:15',
+    nextApptDate: '12/07/2026',
+    nextApptTime: '10:00',
+    status: 'follow-up',
+    faculty: 'Business Administration',
+  },
+  {
+    id: 'p5',
+    initials: 'ZB',
+    avatarBg: '#3B82F6',
+    name: 'Zainab Bello',
+    mrn: 'MRN-2024-00571',
+    meta: '20y Female · Microbiology',
+    complaint: 'Suspected typhoid — awaiting Widal test results, on IV fluids',
+    allergies: ['Penicillin'],
+    lastVisitDate: '28/06/2026',
+    lastVisitTime: '09:15',
+    nextApptDate: '12/07/2026',
+    nextApptTime: '10:00',
+    status: 'referred',
+    faculty: 'Microbiology',
+  },
+  {
+    id: 'p6',
+    initials: 'SA',
+    avatarBg: '#3B82F6',
+    name: 'Segun Adeleke',
+    mrn: 'MRN-2024-00614',
+    meta: '21y Male · Engineering',
+    complaint: 'Orthopaedic referral — post-appendicitis follow-up',
+    allergies: ['NSAIDs'],
+    lastVisitDate: '28/06/2026',
+    lastVisitTime: '09:15',
+    nextApptDate: '18/07/2026',
+    nextApptTime: '14:30',
+    status: 'referred',
+    faculty: 'Engineering',
+  },
+  {
+    id: 'p7',
+    initials: 'CN',
+    avatarBg: '#6B7280',
+    name: 'Chisom Nwosu',
+    mrn: 'MRN-2024-00234',
+    meta: '21y Female · Education',
+    complaint: 'Malaria — fully treated, fever resolved, appetite restored',
+    allergies: ['Penicillin', 'Sulfonamides'],
+    lastVisitDate: '28/06/2026',
+    lastVisitTime: '09:15',
+    nextApptDate: '12/07/2026',
+    nextApptTime: '10:00',
+    status: 'discharged',
+    faculty: 'Education',
+  },
+];
+
+// ── Patient detail view ───────────────────────────────────────────────────────
+
+export type PatientDetailMock = {
+  id: string;
+  initials: string;
+  name: string;
+  mrn: string;
+  age: string;
+  gender: string;
+  bloodGroup: string;
+  allergies: Allergy[];
+  isUrgent: boolean;
+};
+
+export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
+  p1: {
+    id: 'p1',
+    initials: 'AO',
+    name: 'Adaeze Okonkwo',
+    mrn: 'MRN-2024-00451',
+    age: '21y',
+    gender: 'Female',
+    bloodGroup: 'O+',
+    allergies: [
+      {
+        id: 'al-p1-1',
+        substance: 'Penicillin',
+        reaction: 'Anaphylaxis',
+        severity: 'LIFE_THREATENING',
+        recordedAt: '2024-03-12T08:30:00Z',
+        recordedBy: 'Dr. A. Nwosu',
+      },
+      {
+        id: 'al-p1-2',
+        substance: 'Sulfonamides',
+        reaction: 'Urticaria and angioedema',
+        severity: 'SEVERE',
+        recordedAt: '2024-03-12T08:30:00Z',
+        recordedBy: 'Dr. A. Nwosu',
+      },
+    ],
+    isUrgent: true,
+  },
+  p2: {
+    id: 'p2',
+    initials: 'IE',
+    name: 'Ifeanyi Eze',
+    mrn: 'MRN-2024-00592',
+    age: '20y',
+    gender: 'Male',
+    bloodGroup: 'A+',
+    allergies: [],
+    isUrgent: false,
+  },
+  p3: {
+    id: 'p3',
+    initials: 'NA',
+    name: 'Ngozi Adeyemi',
+    mrn: 'MRN-2024-00512',
+    age: '23y',
+    gender: 'Female',
+    bloodGroup: 'B-',
+    allergies: [
+      {
+        id: 'al-p3-1',
+        substance: 'Aspirin',
+        reaction: 'Bronchospasm and rhinitis',
+        severity: 'SEVERE',
+        recordedAt: '2024-05-18T10:00:00Z',
+        recordedBy: 'Dr. C. Obi',
+      },
+    ],
+    isUrgent: false,
+  },
+};
+
+export const FALLBACK_PATIENT_DETAIL: PatientDetailMock = {
+  id: 'unknown',
+  initials: '??',
+  name: 'Unknown Patient',
+  mrn: 'MRN-0000-00000',
+  age: '—',
+  gender: '—',
+  bloodGroup: '—',
+  allergies: [],
+  isUrgent: false,
+};

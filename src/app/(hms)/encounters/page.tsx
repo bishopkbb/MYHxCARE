@@ -14,7 +14,12 @@ import {
   Thermometer,
   Users,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+
+import { PermissionGate } from '@/components/shared/PermissionGate';
+import { PERMISSIONS } from '@/constants/permissions';
+import { MOCK_QUEUE, type PatientStatus } from '@/features/encounters/__mocks__/encounterFixtures';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -24,33 +29,6 @@ type QueueTab = {
   count: number;
   badgeBg: string;
   badgeColor: string;
-};
-
-type PatientStatus =
-  | 'waiting'
-  | 'in-consultation'
-  | 'emergency'
-  | 'completed'
-  | 'follow-up'
-  | 'new-admissions'
-  | 'discharged'
-  | 'under-observation';
-
-type PatientRow = {
-  id: string;
-  initials: string;
-  avatarBg: string;
-  name: string;
-  mrn: string;
-  meta: string;
-  complaint: string;
-  allergies: string[];
-  hr: number;
-  temp: number;
-  bp: string;
-  waitDisplay: string | null; // null → "In progress"
-  completedAt: string | null; // e.g. "09:45"
-  status: PatientStatus;
 };
 
 type StatusCfg = {
@@ -127,496 +105,97 @@ const STATUS_CFG: Record<PatientStatus, StatusCfg> = {
   },
 };
 
-// ── Mock data — will be replaced with real API data in Phase 6 ─────────────────
+// ── UI config ─────────────────────────────────────────────────────────────────
 
 const QUEUE_TABS: QueueTab[] = [
   {
     id: 'all',
     label: 'All Patients',
-    count: 8,
+    count: 0,
     badgeBg: 'rgba(0,180,216,0.12)',
     badgeColor: '#00B4D8',
   },
   {
     id: 'waiting',
     label: 'Waiting',
-    count: 3,
+    count: 0,
     badgeBg: 'rgba(245,158,11,0.12)',
     badgeColor: '#F59E0B',
   },
   {
     id: 'in-consultation',
     label: 'In Consultation',
-    count: 2,
+    count: 0,
     badgeBg: 'rgba(0,180,216,0.12)',
     badgeColor: '#00B4D8',
   },
   {
     id: 'completed',
     label: 'Completed',
-    count: 2,
+    count: 0,
     badgeBg: 'rgba(34,197,94,0.12)',
     badgeColor: '#22C55E',
   },
   {
     id: 'emergency',
     label: 'Emergency',
-    count: 1,
+    count: 0,
     badgeBg: 'rgba(239,68,68,0.12)',
     badgeColor: '#EF4444',
   },
   {
     id: 'follow-up',
     label: 'Follow-up Needed',
-    count: 4,
+    count: 0,
     badgeBg: 'rgba(245,158,11,0.12)',
     badgeColor: '#F59E0B',
   },
   {
     id: 'new-admissions',
     label: 'New Admissions',
-    count: 5,
+    count: 0,
     badgeBg: 'rgba(59,130,246,0.12)',
     badgeColor: '#3B82F6',
   },
   {
     id: 'discharged',
     label: 'Discharged',
-    count: 6,
+    count: 0,
     badgeBg: 'rgba(107,114,128,0.12)',
     badgeColor: '#6B7280',
   },
   {
     id: 'under-observation',
     label: 'Under Observation',
-    count: 3,
+    count: 0,
     badgeBg: 'rgba(139,92,246,0.12)',
     badgeColor: '#8B5CF6',
   },
 ];
 
-const MOCK_QUEUE: PatientRow[] = [
-  {
-    id: 'q1',
-    initials: 'AO',
-    avatarBg: '#F59E0B',
-    name: 'Adaeze Okonkwo',
-    mrn: 'MRN-2024-00451',
-    meta: '21y Female · Medicine & Surgery',
-    complaint: 'Persistent headache and fever for 3 days',
-    allergies: ['Penicillin', 'Sulfonamides'],
-    hr: 98,
-    temp: 38.7,
-    bp: '132/86',
-    waitDisplay: '47 min',
-    completedAt: null,
-    status: 'waiting',
-  },
-  {
-    id: 'q2',
-    initials: 'CE',
-    avatarBg: '#00B4D8',
-    name: 'Chukwuemeka Eze',
-    mrn: 'MRN-2024-00389',
-    meta: '19y Male · Engineering',
-    complaint: 'Abdominal pain and nausea since yesterday',
-    allergies: [],
-    hr: 84,
-    temp: 37.2,
-    bp: '118/75',
-    waitDisplay: null,
-    completedAt: null,
-    status: 'in-consultation',
-  },
-  {
-    id: 'q3',
-    initials: 'NA',
-    avatarBg: '#EF4444',
-    name: 'Ngozi Adeyemi',
-    mrn: 'MRN-2024-00512',
-    meta: '23y Female · Law',
-    complaint: 'Chest pain and difficulty breathing — sudden onset',
-    allergies: ['Aspirin', 'Codeine'],
-    hr: 118,
-    temp: 37.8,
-    bp: '158/102',
-    waitDisplay: '12 min',
-    completedAt: null,
-    status: 'emergency',
-  },
-  {
-    id: 'q4',
-    initials: 'IM',
-    avatarBg: '#0098CC',
-    name: 'Ibrahim Musa',
-    mrn: 'MRN-2024-00301',
-    meta: '20y Male · Natural Sciences',
-    complaint: 'Routine checkup and malaria prophylaxis refill',
-    allergies: [],
-    hr: 72,
-    temp: 36.8,
-    bp: '116/72',
-    waitDisplay: null,
-    completedAt: '09:45',
-    status: 'completed',
-  },
-  {
-    id: 'q5',
-    initials: 'CO',
-    avatarBg: '#25464D',
-    name: 'Chinwe Okafor',
-    mrn: 'MRN-2024-00467',
-    meta: '22y Female · Medicine & Surgery',
-    complaint: 'Diffuse skin rash and itching for 5 days',
-    allergies: ['Latex'],
-    hr: 76,
-    temp: 37.0,
-    bp: '110/70',
-    waitDisplay: '31 min',
-    completedAt: null,
-    status: 'waiting',
-  },
-  {
-    id: 'q6',
-    initials: 'DO',
-    avatarBg: '#F59E0B',
-    name: 'David Osei',
-    mrn: 'MRN-2024-00398',
-    meta: '24y Male · Environmental Sciences',
-    complaint: 'Severe throbbing headache, photophobia, neck stiffness',
-    allergies: ['Tetracycline'],
-    hr: 104,
-    temp: 39.1,
-    bp: '140/90',
-    waitDisplay: '58 min',
-    completedAt: null,
-    status: 'waiting',
-  },
-  {
-    id: 'q7',
-    initials: 'AN',
-    avatarBg: '#00B4D8',
-    name: 'Amaka Nwosu',
-    mrn: 'MRN-2024-00489',
-    meta: '21y Female · Education',
-    complaint: 'Irregular menstrual cycle and pelvic pain',
-    allergies: ['NSAIDs'],
-    hr: 80,
-    temp: 37.1,
-    bp: '108/68',
-    waitDisplay: null,
-    completedAt: null,
-    status: 'in-consultation',
-  },
-  {
-    id: 'q8',
-    initials: 'BA',
-    avatarBg: '#0098CC',
-    name: 'Babatunde Alade',
-    mrn: 'MRN-2024-00356',
-    meta: '20y Male · Business Administration',
-    complaint: 'Follow-up for treated malaria — feeling better',
-    allergies: [],
-    hr: 78,
-    temp: 36.9,
-    bp: '120/78',
-    waitDisplay: null,
-    completedAt: '10:20',
-    status: 'completed',
-  },
-  // ── Follow-up Needed ──────────────────────────────────────────────────────
-  {
-    id: 'q9',
-    initials: 'EO',
-    avatarBg: '#3B82F6',
-    name: 'Emeka Obi',
-    mrn: 'MRN-2024-00521',
-    meta: '22y Male · Pharmacy',
-    complaint: 'Follow-up for hypertension — BP monitoring review',
-    allergies: [],
-    hr: 78,
-    temp: 36.9,
-    bp: '128/82',
-    waitDisplay: '15 min',
-    completedAt: null,
-    status: 'follow-up' as const,
-  },
-  {
-    id: 'q10',
-    initials: 'KA',
-    avatarBg: '#EC4899',
-    name: 'Kemi Adebayo',
-    mrn: 'MRN-2024-00563',
-    meta: '20y Female · Mass Communication',
-    complaint: 'Follow-up post-UTI treatment — repeat urinalysis due',
-    allergies: ['Sulfonamides'],
-    hr: 72,
-    temp: 36.7,
-    bp: '110/68',
-    waitDisplay: '22 min',
-    completedAt: null,
-    status: 'follow-up' as const,
-  },
-  {
-    id: 'q11',
-    initials: 'TO',
-    avatarBg: '#22C55E',
-    name: 'Tolu Ogundimu',
-    mrn: 'MRN-2024-00478',
-    meta: '23y Male · Agriculture',
-    complaint: 'Follow-up wound check — laceration from lab accident',
-    allergies: ['Iodine'],
-    hr: 76,
-    temp: 36.8,
-    bp: '120/76',
-    waitDisplay: '38 min',
-    completedAt: null,
-    status: 'follow-up' as const,
-  },
-  {
-    id: 'q12',
-    initials: 'BN',
-    avatarBg: '#8B5CF6',
-    name: 'Blessing Nkwuocha',
-    mrn: 'MRN-2024-00534',
-    meta: '21y Female · Economics',
-    complaint: 'Follow-up for anaemia — repeat FBC and iron panel',
-    allergies: [],
-    hr: 88,
-    temp: 37.0,
-    bp: '104/64',
-    waitDisplay: '51 min',
-    completedAt: null,
-    status: 'follow-up' as const,
-  },
-  // ── New Admissions ────────────────────────────────────────────────────────
-  {
-    id: 'q13',
-    initials: 'IE',
-    avatarBg: '#F97316',
-    name: 'Ifeanyi Eze',
-    mrn: 'MRN-2024-00592',
-    meta: '20y Male · Computer Science',
-    complaint: 'Suspected typhoid — high fever, abdominal pain, rose spots',
-    allergies: ['Penicillin'],
-    hr: 102,
-    temp: 39.3,
-    bp: '108/70',
-    waitDisplay: '5 min',
-    completedAt: null,
-    status: 'new-admissions' as const,
-  },
-  {
-    id: 'q14',
-    initials: 'GO',
-    avatarBg: '#14B8A6',
-    name: 'Grace Okafor',
-    mrn: 'MRN-2024-00607',
-    meta: '22y Female · Nursing Science',
-    complaint: 'Severe dehydration — vomiting and diarrhoea for 48 hours',
-    allergies: [],
-    hr: 114,
-    temp: 37.4,
-    bp: '98/60',
-    waitDisplay: '8 min',
-    completedAt: null,
-    status: 'new-admissions' as const,
-  },
-  {
-    id: 'q15',
-    initials: 'SA',
-    avatarBg: '#6366F1',
-    name: 'Segun Adeleke',
-    mrn: 'MRN-2024-00614',
-    meta: '21y Male · Engineering',
-    complaint: 'Suspected appendicitis — right iliac fossa pain, guarding',
-    allergies: ['NSAIDs'],
-    hr: 108,
-    temp: 38.2,
-    bp: '126/82',
-    waitDisplay: '3 min',
-    completedAt: null,
-    status: 'new-admissions' as const,
-  },
-  {
-    id: 'q16',
-    initials: 'FH',
-    avatarBg: '#A855F7',
-    name: 'Fatima Hassan',
-    mrn: 'MRN-2024-00628',
-    meta: '19y Female · Medicine & Surgery',
-    complaint: 'Severe iron-deficiency anaemia — pallor, fatigue, dyspnoea',
-    allergies: [],
-    hr: 110,
-    temp: 36.9,
-    bp: '100/62',
-    waitDisplay: '11 min',
-    completedAt: null,
-    status: 'new-admissions' as const,
-  },
-  {
-    id: 'q17',
-    initials: 'PO',
-    avatarBg: '#0EA5E9',
-    name: 'Pius Onwuka',
-    mrn: 'MRN-2024-00635',
-    meta: '24y Male · Architecture',
-    complaint: 'Severe headache, neck stiffness, photophobia — query meningitis',
-    allergies: ['Sulfonamides', 'Penicillin'],
-    hr: 116,
-    temp: 39.6,
-    bp: '144/94',
-    waitDisplay: '2 min',
-    completedAt: null,
-    status: 'new-admissions' as const,
-  },
-  // ── Discharged ────────────────────────────────────────────────────────────
-  {
-    id: 'q18',
-    initials: 'CN',
-    avatarBg: '#22C55E',
-    name: 'Chisom Nwosu',
-    mrn: 'MRN-2024-00234',
-    meta: '21y Female · Education',
-    complaint: 'Malaria — fully treated, fever resolved, appetite restored',
-    allergies: [],
-    hr: 70,
-    temp: 36.5,
-    bp: '112/72',
-    waitDisplay: null,
-    completedAt: '07:30',
-    status: 'discharged' as const,
-  },
-  {
-    id: 'q19',
-    initials: 'AG',
-    avatarBg: '#D97706',
-    name: 'Abdullahi Garba',
-    mrn: 'MRN-2024-00267',
-    meta: '22y Male · Political Science',
-    complaint: 'Wound care and dressing — healed laceration on right hand',
-    allergies: ['Iodine'],
-    hr: 74,
-    temp: 36.6,
-    bp: '118/76',
-    waitDisplay: null,
-    completedAt: '08:15',
-    status: 'discharged' as const,
-  },
-  {
-    id: 'q20',
-    initials: 'NE',
-    avatarBg: '#EF4444',
-    name: 'Ngozi Eke',
-    mrn: 'MRN-2024-00298',
-    meta: '20y Female · Biochemistry',
-    complaint: 'Post-appendectomy recovery — pain controlled, wound clean',
-    allergies: ['Codeine'],
-    hr: 68,
-    temp: 36.4,
-    bp: '108/68',
-    waitDisplay: null,
-    completedAt: '08:50',
-    status: 'discharged' as const,
-  },
-  {
-    id: 'q21',
-    initials: 'SO',
-    avatarBg: '#3B82F6',
-    name: 'Samuel Oladele',
-    mrn: 'MRN-2024-00315',
-    meta: '23y Male · Law',
-    complaint: 'Viral fever — resolved after supportive treatment and rest',
-    allergies: [],
-    hr: 72,
-    temp: 36.7,
-    bp: '116/74',
-    waitDisplay: null,
-    completedAt: '09:10',
-    status: 'discharged' as const,
-  },
-  {
-    id: 'q22',
-    initials: 'AO',
-    avatarBg: '#F59E0B',
-    name: 'Adaora Obiechina',
-    mrn: 'MRN-2024-00322',
-    meta: '22y Female · Statistics',
-    complaint: 'UTI treatment complete — symptoms resolved, course finished',
-    allergies: ['Sulfonamides'],
-    hr: 76,
-    temp: 36.6,
-    bp: '110/70',
-    waitDisplay: null,
-    completedAt: '09:35',
-    status: 'discharged' as const,
-  },
-  {
-    id: 'q23',
-    initials: 'MA',
-    avatarBg: '#6B7280',
-    name: 'Musa Aliyu',
-    mrn: 'MRN-2024-00348',
-    meta: '25y Male · Mechanical Engineering',
-    complaint: 'Orthopaedic consultation — ankle sprain assessed, physio referral given',
-    allergies: [],
-    hr: 78,
-    temp: 36.8,
-    bp: '122/78',
-    waitDisplay: null,
-    completedAt: '10:05',
-    status: 'discharged' as const,
-  },
-  // ── Under Observation ─────────────────────────────────────────────────────
-  {
-    id: 'q24',
-    initials: 'ZB',
-    avatarBg: '#8B5CF6',
-    name: 'Zainab Bello',
-    mrn: 'MRN-2024-00571',
-    meta: '20y Female · Microbiology',
-    complaint: 'Suspected typhoid — awaiting Widal test results, on IV fluids',
-    allergies: ['Penicillin'],
-    hr: 96,
-    temp: 38.4,
-    bp: '114/72',
-    waitDisplay: null,
-    completedAt: null,
-    status: 'under-observation' as const,
-  },
-  {
-    id: 'q25',
-    initials: 'CK',
-    avatarBg: '#0098CC',
-    name: 'Chidi Okeke',
-    mrn: 'MRN-2024-00584',
-    meta: '23y Male · Physics',
-    complaint: 'Post-procedure monitoring — minor excision, vitals stable',
-    allergies: [],
-    hr: 82,
-    temp: 37.3,
-    bp: '120/80',
-    waitDisplay: null,
-    completedAt: null,
-    status: 'under-observation' as const,
-  },
-  {
-    id: 'q26',
-    initials: 'NN',
-    avatarBg: '#F97316',
-    name: 'Nkechi Nnaji',
-    mrn: 'MRN-2024-00598',
-    meta: '22y Female · Food Science',
-    complaint: 'Allergic reaction — generalised urticaria, responding to antihistamines',
-    allergies: ['NSAIDs', 'Latex'],
-    hr: 92,
-    temp: 37.6,
-    bp: '126/80',
-    waitDisplay: null,
-    completedAt: null,
-    status: 'under-observation' as const,
-  },
-];
+// ── Column definitions (header + body share these widths) ─────────────────────
+
+const COLS = [
+  { key: 'patient', label: 'Patient', width: 'w-[22%] xl:w-[21%]', headerPad: 'pl-5 pr-3' },
+  { key: 'complaint', label: 'Chief Complaint', width: 'w-[35%] xl:w-[26%]', headerPad: 'pr-4' },
+  { key: 'vitals', label: 'Vitals', width: 'hidden xl:block xl:w-[13%]', headerPad: 'pr-4' },
+  { key: 'wait', label: 'Wait Time', width: 'hidden xl:block xl:w-[12%]', headerPad: 'pr-4' },
+  { key: 'status', label: 'Status', width: 'w-[18%] xl:w-[13%]', headerPad: 'pr-4' },
+  { key: 'actions', label: 'Actions', width: 'w-[25%] xl:w-[15%]', headerPad: 'pr-4' },
+] as const;
+
+// ── Tab → status mapping ──────────────────────────────────────────────────────
+
+const TAB_STATUS_MAP: Partial<Record<string, PatientStatus>> = {
+  waiting: 'waiting',
+  'in-consultation': 'in-consultation',
+  completed: 'completed',
+  emergency: 'emergency',
+  'follow-up': 'follow-up',
+  'new-admissions': 'new-admissions',
+  discharged: 'discharged',
+  'under-observation': 'under-observation',
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -633,19 +212,6 @@ function getTempColor(temp: number): string {
   return '#25464D';
 }
 
-// ── Tab → status mapping ──────────────────────────────────────────────────────
-
-const TAB_STATUS_MAP: Partial<Record<string, PatientStatus>> = {
-  waiting: 'waiting',
-  'in-consultation': 'in-consultation',
-  completed: 'completed',
-  emergency: 'emergency',
-  'follow-up': 'follow-up',
-  'new-admissions': 'new-admissions',
-  discharged: 'discharged',
-  'under-observation': 'under-observation',
-};
-
 function getTabCount(tabId: string): number {
   if (tabId === 'all') return MOCK_QUEUE.length;
   const status = TAB_STATUS_MAP[tabId];
@@ -653,22 +219,10 @@ function getTabCount(tabId: string): number {
   return MOCK_QUEUE.filter((p) => p.status === status).length;
 }
 
-// ── Column definitions (header + body share these widths) ─────────────────────
-
-// lg (4 col):  22 + 35 + 18 + 25 = 100%
-// xl (6 col):  21 + 26 + 13 + 12 + 13 + 15 = 100%
-const COLS = [
-  { key: 'patient', label: 'Patient', width: 'w-[22%] xl:w-[21%]', headerPad: 'pl-5 pr-3' },
-  { key: 'complaint', label: 'Chief Complaint', width: 'w-[35%] xl:w-[26%]', headerPad: 'pr-4' },
-  { key: 'vitals', label: 'Vitals', width: 'hidden xl:block xl:w-[13%]', headerPad: 'pr-4' },
-  { key: 'wait', label: 'Wait Time', width: 'hidden xl:block xl:w-[12%]', headerPad: 'pr-4' },
-  { key: 'status', label: 'Status', width: 'w-[18%] xl:w-[13%]', headerPad: 'pr-4' },
-  { key: 'actions', label: 'Actions', width: 'w-[25%] xl:w-[15%]', headerPad: 'pr-4' },
-] as const;
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function EncountersPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('all');
   const [search, setSearch] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
@@ -1045,8 +599,8 @@ export default function EncountersPage() {
                   className="flex items-center gap-2 border-t px-3 py-3"
                   style={{ borderColor: 'rgba(0,100,130,0.06)' }}
                 >
-                  <div className="size-9 rounded-[8px] bg-slate-100" />
-                  <div className="h-9 flex-1 rounded-[8px] bg-slate-100" />
+                  <div className="size-11 rounded-[8px] bg-slate-100" />
+                  <div className="h-11 flex-1 rounded-[8px] bg-slate-100" />
                 </div>
               </div>
             ))}
@@ -1197,29 +751,32 @@ export default function EncountersPage() {
                   </div>
                 </div>
 
-                {/* Actions */}
+                {/* Actions — touch targets ≥ 44px per WCAG 2.1 AA */}
                 <div
                   className="flex items-center gap-2 border-t px-3 py-3"
                   style={{ borderColor: 'rgba(0,100,130,0.06)' }}
                 >
                   <button
                     type="button"
+                    onClick={() => router.push(`/patients/${patient.id}`)}
                     className="flex shrink-0 items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
-                    style={{ width: 36, height: 36, background: '#E2EDF1' }}
+                    style={{ width: 44, height: 44, background: '#E2EDF1' }}
                     aria-label={`View details for ${patient.name}`}
                   >
-                    <Eye style={{ width: 14, height: 14, color: '#4A7080' }} />
+                    <Eye style={{ width: 16, height: 16, color: '#4A7080' }} />
                   </button>
-                  <button
-                    type="button"
-                    disabled={patient.status === 'completed'}
-                    className="flex-1 rounded-[8px] py-2.5 text-center text-sm font-medium text-white transition-opacity disabled:cursor-default"
-                    style={{
-                      background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
-                    }}
-                  >
-                    Start Consultation
-                  </button>
+                  <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                    <button
+                      type="button"
+                      disabled={patient.status === 'completed'}
+                      className="flex min-h-[44px] flex-1 items-center justify-center rounded-[8px] text-sm font-medium text-white transition-opacity disabled:cursor-default disabled:opacity-60"
+                      style={{
+                        background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
+                      }}
+                    >
+                      Start Consultation
+                    </button>
+                  </PermissionGate>
                 </div>
               </div>
             );
@@ -1452,22 +1009,25 @@ export default function EncountersPage() {
                     <div className="flex w-[25%] items-center gap-2 py-5 pr-4 xl:w-[15%]">
                       <button
                         type="button"
+                        onClick={() => router.push(`/patients/${patient.id}`)}
                         className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
                         style={{ background: '#E2EDF1' }}
                         aria-label={`View details for ${patient.name}`}
                       >
                         <Eye style={{ width: 16, height: 16, color: '#4A7080' }} />
                       </button>
-                      <button
-                        type="button"
-                        disabled={patient.status === 'completed'}
-                        className="flex-1 cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-default disabled:opacity-60"
-                        style={{
-                          background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
-                        }}
-                      >
-                        Start Consultation
-                      </button>
+                      <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                        <button
+                          type="button"
+                          disabled={patient.status === 'completed'}
+                          className="flex-1 cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-default disabled:opacity-60"
+                          style={{
+                            background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
+                          }}
+                        >
+                          Start Consultation
+                        </button>
+                      </PermissionGate>
                     </div>
                   </div>
                 );

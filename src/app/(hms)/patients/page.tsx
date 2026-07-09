@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Activity,
   AlertTriangle,
   ChevronDown,
   ClipboardList,
@@ -20,37 +19,17 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+
+import { PermissionGate } from '@/components/shared/PermissionGate';
+import { PERMISSIONS } from '@/constants/permissions';
+import {
+  MOCK_PATIENTS,
+  PATIENT_STAT_CARDS,
+  type PatientRecordStatus,
+} from '@/features/patients/__mocks__/patientFixtures';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
-
-type PatientStatCard = {
-  title: string;
-  icon: LucideIcon;
-  count: string;
-  label: string;
-  accent: string;
-  iconBg: string;
-};
-
-type PatientRecordStatus = 'admitted' | 'active' | 'follow-up' | 'referred' | 'discharged';
-
-type PatientRecord = {
-  id: string;
-  initials: string;
-  avatarBg: string;
-  name: string;
-  mrn: string;
-  meta: string;
-  complaint: string;
-  allergies: string[];
-  lastVisitDate: string;
-  lastVisitTime: string;
-  nextApptDate: string;
-  nextApptTime: string;
-  status: PatientRecordStatus;
-  faculty: string;
-};
 
 type StatusCfg = {
   label: string;
@@ -194,181 +173,52 @@ const DOCTOR_ACTIONS: {
   key: string;
   label: string;
   icon: LucideIcon;
+  permission?: string;
   danger?: boolean;
   hideFor?: PatientRecordStatus[];
 }[] = [
   { key: 'view', label: 'View Patient Record', icon: Eye },
-  { key: 'consult', label: 'Start Consultation', icon: Stethoscope, hideFor: ['discharged'] },
-  { key: 'note', label: 'Add Clinical Note', icon: FileText },
-  { key: 'lab', label: 'Request Lab Test', icon: FlaskConical, hideFor: ['discharged'] },
-  { key: 'rx', label: 'Write Prescription', icon: ClipboardList, hideFor: ['discharged'] },
-  { key: 'refer', label: 'Refer Patient', icon: Share2, hideFor: ['referred', 'discharged'] },
+  {
+    key: 'consult',
+    label: 'Start Consultation',
+    icon: Stethoscope,
+    permission: PERMISSIONS.ENCOUNTERS_WRITE,
+    hideFor: ['discharged'],
+  },
+  {
+    key: 'note',
+    label: 'Add Clinical Note',
+    icon: FileText,
+    permission: PERMISSIONS.ENCOUNTERS_WRITE,
+  },
+  {
+    key: 'lab',
+    label: 'Request Lab Test',
+    icon: FlaskConical,
+    permission: PERMISSIONS.LAB_ORDERS_WRITE,
+    hideFor: ['discharged'],
+  },
+  {
+    key: 'rx',
+    label: 'Write Prescription',
+    icon: ClipboardList,
+    permission: PERMISSIONS.PRESCRIPTIONS_WRITE,
+    hideFor: ['discharged'],
+  },
+  {
+    key: 'refer',
+    label: 'Refer Patient',
+    icon: Share2,
+    permission: PERMISSIONS.REFERRALS_WRITE,
+    hideFor: ['referred', 'discharged'],
+  },
   {
     key: 'discharge',
     label: 'Discharge Patient',
     icon: LogOut,
+    permission: PERMISSIONS.ENCOUNTERS_WRITE,
     danger: true,
     hideFor: ['discharged'],
-  },
-];
-
-// ── Mock data — will be replaced with real API data in Phase 6 ────────────────
-
-const PATIENT_STAT_CARDS: PatientStatCard[] = [
-  {
-    title: 'Total Patients',
-    icon: Users,
-    count: '1,240',
-    label: 'All time',
-    accent: '#0098CC',
-    iconBg: 'rgba(0,152,204,0.1)',
-  },
-  {
-    title: 'Active Patients',
-    icon: Stethoscope,
-    count: '890',
-    label: 'Under your care',
-    accent: '#22C55E',
-    iconBg: 'rgba(34,197,94,0.1)',
-  },
-  {
-    title: 'Assigned Patients',
-    icon: Stethoscope,
-    count: '4',
-    label: 'This week',
-    accent: '#F59E0B',
-    iconBg: 'rgba(245,158,11,0.1)',
-  },
-  {
-    title: 'Emergency',
-    icon: Activity,
-    count: '3',
-    label: 'Chronic Care',
-    accent: '#EF4444',
-    iconBg: 'rgba(239,68,68,0.1)',
-  },
-  {
-    title: 'Active Referrals',
-    icon: Share2,
-    count: '3',
-    label: '2 awaiting response',
-    accent: '#3B82F6',
-    iconBg: 'rgba(59,130,246,0.1)',
-  },
-];
-
-const MOCK_PATIENTS: PatientRecord[] = [
-  {
-    id: 'p1',
-    initials: 'AO',
-    avatarBg: '#EF4444',
-    name: 'Adaeze Okonkwo',
-    mrn: 'MRN-2024-00451',
-    meta: '21y Female · Medicine & Surgery',
-    complaint: 'Persistent headache and fever for 3 days',
-    allergies: ['Penicillin', 'Sulfonamides'],
-    lastVisitDate: 'Jun 28, 2026',
-    lastVisitTime: '09:15am',
-    nextApptDate: 'Jul 12, 2026',
-    nextApptTime: '10:00am',
-    status: 'admitted',
-    faculty: 'Medicine & Surgery',
-  },
-  {
-    id: 'p2',
-    initials: 'IE',
-    avatarBg: '#EF4444',
-    name: 'Ifeanyi Eze',
-    mrn: 'MRN-2024-00592',
-    meta: '20y Male · Computer Science',
-    complaint: 'Suspected typhoid — high fever, abdominal pain, rose spots',
-    allergies: ['Penicillin'],
-    lastVisitDate: 'Jun 28, 2026',
-    lastVisitTime: '09:15am',
-    nextApptDate: 'Jul 14, 2026',
-    nextApptTime: '09:00am',
-    status: 'admitted',
-    faculty: 'Computer Science',
-  },
-  {
-    id: 'p3',
-    initials: 'NA',
-    avatarBg: '#22C55E',
-    name: 'Ngozi Adeyemi',
-    mrn: 'MRN-2024-00512',
-    meta: '23y Female · Law',
-    complaint: 'Diffuse skin rash and itching for 5 days',
-    allergies: ['Penicillin', 'Sulfonamides'],
-    lastVisitDate: 'Jun 28, 2026',
-    lastVisitTime: '09:15am',
-    nextApptDate: 'Jul 15, 2026',
-    nextApptTime: '11:00am',
-    status: 'active',
-    faculty: 'Law',
-  },
-  {
-    id: 'p4',
-    initials: 'BA',
-    avatarBg: '#F59E0B',
-    name: 'Babatunde Alade',
-    mrn: 'MRN-2024-00356',
-    meta: '20y Male · Business Administration',
-    complaint: 'Follow-up for treated malaria — monitoring recovery',
-    allergies: [],
-    lastVisitDate: 'Jun 28, 2026',
-    lastVisitTime: '09:15am',
-    nextApptDate: 'Jul 12, 2026',
-    nextApptTime: '10:00am',
-    status: 'follow-up',
-    faculty: 'Business Administration',
-  },
-  {
-    id: 'p5',
-    initials: 'ZB',
-    avatarBg: '#3B82F6',
-    name: 'Zainab Bello',
-    mrn: 'MRN-2024-00571',
-    meta: '20y Female · Microbiology',
-    complaint: 'Suspected typhoid — awaiting Widal test results, on IV fluids',
-    allergies: ['Penicillin'],
-    lastVisitDate: 'Jun 28, 2026',
-    lastVisitTime: '09:15am',
-    nextApptDate: 'Jul 12, 2026',
-    nextApptTime: '10:00am',
-    status: 'referred',
-    faculty: 'Microbiology',
-  },
-  {
-    id: 'p6',
-    initials: 'SA',
-    avatarBg: '#3B82F6',
-    name: 'Segun Adeleke',
-    mrn: 'MRN-2024-00614',
-    meta: '21y Male · Engineering',
-    complaint: 'Orthopaedic referral — post-appendicitis follow-up',
-    allergies: ['NSAIDs'],
-    lastVisitDate: 'Jun 28, 2026',
-    lastVisitTime: '09:15am',
-    nextApptDate: 'Jul 18, 2026',
-    nextApptTime: '02:30pm',
-    status: 'referred',
-    faculty: 'Engineering',
-  },
-  {
-    id: 'p7',
-    initials: 'CN',
-    avatarBg: '#6B7280',
-    name: 'Chisom Nwosu',
-    mrn: 'MRN-2024-00234',
-    meta: '21y Female · Education',
-    complaint: 'Malaria — fully treated, fever resolved, appetite restored',
-    allergies: ['Penicillin', 'Sulfonamides'],
-    lastVisitDate: 'Jun 28, 2026',
-    lastVisitTime: '09:15am',
-    nextApptDate: 'Jul 12, 2026',
-    nextApptTime: '10:00am',
-    status: 'discharged',
-    faculty: 'Education',
   },
 ];
 
@@ -729,13 +579,6 @@ export default function PatientsPage() {
       </div>
 
       {/* ── Quick-filter strip ─────────────────────────────────────────── */}
-      {/*
-        Figma: outer 974 px (gap 92 px), pill 765 px (bg #E6F8FD,
-        border-radius 12px, p 4px), Clear Filter 117 px.
-        Each dropdown button: h 36px, bg #FFFFFF, radius 8px, p 6px 12px,
-        DM Sans 500 12px/18px #25464D, chevron 24×24.
-        Clear Filter: h 40px, 1px solid #00B4D8, DM Sans 500 14px/22px #00B4D8.
-      */}
       <div
         ref={quickFilterRef}
         className="mt-4 flex flex-wrap items-center gap-3 lg:flex-nowrap lg:gap-[92px]"
@@ -1009,13 +852,15 @@ export default function PatientsPage() {
                     <Eye style={{ width: 14, height: 14, color: '#4A7080' }} />
                   </button>
                   {patient.status !== 'discharged' && (
-                    <button
-                      type="button"
-                      className="flex-1 rounded-[8px] py-2 text-center text-sm font-medium text-white transition-opacity hover:opacity-90"
-                      style={{ background: '#00B4D8' }}
-                    >
-                      Start Consultation
-                    </button>
+                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                      <button
+                        type="button"
+                        className="flex-1 rounded-[8px] py-2 text-center text-sm font-medium text-white transition-opacity hover:opacity-90"
+                        style={{ background: '#00B4D8' }}
+                      >
+                        Start Consultation
+                      </button>
+                    </PermissionGate>
                   )}
                 </div>
               </div>
@@ -1203,7 +1048,7 @@ export default function PatientsPage() {
 
                     {/* ── ACTIONS ── */}
                     <div className="flex w-[8%] items-center gap-2 py-5 pr-4">
-                      {/* View record */}
+                      {/* View record — always accessible */}
                       <button
                         type="button"
                         aria-label={`View ${patient.name}`}
@@ -1243,9 +1088,8 @@ export default function PatientsPage() {
                               (action) => !action.hideFor?.includes(patient.status),
                             ).map((action) => {
                               const ActionIcon = action.icon;
-                              return (
+                              const btn = (
                                 <button
-                                  key={action.key}
                                   type="button"
                                   onClick={() => {
                                     setActionMenuId(null);
@@ -1264,6 +1108,13 @@ export default function PatientsPage() {
                                   />
                                   {action.label}
                                 </button>
+                              );
+                              return action.permission ? (
+                                <PermissionGate key={action.key} permission={action.permission}>
+                                  {btn}
+                                </PermissionGate>
+                              ) : (
+                                <Fragment key={action.key}>{btn}</Fragment>
                               );
                             })}
                           </div>

@@ -618,7 +618,7 @@ export default function DashboardPage() {
           return (
             <div
               key={card.title}
-              className="flex flex-col rounded-[12px] p-4"
+              className="flex cursor-pointer flex-col rounded-[12px] p-4 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md"
               style={{
                 background: '#FFFFFF',
                 border: `1px solid ${card.accent}`,
@@ -715,7 +715,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={patient.id}
-                  className="flex items-center gap-2 py-3 pr-4 pl-4 sm:gap-4.5"
+                  className="flex items-center gap-2 py-3 pr-4 pl-4 transition-colors duration-100 hover:bg-[#F5FBFD] sm:gap-4.5"
                   style={{
                     background: cfg.rowBg,
                     borderLeft: `3px solid ${cfg.borderLeft}`,

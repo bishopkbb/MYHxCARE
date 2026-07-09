@@ -4,76 +4,18 @@ import { AlertTriangle, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
 
-// ── Types ──────────────────────────────────────────────────────────────────────
-
-type PatientDetail = {
-  id: string;
-  initials: string;
-  name: string;
-  mrn: string;
-  age: string;
-  gender: string;
-  bloodGroup: string;
-  allergies: string[];
-  isUrgent: boolean;
-};
-
-// ── Mock data — will be replaced with real API data in Phase 6 ────────────────
-
-const MOCK_PATIENTS: Record<string, PatientDetail> = {
-  p1: {
-    id: 'p1',
-    initials: 'AO',
-    name: 'Adaeze Okonkwo',
-    mrn: 'MRN-2024-00451',
-    age: '21y',
-    gender: 'Female',
-    bloodGroup: 'O+',
-    allergies: ['Penicillin', 'Sulfonamides'],
-    isUrgent: true,
-  },
-  p2: {
-    id: 'p2',
-    initials: 'IE',
-    name: 'Ifeanyi Eze',
-    mrn: 'MRN-2024-00592',
-    age: '20y',
-    gender: 'Male',
-    bloodGroup: 'A+',
-    allergies: [],
-    isUrgent: false,
-  },
-  p3: {
-    id: 'p3',
-    initials: 'NA',
-    name: 'Ngozi Adeyemi',
-    mrn: 'MRN-2024-00512',
-    age: '23y',
-    gender: 'Female',
-    bloodGroup: 'B-',
-    allergies: ['Aspirin'],
-    isUrgent: false,
-  },
-};
-
-const FALLBACK_PATIENT: PatientDetail = {
-  id: 'unknown',
-  initials: '??',
-  name: 'Unknown Patient',
-  mrn: 'MRN-0000-00000',
-  age: '—',
-  gender: '—',
-  bloodGroup: '—',
-  allergies: [],
-  isUrgent: false,
-};
+import { AllergyBanner } from '@/components/clinical/AllergyBanner';
+import {
+  FALLBACK_PATIENT_DETAIL,
+  MOCK_PATIENT_DETAILS,
+} from '@/features/patients/__mocks__/patientFixtures';
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function PatientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const patient = MOCK_PATIENTS[id] ?? FALLBACK_PATIENT;
+  const patient = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
 
   return (
     <div>
@@ -151,13 +93,13 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             BG: {patient.bloodGroup}
           </span>
 
-          {/* Allergy icon + pills */}
+          {/* Allergy icon + substance pills (max 2 + overflow chip) */}
           {patient.allergies.length > 0 && (
             <>
               <AlertTriangle style={{ width: 22, height: 22, color: '#FCA5A5', flexShrink: 0 }} />
               {patient.allergies.slice(0, 2).map((allergy) => (
                 <span
-                  key={allergy}
+                  key={allergy.id}
                   className="shrink-0 text-sm leading-[22px] font-medium"
                   style={{
                     borderRadius: 4,
@@ -168,7 +110,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                     fontFamily: 'var(--font-sans)',
                   }}
                 >
-                  {allergy}
+                  {allergy.substance}
                 </span>
               ))}
               {patient.allergies.length > 2 && (
@@ -209,6 +151,13 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           </div>
         )}
       </div>
+
+      {/* ── Allergy banner — shown below preview bar when allergies exist ── */}
+      {patient.allergies.length > 0 && (
+        <div className="px-5 pt-4">
+          <AllergyBanner allergies={patient.allergies} />
+        </div>
+      )}
 
       {/* ── Page content — subsequent sections will be built here ─────────── */}
       <div className="p-6" />
