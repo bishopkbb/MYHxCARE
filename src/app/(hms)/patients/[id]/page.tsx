@@ -155,7 +155,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           {patient.allergies.length > 0 && (
             <>
               <AlertTriangle style={{ width: 22, height: 22, color: '#FCA5A5', flexShrink: 0 }} />
-              {patient.allergies.map((allergy) => (
+              {patient.allergies.slice(0, 2).map((allergy) => (
                 <span
                   key={allergy}
                   className="shrink-0 text-sm leading-[22px] font-medium"
@@ -171,6 +171,21 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   {allergy}
                 </span>
               ))}
+              {patient.allergies.length > 2 && (
+                <span
+                  className="shrink-0 text-sm leading-[22px] font-medium"
+                  style={{
+                    borderRadius: 4,
+                    padding: '3px 8px',
+                    background: 'rgba(239,68,68,0.15)',
+                    border: '1px solid rgba(239,68,68,0.25)',
+                    color: '#FCA5A5',
+                    fontFamily: 'var(--font-sans)',
+                  }}
+                >
+                  +{patient.allergies.length - 2} more
+                </span>
+              )}
             </>
           )}
         </div>

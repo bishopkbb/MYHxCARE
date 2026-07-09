@@ -93,9 +93,11 @@ export function AppSidebar({
         >
           {/* Logo + brand + toggle */}
           <div className={cn('flex items-center gap-2.5', collapsed && 'flex-col')}>
-            {/* Logo */}
-            <div
-              className="flex size-12.5 shrink-0 items-center justify-center overflow-hidden rounded-[12px]"
+            {/* Logo — navigates home */}
+            <Link
+              href="/dashboard"
+              aria-label="Go to home dashboard"
+              className="group flex size-12.5 shrink-0 items-center justify-center overflow-hidden rounded-[12px] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(0,180,216,0.55)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none"
               style={{ background: '#25464D' }}
             >
               <Image
@@ -103,9 +105,9 @@ export function AppSidebar({
                 alt="MYHxCare"
                 width={50}
                 height={50}
-                className="size-12.5 object-contain"
+                className="size-12.5 object-contain transition-[filter] duration-200 group-hover:brightness-110"
               />
-            </div>
+            </Link>
 
             {/* Brand text — hidden when collapsed */}
             {!collapsed && (

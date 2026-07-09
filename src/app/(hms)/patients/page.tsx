@@ -525,7 +525,7 @@ export default function PatientsPage() {
           return (
             <div
               key={card.title}
-              className="flex flex-col rounded-[12px] p-5"
+              className="flex cursor-pointer flex-col rounded-[12px] p-5 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md"
               style={{
                 background: '#FFFFFF',
                 border: `1px solid ${card.accent}`,
@@ -603,7 +603,7 @@ export default function PatientsPage() {
 
             {filterOpen && (
               <div
-                className="absolute top-full right-0 z-20 mt-2 w-72 rounded-[12px] bg-white p-4"
+                className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-20 mt-2 w-72 rounded-[12px] bg-white p-4 duration-150"
                 style={{
                   border: '1px solid rgba(0,100,130,0.12)',
                   boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',
@@ -692,7 +692,7 @@ export default function PatientsPage() {
             </button>
             {exportOpen && (
               <div
-                className="absolute top-full right-0 z-20 mt-2 w-52 overflow-hidden rounded-[12px] bg-white py-1.5"
+                className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-20 mt-2 w-52 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
                 style={{
                   border: '1px solid rgba(0,100,130,0.12)',
                   boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',
@@ -778,7 +778,7 @@ export default function PatientsPage() {
 
                 {isOpen && (
                   <div
-                    className={`absolute top-full z-30 mt-1 min-w-[180px] overflow-hidden rounded-[12px] bg-white py-1.5 ${def.alignRight ? 'right-0' : 'left-0'}`}
+                    className={`animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full z-30 mt-1 min-w-[180px] overflow-hidden rounded-[12px] bg-white py-1.5 duration-150 ${def.alignRight ? 'right-0' : 'left-0'}`}
                     style={{
                       border: '1px solid rgba(0,100,130,0.12)',
                       boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',
@@ -879,12 +879,23 @@ export default function PatientsPage() {
           </div>
         ) : filteredPatients.length === 0 ? (
           <div
-            className="flex min-h-[180px] items-center justify-center rounded-[12px]"
+            className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px] py-10 text-center"
             style={{ background: 'rgba(226,237,241,0.25)' }}
           >
-            <p className="text-base leading-6" style={{ color: '#8A98A3' }}>
-              No patients match this filter.
-            </p>
+            <div
+              className="flex size-12 items-center justify-center rounded-full"
+              style={{ background: 'rgba(226,237,241,0.6)' }}
+            >
+              <Users style={{ width: 22, height: 22, color: '#8A98A3' }} />
+            </div>
+            <div>
+              <p className="text-sm leading-5.5 font-medium" style={{ color: '#4A7080' }}>
+                No patients match this filter
+              </p>
+              <p className="mt-0.5 text-xs leading-5" style={{ color: '#8A98A3' }}>
+                Adjust your search or clear filters
+              </p>
+            </div>
           </div>
         ) : (
           filteredPatients.map((patient) => {
@@ -892,7 +903,7 @@ export default function PatientsPage() {
             return (
               <div
                 key={patient.id}
-                className="overflow-hidden rounded-[12px] bg-white"
+                className="overflow-hidden rounded-[12px] bg-white transition-shadow duration-150 hover:shadow-md"
                 style={{
                   border: '1px solid rgba(0,100,130,0.08)',
                   borderLeft: `4px solid ${cfg.borderLeft}`,
@@ -1073,10 +1084,31 @@ export default function PatientsPage() {
               ))}
             </div>
           ) : filteredPatients.length === 0 ? (
-            <div className="flex min-h-[200px] items-center justify-center">
-              <p className="text-base leading-6" style={{ color: '#8A98A3' }}>
-                No patients match this filter.
-              </p>
+            <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 py-10 text-center">
+              <div
+                className="flex size-14 items-center justify-center rounded-full"
+                style={{ background: 'rgba(226,237,241,0.6)' }}
+              >
+                <Users style={{ width: 24, height: 24, color: '#8A98A3' }} />
+              </div>
+              <div>
+                <p className="text-base leading-6 font-medium" style={{ color: '#4A7080' }}>
+                  No patients match this filter
+                </p>
+                <p className="mt-0.5 text-sm leading-5.5" style={{ color: '#8A98A3' }}>
+                  Try adjusting your search or clearing the filters
+                </p>
+              </div>
+              {hasActiveQuickFilters && (
+                <button
+                  type="button"
+                  onClick={clearQuickFilters}
+                  className="mt-1 text-sm font-medium transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{ color: '#00B4D8' }}
+                >
+                  Clear all filters
+                </button>
+              )}
             </div>
           ) : (
             <div className="flex flex-col gap-2 pt-2">
@@ -1086,7 +1118,7 @@ export default function PatientsPage() {
                 return (
                   <div
                     key={patient.id}
-                    className="flex min-h-[110px] items-center bg-white"
+                    className="flex min-h-[110px] items-center bg-white transition-colors duration-100 hover:bg-[#F5FBFD]"
                     style={{
                       borderLeft: `5px solid ${cfg.borderLeft}`,
                       borderBottom: `3px solid ${cfg.borderLeft}`,
@@ -1201,7 +1233,7 @@ export default function PatientsPage() {
 
                         {actionMenuId === patient.id && (
                           <div
-                            className="absolute top-full right-0 z-30 mt-1 w-52 overflow-hidden rounded-[12px] bg-white py-1.5"
+                            className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 w-52 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
                             style={{
                               border: '1px solid rgba(0,100,130,0.12)',
                               boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',

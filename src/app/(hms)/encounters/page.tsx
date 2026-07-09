@@ -12,6 +12,7 @@ import {
   Printer,
   Search,
   Thermometer,
+  Users,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -810,7 +811,7 @@ export default function EncountersPage() {
 
             {filterOpen && (
               <div
-                className="absolute top-full right-0 z-20 mt-2 w-72 rounded-[12px] bg-white p-4"
+                className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-20 mt-2 w-72 rounded-[12px] bg-white p-4 duration-150"
                 style={{
                   border: '1px solid rgba(0,100,130,0.12)',
                   boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',
@@ -902,7 +903,7 @@ export default function EncountersPage() {
 
             {exportOpen && (
               <div
-                className="absolute top-full right-0 z-20 mt-2 w-52 overflow-hidden rounded-[12px] bg-white py-1.5"
+                className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-20 mt-2 w-52 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
                 style={{
                   border: '1px solid rgba(0,100,130,0.12)',
                   boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',
@@ -996,14 +997,79 @@ export default function EncountersPage() {
 
       {/* ── Mobile card view — visible below lg ─────────────────────────── */}
       <div className="mt-6 space-y-3 lg:hidden">
-        {filteredQueue.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="animate-pulse overflow-hidden rounded-[12px] bg-white"
+                style={{
+                  border: '1px solid rgba(0,100,130,0.08)',
+                  borderLeft: '4px solid #E2EDF1',
+                  boxShadow: '0px 1px 3px rgba(0,0,0,0.05)',
+                }}
+              >
+                <div className="flex items-start justify-between p-3">
+                  <div className="flex items-start gap-3">
+                    <div className="size-10 shrink-0 rounded-full bg-slate-100" />
+                    <div className="space-y-2.5 pt-0.5">
+                      <div className="h-4 w-36 rounded-md bg-slate-100" />
+                      <div className="h-3.5 w-28 rounded-md bg-slate-100" />
+                      <div className="h-3.5 w-44 rounded-md bg-slate-100" />
+                    </div>
+                  </div>
+                  <div className="h-6 w-20 rounded-full bg-slate-100" />
+                </div>
+                <div
+                  className="border-t px-3 py-2.5"
+                  style={{ borderColor: 'rgba(0,100,130,0.06)' }}
+                >
+                  <div className="h-4 w-full rounded-md bg-slate-100" />
+                  <div className="mt-2 h-3.5 w-24 rounded-md bg-slate-100" />
+                </div>
+                <div
+                  className="flex items-center justify-between border-t px-3 py-2"
+                  style={{
+                    borderColor: 'rgba(0,100,130,0.06)',
+                    background: 'rgba(226,237,241,0.25)',
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-3 w-14 rounded-md bg-slate-100" />
+                    <div className="h-3 w-14 rounded-md bg-slate-100" />
+                    <div className="h-3 w-14 rounded-md bg-slate-100" />
+                  </div>
+                  <div className="h-3 w-16 rounded-md bg-slate-100" />
+                </div>
+                <div
+                  className="flex items-center gap-2 border-t px-3 py-3"
+                  style={{ borderColor: 'rgba(0,100,130,0.06)' }}
+                >
+                  <div className="size-9 rounded-[8px] bg-slate-100" />
+                  <div className="h-9 flex-1 rounded-[8px] bg-slate-100" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredQueue.length === 0 ? (
           <div
-            className="flex min-h-[180px] items-center justify-center rounded-[12px]"
+            className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px] py-10 text-center"
             style={{ background: 'rgba(226,237,241,0.25)' }}
           >
-            <p className="text-base leading-6" style={{ color: '#8A98A3' }}>
-              No patients match this filter.
-            </p>
+            <div
+              className="flex size-12 items-center justify-center rounded-full"
+              style={{ background: 'rgba(226,237,241,0.6)' }}
+            >
+              <Users style={{ width: 22, height: 22, color: '#8A98A3' }} />
+            </div>
+            <div>
+              <p className="text-sm leading-5.5 font-medium" style={{ color: '#4A7080' }}>
+                No patients in this queue
+              </p>
+              <p className="mt-0.5 text-xs leading-5" style={{ color: '#8A98A3' }}>
+                Adjust your search or change the active tab
+              </p>
+            </div>
           </div>
         ) : (
           filteredQueue.map((patient) => {
@@ -1011,7 +1077,7 @@ export default function EncountersPage() {
             return (
               <div
                 key={patient.id}
-                className="overflow-hidden rounded-[12px] bg-white"
+                className="overflow-hidden rounded-[12px] bg-white transition-shadow duration-150 hover:shadow-md"
                 style={{
                   border: '1px solid rgba(0,100,130,0.08)',
                   borderLeft: `4px solid ${cfg.borderLeft}`,
@@ -1221,10 +1287,21 @@ export default function EncountersPage() {
               ))}
             </div>
           ) : filteredQueue.length === 0 ? (
-            <div className="flex min-h-[200px] items-center justify-center">
-              <p className="text-base leading-6" style={{ color: '#8A98A3' }}>
-                No patients match this filter.
-              </p>
+            <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 py-10 text-center">
+              <div
+                className="flex size-14 items-center justify-center rounded-full"
+                style={{ background: 'rgba(226,237,241,0.6)' }}
+              >
+                <Users style={{ width: 24, height: 24, color: '#8A98A3' }} />
+              </div>
+              <div>
+                <p className="text-base leading-6 font-medium" style={{ color: '#4A7080' }}>
+                  No patients in this queue
+                </p>
+                <p className="mt-0.5 text-sm leading-5.5" style={{ color: '#8A98A3' }}>
+                  Try changing the tab or clearing any active filters
+                </p>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col gap-2 pt-2">
@@ -1234,7 +1311,7 @@ export default function EncountersPage() {
                 return (
                   <div
                     key={patient.id}
-                    className="flex min-h-[110px] items-center bg-white"
+                    className="flex min-h-[110px] items-center bg-white transition-colors duration-100 hover:bg-[#F5FBFD]"
                     style={{
                       borderLeft: `5px solid ${cfg.borderLeft}`,
                       borderBottom: `3px solid ${cfg.borderLeft}`,
