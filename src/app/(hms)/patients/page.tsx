@@ -728,7 +728,10 @@ export default function PatientsPage() {
         DM Sans 500 12px/18px #25464D, chevron 24×24.
         Clear Filter: h 40px, 1px solid #00B4D8, DM Sans 500 14px/22px #00B4D8.
       */}
-      <div ref={quickFilterRef} className="mt-4 flex flex-wrap items-center gap-3 lg:flex-nowrap">
+      <div
+        ref={quickFilterRef}
+        className="mt-4 flex flex-wrap items-center gap-3 lg:flex-nowrap lg:gap-[92px]"
+      >
         {/* Dropdown pill container */}
         <div
           className="flex flex-1 flex-wrap items-center gap-3 rounded-[12px] p-1"
