@@ -731,7 +731,7 @@ export default function PatientsPage() {
       <div ref={quickFilterRef} className="mt-4 flex flex-wrap items-center gap-3 lg:flex-nowrap">
         {/* Dropdown pill container */}
         <div
-          className="flex flex-1 flex-wrap items-center gap-2 rounded-[12px] p-1"
+          className="flex flex-1 flex-wrap items-center justify-between gap-2 rounded-[12px] p-1"
           style={{ background: '#E6F8FD' }}
         >
           {QUICK_FILTER_DEFS.map((def) => {
@@ -1040,7 +1040,7 @@ export default function PatientsPage() {
                     <p className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
                       {patient.lastVisitDate}
                     </p>
-                    <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                    <p className="text-center text-sm leading-5.5" style={{ color: '#4A7080' }}>
                       {patient.lastVisitTime}
                     </p>
                   </div>
@@ -1064,7 +1064,7 @@ export default function PatientsPage() {
                     <p className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
                       {patient.nextApptDate}
                     </p>
-                    <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                    <p className="text-center text-sm leading-5.5" style={{ color: '#4A7080' }}>
                       {patient.nextApptTime}
                     </p>
                   </div>
