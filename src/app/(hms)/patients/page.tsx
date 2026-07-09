@@ -225,12 +225,24 @@ const DOCTOR_ACTIONS: {
 // ── Table column definitions ──────────────────────────────────────────────────
 
 const COLS = [
-  { key: 'patient', label: 'Patient', width: 'w-[26%]', headPad: 'pl-5 pr-3' },
-  { key: 'complaint', label: 'Chief Complaint', width: 'w-[26%]', headPad: 'pr-4' },
-  { key: 'lastVisit', label: 'Last Visit', width: 'w-[12%]', headPad: 'pr-4' },
-  { key: 'status', label: 'Status', width: 'w-[12%]', headPad: 'pr-4' },
-  { key: 'nextAppt', label: 'Next Appointment', width: 'w-[16%]', headPad: 'pr-4' },
-  { key: 'actions', label: 'Actions', width: 'w-[8%]', headPad: 'pr-4' },
+  { key: 'patient', label: 'Patient', width: 'w-[26%]', headPad: 'pl-5 pr-3', align: '' },
+  { key: 'complaint', label: 'Chief Complaint', width: 'w-[26%]', headPad: 'pr-4', align: '' },
+  {
+    key: 'lastVisit',
+    label: 'Last Visit',
+    width: 'w-[12%]',
+    headPad: 'pr-4',
+    align: 'text-center',
+  },
+  { key: 'status', label: 'Status', width: 'w-[12%]', headPad: 'pr-4', align: '' },
+  {
+    key: 'nextAppt',
+    label: 'Next Appointment',
+    width: 'w-[16%]',
+    headPad: 'pr-4',
+    align: 'text-center',
+  },
+  { key: 'actions', label: 'Actions', width: 'w-[8%]', headPad: 'pr-4', align: '' },
 ] as const;
 
 // ── Page ───────────────────────────────────────────────────────────────────────
@@ -878,7 +890,7 @@ export default function PatientsPage() {
             style={{ background: 'rgba(226,237,241,0.4)', borderBottom: '1px solid #E6F8FD' }}
           >
             {COLS.map((col) => (
-              <div key={col.key} className={`${col.width} ${col.headPad} py-3.5`}>
+              <div key={col.key} className={`${col.width} ${col.headPad} ${col.align} py-3.5`}>
                 <span
                   className="text-xs leading-[18px] font-bold tracking-wider uppercase"
                   style={{ color: '#4A7080' }}
