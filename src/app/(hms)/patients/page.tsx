@@ -126,21 +126,96 @@ export default function PatientsPage() {
   return (
     <div className="px-4 pt-6 pb-24 sm:px-6 lg:px-12 lg:pt-10">
       {/* ── Page header ────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-start justify-between gap-y-3 sm:items-center">
-        <div>
-          <h1
-            className="font-display text-2xl leading-8 font-semibold"
-            style={{ color: '#2F3A40' }}
-          >
-            Patient
-          </h1>
-          <p className="mt-1 text-sm leading-5.5" style={{ color: '#2F3A40' }}>
-            View and manage patients under your care.
-          </p>
+      <div>
+        <h1 className="font-display text-2xl leading-8 font-semibold" style={{ color: '#2F3A40' }}>
+          Patient
+        </h1>
+        <p className="mt-1 text-sm leading-5.5" style={{ color: '#2F3A40' }}>
+          View and manage patients under your care.
+        </p>
+      </div>
+
+      {/* ── Stat cards ─────────────────────────────────────────────────── */}
+      {/*
+        Grid breakpoints:
+          default → 1 col   (mobile)
+          sm      → 2 cols  (640 px+)
+          lg      → 3 cols  (1024 px+)
+          2xl     → 5 cols  (1536 px+ — ~219 px/card with sidebar + padding)
+        xl skipped: 904 px content / 5 cols = ~168 px/card, too narrow for
+        "Assigned Patients" title + icon without wrapping.
+      */}
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+        {PATIENT_STAT_CARDS.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={card.title}
+              className="flex flex-col rounded-[12px] p-4"
+              style={{
+                background: '#FFFFFF',
+                border: `1px solid ${card.accent}`,
+                borderTopWidth: '3px',
+                boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.05)',
+              }}
+            >
+              {/* Title row: label left, icon right */}
+              <div className="flex items-start justify-between">
+                <p className="text-base leading-6 font-semibold" style={{ color: '#25464D' }}>
+                  {card.title}
+                </p>
+                <div
+                  className="flex size-10 shrink-0 items-center justify-center rounded-[12px]"
+                  style={{ background: card.iconBg }}
+                >
+                  <Icon style={{ width: 24, height: 24, color: card.accent }} />
+                </div>
+              </div>
+
+              {/* Count — Outfit Black 30 / 36, accent colour */}
+              <p
+                className="font-display mt-1.5 text-[30px] leading-9 font-black"
+                style={{ color: card.accent }}
+              >
+                {card.count}
+              </p>
+
+              {/* Sub-label — DM Sans Regular 14 / 22, muted */}
+              <p className="mt-1 text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                {card.label}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Search + controls row ──────────────────────────────────────── */}
+      {/*
+        Figma: 1164 px container, gap 131 px between search (865 px) and
+        buttons (183 px). On desktop flex-1 on the search naturally fills
+        that space. On mobile the row wraps: search full-width first,
+        buttons on the next line.
+      */}
+      <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+        {/* Search bar — flex-1 grows to fill the available space */}
+        <div className="relative w-full min-w-0 sm:flex-1">
+          <Search
+            className="pointer-events-none absolute top-1/2 left-[10px] -translate-y-1/2"
+            style={{ width: 16, height: 16, color: '#8A98A3' }}
+          />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name, MRN, or diagnosis..."
+            className="h-[42px] w-full rounded-[12px] pr-4 pl-9 text-base leading-6 outline-none placeholder:text-[#8A98A3] focus:ring-2 focus:ring-[#0098CC]/30"
+            style={{ background: '#FFFFFF', border: '1px solid #0064821F', color: '#2F3A40' }}
+          />
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* ── Filter button + panel ─────────────────────────────────── */}
+        {/* Filter + Export — fixed width, right-aligned */}
+        <div className="flex shrink-0 items-center gap-2">
+          {/* ── Filter button + panel ───────────────────────────────── */}
           <div ref={filterRef} className="relative">
             <button
               type="button"
@@ -242,7 +317,7 @@ export default function PatientsPage() {
             )}
           </div>
 
-          {/* ── Export button + menu ──────────────────────────────────── */}
+          {/* ── Export button + menu ─────────────────────────────────── */}
           <div ref={exportRef} className="relative">
             <button
               type="button"
@@ -294,76 +369,6 @@ export default function PatientsPage() {
             )}
           </div>
         </div>
-      </div>
-
-      {/* ── Stat cards ─────────────────────────────────────────────────── */}
-      {/*
-        Grid breakpoints:
-          default → 1 col   (mobile)
-          sm      → 2 cols  (640 px+)
-          lg      → 3 cols  (1024 px+)
-          2xl     → 5 cols  (1536 px+ — ~219 px/card with sidebar + padding)
-        xl skipped: 904 px content / 5 cols = ~168 px/card, too narrow for
-        "Assigned Patients" title + icon without wrapping.
-      */}
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
-        {PATIENT_STAT_CARDS.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={card.title}
-              className="flex flex-col rounded-[12px] p-4"
-              style={{
-                background: '#FFFFFF',
-                border: `1px solid ${card.accent}`,
-                borderTopWidth: '3px',
-                boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.05)',
-              }}
-            >
-              {/* Title row: label left, icon right */}
-              <div className="flex items-start justify-between">
-                <p className="text-base leading-6 font-semibold" style={{ color: '#25464D' }}>
-                  {card.title}
-                </p>
-                <div
-                  className="flex size-10 shrink-0 items-center justify-center rounded-[12px]"
-                  style={{ background: card.iconBg }}
-                >
-                  <Icon style={{ width: 24, height: 24, color: card.accent }} />
-                </div>
-              </div>
-
-              {/* Count — Outfit Black 30 / 36, accent colour */}
-              <p
-                className="font-display mt-1.5 text-[30px] leading-9 font-black"
-                style={{ color: card.accent }}
-              >
-                {card.count}
-              </p>
-
-              {/* Sub-label — DM Sans Regular 14 / 22, muted */}
-              <p className="mt-1 text-sm leading-5.5" style={{ color: '#4A7080' }}>
-                {card.label}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ── Search bar ─────────────────────────────────────────────────── */}
-      <div className="relative mt-6">
-        <Search
-          className="pointer-events-none absolute top-1/2 left-[10px] -translate-y-1/2"
-          style={{ width: 16, height: 16, color: '#8A98A3' }}
-        />
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, MRN, or diagnosis..."
-          className="h-[42px] w-full rounded-[12px] pr-4 pl-9 text-base leading-6 outline-none placeholder:text-[#8A98A3] focus:ring-2 focus:ring-[#0098CC]/30"
-          style={{ background: '#FFFFFF', border: '1px solid #0064821F', color: '#2F3A40' }}
-        />
       </div>
     </div>
   );
