@@ -19,8 +19,8 @@ const PATIENT_STAT_CARDS: PatientStatCard[] = [
     icon: Users,
     count: '1,240',
     label: 'All time',
-    accent: '#00B4D8',
-    iconBg: 'rgba(0,180,216,0.1)',
+    accent: '#0098CC',
+    iconBg: 'rgba(0,152,204,0.1)',
   },
   {
     title: 'Active Patients',
@@ -61,10 +61,10 @@ export default function PatientsPage() {
     <div className="px-4 pt-6 pb-24 sm:px-6 lg:px-12 lg:pt-10">
       {/* ── Page header ────────────────────────────────────────────────── */}
       <div>
-        <h1 className="font-display text-2xl leading-8 font-semibold" style={{ color: '#0D2630' }}>
+        <h1 className="font-display text-2xl leading-8 font-semibold" style={{ color: '#2F3A40' }}>
           Patient
         </h1>
-        <p className="mt-1 text-sm leading-5.5" style={{ color: '#4A7080' }}>
+        <p className="mt-1 text-sm leading-5.5" style={{ color: '#2F3A40' }}>
           View and manage patients under your care.
         </p>
       </div>
@@ -88,7 +88,9 @@ export default function PatientsPage() {
               className="flex flex-col rounded-[12px] p-4"
               style={{
                 background: '#FFFFFF',
-                border: `1.5px solid ${card.accent}`,
+                border: `1px solid ${card.accent}`,
+                borderTopWidth: '3px',
+                boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.05)',
               }}
             >
               {/* Title row: label left, icon right */}
