@@ -397,6 +397,7 @@ export default function PatientsPage() {
   const [quickFilters, setQuickFilters] = useState<QuickFilters>(QUICK_DEFAULTS);
   const [openDropdown, setOpenDropdown] = useState<keyof QuickFilters | null>(null);
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const filterRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
@@ -414,6 +415,11 @@ export default function PatientsPage() {
     }
     document.addEventListener('mousedown', onMouseDown);
     return () => document.removeEventListener('mousedown', onMouseDown);
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 1200);
+    return () => clearTimeout(t);
   }, []);
 
   const activeFilterCount = [activeFilters.gender !== 'all', activeFilters.status !== 'all'].filter(
@@ -504,10 +510,10 @@ export default function PatientsPage() {
     <div className="px-4 pt-6 pb-24 sm:px-6 lg:px-12 lg:pt-10">
       {/* ── Page header ────────────────────────────────────────────────── */}
       <div>
-        <h1 className="font-display text-2xl leading-8 font-semibold" style={{ color: '#2F3A40' }}>
-          Patient
+        <h1 className="font-display text-3xl leading-10 font-semibold" style={{ color: '#2F3A40' }}>
+          Patients
         </h1>
-        <p className="mt-1 text-sm leading-5.5" style={{ color: '#2F3A40' }}>
+        <p className="mt-1 text-base leading-6" style={{ color: '#4A7080' }}>
           View and manage patients under your care.
         </p>
       </div>
@@ -519,7 +525,7 @@ export default function PatientsPage() {
           return (
             <div
               key={card.title}
-              className="flex flex-col rounded-[12px] p-4"
+              className="flex flex-col rounded-[12px] p-5"
               style={{
                 background: '#FFFFFF',
                 border: `1px solid ${card.accent}`,
@@ -821,7 +827,57 @@ export default function PatientsPage() {
 
       {/* ── Mobile card view — visible below lg ──────────────────────────── */}
       <div className="mt-6 space-y-3 lg:hidden">
-        {filteredPatients.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="animate-pulse overflow-hidden rounded-[12px] bg-white"
+                style={{
+                  border: '1px solid rgba(0,100,130,0.08)',
+                  borderLeft: '4px solid #E2EDF1',
+                  boxShadow: '0px 1px 3px rgba(0,0,0,0.05)',
+                }}
+              >
+                <div className="flex items-start justify-between p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="size-10 shrink-0 rounded-full bg-slate-100" />
+                    <div className="space-y-2.5 pt-0.5">
+                      <div className="h-4 w-36 rounded-md bg-slate-100" />
+                      <div className="h-3.5 w-28 rounded-md bg-slate-100" />
+                      <div className="h-3.5 w-44 rounded-md bg-slate-100" />
+                    </div>
+                  </div>
+                  <div className="h-6 w-16 rounded-full bg-slate-100" />
+                </div>
+                <div className="border-t px-4 py-3" style={{ borderColor: 'rgba(0,100,130,0.06)' }}>
+                  <div className="h-4 w-full rounded-md bg-slate-100" />
+                  <div className="mt-2 h-3.5 w-32 rounded-md bg-slate-100" />
+                </div>
+                <div
+                  className="flex items-center justify-between border-t px-4 py-3"
+                  style={{ borderColor: 'rgba(0,100,130,0.06)' }}
+                >
+                  <div className="space-y-2">
+                    <div className="h-3 w-16 rounded-md bg-slate-100" />
+                    <div className="h-3.5 w-24 rounded-md bg-slate-100" />
+                  </div>
+                  <div className="space-y-2 text-right">
+                    <div className="h-3 w-24 rounded-md bg-slate-100" />
+                    <div className="h-3.5 w-20 rounded-md bg-slate-100" />
+                  </div>
+                </div>
+                <div
+                  className="flex items-center gap-2 border-t px-4 py-3"
+                  style={{ borderColor: 'rgba(0,100,130,0.06)' }}
+                >
+                  <div className="size-9 rounded-[8px] bg-slate-100" />
+                  <div className="h-9 flex-1 rounded-[8px] bg-slate-100" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredPatients.length === 0 ? (
           <div
             className="flex min-h-[180px] items-center justify-center rounded-[12px]"
             style={{ background: 'rgba(226,237,241,0.25)' }}
@@ -844,7 +900,7 @@ export default function PatientsPage() {
                 }}
               >
                 {/* Identity + status */}
-                <div className="flex items-start justify-between p-3">
+                <div className="flex items-start justify-between p-4">
                   <div className="flex items-start gap-3">
                     <div
                       className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
@@ -877,10 +933,7 @@ export default function PatientsPage() {
                 </div>
 
                 {/* Complaint + allergy */}
-                <div
-                  className="border-t px-3 py-2.5"
-                  style={{ borderColor: 'rgba(0,100,130,0.06)' }}
-                >
+                <div className="border-t px-4 py-3" style={{ borderColor: 'rgba(0,100,130,0.06)' }}>
                   <p className="text-sm leading-5.5" style={{ color: '#2F3A40' }}>
                     {patient.complaint}
                   </p>
@@ -900,7 +953,7 @@ export default function PatientsPage() {
 
                 {/* Last visit + next appointment */}
                 <div
-                  className="flex items-center justify-between border-t px-3 py-2"
+                  className="flex items-center justify-between border-t px-4 py-3"
                   style={{
                     borderColor: 'rgba(0,100,130,0.06)',
                     background: 'rgba(226,237,241,0.25)',
@@ -932,14 +985,14 @@ export default function PatientsPage() {
 
                 {/* Actions */}
                 <div
-                  className="flex items-center gap-2 border-t px-3 py-2.5"
+                  className="flex items-center gap-2 border-t px-4 py-3"
                   style={{ borderColor: 'rgba(0,100,130,0.06)' }}
                 >
                   <button
                     type="button"
                     aria-label={`View ${patient.name}`}
                     onClick={() => router.push(`/patients/${patient.id}`)}
-                    className="flex size-9 shrink-0 items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
+                    className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-[8px] transition-colors hover:opacity-80"
                     style={{ background: '#E2EDF1' }}
                   >
                     <Eye style={{ width: 14, height: 14, color: '#4A7080' }} />
@@ -969,10 +1022,10 @@ export default function PatientsPage() {
             style={{ background: 'rgba(226,237,241,0.4)', borderBottom: '1px solid #E6F8FD' }}
           >
             {COLS.map((col) => (
-              <div key={col.key} className={`${col.width} ${col.headPad} py-2`}>
+              <div key={col.key} className={`${col.width} ${col.headPad} py-3.5`}>
                 <span
-                  className="text-xs leading-[18px] font-bold uppercase"
-                  style={{ color: '#25464D' }}
+                  className="text-xs leading-[18px] font-bold tracking-wider uppercase"
+                  style={{ color: '#4A7080' }}
                 >
                   {col.label}
                 </span>
@@ -981,7 +1034,45 @@ export default function PatientsPage() {
           </div>
 
           {/* Table rows */}
-          {filteredPatients.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col gap-2 pt-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex min-h-[110px] animate-pulse items-center bg-white"
+                  style={{ borderLeft: '5px solid #E2EDF1', borderBottom: '3px solid #E2EDF1' }}
+                >
+                  <div className="flex w-[26%] items-start gap-3 py-5 pr-3 pl-5">
+                    <div className="size-10 shrink-0 rounded-full bg-slate-100" />
+                    <div className="flex-1 space-y-2.5 pt-0.5">
+                      <div className="h-4 w-36 rounded-md bg-slate-100" />
+                      <div className="h-3.5 w-24 rounded-md bg-slate-100" />
+                      <div className="h-3.5 w-44 rounded-md bg-slate-100" />
+                    </div>
+                  </div>
+                  <div className="w-[26%] space-y-2.5 py-5 pr-4">
+                    <div className="h-4 w-48 rounded-md bg-slate-100" />
+                    <div className="h-3.5 w-32 rounded-md bg-slate-100" />
+                  </div>
+                  <div className="w-[12%] space-y-2 py-5 pr-4">
+                    <div className="mx-auto h-4 w-20 rounded-md bg-slate-100" />
+                    <div className="mx-auto h-3.5 w-14 rounded-md bg-slate-100" />
+                  </div>
+                  <div className="w-[12%] py-5 pr-4">
+                    <div className="h-7 w-20 rounded-full bg-slate-100" />
+                  </div>
+                  <div className="w-[16%] space-y-2 py-5 pr-4">
+                    <div className="mx-auto h-4 w-24 rounded-md bg-slate-100" />
+                    <div className="mx-auto h-3.5 w-16 rounded-md bg-slate-100" />
+                  </div>
+                  <div className="flex w-[8%] items-center gap-2 py-5 pr-4">
+                    <div className="size-9 rounded-full bg-slate-100" />
+                    <div className="size-9 rounded-full bg-slate-100" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredPatients.length === 0 ? (
             <div className="flex min-h-[200px] items-center justify-center">
               <p className="text-base leading-6" style={{ color: '#8A98A3' }}>
                 No patients match this filter.
@@ -995,14 +1086,14 @@ export default function PatientsPage() {
                 return (
                   <div
                     key={patient.id}
-                    className="flex min-h-[95px] items-center bg-white"
+                    className="flex min-h-[110px] items-center bg-white"
                     style={{
                       borderLeft: `5px solid ${cfg.borderLeft}`,
                       borderBottom: `3px solid ${cfg.borderLeft}`,
                     }}
                   >
                     {/* ── PATIENT ── */}
-                    <div className="flex w-[26%] items-start gap-3 py-4 pr-3 pl-5">
+                    <div className="flex w-[26%] items-start gap-3 py-5 pr-3 pl-5">
                       <div
                         className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
                         style={{ background: patient.avatarBg }}
@@ -1026,7 +1117,7 @@ export default function PatientsPage() {
                     </div>
 
                     {/* ── CHIEF COMPLAINT ── */}
-                    <div className="w-[26%] py-4 pr-4">
+                    <div className="w-[26%] py-5 pr-4">
                       <p className="text-base leading-6" style={{ color: '#2F3A40' }}>
                         {patient.complaint}
                       </p>
@@ -1045,7 +1136,7 @@ export default function PatientsPage() {
                     </div>
 
                     {/* ── LAST VISIT ── */}
-                    <div className="w-[12%] py-4 pr-4 text-center">
+                    <div className="w-[12%] py-5 pr-4 text-center">
                       <p className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
                         {patient.lastVisitDate}
                       </p>
@@ -1055,9 +1146,9 @@ export default function PatientsPage() {
                     </div>
 
                     {/* ── STATUS ── */}
-                    <div className="w-[12%] py-4 pr-4">
+                    <div className="w-[12%] py-5 pr-4">
                       <span
-                        className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
+                        className="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium"
                         style={{
                           border: `1px solid ${cfg.pillBorder}`,
                           color: cfg.pillColor,
@@ -1069,7 +1160,7 @@ export default function PatientsPage() {
                     </div>
 
                     {/* ── NEXT APPOINTMENT ── */}
-                    <div className="w-[16%] py-4 pr-4 text-center">
+                    <div className="w-[16%] py-5 pr-4 text-center">
                       <p className="text-sm leading-5.5 font-medium" style={{ color: '#25464D' }}>
                         {patient.nextApptDate}
                       </p>
@@ -1079,16 +1170,16 @@ export default function PatientsPage() {
                     </div>
 
                     {/* ── ACTIONS ── */}
-                    <div className="flex w-[8%] items-center gap-2 py-4 pr-4">
+                    <div className="flex w-[8%] items-center gap-2 py-5 pr-4">
                       {/* View record */}
                       <button
                         type="button"
                         aria-label={`View ${patient.name}`}
                         onClick={() => router.push(`/patients/${patient.id}`)}
-                        className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
+                        className="flex size-9 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
                         style={{ color: '#4A7080' }}
                       >
-                        <Eye style={{ width: 16, height: 16 }} />
+                        <Eye style={{ width: 17, height: 17 }} />
                       </button>
 
                       {/* Context menu */}
@@ -1102,7 +1193,7 @@ export default function PatientsPage() {
                           onClick={() =>
                             setActionMenuId((prev) => (prev === patient.id ? null : patient.id))
                           }
-                          className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
+                          className="flex size-9 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
                           style={{ color: '#4A7080' }}
                         >
                           <MoreVertical style={{ width: 16, height: 16 }} />
@@ -1129,7 +1220,7 @@ export default function PatientsPage() {
                                     if (action.key === 'view')
                                       router.push(`/patients/${patient.id}`);
                                   }}
-                                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm leading-5.5 transition-colors hover:bg-[#E6F8FD]"
+                                  className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-3 text-sm leading-5.5 transition-colors hover:bg-[#E6F8FD]"
                                   style={{ color: action.danger ? '#EF4444' : '#2F3A40' }}
                                 >
                                   <ActionIcon

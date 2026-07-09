@@ -676,6 +676,7 @@ export default function EncountersPage() {
     gender: 'all',
     allergies: 'all',
   });
+  const [isLoading, setIsLoading] = useState(true);
   const filterRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
 
@@ -690,6 +691,11 @@ export default function EncountersPage() {
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoading(false), 1200);
+    return () => clearTimeout(t);
   }, []);
 
   const activeFilterCount = [
@@ -767,12 +773,12 @@ export default function EncountersPage() {
       <div className="flex flex-wrap items-start justify-between gap-y-3 sm:items-center">
         <div>
           <h1
-            className="font-display text-2xl leading-8 font-semibold"
+            className="font-display text-3xl leading-10 font-semibold"
             style={{ color: '#2F3A40' }}
           >
             Patient Queue
           </h1>
-          <p className="mt-0.5 text-base leading-6" style={{ color: '#2F3A40' }}>
+          <p className="mt-1 text-base leading-6" style={{ color: '#4A7080' }}>
             {formatQueueDate()}
           </p>
         </div>
@@ -1164,10 +1170,10 @@ export default function EncountersPage() {
             style={{ background: 'rgba(226,237,241,0.4)', borderBottom: '1px solid #E6F8FD' }}
           >
             {COLS.map((col) => (
-              <div key={col.key} className={`${col.width} ${col.headerPad} py-2`}>
+              <div key={col.key} className={`${col.width} ${col.headerPad} py-3.5`}>
                 <span
-                  className="text-xs leading-[18px] font-bold uppercase"
-                  style={{ color: '#25464D' }}
+                  className="text-xs leading-[18px] font-bold tracking-wider uppercase"
+                  style={{ color: '#4A7080' }}
                 >
                   {col.label}
                 </span>
@@ -1176,7 +1182,45 @@ export default function EncountersPage() {
           </div>
 
           {/* Table rows */}
-          {filteredQueue.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col gap-2 pt-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex min-h-[110px] animate-pulse items-center bg-white"
+                  style={{ borderLeft: '5px solid #E2EDF1', borderBottom: '3px solid #E2EDF1' }}
+                >
+                  <div className="flex w-[22%] items-start gap-3 py-5 pr-3 pl-5 xl:w-[21%]">
+                    <div className="size-10 shrink-0 rounded-full bg-slate-100" />
+                    <div className="flex-1 space-y-2.5 pt-0.5">
+                      <div className="h-4 w-32 rounded-md bg-slate-100" />
+                      <div className="h-3.5 w-24 rounded-md bg-slate-100" />
+                      <div className="h-3.5 w-40 rounded-md bg-slate-100" />
+                    </div>
+                  </div>
+                  <div className="w-[35%] space-y-2.5 py-5 pr-4 xl:w-[26%]">
+                    <div className="h-4 w-44 rounded-md bg-slate-100" />
+                    <div className="h-3.5 w-28 rounded-md bg-slate-100" />
+                  </div>
+                  <div className="hidden w-[13%] space-y-2 py-5 pr-4 xl:block">
+                    <div className="h-3.5 w-16 rounded-md bg-slate-100" />
+                    <div className="h-3.5 w-16 rounded-md bg-slate-100" />
+                    <div className="h-3.5 w-20 rounded-md bg-slate-100" />
+                  </div>
+                  <div className="hidden w-[12%] py-5 pr-4 xl:block">
+                    <div className="h-3.5 w-16 rounded-md bg-slate-100" />
+                  </div>
+                  <div className="w-[18%] py-5 pr-4 xl:w-[13%]">
+                    <div className="h-7 w-24 rounded-full bg-slate-100" />
+                  </div>
+                  <div className="flex w-[25%] items-center gap-2 py-5 pr-4 xl:w-[15%]">
+                    <div className="size-9 rounded-[8px] bg-slate-100" />
+                    <div className="h-9 flex-1 rounded-[8px] bg-slate-100" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredQueue.length === 0 ? (
             <div className="flex min-h-[200px] items-center justify-center">
               <p className="text-base leading-6" style={{ color: '#8A98A3' }}>
                 No patients match this filter.
@@ -1190,14 +1234,14 @@ export default function EncountersPage() {
                 return (
                   <div
                     key={patient.id}
-                    className="flex min-h-[95px] items-center bg-white"
+                    className="flex min-h-[110px] items-center bg-white"
                     style={{
                       borderLeft: `5px solid ${cfg.borderLeft}`,
                       borderBottom: `3px solid ${cfg.borderLeft}`,
                     }}
                   >
                     {/* ── PATIENT ── */}
-                    <div className="flex w-[22%] items-start gap-3 py-4 pr-3 pl-3 xl:w-[21%]">
+                    <div className="flex w-[22%] items-start gap-3 py-5 pr-3 pl-5 xl:w-[21%]">
                       <div
                         className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
                         style={{ background: patient.avatarBg }}
@@ -1221,7 +1265,7 @@ export default function EncountersPage() {
                     </div>
 
                     {/* ── CHIEF COMPLAINT ── */}
-                    <div className="w-[35%] py-4 pr-4 xl:w-[26%]">
+                    <div className="w-[35%] py-5 pr-4 xl:w-[26%]">
                       <p className="text-base leading-6" style={{ color: '#2F3A40' }}>
                         {patient.complaint}
                       </p>
@@ -1240,7 +1284,7 @@ export default function EncountersPage() {
                     </div>
 
                     {/* ── VITALS ── */}
-                    <div className="hidden w-[13%] space-y-0.5 py-4 pr-4 xl:block">
+                    <div className="hidden w-[13%] space-y-1 py-5 pr-4 xl:block">
                       <div className="flex items-center gap-1.5">
                         <Heart
                           className="shrink-0"
@@ -1274,7 +1318,7 @@ export default function EncountersPage() {
                     </div>
 
                     {/* ── WAIT TIME ── */}
-                    <div className="hidden w-[12%] py-4 pr-4 xl:block">
+                    <div className="hidden w-[12%] py-5 pr-4 xl:block">
                       {patient.completedAt !== null ? (
                         <div className="flex items-start gap-1.5">
                           <Clock
@@ -1314,9 +1358,9 @@ export default function EncountersPage() {
                     </div>
 
                     {/* ── STATUS ── */}
-                    <div className="w-[18%] py-4 pr-4 xl:w-[13%]">
+                    <div className="w-[18%] py-5 pr-4 xl:w-[13%]">
                       <span
-                        className="inline-flex items-center rounded-full px-2 py-0.5 text-sm leading-5.5 font-medium"
+                        className="inline-flex items-center rounded-full px-3 py-1.5 text-sm leading-5.5 font-medium"
                         style={{
                           border: `1px solid ${cfg.pillBorder}`,
                           color: cfg.pillColor,
@@ -1328,21 +1372,20 @@ export default function EncountersPage() {
                     </div>
 
                     {/* ── ACTIONS ── */}
-                    <div className="flex w-[25%] items-center gap-1.5 py-4 pr-4 xl:w-[15%]">
+                    <div className="flex w-[25%] items-center gap-2 py-5 pr-4 xl:w-[15%]">
                       <button
                         type="button"
-                        className="flex shrink-0 items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
-                        style={{ width: 26, height: 28, background: '#E2EDF1' }}
+                        className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
+                        style={{ background: '#E2EDF1' }}
                         aria-label={`View details for ${patient.name}`}
                       >
-                        <Eye style={{ width: 14, height: 14, color: '#4A7080' }} />
+                        <Eye style={{ width: 16, height: 16, color: '#4A7080' }} />
                       </button>
                       <button
                         type="button"
                         disabled={patient.status === 'completed'}
-                        className="flex-1 rounded-[8px] px-3 py-1.5 text-center text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-default"
+                        className="flex-1 cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-default disabled:opacity-60"
                         style={{
-                          height: 56,
                           background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
                         }}
                       >
