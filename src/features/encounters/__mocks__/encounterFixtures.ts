@@ -16,6 +16,7 @@ export type PatientStatus =
 
 export type PatientRow = {
   id: string;
+  patientId?: string; // links to MOCK_PATIENT_DETAILS key; omit when no detail page exists yet
   initials: string;
   avatarBg: string;
   name: string;
@@ -34,6 +35,7 @@ export type PatientRow = {
 export const MOCK_QUEUE: PatientRow[] = [
   {
     id: 'q1',
+    patientId: 'p1',
     initials: 'AO',
     avatarBg: '#F59E0B',
     name: 'Adaeze Okonkwo',
@@ -66,6 +68,7 @@ export const MOCK_QUEUE: PatientRow[] = [
   },
   {
     id: 'q3',
+    patientId: 'p3',
     initials: 'NA',
     avatarBg: '#EF4444',
     name: 'Ngozi Adeyemi',
@@ -228,6 +231,7 @@ export const MOCK_QUEUE: PatientRow[] = [
   // ── New Admissions ────────────────────────────────────────────────────────
   {
     id: 'q13',
+    patientId: 'p2',
     initials: 'IE',
     avatarBg: '#F97316',
     name: 'Ifeanyi Eze',

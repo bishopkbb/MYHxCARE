@@ -758,7 +758,7 @@ export default function EncountersPage() {
                 >
                   <button
                     type="button"
-                    onClick={() => router.push(`/patients/${patient.id}`)}
+                    onClick={() => router.push(`/patients/${patient.patientId ?? patient.id}`)}
                     className="flex shrink-0 items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
                     style={{ width: 44, height: 44, background: '#E2EDF1' }}
                     aria-label={`View details for ${patient.name}`}
@@ -1009,7 +1009,7 @@ export default function EncountersPage() {
                     <div className="flex w-[25%] items-center gap-2 py-5 pr-4 xl:w-[15%]">
                       <button
                         type="button"
-                        onClick={() => router.push(`/patients/${patient.id}`)}
+                        onClick={() => router.push(`/patients/${patient.patientId ?? patient.id}`)}
                         className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
                         style={{ background: '#E2EDF1' }}
                         aria-label={`View details for ${patient.name}`}
