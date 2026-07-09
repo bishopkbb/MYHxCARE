@@ -995,7 +995,7 @@ export default function PatientsPage() {
                   className="flex min-h-[95px] items-center bg-white"
                   style={{
                     borderLeft: `3px solid ${cfg.borderLeft}`,
-                    borderBottom: isLast ? undefined : '1px solid rgba(0,100,130,0.06)',
+                    borderBottom: isLast ? undefined : `2px solid ${cfg.borderLeft}`,
                   }}
                 >
                   {/* ── PATIENT ── */}
