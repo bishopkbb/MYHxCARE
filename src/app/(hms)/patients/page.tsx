@@ -994,8 +994,8 @@ export default function PatientsPage() {
                     key={patient.id}
                     className="flex min-h-[95px] items-center bg-white"
                     style={{
-                      borderLeft: `3px solid ${cfg.borderLeft}`,
-                      borderBottom: `2px solid ${cfg.borderLeft}`,
+                      borderLeft: `5px solid ${cfg.borderLeft}`,
+                      borderBottom: `3px solid ${cfg.borderLeft}`,
                     }}
                   >
                     {/* ── PATIENT ── */}
