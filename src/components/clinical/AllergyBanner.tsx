@@ -35,7 +35,7 @@ export function AllergyBanner({ allergies, className }: AllergyBannerProps) {
       role="alert"
       aria-label={hasCritical ? 'Critical allergy alert' : 'Allergy alert'}
       className={cn(
-        'rounded-lg border px-3 py-2.5',
+        'rounded-lg border px-4 py-3',
         hasCritical
           ? 'border-destructive/40 bg-destructive/10 text-destructive'
           : 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-300',
@@ -43,38 +43,38 @@ export function AllergyBanner({ allergies, className }: AllergyBannerProps) {
       )}
     >
       {/* ── Header row ─────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         {hasCritical ? (
-          <ShieldAlert className="size-4 shrink-0" aria-hidden />
+          <ShieldAlert className="size-5 shrink-0" aria-hidden />
         ) : (
-          <AlertTriangle className="size-4 shrink-0" aria-hidden />
+          <AlertTriangle className="size-5 shrink-0" aria-hidden />
         )}
-        <span className="text-xs font-bold tracking-wider uppercase">
+        <span className="text-sm font-bold tracking-wider uppercase">
           {hasCritical ? 'Critical Allergy Alert' : 'Allergy Alert'}
         </span>
-        <span className="ml-auto text-xs opacity-60">
+        <span className="ml-auto text-sm opacity-60">
           {allergies.length} {allergies.length === 1 ? 'allergy' : 'allergies'} on record
         </span>
       </div>
 
       {/* ── Divider ────────────────────────────────────────────────────── */}
-      <div className="mt-2 border-t border-current/15" />
+      <div className="mt-2.5 border-t border-current/15" />
 
       {/* ── Allergy rows ───────────────────────────────────────────────── */}
-      <div className="mt-1.5 space-y-1.5">
+      <div className="mt-2 space-y-2">
         {allergies.map((allergy) => (
-          <div key={allergy.id} className="flex items-baseline gap-3">
-            {/* Substance — fixed min-width so reactions align vertically */}
-            <span className="min-w-[110px] shrink-0 text-sm leading-snug font-semibold">
+          <div key={allergy.id} className="flex items-baseline gap-4">
+            {/* Substance — 16px SemiBold; min-width keeps reactions aligned */}
+            <span className="min-w-[130px] shrink-0 text-base leading-snug font-semibold">
               {allergy.substance}
             </span>
 
-            {/* Reaction — fills remaining space */}
-            <span className="flex-1 text-xs leading-snug opacity-85">{allergy.reaction}</span>
+            {/* Reaction — 14px */}
+            <span className="flex-1 text-sm leading-snug opacity-85">{allergy.reaction}</span>
 
-            {/* Severity badge — always shown */}
+            {/* Severity badge — larger padding + text */}
             <span
-              className="shrink-0 rounded px-1.5 py-0.5 text-[10px] leading-none font-bold tracking-wide uppercase"
+              className="shrink-0 rounded px-2.5 py-1 text-xs leading-none font-bold tracking-wide uppercase"
               style={SEVERITY_BADGE[allergy.severity]}
             >
               {SEVERITY_LABEL[allergy.severity]}
