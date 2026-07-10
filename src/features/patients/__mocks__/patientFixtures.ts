@@ -204,9 +204,14 @@ export type PatientDetailMock = {
   initials: string;
   name: string;
   mrn: string;
+  dob: string; // YYYY-MM-DD
   age: string;
   gender: string;
   bloodGroup: string;
+  faculty: string;
+  level: string; // academic level e.g. "400L"
+  fileNumber: string; // university file number e.g. "UZ/MED/2021/0234"
+  queueStatus: string; // current encounter status for display
   allergies: Allergy[];
   isUrgent: boolean;
 };
@@ -217,9 +222,14 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
     initials: 'AO',
     name: 'Adaeze Okonkwo',
     mrn: 'MRN-2024-00451',
+    dob: '2003-05-12',
     age: '21y',
     gender: 'Female',
     bloodGroup: 'O+',
+    faculty: 'Medicine & Surgery',
+    level: '400L',
+    fileNumber: 'UZ/MED/2021/0234',
+    queueStatus: 'Waiting',
     allergies: [
       {
         id: 'al-p1-1',
@@ -245,9 +255,14 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
     initials: 'IE',
     name: 'Ifeanyi Eze',
     mrn: 'MRN-2024-00592',
+    dob: '2004-08-20',
     age: '20y',
     gender: 'Male',
     bloodGroup: 'A+',
+    faculty: 'Computer Science',
+    level: '200L',
+    fileNumber: 'UZ/CSC/2022/0103',
+    queueStatus: 'New Admission',
     allergies: [],
     isUrgent: false,
   },
@@ -256,9 +271,14 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
     initials: 'NA',
     name: 'Ngozi Adeyemi',
     mrn: 'MRN-2024-00512',
+    dob: '2001-11-15',
     age: '23y',
     gender: 'Female',
     bloodGroup: 'B-',
+    faculty: 'Law',
+    level: '500L',
+    fileNumber: 'UZ/LAW/2020/0089',
+    queueStatus: 'Emergency',
     allergies: [
       {
         id: 'al-p3-1',
@@ -278,9 +298,14 @@ export const FALLBACK_PATIENT_DETAIL: PatientDetailMock = {
   initials: '??',
   name: 'Unknown Patient',
   mrn: 'MRN-0000-00000',
+  dob: '—',
   age: '—',
   gender: '—',
   bloodGroup: '—',
+  faculty: '—',
+  level: '—',
+  fileNumber: '—',
+  queueStatus: '—',
   allergies: [],
   isUrgent: false,
 };
