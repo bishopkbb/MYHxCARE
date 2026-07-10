@@ -201,11 +201,11 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
 
         {/* ── Patient info section ──────────────────────────────────────────── */}
         <div
-          className="flex flex-wrap items-start justify-between gap-5 px-6 py-5"
+          className="flex flex-col gap-5 px-5 py-5 md:flex-row md:items-start md:justify-between md:px-6"
           style={{ borderBottom: '1px solid rgba(0,100,130,0.10)' }}
         >
           {/* ── Left: avatar + info ────────────────────────────────────────── */}
-          <div className="flex items-start gap-4">
+          <div className="flex min-w-0 items-start gap-4">
             {/* Avatar — 56×56, rounded-[12px] per spec */}
             <div
               className="flex shrink-0 items-center justify-center text-lg font-semibold text-white"
@@ -294,12 +294,14 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* ── Right: quick action buttons ────────────────────────────────── */}
-          <div className="flex flex-wrap items-center gap-[15px]">
+          {/* Mobile: full-width col → Start full row, Prescribe+Lab share row */}
+          {/* md+: row, right-aligned to the info block */}
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap md:w-auto md:flex-nowrap md:gap-[15px]">
             <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
-              {/* DM Sans SemiBold 16px white */}
+              {/* DM Sans SemiBold 16/24 white */}
               <button
                 type="button"
-                className="flex items-center gap-1.5 rounded-[12px] px-4 font-semibold text-white transition-opacity hover:opacity-90"
+                className="flex w-full items-center justify-center gap-2 rounded-[12px] px-4 font-semibold text-white transition-opacity hover:opacity-90 sm:w-auto sm:justify-start"
                 style={{
                   fontFamily: 'inherit',
                   fontSize: 16,
@@ -311,56 +313,60 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   paddingBottom: 8,
                 }}
               >
-                <Activity style={{ width: 16, height: 16 }} />
+                <Activity style={{ width: 16, height: 16, flexShrink: 0 }} />
                 Start Consultation
               </button>
             </PermissionGate>
 
-            <PermissionGate permission={PERMISSIONS.PRESCRIPTIONS_WRITE}>
-              {/* DM Sans Regular 14px #0D2630 */}
-              <button
-                type="button"
-                className="flex items-center gap-1.5 rounded-[12px] px-3 font-normal transition-colors hover:bg-[#E6F8FD]"
-                style={{
-                  fontFamily: 'inherit',
-                  fontSize: 14,
-                  lineHeight: '22px',
-                  background: '#FFFFFF',
-                  border: '1px solid #0064821F',
-                  color: '#0D2630',
-                  height: 42,
-                  width: 124,
-                  paddingTop: 8,
-                  paddingBottom: 8,
-                }}
-              >
-                <FileText style={{ width: 15, height: 15, color: '#00B4D8' }} />
-                Prescribe
-              </button>
-            </PermissionGate>
+            <div className="flex gap-3 sm:contents md:gap-[15px]">
+              <PermissionGate permission={PERMISSIONS.PRESCRIPTIONS_WRITE}>
+                {/* DM Sans SemiBold 16/24 #0D2630 — matches outlined button style */}
+                <button
+                  type="button"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-[12px] px-4 font-semibold whitespace-nowrap transition-colors hover:bg-[#E6F8FD] sm:flex-none"
+                  style={{
+                    fontFamily: 'inherit',
+                    fontSize: 16,
+                    lineHeight: '24px',
+                    background: '#FFFFFF',
+                    border: '1px solid #0064821F',
+                    color: '#0D2630',
+                    height: 42,
+                    minWidth: 130,
+                    paddingTop: 8,
+                    paddingBottom: 8,
+                  }}
+                >
+                  <FileText style={{ width: 16, height: 16, color: '#00B4D8', flexShrink: 0 }} />
+                  Prescribe
+                </button>
+              </PermissionGate>
 
-            <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
-              {/* DM Sans SemiBold 16px #0D2630 */}
-              <button
-                type="button"
-                className="flex items-center gap-1.5 rounded-[12px] px-3 font-semibold transition-colors hover:bg-[#E6F8FD]"
-                style={{
-                  fontFamily: 'inherit',
-                  fontSize: 16,
-                  lineHeight: '24px',
-                  background: '#FFFFFF',
-                  border: '1px solid #0064821F',
-                  color: '#0D2630',
-                  height: 42,
-                  width: 124,
-                  paddingTop: 8,
-                  paddingBottom: 8,
-                }}
-              >
-                <FlaskConical style={{ width: 16, height: 16, color: '#00B4D8' }} />
-                Request Lab
-              </button>
-            </PermissionGate>
+              <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+                {/* DM Sans SemiBold 16/24 #0D2630 */}
+                <button
+                  type="button"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-[12px] px-4 font-semibold whitespace-nowrap transition-colors hover:bg-[#E6F8FD] sm:flex-none"
+                  style={{
+                    fontFamily: 'inherit',
+                    fontSize: 16,
+                    lineHeight: '24px',
+                    background: '#FFFFFF',
+                    border: '1px solid #0064821F',
+                    color: '#0D2630',
+                    height: 42,
+                    minWidth: 148,
+                    paddingTop: 8,
+                    paddingBottom: 8,
+                  }}
+                >
+                  <FlaskConical
+                    style={{ width: 16, height: 16, color: '#00B4D8', flexShrink: 0 }}
+                  />
+                  Request Lab
+                </button>
+              </PermissionGate>
+            </div>
           </div>
         </div>
 
@@ -378,7 +384,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className="font-display flex items-center gap-2 border-b-2 px-4 py-3 font-semibold whitespace-nowrap transition-colors"
+                  className="font-display flex items-center gap-2 border-b-2 px-5 py-3.5 font-semibold whitespace-nowrap transition-colors"
                   style={{
                     fontSize: 16,
                     lineHeight: '24px',
