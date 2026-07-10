@@ -92,7 +92,7 @@ export function SessionExpiredOverlay() {
           </button>
         </form>
 
-        <p className="text-muted-foreground mt-4 text-center text-xs">
+        <p className="text-muted-foreground mt-4 text-center text-sm">
           Not you?{' '}
           <a href="/login" className="text-primary underline-offset-4 hover:underline">
             Sign in as someone else

@@ -82,7 +82,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
             type="search"
             placeholder="Search patients, records, results…"
             aria-label="Search patients, records and results"
-            className="h-9 w-96 rounded-[10px] pr-4 pl-9 text-xs leading-4.5 text-[#25464D] outline-none placeholder:text-[#25464D] focus:ring-2 focus:ring-[#0098CC]/30"
+            className="h-9 w-96 rounded-[10px] pr-4 pl-9 text-sm leading-5 text-[#25464D] outline-none placeholder:text-[#25464D] focus:ring-2 focus:ring-[#0098CC]/30"
             style={{ background: '#E6F8FD' }}
           />
         </div>

@@ -74,7 +74,7 @@ export function AllergyBanner({ allergies, className }: AllergyBannerProps) {
 
             {/* Severity badge — larger padding + text */}
             <span
-              className="shrink-0 rounded px-2.5 py-1 text-xs leading-none font-bold tracking-wide uppercase"
+              className="shrink-0 rounded px-2.5 py-1 text-sm leading-none font-bold tracking-wide uppercase"
               style={SEVERITY_BADGE[allergy.severity]}
             >
               {SEVERITY_LABEL[allergy.severity]}

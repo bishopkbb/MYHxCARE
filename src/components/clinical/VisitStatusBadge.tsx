@@ -25,7 +25,7 @@ export function VisitStatusBadge({ status, className }: VisitStatusBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+        'inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium',
         VARIANT_STYLES[display.variant],
         className,
       )}

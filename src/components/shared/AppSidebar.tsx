@@ -157,7 +157,7 @@ export function AppSidebar({
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-base leading-6 text-white">{user?.name ?? '—'}</p>
-                  <p className="truncate text-xs leading-4.5" style={{ color: '#0098CC' }}>
+                  <p className="truncate text-sm leading-5" style={{ color: '#0098CC' }}>
                     {user?.role ?? ''}
                   </p>
                 </div>
@@ -175,7 +175,7 @@ export function AppSidebar({
             <div key={section.label ?? idx} className="mb-3 px-2">
               {section.label && !collapsed && (
                 <p
-                  className="px-3 text-xs leading-4.5 font-bold uppercase"
+                  className="px-3 text-sm leading-5 font-bold uppercase"
                   style={{ color: '#0098CC' }}
                 >
                   {section.label}

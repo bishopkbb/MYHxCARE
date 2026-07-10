@@ -42,7 +42,7 @@ export default function SettingsPage() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-foreground text-sm font-medium">{title}</p>
-              <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>
+              <p className="text-muted-foreground mt-0.5 text-sm">{description}</p>
             </div>
             <ChevronRight className="text-muted-foreground size-4 shrink-0" />
           </Link>

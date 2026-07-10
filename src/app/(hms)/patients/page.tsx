@@ -455,7 +455,7 @@ export default function PatientsPage() {
               Filter
               {activeFilterCount > 0 && (
                 <span
-                  className="inline-flex items-center justify-center rounded-full text-xs font-bold text-white"
+                  className="inline-flex items-center justify-center rounded-full text-sm font-bold text-white"
                   style={{ width: 18, height: 18, background: '#00B4D8' }}
                 >
                   {activeFilterCount}
@@ -490,7 +490,7 @@ export default function PatientsPage() {
                   )}
                 </div>
                 <div className="mb-4">
-                  <p className="mb-2 text-xs font-bold uppercase" style={{ color: '#4A7080' }}>
+                  <p className="mb-2 text-sm font-bold uppercase" style={{ color: '#4A7080' }}>
                     Gender
                   </p>
                   <div className="flex gap-1.5">
@@ -512,7 +512,7 @@ export default function PatientsPage() {
                   </div>
                 </div>
                 <div>
-                  <p className="mb-2 text-xs font-bold uppercase" style={{ color: '#4A7080' }}>
+                  <p className="mb-2 text-sm font-bold uppercase" style={{ color: '#4A7080' }}>
                     Status
                   </p>
                   <div className="flex gap-1.5">
@@ -617,7 +617,7 @@ export default function PatientsPage() {
                     color: isActive ? '#00B4D8' : '#25464D',
                   }}
                 >
-                  <span className="text-xs leading-[18px] font-medium">
+                  <span className="text-sm leading-[22px] font-medium">
                     {def.getLabel(quickFilters)}
                   </span>
                   <ChevronDown
@@ -747,7 +747,7 @@ export default function PatientsPage() {
               <p className="text-sm leading-5.5 font-medium" style={{ color: '#4A7080' }}>
                 No patients match this filter
               </p>
-              <p className="mt-0.5 text-xs leading-5" style={{ color: '#8A98A3' }}>
+              <p className="mt-0.5 text-sm leading-5" style={{ color: '#8A98A3' }}>
                 Adjust your search or clear filters
               </p>
             </div>
@@ -787,7 +787,7 @@ export default function PatientsPage() {
                     </div>
                   </div>
                   <span
-                    className="ml-2 inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    className="ml-2 inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-sm font-medium"
                     style={{
                       border: `1px solid ${cfg.pillBorder}`,
                       color: cfg.pillColor,
@@ -809,7 +809,7 @@ export default function PatientsPage() {
                         className="shrink-0"
                         style={{ width: 12, height: 12, color: '#F59E0B' }}
                       />
-                      <p className="text-xs leading-5">
+                      <p className="text-sm leading-5">
                         <span style={{ color: '#EF4444' }}>ALLERGY: </span>
                         <span style={{ color: '#00B4D8' }}>{patient.allergies.join(', ')}</span>
                       </p>
@@ -826,24 +826,24 @@ export default function PatientsPage() {
                   }}
                 >
                   <div>
-                    <p className="text-xs font-bold uppercase" style={{ color: '#4A7080' }}>
+                    <p className="text-sm font-bold uppercase" style={{ color: '#4A7080' }}>
                       Last Visit
                     </p>
-                    <p className="text-xs leading-5" style={{ color: '#25464D' }}>
+                    <p className="text-sm leading-5" style={{ color: '#25464D' }}>
                       {patient.lastVisitDate}
                     </p>
-                    <p className="text-xs leading-5" style={{ color: '#4A7080' }}>
+                    <p className="text-sm leading-5" style={{ color: '#4A7080' }}>
                       {patient.lastVisitTime}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-bold uppercase" style={{ color: '#4A7080' }}>
+                    <p className="text-sm font-bold uppercase" style={{ color: '#4A7080' }}>
                       Next Appointment
                     </p>
-                    <p className="text-xs leading-5" style={{ color: '#25464D' }}>
+                    <p className="text-sm leading-5" style={{ color: '#25464D' }}>
                       {patient.nextApptDate}
                     </p>
-                    <p className="text-xs leading-5" style={{ color: '#4A7080' }}>
+                    <p className="text-sm leading-5" style={{ color: '#4A7080' }}>
                       {patient.nextApptTime}
                     </p>
                   </div>
@@ -892,7 +892,7 @@ export default function PatientsPage() {
             {COLS.map((col) => (
               <div key={col.key} className={`${col.width} ${col.headPad} ${col.align} py-3.5`}>
                 <span
-                  className="text-xs leading-[18px] font-bold tracking-wider uppercase"
+                  className="text-sm leading-[22px] font-bold tracking-wider uppercase"
                   style={{ color: '#4A7080' }}
                 >
                   {col.label}

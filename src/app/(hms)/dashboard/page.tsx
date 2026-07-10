@@ -755,7 +755,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock style={{ width: 9, height: 9, color: '#25464D' }} />
-                      <span className="text-xs leading-[18px]" style={{ color: '#25464D' }}>
+                      <span className="text-sm leading-[22px]" style={{ color: '#25464D' }}>
                         {patient.waitTime ?? 'In progress'}
                       </span>
                     </div>
@@ -871,7 +871,7 @@ export default function DashboardPage() {
                       </p>
 
                       {/* Timestamp */}
-                      <p className="text-xs leading-[18px]" style={{ color: '#25464D' }}>
+                      <p className="text-sm leading-[22px]" style={{ color: '#25464D' }}>
                         {alert.time}
                       </p>
                     </div>

@@ -355,7 +355,7 @@ export default function EncountersPage() {
               Filter
               {activeFilterCount > 0 && (
                 <span
-                  className="inline-flex items-center justify-center rounded-full text-xs font-bold text-white"
+                  className="inline-flex items-center justify-center rounded-full text-sm font-bold text-white"
                   style={{ width: 18, height: 18, background: '#00B4D8' }}
                 >
                   {activeFilterCount}
@@ -391,7 +391,7 @@ export default function EncountersPage() {
                 </div>
 
                 <div className="mb-4">
-                  <p className="mb-2 text-xs font-bold uppercase" style={{ color: '#4A7080' }}>
+                  <p className="mb-2 text-sm font-bold uppercase" style={{ color: '#4A7080' }}>
                     Gender
                   </p>
                   <div className="flex gap-1.5">
@@ -414,7 +414,7 @@ export default function EncountersPage() {
                 </div>
 
                 <div>
-                  <p className="mb-2 text-xs font-bold uppercase" style={{ color: '#4A7080' }}>
+                  <p className="mb-2 text-sm font-bold uppercase" style={{ color: '#4A7080' }}>
                     Allergies
                   </p>
                   <div className="flex gap-1.5">
@@ -532,7 +532,7 @@ export default function EncountersPage() {
             >
               {tab.label}
               <span
-                className="inline-flex items-center justify-center rounded-full text-xs leading-[18px] font-bold"
+                className="inline-flex items-center justify-center rounded-full text-sm leading-[22px] font-bold"
                 style={{
                   minWidth: 20,
                   height: 22,
@@ -620,7 +620,7 @@ export default function EncountersPage() {
               <p className="text-sm leading-5.5 font-medium" style={{ color: '#4A7080' }}>
                 No patients in this queue
               </p>
-              <p className="mt-0.5 text-xs leading-5" style={{ color: '#8A98A3' }}>
+              <p className="mt-0.5 text-sm leading-5" style={{ color: '#8A98A3' }}>
                 Adjust your search or change the active tab
               </p>
             </div>
@@ -660,7 +660,7 @@ export default function EncountersPage() {
                     </div>
                   </div>
                   <span
-                    className="ml-2 inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                    className="ml-2 inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-sm font-medium"
                     style={{
                       border: `1px solid ${cfg.pillBorder}`,
                       color: cfg.pillColor,
@@ -685,7 +685,7 @@ export default function EncountersPage() {
                         className="shrink-0"
                         style={{ width: 12, height: 12, color: '#F59E0B' }}
                       />
-                      <p className="text-xs leading-5">
+                      <p className="text-sm leading-5">
                         <span style={{ color: '#EF4444' }}>ALLERGY: </span>
                         <span style={{ color: '#00B4D8' }}>{patient.allergies.join(', ')}</span>
                       </p>
@@ -707,7 +707,7 @@ export default function EncountersPage() {
                         className="shrink-0"
                         style={{ width: 11, height: 11, fill: '#EF4444', stroke: 'none' }}
                       />
-                      <span className="text-xs" style={{ color: '#25464D' }}>
+                      <span className="text-sm" style={{ color: '#25464D' }}>
                         {patient.hr} bpm
                       </span>
                     </div>
@@ -716,7 +716,7 @@ export default function EncountersPage() {
                         className="shrink-0"
                         style={{ width: 11, height: 11, color: '#F59E0B' }}
                       />
-                      <span className="text-xs" style={{ color: getTempColor(patient.temp) }}>
+                      <span className="text-sm" style={{ color: getTempColor(patient.temp) }}>
                         {patient.temp}°C
                       </span>
                     </div>
@@ -725,7 +725,7 @@ export default function EncountersPage() {
                         className="shrink-0"
                         style={{ width: 11, height: 11, color: '#00B4D8' }}
                       />
-                      <span className="text-xs" style={{ color: '#25464D' }}>
+                      <span className="text-sm" style={{ color: '#25464D' }}>
                         {patient.bp}
                       </span>
                     </div>
@@ -736,7 +736,7 @@ export default function EncountersPage() {
                       style={{ width: 11, height: 11, color: '#8A98A3' }}
                     />
                     <span
-                      className="text-xs"
+                      className="text-sm"
                       style={{
                         color:
                           patient.completedAt !== null || patient.waitDisplay === null
@@ -795,7 +795,7 @@ export default function EncountersPage() {
             {COLS.map((col) => (
               <div key={col.key} className={`${col.width} ${col.headerPad} py-3.5`}>
                 <span
-                  className="text-xs leading-[18px] font-bold tracking-wider uppercase"
+                  className="text-sm leading-[22px] font-bold tracking-wider uppercase"
                   style={{ color: '#4A7080' }}
                 >
                   {col.label}

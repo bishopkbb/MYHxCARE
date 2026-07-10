@@ -244,7 +244,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               {/* Row 2: URGENT badge */}
               {patient.isUrgent && (
                 <span
-                  className="mt-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold tracking-wide uppercase"
+                  className="mt-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-sm font-bold tracking-wide uppercase"
                   style={{
                     background: '#FFFBEB',
                     border: '1px solid #EF4444',
@@ -418,7 +418,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               <p className="text-sm font-medium" style={{ color: '#4A7080' }}>
                 {PATIENT_TABS.find((t) => t.key === activeTab)?.label} — coming soon
               </p>
-              <p className="text-xs" style={{ color: '#8A98A3' }}>
+              <p className="text-sm" style={{ color: '#8A98A3' }}>
                 This section will be built in an upcoming step
               </p>
             </div>
