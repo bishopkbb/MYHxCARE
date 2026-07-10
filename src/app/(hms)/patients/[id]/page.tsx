@@ -256,20 +256,37 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               )}
 
               {/* Row 3+: info grid */}
-              <div className="mt-3 grid grid-cols-2 gap-x-10 gap-y-1">
-                <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+              <div className="mt-3 grid grid-cols-2 gap-x-10 gap-y-1.5">
+                {/* Labels: DM Sans Regular 14/22 #4A7080 */}
+                <p
+                  className="font-normal"
+                  style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                >
                   {patient.mrn}
                 </p>
-                <p className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+                {/* Values: DM Sans Medium 14/22 #0D2630 */}
+                <p
+                  className="font-medium"
+                  style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                >
                   {patient.age} · {patient.gender}
                 </p>
-                <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                <p
+                  className="font-normal"
+                  style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                >
                   DOB: {patient.dob}
                 </p>
-                <p className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+                <p
+                  className="font-medium"
+                  style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                >
                   BG: {patient.bloodGroup}
                 </p>
-                <p className="col-span-2 text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                <p
+                  className="col-span-2 font-normal"
+                  style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                >
                   {patient.faculty} · {patient.level} · {patient.fileNumber}
                 </p>
               </div>
@@ -279,10 +296,14 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           {/* ── Right: quick action buttons ────────────────────────────────── */}
           <div className="flex flex-wrap items-center gap-[15px]">
             <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+              {/* DM Sans SemiBold 16px white */}
               <button
                 type="button"
-                className="flex items-center gap-1.5 rounded-[12px] px-4 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                className="flex items-center gap-1.5 rounded-[12px] px-4 font-semibold text-white transition-opacity hover:opacity-90"
                 style={{
+                  fontFamily: 'inherit',
+                  fontSize: 16,
+                  lineHeight: '24px',
                   background: '#00B4D8',
                   height: 40,
                   minWidth: 198,
@@ -290,54 +311,65 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   paddingBottom: 8,
                 }}
               >
-                <Activity style={{ width: 15, height: 15 }} />
+                <Activity style={{ width: 16, height: 16 }} />
                 Start Consultation
               </button>
             </PermissionGate>
 
             <PermissionGate permission={PERMISSIONS.PRESCRIPTIONS_WRITE}>
+              {/* DM Sans Regular 14px #0D2630 */}
               <button
                 type="button"
-                className="flex items-center gap-1.5 rounded-[12px] px-3 text-sm font-medium transition-colors hover:bg-[#E6F8FD]"
+                className="flex items-center gap-1.5 rounded-[12px] px-3 font-normal transition-colors hover:bg-[#E6F8FD]"
                 style={{
+                  fontFamily: 'inherit',
+                  fontSize: 14,
+                  lineHeight: '22px',
                   background: '#FFFFFF',
                   border: '1px solid #0064821F',
-                  color: '#2F3A40',
+                  color: '#0D2630',
                   height: 42,
                   width: 124,
                   paddingTop: 8,
                   paddingBottom: 8,
                 }}
               >
-                <FileText style={{ width: 14, height: 14, color: '#00B4D8' }} />
+                <FileText style={{ width: 15, height: 15, color: '#00B4D8' }} />
                 Prescribe
               </button>
             </PermissionGate>
 
             <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+              {/* DM Sans SemiBold 16px #0D2630 */}
               <button
                 type="button"
-                className="flex items-center gap-1.5 rounded-[12px] px-3 text-sm font-medium transition-colors hover:bg-[#E6F8FD]"
+                className="flex items-center gap-1.5 rounded-[12px] px-3 font-semibold transition-colors hover:bg-[#E6F8FD]"
                 style={{
+                  fontFamily: 'inherit',
+                  fontSize: 16,
+                  lineHeight: '24px',
                   background: '#FFFFFF',
                   border: '1px solid #0064821F',
-                  color: '#2F3A40',
+                  color: '#0D2630',
                   height: 42,
                   width: 124,
                   paddingTop: 8,
                   paddingBottom: 8,
                 }}
               >
-                <FlaskConical style={{ width: 14, height: 14, color: '#00B4D8' }} />
+                <FlaskConical style={{ width: 16, height: 16, color: '#00B4D8' }} />
                 Request Lab
               </button>
             </PermissionGate>
           </div>
         </div>
 
-        {/* ── Tab navigation ────────────────────────────────────────────────── */}
-        <div className="overflow-x-auto" style={{ borderBottom: '1px solid rgba(0,100,130,0.10)' }}>
-          <div className="flex min-w-max">
+        {/* ── Tab navigation ─────────────────────────────────────────────────
+             Container: bg #FFFFFF, px-5 (20px), border-bottom #0064821F
+             Labels: Outfit SemiBold 16/24
+        ── */}
+        <div className="overflow-x-auto bg-white" style={{ borderBottom: '1px solid #0064821F' }}>
+          <div className="flex min-w-max px-5">
             {PATIENT_TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.key;
@@ -346,13 +378,15 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className="flex items-center gap-1.5 border-b-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors"
+                  className="font-display flex items-center gap-2 border-b-2 px-4 py-3 font-semibold whitespace-nowrap transition-colors"
                   style={{
+                    fontSize: 16,
+                    lineHeight: '24px',
                     borderBottomColor: isActive ? '#00B4D8' : 'transparent',
                     color: isActive ? '#00B4D8' : '#4A7080',
                   }}
                 >
-                  <Icon style={{ width: 15, height: 15 }} />
+                  <Icon style={{ width: 16, height: 16 }} />
                   {tab.label}
                 </button>
               );
