@@ -2762,7 +2762,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                           /* Pending: flush edge-to-edge teal band */
                           <div
                             className="flex items-center gap-2 px-4 py-[10px]"
-                            style={{ background: '#E6F8FD' }}
+                            style={{ background: '#FFFFFF' }}
                           >
                             <RefreshCw
                               aria-hidden
