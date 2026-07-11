@@ -116,7 +116,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           },
           {
             label: 'Clinical Notes',
-            href: '/encounters',
+            href: '/clinical-notes',
             icon: ClipboardList,
             iconSrc: '/icons/clinical%20notes.png',
           },
