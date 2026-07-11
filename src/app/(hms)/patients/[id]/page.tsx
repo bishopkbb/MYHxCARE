@@ -2848,25 +2848,31 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             </>
           )}
 
-          {activeTab !== 'biodata' &&
-            activeTab !== 'medical-history' &&
-            activeTab !== 'allergies' &&
-            activeTab !== 'vital-signs' &&
-            activeTab !== 'prev-consultations' &&
-            activeTab !== 'current-medications' &&
-            activeTab !== 'lab-results' && (
+          {/* ── Attachments tab ────────────────────────────────────────── */}
+          {activeTab === 'attachments' && (
+            <div
+              className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
+              style={{
+                background: 'rgba(226,237,241,0.25)',
+                border: '1px solid rgba(0,180,216,0.15)',
+              }}
+            >
               <div
-                className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-[12px]"
-                style={{ background: 'rgba(226,237,241,0.25)' }}
+                className="flex size-12 items-center justify-center rounded-full"
+                style={{ background: 'rgba(0,180,216,0.08)' }}
               >
-                <p className="text-sm font-medium" style={{ color: '#4A7080' }}>
-                  {PATIENT_TABS.find((t) => t.key === activeTab)?.label} — coming soon
+                <Paperclip aria-hidden style={{ width: 24, height: 24, color: '#00B4D8' }} />
+              </div>
+              <div className="text-center">
+                <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                  No attachments on record
                 </p>
-                <p className="text-sm" style={{ color: '#8A98A3' }}>
-                  This section will be built in an upcoming step
+                <p className="mt-1 max-w-xs" style={{ fontSize: 14, color: '#4A7080' }}>
+                  Patient documents, lab reports and images will appear here once uploaded.
                 </p>
               </div>
-            )}
+            </div>
+          )}
         </div>
       </div>
 
