@@ -437,26 +437,26 @@ function AddNoteModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
       style={{ background: 'rgba(13,38,48,0.45)' }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        className="flex w-full flex-col gap-5 overflow-y-auto bg-white"
+        className="flex w-full flex-col gap-6 overflow-y-auto bg-white"
         style={{
-          maxWidth: 740,
-          maxHeight: 'calc(100vh - 64px)',
+          maxWidth: 1040,
+          maxHeight: 'calc(100vh - 24px)',
           borderRadius: 16,
-          padding: 24,
+          padding: 32,
         }}
       >
         {/* ── Modal header ── */}
         <div className="flex items-center justify-between gap-3">
           <h2
             className="font-display font-semibold"
-            style={{ fontSize: 24, lineHeight: '32px', color: '#0D2630' }}
+            style={{ fontSize: 28, lineHeight: '36px', color: '#0D2630' }}
           >
             New Clinical Note
           </h2>
@@ -559,7 +559,7 @@ function AddNoteModal({
             onChange={(e) => setContent(e.target.value)}
             placeholder={noteType === 'soap' ? '' : 'Enter note content...'}
             className="resize-none transition-[border-color] placeholder:text-[#8A98A3]"
-            style={{ ...TEXTAREA_STYLE, minHeight: 200 }}
+            style={{ ...TEXTAREA_STYLE, minHeight: 400 }}
             onFocus={(e) => (e.currentTarget.style.borderColor = '#00B4D8')}
             onBlur={(e) => (e.currentTarget.style.borderColor = '#0064821F')}
           />
