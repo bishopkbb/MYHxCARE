@@ -225,13 +225,16 @@ export default function MedicalRecordsPage() {
   });
 
   return (
-    <main className="flex-1 overflow-y-auto px-6 py-6" style={{ background: '#F5FBFD' }}>
+    <main
+      className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6"
+      style={{ background: '#F5FBFD' }}
+    >
       {/* ── Page header ──────────────────────────────────────────────────────── */}
-      <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="mb-5 flex items-start justify-between gap-3 sm:mb-6">
         <div>
           <h1
             className="font-display font-semibold"
-            style={{ fontSize: 24, lineHeight: '32px', color: '#0D2630' }}
+            style={{ fontSize: 22, lineHeight: '30px', color: '#0D2630' }}
           >
             Medical Records
           </h1>
@@ -240,52 +243,51 @@ export default function MedicalRecordsPage() {
           </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => toast.info('Filter', 'Advanced filters coming soon.')}
-            className="flex items-center gap-2 rounded-[10px] px-4 font-sans font-semibold transition-colors hover:bg-slate-50"
+            className="flex items-center gap-2 rounded-[10px] px-3 font-sans font-semibold transition-colors hover:bg-slate-50 sm:px-4"
             style={{
               fontSize: 14,
               lineHeight: '22px',
-              height: 42,
+              height: 40,
               color: '#0D2630',
               border: '1px solid #0064821F',
               background: '#FFFFFF',
             }}
           >
             <ListFilter style={{ width: 16, height: 16, flexShrink: 0 }} />
-            Filter
+            <span className="hidden sm:inline">Filter</span>
           </button>
 
           <button
             type="button"
             onClick={() => toast.success('Export ready', 'Medical records downloaded as CSV.')}
-            className="flex items-center gap-2 rounded-[10px] px-4 font-sans font-semibold transition-colors hover:bg-slate-50"
+            className="flex items-center gap-2 rounded-[10px] px-3 font-sans font-semibold transition-colors hover:bg-slate-50 sm:px-4"
             style={{
               fontSize: 14,
               lineHeight: '22px',
-              height: 42,
+              height: 40,
               color: '#0D2630',
               border: '1px solid #0064821F',
               background: '#FFFFFF',
             }}
           >
             <Download style={{ width: 16, height: 16, flexShrink: 0 }} />
-            Export Records
+            <span className="hidden sm:inline">Export Records</span>
           </button>
         </div>
       </div>
 
-      {/* ── Metric cards ─────────────────────────────────────────────────────── */}
-      <div className="mb-6 flex flex-wrap gap-[60px]">
+      {/* ── Metric cards — 2×2 grid on mobile, fixed-width row on lg+ ────────── */}
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:mb-6 lg:flex lg:gap-[60px]">
         {metrics.map((m) => (
           <div
             key={m.label}
-            className="flex items-center gap-3"
+            className="flex items-center gap-3 lg:w-[200px] lg:shrink-0"
             style={{
-              width: 200,
-              height: 64,
+              minHeight: 64,
               borderRadius: 12,
               borderTop: '1px solid #0064821F',
               borderRight: '1px solid #0064821F',
@@ -297,7 +299,7 @@ export default function MedicalRecordsPage() {
           >
             <span
               className="font-display shrink-0 font-semibold"
-              style={{ fontSize: 28, lineHeight: '36px', color: m.color }}
+              style={{ fontSize: 26, lineHeight: '34px', color: m.color }}
             >
               {m.value}
             </span>
@@ -313,7 +315,7 @@ export default function MedicalRecordsPage() {
 
       {/* ── Search bar ───────────────────────────────────────────────────────── */}
       <div
-        className="mb-4 flex items-center gap-3 px-4"
+        className="mb-3 flex items-center gap-3 px-3 sm:mb-4 sm:px-4"
         style={{
           height: 42,
           borderRadius: 10,
@@ -332,9 +334,9 @@ export default function MedicalRecordsPage() {
         />
       </div>
 
-      {/* ── Tab bar ──────────────────────────────────────────────────────────── */}
+      {/* ── Tab bar — scrollable pills on mobile, spread flex on sm+ ─────────── */}
       <div
-        className="mb-4 flex gap-1 overflow-x-auto"
+        className="mb-3 flex gap-1 overflow-x-auto sm:mb-4 sm:gap-[50px]"
         style={{
           borderRadius: 12,
           padding: 4,
@@ -348,7 +350,7 @@ export default function MedicalRecordsPage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className="flex shrink-0 items-center gap-2 rounded-[9px] px-4 font-sans font-semibold whitespace-nowrap transition-all"
+              className="flex shrink-0 items-center gap-1.5 rounded-[9px] px-3 font-sans font-semibold whitespace-nowrap transition-all sm:flex-1 sm:justify-center sm:gap-2 sm:px-4"
               style={{
                 fontSize: 14,
                 lineHeight: '22px',
@@ -402,15 +404,17 @@ export default function MedicalRecordsPage() {
             return (
               <div
                 key={record.id}
-                className="flex cursor-pointer items-center gap-4 px-4 transition-shadow hover:shadow-sm"
+                className="flex cursor-pointer items-center gap-3 px-3 transition-shadow hover:shadow-sm sm:gap-4 sm:px-4"
                 style={{
-                  height: 70,
+                  minHeight: 70,
                   borderRadius: 12,
                   background: '#FFFFFF',
                   borderTop: '1px solid #0064821F',
                   borderRight: '1px solid #0064821F',
                   borderBottom: '1px solid #0064821F',
                   borderLeft: isCriticalRow ? '3px solid #EF4444' : '1px solid #0064821F',
+                  paddingTop: 12,
+                  paddingBottom: 12,
                 }}
               >
                 {/* Icon circle */}
@@ -441,13 +445,15 @@ export default function MedicalRecordsPage() {
                     className="truncate"
                     style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
                   >
-                    {record.patientName} · {record.mrn} · {record.date} · {record.provider}
+                    {record.patientName}
+                    <span className="hidden sm:inline"> · {record.mrn}</span> · {record.date}
+                    <span className="hidden sm:inline"> · {record.provider}</span>
                   </p>
                 </div>
 
-                {/* Type badge */}
+                {/* Type badge — desktop only */}
                 <span
-                  className="shrink-0 rounded-full px-3 py-0.5 font-sans font-semibold tracking-wide"
+                  className="hidden shrink-0 rounded-full px-3 py-0.5 font-sans font-semibold tracking-wide sm:inline"
                   style={{
                     fontSize: 12,
                     lineHeight: '20px',
@@ -461,7 +467,7 @@ export default function MedicalRecordsPage() {
 
                 {/* Status badge */}
                 <span
-                  className="shrink-0 rounded-full px-3 py-0.5 font-sans font-medium"
+                  className="shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium sm:px-3"
                   style={{
                     fontSize: 14,
                     lineHeight: '22px',
