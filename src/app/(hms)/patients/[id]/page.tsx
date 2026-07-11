@@ -11,6 +11,7 @@ import {
   Paperclip,
   Pill,
   RefreshCw,
+  ShieldAlert,
   Stethoscope,
   User,
 } from 'lucide-react';
@@ -142,6 +143,30 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
     Moderate: { color: '#F59E0B', border: '1px solid #F59E0B' },
     Mild: { color: '#22C55E', border: '1px solid #22C55E' },
   } as const;
+
+  // ── Allergies fetch simulation ────────────────────────────────────────────────
+  type AllergiesStatus = 'loading' | 'loaded' | 'empty' | 'error';
+  const [allergiesStatus, setAllergiesStatus] = useState<AllergiesStatus>('loading');
+  const allergiesLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (activeTab !== 'allergies') return;
+    if (allergiesLoadedRef.current) return;
+    const t = setTimeout(() => {
+      allergiesLoadedRef.current = true;
+      setAllergiesStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+    return () => clearTimeout(t);
+  }, [activeTab, patient.id]);
+
+  function retryAllergies() {
+    allergiesLoadedRef.current = false;
+    setAllergiesStatus('loading');
+    setTimeout(() => {
+      allergiesLoadedRef.current = true;
+      setAllergiesStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+  }
 
   const queueBadge = QUEUE_BADGE[patient.queueStatus] ?? FALLBACK_BADGE;
 
@@ -1672,19 +1697,225 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               )}
             </>
           )}
-          {activeTab !== 'biodata' && activeTab !== 'medical-history' && (
-            <div
-              className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-[12px]"
-              style={{ background: 'rgba(226,237,241,0.25)' }}
-            >
-              <p className="text-sm font-medium" style={{ color: '#4A7080' }}>
-                {PATIENT_TABS.find((t) => t.key === activeTab)?.label} — coming soon
-              </p>
-              <p className="text-sm" style={{ color: '#8A98A3' }}>
-                This section will be built in an upcoming step
-              </p>
-            </div>
+          {activeTab === 'allergies' && (
+            <>
+              {/* ── Loading skeleton ─────────────────────────────────────────── */}
+              {allergiesStatus === 'loading' && (
+                <div className="flex flex-col gap-[30px]">
+                  {/* Header notice skeleton */}
+                  <div
+                    className="animate-pulse rounded-[12px] p-[14px]"
+                    style={{
+                      background: 'rgba(254,242,242,0.7)',
+                      border: '1px solid rgba(255,162,162,0.35)',
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="size-5 shrink-0 rounded-sm bg-slate-200" />
+                      <div className="flex-1">
+                        <div className="h-[18px] w-52 rounded-sm bg-slate-200" />
+                        <div className="mt-1.5 h-3.5 w-80 rounded-sm bg-slate-100" />
+                      </div>
+                    </div>
+                  </div>
+                  {/* Allergy card skeletons */}
+                  {[0, 1].map((i) => (
+                    <div
+                      key={i}
+                      className="flex animate-pulse items-center gap-3 rounded-[12px] bg-white p-4"
+                      style={{ border: '2px solid rgba(255,162,162,0.25)' }}
+                    >
+                      <div className="size-10 shrink-0 rounded-full bg-slate-100" />
+                      <div className="flex-1">
+                        <div className="h-[18px] w-24 rounded-sm bg-slate-200" />
+                        <div className="mt-1.5 h-3.5 w-44 rounded-sm bg-slate-100" />
+                      </div>
+                      <div className="h-8 w-[86px] shrink-0 rounded-full bg-slate-100" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ── Error state ───────────────────────────────────────────────── */}
+              {allergiesStatus === 'error' && (
+                <div
+                  className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-[12px] py-12 text-center"
+                  style={{
+                    background: 'rgba(239,68,68,0.03)',
+                    border: '1px solid rgba(239,68,68,0.12)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(239,68,68,0.08)' }}
+                  >
+                    <AlertTriangle style={{ width: 22, height: 22, color: '#EF4444' }} />
+                  </div>
+                  <div>
+                    <p className="text-base leading-6 font-medium" style={{ color: '#4A7080' }}>
+                      Could not load allergy records
+                    </p>
+                    <p className="mt-0.5 text-sm leading-5" style={{ color: '#8A98A3' }}>
+                      An error occurred while fetching this patient&apos;s allergy data
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={retryAllergies}
+                    className="mt-1 flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80"
+                    style={{ background: '#E2EDF1', color: '#25464D' }}
+                  >
+                    <RefreshCw style={{ width: 14, height: 14 }} />
+                    Try again
+                  </button>
+                </div>
+              )}
+
+              {/* ── Empty state (unknown patient) ─────────────────────────────── */}
+              {allergiesStatus === 'empty' && (
+                <div
+                  className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-[12px] py-12 text-center"
+                  style={{ background: 'rgba(226,237,241,0.25)' }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(226,237,241,0.6)' }}
+                  >
+                    <ShieldAlert style={{ width: 22, height: 22, color: '#8A98A3' }} />
+                  </div>
+                  <div>
+                    <p className="text-base leading-6 font-medium" style={{ color: '#4A7080' }}>
+                      No allergy data available
+                    </p>
+                    <p className="mt-0.5 text-sm leading-5" style={{ color: '#8A98A3' }}>
+                      Patient identity could not be resolved
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Loaded ─────────────────────────────────────────────────────── */}
+              {allergiesStatus === 'loaded' && (
+                <>
+                  {patient.allergies.length === 0 ? (
+                    <div
+                      className="flex min-h-[160px] flex-col items-center justify-center gap-3 rounded-[12px] py-10 text-center"
+                      style={{
+                        background: 'rgba(34,197,94,0.03)',
+                        border: '1px solid rgba(34,197,94,0.2)',
+                      }}
+                    >
+                      <div
+                        className="flex size-12 items-center justify-center rounded-full"
+                        style={{ background: 'rgba(34,197,94,0.08)' }}
+                      >
+                        <ShieldAlert style={{ width: 22, height: 22, color: '#22C55E' }} />
+                      </div>
+                      <div>
+                        <p className="text-base leading-6 font-medium" style={{ color: '#4A7080' }}>
+                          No documented drug allergies
+                        </p>
+                        <p className="mt-0.5 text-sm leading-5" style={{ color: '#8A98A3' }}>
+                          This patient has no recorded drug allergies on file
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-[30px]">
+                      {/* ── Documented Drug Allergies notice ── */}
+                      <div
+                        className="flex items-center gap-3 rounded-[12px] p-[14px]"
+                        style={{ background: '#FEF2F2', border: '1px solid #FFC9C9' }}
+                      >
+                        <AlertTriangle
+                          aria-hidden
+                          style={{ width: 20, height: 20, color: '#DC2626', flexShrink: 0 }}
+                        />
+                        <div>
+                          <p
+                            className="leading-6 font-semibold"
+                            style={{ fontSize: 16, color: '#DC2626' }}
+                          >
+                            Documented Drug Allergies
+                          </p>
+                          <p className="leading-5" style={{ fontSize: 14, color: '#DC2626' }}>
+                            Must be respected in all clinical workflows, especially prescribing.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* ── Individual allergy cards ── */}
+                      {patient.allergies.map((allergy) => (
+                        <div
+                          key={allergy.id}
+                          className="flex items-center gap-3 rounded-[12px] bg-white p-4"
+                          style={{ border: '2px solid #FFC9C9' }}
+                        >
+                          {/* Icon circle */}
+                          <div
+                            className="flex size-10 shrink-0 items-center justify-center rounded-full"
+                            style={{ background: '#FEE2E2' }}
+                          >
+                            <ShieldAlert
+                              aria-hidden
+                              style={{ width: 20, height: 20, color: '#EF4444' }}
+                            />
+                          </div>
+
+                          {/* Substance + subtitle */}
+                          <div className="flex-1">
+                            <p
+                              className="leading-6 font-semibold"
+                              style={{ fontSize: 16, color: '#0D2630' }}
+                            >
+                              {allergy.substance}
+                            </p>
+                            <p className="leading-5" style={{ fontSize: 14, color: '#4A7080' }}>
+                              Drug Allergy — Do Not Prescribe
+                            </p>
+                          </div>
+
+                          {/* ALLERGY badge */}
+                          <span
+                            className="shrink-0 font-medium uppercase"
+                            style={{
+                              fontSize: 14,
+                              lineHeight: '24px',
+                              paddingTop: 4,
+                              paddingBottom: 4,
+                              paddingLeft: 12,
+                              paddingRight: 12,
+                              borderRadius: 9999,
+                              background: '#FEF2F2',
+                              border: '1px solid #FFA2A2',
+                              color: '#DC2626',
+                            }}
+                          >
+                            ALLERGY
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </>
           )}
+          {activeTab !== 'biodata' &&
+            activeTab !== 'medical-history' &&
+            activeTab !== 'allergies' && (
+              <div
+                className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-[12px]"
+                style={{ background: 'rgba(226,237,241,0.25)' }}
+              >
+                <p className="text-sm font-medium" style={{ color: '#4A7080' }}>
+                  {PATIENT_TABS.find((t) => t.key === activeTab)?.label} — coming soon
+                </p>
+                <p className="text-sm" style={{ color: '#8A98A3' }}>
+                  This section will be built in an upcoming step
+                </p>
+              </div>
+            )}
         </div>
       </div>
 
