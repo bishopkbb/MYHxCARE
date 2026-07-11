@@ -71,8 +71,7 @@ const VITAL_SHORT_LABEL: Record<string, string> = {
   spo2: 'SpO2',
 };
 
-// Only these vitals are clinically relevant in the sidebar quick-view
-const SIDEBAR_VITAL_KEYS = new Set([
+const SUMMARY_VITAL_KEYS = new Set([
   'blood-pressure',
   'pulse-rate',
   'temperature',
@@ -141,7 +140,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
   }
 
   const activeMedications = patient.medications.filter((m) => m.status === 'active');
-  const sidebarVitals = patient.vitalSigns.readings.filter((r) => SIDEBAR_VITAL_KEYS.has(r.key));
+  const summaryVitals = patient.vitalSigns.readings.filter((r) => SUMMARY_VITAL_KEYS.has(r.key));
   const sliderPct = ((form.severity - 1) / 9) * 100;
 
   return (
@@ -232,7 +231,6 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                 aria-hidden
                 style={{ width: 18, height: 18, color: '#FCA5A5', flexShrink: 0 }}
               />
-              {/* Mobile: count chip */}
               <span
                 className="shrink-0 text-sm font-medium sm:hidden"
                 style={{
@@ -247,7 +245,6 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                   ? '1 allergy'
                   : `${patient.allergies.length} allergies`}
               </span>
-              {/* sm+: individual substance pills */}
               {patient.allergies.slice(0, 2).map((a) => (
                 <span
                   key={a.id}
@@ -275,7 +272,6 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
           )}
         </div>
 
-        {/* URGENT — desktop right slot */}
         {patient.isUrgent && (
           <span
             className="hidden shrink-0 text-sm font-bold tracking-wide uppercase sm:inline"
@@ -292,641 +288,667 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
         )}
       </div>
 
-      {/* ── 2-column split ─────────────────────────────────────────────────────── */}
-      <div className="flex min-h-0 flex-1">
-        {/* ── Left: patient summary sidebar ────────────────────────────────── */}
-        <aside
-          className="hidden w-[300px] shrink-0 flex-col overflow-y-auto bg-white lg:flex xl:w-[320px]"
-          style={{ borderRight: '1px solid #0064821F' }}
-        >
-          {/* Identity */}
+      {/* ── Scrollable body ─────────────────────────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-4xl space-y-5 px-5 py-5">
+          {/* ── Patient summary card ──────────────────────────────────────────── */}
           <div
-            className="flex items-center gap-3 px-5 py-4"
-            style={{ borderBottom: '1px solid #0064821F' }}
+            className="overflow-hidden rounded-[16px] bg-white"
+            style={{ border: '1px solid #0064821F' }}
           >
+            {/* Identity */}
             <div
-              className="flex shrink-0 items-center justify-center rounded-full font-semibold text-white"
-              style={{ width: 48, height: 48, background: '#00B4D8', fontSize: 18 }}
+              className="flex items-start gap-4 px-5 py-4"
+              style={{ borderBottom: '1px solid #0064821F' }}
             >
-              {patient.initials}
-            </div>
-            <div className="min-w-0">
-              <p
-                className="truncate font-semibold"
-                style={{ fontSize: 18, lineHeight: '28px', color: '#0D2630' }}
+              <div
+                className="flex shrink-0 items-center justify-center rounded-full font-semibold text-white"
+                style={{ width: 52, height: 52, background: '#00B4D8', fontSize: 20 }}
               >
-                {patient.name}
-              </p>
-              <p style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>{patient.mrn}</p>
+                {patient.initials}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p
+                  className="font-semibold"
+                  style={{ fontSize: 18, lineHeight: '28px', color: '#0D2630' }}
+                >
+                  {patient.name}
+                </p>
+                <p style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>{patient.mrn}</p>
+                <p style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
+                  {patient.age} {patient.gender} · BG: {patient.bloodGroup}
+                </p>
+              </div>
+              {patient.isUrgent && (
+                <span
+                  className="shrink-0 text-sm font-bold tracking-wide uppercase"
+                  style={{
+                    borderRadius: 4,
+                    padding: '4px 10px',
+                    background: 'rgba(245,158,11,0.12)',
+                    border: '1px solid rgba(245,158,11,0.45)',
+                    color: '#D97706',
+                  }}
+                >
+                  URGENT
+                </span>
+              )}
             </div>
-          </div>
 
-          {/* Demographics */}
-          <div className="px-5 py-3" style={{ borderBottom: '1px solid #0064821F' }}>
-            <p style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-              {patient.age} {patient.gender} · BG: {patient.bloodGroup}
-            </p>
-          </div>
-
-          {/* Vital Signs */}
-          {sidebarVitals.length > 0 && (
-            <div className="px-5 py-4" style={{ borderBottom: '1px solid #0064821F' }}>
-              <p
-                className="mb-3 text-sm font-semibold tracking-wider uppercase"
-                style={{ color: '#00B4D8' }}
-              >
-                Vital Signs
-              </p>
-              <div className="flex flex-col gap-[10px]">
-                {sidebarVitals.map((reading) => {
-                  const label = VITAL_SHORT_LABEL[reading.key] ?? reading.key;
-                  const isAbnormal = reading.status === 'abnormal';
-                  return (
-                    <div key={reading.key} className="flex items-center justify-between">
-                      <span style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-                        {label}
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className="font-medium"
-                          style={{
-                            fontSize: 14,
-                            lineHeight: '22px',
-                            color: isAbnormal ? '#EF4444' : '#0D2630',
-                          }}
-                        >
-                          {reading.value}
+            {/* Vital Signs */}
+            {summaryVitals.length > 0 && (
+              <div className="px-5 py-4" style={{ borderBottom: '1px solid #0064821F' }}>
+                <p
+                  className="mb-3 text-sm font-semibold tracking-wider uppercase"
+                  style={{ color: '#00B4D8' }}
+                >
+                  Vital Signs
+                </p>
+                <div className="flex flex-col gap-2">
+                  {summaryVitals.map((reading) => {
+                    const label = VITAL_SHORT_LABEL[reading.key] ?? reading.key;
+                    const isAbnormal = reading.status === 'abnormal';
+                    return (
+                      <div key={reading.key} className="flex items-center justify-between">
+                        <span style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
+                          {label}
                         </span>
-                        {isAbnormal && (
-                          <AlertTriangle
-                            aria-hidden
-                            style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0 }}
-                          />
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="font-medium"
+                            style={{
+                              fontSize: 14,
+                              lineHeight: '22px',
+                              color: isAbnormal ? '#EF4444' : '#0D2630',
+                            }}
+                          >
+                            {reading.value}
+                          </span>
+                          {isAbnormal && (
+                            <AlertTriangle
+                              aria-hidden
+                              style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0 }}
+                            />
+                          )}
+                        </div>
                       </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Allergies */}
+            {patient.allergies.length > 0 && (
+              <div
+                className="px-5 py-4"
+                style={{
+                  borderBottom: activeMedications.length > 0 ? '1px solid #0064821F' : undefined,
+                }}
+              >
+                <div className="mb-2 flex items-center gap-1.5">
+                  <AlertTriangle aria-hidden style={{ width: 14, height: 14, color: '#F59E0B' }} />
+                  <p
+                    className="text-sm font-semibold tracking-wider uppercase"
+                    style={{ color: '#F59E0B' }}
+                  >
+                    Allergies
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {patient.allergies.map((allergy) => (
+                    <span
+                      key={allergy.id}
+                      className="rounded-full px-3 py-1"
+                      style={{
+                        fontSize: 14,
+                        lineHeight: '22px',
+                        border: '1px solid rgba(239,68,68,0.40)',
+                        color: '#EF4444',
+                        background: 'rgba(239,68,68,0.05)',
+                      }}
+                    >
+                      {allergy.substance}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Active Medications */}
+            {activeMedications.length > 0 && (
+              <div className="px-5 py-4">
+                <p
+                  className="mb-3 text-sm font-semibold tracking-wider uppercase"
+                  style={{ color: '#4A7080' }}
+                >
+                  Active Medications
+                </p>
+                <div className="flex flex-col gap-2">
+                  {activeMedications.map((med) => (
+                    <div
+                      key={med.id}
+                      className="rounded-[10px] px-4 py-3"
+                      style={{
+                        background: 'rgba(0,180,216,0.06)',
+                        border: '1px solid rgba(0,180,216,0.18)',
+                      }}
+                    >
+                      <p
+                        className="font-medium"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                      >
+                        {med.name}
+                      </p>
+                      <p style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
+                        {med.dose} · {med.frequency}
+                      </p>
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Consultation form card ─────────────────────────────────────────── */}
+          <div
+            className="overflow-hidden rounded-[16px] bg-white"
+            style={{ border: '1px solid #0064821F' }}
+          >
+            {/* Step navigation */}
+            <div className="overflow-x-auto" style={{ borderBottom: '1px solid #0064821F' }}>
+              <div className="flex min-w-max">
+                {CONSULTATION_STEPS.map((step) => {
+                  const isActive = currentStep === step.number;
+                  const isCompleted = currentStep > step.number;
+                  const Icon = step.icon;
+                  return (
+                    <button
+                      key={step.key}
+                      type="button"
+                      onClick={() => setCurrentStep(step.number)}
+                      className="font-display flex items-center gap-2 border-b-2 px-4 py-3.5 font-semibold whitespace-nowrap transition-colors"
+                      style={{
+                        fontSize: 15,
+                        lineHeight: '24px',
+                        borderBottomColor: isActive ? '#00B4D8' : 'transparent',
+                        color: isActive ? '#00B4D8' : isCompleted ? '#4A7080' : '#8A98A3',
+                      }}
+                    >
+                      <span
+                        className="flex shrink-0 items-center justify-center rounded-full text-sm font-bold"
+                        style={{
+                          width: 24,
+                          height: 24,
+                          background: isActive ? '#00B4D8' : '#E2EDF1',
+                          color: isActive ? '#FFFFFF' : isCompleted ? '#4A7080' : '#8A98A3',
+                        }}
+                      >
+                        {step.number}
+                      </span>
+                      <Icon style={{ width: 16, height: 16, flexShrink: 0 }} />
+                      {step.label}
+                    </button>
                   );
                 })}
               </div>
             </div>
-          )}
 
-          {/* Allergies */}
-          {patient.allergies.length > 0 && (
-            <div className="px-5 py-4" style={{ borderBottom: '1px solid #0064821F' }}>
-              <div className="mb-3 flex items-center gap-1.5">
-                <AlertTriangle aria-hidden style={{ width: 14, height: 14, color: '#F59E0B' }} />
-                <p
-                  className="text-sm font-semibold tracking-wider uppercase"
-                  style={{ color: '#F59E0B' }}
-                >
-                  Allergies
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {patient.allergies.map((allergy) => (
-                  <span
-                    key={allergy.id}
-                    className="rounded-full px-3 py-1 text-sm"
-                    style={{
-                      border: '1px solid rgba(239,68,68,0.40)',
-                      color: '#EF4444',
-                      background: 'rgba(239,68,68,0.05)',
-                    }}
+            {/* ── Step content ──────────────────────────────────────────────────── */}
+            <div className="p-5 sm:p-6">
+              {/* Step 1: Chief Complaint */}
+              {currentStep === 1 && (
+                <div className="max-w-2xl">
+                  <h2
+                    className="font-display font-semibold"
+                    style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
                   >
-                    {allergy.substance}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+                    Chief Complaint
+                  </h2>
+                  <p
+                    className="mt-1"
+                    style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                  >
+                    Primary reason for today&apos;s visit, in patient&apos;s own words.
+                  </p>
 
-          {/* Active Medications */}
-          {activeMedications.length > 0 && (
-            <div className="px-5 py-4">
-              <p
-                className="mb-3 text-sm font-semibold tracking-wider uppercase"
-                style={{ color: '#4A7080' }}
-              >
-                Active Medications
-              </p>
-              <div className="flex flex-col gap-2">
-                {activeMedications.map((med) => (
-                  <div
-                    key={med.id}
-                    className="rounded-[8px] px-3 py-2"
-                    style={{
-                      background: 'rgba(0,180,216,0.06)',
-                      border: '1px solid rgba(0,180,216,0.15)',
-                    }}
-                  >
-                    <p
-                      className="font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                  <textarea
+                    value={form.chiefComplaint}
+                    onChange={(e) => setField('chiefComplaint', e.target.value)}
+                    rows={5}
+                    className="mt-4 w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                    style={TEXTAREA_BASE}
+                    onFocus={focusBorder}
+                    onBlur={blurBorder}
+                  />
+
+                  <div className="mt-5 grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        className="mb-1.5 block font-medium"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                      >
+                        Duration
+                      </label>
+                      <input
+                        type="text"
+                        value={form.duration}
+                        onChange={(e) => setField('duration', e.target.value)}
+                        placeholder="e.g., 3 days"
+                        className="w-full px-4 transition-[border-color] outline-none"
+                        style={SINGLE_INPUT_BASE}
+                        onFocus={focusBorder}
+                        onBlur={blurBorder}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="mb-1.5 block font-medium"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                      >
+                        Onset
+                      </label>
+                      <input
+                        type="date"
+                        value={form.onset}
+                        onChange={(e) => setField('onset', e.target.value)}
+                        className="w-full px-4 transition-[border-color] outline-none"
+                        style={SINGLE_INPUT_BASE}
+                        onFocus={focusBorder}
+                        onBlur={blurBorder}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <div className="mb-3 flex items-center justify-between">
+                      <label
+                        className="font-medium"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                      >
+                        Severity (1–10)
+                      </label>
+                      <span
+                        className="font-semibold"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+                      >
+                        {form.severity}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={1}
+                      max={10}
+                      value={form.severity}
+                      onChange={(e) => setField('severity', Number(e.target.value))}
+                      className="h-2 w-full cursor-pointer appearance-none rounded-full [&::-moz-range-thumb]:h-[18px] [&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md"
+                      style={{
+                        background: `linear-gradient(to right, #00B4D8 ${sliderPct}%, #1A3D4D ${sliderPct}%)`,
+                      }}
+                    />
+                    <div className="mt-1.5 flex justify-between">
+                      <span className="text-sm" style={{ color: '#8A98A3' }}>
+                        1
+                      </span>
+                      <span className="text-sm" style={{ color: '#8A98A3' }}>
+                        10
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: History */}
+              {currentStep === 2 && (
+                <div className="max-w-2xl space-y-6">
+                  <div>
+                    <h2
+                      className="font-display font-semibold"
+                      style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
                     >
-                      {med.name}
-                    </p>
-                    <p style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-                      {med.dose} · {med.frequency}
+                      History
+                    </h2>
+                    <p
+                      className="mt-1"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                    >
+                      History of present illness, past medical and social history.
                     </p>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </aside>
 
-        {/* ── Right: consultation wizard ────────────────────────────────────── */}
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          {/* Step navigation */}
-          <div
-            className="shrink-0 overflow-x-auto bg-white"
-            style={{ borderBottom: '1px solid #0064821F' }}
-          >
-            <div className="flex min-w-max px-5">
-              {CONSULTATION_STEPS.map((step) => {
-                const isActive = currentStep === step.number;
-                const isCompleted = currentStep > step.number;
-                const Icon = step.icon;
-                return (
-                  <button
-                    key={step.key}
-                    type="button"
-                    onClick={() => setCurrentStep(step.number)}
-                    className="font-display flex items-center gap-2 border-b-2 px-4 py-3.5 font-semibold whitespace-nowrap transition-colors"
-                    style={{
-                      fontSize: 15,
-                      lineHeight: '24px',
-                      borderBottomColor: isActive ? '#00B4D8' : 'transparent',
-                      color: isActive ? '#00B4D8' : isCompleted ? '#4A7080' : '#8A98A3',
-                    }}
-                  >
-                    {/* Step number circle */}
-                    <span
-                      className="flex shrink-0 items-center justify-center rounded-full text-sm font-bold"
-                      style={{
-                        width: 24,
-                        height: 24,
-                        background: isActive ? '#00B4D8' : '#E2EDF1',
-                        color: isActive ? '#FFFFFF' : isCompleted ? '#4A7080' : '#8A98A3',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {step.number}
-                    </span>
-                    <Icon style={{ width: 16, height: 16, flexShrink: 0 }} />
-                    {step.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ── Step content area ─────────────────────────────────────────── */}
-          <div className="flex-1 overflow-y-auto p-5 sm:p-6">
-            {/* ── Step 1: Chief Complaint ────────────────────────────────── */}
-            {currentStep === 1 && (
-              <div className="max-w-2xl">
-                <h2
-                  className="font-display font-semibold"
-                  style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
-                >
-                  Chief Complaint
-                </h2>
-                <p className="mt-1" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-                  Primary reason for today&apos;s visit, in patient&apos;s own words.
-                </p>
-
-                <textarea
-                  value={form.chiefComplaint}
-                  onChange={(e) => setField('chiefComplaint', e.target.value)}
-                  rows={5}
-                  className="mt-4 w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                  style={TEXTAREA_BASE}
-                  onFocus={focusBorder}
-                  onBlur={blurBorder}
-                />
-
-                <div className="mt-5 grid grid-cols-2 gap-4">
                   <div>
                     <label
                       className="mb-1.5 block font-medium"
                       style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
                     >
-                      Duration
+                      History of Present Illness
+                    </label>
+                    <textarea
+                      value={form.historyPresentIllness}
+                      onChange={(e) => setField('historyPresentIllness', e.target.value)}
+                      placeholder="Describe the progression and context of the current complaint..."
+                      rows={4}
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                      style={TEXTAREA_BASE}
+                      onFocus={focusBorder}
+                      onBlur={blurBorder}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="mb-1.5 block font-medium"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                    >
+                      Past Medical &amp; Surgical History
+                    </label>
+                    <textarea
+                      value={form.pastMedicalHistory}
+                      onChange={(e) => setField('pastMedicalHistory', e.target.value)}
+                      placeholder="Previous diagnoses, surgeries, hospitalisations, chronic conditions..."
+                      rows={4}
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                      style={TEXTAREA_BASE}
+                      onFocus={focusBorder}
+                      onBlur={blurBorder}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="mb-1.5 block font-medium"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                    >
+                      Family &amp; Social History
+                    </label>
+                    <textarea
+                      value={form.familySocialHistory}
+                      onChange={(e) => setField('familySocialHistory', e.target.value)}
+                      placeholder="Relevant family conditions, occupation, lifestyle, substance use..."
+                      rows={4}
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                      style={TEXTAREA_BASE}
+                      onFocus={focusBorder}
+                      onBlur={blurBorder}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Examination */}
+              {currentStep === 3 && (
+                <div className="max-w-2xl space-y-6">
+                  <div>
+                    <h2
+                      className="font-display font-semibold"
+                      style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                    >
+                      Examination
+                    </h2>
+                    <p
+                      className="mt-1"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                    >
+                      Physical examination findings.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label
+                      className="mb-1.5 block font-medium"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                    >
+                      General Appearance &amp; Vitals Impression
+                    </label>
+                    <textarea
+                      value={form.generalAppearance}
+                      onChange={(e) => setField('generalAppearance', e.target.value)}
+                      placeholder="e.g., Alert, not in acute distress. Febrile. No pallor or jaundice..."
+                      rows={5}
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                      style={TEXTAREA_BASE}
+                      onFocus={focusBorder}
+                      onBlur={blurBorder}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="mb-1.5 block font-medium"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                    >
+                      Systems Examination
+                    </label>
+                    <textarea
+                      value={form.systemsExamination}
+                      onChange={(e) => setField('systemsExamination', e.target.value)}
+                      placeholder="CVS, RS, Abdomen, CNS — findings per system..."
+                      rows={6}
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                      style={TEXTAREA_BASE}
+                      onFocus={focusBorder}
+                      onBlur={blurBorder}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Diagnosis */}
+              {currentStep === 4 && (
+                <div className="max-w-2xl space-y-6">
+                  <div>
+                    <h2
+                      className="font-display font-semibold"
+                      style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                    >
+                      Diagnosis
+                    </h2>
+                    <p
+                      className="mt-1"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                    >
+                      Clinical impression and differential diagnoses.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label
+                      className="mb-1.5 block font-medium"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                    >
+                      Primary Diagnosis
                     </label>
                     <input
                       type="text"
-                      value={form.duration}
-                      onChange={(e) => setField('duration', e.target.value)}
-                      placeholder="e.g., 3 days"
+                      value={form.primaryDiagnosis}
+                      onChange={(e) => setField('primaryDiagnosis', e.target.value)}
+                      placeholder="e.g., Malaria (Uncomplicated) — B54"
                       className="w-full px-4 transition-[border-color] outline-none"
                       style={SINGLE_INPUT_BASE}
                       onFocus={focusBorder}
                       onBlur={blurBorder}
                     />
                   </div>
+
                   <div>
                     <label
                       className="mb-1.5 block font-medium"
                       style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
                     >
-                      Onset
+                      Differential Diagnoses
                     </label>
-                    <input
-                      type="date"
-                      value={form.onset}
-                      onChange={(e) => setField('onset', e.target.value)}
-                      className="w-full px-4 transition-[border-color] outline-none"
-                      style={SINGLE_INPUT_BASE}
+                    <textarea
+                      value={form.differentialDiagnosis}
+                      onChange={(e) => setField('differentialDiagnosis', e.target.value)}
+                      placeholder="List alternative diagnoses under consideration..."
+                      rows={5}
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                      style={TEXTAREA_BASE}
                       onFocus={focusBorder}
                       onBlur={blurBorder}
                     />
                   </div>
                 </div>
+              )}
 
-                <div className="mt-6">
-                  <div className="mb-3 flex items-center justify-between">
+              {/* Step 5: Treatment Plan */}
+              {currentStep === 5 && (
+                <div className="max-w-2xl space-y-6">
+                  <div>
+                    <h2
+                      className="font-display font-semibold"
+                      style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                    >
+                      Treatment Plan
+                    </h2>
+                    <p
+                      className="mt-1"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                    >
+                      Medications, investigations and management plan.
+                    </p>
+                  </div>
+
+                  <div>
                     <label
-                      className="font-medium"
+                      className="mb-1.5 block font-medium"
                       style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
                     >
-                      Severity (1–10)
+                      Medications Prescribed
                     </label>
-                    <span
-                      className="font-semibold"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+                    <textarea
+                      value={form.medicationsPrescribed}
+                      onChange={(e) => setField('medicationsPrescribed', e.target.value)}
+                      placeholder="e.g., Artemether-Lumefantrine 80/480mg, BD × 3 days..."
+                      rows={4}
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                      style={TEXTAREA_BASE}
+                      onFocus={focusBorder}
+                      onBlur={blurBorder}
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      className="mb-1.5 block font-medium"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
                     >
-                      {form.severity}
-                    </span>
+                      Investigations Ordered
+                    </label>
+                    <textarea
+                      value={form.investigationsOrdered}
+                      onChange={(e) => setField('investigationsOrdered', e.target.value)}
+                      placeholder="e.g., FBC, Malaria RDT, Urinalysis, Chest X-Ray..."
+                      rows={4}
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                      style={TEXTAREA_BASE}
+                      onFocus={focusBorder}
+                      onBlur={blurBorder}
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min={1}
-                    max={10}
-                    value={form.severity}
-                    onChange={(e) => setField('severity', Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-full [&::-moz-range-thumb]:h-[18px] [&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md"
-                    style={{
-                      background: `linear-gradient(to right, #00B4D8 ${sliderPct}%, #1A3D4D ${sliderPct}%)`,
-                    }}
-                  />
-                  <div className="mt-1.5 flex justify-between">
-                    <span className="text-sm" style={{ color: '#8A98A3' }}>
-                      1
-                    </span>
-                    <span className="text-sm" style={{ color: '#8A98A3' }}>
-                      10
-                    </span>
+
+                  <div>
+                    <label
+                      className="mb-1.5 block font-medium"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                    >
+                      Management Plan
+                    </label>
+                    <textarea
+                      value={form.managementPlan}
+                      onChange={(e) => setField('managementPlan', e.target.value)}
+                      placeholder="Admission, referral, follow-up date and instructions..."
+                      rows={4}
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                      style={TEXTAREA_BASE}
+                      onFocus={focusBorder}
+                      onBlur={blurBorder}
+                    />
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* ── Step 2: History ───────────────────────────────────────── */}
-            {currentStep === 2 && (
-              <div className="max-w-2xl space-y-6">
-                <div>
+              {/* Step 6: Clinical Notes */}
+              {currentStep === 6 && (
+                <div className="max-w-2xl">
                   <h2
                     className="font-display font-semibold"
                     style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
                   >
-                    History
+                    Clinical Notes
                   </h2>
                   <p
                     className="mt-1"
                     style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
                   >
-                    History of present illness, past medical and social history.
+                    Additional observations and free-text clinical documentation.
                   </p>
-                </div>
 
-                <div>
-                  <label
-                    className="mb-1.5 block font-medium"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                  >
-                    History of Present Illness
-                  </label>
                   <textarea
-                    value={form.historyPresentIllness}
-                    onChange={(e) => setField('historyPresentIllness', e.target.value)}
-                    placeholder="Describe the progression and context of the current complaint..."
-                    rows={4}
-                    className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
+                    value={form.clinicalNotes}
+                    onChange={(e) => setField('clinicalNotes', e.target.value)}
+                    placeholder="Enter any additional clinical observations, notes or instructions..."
+                    rows={12}
+                    className="mt-4 w-full resize-none px-4 py-3 transition-[border-color] outline-none"
                     style={TEXTAREA_BASE}
                     onFocus={focusBorder}
                     onBlur={blurBorder}
                   />
                 </div>
-
-                <div>
-                  <label
-                    className="mb-1.5 block font-medium"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                  >
-                    Past Medical &amp; Surgical History
-                  </label>
-                  <textarea
-                    value={form.pastMedicalHistory}
-                    onChange={(e) => setField('pastMedicalHistory', e.target.value)}
-                    placeholder="Previous diagnoses, surgeries, hospitalisations, chronic conditions..."
-                    rows={4}
-                    className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                    style={TEXTAREA_BASE}
-                    onFocus={focusBorder}
-                    onBlur={blurBorder}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="mb-1.5 block font-medium"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                  >
-                    Family &amp; Social History
-                  </label>
-                  <textarea
-                    value={form.familySocialHistory}
-                    onChange={(e) => setField('familySocialHistory', e.target.value)}
-                    placeholder="Relevant family conditions, occupation, lifestyle, substance use..."
-                    rows={4}
-                    className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                    style={TEXTAREA_BASE}
-                    onFocus={focusBorder}
-                    onBlur={blurBorder}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* ── Step 3: Examination ───────────────────────────────────── */}
-            {currentStep === 3 && (
-              <div className="max-w-2xl space-y-6">
-                <div>
-                  <h2
-                    className="font-display font-semibold"
-                    style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
-                  >
-                    Examination
-                  </h2>
-                  <p
-                    className="mt-1"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-                  >
-                    Physical examination findings.
-                  </p>
-                </div>
-
-                <div>
-                  <label
-                    className="mb-1.5 block font-medium"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                  >
-                    General Appearance &amp; Vitals Impression
-                  </label>
-                  <textarea
-                    value={form.generalAppearance}
-                    onChange={(e) => setField('generalAppearance', e.target.value)}
-                    placeholder="e.g., Alert, not in acute distress. Febrile. No pallor or jaundice..."
-                    rows={5}
-                    className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                    style={TEXTAREA_BASE}
-                    onFocus={focusBorder}
-                    onBlur={blurBorder}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="mb-1.5 block font-medium"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                  >
-                    Systems Examination
-                  </label>
-                  <textarea
-                    value={form.systemsExamination}
-                    onChange={(e) => setField('systemsExamination', e.target.value)}
-                    placeholder="CVS, RS, Abdomen, CNS — findings per system..."
-                    rows={6}
-                    className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                    style={TEXTAREA_BASE}
-                    onFocus={focusBorder}
-                    onBlur={blurBorder}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* ── Step 4: Diagnosis ─────────────────────────────────────── */}
-            {currentStep === 4 && (
-              <div className="max-w-2xl space-y-6">
-                <div>
-                  <h2
-                    className="font-display font-semibold"
-                    style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
-                  >
-                    Diagnosis
-                  </h2>
-                  <p
-                    className="mt-1"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-                  >
-                    Clinical impression and differential diagnoses.
-                  </p>
-                </div>
-
-                <div>
-                  <label
-                    className="mb-1.5 block font-medium"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                  >
-                    Primary Diagnosis
-                  </label>
-                  <input
-                    type="text"
-                    value={form.primaryDiagnosis}
-                    onChange={(e) => setField('primaryDiagnosis', e.target.value)}
-                    placeholder="e.g., Malaria (Uncomplicated) — B54"
-                    className="w-full px-4 transition-[border-color] outline-none"
-                    style={SINGLE_INPUT_BASE}
-                    onFocus={focusBorder}
-                    onBlur={blurBorder}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="mb-1.5 block font-medium"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                  >
-                    Differential Diagnoses
-                  </label>
-                  <textarea
-                    value={form.differentialDiagnosis}
-                    onChange={(e) => setField('differentialDiagnosis', e.target.value)}
-                    placeholder="List alternative diagnoses under consideration..."
-                    rows={5}
-                    className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                    style={TEXTAREA_BASE}
-                    onFocus={focusBorder}
-                    onBlur={blurBorder}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* ── Step 5: Treatment Plan ────────────────────────────────── */}
-            {currentStep === 5 && (
-              <div className="max-w-2xl space-y-6">
-                <div>
-                  <h2
-                    className="font-display font-semibold"
-                    style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
-                  >
-                    Treatment Plan
-                  </h2>
-                  <p
-                    className="mt-1"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-                  >
-                    Medications, investigations and management plan.
-                  </p>
-                </div>
-
-                <div>
-                  <label
-                    className="mb-1.5 block font-medium"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                  >
-                    Medications Prescribed
-                  </label>
-                  <textarea
-                    value={form.medicationsPrescribed}
-                    onChange={(e) => setField('medicationsPrescribed', e.target.value)}
-                    placeholder="e.g., Artemether-Lumefantrine 80/480mg, BD × 3 days..."
-                    rows={4}
-                    className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                    style={TEXTAREA_BASE}
-                    onFocus={focusBorder}
-                    onBlur={blurBorder}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="mb-1.5 block font-medium"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                  >
-                    Investigations Ordered
-                  </label>
-                  <textarea
-                    value={form.investigationsOrdered}
-                    onChange={(e) => setField('investigationsOrdered', e.target.value)}
-                    placeholder="e.g., FBC, Malaria RDT, Urinalysis, Chest X-Ray..."
-                    rows={4}
-                    className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                    style={TEXTAREA_BASE}
-                    onFocus={focusBorder}
-                    onBlur={blurBorder}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    className="mb-1.5 block font-medium"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                  >
-                    Management Plan
-                  </label>
-                  <textarea
-                    value={form.managementPlan}
-                    onChange={(e) => setField('managementPlan', e.target.value)}
-                    placeholder="Admission, referral, follow-up date and instructions..."
-                    rows={4}
-                    className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                    style={TEXTAREA_BASE}
-                    onFocus={focusBorder}
-                    onBlur={blurBorder}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* ── Step 6: Clinical Notes ────────────────────────────────── */}
-            {currentStep === 6 && (
-              <div className="max-w-2xl">
-                <h2
-                  className="font-display font-semibold"
-                  style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
-                >
-                  Clinical Notes
-                </h2>
-                <p className="mt-1" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-                  Additional observations and free-text clinical documentation.
-                </p>
-
-                <textarea
-                  value={form.clinicalNotes}
-                  onChange={(e) => setField('clinicalNotes', e.target.value)}
-                  placeholder="Enter any additional clinical observations, notes or instructions..."
-                  rows={12}
-                  className="mt-4 w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                  style={TEXTAREA_BASE}
-                  onFocus={focusBorder}
-                  onBlur={blurBorder}
-                />
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* ── Bottom action bar ──────────────────────────────────────────── */}
-          <div
-            className="flex shrink-0 items-center gap-3 px-5 py-4"
-            style={{ background: '#FFFFFF', borderTop: '1px solid #0064821F' }}
-          >
-            <button
-              type="button"
-              className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-slate-50"
-              style={{
-                fontSize: 16,
-                lineHeight: '24px',
-                color: '#0D2630',
-                border: '1px solid #0064821F',
-                height: 44,
-              }}
-            >
-              Save Draft
-            </button>
-
-            <button
-              type="button"
-              className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-amber-50"
-              style={{
-                fontSize: 16,
-                lineHeight: '24px',
-                color: '#D97706',
-                border: '1px solid #F59E0B',
-                height: 44,
-              }}
-            >
-              Refer Patient
-            </button>
-
-            <button
-              type="button"
-              className="rounded-[12px] px-5 font-sans font-semibold text-white transition-opacity hover:opacity-90"
-              style={{
-                fontSize: 16,
-                lineHeight: '24px',
-                background: '#00B4D8',
-                height: 44,
-              }}
-            >
-              Complete Consultation
-            </button>
-          </div>
+          {/* bottom padding so action bar doesn't overlap last card on mobile */}
+          <div className="h-2" />
         </div>
+      </div>
+
+      {/* ── Action bar ────────────────────────────────────────────────────────── */}
+      <div
+        className="flex shrink-0 items-center gap-3 px-5 py-4"
+        style={{ background: '#FFFFFF', borderTop: '1px solid #0064821F' }}
+      >
+        <button
+          type="button"
+          className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-slate-50"
+          style={{
+            fontSize: 16,
+            lineHeight: '24px',
+            color: '#0D2630',
+            border: '1px solid #0064821F',
+            height: 44,
+          }}
+        >
+          Save Draft
+        </button>
+
+        <button
+          type="button"
+          className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-amber-50"
+          style={{
+            fontSize: 16,
+            lineHeight: '24px',
+            color: '#D97706',
+            border: '1px solid #F59E0B',
+            height: 44,
+          }}
+        >
+          Refer Patient
+        </button>
+
+        <button
+          type="button"
+          className="rounded-[12px] px-5 font-sans font-semibold text-white transition-opacity hover:opacity-90"
+          style={{
+            fontSize: 16,
+            lineHeight: '24px',
+            background: '#00B4D8',
+            height: 44,
+          }}
+        >
+          Complete Consultation
+        </button>
       </div>
     </div>
   );
