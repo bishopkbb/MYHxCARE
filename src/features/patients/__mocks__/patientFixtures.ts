@@ -245,6 +245,29 @@ export type MedicalHistory = {
   allergiesHistory: AllergyHistoryEntry[];
 };
 
+// ── Vital Signs types ─────────────────────────────────────────────────────────
+
+export type VitalKey =
+  | 'blood-pressure'
+  | 'pulse-rate'
+  | 'temperature'
+  | 'resp-rate'
+  | 'spo2'
+  | 'weight'
+  | 'height'
+  | 'bmi';
+
+export type VitalSign = {
+  key: VitalKey;
+  value: string; // full display string: "132/86 mmHg", "38.7°C", "97%"
+  status: 'normal' | 'abnormal'; // abnormal = red reading text + AlertTriangle
+};
+
+export type VitalSignsRecord = {
+  recordedAt: string; // e.g. "09:15 AM today"
+  readings: VitalSign[];
+};
+
 // ── Patient detail view ───────────────────────────────────────────────────────
 
 export type PatientDetailMock = {
@@ -266,6 +289,7 @@ export type PatientDetailMock = {
   allergies: Allergy[];
   isUrgent: boolean;
   medicalHistory: MedicalHistory;
+  vitalSigns: VitalSignsRecord;
 };
 
 export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
@@ -351,6 +375,19 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         },
       ],
     },
+    vitalSigns: {
+      recordedAt: '09:15 AM today',
+      readings: [
+        { key: 'blood-pressure', value: '132/86 mmHg', status: 'normal' },
+        { key: 'pulse-rate', value: '98 bpm', status: 'normal' },
+        { key: 'temperature', value: '38.7°C', status: 'abnormal' },
+        { key: 'resp-rate', value: '22/min', status: 'abnormal' },
+        { key: 'spo2', value: '97%', status: 'normal' },
+        { key: 'weight', value: '58 kg', status: 'normal' },
+        { key: 'height', value: '165 cm', status: 'normal' },
+        { key: 'bmi', value: '21.3', status: 'normal' },
+      ],
+    },
   },
   p2: {
     id: 'p2',
@@ -401,6 +438,19 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
           severity: 'Moderate',
           notedOn: 'Jul 05, 2026',
         },
+      ],
+    },
+    vitalSigns: {
+      recordedAt: '08:45 AM today',
+      readings: [
+        { key: 'blood-pressure', value: '118/75 mmHg', status: 'normal' },
+        { key: 'pulse-rate', value: '88 bpm', status: 'normal' },
+        { key: 'temperature', value: '38.2°C', status: 'abnormal' },
+        { key: 'resp-rate', value: '17/min', status: 'normal' },
+        { key: 'spo2', value: '98%', status: 'normal' },
+        { key: 'weight', value: '72 kg', status: 'normal' },
+        { key: 'height', value: '175 cm', status: 'normal' },
+        { key: 'bmi', value: '23.5', status: 'normal' },
       ],
     },
   },
@@ -469,6 +519,19 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         },
       ],
     },
+    vitalSigns: {
+      recordedAt: '07:30 AM today',
+      readings: [
+        { key: 'blood-pressure', value: '116/74 mmHg', status: 'normal' },
+        { key: 'pulse-rate', value: '104 bpm', status: 'abnormal' },
+        { key: 'temperature', value: '37.8°C', status: 'abnormal' },
+        { key: 'resp-rate', value: '18/min', status: 'normal' },
+        { key: 'spo2', value: '98%', status: 'normal' },
+        { key: 'weight', value: '63 kg', status: 'normal' },
+        { key: 'height', value: '162 cm', status: 'normal' },
+        { key: 'bmi', value: '24.0', status: 'normal' },
+      ],
+    },
   },
 };
 
@@ -497,5 +560,9 @@ export const FALLBACK_PATIENT_DETAIL: PatientDetailMock = {
     surgicalHistory: [],
     chronicConditions: [],
     allergiesHistory: [],
+  },
+  vitalSigns: {
+    recordedAt: '',
+    readings: [],
   },
 };

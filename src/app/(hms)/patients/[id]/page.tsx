@@ -5,15 +5,23 @@ import {
   AlertTriangle,
   ChevronLeft,
   ChevronsDown,
+  Clock,
+  Droplets,
   FileText,
   FlaskConical,
+  Heart,
   History,
   Paperclip,
   Pill,
   RefreshCw,
+  Scale,
   ShieldAlert,
   Stethoscope,
+  Thermometer,
+  TrendingUp,
   User,
+  Users,
+  Wind,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -68,6 +76,64 @@ const PATIENT_TABS: PatientTab[] = [
   { key: 'lab-results', label: 'Lab Results', icon: FlaskConical },
   { key: 'attachments', label: 'Attachments', icon: Paperclip },
 ];
+
+type VitalCardConfig = {
+  label: string;
+  icon: LucideIcon;
+  accentColor: string;
+  thinBorderColor: string;
+};
+
+const VITAL_CARD_CONFIG: Record<string, VitalCardConfig> = {
+  'blood-pressure': {
+    label: 'Blood Pressure',
+    icon: Activity,
+    accentColor: '#3B82F6',
+    thinBorderColor: 'rgba(59,130,246,0.2)',
+  },
+  'pulse-rate': {
+    label: 'Pulse Rate',
+    icon: Heart,
+    accentColor: '#EF4444',
+    thinBorderColor: 'rgba(239,68,68,0.2)',
+  },
+  temperature: {
+    label: 'Temperature',
+    icon: Thermometer,
+    accentColor: '#EF4444',
+    thinBorderColor: 'rgba(239,68,68,0.2)',
+  },
+  'resp-rate': {
+    label: 'Resp. Rate',
+    icon: Wind,
+    accentColor: '#EF4444',
+    thinBorderColor: 'rgba(239,68,68,0.2)',
+  },
+  spo2: {
+    label: 'SpO2',
+    icon: Droplets,
+    accentColor: '#8B5CF6',
+    thinBorderColor: 'rgba(139,92,246,0.2)',
+  },
+  weight: {
+    label: 'Weight',
+    icon: Scale,
+    accentColor: '#475569',
+    thinBorderColor: 'rgba(71,85,105,0.2)',
+  },
+  height: {
+    label: 'Height',
+    icon: TrendingUp,
+    accentColor: '#475569',
+    thinBorderColor: 'rgba(71,85,105,0.2)',
+  },
+  bmi: {
+    label: 'BMI',
+    icon: Users,
+    accentColor: '#00B4D8',
+    thinBorderColor: 'rgba(0,180,216,0.2)',
+  },
+};
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
@@ -165,6 +231,30 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
     setTimeout(() => {
       allergiesLoadedRef.current = true;
       setAllergiesStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+  }
+
+  // ── Vital Signs fetch simulation ──────────────────────────────────────────────
+  type VitalsStatus = 'loading' | 'loaded' | 'empty' | 'error';
+  const [vitalsStatus, setVitalsStatus] = useState<VitalsStatus>('loading');
+  const vitalsLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (activeTab !== 'vital-signs') return;
+    if (vitalsLoadedRef.current) return;
+    const t = setTimeout(() => {
+      vitalsLoadedRef.current = true;
+      setVitalsStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+    return () => clearTimeout(t);
+  }, [activeTab, patient.id]);
+
+  function retryVitals() {
+    vitalsLoadedRef.current = false;
+    setVitalsStatus('loading');
+    setTimeout(() => {
+      vitalsLoadedRef.current = true;
+      setVitalsStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
     }, 900);
   }
 
@@ -1901,9 +1991,187 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               )}
             </>
           )}
+          {activeTab === 'vital-signs' && (
+            <>
+              {/* ── Loading skeleton ──────────────────────────────────────────── */}
+              {vitalsStatus === 'loading' && (
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center justify-between">
+                    <div className="h-6 w-44 animate-pulse rounded-md bg-slate-200" />
+                    <div className="flex items-center gap-1">
+                      <div className="size-[18px] animate-pulse rounded-sm bg-slate-100" />
+                      <div className="h-[18px] w-36 animate-pulse rounded-sm bg-slate-100" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="animate-pulse rounded-[12px] bg-white"
+                        style={{
+                          height: 120,
+                          border: '1px solid rgba(37,70,77,0.1)',
+                          borderLeft: '3px solid rgba(37,70,77,0.15)',
+                        }}
+                      >
+                        <div className="flex h-full flex-col justify-between p-5">
+                          <div className="size-[18px] rounded-sm bg-slate-200" />
+                          <div className="h-8 w-24 rounded-md bg-slate-200" />
+                          <div className="h-[18px] w-20 rounded-sm bg-slate-100" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Error state ───────────────────────────────────────────────── */}
+              {vitalsStatus === 'error' && (
+                <div
+                  className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
+                  style={{
+                    background: 'rgba(239,68,68,0.04)',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(239,68,68,0.08)' }}
+                  >
+                    <AlertTriangle
+                      aria-hidden
+                      style={{ width: 24, height: 24, color: '#EF4444' }}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                      Failed to load vital signs
+                    </p>
+                    <p className="mt-1" style={{ fontSize: 14, color: '#4A7080' }}>
+                      Could not retrieve the patient&apos;s latest readings.
+                    </p>
+                  </div>
+                  <button
+                    onClick={retryVitals}
+                    className="flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors hover:opacity-90"
+                    style={{ fontSize: 14, background: '#00B4D8', color: '#FFFFFF' }}
+                  >
+                    <RefreshCw aria-hidden style={{ width: 15, height: 15 }} />
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {/* ── Empty state ───────────────────────────────────────────────── */}
+              {vitalsStatus === 'empty' && (
+                <div
+                  className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
+                  style={{
+                    background: 'rgba(226,237,241,0.25)',
+                    border: '1px solid rgba(0,180,216,0.15)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(0,180,216,0.08)' }}
+                  >
+                    <Thermometer aria-hidden style={{ width: 24, height: 24, color: '#00B4D8' }} />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                      No vital signs recorded
+                    </p>
+                    <p className="mt-1" style={{ fontSize: 14, color: '#4A7080' }}>
+                      Vitals will appear here once recorded by nursing staff.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Loaded ────────────────────────────────────────────────────── */}
+              {vitalsStatus === 'loaded' && (
+                <div className="flex flex-col gap-6">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <p
+                      className="font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                    >
+                      Most Recent Vital Signs
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <Clock aria-hidden style={{ width: 18, height: 18, color: '#4A7080' }} />
+                      <span
+                        className="font-sans"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                      >
+                        Recorded: {patient.vitalSigns.recordedAt}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Cards grid */}
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    {patient.vitalSigns.readings.map((reading) => {
+                      const config = VITAL_CARD_CONFIG[reading.key];
+                      if (!config) return null;
+                      const Icon = config.icon;
+                      const isAbnormal = reading.status === 'abnormal';
+                      return (
+                        <div
+                          key={reading.key}
+                          className="flex flex-col justify-between rounded-[12px] bg-white p-5"
+                          style={{
+                            height: 120,
+                            border: `1px solid ${config.thinBorderColor}`,
+                            borderLeft: `3px solid ${config.accentColor}`,
+                          }}
+                        >
+                          {/* Icon row */}
+                          <div className="flex items-center justify-between">
+                            <Icon
+                              aria-hidden
+                              style={{ width: 18, height: 18, color: config.accentColor }}
+                            />
+                            {isAbnormal && (
+                              <AlertTriangle
+                                aria-hidden
+                                style={{ width: 18, height: 18, color: '#EF4444' }}
+                              />
+                            )}
+                          </div>
+
+                          {/* Reading value */}
+                          <p
+                            className="font-display font-semibold"
+                            style={{
+                              fontSize: 24,
+                              lineHeight: '32px',
+                              color: isAbnormal ? '#EF4444' : '#0D2630',
+                            }}
+                          >
+                            {reading.value}
+                          </p>
+
+                          {/* Label */}
+                          <p
+                            className="font-sans"
+                            style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                          >
+                            {config.label}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
           {activeTab !== 'biodata' &&
             activeTab !== 'medical-history' &&
-            activeTab !== 'allergies' && (
+            activeTab !== 'allergies' &&
+            activeTab !== 'vital-signs' && (
               <div
                 className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-[12px]"
                 style={{ background: 'rgba(226,237,241,0.25)' }}
