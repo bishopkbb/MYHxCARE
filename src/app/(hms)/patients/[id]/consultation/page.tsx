@@ -145,7 +145,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
   const sliderPct = ((form.severity - 1) / 9) * 100;
 
   return (
-    <div className="flex min-h-screen flex-col" style={{ background: '#F5FBFD' }}>
+    <div className="flex h-full flex-col overflow-hidden" style={{ background: '#F5FBFD' }}>
       {/* ── Patient preview bar ────────────────────────────────────────────────── */}
       <div
         className="px-5 py-[10px] sm:flex sm:min-h-[60px] sm:items-center sm:gap-4 sm:py-0"
@@ -293,7 +293,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* ── 2-column split ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1">
         {/* ── Left: patient summary sidebar ────────────────────────────────── */}
         <aside
           className="hidden w-[300px] shrink-0 flex-col overflow-y-auto bg-white lg:flex xl:w-[320px]"

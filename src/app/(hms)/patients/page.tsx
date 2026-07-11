@@ -867,6 +867,7 @@ export default function PatientsPage() {
                     <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
                       <button
                         type="button"
+                        onClick={() => router.push(`/patients/${patient.id}/consultation`)}
                         className="flex-1 rounded-[8px] py-2 text-center text-sm font-medium text-white transition-opacity hover:opacity-90"
                         style={{ background: '#00B4D8' }}
                       >

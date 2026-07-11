@@ -769,6 +769,9 @@ export default function EncountersPage() {
                     <button
                       type="button"
                       disabled={patient.status === 'completed'}
+                      onClick={() =>
+                        router.push(`/patients/${patient.patientId ?? patient.id}/consultation`)
+                      }
                       className="flex min-h-[44px] flex-1 items-center justify-center rounded-[8px] text-sm font-medium text-white transition-opacity disabled:cursor-default disabled:opacity-60"
                       style={{
                         background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
@@ -1020,6 +1023,9 @@ export default function EncountersPage() {
                         <button
                           type="button"
                           disabled={patient.status === 'completed'}
+                          onClick={() =>
+                            router.push(`/patients/${patient.patientId ?? patient.id}/consultation`)
+                          }
                           className="flex-1 cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-default disabled:opacity-60"
                           style={{
                             background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
