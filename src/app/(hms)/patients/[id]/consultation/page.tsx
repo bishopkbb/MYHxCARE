@@ -36,7 +36,8 @@ type ConsultationForm = {
   severity: number;
   historyPresentIllness: string;
   pastMedicalHistory: string;
-  familySocialHistory: string;
+  familyHistory: string;
+  socialHistory: string;
   generalAppearance: string;
   systemsExamination: string;
   primaryDiagnosis: string;
@@ -81,7 +82,8 @@ const INITIAL_FORM: ConsultationForm = {
   severity: 5,
   historyPresentIllness: '',
   pastMedicalHistory: '',
-  familySocialHistory: '',
+  familyHistory: '',
+  socialHistory: '',
   generalAppearance: '',
   systemsExamination: '',
   primaryDiagnosis: '',
@@ -600,73 +602,77 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
               {/* Step 2: History */}
               {currentStep === 2 && (
                 <div className="space-y-6">
+                  {/* History of Presenting Illness (HPI) */}
                   <div>
-                    <h2
-                      className="font-display font-semibold"
-                      style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
-                    >
-                      History
-                    </h2>
                     <p
-                      className="mt-1"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                      className="pb-[6px] font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                     >
-                      History of present illness, past medical and social history.
+                      History of Presenting Illness (HPI)
                     </p>
-                  </div>
-
-                  <div>
-                    <label
-                      className="mb-1.5 block font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                    >
-                      History of Present Illness
-                    </label>
                     <textarea
                       value={form.historyPresentIllness}
                       onChange={(e) => setField('historyPresentIllness', e.target.value)}
-                      placeholder="Describe the progression and context of the current complaint..."
-                      rows={4}
-                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                      style={TEXTAREA_BASE}
+                      placeholder="Onset, duration, character, associated symptoms, relieving/aggravating factors..."
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                      style={{ ...TEXTAREA_BASE, minHeight: 128 }}
                       onFocus={focusBorder}
                       onBlur={blurBorder}
                     />
                   </div>
 
+                  {/* Past Medical History */}
                   <div>
-                    <label
-                      className="mb-1.5 block font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                    <p
+                      className="pb-[6px] font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                     >
-                      Past Medical &amp; Surgical History
-                    </label>
+                      Past Medical History
+                    </p>
                     <textarea
                       value={form.pastMedicalHistory}
                       onChange={(e) => setField('pastMedicalHistory', e.target.value)}
-                      placeholder="Previous diagnoses, surgeries, hospitalisations, chronic conditions..."
-                      rows={4}
-                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                      style={TEXTAREA_BASE}
+                      placeholder="Previous illnesses, surgeries, hospitalisations, chronic conditions..."
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                      style={{ ...TEXTAREA_BASE, minHeight: 128 }}
                       onFocus={focusBorder}
                       onBlur={blurBorder}
                     />
                   </div>
 
+                  {/* Family History */}
                   <div>
-                    <label
-                      className="mb-1.5 block font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                    <p
+                      className="pb-[6px] font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                     >
-                      Family &amp; Social History
-                    </label>
+                      Family History
+                    </p>
                     <textarea
-                      value={form.familySocialHistory}
-                      onChange={(e) => setField('familySocialHistory', e.target.value)}
-                      placeholder="Relevant family conditions, occupation, lifestyle, substance use..."
-                      rows={4}
-                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                      style={TEXTAREA_BASE}
+                      value={form.familyHistory}
+                      onChange={(e) => setField('familyHistory', e.target.value)}
+                      placeholder="Relevant family medical history..."
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                      style={{ ...TEXTAREA_BASE, minHeight: 128 }}
+                      onFocus={focusBorder}
+                      onBlur={blurBorder}
+                    />
+                  </div>
+
+                  {/* Social History */}
+                  <div>
+                    <p
+                      className="pb-[6px] font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                    >
+                      Social History
+                    </p>
+                    <textarea
+                      value={form.socialHistory}
+                      onChange={(e) => setField('socialHistory', e.target.value)}
+                      placeholder="Smoking, alcohol, drug use, occupation, living situation..."
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                      style={{ ...TEXTAREA_BASE, minHeight: 128 }}
                       onFocus={focusBorder}
                       onBlur={blurBorder}
                     />
