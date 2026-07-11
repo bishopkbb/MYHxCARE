@@ -81,58 +81,17 @@ type VitalCardConfig = {
   label: string;
   icon: LucideIcon;
   accentColor: string;
-  thinBorderColor: string;
 };
 
 const VITAL_CARD_CONFIG: Record<string, VitalCardConfig> = {
-  'blood-pressure': {
-    label: 'Blood Pressure',
-    icon: Activity,
-    accentColor: '#3B82F6',
-    thinBorderColor: 'rgba(59,130,246,0.2)',
-  },
-  'pulse-rate': {
-    label: 'Pulse Rate',
-    icon: Heart,
-    accentColor: '#EF4444',
-    thinBorderColor: 'rgba(239,68,68,0.2)',
-  },
-  temperature: {
-    label: 'Temperature',
-    icon: Thermometer,
-    accentColor: '#EF4444',
-    thinBorderColor: 'rgba(239,68,68,0.2)',
-  },
-  'resp-rate': {
-    label: 'Resp. Rate',
-    icon: Wind,
-    accentColor: '#EF4444',
-    thinBorderColor: 'rgba(239,68,68,0.2)',
-  },
-  spo2: {
-    label: 'SpO2',
-    icon: Droplets,
-    accentColor: '#8B5CF6',
-    thinBorderColor: 'rgba(139,92,246,0.2)',
-  },
-  weight: {
-    label: 'Weight',
-    icon: Scale,
-    accentColor: '#475569',
-    thinBorderColor: 'rgba(71,85,105,0.2)',
-  },
-  height: {
-    label: 'Height',
-    icon: TrendingUp,
-    accentColor: '#475569',
-    thinBorderColor: 'rgba(71,85,105,0.2)',
-  },
-  bmi: {
-    label: 'BMI',
-    icon: Users,
-    accentColor: '#00B4D8',
-    thinBorderColor: 'rgba(0,180,216,0.2)',
-  },
+  'blood-pressure': { label: 'Blood Pressure', icon: Activity, accentColor: '#3B82F6' },
+  'pulse-rate': { label: 'Pulse Rate', icon: Heart, accentColor: '#EF4444' },
+  temperature: { label: 'Temperature', icon: Thermometer, accentColor: '#EF4444' },
+  'resp-rate': { label: 'Resp. Rate', icon: Wind, accentColor: '#EF4444' },
+  spo2: { label: 'SpO2', icon: Droplets, accentColor: '#8B5CF6' },
+  weight: { label: 'Weight', icon: Scale, accentColor: '#475569' },
+  height: { label: 'Height', icon: TrendingUp, accentColor: '#475569' },
+  bmi: { label: 'BMI', icon: Users, accentColor: '#00B4D8' },
 };
 
 // ── Page ───────────────────────────────────────────────────────────────────────
@@ -2060,8 +2019,8 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         className="animate-pulse rounded-[12px] bg-white"
                         style={{
                           height: 120,
-                          border: '2px solid rgba(37,70,77,0.1)',
-                          borderLeft: '4px solid rgba(37,70,77,0.15)',
+                          border: '1px solid rgba(37,70,77,0.15)',
+                          borderTopWidth: '3px',
                         }}
                       >
                         <div className="flex h-full flex-col justify-between p-5">
@@ -2170,11 +2129,11 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                       return (
                         <div
                           key={reading.key}
-                          className="flex flex-col justify-between rounded-[12px] bg-white p-5"
+                          className="flex cursor-pointer flex-col justify-between rounded-[12px] bg-white p-5 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md"
                           style={{
                             height: 120,
-                            border: `2px solid ${config.thinBorderColor}`,
-                            borderLeft: `4px solid ${config.accentColor}`,
+                            border: `1px solid ${config.accentColor}`,
+                            borderTopWidth: '3px',
                           }}
                         >
                           {/* Icon row */}
