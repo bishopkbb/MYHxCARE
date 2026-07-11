@@ -211,6 +211,9 @@ export type PatientDetailMock = {
   faculty: string;
   level: string; // academic level e.g. "400L"
   fileNumber: string; // university file number e.g. "UZ/MED/2021/0234"
+  address: string;
+  phone: string;
+  email: string;
   queueStatus: string; // current encounter status for display
   allergies: Allergy[];
   isUrgent: boolean;
@@ -223,12 +226,15 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
     name: 'Adaeze Okonkwo',
     mrn: 'MRN-2024-00451',
     dob: '2003-05-12',
-    age: '21y',
+    age: '21 years',
     gender: 'Female',
     bloodGroup: 'O+',
     faculty: 'Medicine & Surgery',
     level: '400L',
     fileNumber: 'UZ/MED/2021/0234',
+    address: 'Block C, Room 12, Nnamdi Azikiwe Hostel',
+    phone: '+234 802 345 6789',
+    email: 'adaeze.okonkwo@unizik.edu.ng',
     queueStatus: 'Waiting',
     allergies: [
       {
@@ -256,12 +262,15 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
     name: 'Ifeanyi Eze',
     mrn: 'MRN-2024-00592',
     dob: '2004-08-20',
-    age: '20y',
+    age: '21 years',
     gender: 'Male',
     bloodGroup: 'A+',
     faculty: 'Computer Science',
     level: '200L',
     fileNumber: 'UZ/CSC/2022/0103',
+    address: 'Block A, Room 24, Okpara Hall',
+    phone: '+234 803 127 4521',
+    email: 'ifeanyi.eze@unizik.edu.ng',
     queueStatus: 'New Admission',
     allergies: [],
     isUrgent: false,
@@ -272,12 +281,15 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
     name: 'Ngozi Adeyemi',
     mrn: 'MRN-2024-00512',
     dob: '2001-11-15',
-    age: '23y',
+    age: '24 years',
     gender: 'Female',
     bloodGroup: 'B-',
     faculty: 'Law',
     level: '500L',
     fileNumber: 'UZ/LAW/2020/0089',
+    address: 'Block D, Room 8, Odenigbo Hall',
+    phone: '+234 806 512 3344',
+    email: 'ngozi.adeyemi@unizik.edu.ng',
     queueStatus: 'Emergency',
     allergies: [
       {
@@ -305,6 +317,9 @@ export const FALLBACK_PATIENT_DETAIL: PatientDetailMock = {
   faculty: '—',
   level: '—',
   fileNumber: '—',
+  address: '—',
+  phone: '—',
+  email: '—',
   queueStatus: '—',
   allergies: [],
   isUrgent: false,

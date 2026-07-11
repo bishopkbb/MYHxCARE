@@ -401,13 +401,91 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* ── Tab content ───────────────────────────────────────────────────── */}
-        <div className="p-6">
+        <div className="p-5 sm:p-6">
           {activeTab === 'biodata' && (
-            <div
-              className="flex min-h-[160px] items-center justify-center rounded-[12px] text-sm"
-              style={{ background: 'rgba(226,237,241,0.25)', color: '#4A7080' }}
-            >
-              Biodata section — coming next
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {/* ── Personal Information ─────────────────────────────────────── */}
+              <div
+                className="rounded-[12px] bg-white p-4"
+                style={{ border: '1px solid #0064821F' }}
+              >
+                <div className="pb-2" style={{ borderBottom: '1px solid #0064821F' }}>
+                  <h3
+                    className="font-display font-semibold"
+                    style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                  >
+                    Personal Information
+                  </h3>
+                </div>
+                <dl className="space-y-3 pt-3">
+                  {(
+                    [
+                      { label: 'Full Name', value: patient.name },
+                      { label: 'Date of Birth', value: patient.dob },
+                      { label: 'Age', value: patient.age },
+                      { label: 'Gender', value: patient.gender },
+                      { label: 'Blood Group', value: patient.bloodGroup },
+                      { label: 'Address', value: patient.address },
+                    ] as { label: string; value: string }[]
+                  ).map(({ label, value }) => (
+                    <div key={label} className="flex items-start justify-between gap-6">
+                      <dt
+                        className="shrink-0 font-normal"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#25464D' }}
+                      >
+                        {label}
+                      </dt>
+                      <dd
+                        className="m-0 text-right font-normal"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                      >
+                        {value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+
+              {/* ── Academic & Contact Details ────────────────────────────────── */}
+              <div
+                className="rounded-[12px] bg-white p-4"
+                style={{ border: '1px solid #0064821F' }}
+              >
+                <div className="pb-2" style={{ borderBottom: '1px solid #0064821F' }}>
+                  <h3
+                    className="font-display font-semibold"
+                    style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                  >
+                    Academic & Contact Details
+                  </h3>
+                </div>
+                <dl className="space-y-3 pt-3">
+                  {(
+                    [
+                      { label: 'Student ID', value: patient.fileNumber },
+                      { label: 'Faculty', value: patient.faculty },
+                      { label: 'Level', value: patient.level },
+                      { label: 'Phone', value: patient.phone },
+                      { label: 'Email', value: patient.email },
+                    ] as { label: string; value: string }[]
+                  ).map(({ label, value }) => (
+                    <div key={label} className="flex items-start justify-between gap-6">
+                      <dt
+                        className="shrink-0 font-normal"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#25464D' }}
+                      >
+                        {label}
+                      </dt>
+                      <dd
+                        className="m-0 text-right font-normal"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                      >
+                        {value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
             </div>
           )}
           {activeTab !== 'biodata' && (
