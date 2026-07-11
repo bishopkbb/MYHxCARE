@@ -4,6 +4,7 @@ import {
   Activity,
   AlertTriangle,
   ChevronLeft,
+  ChevronsDown,
   FileText,
   FlaskConical,
   History,
@@ -98,6 +99,49 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
       setBiodataStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
     }, 900);
   }
+
+  // ── Medical History fetch simulation ─────────────────────────────────────────
+  type MedHistStatus = 'loading' | 'loaded' | 'empty' | 'error';
+  const [medHistStatus, setMedHistStatus] = useState<MedHistStatus>('loading');
+  const medHistLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (activeTab !== 'medical-history') return;
+    if (medHistLoadedRef.current) return;
+    const t = setTimeout(() => {
+      medHistLoadedRef.current = true;
+      setMedHistStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+    return () => clearTimeout(t);
+  }, [activeTab, patient.id]);
+
+  function retryMedHist() {
+    medHistLoadedRef.current = false;
+    setMedHistStatus('loading');
+    setTimeout(() => {
+      medHistLoadedRef.current = true;
+      setMedHistStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+  }
+
+  const [openSections, setOpenSections] = useState({
+    pastDiagnoses: true,
+    familyHistory: true,
+    immunizationHistory: true,
+    surgicalHistory: true,
+    chronicConditions: true,
+    allergiesHistory: true,
+  });
+
+  function toggleSection(key: keyof typeof openSections) {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
+  const medSeverityStyles = {
+    Severe: { color: '#EF4444', border: '1px solid #EF4444' },
+    Moderate: { color: '#F59E0B', border: '1px solid #F59E0B' },
+    Mild: { color: '#22C55E', border: '1px solid #22C55E' },
+  } as const;
 
   const queueBadge = QUEUE_BADGE[patient.queueStatus] ?? FALLBACK_BADGE;
 
@@ -630,7 +674,1005 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               )}
             </>
           )}
-          {activeTab !== 'biodata' && (
+          {activeTab === 'medical-history' && (
+            <>
+              {/* ── Loading skeleton ─────────────────────────────────────────── */}
+              {medHistStatus === 'loading' && (
+                <div className="grid grid-cols-1 gap-7 lg:grid-cols-2">
+                  <div className="flex flex-col gap-7">
+                    {/* Past Diagnoses skeleton */}
+                    <div
+                      className="animate-pulse overflow-hidden rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.15)' }}
+                    >
+                      <div
+                        className="flex items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.1)' }}
+                      >
+                        <div className="h-6 w-36 rounded-md bg-slate-100" />
+                        <div className="size-6 rounded-md bg-slate-100" />
+                      </div>
+                      <div
+                        className="flex items-center gap-4 px-4 py-[5px]"
+                        style={{ background: 'rgba(230,248,253,0.6)' }}
+                      >
+                        <div className="h-4 w-28 rounded-sm bg-slate-200" />
+                        <div className="h-4 w-24 rounded-sm bg-slate-200" />
+                        <div className="ml-auto h-4 w-14 rounded-sm bg-slate-200" />
+                      </div>
+                      {[
+                        ['w-40', 'w-20', 'w-14'],
+                        ['w-24', 'w-20', 'w-16'],
+                        ['w-32', 'w-20', 'w-16'],
+                        ['w-36', 'w-20', 'w-14'],
+                        ['w-28', 'w-20', 'w-16'],
+                      ].map(([c1, c2, c3], i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-4 px-4 py-[4px]"
+                          style={{ borderBottom: '1px solid rgba(37,70,77,0.08)' }}
+                        >
+                          <div className={`h-[22px] ${c1} rounded-sm bg-slate-100`} />
+                          <div className={`h-[22px] ${c2} rounded-sm bg-slate-100`} />
+                          <div className={`ml-auto h-[22px] ${c3} rounded-sm bg-slate-100`} />
+                        </div>
+                      ))}
+                    </div>
+                    {/* Family History skeleton */}
+                    <div
+                      className="animate-pulse overflow-hidden rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.15)' }}
+                    >
+                      <div
+                        className="flex items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.1)' }}
+                      >
+                        <div className="h-6 w-32 rounded-md bg-slate-100" />
+                        <div className="size-6 rounded-md bg-slate-100" />
+                      </div>
+                      <div
+                        className="flex items-center gap-4 px-4 py-[5px]"
+                        style={{ background: 'rgba(230,248,253,0.6)' }}
+                      >
+                        <div className="h-4 w-24 rounded-sm bg-slate-200" />
+                        <div className="h-4 w-28 rounded-sm bg-slate-200" />
+                        <div className="ml-auto h-4 w-16 rounded-sm bg-slate-200" />
+                      </div>
+                      {[
+                        ['w-28', 'w-16', 'w-24'],
+                        ['w-32', 'w-20', 'w-24'],
+                        ['w-20', 'w-28', 'w-16'],
+                      ].map(([c1, c2, c3], i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-4 px-4 py-[4px]"
+                          style={{ borderBottom: '1px solid rgba(37,70,77,0.08)' }}
+                        >
+                          <div className={`h-[22px] ${c1} rounded-sm bg-slate-100`} />
+                          <div className={`h-[22px] ${c2} rounded-sm bg-slate-100`} />
+                          <div className={`ml-auto h-[22px] ${c3} rounded-sm bg-slate-100`} />
+                        </div>
+                      ))}
+                    </div>
+                    {/* Immunization History skeleton */}
+                    <div
+                      className="animate-pulse overflow-hidden rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.15)' }}
+                    >
+                      <div
+                        className="flex items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.1)' }}
+                      >
+                        <div className="h-6 w-44 rounded-md bg-slate-100" />
+                        <div className="size-6 rounded-md bg-slate-100" />
+                      </div>
+                      <div
+                        className="flex items-center gap-4 px-4 py-[5px]"
+                        style={{ background: 'rgba(230,248,253,0.6)' }}
+                      >
+                        <div className="h-4 w-20 rounded-sm bg-slate-200" />
+                        <div className="h-4 w-32 rounded-sm bg-slate-200" />
+                        <div className="ml-auto h-4 w-20 rounded-sm bg-slate-200" />
+                      </div>
+                      {[
+                        ['w-36', 'w-24', 'w-24'],
+                        ['w-24', 'w-24', 'w-24'],
+                        ['w-28', 'w-24', 'w-24'],
+                        ['w-24', 'w-24', 'w-16'],
+                        ['w-32', 'w-24', 'w-20'],
+                      ].map(([c1, c2, c3], i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-4 px-4 py-[4px]"
+                          style={{ borderBottom: '1px solid rgba(37,70,77,0.08)' }}
+                        >
+                          <div className={`h-[22px] ${c1} rounded-sm bg-slate-100`} />
+                          <div className={`h-[22px] ${c2} rounded-sm bg-slate-100`} />
+                          <div className={`ml-auto h-[22px] ${c3} rounded-sm bg-slate-100`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-7">
+                    {/* Surgical History skeleton */}
+                    <div
+                      className="animate-pulse overflow-hidden rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.15)' }}
+                    >
+                      <div
+                        className="flex items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.1)' }}
+                      >
+                        <div className="h-6 w-36 rounded-md bg-slate-100" />
+                        <div className="size-6 rounded-md bg-slate-100" />
+                      </div>
+                      <div
+                        className="flex items-center gap-4 px-4 py-[5px]"
+                        style={{ background: 'rgba(230,248,253,0.6)' }}
+                      >
+                        <div className="h-4 w-32 rounded-sm bg-slate-200" />
+                        <div className="h-4 w-16 rounded-sm bg-slate-200" />
+                        <div className="ml-auto h-4 w-20 rounded-sm bg-slate-200" />
+                      </div>
+                      <div
+                        className="flex items-center gap-4 px-4 py-[4px]"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.08)' }}
+                      >
+                        <div className="h-[22px] w-40 rounded-sm bg-slate-100" />
+                        <div className="h-[22px] w-20 rounded-sm bg-slate-100" />
+                        <div className="ml-auto h-[22px] w-20 rounded-sm bg-slate-100" />
+                      </div>
+                    </div>
+                    {/* Chronic Conditions skeleton */}
+                    <div
+                      className="animate-pulse overflow-hidden rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.15)' }}
+                    >
+                      <div
+                        className="flex items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.1)' }}
+                      >
+                        <div className="h-6 w-40 rounded-md bg-slate-100" />
+                        <div className="size-6 rounded-md bg-slate-100" />
+                      </div>
+                      <div
+                        className="flex items-center gap-4 px-4 py-[5px]"
+                        style={{ background: 'rgba(230,248,253,0.6)' }}
+                      >
+                        <div className="h-4 w-28 rounded-sm bg-slate-200" />
+                        <div className="h-4 w-16 rounded-sm bg-slate-200" />
+                        <div className="ml-auto h-4 w-16 rounded-sm bg-slate-200" />
+                      </div>
+                      <div
+                        className="flex items-center gap-4 px-4 py-[4px]"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.08)' }}
+                      >
+                        <div className="h-[22px] w-44 rounded-sm bg-slate-100" />
+                        <div className="h-[22px] w-16 rounded-sm bg-slate-100" />
+                        <div className="ml-auto h-[22px] w-16 rounded-sm bg-slate-100" />
+                      </div>
+                    </div>
+                    {/* Allergies History skeleton — 4 cols */}
+                    <div
+                      className="animate-pulse overflow-hidden rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.15)' }}
+                    >
+                      <div
+                        className="flex items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.1)' }}
+                      >
+                        <div className="h-6 w-40 rounded-md bg-slate-100" />
+                        <div className="size-6 rounded-md bg-slate-100" />
+                      </div>
+                      <div
+                        className="flex items-center gap-4 px-4 py-[5px]"
+                        style={{ background: 'rgba(230,248,253,0.6)' }}
+                      >
+                        <div className="h-4 w-20 rounded-sm bg-slate-200" />
+                        <div className="h-4 w-24 rounded-sm bg-slate-200" />
+                        <div className="h-4 w-16 rounded-sm bg-slate-200" />
+                        <div className="ml-auto h-4 w-20 rounded-sm bg-slate-200" />
+                      </div>
+                      {[
+                        ['w-20', 'w-28', 'w-14', 'w-24'],
+                        ['w-24', 'w-24', 'w-20', 'w-24'],
+                        ['w-16', 'w-24', 'w-10', 'w-24'],
+                      ].map(([c1, c2, c3, c4], i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-4 px-4 py-[4px]"
+                          style={{ borderBottom: '1px solid rgba(37,70,77,0.08)' }}
+                        >
+                          <div className={`h-[22px] ${c1} rounded-sm bg-slate-100`} />
+                          <div className={`h-[22px] ${c2} rounded-sm bg-slate-100`} />
+                          <div className={`h-[22px] ${c3} rounded-sm bg-slate-100`} />
+                          <div className={`ml-auto h-[22px] ${c4} rounded-sm bg-slate-100`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Error state ───────────────────────────────────────────────── */}
+              {medHistStatus === 'error' && (
+                <div
+                  className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-[12px] py-12 text-center"
+                  style={{
+                    background: 'rgba(239,68,68,0.03)',
+                    border: '1px solid rgba(239,68,68,0.12)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(239,68,68,0.08)' }}
+                  >
+                    <AlertTriangle style={{ width: 22, height: 22, color: '#EF4444' }} />
+                  </div>
+                  <div>
+                    <p className="text-base leading-6 font-medium" style={{ color: '#4A7080' }}>
+                      Could not load medical history
+                    </p>
+                    <p className="mt-0.5 text-sm leading-5" style={{ color: '#8A98A3' }}>
+                      An error occurred while fetching this patient&apos;s medical history
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={retryMedHist}
+                    className="mt-1 flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80"
+                    style={{ background: '#E2EDF1', color: '#25464D' }}
+                  >
+                    <RefreshCw style={{ width: 14, height: 14 }} />
+                    Try again
+                  </button>
+                </div>
+              )}
+
+              {/* ── Empty state ────────────────────────────────────────────────── */}
+              {medHistStatus === 'empty' && (
+                <div
+                  className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-[12px] py-12 text-center"
+                  style={{ background: 'rgba(226,237,241,0.25)' }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(226,237,241,0.6)' }}
+                  >
+                    <History style={{ width: 22, height: 22, color: '#8A98A3' }} />
+                  </div>
+                  <div>
+                    <p className="text-base leading-6 font-medium" style={{ color: '#4A7080' }}>
+                      No medical history on record
+                    </p>
+                    <p className="mt-0.5 text-sm leading-5" style={{ color: '#8A98A3' }}>
+                      This patient&apos;s medical history has not been entered yet
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Loaded ─────────────────────────────────────────────────────── */}
+              {medHistStatus === 'loaded' && (
+                <div className="grid grid-cols-1 gap-7 lg:grid-cols-2">
+                  {/* Left column */}
+                  <div className="flex flex-col gap-7">
+                    {/* Past Diagnoses */}
+                    <div
+                      className="rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.2)' }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleSection('pastDiagnoses')}
+                        aria-expanded={openSections.pastDiagnoses}
+                        className="flex w-full items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                      >
+                        <h4
+                          className="font-semibold"
+                          style={{ fontSize: 16, lineHeight: '24px', color: '#000000' }}
+                        >
+                          Past Diagnoses
+                        </h4>
+                        <ChevronsDown
+                          style={{
+                            width: 24,
+                            height: 24,
+                            color: '#00B4D8',
+                            flexShrink: 0,
+                            transform: openSections.pastDiagnoses ? undefined : 'rotate(180deg)',
+                            transition: 'transform 0.2s ease',
+                          }}
+                        />
+                      </button>
+                      {openSections.pastDiagnoses && (
+                        <div className="overflow-x-auto">
+                          <div className="min-w-[360px]">
+                            <div
+                              className="flex items-center px-4 py-[5px]"
+                              style={{ background: '#E6F8FD' }}
+                            >
+                              <span
+                                className="w-[55%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Condition / Diagnosis
+                              </span>
+                              <span
+                                className="w-[25%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Date Diagnosed
+                              </span>
+                              <span
+                                className="w-[20%] text-right font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Status
+                              </span>
+                            </div>
+                            {patient.medicalHistory.pastDiagnoses.length === 0 ? (
+                              <div
+                                className="flex items-center px-4 py-[5px]"
+                                style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                              >
+                                <span
+                                  className="w-[55%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  No diagnoses recorded
+                                </span>
+                                <span
+                                  className="w-[25%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                                <span
+                                  className="w-[20%] text-right"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                              </div>
+                            ) : (
+                              patient.medicalHistory.pastDiagnoses.map((row, i) => (
+                                <div
+                                  key={i}
+                                  className="flex items-center px-4 py-[5px]"
+                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                                >
+                                  <span
+                                    className="w-[55%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.condition}
+                                  </span>
+                                  <span
+                                    className="w-[25%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.dateDiagnosed}
+                                  </span>
+                                  <span
+                                    className="w-[20%] text-right font-medium"
+                                    style={{
+                                      fontSize: 14,
+                                      lineHeight: '22px',
+                                      color: row.status === 'Active' ? '#22C55E' : '#2F3A40',
+                                    }}
+                                  >
+                                    {row.status}
+                                  </span>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Family History */}
+                    <div
+                      className="rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.2)' }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleSection('familyHistory')}
+                        aria-expanded={openSections.familyHistory}
+                        className="flex w-full items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                      >
+                        <h4
+                          className="font-semibold"
+                          style={{ fontSize: 16, lineHeight: '24px', color: '#000000' }}
+                        >
+                          Family History
+                        </h4>
+                        <ChevronsDown
+                          style={{
+                            width: 24,
+                            height: 24,
+                            color: '#00B4D8',
+                            flexShrink: 0,
+                            transform: openSections.familyHistory ? undefined : 'rotate(180deg)',
+                            transition: 'transform 0.2s ease',
+                          }}
+                        />
+                      </button>
+                      {openSections.familyHistory && (
+                        <div className="overflow-x-auto">
+                          <div className="min-w-[360px]">
+                            <div
+                              className="flex items-center px-4 py-[5px]"
+                              style={{ background: '#E6F8FD' }}
+                            >
+                              <span
+                                className="w-[40%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Condition
+                              </span>
+                              <span
+                                className="w-[30%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Relationship
+                              </span>
+                              <span
+                                className="w-[30%] text-right font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Notes
+                              </span>
+                            </div>
+                            {patient.medicalHistory.familyHistory.length === 0 ? (
+                              <div
+                                className="flex items-center px-4 py-[5px]"
+                                style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                              >
+                                <span
+                                  className="w-[40%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  No family history recorded
+                                </span>
+                                <span
+                                  className="w-[30%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                                <span
+                                  className="w-[30%] text-right"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                              </div>
+                            ) : (
+                              patient.medicalHistory.familyHistory.map((row, i) => (
+                                <div
+                                  key={i}
+                                  className="flex items-center px-4 py-[5px]"
+                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                                >
+                                  <span
+                                    className="w-[40%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.condition}
+                                  </span>
+                                  <span
+                                    className="w-[30%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.relationship}
+                                  </span>
+                                  <span
+                                    className="w-[30%] text-right"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.notes}
+                                  </span>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Immunization History */}
+                    <div
+                      className="rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.2)' }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleSection('immunizationHistory')}
+                        aria-expanded={openSections.immunizationHistory}
+                        className="flex w-full items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                      >
+                        <h4
+                          className="font-semibold"
+                          style={{ fontSize: 16, lineHeight: '24px', color: '#000000' }}
+                        >
+                          Immunization History
+                        </h4>
+                        <ChevronsDown
+                          style={{
+                            width: 24,
+                            height: 24,
+                            color: '#00B4D8',
+                            flexShrink: 0,
+                            transform: openSections.immunizationHistory
+                              ? undefined
+                              : 'rotate(180deg)',
+                            transition: 'transform 0.2s ease',
+                          }}
+                        />
+                      </button>
+                      {openSections.immunizationHistory && (
+                        <div className="overflow-x-auto">
+                          <div className="min-w-[360px]">
+                            <div
+                              className="flex items-center px-4 py-[5px]"
+                              style={{ background: '#E6F8FD' }}
+                            >
+                              <span
+                                className="w-[40%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Vaccine
+                              </span>
+                              <span
+                                className="w-[35%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Date Administered
+                              </span>
+                              <span
+                                className="w-[25%] text-right font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Next Due
+                              </span>
+                            </div>
+                            {patient.medicalHistory.immunizationHistory.length === 0 ? (
+                              <div
+                                className="flex items-center px-4 py-[5px]"
+                                style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                              >
+                                <span
+                                  className="w-[40%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  No immunization records
+                                </span>
+                                <span
+                                  className="w-[35%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                                <span
+                                  className="w-[25%] text-right"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                              </div>
+                            ) : (
+                              patient.medicalHistory.immunizationHistory.map((row, i) => (
+                                <div
+                                  key={i}
+                                  className="flex items-center px-4 py-[5px]"
+                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                                >
+                                  <span
+                                    className="w-[40%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.vaccine}
+                                  </span>
+                                  <span
+                                    className="w-[35%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.dateAdministered}
+                                  </span>
+                                  <span
+                                    className="w-[25%] text-right"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.nextDue ?? '–'}
+                                  </span>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right column */}
+                  <div className="flex flex-col gap-7">
+                    {/* Surgical History */}
+                    <div
+                      className="rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.2)' }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleSection('surgicalHistory')}
+                        aria-expanded={openSections.surgicalHistory}
+                        className="flex w-full items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                      >
+                        <h4
+                          className="font-semibold"
+                          style={{ fontSize: 16, lineHeight: '24px', color: '#000000' }}
+                        >
+                          Surgical History
+                        </h4>
+                        <ChevronsDown
+                          style={{
+                            width: 24,
+                            height: 24,
+                            color: '#00B4D8',
+                            flexShrink: 0,
+                            transform: openSections.surgicalHistory ? undefined : 'rotate(180deg)',
+                            transition: 'transform 0.2s ease',
+                          }}
+                        />
+                      </button>
+                      {openSections.surgicalHistory && (
+                        <div className="overflow-x-auto">
+                          <div className="min-w-[360px]">
+                            <div
+                              className="flex items-center px-4 py-[5px]"
+                              style={{ background: '#E6F8FD' }}
+                            >
+                              <span
+                                className="w-[50%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Surgery / Procedure
+                              </span>
+                              <span
+                                className="w-[25%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Date
+                              </span>
+                              <span
+                                className="w-[25%] text-right font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Hospital
+                              </span>
+                            </div>
+                            {patient.medicalHistory.surgicalHistory.length === 0 ? (
+                              <div
+                                className="flex items-center px-4 py-[5px]"
+                                style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                              >
+                                <span
+                                  className="w-[50%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  No surgical history recorded
+                                </span>
+                                <span
+                                  className="w-[25%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                                <span
+                                  className="w-[25%] text-right"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                              </div>
+                            ) : (
+                              patient.medicalHistory.surgicalHistory.map((row, i) => (
+                                <div
+                                  key={i}
+                                  className="flex items-center px-4 py-[5px]"
+                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                                >
+                                  <span
+                                    className="w-[50%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.procedure}
+                                  </span>
+                                  <span
+                                    className="w-[25%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.date}
+                                  </span>
+                                  <span
+                                    className="w-[25%] text-right"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.hospital}
+                                  </span>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Chronic Conditions */}
+                    <div
+                      className="rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.2)' }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleSection('chronicConditions')}
+                        aria-expanded={openSections.chronicConditions}
+                        className="flex w-full items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                      >
+                        <h4
+                          className="font-semibold"
+                          style={{ fontSize: 16, lineHeight: '24px', color: '#000000' }}
+                        >
+                          Chronic Conditions
+                        </h4>
+                        <ChevronsDown
+                          style={{
+                            width: 24,
+                            height: 24,
+                            color: '#00B4D8',
+                            flexShrink: 0,
+                            transform: openSections.chronicConditions
+                              ? undefined
+                              : 'rotate(180deg)',
+                            transition: 'transform 0.2s ease',
+                          }}
+                        />
+                      </button>
+                      {openSections.chronicConditions && (
+                        <div className="overflow-x-auto">
+                          <div className="min-w-[360px]">
+                            <div
+                              className="flex items-center px-4 py-[5px]"
+                              style={{ background: '#E6F8FD' }}
+                            >
+                              <span
+                                className="w-[55%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Condition
+                              </span>
+                              <span
+                                className="w-[20%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Date
+                              </span>
+                              <span
+                                className="w-[25%] text-right font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Status
+                              </span>
+                            </div>
+                            {patient.medicalHistory.chronicConditions.length === 0 ? (
+                              <div
+                                className="flex items-center px-4 py-[5px]"
+                                style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                              >
+                                <span
+                                  className="w-[55%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  None recorded
+                                </span>
+                                <span
+                                  className="w-[20%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                                <span
+                                  className="w-[25%] text-right"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                              </div>
+                            ) : (
+                              patient.medicalHistory.chronicConditions.map((row, i) => (
+                                <div
+                                  key={i}
+                                  className="flex items-center px-4 py-[5px]"
+                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                                >
+                                  <span
+                                    className="w-[55%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.condition}
+                                  </span>
+                                  <span
+                                    className="w-[20%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.date}
+                                  </span>
+                                  <span
+                                    className="w-[25%] text-right font-medium"
+                                    style={{
+                                      fontSize: 14,
+                                      lineHeight: '22px',
+                                      color: row.status === 'Active' ? '#22C55E' : '#2F3A40',
+                                    }}
+                                  >
+                                    {row.status}
+                                  </span>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Allergies History */}
+                    <div
+                      className="rounded-[12px] bg-white"
+                      style={{ border: '1px solid rgba(37,70,77,0.2)' }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleSection('allergiesHistory')}
+                        aria-expanded={openSections.allergiesHistory}
+                        className="flex w-full items-center justify-between px-4 py-2"
+                        style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                      >
+                        <h4
+                          className="font-semibold"
+                          style={{ fontSize: 16, lineHeight: '24px', color: '#000000' }}
+                        >
+                          Allergies History
+                        </h4>
+                        <ChevronsDown
+                          style={{
+                            width: 24,
+                            height: 24,
+                            color: '#00B4D8',
+                            flexShrink: 0,
+                            transform: openSections.allergiesHistory ? undefined : 'rotate(180deg)',
+                            transition: 'transform 0.2s ease',
+                          }}
+                        />
+                      </button>
+                      {openSections.allergiesHistory && (
+                        <div className="overflow-x-auto">
+                          <div className="min-w-[440px]">
+                            <div
+                              className="flex items-center px-4 py-[5px]"
+                              style={{ background: '#E6F8FD' }}
+                            >
+                              <span
+                                className="w-[22%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Allergen
+                              </span>
+                              <span
+                                className="w-[33%] font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Reaction
+                              </span>
+                              <span
+                                className="w-[20%] text-center font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Severity
+                              </span>
+                              <span
+                                className="w-[25%] text-right font-medium uppercase"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                              >
+                                Noted On
+                              </span>
+                            </div>
+                            {patient.medicalHistory.allergiesHistory.length === 0 ? (
+                              <div
+                                className="flex items-center px-4 py-[5px]"
+                                style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                              >
+                                <span
+                                  className="w-[22%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  No allergies recorded
+                                </span>
+                                <span
+                                  className="w-[33%]"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                                <span
+                                  className="w-[20%] text-center"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                                <span
+                                  className="w-[25%] text-right"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                >
+                                  –
+                                </span>
+                              </div>
+                            ) : (
+                              patient.medicalHistory.allergiesHistory.map((row, i) => (
+                                <div
+                                  key={i}
+                                  className="flex items-center px-4 py-[5px]"
+                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                                >
+                                  <span
+                                    className="w-[22%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.allergen}
+                                  </span>
+                                  <span
+                                    className="w-[33%]"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.reaction}
+                                  </span>
+                                  <span className="flex w-[20%] justify-center">
+                                    <span
+                                      className="inline-flex items-center rounded-full px-2.5 py-0.5 font-medium"
+                                      style={{
+                                        fontSize: 14,
+                                        lineHeight: '18px',
+                                        ...medSeverityStyles[row.severity],
+                                      }}
+                                    >
+                                      {row.severity}
+                                    </span>
+                                  </span>
+                                  <span
+                                    className="w-[25%] text-right"
+                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  >
+                                    {row.notedOn}
+                                  </span>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          {activeTab !== 'biodata' && activeTab !== 'medical-history' && (
             <div
               className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-[12px]"
               style={{ background: 'rgba(226,237,241,0.25)' }}

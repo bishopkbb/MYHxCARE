@@ -197,6 +197,54 @@ export const MOCK_PATIENTS: PatientRecord[] = [
   },
 ];
 
+// ── Medical History types ─────────────────────────────────────────────────────
+
+export type PastDiagnosis = {
+  condition: string;
+  dateDiagnosed: string;
+  status: 'Active' | 'Resolved';
+};
+
+export type FamilyHistoryEntry = {
+  condition: string;
+  relationship: string;
+  notes: string;
+};
+
+export type ImmunizationEntry = {
+  vaccine: string;
+  dateAdministered: string;
+  nextDue: string | null; // null → "–"; "Completed" → verbatim
+};
+
+export type SurgicalEntry = {
+  procedure: string;
+  date: string;
+  hospital: string;
+};
+
+export type ChronicCondition = {
+  condition: string;
+  date: string;
+  status: string;
+};
+
+export type AllergyHistoryEntry = {
+  allergen: string;
+  reaction: string;
+  severity: 'Severe' | 'Moderate' | 'Mild';
+  notedOn: string;
+};
+
+export type MedicalHistory = {
+  pastDiagnoses: PastDiagnosis[];
+  familyHistory: FamilyHistoryEntry[];
+  immunizationHistory: ImmunizationEntry[];
+  surgicalHistory: SurgicalEntry[];
+  chronicConditions: ChronicCondition[];
+  allergiesHistory: AllergyHistoryEntry[];
+};
+
 // ── Patient detail view ───────────────────────────────────────────────────────
 
 export type PatientDetailMock = {
@@ -217,6 +265,7 @@ export type PatientDetailMock = {
   queueStatus: string; // current encounter status for display
   allergies: Allergy[];
   isUrgent: boolean;
+  medicalHistory: MedicalHistory;
 };
 
 export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
@@ -255,6 +304,53 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
       },
     ],
     isUrgent: true,
+    medicalHistory: {
+      pastDiagnoses: [
+        { condition: 'Migraine (Tension Type)', dateDiagnosed: 'Mar 12, 2025', status: 'Active' },
+        { condition: 'Gastritis', dateDiagnosed: 'Jun 25, 2025', status: 'Resolved' },
+        { condition: 'Malaria', dateDiagnosed: 'Sep 12, 2025', status: 'Resolved' },
+        { condition: 'Typhoid Fever', dateDiagnosed: 'Jan 22, 2026', status: 'Resolved' },
+        { condition: 'Migraine (Tension Type)', dateDiagnosed: 'Mar 24, 2026', status: 'Resolved' },
+      ],
+      familyHistory: [
+        { condition: 'Hypertension', relationship: 'Father', notes: 'On medication' },
+        { condition: 'Type 2 Diabetes', relationship: 'Mother', notes: 'On medication' },
+        { condition: 'Asthma', relationship: 'Younger Sister', notes: 'Mild' },
+      ],
+      immunizationHistory: [
+        {
+          vaccine: 'COVID-19 (Booster)',
+          dateAdministered: 'Nov 20, 2025',
+          nextDue: 'Nov 20, 2026',
+        },
+        { vaccine: 'Influenza', dateAdministered: 'Dec 25, 2025', nextDue: 'Feb 20, 2026' },
+        { vaccine: 'Tetanus (TT)', dateAdministered: 'Jan 15, 2026', nextDue: 'Mar 15, 2026' },
+        { vaccine: 'Influenza', dateAdministered: 'May 13, 2024', nextDue: null },
+        { vaccine: 'HPV (Dose 3)', dateAdministered: 'Aug 18, 2022', nextDue: 'Completed' },
+      ],
+      surgicalHistory: [],
+      chronicConditions: [],
+      allergiesHistory: [
+        {
+          allergen: 'Penicillin',
+          reaction: 'Skin rash, itching',
+          severity: 'Severe',
+          notedOn: 'Nov 20, 2025',
+        },
+        {
+          allergen: 'Sulfonamides',
+          reaction: 'Nausea, Vomiting',
+          severity: 'Moderate',
+          notedOn: 'Nov 20, 2025',
+        },
+        {
+          allergen: 'Latex',
+          reaction: 'Skin irritation',
+          severity: 'Mild',
+          notedOn: 'Nov 20, 2025',
+        },
+      ],
+    },
   },
   p2: {
     id: 'p2',
@@ -274,6 +370,39 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
     queueStatus: 'New Admission',
     allergies: [],
     isUrgent: false,
+    medicalHistory: {
+      pastDiagnoses: [
+        { condition: 'Typhoid Fever', dateDiagnosed: 'Jul 05, 2026', status: 'Active' },
+        { condition: 'Malaria', dateDiagnosed: 'Feb 14, 2025', status: 'Resolved' },
+      ],
+      familyHistory: [
+        { condition: 'Sickle Cell Trait', relationship: 'Father', notes: 'Carrier (AS)' },
+        { condition: 'Hypertension', relationship: 'Mother', notes: 'On medication' },
+      ],
+      immunizationHistory: [
+        {
+          vaccine: 'COVID-19 (Booster)',
+          dateAdministered: 'Oct 10, 2025',
+          nextDue: 'Oct 10, 2026',
+        },
+        {
+          vaccine: 'Hepatitis B (3rd Dose)',
+          dateAdministered: 'Jan 03, 2020',
+          nextDue: 'Completed',
+        },
+        { vaccine: 'BCG', dateAdministered: 'Mar 01, 2005', nextDue: 'Completed' },
+      ],
+      surgicalHistory: [],
+      chronicConditions: [],
+      allergiesHistory: [
+        {
+          allergen: 'Penicillin',
+          reaction: 'Skin rash',
+          severity: 'Moderate',
+          notedOn: 'Jul 05, 2026',
+        },
+      ],
+    },
   },
   p3: {
     id: 'p3',
@@ -302,6 +431,44 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
       },
     ],
     isUrgent: false,
+    medicalHistory: {
+      pastDiagnoses: [
+        { condition: 'Diffuse Skin Rash', dateDiagnosed: 'Jul 10, 2026', status: 'Active' },
+        { condition: 'Urinary Tract Infection', dateDiagnosed: 'Apr 20, 2025', status: 'Resolved' },
+        { condition: 'Malaria', dateDiagnosed: 'Nov 05, 2024', status: 'Resolved' },
+      ],
+      familyHistory: [
+        { condition: 'Type 2 Diabetes', relationship: 'Father', notes: 'On insulin' },
+        { condition: 'Asthma', relationship: 'Mother', notes: 'Mild, seasonal' },
+      ],
+      immunizationHistory: [
+        { vaccine: 'COVID-19 (Primary)', dateAdministered: 'Sep 14, 2022', nextDue: 'Completed' },
+        { vaccine: 'Tetanus (TT)', dateAdministered: 'Jun 22, 2024', nextDue: 'Jun 22, 2029' },
+        {
+          vaccine: 'Hepatitis B (3rd Dose)',
+          dateAdministered: 'Feb 18, 2019',
+          nextDue: 'Completed',
+        },
+      ],
+      surgicalHistory: [
+        { procedure: 'Appendectomy', date: 'Mar 08, 2023', hospital: 'UNTH Enugu' },
+      ],
+      chronicConditions: [
+        {
+          condition: 'Aspirin-Exacerbated Respiratory Disease',
+          date: 'Jan 15, 2024',
+          status: 'Active',
+        },
+      ],
+      allergiesHistory: [
+        {
+          allergen: 'Aspirin',
+          reaction: 'Bronchospasm, rhinitis',
+          severity: 'Severe',
+          notedOn: 'May 18, 2024',
+        },
+      ],
+    },
   },
 };
 
@@ -323,4 +490,12 @@ export const FALLBACK_PATIENT_DETAIL: PatientDetailMock = {
   queueStatus: '—',
   allergies: [],
   isUrgent: false,
+  medicalHistory: {
+    pastDiagnoses: [],
+    familyHistory: [],
+    immunizationHistory: [],
+    surgicalHistory: [],
+    chronicConditions: [],
+    allergiesHistory: [],
+  },
 };
