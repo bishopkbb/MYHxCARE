@@ -2020,7 +2020,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         style={{
                           height: 120,
                           border: '1px solid rgba(37,70,77,0.15)',
-                          borderTopWidth: '3px',
+                          borderLeftWidth: '3px',
                         }}
                       >
                         <div className="flex h-full flex-col justify-between p-5">
@@ -2133,7 +2133,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                           style={{
                             height: 120,
                             border: `1px solid ${config.accentColor}`,
-                            borderTopWidth: '3px',
+                            borderLeftWidth: '3px',
                           }}
                         >
                           {/* Icon row */}
