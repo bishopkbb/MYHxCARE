@@ -263,58 +263,91 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   return (
     <div className="flex min-h-screen flex-col" style={{ background: '#F5FBFD' }}>
       {/* ── Quick patient preview bar ─────────────────────────────────────── */}
+      {/*
+          Mobile  : 2-row layout — row 1 has back+sep+avatar+name+URGENT,
+                    row 2 has supplementary info (MRN, age, BG, allergy count)
+          sm+     : single flex-row, same as original desktop design
+      */}
       <div
-        className="flex items-center gap-4 px-5"
-        style={{
-          background: '#1A3D4D',
-          borderBottom: '1px solid rgba(255,255,255,0.10)',
-          minHeight: 60,
-          paddingTop: 14,
-          paddingBottom: 14,
-        }}
+        className="px-5 py-[10px] sm:flex sm:min-h-[60px] sm:items-center sm:gap-4 sm:py-0"
+        style={{ background: '#1A3D4D', borderBottom: '1px solid rgba(255,255,255,0.10)' }}
       >
-        {/* Back */}
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="flex shrink-0 items-center gap-1.5"
-        >
-          <ChevronLeft style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.58)' }} />
-          <span className="text-sm leading-[22px]" style={{ color: 'rgba(255,255,255,0.58)' }}>
-            Back to Queue
+        {/* ── Row 1 (mobile) / nav block (sm+) ──────────────────────────── */}
+        <div className="flex items-center gap-3">
+          {/* Back */}
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex shrink-0 items-center gap-1.5"
+          >
+            <ChevronLeft style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.58)' }} />
+            <span className="text-sm leading-[22px]" style={{ color: 'rgba(255,255,255,0.58)' }}>
+              Back to Queue
+            </span>
+          </button>
+
+          <div
+            className="shrink-0"
+            style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.18)' }}
+          />
+
+          {/* Avatar */}
+          <div
+            className="flex shrink-0 items-center justify-center rounded-full text-sm font-medium text-white"
+            style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.15)' }}
+          >
+            {patient.initials}
+          </div>
+
+          {/* Name — only visible on mobile (sm+ shows it in the info strip below) */}
+          <span
+            className="min-w-0 flex-1 truncate font-normal text-white sm:hidden"
+            style={{ fontSize: 16, lineHeight: '24px' }}
+          >
+            {patient.name}
           </span>
-        </button>
 
-        <div
-          className="shrink-0"
-          style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.18)' }}
-        />
-
-        {/* Avatar */}
-        <div
-          className="flex shrink-0 items-center justify-center rounded-full text-sm font-medium text-white"
-          style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.15)' }}
-        >
-          {patient.initials}
+          {/* URGENT — mobile slot, sits inline with the name */}
+          {patient.isUrgent && (
+            <span
+              className="shrink-0 text-sm font-medium sm:hidden"
+              style={{
+                borderRadius: 4,
+                padding: '4px 10px',
+                background: 'rgba(245,158,11,0.30)',
+                border: '1px solid rgba(245,158,11,0.45)',
+                color: '#FCD34D',
+              }}
+            >
+              URGENT
+            </span>
+          )}
         </div>
 
-        {/* Compact info strip */}
-        <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1">
-          <span className="shrink-0 text-lg leading-7 font-normal text-white">{patient.name}</span>
+        {/* ── Row 2 (mobile) / info strip (sm+) ─────────────────────────── */}
+        <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 sm:mt-0 sm:flex-1 sm:gap-x-4">
+          {/* Name — hidden on mobile (shown in row 1), visible sm+ */}
           <span
-            className="shrink-0 text-base leading-6"
+            className="hidden shrink-0 font-normal text-white sm:inline"
+            style={{ fontSize: 18, lineHeight: '28px' }}
+          >
+            {patient.name}
+          </span>
+
+          <span
+            className="shrink-0 text-sm leading-[22px] sm:text-base"
             style={{ color: 'rgba(255,255,255,0.52)' }}
           >
             {patient.mrn}
           </span>
           <span
-            className="shrink-0 text-base leading-6"
+            className="shrink-0 text-sm leading-[22px] sm:text-base"
             style={{ color: 'rgba(255,255,255,0.52)' }}
           >
             {patient.age} · {patient.gender}
           </span>
           <span
-            className="shrink-0 text-base leading-6"
+            className="shrink-0 text-sm leading-[22px] sm:text-base"
             style={{ color: 'rgba(255,255,255,0.52)' }}
           >
             BG: {patient.bloodGroup}
@@ -322,11 +355,29 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
 
           {patient.allergies.length > 0 && (
             <>
-              <AlertTriangle style={{ width: 22, height: 22, color: '#FCA5A5', flexShrink: 0 }} />
+              <AlertTriangle style={{ width: 18, height: 18, color: '#FCA5A5', flexShrink: 0 }} />
+
+              {/* Mobile: compact count chip */}
+              <span
+                className="shrink-0 text-sm font-medium sm:hidden"
+                style={{
+                  borderRadius: 4,
+                  padding: '3px 8px',
+                  background: 'rgba(239,68,68,0.28)',
+                  border: '1px solid rgba(239,68,68,0.40)',
+                  color: '#FCA5A5',
+                }}
+              >
+                {patient.allergies.length === 1
+                  ? '1 allergy'
+                  : `${patient.allergies.length} allergies`}
+              </span>
+
+              {/* sm+: individual substance pills */}
               {patient.allergies.slice(0, 2).map((allergy) => (
                 <span
                   key={allergy.id}
-                  className="shrink-0 text-sm leading-[22px] font-medium"
+                  className="hidden shrink-0 text-sm font-medium sm:inline"
                   style={{
                     borderRadius: 4,
                     padding: '3px 8px',
@@ -340,7 +391,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               ))}
               {patient.allergies.length > 2 && (
                 <span
-                  className="shrink-0 text-sm leading-[22px] font-medium"
+                  className="hidden shrink-0 text-sm font-medium sm:inline"
                   style={{
                     borderRadius: 4,
                     padding: '3px 8px',
@@ -354,12 +405,11 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               )}
             </>
           )}
-        </div>
 
-        {patient.isUrgent && (
-          <div className="ml-auto shrink-0">
+          {/* URGENT — sm+ slot, pinned right */}
+          {patient.isUrgent && (
             <span
-              className="text-sm leading-[22px] font-medium"
+              className="ml-auto hidden shrink-0 text-sm font-medium sm:inline"
               style={{
                 borderRadius: 4,
                 padding: '4px 12px',
@@ -370,8 +420,8 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             >
               URGENT
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* ── White content shell ────────────────────────────────────────────── */}

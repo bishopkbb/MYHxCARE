@@ -390,31 +390,31 @@ export default function DashboardPage() {
       {/* ── Emergency banner ─────────────────────────────────────────── */}
       {MOCK_EMERGENCY.count > 0 && (
         <div
-          className="mt-3.5 flex items-start gap-3 rounded-[12px] p-3.5 sm:items-center"
+          className="mt-3.5 flex flex-col gap-3 rounded-[12px] p-3.5 sm:flex-row sm:items-center"
           style={{ background: '#FEF2F2', border: '1px solid #EF4444' }}
         >
-          {/* Alert icon container */}
-          <div
-            className="flex size-9 shrink-0 items-center justify-center rounded-[12px]"
-            style={{ background: '#FFE2E2' }}
-          >
-            <AlertTriangle style={{ width: 18, height: 18, color: '#EF4444' }} />
+          {/* Icon + text in a horizontal sub-row at all sizes */}
+          <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
+            <div
+              className="flex size-9 shrink-0 items-center justify-center rounded-[12px]"
+              style={{ background: '#FFE2E2' }}
+            >
+              <AlertTriangle style={{ width: 18, height: 18, color: '#EF4444' }} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-base leading-6 font-semibold" style={{ color: '#EF4444' }}>
+                Emergency Patient Requires Immediate Attention
+              </p>
+              <p className="text-sm leading-5.5" style={{ color: '#EF4444' }}>
+                {MOCK_EMERGENCY.patientName} — {MOCK_EMERGENCY.complaint}
+              </p>
+            </div>
           </div>
 
-          {/* Text */}
-          <div className="min-w-0 flex-1">
-            <p className="text-base leading-6 font-semibold" style={{ color: '#EF4444' }}>
-              Emergency Patient Requires Immediate Attention
-            </p>
-            <p className="text-sm leading-5.5" style={{ color: '#EF4444' }}>
-              {MOCK_EMERGENCY.patientName} — {MOCK_EMERGENCY.complaint}
-            </p>
-          </div>
-
-          {/* Open Record button */}
+          {/* Button — full-width on mobile, auto-width inline on sm+ */}
           <button
             type="button"
-            className="flex shrink-0 items-center gap-1.5 rounded-[12px] px-4 py-2 text-sm leading-5.5 font-medium text-white transition-opacity hover:opacity-90"
+            className="flex w-full items-center justify-center gap-1.5 rounded-[12px] px-4 py-2 text-sm leading-5.5 font-medium text-white transition-opacity hover:opacity-90 sm:w-auto sm:shrink-0 sm:justify-start"
             style={{ background: '#EF4444' }}
           >
             Open Record

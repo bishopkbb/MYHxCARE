@@ -65,22 +65,22 @@ export function AllergyBanner({ allergies, className }: AllergyBannerProps) {
         {allergies.map((allergy) => (
           <div
             key={allergy.id}
-            className="grid items-baseline gap-x-4 gap-y-0"
-            style={{ gridTemplateColumns: 'auto 1fr auto' }}
+            className="grid gap-x-4 gap-y-0.5"
+            style={{ gridTemplateColumns: '1fr auto' }}
           >
-            {/* Substance */}
+            {/* Substance — col 1, row 1 */}
             <span className="text-base leading-snug font-semibold">{allergy.substance}</span>
 
-            {/* Reaction — 14px; min-w-0 lets it shrink within the 1fr column */}
-            <span className="min-w-0 text-sm leading-snug opacity-85">{allergy.reaction}</span>
-
-            {/* Severity badge */}
+            {/* Severity badge — col 2, spans both rows, vertically centred */}
             <span
-              className="rounded px-2.5 py-1 text-sm leading-none font-bold tracking-wide uppercase"
+              className="row-span-2 self-center rounded px-2.5 py-1 text-sm leading-none font-bold tracking-wide uppercase"
               style={SEVERITY_BADGE[allergy.severity]}
             >
               {SEVERITY_LABEL[allergy.severity]}
             </span>
+
+            {/* Reaction — col 1, row 2 */}
+            <span className="min-w-0 text-sm leading-snug opacity-85">{allergy.reaction}</span>
           </div>
         ))}
       </div>
