@@ -9,12 +9,13 @@ import {
   History,
   Paperclip,
   Pill,
+  RefreshCw,
   Stethoscope,
   User,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { use, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 
 import { AllergyBanner } from '@/components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
@@ -73,6 +74,30 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const patient = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
   const [activeTab, setActiveTab] = useState('biodata');
+
+  // ── Biodata fetch simulation ────────────────────────────────────────────────
+  type BiodataStatus = 'loading' | 'loaded' | 'empty' | 'error';
+  const [biodataStatus, setBiodataStatus] = useState<BiodataStatus>('loading');
+  const biodataLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (activeTab !== 'biodata') return;
+    if (biodataLoadedRef.current) return;
+    const t = setTimeout(() => {
+      biodataLoadedRef.current = true;
+      setBiodataStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+    return () => clearTimeout(t);
+  }, [activeTab, patient.id]);
+
+  function retryBiodata() {
+    biodataLoadedRef.current = false;
+    setBiodataStatus('loading');
+    setTimeout(() => {
+      biodataLoadedRef.current = true;
+      setBiodataStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+  }
 
   const queueBadge = QUEUE_BADGE[patient.queueStatus] ?? FALLBACK_BADGE;
 
@@ -403,90 +428,207 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
         {/* ── Tab content ───────────────────────────────────────────────────── */}
         <div className="p-5 sm:p-6">
           {activeTab === 'biodata' && (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {/* ── Personal Information ─────────────────────────────────────── */}
-              <div
-                className="rounded-[12px] bg-white p-4"
-                style={{ border: '1px solid #0064821F' }}
-              >
-                <div className="pb-2" style={{ borderBottom: '1px solid #0064821F' }}>
-                  <h3
-                    className="font-display font-semibold"
-                    style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+            <>
+              {/* ── Loading skeleton ─────────────────────────────────────────── */}
+              {biodataStatus === 'loading' && (
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  {/* Personal Information skeleton */}
+                  <div
+                    className="animate-pulse rounded-[12px] bg-white p-4"
+                    style={{ border: '1px solid #0064821F' }}
                   >
-                    Personal Information
-                  </h3>
-                </div>
-                <dl className="space-y-3 pt-3">
-                  {(
-                    [
-                      { label: 'Full Name', value: patient.name },
-                      { label: 'Date of Birth', value: patient.dob },
-                      { label: 'Age', value: patient.age },
-                      { label: 'Gender', value: patient.gender },
-                      { label: 'Blood Group', value: patient.bloodGroup },
-                      { label: 'Address', value: patient.address },
-                    ] as { label: string; value: string }[]
-                  ).map(({ label, value }) => (
-                    <div key={label} className="flex items-start justify-between gap-6">
-                      <dt
-                        className="shrink-0 font-normal"
-                        style={{ fontSize: 16, lineHeight: '24px', color: '#25464D' }}
-                      >
-                        {label}
-                      </dt>
-                      <dd
-                        className="m-0 text-right font-normal"
-                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                      >
-                        {value}
-                      </dd>
+                    <div className="pb-2" style={{ borderBottom: '1px solid #0064821F' }}>
+                      <div className="h-7 w-44 rounded-md bg-slate-100" />
                     </div>
-                  ))}
-                </dl>
-              </div>
+                    <div className="space-y-3 pt-3">
+                      {[
+                        ['w-20', 'w-36'],
+                        ['w-24', 'w-28'],
+                        ['w-8', 'w-16'],
+                        ['w-14', 'w-14'],
+                        ['w-20', 'w-10'],
+                        ['w-14', 'w-40'],
+                      ].map(([lw, vw], i) => (
+                        <div key={i} className="flex items-center justify-between gap-6">
+                          <div className={`h-6 ${lw} rounded-md bg-slate-100`} />
+                          <div className={`h-6 ${vw} rounded-md bg-slate-100`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
-              {/* ── Academic & Contact Details ────────────────────────────────── */}
-              <div
-                className="rounded-[12px] bg-white p-4"
-                style={{ border: '1px solid #0064821F' }}
-              >
-                <div className="pb-2" style={{ borderBottom: '1px solid #0064821F' }}>
-                  <h3
-                    className="font-display font-semibold"
-                    style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                  {/* Academic & Contact skeleton */}
+                  <div
+                    className="animate-pulse rounded-[12px] bg-white p-4"
+                    style={{ border: '1px solid #0064821F' }}
                   >
-                    Academic & Contact Details
-                  </h3>
-                </div>
-                <dl className="space-y-3 pt-3">
-                  {(
-                    [
-                      { label: 'Student ID', value: patient.fileNumber },
-                      { label: 'Faculty', value: patient.faculty },
-                      { label: 'Level', value: patient.level },
-                      { label: 'Phone', value: patient.phone },
-                      { label: 'Email', value: patient.email },
-                    ] as { label: string; value: string }[]
-                  ).map(({ label, value }) => (
-                    <div key={label} className="flex items-start justify-between gap-6">
-                      <dt
-                        className="shrink-0 font-normal"
-                        style={{ fontSize: 16, lineHeight: '24px', color: '#25464D' }}
-                      >
-                        {label}
-                      </dt>
-                      <dd
-                        className="m-0 text-right font-normal"
-                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                      >
-                        {value}
-                      </dd>
+                    <div className="pb-2" style={{ borderBottom: '1px solid #0064821F' }}>
+                      <div className="h-7 w-52 rounded-md bg-slate-100" />
                     </div>
-                  ))}
-                </dl>
-              </div>
-            </div>
+                    <div className="space-y-3 pt-3">
+                      {[
+                        ['w-16', 'w-32'],
+                        ['w-12', 'w-36'],
+                        ['w-10', 'w-10'],
+                        ['w-10', 'w-28'],
+                        ['w-10', 'w-40'],
+                      ].map(([lw, vw], i) => (
+                        <div key={i} className="flex items-center justify-between gap-6">
+                          <div className={`h-6 ${lw} rounded-md bg-slate-100`} />
+                          <div className={`h-6 ${vw} rounded-md bg-slate-100`} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Error state ──────────────────────────────────────────────── */}
+              {biodataStatus === 'error' && (
+                <div
+                  className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-[12px] py-12 text-center"
+                  style={{
+                    background: 'rgba(239,68,68,0.03)',
+                    border: '1px solid rgba(239,68,68,0.12)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(239,68,68,0.08)' }}
+                  >
+                    <AlertTriangle style={{ width: 22, height: 22, color: '#EF4444' }} />
+                  </div>
+                  <div>
+                    <p className="text-base leading-6 font-medium" style={{ color: '#4A7080' }}>
+                      Could not load biodata
+                    </p>
+                    <p className="mt-0.5 text-sm leading-5" style={{ color: '#8A98A3' }}>
+                      An error occurred while fetching patient details
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={retryBiodata}
+                    className="mt-1 flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80"
+                    style={{ background: '#E2EDF1', color: '#25464D' }}
+                  >
+                    <RefreshCw style={{ width: 14, height: 14 }} />
+                    Try again
+                  </button>
+                </div>
+              )}
+
+              {/* ── Empty state ───────────────────────────────────────────────── */}
+              {biodataStatus === 'empty' && (
+                <div
+                  className="flex min-h-[280px] flex-col items-center justify-center gap-3 rounded-[12px] py-12 text-center"
+                  style={{ background: 'rgba(226,237,241,0.25)' }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(226,237,241,0.6)' }}
+                  >
+                    <User style={{ width: 22, height: 22, color: '#8A98A3' }} />
+                  </div>
+                  <div>
+                    <p className="text-base leading-6 font-medium" style={{ color: '#4A7080' }}>
+                      No biodata on record
+                    </p>
+                    <p className="mt-0.5 text-sm leading-5" style={{ color: '#8A98A3' }}>
+                      Patient details have not been entered yet
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Loaded: two-card grid ─────────────────────────────────────── */}
+              {biodataStatus === 'loaded' && (
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  {/* Personal Information */}
+                  <div
+                    className="rounded-[12px] bg-white p-4"
+                    style={{ border: '1px solid #0064821F' }}
+                  >
+                    <div className="pb-2" style={{ borderBottom: '1px solid #0064821F' }}>
+                      <h3
+                        className="font-display font-semibold"
+                        style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                      >
+                        Personal Information
+                      </h3>
+                    </div>
+                    <dl className="space-y-3 pt-3">
+                      {(
+                        [
+                          { label: 'Full Name', value: patient.name },
+                          { label: 'Date of Birth', value: patient.dob },
+                          { label: 'Age', value: patient.age },
+                          { label: 'Gender', value: patient.gender },
+                          { label: 'Blood Group', value: patient.bloodGroup },
+                          { label: 'Address', value: patient.address },
+                        ] as { label: string; value: string }[]
+                      ).map(({ label, value }) => (
+                        <div key={label} className="flex items-start justify-between gap-6">
+                          <dt
+                            className="shrink-0 font-normal"
+                            style={{ fontSize: 16, lineHeight: '24px', color: '#25464D' }}
+                          >
+                            {label}
+                          </dt>
+                          <dd
+                            className="m-0 text-right font-normal"
+                            style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                          >
+                            {value}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+
+                  {/* Academic & Contact Details */}
+                  <div
+                    className="rounded-[12px] bg-white p-4"
+                    style={{ border: '1px solid #0064821F' }}
+                  >
+                    <div className="pb-2" style={{ borderBottom: '1px solid #0064821F' }}>
+                      <h3
+                        className="font-display font-semibold"
+                        style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                      >
+                        Academic & Contact Details
+                      </h3>
+                    </div>
+                    <dl className="space-y-3 pt-3">
+                      {(
+                        [
+                          { label: 'Student ID', value: patient.fileNumber },
+                          { label: 'Faculty', value: patient.faculty },
+                          { label: 'Level', value: patient.level },
+                          { label: 'Phone', value: patient.phone },
+                          { label: 'Email', value: patient.email },
+                        ] as { label: string; value: string }[]
+                      ).map(({ label, value }) => (
+                        <div key={label} className="flex items-start justify-between gap-6">
+                          <dt
+                            className="shrink-0 font-normal"
+                            style={{ fontSize: 16, lineHeight: '24px', color: '#25464D' }}
+                          >
+                            {label}
+                          </dt>
+                          <dd
+                            className="m-0 text-right font-normal"
+                            style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                          >
+                            {value}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                </div>
+              )}
+            </>
           )}
           {activeTab !== 'biodata' && (
             <div
