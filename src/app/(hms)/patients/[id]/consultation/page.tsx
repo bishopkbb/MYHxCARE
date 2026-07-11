@@ -29,26 +29,20 @@ type ConsultationStep = {
 };
 
 type ConsultationForm = {
-  // Step 1 — Chief Complaint
   chiefComplaint: string;
   duration: string;
   onset: string;
   severity: number;
-  // Step 2 — History
   historyPresentIllness: string;
   pastMedicalHistory: string;
   familySocialHistory: string;
-  // Step 3 — Examination
   generalAppearance: string;
   systemsExamination: string;
-  // Step 4 — Diagnosis
   primaryDiagnosis: string;
   differentialDiagnosis: string;
-  // Step 5 — Treatment Plan
   medicationsPrescribed: string;
   investigationsOrdered: string;
   managementPlan: string;
-  // Step 6 — Clinical Notes
   clinicalNotes: string;
 };
 
@@ -107,16 +101,9 @@ const INPUT_BASE: React.CSSProperties = {
   background: '#FFFFFF',
 };
 
-const TEXTAREA_BASE: React.CSSProperties = {
-  ...INPUT_BASE,
-  borderRadius: 12,
-};
+const TEXTAREA_BASE: React.CSSProperties = { ...INPUT_BASE, borderRadius: 12 };
 
-const SINGLE_INPUT_BASE: React.CSSProperties = {
-  ...INPUT_BASE,
-  height: 44,
-  borderRadius: 10,
-};
+const SINGLE_INPUT_BASE: React.CSSProperties = { ...INPUT_BASE, height: 44, borderRadius: 10 };
 
 function focusBorder(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
   e.currentTarget.style.borderColor = '#00B4D8';
@@ -150,7 +137,6 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
         className="px-5 py-[10px] sm:flex sm:min-h-[60px] sm:items-center sm:gap-4 sm:py-0"
         style={{ background: '#1A3D4D', borderBottom: '1px solid rgba(255,255,255,0.10)' }}
       >
-        {/* Row 1 (mobile) / nav block (sm+) */}
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -198,7 +184,6 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
           )}
         </div>
 
-        {/* Row 2 (mobile) / info strip (sm+) */}
         <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 sm:mt-0 sm:flex-1 sm:gap-x-4">
           <span
             className="hidden shrink-0 font-normal text-white sm:inline"
@@ -290,16 +275,13 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
       {/* ── Scrollable body ─────────────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-4xl space-y-5 px-5 py-5">
+        <div className="space-y-5 px-5 py-5">
           {/* ── Patient summary card ──────────────────────────────────────────── */}
-          <div
-            className="overflow-hidden rounded-[16px] bg-white"
-            style={{ border: '1px solid #0064821F' }}
-          >
-            {/* Identity */}
+          <div className="overflow-hidden rounded-[16px]" style={{ border: '1px solid #0064821F' }}>
+            {/* Identity — height ~106px, white */}
             <div
-              className="flex items-start gap-4 px-5 py-4"
-              style={{ borderBottom: '1px solid #0064821F' }}
+              className="flex items-center gap-4 px-4 py-4"
+              style={{ background: '#FFFFFF', borderBottom: '1px solid #0064821F' }}
             >
               <div
                 className="flex shrink-0 items-center justify-center rounded-full font-semibold text-white"
@@ -335,96 +317,106 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
               )}
             </div>
 
-            {/* Vital Signs */}
-            {summaryVitals.length > 0 && (
-              <div className="px-5 py-4" style={{ borderBottom: '1px solid #0064821F' }}>
-                <p
-                  className="mb-3 text-sm font-semibold tracking-wider uppercase"
-                  style={{ color: '#00B4D8' }}
-                >
-                  Vital Signs
-                </p>
-                <div className="flex flex-col gap-2">
-                  {summaryVitals.map((reading) => {
-                    const label = VITAL_SHORT_LABEL[reading.key] ?? reading.key;
-                    const isAbnormal = reading.status === 'abnormal';
-                    return (
-                      <div key={reading.key} className="flex items-center justify-between">
-                        <span style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-                          {label}
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className="font-medium"
-                            style={{
-                              fontSize: 14,
-                              lineHeight: '22px',
-                              color: isAbnormal ? '#EF4444' : '#0D2630',
-                            }}
-                          >
-                            {reading.value}
+            {/* Vitals + Allergies — 2-column, semi-transparent */}
+            <div
+              className="grid grid-cols-1 gap-6 px-4 py-4 sm:grid-cols-2"
+              style={{ background: 'rgba(255,255,255,0.52)' }}
+            >
+              {/* Left: Vital Signs */}
+              {summaryVitals.length > 0 && (
+                <div>
+                  <p
+                    className="mb-3 text-sm font-semibold tracking-wider uppercase"
+                    style={{ color: '#00B4D8' }}
+                  >
+                    Vital Signs
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {summaryVitals.map((reading) => {
+                      const label = VITAL_SHORT_LABEL[reading.key] ?? reading.key;
+                      const isAbnormal = reading.status === 'abnormal';
+                      return (
+                        <div key={reading.key} className="flex items-center justify-between">
+                          <span style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
+                            {label}
                           </span>
-                          {isAbnormal && (
-                            <AlertTriangle
-                              aria-hidden
-                              style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0 }}
-                            />
-                          )}
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className="font-medium"
+                              style={{
+                                fontSize: 14,
+                                lineHeight: '22px',
+                                color: isAbnormal ? '#EF4444' : '#0D2630',
+                              }}
+                            >
+                              {reading.value}
+                            </span>
+                            {isAbnormal && (
+                              <AlertTriangle
+                                aria-hidden
+                                style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0 }}
+                              />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Allergies */}
-            {patient.allergies.length > 0 && (
+              {/* Right: Allergies */}
+              {patient.allergies.length > 0 && (
+                <div>
+                  <div className="mb-2 flex items-center gap-1.5">
+                    <AlertTriangle
+                      aria-hidden
+                      style={{ width: 14, height: 14, color: '#F59E0B' }}
+                    />
+                    <p
+                      className="text-sm font-semibold tracking-wider uppercase"
+                      style={{ color: '#F59E0B' }}
+                    >
+                      Allergies
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {patient.allergies.map((allergy) => (
+                      <span
+                        key={allergy.id}
+                        className="rounded-full px-3 py-1"
+                        style={{
+                          fontSize: 14,
+                          lineHeight: '22px',
+                          border: '1px solid rgba(239,68,68,0.40)',
+                          color: '#EF4444',
+                          background: 'rgba(239,68,68,0.05)',
+                        }}
+                      >
+                        {allergy.substance}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Active Medications — semi-transparent, border-top divider */}
+            {activeMedications.length > 0 && (
               <div
-                className="px-5 py-4"
+                className="px-4 py-4"
                 style={{
-                  borderBottom: activeMedications.length > 0 ? '1px solid #0064821F' : undefined,
+                  background: 'rgba(255,255,255,0.52)',
+                  borderTop: '1px solid #0064821F',
                 }}
               >
-                <div className="mb-2 flex items-center gap-1.5">
-                  <AlertTriangle aria-hidden style={{ width: 14, height: 14, color: '#F59E0B' }} />
-                  <p
-                    className="text-sm font-semibold tracking-wider uppercase"
-                    style={{ color: '#F59E0B' }}
-                  >
-                    Allergies
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {patient.allergies.map((allergy) => (
-                    <span
-                      key={allergy.id}
-                      className="rounded-full px-3 py-1"
-                      style={{
-                        fontSize: 14,
-                        lineHeight: '22px',
-                        border: '1px solid rgba(239,68,68,0.40)',
-                        color: '#EF4444',
-                        background: 'rgba(239,68,68,0.05)',
-                      }}
-                    >
-                      {allergy.substance}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Active Medications */}
-            {activeMedications.length > 0 && (
-              <div className="px-5 py-4">
                 <p
-                  className="mb-3 text-sm font-semibold tracking-wider uppercase"
+                  className="mb-[11px] text-sm font-semibold tracking-wider uppercase"
                   style={{ color: '#4A7080' }}
                 >
                   Active Medications
                 </p>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-[11px]">
                   {activeMedications.map((med) => (
                     <div
                       key={med.id}
@@ -455,9 +447,12 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
             className="overflow-hidden rounded-[16px] bg-white"
             style={{ border: '1px solid #0064821F' }}
           >
-            {/* Step navigation */}
-            <div className="overflow-x-auto" style={{ borderBottom: '1px solid #0064821F' }}>
-              <div className="flex min-w-max">
+            {/* Tab bar — 47px height, px-4, gap-[14px] */}
+            <div
+              className="overflow-x-auto"
+              style={{ background: '#FFFFFF', borderBottom: '1px solid #0064821F' }}
+            >
+              <div className="flex min-w-max gap-[14px] px-4">
                 {CONSULTATION_STEPS.map((step) => {
                   const isActive = currentStep === step.number;
                   const isCompleted = currentStep > step.number;
@@ -467,7 +462,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                       key={step.key}
                       type="button"
                       onClick={() => setCurrentStep(step.number)}
-                      className="font-display flex items-center gap-2 border-b-2 px-4 py-3.5 font-semibold whitespace-nowrap transition-colors"
+                      className="font-display flex items-center gap-2 border-b-2 py-[10px] font-semibold whitespace-nowrap transition-colors"
                       style={{
                         fontSize: 15,
                         lineHeight: '24px',
@@ -495,10 +490,10 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
             </div>
 
             {/* ── Step content ──────────────────────────────────────────────────── */}
-            <div className="p-5 sm:p-6">
+            <div className="px-5 py-5 sm:px-6">
               {/* Step 1: Chief Complaint */}
               {currentStep === 1 && (
-                <div className="max-w-2xl">
+                <div>
                   <h2
                     className="font-display font-semibold"
                     style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
@@ -515,14 +510,14 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                   <textarea
                     value={form.chiefComplaint}
                     onChange={(e) => setField('chiefComplaint', e.target.value)}
-                    rows={5}
+                    rows={4}
                     className="mt-4 w-full resize-none px-4 py-3 transition-[border-color] outline-none"
                     style={TEXTAREA_BASE}
                     onFocus={focusBorder}
                     onBlur={blurBorder}
                   />
 
-                  <div className="mt-5 grid grid-cols-2 gap-4">
+                  <div className="mt-4 grid max-w-[670px] grid-cols-2 gap-4 pt-4">
                     <div>
                       <label
                         className="mb-1.5 block font-medium"
@@ -560,7 +555,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                     </div>
                   </div>
 
-                  <div className="mt-6">
+                  <div className="mt-2 pt-4">
                     <div className="mb-3 flex items-center justify-between">
                       <label
                         className="font-medium"
@@ -575,24 +570,26 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                         {form.severity}
                       </span>
                     </div>
-                    <input
-                      type="range"
-                      min={1}
-                      max={10}
-                      value={form.severity}
-                      onChange={(e) => setField('severity', Number(e.target.value))}
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full [&::-moz-range-thumb]:h-[18px] [&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md"
-                      style={{
-                        background: `linear-gradient(to right, #00B4D8 ${sliderPct}%, #1A3D4D ${sliderPct}%)`,
-                      }}
-                    />
-                    <div className="mt-1.5 flex justify-between">
-                      <span className="text-sm" style={{ color: '#8A98A3' }}>
-                        1
-                      </span>
-                      <span className="text-sm" style={{ color: '#8A98A3' }}>
-                        10
-                      </span>
+                    <div className="pt-[6px]">
+                      <input
+                        type="range"
+                        min={1}
+                        max={10}
+                        value={form.severity}
+                        onChange={(e) => setField('severity', Number(e.target.value))}
+                        className="h-2 w-full cursor-pointer appearance-none rounded-full [&::-moz-range-thumb]:h-[18px] [&::-moz-range-thumb]:w-[18px] [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-thumb]:h-[18px] [&::-webkit-slider-thumb]:w-[18px] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-md"
+                        style={{
+                          background: `linear-gradient(to right, #00B4D8 ${sliderPct}%, #1A3D4D ${sliderPct}%)`,
+                        }}
+                      />
+                      <div className="mt-1.5 flex justify-between">
+                        <span className="text-sm" style={{ color: '#8A98A3' }}>
+                          1
+                        </span>
+                        <span className="text-sm" style={{ color: '#8A98A3' }}>
+                          10
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -600,7 +597,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
               {/* Step 2: History */}
               {currentStep === 2 && (
-                <div className="max-w-2xl space-y-6">
+                <div className="space-y-6">
                   <div>
                     <h2
                       className="font-display font-semibold"
@@ -677,7 +674,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
               {/* Step 3: Examination */}
               {currentStep === 3 && (
-                <div className="max-w-2xl space-y-6">
+                <div className="space-y-6">
                   <div>
                     <h2
                       className="font-display font-semibold"
@@ -735,7 +732,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
               {/* Step 4: Diagnosis */}
               {currentStep === 4 && (
-                <div className="max-w-2xl space-y-6">
+                <div className="space-y-6">
                   <div>
                     <h2
                       className="font-display font-semibold"
@@ -793,7 +790,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
               {/* Step 5: Treatment Plan */}
               {currentStep === 5 && (
-                <div className="max-w-2xl space-y-6">
+                <div className="space-y-6">
                   <div>
                     <h2
                       className="font-display font-semibold"
@@ -870,7 +867,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
               {/* Step 6: Clinical Notes */}
               {currentStep === 6 && (
-                <div className="max-w-2xl">
+                <div>
                   <h2
                     className="font-display font-semibold"
                     style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
@@ -897,58 +894,62 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                 </div>
               )}
             </div>
+
+            {/* ── Action bar — max-w 622px, space-between ───────────────────────── */}
+            <div
+              className="flex max-w-[622px] items-center justify-between"
+              style={{
+                borderTop: '1px solid #0064821F',
+                padding: '14px 20px',
+                background: '#FFFFFF',
+              }}
+            >
+              <button
+                type="button"
+                className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-slate-50"
+                style={{
+                  fontSize: 16,
+                  lineHeight: '24px',
+                  color: '#0D2630',
+                  border: '1px solid #0064821F',
+                  height: 44,
+                }}
+              >
+                Save Draft
+              </button>
+
+              <button
+                type="button"
+                className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-amber-50"
+                style={{
+                  fontSize: 16,
+                  lineHeight: '24px',
+                  color: '#D97706',
+                  border: '1px solid #F59E0B',
+                  height: 44,
+                }}
+              >
+                Refer Patient
+              </button>
+
+              <button
+                type="button"
+                className="rounded-[12px] px-5 font-sans font-semibold text-white transition-opacity hover:opacity-90"
+                style={{
+                  fontSize: 16,
+                  lineHeight: '24px',
+                  background: '#00B4D8',
+                  height: 44,
+                }}
+              >
+                Complete Consultation
+              </button>
+            </div>
           </div>
 
-          {/* bottom padding so action bar doesn't overlap last card on mobile */}
-          <div className="h-2" />
+          {/* scroll breathing room below last card */}
+          <div className="h-4" />
         </div>
-      </div>
-
-      {/* ── Action bar ────────────────────────────────────────────────────────── */}
-      <div
-        className="flex shrink-0 items-center gap-3 px-5 py-4"
-        style={{ background: '#FFFFFF', borderTop: '1px solid #0064821F' }}
-      >
-        <button
-          type="button"
-          className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-slate-50"
-          style={{
-            fontSize: 16,
-            lineHeight: '24px',
-            color: '#0D2630',
-            border: '1px solid #0064821F',
-            height: 44,
-          }}
-        >
-          Save Draft
-        </button>
-
-        <button
-          type="button"
-          className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-amber-50"
-          style={{
-            fontSize: 16,
-            lineHeight: '24px',
-            color: '#D97706',
-            border: '1px solid #F59E0B',
-            height: 44,
-          }}
-        >
-          Refer Patient
-        </button>
-
-        <button
-          type="button"
-          className="rounded-[12px] px-5 font-sans font-semibold text-white transition-opacity hover:opacity-90"
-          style={{
-            fontSize: 16,
-            lineHeight: '24px',
-            background: '#00B4D8',
-            height: 44,
-          }}
-        >
-          Complete Consultation
-        </button>
       </div>
     </div>
   );
