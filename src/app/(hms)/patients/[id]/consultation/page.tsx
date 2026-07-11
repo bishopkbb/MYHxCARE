@@ -6,8 +6,12 @@ import {
   ChevronLeft,
   ClipboardList,
   FileText,
+  FlaskConical,
+  Info,
   MessageSquare,
+  Pill,
   Search,
+  Share2,
   Stethoscope,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -38,13 +42,18 @@ type ConsultationForm = {
   pastMedicalHistory: string;
   familyHistory: string;
   socialHistory: string;
-  generalAppearance: string;
-  systemsExamination: string;
+  generalExamination: string;
+  cardiovascularSystem: string;
+  respiratorySystem: string;
+  abdominalGIT: string;
+  neurologicalSystem: string;
+  musculoskeletal: string;
+  entHeadNeck: string;
   primaryDiagnosis: string;
-  differentialDiagnosis: string;
-  medicationsPrescribed: string;
-  investigationsOrdered: string;
-  managementPlan: string;
+  differentialDiagnoses: string;
+  diagnosticReasoning: string;
+  treatmentPlan: string;
+  followUpInstructions: string;
   clinicalNotes: string;
 };
 
@@ -84,13 +93,18 @@ const INITIAL_FORM: ConsultationForm = {
   pastMedicalHistory: '',
   familyHistory: '',
   socialHistory: '',
-  generalAppearance: '',
-  systemsExamination: '',
+  generalExamination: '',
+  cardiovascularSystem: '',
+  respiratorySystem: '',
+  abdominalGIT: '',
+  neurologicalSystem: '',
+  musculoskeletal: '',
+  entHeadNeck: '',
   primaryDiagnosis: '',
-  differentialDiagnosis: '',
-  medicationsPrescribed: '',
-  investigationsOrdered: '',
-  managementPlan: '',
+  differentialDiagnoses: '',
+  diagnosticReasoning: '',
+  treatmentPlan: '',
+  followUpInstructions: '',
   clinicalNotes: '',
 };
 
@@ -683,57 +697,140 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
               {/* Step 3: Examination */}
               {currentStep === 3 && (
                 <div className="space-y-6">
+                  {/* General Examination — full width */}
                   <div>
-                    <h2
-                      className="font-display font-semibold"
-                      style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
-                    >
-                      Examination
-                    </h2>
                     <p
-                      className="mt-1"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                      className="pb-[6px] font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                     >
-                      Physical examination findings.
+                      General Examination
                     </p>
-                  </div>
-
-                  <div>
-                    <label
-                      className="mb-1.5 block font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                    >
-                      General Appearance &amp; Vitals Impression
-                    </label>
                     <textarea
-                      value={form.generalAppearance}
-                      onChange={(e) => setField('generalAppearance', e.target.value)}
-                      placeholder="e.g., Alert, not in acute distress. Febrile. No pallor or jaundice..."
-                      rows={5}
-                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                      style={TEXTAREA_BASE}
+                      value={form.generalExamination}
+                      onChange={(e) => setField('generalExamination', e.target.value)}
+                      placeholder="Patient appearance, nutritional status, conscious level, pallor, jaundice, cyanosis, oedema..."
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                      style={{ ...TEXTAREA_BASE, minHeight: 128 }}
                       onFocus={focusBorder}
                       onBlur={blurBorder}
                     />
                   </div>
 
-                  <div>
-                    <label
-                      className="mb-1.5 block font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                    >
-                      Systems Examination
-                    </label>
-                    <textarea
-                      value={form.systemsExamination}
-                      onChange={(e) => setField('systemsExamination', e.target.value)}
-                      placeholder="CVS, RS, Abdomen, CNS — findings per system..."
-                      rows={6}
-                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                      style={TEXTAREA_BASE}
-                      onFocus={focusBorder}
-                      onBlur={blurBorder}
-                    />
+                  {/* Systems — 2-column grid */}
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {/* Cardiovascular System */}
+                    <div>
+                      <p
+                        className="pb-[6px] font-sans font-semibold"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                      >
+                        Cardiovascular System
+                      </p>
+                      <textarea
+                        value={form.cardiovascularSystem}
+                        onChange={(e) => setField('cardiovascularSystem', e.target.value)}
+                        placeholder="Findings..."
+                        className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                        style={{ ...TEXTAREA_BASE, minHeight: 128 }}
+                        onFocus={focusBorder}
+                        onBlur={blurBorder}
+                      />
+                    </div>
+
+                    {/* Respiratory System */}
+                    <div>
+                      <p
+                        className="pb-[6px] font-sans font-semibold"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                      >
+                        Respiratory System
+                      </p>
+                      <textarea
+                        value={form.respiratorySystem}
+                        onChange={(e) => setField('respiratorySystem', e.target.value)}
+                        placeholder="Findings..."
+                        className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                        style={{ ...TEXTAREA_BASE, minHeight: 128 }}
+                        onFocus={focusBorder}
+                        onBlur={blurBorder}
+                      />
+                    </div>
+
+                    {/* Abdominal / GIT */}
+                    <div>
+                      <p
+                        className="pb-[6px] font-sans font-semibold"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                      >
+                        Abdominal / GIT
+                      </p>
+                      <textarea
+                        value={form.abdominalGIT}
+                        onChange={(e) => setField('abdominalGIT', e.target.value)}
+                        placeholder="Findings..."
+                        className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                        style={{ ...TEXTAREA_BASE, minHeight: 128 }}
+                        onFocus={focusBorder}
+                        onBlur={blurBorder}
+                      />
+                    </div>
+
+                    {/* Neurological System */}
+                    <div>
+                      <p
+                        className="pb-[6px] font-sans font-semibold"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                      >
+                        Neurological System
+                      </p>
+                      <textarea
+                        value={form.neurologicalSystem}
+                        onChange={(e) => setField('neurologicalSystem', e.target.value)}
+                        placeholder="Findings..."
+                        className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                        style={{ ...TEXTAREA_BASE, minHeight: 128 }}
+                        onFocus={focusBorder}
+                        onBlur={blurBorder}
+                      />
+                    </div>
+
+                    {/* Musculoskeletal */}
+                    <div>
+                      <p
+                        className="pb-[6px] font-sans font-semibold"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                      >
+                        Musculoskeletal
+                      </p>
+                      <textarea
+                        value={form.musculoskeletal}
+                        onChange={(e) => setField('musculoskeletal', e.target.value)}
+                        placeholder="Findings..."
+                        className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                        style={{ ...TEXTAREA_BASE, minHeight: 128 }}
+                        onFocus={focusBorder}
+                        onBlur={blurBorder}
+                      />
+                    </div>
+
+                    {/* ENT / Head & Neck */}
+                    <div>
+                      <p
+                        className="pb-[6px] font-sans font-semibold"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                      >
+                        ENT / Head &amp; Neck
+                      </p>
+                      <textarea
+                        value={form.entHeadNeck}
+                        onChange={(e) => setField('entHeadNeck', e.target.value)}
+                        placeholder="Findings..."
+                        className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                        style={{ ...TEXTAREA_BASE, minHeight: 128 }}
+                        onFocus={focusBorder}
+                        onBlur={blurBorder}
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -741,54 +838,93 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
               {/* Step 4: Diagnosis */}
               {currentStep === 4 && (
                 <div className="space-y-6">
+                  {/* Primary Diagnosis */}
                   <div>
-                    <h2
-                      className="font-display font-semibold"
-                      style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
-                    >
-                      Diagnosis
-                    </h2>
                     <p
-                      className="mt-1"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-                    >
-                      Clinical impression and differential diagnoses.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label
-                      className="mb-1.5 block font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                      className="pb-[6px] font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                     >
                       Primary Diagnosis
-                    </label>
+                    </p>
                     <input
                       type="text"
                       value={form.primaryDiagnosis}
                       onChange={(e) => setField('primaryDiagnosis', e.target.value)}
-                      placeholder="e.g., Malaria (Uncomplicated) — B54"
+                      placeholder="e.g., Upper Respiratory Tract Infection"
                       className="w-full px-4 transition-[border-color] outline-none"
                       style={SINGLE_INPUT_BASE}
                       onFocus={focusBorder}
                       onBlur={blurBorder}
                     />
+                    {/* Quick-pick chips */}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {[
+                        'Malaria',
+                        'URTI',
+                        'Hypertension',
+                        'Gastroenteritis',
+                        'Pneumonia',
+                        'Anaemia',
+                        'UTI',
+                        'Diabetes Mellitus',
+                      ].map((condition) => (
+                        <button
+                          key={condition}
+                          type="button"
+                          onClick={() => setField('primaryDiagnosis', condition)}
+                          className="rounded-full px-3 py-1 transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+                          style={{
+                            fontSize: 14,
+                            lineHeight: '22px',
+                            color: '#4A7080',
+                            border: '1px solid #0064821F',
+                            background:
+                              form.primaryDiagnosis === condition
+                                ? 'rgba(0,180,216,0.08)'
+                                : '#FFFFFF',
+                            borderColor:
+                              form.primaryDiagnosis === condition ? '#00B4D8' : '#0064821F',
+                          }}
+                        >
+                          {condition}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
+                  {/* Differential Diagnoses */}
                   <div>
-                    <label
-                      className="mb-1.5 block font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                    <p
+                      className="pb-[6px] font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                     >
                       Differential Diagnoses
-                    </label>
+                    </p>
                     <textarea
-                      value={form.differentialDiagnosis}
-                      onChange={(e) => setField('differentialDiagnosis', e.target.value)}
-                      placeholder="List alternative diagnoses under consideration..."
-                      rows={5}
-                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                      style={TEXTAREA_BASE}
+                      value={form.differentialDiagnoses}
+                      onChange={(e) => setField('differentialDiagnoses', e.target.value)}
+                      placeholder="Differential diagnoses in order of likelihood..."
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                      style={{ ...TEXTAREA_BASE, minHeight: 128 }}
+                      onFocus={focusBorder}
+                      onBlur={blurBorder}
+                    />
+                  </div>
+
+                  {/* Diagnostic Reasoning */}
+                  <div>
+                    <p
+                      className="pb-[6px] font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                    >
+                      Diagnostic Reasoning
+                    </p>
+                    <textarea
+                      value={form.diagnosticReasoning}
+                      onChange={(e) => setField('diagnosticReasoning', e.target.value)}
+                      placeholder="Clinical reasoning supporting this diagnosis..."
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                      style={{ ...TEXTAREA_BASE, minHeight: 128 }}
                       onFocus={focusBorder}
                       onBlur={blurBorder}
                     />
@@ -799,73 +935,102 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
               {/* Step 5: Treatment Plan */}
               {currentStep === 5 && (
                 <div className="space-y-6">
+                  {/* Treatment Plan textarea */}
                   <div>
-                    <h2
-                      className="font-display font-semibold"
-                      style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                    <p
+                      className="pb-[6px] font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                     >
                       Treatment Plan
-                    </h2>
-                    <p
-                      className="mt-1"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-                    >
-                      Medications, investigations and management plan.
                     </p>
-                  </div>
-
-                  <div>
-                    <label
-                      className="mb-1.5 block font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                    >
-                      Medications Prescribed
-                    </label>
                     <textarea
-                      value={form.medicationsPrescribed}
-                      onChange={(e) => setField('medicationsPrescribed', e.target.value)}
-                      placeholder="e.g., Artemether-Lumefantrine 80/480mg, BD × 3 days..."
-                      rows={4}
-                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                      style={TEXTAREA_BASE}
+                      value={form.treatmentPlan}
+                      onChange={(e) => setField('treatmentPlan', e.target.value)}
+                      placeholder="Overall treatment plan, goals, and expected outcomes..."
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                      style={{ ...TEXTAREA_BASE, minHeight: 128 }}
                       onFocus={focusBorder}
                       onBlur={blurBorder}
                     />
                   </div>
 
-                  <div>
-                    <label
-                      className="mb-1.5 block font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                  {/* Quick action buttons */}
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        toast.info('Coming soon', 'Prescription module is not yet available.')
+                      }
+                      className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+                      style={{
+                        fontSize: 14,
+                        lineHeight: '22px',
+                        height: 44,
+                        color: '#00B4D8',
+                        border: '1px solid #00B4D8',
+                        background: '#FFFFFF',
+                      }}
                     >
-                      Investigations Ordered
-                    </label>
-                    <textarea
-                      value={form.investigationsOrdered}
-                      onChange={(e) => setField('investigationsOrdered', e.target.value)}
-                      placeholder="e.g., FBC, Malaria RDT, Urinalysis, Chest X-Ray..."
-                      rows={4}
-                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                      style={TEXTAREA_BASE}
-                      onFocus={focusBorder}
-                      onBlur={blurBorder}
-                    />
+                      <Pill style={{ width: 16, height: 16, flexShrink: 0 }} />
+                      Add Prescription
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        toast.info('Coming soon', 'Lab test request module is not yet available.')
+                      }
+                      className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+                      style={{
+                        fontSize: 14,
+                        lineHeight: '22px',
+                        height: 44,
+                        color: '#00B4D8',
+                        border: '1px solid #00B4D8',
+                        background: '#FFFFFF',
+                      }}
+                    >
+                      <FlaskConical style={{ width: 16, height: 16, flexShrink: 0 }} />
+                      Request Lab Test
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        toast.warning(
+                          'Patient referred',
+                          'Referral submitted for specialist review.',
+                        )
+                      }
+                      className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+                      style={{
+                        fontSize: 14,
+                        lineHeight: '22px',
+                        height: 44,
+                        color: '#00B4D8',
+                        border: '1px solid #00B4D8',
+                        background: '#FFFFFF',
+                      }}
+                    >
+                      <Share2 style={{ width: 16, height: 16, flexShrink: 0 }} />
+                      Refer Patient
+                    </button>
                   </div>
 
+                  {/* Follow-up Instructions */}
                   <div>
-                    <label
-                      className="mb-1.5 block font-medium"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                    <p
+                      className="pb-[6px] font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                     >
-                      Management Plan
-                    </label>
+                      Follow-up Instructions
+                    </p>
                     <textarea
-                      value={form.managementPlan}
-                      onChange={(e) => setField('managementPlan', e.target.value)}
-                      placeholder="Admission, referral, follow-up date and instructions..."
-                      rows={4}
-                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                      style={TEXTAREA_BASE}
+                      value={form.followUpInstructions}
+                      onChange={(e) => setField('followUpInstructions', e.target.value)}
+                      placeholder="Return schedule, warning signs, lifestyle advice..."
+                      className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                      style={{ ...TEXTAREA_BASE, minHeight: 128 }}
                       onFocus={focusBorder}
                       onBlur={blurBorder}
                     />
@@ -875,30 +1040,57 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
               {/* Step 6: Clinical Notes */}
               {currentStep === 6 && (
-                <div>
-                  <h2
-                    className="font-display font-semibold"
-                    style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
-                  >
-                    Clinical Notes
-                  </h2>
-                  <p
-                    className="mt-1"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-                  >
-                    Additional observations and free-text clinical documentation.
-                  </p>
+                <div className="space-y-4">
+                  {/* Title + teal subtitle */}
+                  <div>
+                    <p
+                      className="font-sans font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                    >
+                      Clinical Notes
+                    </p>
+                    <p
+                      className="mt-0.5"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+                    >
+                      Confidential observations. Audit-logged and time-stamped.
+                    </p>
+                  </div>
 
+                  {/* Large textarea */}
                   <textarea
                     value={form.clinicalNotes}
                     onChange={(e) => setField('clinicalNotes', e.target.value)}
-                    placeholder="Enter any additional clinical observations, notes or instructions..."
-                    rows={12}
-                    className="mt-4 w-full resize-none px-4 py-3 transition-[border-color] outline-none"
-                    style={TEXTAREA_BASE}
+                    placeholder="Clinical observations, nursing instructions, follow-up notes..."
+                    className="w-full resize-none px-4 py-3 transition-[border-color] outline-none placeholder:text-[#8A98A3]"
+                    style={{ ...TEXTAREA_BASE, minHeight: 240 }}
                     onFocus={focusBorder}
                     onBlur={blurBorder}
                   />
+
+                  {/* Info banner */}
+                  <div
+                    className="flex items-start gap-2.5 rounded-[10px] px-4 py-3"
+                    style={{
+                      background: 'rgba(0,180,216,0.07)',
+                      border: '1px solid rgba(0,180,216,0.20)',
+                    }}
+                  >
+                    <Info
+                      aria-hidden
+                      style={{
+                        width: 16,
+                        height: 16,
+                        color: '#00B4D8',
+                        flexShrink: 0,
+                        marginTop: 3,
+                      }}
+                    />
+                    <p style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
+                      All clinical notes are time-stamped. Submitted notes cannot be deleted — only
+                      amended.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
