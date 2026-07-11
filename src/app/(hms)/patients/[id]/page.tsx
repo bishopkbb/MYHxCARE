@@ -610,6 +610,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               {/* DM Sans SemiBold 16/24 white */}
               <button
                 type="button"
+                onClick={() => router.push(`/patients/${id}/consultation`)}
                 className="flex w-full items-center justify-center gap-2 rounded-[12px] px-4 font-semibold text-white transition-opacity hover:opacity-90 sm:w-auto sm:justify-start"
                 style={{
                   fontFamily: 'inherit',
