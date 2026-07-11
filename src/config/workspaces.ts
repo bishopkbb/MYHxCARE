@@ -110,7 +110,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           },
           {
             label: 'Medical Records',
-            href: '/patients',
+            href: '/medical-records',
             icon: FileText,
             iconSrc: '/icons/medical%20records.png',
           },
