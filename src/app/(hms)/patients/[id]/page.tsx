@@ -241,6 +241,30 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
     }, 900);
   }
 
+  // ── Current Medications fetch simulation ──────────────────────────────────────
+  type MedicationsStatus = 'loading' | 'loaded' | 'empty' | 'error';
+  const [medicationsStatus, setMedicationsStatus] = useState<MedicationsStatus>('loading');
+  const medicationsLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (activeTab !== 'current-medications') return;
+    if (medicationsLoadedRef.current) return;
+    const t = setTimeout(() => {
+      medicationsLoadedRef.current = true;
+      setMedicationsStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+    return () => clearTimeout(t);
+  }, [activeTab, patient.id]);
+
+  function retryMedications() {
+    medicationsLoadedRef.current = false;
+    setMedicationsStatus('loading');
+    setTimeout(() => {
+      medicationsLoadedRef.current = true;
+      setMedicationsStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+  }
+
   const queueBadge = QUEUE_BADGE[patient.queueStatus] ?? FALLBACK_BADGE;
 
   return (
@@ -2364,11 +2388,166 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             </>
           )}
 
+          {/* ── Current Medications tab ────────────────────────────────── */}
+          {activeTab === 'current-medications' && (
+            <>
+              {/* ── Loading skeleton ──────────────────────────────────────── */}
+              {medicationsStatus === 'loading' && (
+                <div className="flex flex-col gap-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex animate-pulse items-center gap-4 rounded-[12px] bg-white p-4"
+                      style={{ border: '1px solid rgba(0,100,130,0.12)' }}
+                    >
+                      <div className="size-10 shrink-0 rounded-[8px] bg-slate-200" />
+                      <div className="flex flex-1 flex-col gap-1.5">
+                        <div className="h-5 w-32 rounded-md bg-slate-200" />
+                        <div className="h-[18px] w-40 rounded-sm bg-slate-100" />
+                        <div className="h-[18px] w-48 rounded-sm bg-slate-100" />
+                      </div>
+                      <div className="h-7 w-20 shrink-0 rounded-full bg-slate-100" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ── Error state ───────────────────────────────────────────── */}
+              {medicationsStatus === 'error' && (
+                <div
+                  className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
+                  style={{
+                    background: 'rgba(239,68,68,0.04)',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(239,68,68,0.08)' }}
+                  >
+                    <AlertTriangle
+                      aria-hidden
+                      style={{ width: 24, height: 24, color: '#EF4444' }}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                      Failed to load medications
+                    </p>
+                    <p className="mt-1" style={{ fontSize: 14, color: '#4A7080' }}>
+                      Check your connection and try again.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={retryMedications}
+                    className="rounded-[8px] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{ background: '#0D2630' }}
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {/* ── Empty state ───────────────────────────────────────────── */}
+              {medicationsStatus === 'empty' && (
+                <div
+                  className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
+                  style={{
+                    background: 'rgba(226,237,241,0.25)',
+                    border: '1px solid rgba(0,180,216,0.15)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(0,180,216,0.08)' }}
+                  >
+                    <Pill aria-hidden style={{ width: 24, height: 24, color: '#00B4D8' }} />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                      No medications on record
+                    </p>
+                    <p className="mt-1" style={{ fontSize: 14, color: '#4A7080' }}>
+                      Prescribed medications will appear here once added by the attending doctor.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Loaded ────────────────────────────────────────────────── */}
+              {medicationsStatus === 'loaded' && (
+                <div className="flex flex-col gap-3">
+                  {patient.medications.map((med) => {
+                    const statusStyles: Record<
+                      'active' | 'discontinued' | 'completed',
+                      { border: string; color: string; label: string }
+                    > = {
+                      active: { border: '#22C55E', color: '#22C55E', label: 'Active' },
+                      discontinued: { border: '#EF4444', color: '#EF4444', label: 'Discontinued' },
+                      completed: { border: '#4A7080', color: '#4A7080', label: 'Completed' },
+                    };
+                    const badge = statusStyles[med.status];
+                    return (
+                      <div
+                        key={med.id}
+                        className="flex items-center gap-4 rounded-[12px] bg-white p-4"
+                        style={{ border: '1px solid rgba(0,100,130,0.12)' }}
+                      >
+                        {/* Icon */}
+                        <div
+                          className="flex shrink-0 items-center justify-center rounded-[8px]"
+                          style={{ width: 40, height: 40, background: 'rgba(0,180,216,0.08)' }}
+                        >
+                          <Pill aria-hidden style={{ width: 20, height: 20, color: '#00B4D8' }} />
+                        </div>
+
+                        {/* Drug info */}
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className="font-sans font-semibold"
+                            style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                          >
+                            {med.name}
+                          </p>
+                          <p
+                            className="font-sans"
+                            style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+                          >
+                            {med.dose} · {med.frequency} · {med.route}
+                          </p>
+                          <p
+                            className="font-sans"
+                            style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                          >
+                            Started {med.startedDate} · {med.prescribedBy}
+                          </p>
+                        </div>
+
+                        {/* Status badge */}
+                        <span
+                          className="shrink-0 rounded-full px-3 py-1 font-sans text-sm font-medium"
+                          style={{
+                            border: `1px solid ${badge.border}`,
+                            color: badge.color,
+                          }}
+                        >
+                          {badge.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
           {activeTab !== 'biodata' &&
             activeTab !== 'medical-history' &&
             activeTab !== 'allergies' &&
             activeTab !== 'vital-signs' &&
-            activeTab !== 'prev-consultations' && (
+            activeTab !== 'prev-consultations' &&
+            activeTab !== 'current-medications' && (
               <div
                 className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-[12px]"
                 style={{ background: 'rgba(226,237,241,0.25)' }}

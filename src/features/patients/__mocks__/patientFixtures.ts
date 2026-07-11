@@ -277,6 +277,19 @@ export type Consultation = {
   plan: string;
 };
 
+export type MedicationStatus = 'active' | 'discontinued' | 'completed';
+
+export type Medication = {
+  id: string;
+  name: string;
+  dose: string;
+  frequency: string;
+  route: string;
+  startedDate: string; // "YYYY-MM-DD"
+  prescribedBy: string;
+  status: MedicationStatus;
+};
+
 // ── Patient detail view ───────────────────────────────────────────────────────
 
 export type PatientDetailMock = {
@@ -300,6 +313,7 @@ export type PatientDetailMock = {
   medicalHistory: MedicalHistory;
   vitalSigns: VitalSignsRecord;
   consultations: Consultation[];
+  medications: Medication[];
 };
 
 export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
@@ -424,6 +438,38 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         plan: 'Ibuprofen 400mg TDS PRN, counselling referral',
       },
     ],
+    medications: [
+      {
+        id: 'm1',
+        name: 'Paracetamol',
+        dose: '1000mg',
+        frequency: 'TDS',
+        route: 'Oral',
+        startedDate: '2026-06-15',
+        prescribedBy: 'Dr. E. Obi',
+        status: 'active',
+      },
+      {
+        id: 'm2',
+        name: 'Ibuprofen',
+        dose: '400mg',
+        frequency: 'TDS PRN',
+        route: 'Oral',
+        startedDate: '2026-01-20',
+        prescribedBy: 'Dr. E. Obi',
+        status: 'active',
+      },
+      {
+        id: 'm3',
+        name: 'Metronidazole',
+        dose: '400mg',
+        frequency: 'TDS',
+        route: 'Oral',
+        startedDate: '2026-04-03',
+        prescribedBy: 'Dr. A. Chukwu',
+        status: 'completed',
+      },
+    ],
   },
   p2: {
     id: 'p2',
@@ -505,6 +551,38 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         diagnosis: 'Malaria (P. falciparum)',
         complaint: 'Fever, chills, headache, joint pains',
         plan: 'Artemether-Lumefantrine 4 tabs BD × 3 days',
+      },
+    ],
+    medications: [
+      {
+        id: 'm1',
+        name: 'Ciprofloxacin',
+        dose: '500mg',
+        frequency: 'BD',
+        route: 'Oral',
+        startedDate: '2026-07-05',
+        prescribedBy: 'Dr. K. Nwosu',
+        status: 'active',
+      },
+      {
+        id: 'm2',
+        name: 'Metronidazole',
+        dose: '400mg',
+        frequency: 'TDS',
+        route: 'Oral',
+        startedDate: '2026-04-03',
+        prescribedBy: 'Dr. A. Chukwu',
+        status: 'completed',
+      },
+      {
+        id: 'm3',
+        name: 'Artemether-Lumefantrine',
+        dose: '80/480mg',
+        frequency: 'BD',
+        route: 'Oral',
+        startedDate: '2025-02-14',
+        prescribedBy: 'Dr. E. Obi',
+        status: 'completed',
       },
     ],
   },
@@ -612,6 +690,38 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         plan: 'Mefenamic acid 500mg TDS PRN, heat pad, review in 2 weeks',
       },
     ],
+    medications: [
+      {
+        id: 'm1',
+        name: 'Chlorphenamine',
+        dose: '4mg',
+        frequency: 'TDS',
+        route: 'Oral',
+        startedDate: '2026-05-21',
+        prescribedBy: 'Dr. A. Chukwu',
+        status: 'active',
+      },
+      {
+        id: 'm2',
+        name: 'Hydrocortisone Cream 1%',
+        dose: 'Apply thinly',
+        frequency: 'BD',
+        route: 'Topical',
+        startedDate: '2026-05-21',
+        prescribedBy: 'Dr. A. Chukwu',
+        status: 'active',
+      },
+      {
+        id: 'm3',
+        name: 'Amoxicillin',
+        dose: '500mg',
+        frequency: 'TDS',
+        route: 'Oral',
+        startedDate: '2025-11-10',
+        prescribedBy: 'Dr. E. Obi',
+        status: 'completed',
+      },
+    ],
   },
 };
 
@@ -646,4 +756,5 @@ export const FALLBACK_PATIENT_DETAIL: PatientDetailMock = {
     readings: [],
   },
   consultations: [],
+  medications: [],
 };
