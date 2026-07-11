@@ -2758,30 +2758,29 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         </div>
 
                         {/* ── Card body ─────────────────────────────────── */}
-                        <div className="flex flex-col gap-1 px-4 py-3">
-                          {/* Pending placeholder */}
-                          {result.status === 'pending' && (
-                            <div
-                              className="flex items-center gap-2 rounded-[8px] p-2"
-                              style={{ background: '#E6F8FD' }}
+                        {result.status === 'pending' ? (
+                          /* Pending: flush edge-to-edge teal band */
+                          <div
+                            className="flex items-center gap-2 px-4 py-[10px]"
+                            style={{ background: '#E6F8FD' }}
+                          >
+                            <RefreshCw
+                              aria-hidden
+                              style={{ width: 16, height: 16, color: '#4A7080' }}
+                              className="shrink-0"
+                            />
+                            <span
+                              className="font-sans"
+                              style={{ fontSize: 16, lineHeight: '24px', color: '#4A7080' }}
                             >
-                              <RefreshCw
-                                aria-hidden
-                                style={{ width: 16, height: 16, color: '#4A7080' }}
-                                className="shrink-0"
-                              />
-                              <span
-                                className="font-sans"
-                                style={{ fontSize: 16, lineHeight: '24px', color: '#4A7080' }}
-                              >
-                                Awaiting laboratory result...
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Result rows */}
-                          {result.status !== 'pending' &&
-                            result.items.map((item, idx) => (
+                              Awaiting laboratory result...
+                            </span>
+                          </div>
+                        ) : (
+                          /* Verified / Critical: padded rows wrapper */
+                          <div className="flex flex-col gap-1 px-4 py-3">
+                            {/* Result rows */}
+                            {result.items.map((item, idx) => (
                               <div
                                 key={idx}
                                 className="grid grid-cols-3 items-center rounded-[8px] p-2"
@@ -2789,11 +2788,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                               >
                                 <span
                                   className="font-sans"
-                                  style={{
-                                    fontSize: 16,
-                                    lineHeight: '24px',
-                                    color: '#4A7080',
-                                  }}
+                                  style={{ fontSize: 16, lineHeight: '24px', color: '#4A7080' }}
                                 >
                                   {item.name}
                                 </span>
@@ -2810,51 +2805,41 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                                 </span>
                                 <span
                                   className="text-right font-sans"
-                                  style={{
-                                    fontSize: 16,
-                                    lineHeight: '24px',
-                                    color: '#4A7080',
-                                  }}
+                                  style={{ fontSize: 16, lineHeight: '24px', color: '#4A7080' }}
                                 >
                                   {item.refRange}
                                 </span>
                               </div>
                             ))}
 
-                          {/* Inline note row */}
-                          {result.inlineNote && (
-                            <div className="rounded-[8px] p-2" style={{ background: '#E6F8FD' }}>
-                              <span
-                                className="font-sans"
-                                style={{
-                                  fontSize: 16,
-                                  lineHeight: '24px',
-                                  color: '#4A7080',
-                                }}
-                              >
-                                {result.inlineNote}
-                              </span>
-                            </div>
-                          )}
+                            {/* Inline note row */}
+                            {result.inlineNote && (
+                              <div className="rounded-[8px] p-2" style={{ background: '#E6F8FD' }}>
+                                <span
+                                  className="font-sans"
+                                  style={{ fontSize: 16, lineHeight: '24px', color: '#4A7080' }}
+                                >
+                                  {result.inlineNote}
+                                </span>
+                              </div>
+                            )}
 
-                          {/* Critical footer */}
-                          {result.criticalNote && (
-                            <div
-                              className="mt-2 rounded-[8px] p-[10px]"
-                              style={{
-                                border: '1px solid #FCA5A5',
-                                background: '#FEF2F2',
-                              }}
-                            >
-                              <p
-                                className="font-sans"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#EF4444' }}
+                            {/* Critical footer */}
+                            {result.criticalNote && (
+                              <div
+                                className="mt-2 rounded-[8px] p-[10px]"
+                                style={{ border: '1px solid #FCA5A5', background: '#FEF2F2' }}
                               >
-                                {result.criticalNote}
-                              </p>
-                            </div>
-                          )}
-                        </div>
+                                <p
+                                  className="font-sans"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#EF4444' }}
+                                >
+                                  {result.criticalNote}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
