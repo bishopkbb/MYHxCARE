@@ -472,7 +472,7 @@ export default function EncountersPage() {
                   className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors hover:bg-[#E6F8FD]"
                   style={{ color: '#2F3A40' }}
                 >
-                  <FileText style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                  <FileText style={{ width: 16, height: 16, color: '#00B4D8' }} />
                   Export as CSV
                 </button>
                 <button
@@ -484,7 +484,7 @@ export default function EncountersPage() {
                   className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors hover:bg-[#E6F8FD]"
                   style={{ color: '#2F3A40' }}
                 >
-                  <Printer style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                  <Printer style={{ width: 16, height: 16, color: '#00B4D8' }} />
                   Export as PDF
                 </button>
               </div>
@@ -683,7 +683,7 @@ export default function EncountersPage() {
                     <div className="mt-1 flex items-center gap-1">
                       <AlertTriangle
                         className="shrink-0"
-                        style={{ width: 12, height: 12, color: '#F59E0B' }}
+                        style={{ width: 14, height: 14, color: '#F59E0B' }}
                       />
                       <p className="text-sm leading-5">
                         <span style={{ color: '#EF4444' }}>ALLERGY: </span>
@@ -705,7 +705,7 @@ export default function EncountersPage() {
                     <div className="flex items-center gap-1">
                       <Heart
                         className="shrink-0"
-                        style={{ width: 11, height: 11, fill: '#EF4444', stroke: 'none' }}
+                        style={{ width: 14, height: 14, fill: '#EF4444', stroke: 'none' }}
                       />
                       <span className="text-sm" style={{ color: '#25464D' }}>
                         {patient.hr} bpm
@@ -714,7 +714,7 @@ export default function EncountersPage() {
                     <div className="flex items-center gap-1">
                       <Thermometer
                         className="shrink-0"
-                        style={{ width: 11, height: 11, color: '#F59E0B' }}
+                        style={{ width: 14, height: 14, color: '#F59E0B' }}
                       />
                       <span className="text-sm" style={{ color: getTempColor(patient.temp) }}>
                         {patient.temp}°C
@@ -723,7 +723,7 @@ export default function EncountersPage() {
                     <div className="flex items-center gap-1">
                       <Activity
                         className="shrink-0"
-                        style={{ width: 11, height: 11, color: '#00B4D8' }}
+                        style={{ width: 14, height: 14, color: '#00B4D8' }}
                       />
                       <span className="text-sm" style={{ color: '#25464D' }}>
                         {patient.bp}
@@ -733,7 +733,7 @@ export default function EncountersPage() {
                   <div className="flex items-center gap-1">
                     <Clock
                       className="shrink-0"
-                      style={{ width: 11, height: 11, color: '#8A98A3' }}
+                      style={{ width: 14, height: 14, color: '#8A98A3' }}
                     />
                     <span
                       className="text-sm"
@@ -907,7 +907,7 @@ export default function EncountersPage() {
                         <div className="mt-1 flex items-center gap-1">
                           <AlertTriangle
                             className="shrink-0"
-                            style={{ width: 13, height: 13, color: '#F59E0B' }}
+                            style={{ width: 14, height: 14, color: '#F59E0B' }}
                           />
                           <p className="text-sm leading-5.5">
                             <span style={{ color: '#EF4444' }}>ALLERGY: </span>
@@ -922,7 +922,7 @@ export default function EncountersPage() {
                       <div className="flex items-center gap-1.5">
                         <Heart
                           className="shrink-0"
-                          style={{ width: 13, height: 13, fill: '#EF4444', stroke: 'none' }}
+                          style={{ width: 14, height: 14, fill: '#EF4444', stroke: 'none' }}
                         />
                         <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
                           {patient.hr} bpm
@@ -931,7 +931,7 @@ export default function EncountersPage() {
                       <div className="flex items-center gap-1.5">
                         <Thermometer
                           className="shrink-0"
-                          style={{ width: 13, height: 13, color: '#F59E0B' }}
+                          style={{ width: 14, height: 14, color: '#F59E0B' }}
                         />
                         <span
                           className="text-sm leading-5.5"
@@ -943,7 +943,7 @@ export default function EncountersPage() {
                       <div className="flex items-center gap-1.5">
                         <Activity
                           className="shrink-0"
-                          style={{ width: 13, height: 13, color: '#00B4D8' }}
+                          style={{ width: 14, height: 14, color: '#00B4D8' }}
                         />
                         <span className="text-sm leading-5.5" style={{ color: '#25464D' }}>
                           {patient.bp} mmHg

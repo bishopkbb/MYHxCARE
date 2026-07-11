@@ -379,7 +379,7 @@ export default function DashboardPage() {
             className="flex shrink-0 items-center gap-1.5 rounded-[8px] px-3 pt-1.5 pb-1.25"
             style={{ background: '#FEF2F2', border: '1px solid #EF4444' }}
           >
-            <Activity className="shrink-0" style={{ width: 12, height: 12, color: '#EF4444' }} />
+            <Activity className="shrink-0" style={{ width: 14, height: 14, color: '#EF4444' }} />
             <span className="text-sm leading-5.5 font-medium" style={{ color: '#EF4444' }}>
               {MOCK_EMERGENCY.count} Emergency Active
             </span>
@@ -418,7 +418,7 @@ export default function DashboardPage() {
             style={{ background: '#EF4444' }}
           >
             Open Record
-            <ArrowRight style={{ width: 12, height: 12 }} />
+            <ArrowRight style={{ width: 14, height: 14 }} />
           </button>
         </div>
       )}
@@ -703,7 +703,7 @@ export default function DashboardPage() {
               <span className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
                 View All
               </span>
-              <ChevronRight style={{ width: 12, height: 12, color: '#00B4D8' }} />
+              <ChevronRight style={{ width: 14, height: 14, color: '#00B4D8' }} />
             </button>
           </div>
 
@@ -754,7 +754,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Clock style={{ width: 9, height: 9, color: '#25464D' }} />
+                      <Clock style={{ width: 14, height: 14, color: '#25464D' }} />
                       <span className="text-sm leading-[22px]" style={{ color: '#25464D' }}>
                         {patient.waitTime ?? 'In progress'}
                       </span>
@@ -818,7 +818,7 @@ export default function DashboardPage() {
               <span className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
                 View All
               </span>
-              <ChevronRight style={{ width: 12, height: 12, color: '#00B4D8' }} />
+              <ChevronRight style={{ width: 14, height: 14, color: '#00B4D8' }} />
             </button>
           </div>
 

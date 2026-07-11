@@ -71,7 +71,7 @@ export function ActiveSessionsList() {
                   : 'text-muted-foreground hover:border-destructive hover:text-destructive border',
               )}
             >
-              <LogOut className="size-3.5" />
+              <LogOut className="size-4" />
               {isRevokingAll
                 ? 'Signing out…'
                 : confirmingAll

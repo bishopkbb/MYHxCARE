@@ -71,7 +71,7 @@ export function TrustedDevicesList() {
                   : 'text-muted-foreground hover:border-destructive hover:text-destructive border',
               )}
             >
-              <ShieldOff className="size-3.5" />
+              <ShieldOff className="size-4" />
               {isRevokingAll
                 ? 'Removing…'
                 : confirmingAll

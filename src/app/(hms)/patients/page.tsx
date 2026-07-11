@@ -569,7 +569,7 @@ export default function PatientsPage() {
                   className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors hover:bg-[#E6F8FD]"
                   style={{ color: '#2F3A40' }}
                 >
-                  <FileText style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                  <FileText style={{ width: 16, height: 16, color: '#00B4D8' }} />
                   Export as CSV
                 </button>
                 <button
@@ -581,7 +581,7 @@ export default function PatientsPage() {
                   className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors hover:bg-[#E6F8FD]"
                   style={{ color: '#2F3A40' }}
                 >
-                  <Printer style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                  <Printer style={{ width: 16, height: 16, color: '#00B4D8' }} />
                   Export as PDF
                 </button>
               </div>
@@ -675,7 +675,7 @@ export default function PatientsPage() {
             opacity: hasActiveQuickFilters ? 1 : 0.5,
           }}
         >
-          <ListFilter style={{ width: 13, height: 13, color: '#00B4D8' }} />
+          <ListFilter style={{ width: 16, height: 16, color: '#00B4D8' }} />
           <span className="text-sm leading-[22px] font-medium">Clear Filter</span>
         </button>
       </div>
@@ -807,7 +807,7 @@ export default function PatientsPage() {
                     <div className="mt-1 flex items-center gap-1">
                       <AlertTriangle
                         className="shrink-0"
-                        style={{ width: 12, height: 12, color: '#F59E0B' }}
+                        style={{ width: 14, height: 14, color: '#F59E0B' }}
                       />
                       <p className="text-sm leading-5">
                         <span style={{ color: '#EF4444' }}>ALLERGY: </span>
@@ -1014,7 +1014,7 @@ export default function PatientsPage() {
                         <div className="mt-1 flex items-center gap-1">
                           <AlertTriangle
                             className="shrink-0"
-                            style={{ width: 13, height: 13, color: '#F59E0B' }}
+                            style={{ width: 14, height: 14, color: '#F59E0B' }}
                           />
                           <p className="text-sm leading-5.5">
                             <span style={{ color: '#EF4444' }}>ALLERGY: </span>
