@@ -30,6 +30,7 @@ import { use, useEffect, useRef, useState } from 'react';
 import { AllergyBanner } from '@/components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
+import { useToast } from '@/hooks/useToast';
 import {
   FALLBACK_PATIENT_DETAIL,
   MOCK_PATIENT_DETAILS,
@@ -142,6 +143,7 @@ const LAB_STATUS_CONFIG: Record<'critical' | 'verified' | 'pending', LabStatusCf
 
 export default function PatientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const toast = useToast();
   const { id } = use(params);
   const patient = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
   const [activeTab, setActiveTab] = useState('biodata');
@@ -633,6 +635,12 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                 {/* DM Sans SemiBold 16/24 #0D2630 — matches outlined button style */}
                 <button
                   type="button"
+                  onClick={() =>
+                    toast.info(
+                      'Coming soon',
+                      'Prescription writing will be available in a future update.',
+                    )
+                  }
                   className="flex flex-1 items-center justify-center gap-2 rounded-[12px] px-4 font-semibold whitespace-nowrap transition-colors hover:bg-[#E6F8FD] sm:flex-none"
                   style={{
                     fontFamily: 'inherit',
@@ -656,6 +664,9 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                 {/* DM Sans SemiBold 16/24 #0D2630 */}
                 <button
                   type="button"
+                  onClick={() =>
+                    toast.info('Coming soon', 'Lab requests will be available in a future update.')
+                  }
                   className="flex flex-1 items-center justify-center gap-2 rounded-[12px] px-4 font-semibold whitespace-nowrap transition-colors hover:bg-[#E6F8FD] sm:flex-none"
                   style={{
                     fontFamily: 'inherit',

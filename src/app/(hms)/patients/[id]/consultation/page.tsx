@@ -14,6 +14,7 @@ import type { LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use, useState } from 'react';
 
+import { useToast } from '@/hooks/useToast';
 import {
   FALLBACK_PATIENT_DETAIL,
   MOCK_PATIENT_DETAILS,
@@ -119,6 +120,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
   const { id } = use(params);
   const patient = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
 
+  const toast = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [form, setForm] = useState<ConsultationForm>(INITIAL_FORM);
 
@@ -906,6 +908,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
             >
               <button
                 type="button"
+                onClick={() => toast.success('Draft saved', 'Your progress has been saved.')}
                 className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-slate-50"
                 style={{
                   fontSize: 16,
@@ -920,6 +923,9 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
               <button
                 type="button"
+                onClick={() =>
+                  toast.warning('Patient referred', 'Referral submitted for specialist review.')
+                }
                 className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-amber-50"
                 style={{
                   fontSize: 16,
@@ -934,6 +940,10 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
               <button
                 type="button"
+                onClick={() => {
+                  toast.success('Consultation complete', 'The encounter record has been saved.');
+                  router.back();
+                }}
                 className="rounded-[12px] px-5 font-sans font-semibold text-white transition-opacity hover:opacity-90"
                 style={{
                   fontSize: 16,

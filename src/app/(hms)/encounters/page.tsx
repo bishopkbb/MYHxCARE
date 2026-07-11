@@ -20,6 +20,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { MOCK_QUEUE, type PatientStatus } from '@/features/encounters/__mocks__/encounterFixtures';
+import { useToast } from '@/hooks/useToast';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -223,6 +224,7 @@ function getTabCount(tabId: string): number {
 
 export default function EncountersPage() {
   const router = useRouter();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('all');
   const [search, setSearch] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
@@ -318,9 +320,13 @@ export default function EncountersPage() {
     a.download = `patient-queue-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    toast.success('Export ready', `${filteredQueue.length} queue records downloaded as CSV.`);
   };
 
-  const exportPDF = () => window.print();
+  const exportPDF = () => {
+    toast.info('Opening print view', 'Use your browser print dialog to save as PDF.');
+    window.print();
+  };
 
   return (
     <div className="px-4 pt-6 pb-24 sm:px-6 lg:px-12 lg:pt-10">

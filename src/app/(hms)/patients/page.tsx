@@ -23,6 +23,7 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
+import { useToast } from '@/hooks/useToast';
 import {
   MOCK_PATIENTS,
   PATIENT_STAT_CARDS,
@@ -249,6 +250,7 @@ const COLS = [
 
 export default function PatientsPage() {
   const router = useRouter();
+  const toast = useToast();
   const [search, setSearch] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -354,9 +356,13 @@ export default function PatientsPage() {
     a.download = `patients-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    toast.success('Export ready', `${filteredPatients.length} patient records downloaded as CSV.`);
   };
 
-  const exportPDF = () => window.print();
+  const exportPDF = () => {
+    toast.info('Opening print view', 'Use your browser print dialog to save as PDF.');
+    window.print();
+  };
 
   function setQuickFilter(key: keyof QuickFilters, value: string) {
     setQuickFilters((prev) => ({ ...prev, [key]: value }));
@@ -1108,6 +1114,33 @@ export default function PatientsPage() {
                                     setActionMenuId(null);
                                     if (action.key === 'view')
                                       router.push(`/patients/${patient.id}`);
+                                    else if (action.key === 'consult')
+                                      router.push(`/patients/${patient.id}/consultation`);
+                                    else if (action.key === 'note')
+                                      toast.info(
+                                        'Coming soon',
+                                        'Clinical notes will be available in a future update.',
+                                      );
+                                    else if (action.key === 'lab')
+                                      toast.info(
+                                        'Coming soon',
+                                        'Lab requests will be available in a future update.',
+                                      );
+                                    else if (action.key === 'rx')
+                                      toast.info(
+                                        'Coming soon',
+                                        'Prescription writing will be available in a future update.',
+                                      );
+                                    else if (action.key === 'refer')
+                                      toast.info(
+                                        'Coming soon',
+                                        'Patient referrals will be available in a future update.',
+                                      );
+                                    else if (action.key === 'discharge')
+                                      toast.warning(
+                                        'Coming soon',
+                                        'Patient discharge will be available in a future update.',
+                                      );
                                   }}
                                   className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-3 text-sm leading-5.5 transition-colors hover:bg-[#E6F8FD]"
                                   style={{ color: action.danger ? '#EF4444' : '#2F3A40' }}
