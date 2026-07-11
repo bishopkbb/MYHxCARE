@@ -43,16 +43,16 @@ export function AllergyBanner({ allergies, className }: AllergyBannerProps) {
       )}
     >
       {/* ── Header row ─────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {hasCritical ? (
           <ShieldAlert className="size-5 shrink-0" aria-hidden />
         ) : (
           <AlertTriangle className="size-5 shrink-0" aria-hidden />
         )}
-        <span className="text-sm font-bold tracking-wider uppercase">
+        <span className="min-w-0 flex-1 text-sm font-bold tracking-wider uppercase">
           {hasCritical ? 'Critical Allergy Alert' : 'Allergy Alert'}
         </span>
-        <span className="ml-auto text-sm opacity-60">
+        <span className="shrink-0 text-sm opacity-60">
           {allergies.length} {allergies.length === 1 ? 'allergy' : 'allergies'} on record
         </span>
       </div>
@@ -63,18 +63,20 @@ export function AllergyBanner({ allergies, className }: AllergyBannerProps) {
       {/* ── Allergy rows ───────────────────────────────────────────────── */}
       <div className="mt-2 space-y-2">
         {allergies.map((allergy) => (
-          <div key={allergy.id} className="flex items-baseline gap-4">
-            {/* Substance — 16px SemiBold; min-width keeps reactions aligned */}
-            <span className="min-w-[130px] shrink-0 text-base leading-snug font-semibold">
-              {allergy.substance}
-            </span>
+          <div
+            key={allergy.id}
+            className="grid items-baseline gap-x-4 gap-y-0"
+            style={{ gridTemplateColumns: 'auto 1fr auto' }}
+          >
+            {/* Substance */}
+            <span className="text-base leading-snug font-semibold">{allergy.substance}</span>
 
-            {/* Reaction — 14px */}
-            <span className="flex-1 text-sm leading-snug opacity-85">{allergy.reaction}</span>
+            {/* Reaction — 14px; min-w-0 lets it shrink within the 1fr column */}
+            <span className="min-w-0 text-sm leading-snug opacity-85">{allergy.reaction}</span>
 
-            {/* Severity badge — larger padding + text */}
+            {/* Severity badge */}
             <span
-              className="shrink-0 rounded px-2.5 py-1 text-sm leading-none font-bold tracking-wide uppercase"
+              className="rounded px-2.5 py-1 text-sm leading-none font-bold tracking-wide uppercase"
               style={SEVERITY_BADGE[allergy.severity]}
             >
               {SEVERITY_LABEL[allergy.severity]}

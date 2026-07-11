@@ -439,8 +439,8 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                 </span>
               )}
 
-              {/* Row 3+: info grid */}
-              <div className="mt-3 grid grid-cols-2 gap-x-10 gap-y-1.5">
+              {/* Row 3+: info strip */}
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-0.5">
                 {/* Labels: DM Sans Regular 14/22 #4A7080 */}
                 <p
                   className="font-normal"
@@ -468,7 +468,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   BG: {patient.bloodGroup}
                 </p>
                 <p
-                  className="col-span-2 font-normal"
+                  className="w-full font-normal"
                   style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
                 >
                   {patient.faculty} · {patient.level} · {patient.fileNumber}
@@ -735,7 +735,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                             {label}
                           </dt>
                           <dd
-                            className="m-0 text-right font-normal"
+                            className="m-0 min-w-0 text-right font-normal break-all"
                             style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                           >
                             {value}
@@ -776,7 +776,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                             {label}
                           </dt>
                           <dd
-                            className="m-0 text-right font-normal"
+                            className="m-0 min-w-0 text-right font-normal break-all"
                             style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                           >
                             {value}
@@ -1802,9 +1802,9 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   >
                     <div className="flex items-center gap-3">
                       <div className="size-5 shrink-0 rounded-sm bg-slate-200" />
-                      <div className="flex-1">
-                        <div className="h-[18px] w-52 rounded-sm bg-slate-200" />
-                        <div className="mt-1.5 h-3.5 w-80 rounded-sm bg-slate-100" />
+                      <div className="min-w-0 flex-1">
+                        <div className="h-[18px] w-52 max-w-full rounded-sm bg-slate-200" />
+                        <div className="mt-1.5 h-3.5 w-80 max-w-full rounded-sm bg-slate-100" />
                       </div>
                     </div>
                   </div>
@@ -1816,9 +1816,9 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                       style={{ border: '2px solid rgba(255,162,162,0.25)' }}
                     >
                       <div className="size-10 shrink-0 rounded-full bg-slate-100" />
-                      <div className="flex-1">
-                        <div className="h-[18px] w-24 rounded-sm bg-slate-200" />
-                        <div className="mt-1.5 h-3.5 w-44 rounded-sm bg-slate-100" />
+                      <div className="min-w-0 flex-1">
+                        <div className="h-[18px] w-24 max-w-full rounded-sm bg-slate-200" />
+                        <div className="mt-1.5 h-3.5 w-44 max-w-full rounded-sm bg-slate-100" />
                       </div>
                       <div className="h-8 w-[86px] shrink-0 rounded-full bg-slate-100" />
                     </div>
@@ -1953,7 +1953,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                           </div>
 
                           {/* Substance + subtitle */}
-                          <div className="flex-1">
+                          <div className="min-w-0 flex-1">
                             <p
                               className="leading-6 font-semibold"
                               style={{ fontSize: 16, color: '#0D2630' }}
@@ -2010,8 +2010,8 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         className="animate-pulse rounded-[12px] bg-white"
                         style={{
                           height: 120,
-                          border: '1px solid rgba(37,70,77,0.1)',
-                          borderLeft: '3px solid rgba(37,70,77,0.15)',
+                          border: '2px solid rgba(37,70,77,0.1)',
+                          borderLeft: '4px solid rgba(37,70,77,0.15)',
                         }}
                       >
                         <div className="flex h-full flex-col justify-between p-5">
@@ -2092,7 +2092,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               {vitalsStatus === 'loaded' && (
                 <div className="flex flex-col gap-6">
                   {/* Header */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
                     <p
                       className="font-sans font-semibold"
                       style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
@@ -2123,8 +2123,8 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                           className="flex flex-col justify-between rounded-[12px] bg-white p-5"
                           style={{
                             height: 120,
-                            border: `1px solid ${config.thinBorderColor}`,
-                            borderLeft: `3px solid ${config.accentColor}`,
+                            border: `2px solid ${config.thinBorderColor}`,
+                            borderLeft: `4px solid ${config.accentColor}`,
                           }}
                         >
                           {/* Icon row */}
