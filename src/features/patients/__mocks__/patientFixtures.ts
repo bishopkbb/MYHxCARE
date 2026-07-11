@@ -290,6 +290,26 @@ export type Medication = {
   status: MedicationStatus;
 };
 
+export type LabResultStatus = 'critical' | 'verified' | 'pending';
+
+export type LabResultItem = {
+  name: string;
+  value: string;
+  flag: 'H' | 'L' | 'A' | null; // High / Low / Abnormal
+  refRange: string;
+  isAbnormal: boolean;
+};
+
+export type LabResult = {
+  id: string;
+  testName: string;
+  status: LabResultStatus;
+  orderedAt: string; // "Jun 30, 2026 09:30 AM"
+  items: LabResultItem[];
+  inlineNote: string | null; // teal row note below results
+  criticalNote: string | null; // red footer box
+};
+
 // ── Patient detail view ───────────────────────────────────────────────────────
 
 export type PatientDetailMock = {
@@ -314,6 +334,7 @@ export type PatientDetailMock = {
   vitalSigns: VitalSignsRecord;
   consultations: Consultation[];
   medications: Medication[];
+  labResults: LabResult[];
 };
 
 export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
@@ -470,6 +491,53 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         status: 'completed',
       },
     ],
+    labResults: [
+      {
+        id: 'lr1',
+        testName: 'Full Blood Count (FBC)',
+        status: 'critical',
+        orderedAt: 'Jun 30, 2026 09:30 AM',
+        items: [
+          { name: 'WBC', value: '18.4 ×10³/μL', flag: 'H', refRange: '4.5–11.0', isAbnormal: true },
+          { name: 'Neutrophils', value: '85%', flag: 'H', refRange: '40–70', isAbnormal: true },
+          { name: 'Lymphocytes', value: '10%', flag: 'L', refRange: '20–40', isAbnormal: true },
+          {
+            name: 'Haemoglobin',
+            value: '9.2 g/dL',
+            flag: 'L',
+            refRange: '12.0–16.0',
+            isAbnormal: true,
+          },
+          {
+            name: 'Platelets',
+            value: '380 ×10³/μL',
+            flag: null,
+            refRange: '150–400',
+            isAbnormal: false,
+          },
+        ],
+        inlineNote: null,
+        criticalNote:
+          'CRITICAL: Elevated WBC with neutrophilia. Anaemia present. Urgent review required.',
+      },
+      {
+        id: 'lr2',
+        testName: 'Malaria Rapid Diagnostic Test (RDT)',
+        status: 'verified',
+        orderedAt: 'Jun 28, 2026 02:15 PM',
+        items: [
+          {
+            name: 'P. falciparum antigen',
+            value: 'Negative',
+            flag: null,
+            refRange: 'Negative',
+            isAbnormal: false,
+          },
+        ],
+        inlineNote: 'Malaria ruled out. Investigate other causes of fever.',
+        criticalNote: null,
+      },
+    ],
   },
   p2: {
     id: 'p2',
@@ -583,6 +651,54 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         startedDate: '2025-02-14',
         prescribedBy: 'Dr. E. Obi',
         status: 'completed',
+      },
+    ],
+    labResults: [
+      {
+        id: 'lr1',
+        testName: 'Widal Test',
+        status: 'verified',
+        orderedAt: 'Jul 05, 2026 08:00 AM',
+        items: [
+          { name: 'S. typhi O', value: '1:160', flag: 'A', refRange: '< 1:80', isAbnormal: true },
+          { name: 'S. typhi H', value: '1:80', flag: 'A', refRange: '< 1:80', isAbnormal: true },
+        ],
+        inlineNote: 'Significant titre for Typhoid Fever. Correlate with clinical findings.',
+        criticalNote: null,
+      },
+      {
+        id: 'lr2',
+        testName: 'Full Blood Count (FBC)',
+        status: 'verified',
+        orderedAt: 'Jul 05, 2026 08:15 AM',
+        items: [
+          { name: 'WBC', value: '3.2 ×10³/μL', flag: 'L', refRange: '4.5–11.0', isAbnormal: true },
+          {
+            name: 'Haemoglobin',
+            value: '11.1 g/dL',
+            flag: 'L',
+            refRange: '13.0–17.0',
+            isAbnormal: true,
+          },
+          {
+            name: 'Platelets',
+            value: '95 ×10³/μL',
+            flag: 'L',
+            refRange: '150–400',
+            isAbnormal: true,
+          },
+        ],
+        inlineNote: null,
+        criticalNote: null,
+      },
+      {
+        id: 'lr3',
+        testName: 'Urinalysis (Routine)',
+        status: 'pending',
+        orderedAt: 'Jul 06, 2026 09:00 AM',
+        items: [],
+        inlineNote: null,
+        criticalNote: null,
       },
     ],
   },
@@ -722,6 +838,43 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         status: 'completed',
       },
     ],
+    labResults: [
+      {
+        id: 'lr1',
+        testName: 'Malaria Rapid Diagnostic Test (RDT)',
+        status: 'verified',
+        orderedAt: 'Jun 28, 2026 02:15 PM',
+        items: [
+          {
+            name: 'P. falciparum antigen',
+            value: 'Positive',
+            flag: 'A',
+            refRange: 'Negative',
+            isAbnormal: true,
+          },
+        ],
+        inlineNote: 'Positive result. Treatment completed.',
+        criticalNote: null,
+      },
+      {
+        id: 'lr2',
+        testName: 'Chest X-Ray (PA view)',
+        status: 'pending',
+        orderedAt: 'Jun 30, 2026 10:42 AM',
+        items: [],
+        inlineNote: null,
+        criticalNote: null,
+      },
+      {
+        id: 'lr3',
+        testName: 'Urinalysis (Routine)',
+        status: 'pending',
+        orderedAt: 'Jun 30, 2026 09:58 AM',
+        items: [],
+        inlineNote: null,
+        criticalNote: null,
+      },
+    ],
   },
 };
 
@@ -757,4 +910,5 @@ export const FALLBACK_PATIENT_DETAIL: PatientDetailMock = {
   },
   consultations: [],
   medications: [],
+  labResults: [],
 };

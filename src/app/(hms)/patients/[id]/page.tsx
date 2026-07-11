@@ -94,6 +94,50 @@ const VITAL_CARD_CONFIG: Record<string, VitalCardConfig> = {
   bmi: { label: 'BMI', icon: Users, accentColor: '#00B4D8' },
 };
 
+type LabStatusCfg = {
+  cardBorder: string;
+  headerBg: string;
+  headerDivider: string;
+  pillBg: string;
+  pillBorder: string;
+  pillText: string;
+  pillLabel: string;
+  iconColor: string;
+};
+
+const LAB_STATUS_CONFIG: Record<'critical' | 'verified' | 'pending', LabStatusCfg> = {
+  critical: {
+    cardBorder: '#FFC9C9',
+    headerBg: '#FEF2F2',
+    headerDivider: '#FFC9C9',
+    pillBg: '#FFE2E2',
+    pillBorder: '#FFA2A2',
+    pillText: '#EF4444',
+    pillLabel: 'CRITICAL',
+    iconColor: '#EF4444',
+  },
+  verified: {
+    cardBorder: 'rgba(0,100,130,0.2)',
+    headerBg: 'rgba(0,100,130,0.06)',
+    headerDivider: 'rgba(0,100,130,0.15)',
+    pillBg: 'rgba(34,197,94,0.10)',
+    pillBorder: '#22C55E',
+    pillText: '#15803D',
+    pillLabel: 'VERIFIED',
+    iconColor: '#00B4D8',
+  },
+  pending: {
+    cardBorder: 'rgba(245,158,11,0.35)',
+    headerBg: 'rgba(245,158,11,0.08)',
+    headerDivider: 'rgba(245,158,11,0.30)',
+    pillBg: 'rgba(245,158,11,0.10)',
+    pillBorder: '#F59E0B',
+    pillText: '#D97706',
+    pillLabel: 'PENDING',
+    iconColor: '#F59E0B',
+  },
+};
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function PatientDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -262,6 +306,30 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
     setTimeout(() => {
       medicationsLoadedRef.current = true;
       setMedicationsStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+  }
+
+  // ── Lab Results fetch simulation ──────────────────────────────────────────────
+  type LabResultsStatus = 'loading' | 'loaded' | 'empty' | 'error';
+  const [labResultsStatus, setLabResultsStatus] = useState<LabResultsStatus>('loading');
+  const labResultsLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (activeTab !== 'lab-results') return;
+    if (labResultsLoadedRef.current) return;
+    const t = setTimeout(() => {
+      labResultsLoadedRef.current = true;
+      setLabResultsStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+    return () => clearTimeout(t);
+  }, [activeTab, patient.id]);
+
+  function retryLabResults() {
+    labResultsLoadedRef.current = false;
+    setLabResultsStatus('loading');
+    setTimeout(() => {
+      labResultsLoadedRef.current = true;
+      setLabResultsStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
     }, 900);
   }
 
@@ -2542,12 +2610,266 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
             </>
           )}
 
+          {/* ── Lab Results tab ────────────────────────────────────────── */}
+          {activeTab === 'lab-results' && (
+            <>
+              {/* ── Loading skeleton ──────────────────────────────────────── */}
+              {labResultsStatus === 'loading' && (
+                <div className="flex flex-col gap-4">
+                  {Array.from({ length: 2 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="animate-pulse overflow-hidden rounded-[12px]"
+                      style={{ border: '1px solid rgba(0,100,130,0.15)' }}
+                    >
+                      {/* Header shim */}
+                      <div
+                        className="flex items-center justify-between px-4 py-[10px]"
+                        style={{
+                          background: 'rgba(0,100,130,0.04)',
+                          borderBottom: '1px solid rgba(0,100,130,0.10)',
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="size-[18px] rounded-sm bg-slate-200" />
+                          <div className="h-7 w-48 rounded-md bg-slate-200" />
+                          <div className="h-7 w-20 rounded-full bg-slate-100" />
+                        </div>
+                        <div className="h-5 w-36 rounded-sm bg-slate-100" />
+                      </div>
+                      {/* Row shims */}
+                      <div className="flex flex-col gap-1 px-4 py-3">
+                        {Array.from({ length: 3 }).map((_, j) => (
+                          <div key={j} className="h-10 rounded-[8px] bg-slate-100" />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ── Error state ───────────────────────────────────────────── */}
+              {labResultsStatus === 'error' && (
+                <div
+                  className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
+                  style={{
+                    background: 'rgba(239,68,68,0.04)',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(239,68,68,0.08)' }}
+                  >
+                    <AlertTriangle
+                      aria-hidden
+                      style={{ width: 24, height: 24, color: '#EF4444' }}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                      Failed to load lab results
+                    </p>
+                    <p className="mt-1" style={{ fontSize: 14, color: '#4A7080' }}>
+                      Check your connection and try again.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={retryLabResults}
+                    className="rounded-[8px] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{ background: '#0D2630' }}
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {/* ── Empty state ───────────────────────────────────────────── */}
+              {labResultsStatus === 'empty' && (
+                <div
+                  className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
+                  style={{
+                    background: 'rgba(226,237,241,0.25)',
+                    border: '1px solid rgba(0,180,216,0.15)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(0,180,216,0.08)' }}
+                  >
+                    <FlaskConical aria-hidden style={{ width: 24, height: 24, color: '#00B4D8' }} />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                      No lab results on record
+                    </p>
+                    <p className="mt-1" style={{ fontSize: 14, color: '#4A7080' }}>
+                      Ordered investigations will appear here once processed by the laboratory.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Loaded ────────────────────────────────────────────────── */}
+              {labResultsStatus === 'loaded' && (
+                <div className="flex flex-col gap-4">
+                  {patient.labResults.map((result) => {
+                    const cfg = LAB_STATUS_CONFIG[result.status];
+                    return (
+                      <div
+                        key={result.id}
+                        className="overflow-hidden rounded-[12px]"
+                        style={{ border: `1px solid ${cfg.cardBorder}` }}
+                      >
+                        {/* ── Card header ───────────────────────────────── */}
+                        <div
+                          className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 px-4 py-[10px]"
+                          style={{
+                            background: cfg.headerBg,
+                            borderBottom: `1px solid ${cfg.headerDivider}`,
+                          }}
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <FlaskConical
+                              aria-hidden
+                              style={{ width: 18, height: 18, color: cfg.iconColor }}
+                            />
+                            <span
+                              className="font-display font-semibold"
+                              style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                            >
+                              {result.testName}
+                            </span>
+                            <span
+                              className="rounded-full px-2 py-0.5 font-sans text-sm font-semibold"
+                              style={{
+                                background: cfg.pillBg,
+                                border: `1px solid ${cfg.pillBorder}`,
+                                color: cfg.pillText,
+                              }}
+                            >
+                              {cfg.pillLabel}
+                            </span>
+                          </div>
+                          <span className="font-sans text-sm" style={{ color: '#4A7080' }}>
+                            {result.orderedAt}
+                          </span>
+                        </div>
+
+                        {/* ── Card body ─────────────────────────────────── */}
+                        <div className="flex flex-col gap-1 px-4 py-3">
+                          {/* Pending placeholder */}
+                          {result.status === 'pending' && (
+                            <div
+                              className="flex items-center gap-2 rounded-[8px] p-2"
+                              style={{ background: '#E6F8FD' }}
+                            >
+                              <RefreshCw
+                                aria-hidden
+                                style={{ width: 16, height: 16, color: '#4A7080' }}
+                                className="shrink-0"
+                              />
+                              <span
+                                className="font-sans"
+                                style={{ fontSize: 16, lineHeight: '24px', color: '#4A7080' }}
+                              >
+                                Awaiting laboratory result...
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Result rows */}
+                          {result.status !== 'pending' &&
+                            result.items.map((item, idx) => (
+                              <div
+                                key={idx}
+                                className="grid grid-cols-3 items-center rounded-[8px] p-2"
+                                style={{ background: '#E6F8FD' }}
+                              >
+                                <span
+                                  className="font-sans"
+                                  style={{
+                                    fontSize: 16,
+                                    lineHeight: '24px',
+                                    color: '#4A7080',
+                                  }}
+                                >
+                                  {item.name}
+                                </span>
+                                <span
+                                  className="text-center font-sans"
+                                  style={{
+                                    fontSize: 16,
+                                    lineHeight: '24px',
+                                    color: item.isAbnormal ? '#EF4444' : '#0D2630',
+                                  }}
+                                >
+                                  {item.value}
+                                  {item.flag ? ` [${item.flag}]` : ''}
+                                </span>
+                                <span
+                                  className="text-right font-sans"
+                                  style={{
+                                    fontSize: 16,
+                                    lineHeight: '24px',
+                                    color: '#4A7080',
+                                  }}
+                                >
+                                  {item.refRange}
+                                </span>
+                              </div>
+                            ))}
+
+                          {/* Inline note row */}
+                          {result.inlineNote && (
+                            <div className="rounded-[8px] p-2" style={{ background: '#E6F8FD' }}>
+                              <span
+                                className="font-sans"
+                                style={{
+                                  fontSize: 16,
+                                  lineHeight: '24px',
+                                  color: '#4A7080',
+                                }}
+                              >
+                                {result.inlineNote}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Critical footer */}
+                          {result.criticalNote && (
+                            <div
+                              className="mt-2 rounded-[8px] p-[10px]"
+                              style={{
+                                border: '1px solid #FCA5A5',
+                                background: '#FEF2F2',
+                              }}
+                            >
+                              <p
+                                className="font-sans"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#EF4444' }}
+                              >
+                                {result.criticalNote}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
           {activeTab !== 'biodata' &&
             activeTab !== 'medical-history' &&
             activeTab !== 'allergies' &&
             activeTab !== 'vital-signs' &&
             activeTab !== 'prev-consultations' &&
-            activeTab !== 'current-medications' && (
+            activeTab !== 'current-medications' &&
+            activeTab !== 'lab-results' && (
               <div
                 className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-[12px]"
                 style={{ background: 'rgba(226,237,241,0.25)' }}
