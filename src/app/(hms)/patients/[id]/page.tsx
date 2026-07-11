@@ -128,9 +128,9 @@ const LAB_STATUS_CONFIG: Record<'critical' | 'verified' | 'pending', LabStatusCf
   },
   pending: {
     cardBorder: 'rgba(245,158,11,0.35)',
-    headerBg: 'rgba(245,158,11,0.08)',
-    headerDivider: 'rgba(245,158,11,0.30)',
-    pillBg: 'rgba(245,158,11,0.10)',
+    headerBg: '#FFFBEB80',
+    headerDivider: '#FEF3C6',
+    pillBg: '#FEF3C6',
     pillBorder: '#F59E0B',
     pillText: '#D97706',
     pillLabel: 'PENDING',
@@ -2766,12 +2766,12 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                           >
                             <RefreshCw
                               aria-hidden
-                              style={{ width: 16, height: 16, color: '#4A7080' }}
+                              style={{ width: 18, height: 18, color: '#4A7080' }}
                               className="shrink-0"
                             />
                             <span
                               className="font-sans"
-                              style={{ fontSize: 16, lineHeight: '24px', color: '#4A7080' }}
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
                             >
                               Awaiting laboratory result...
                             </span>
