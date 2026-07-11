@@ -217,6 +217,30 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
     }, 900);
   }
 
+  // ── Previous Consultations fetch simulation ───────────────────────────────────
+  type ConsultationsStatus = 'loading' | 'loaded' | 'empty' | 'error';
+  const [consultationsStatus, setConsultationsStatus] = useState<ConsultationsStatus>('loading');
+  const consultationsLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (activeTab !== 'prev-consultations') return;
+    if (consultationsLoadedRef.current) return;
+    const t = setTimeout(() => {
+      consultationsLoadedRef.current = true;
+      setConsultationsStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+    return () => clearTimeout(t);
+  }, [activeTab, patient.id]);
+
+  function retryConsultations() {
+    consultationsLoadedRef.current = false;
+    setConsultationsStatus('loading');
+    setTimeout(() => {
+      consultationsLoadedRef.current = true;
+      setConsultationsStatus(patient.id === 'unknown' ? 'empty' : 'loaded');
+    }, 900);
+  }
+
   const queueBadge = QUEUE_BADGE[patient.queueStatus] ?? FALLBACK_BADGE;
 
   return (
@@ -2177,10 +2201,174 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               )}
             </>
           )}
+          {/* ── Previous Consultations tab ─────────────────────────────── */}
+          {activeTab === 'prev-consultations' && (
+            <>
+              {/* ── Loading skeleton ──────────────────────────────────────── */}
+              {consultationsStatus === 'loading' && (
+                <div className="flex flex-col gap-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="animate-pulse rounded-[12px] bg-white p-4"
+                      style={{ border: '1px solid rgba(0,100,130,0.12)' }}
+                    >
+                      {/* Header shims */}
+                      <div className="flex items-center justify-between pb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="size-[18px] rounded-sm bg-slate-200" />
+                          <div className="h-6 w-28 rounded-md bg-slate-200" />
+                        </div>
+                        <div className="h-6 w-24 rounded-md bg-slate-100" />
+                      </div>
+                      {/* Pill shim */}
+                      <div className="mb-2 h-6 w-48 rounded-full bg-slate-100" />
+                      {/* Text line shims */}
+                      <div className="mb-1.5 h-[22px] w-3/4 rounded-sm bg-slate-100" />
+                      <div className="h-[22px] w-2/3 rounded-sm bg-slate-100" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ── Error state ───────────────────────────────────────────── */}
+              {consultationsStatus === 'error' && (
+                <div
+                  className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
+                  style={{
+                    background: 'rgba(239,68,68,0.04)',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(239,68,68,0.08)' }}
+                  >
+                    <AlertTriangle
+                      aria-hidden
+                      style={{ width: 24, height: 24, color: '#EF4444' }}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                      Failed to load consultations
+                    </p>
+                    <p className="mt-1" style={{ fontSize: 14, color: '#4A7080' }}>
+                      Check your connection and try again.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={retryConsultations}
+                    className="rounded-[8px] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{ background: '#0D2630' }}
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {/* ── Empty state ───────────────────────────────────────────── */}
+              {consultationsStatus === 'empty' && (
+                <div
+                  className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
+                  style={{
+                    background: 'rgba(226,237,241,0.25)',
+                    border: '1px solid rgba(0,180,216,0.15)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(0,180,216,0.08)' }}
+                  >
+                    <Stethoscope aria-hidden style={{ width: 24, height: 24, color: '#00B4D8' }} />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                      No previous consultations
+                    </p>
+                    <p className="mt-1" style={{ fontSize: 14, color: '#4A7080' }}>
+                      Past visit records will appear here once a consultation is completed.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Loaded ────────────────────────────────────────────────── */}
+              {consultationsStatus === 'loaded' && (
+                <div className="flex flex-col gap-4">
+                  {patient.consultations.map((consultation) => (
+                    <div
+                      key={consultation.id}
+                      className="rounded-[12px] bg-white p-4"
+                      style={{ border: '1px solid rgba(0,100,130,0.12)' }}
+                    >
+                      {/* Header row: date + doctor */}
+                      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-0.5 pb-2">
+                        <div className="flex items-center gap-2">
+                          <Stethoscope
+                            aria-hidden
+                            style={{ width: 18, height: 18, color: '#00B4D8' }}
+                          />
+                          <span
+                            className="font-sans font-semibold"
+                            style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                          >
+                            {consultation.date}
+                          </span>
+                        </div>
+                        <span
+                          className="font-sans"
+                          style={{ fontSize: 16, lineHeight: '24px', color: '#4A7080' }}
+                        >
+                          {consultation.doctor}
+                        </span>
+                      </div>
+
+                      {/* Diagnosis pill */}
+                      <div className="mb-2">
+                        <span
+                          className="inline-block rounded-full px-3 py-0.5 font-sans font-semibold"
+                          style={{
+                            fontSize: 16,
+                            lineHeight: '24px',
+                            background: '#00B4D81A',
+                            color: '#00B4D8',
+                          }}
+                        >
+                          {consultation.diagnosis}
+                        </span>
+                      </div>
+
+                      {/* Complaint */}
+                      <p
+                        className="font-sans"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                      >
+                        <span className="font-semibold">Complaint: </span>
+                        <span style={{ color: '#4A7080' }}>{consultation.complaint}</span>
+                      </p>
+
+                      {/* Plan */}
+                      <p
+                        className="font-sans"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                      >
+                        <span className="font-semibold">Plan: </span>
+                        <span style={{ color: '#00B4D8' }}>{consultation.plan}</span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
           {activeTab !== 'biodata' &&
             activeTab !== 'medical-history' &&
             activeTab !== 'allergies' &&
-            activeTab !== 'vital-signs' && (
+            activeTab !== 'vital-signs' &&
+            activeTab !== 'prev-consultations' && (
               <div
                 className="flex min-h-[160px] flex-col items-center justify-center gap-2 rounded-[12px]"
                 style={{ background: 'rgba(226,237,241,0.25)' }}

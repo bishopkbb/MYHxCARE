@@ -268,6 +268,15 @@ export type VitalSignsRecord = {
   readings: VitalSign[];
 };
 
+export type Consultation = {
+  id: string;
+  date: string; // "Jun 15, 2026"
+  doctor: string; // "Dr. E. Obi"
+  diagnosis: string;
+  complaint: string;
+  plan: string;
+};
+
 // ── Patient detail view ───────────────────────────────────────────────────────
 
 export type PatientDetailMock = {
@@ -290,6 +299,7 @@ export type PatientDetailMock = {
   isUrgent: boolean;
   medicalHistory: MedicalHistory;
   vitalSigns: VitalSignsRecord;
+  consultations: Consultation[];
 };
 
 export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
@@ -388,6 +398,32 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         { key: 'bmi', value: '21.3', status: 'normal' },
       ],
     },
+    consultations: [
+      {
+        id: 'c1',
+        date: 'Jun 15, 2026',
+        doctor: 'Dr. E. Obi',
+        diagnosis: 'Upper Respiratory Tract Infection',
+        complaint: 'Sore throat, runny nose, cough',
+        plan: 'Paracetamol 1000mg TDS × 5 days, rest',
+      },
+      {
+        id: 'c2',
+        date: 'Apr 03, 2026',
+        doctor: 'Dr. A. Chukwu',
+        diagnosis: 'Acute Gastroenteritis',
+        complaint: 'Vomiting, diarrhea, cramping',
+        plan: 'ORS, Metronidazole 400mg TDS × 5 days',
+      },
+      {
+        id: 'c3',
+        date: 'Jan 20, 2026',
+        doctor: 'Dr. E. Obi',
+        diagnosis: 'Tension Headache',
+        complaint: 'Bilateral frontal headache, stress',
+        plan: 'Ibuprofen 400mg TDS PRN, counselling referral',
+      },
+    ],
   },
   p2: {
     id: 'p2',
@@ -453,6 +489,24 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         { key: 'bmi', value: '23.5', status: 'normal' },
       ],
     },
+    consultations: [
+      {
+        id: 'c1',
+        date: 'Jul 05, 2026',
+        doctor: 'Dr. K. Nwosu',
+        diagnosis: 'Typhoid Fever',
+        complaint: 'High fever, abdominal pain, generalised weakness',
+        plan: 'Ciprofloxacin 500mg BD × 7 days, IV fluids, bed rest',
+      },
+      {
+        id: 'c2',
+        date: 'Feb 14, 2025',
+        doctor: 'Dr. E. Obi',
+        diagnosis: 'Malaria (P. falciparum)',
+        complaint: 'Fever, chills, headache, joint pains',
+        plan: 'Artemether-Lumefantrine 4 tabs BD × 3 days',
+      },
+    ],
   },
   p3: {
     id: 'p3',
@@ -532,6 +586,32 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
         { key: 'bmi', value: '24.0', status: 'normal' },
       ],
     },
+    consultations: [
+      {
+        id: 'c1',
+        date: 'May 21, 2026',
+        doctor: 'Dr. A. Chukwu',
+        diagnosis: 'Allergic Contact Dermatitis',
+        complaint: 'Itchy rash on arms and torso after exposure to new detergent',
+        plan: 'Chlorphenamine 4mg TDS, Hydrocortisone cream 1%, avoid trigger',
+      },
+      {
+        id: 'c2',
+        date: 'Nov 10, 2025',
+        doctor: 'Dr. E. Obi',
+        diagnosis: 'Acute Pharyngitis',
+        complaint: 'Severe sore throat, painful swallowing, mild fever',
+        plan: 'Amoxicillin 500mg TDS × 5 days, throat lozenges, warm saline gargle',
+      },
+      {
+        id: 'c3',
+        date: 'Jun 18, 2025',
+        doctor: 'Dr. K. Nwosu',
+        diagnosis: 'Dysmenorrhea',
+        complaint: 'Severe menstrual cramps, nausea',
+        plan: 'Mefenamic acid 500mg TDS PRN, heat pad, review in 2 weeks',
+      },
+    ],
   },
 };
 
@@ -565,4 +645,5 @@ export const FALLBACK_PATIENT_DETAIL: PatientDetailMock = {
     recordedAt: '',
     readings: [],
   },
+  consultations: [],
 };
