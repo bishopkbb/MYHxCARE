@@ -107,7 +107,7 @@ export function LoginForm() {
             className={cn(inputClass, 'mt-1.5')}
           />
           {errors.identifier && (
-            <p className="mt-1 text-xs text-red-500">{errors.identifier.message}</p>
+            <p className="mt-1 text-sm text-red-500">{errors.identifier.message}</p>
           )}
         </div>
 
@@ -120,7 +120,7 @@ export function LoginForm() {
             <Link
               href="/password-reset"
               tabIndex={-1}
-              className="text-xs leading-4.5 text-[#00B4D8] underline-offset-4 hover:underline"
+              className="text-sm leading-5 text-[#00B4D8] underline-offset-4 hover:underline"
             >
               Forgot password?
             </Link>
@@ -146,7 +146,7 @@ export function LoginForm() {
             </button>
           </div>
           {errors.password && (
-            <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
+            <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
           )}
         </div>
 
@@ -194,7 +194,7 @@ export function LoginForm() {
         style={{ background: 'rgba(0, 119, 168, 0.05)', borderColor: 'rgba(0, 100, 130, 0.12)' }}
       >
         <ShieldCheck className="mt-px size-4 shrink-0 text-[#00B4D8]" aria-hidden />
-        <p className="text-xs leading-4.5 text-[#8A98A3]">
+        <p className="text-sm leading-5 text-[#8A98A3]">
           <span className="font-medium text-[#0D2630]">Security Notice:</span> This system is for
           authorized personnel only. All sessions are logged and audited. Suspicious activity
           triggers automatic account lockout after 3 failed attempts.
@@ -206,7 +206,7 @@ export function LoginForm() {
         {(['HIPAA', 'ISO 27001', 'NDPR'] as const).map((badge) => (
           <span
             key={badge}
-            className="rounded-lg px-2.5 py-1 font-mono text-[11px] leading-4 tracking-[0.04em] text-[#8A98A3]"
+            className="rounded-lg px-3 py-1.5 font-mono text-sm leading-5 tracking-[0.04em] text-[#8A98A3]"
             style={{ background: 'rgba(14, 45, 58, 0.06)' }}
           >
             {badge}

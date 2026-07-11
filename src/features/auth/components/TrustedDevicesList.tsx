@@ -105,7 +105,7 @@ export function TrustedDevicesList() {
       {devices && devices.length === 0 && (
         <div className="bg-card animate-in fade-in rounded-lg border p-6 text-center duration-200">
           <p className="text-foreground text-sm font-medium">No trusted devices</p>
-          <p className="text-muted-foreground mt-1 text-xs">
+          <p className="text-muted-foreground mt-1 text-sm">
             No other devices have been granted trusted access to your account.
           </p>
         </div>

@@ -285,8 +285,8 @@ function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
 
             {item.badge !== undefined && (
               <span
-                className="flex size-5 shrink-0 items-center justify-center rounded-full leading-none font-black text-white"
-                style={{ background: '#FB2C36', fontSize: 11 }}
+                className="flex size-6 shrink-0 items-center justify-center rounded-full leading-none font-black text-white"
+                style={{ background: '#FB2C36', fontSize: 14 }}
               >
                 {item.badge}
               </span>

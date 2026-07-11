@@ -23,7 +23,7 @@ export default function Error({
           An unexpected error occurred. Your work has been saved where possible.
         </p>
         {error.digest ? (
-          <p className="text-muted-foreground mt-2 font-mono text-xs">Reference: {error.digest}</p>
+          <p className="text-muted-foreground mt-2 font-mono text-sm">Reference: {error.digest}</p>
         ) : null}
       </div>
       <button

@@ -63,27 +63,27 @@ export function SessionCard({ session }: SessionCardProps) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-foreground text-sm font-medium">{session.deviceName}</span>
             {session.isCurrent && (
-              <span className="bg-primary/10 text-primary flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium">
+              <span className="bg-primary/10 text-primary flex items-center gap-1.5 rounded-full px-2 py-0.5 text-sm font-medium">
                 <span className="bg-primary size-1.5 rounded-full" aria-hidden="true" />
                 This device
               </span>
             )}
           </div>
 
-          <p className="text-muted-foreground mt-0.5 text-xs">
+          <p className="text-muted-foreground mt-0.5 text-sm">
             {session.browser} &middot; {session.os}
           </p>
 
-          <p className="text-muted-foreground mt-1 text-xs">
+          <p className="text-muted-foreground mt-1 text-sm">
             {session.ipAddress}
             {session.location ? ` · ${session.location}` : ''}
           </p>
 
-          <p className="text-muted-foreground mt-1 text-xs">
+          <p className="text-muted-foreground mt-1 text-sm">
             Last active {toRelativeTime(session.lastActiveAt)}
           </p>
 
-          {revokeError && <p className="text-destructive mt-1.5 text-xs">{revokeError}</p>}
+          {revokeError && <p className="text-destructive mt-1.5 text-sm">{revokeError}</p>}
         </div>
 
         {!session.isCurrent && (
@@ -92,7 +92,7 @@ export function SessionCard({ session }: SessionCardProps) {
               <button
                 type="button"
                 onClick={() => setConfirming(false)}
-                className="text-muted-foreground hover:text-foreground text-xs underline-offset-4 transition-colors duration-150 hover:underline"
+                className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 transition-colors duration-150 hover:underline"
               >
                 Cancel
               </button>
@@ -102,7 +102,7 @@ export function SessionCard({ session }: SessionCardProps) {
               onClick={handleRevoke}
               disabled={isPending}
               className={cn(
-                'focus-visible:ring-ring rounded-md px-3 py-1.5 text-xs font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                'focus-visible:ring-ring rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50',
                 confirming
                   ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
                   : 'text-muted-foreground hover:border-destructive hover:text-destructive border',

@@ -65,7 +65,7 @@ export function PasswordResetRequestForm() {
           We&apos;ve sent password reset instructions to your registered email. The link expires in
           30 minutes.
         </p>
-        <p className="mt-3 text-xs leading-4.5 text-[#8A98A3]">
+        <p className="mt-3 text-sm leading-5 text-[#8A98A3]">
           Didn&apos;t receive it? Check your spam folder or{' '}
           <button
             type="button"
@@ -78,7 +78,7 @@ export function PasswordResetRequestForm() {
         </p>
         <Link
           href="/login"
-          className="mt-6 inline-flex items-center gap-1.5 text-xs leading-4.5 text-[#00B4D8] underline-offset-4 hover:underline"
+          className="mt-6 inline-flex items-center gap-1.5 text-sm leading-5 text-[#00B4D8] underline-offset-4 hover:underline"
         >
           Back to sign in
         </Link>
@@ -123,7 +123,7 @@ export function PasswordResetRequestForm() {
             className={cn(inputClass, 'mt-1.5')}
           />
           {errors.identifier && (
-            <p className="mt-1 text-xs text-red-500">{errors.identifier.message}</p>
+            <p className="mt-1 text-sm text-red-500">{errors.identifier.message}</p>
           )}
         </div>
 
@@ -150,7 +150,7 @@ export function PasswordResetRequestForm() {
       <div className="mt-6 text-center">
         <Link
           href="/login"
-          className="text-xs leading-4.5 text-[#00B4D8] underline-offset-4 hover:underline"
+          className="text-sm leading-5 text-[#00B4D8] underline-offset-4 hover:underline"
         >
           Back to sign in
         </Link>

@@ -164,7 +164,7 @@ export function PasswordResetSetForm({ token }: PasswordResetSetFormProps) {
             </button>
           </div>
           {errors.password && (
-            <p id="password-error" className="mt-1 text-xs text-red-500">
+            <p id="password-error" className="mt-1 text-sm text-red-500">
               {errors.password.message}
             </p>
           )}
@@ -200,7 +200,7 @@ export function PasswordResetSetForm({ token }: PasswordResetSetFormProps) {
             </button>
           </div>
           {errors.confirmPassword && (
-            <p id="confirm-error" className="mt-1 text-xs text-red-500">
+            <p id="confirm-error" className="mt-1 text-sm text-red-500">
               {errors.confirmPassword.message}
             </p>
           )}
@@ -229,7 +229,7 @@ export function PasswordResetSetForm({ token }: PasswordResetSetFormProps) {
       <div className="mt-6 text-center">
         <Link
           href="/login"
-          className="text-xs leading-4.5 text-[#00B4D8] underline-offset-4 hover:underline"
+          className="text-sm leading-5 text-[#00B4D8] underline-offset-4 hover:underline"
         >
           Back to sign in
         </Link>

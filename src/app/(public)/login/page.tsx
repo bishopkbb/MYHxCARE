@@ -61,7 +61,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-auto pt-6 text-xs leading-4.5 text-[#8A98A3]">
+        <p className="mt-auto pt-6 text-sm leading-5 text-[#8A98A3]">
           © 2026 MYHxCare Technologies. All rights reserved.
         </p>
       </main>
