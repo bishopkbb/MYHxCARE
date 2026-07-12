@@ -28,7 +28,7 @@ jobs:
       # NEXT_PUBLIC_* vars are build args — they're inlined by Turbopack into
       # the client bundle and cannot be overridden at container runtime.
       - name: Log in to DigitalOcean Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ secrets.DOCR_TOKEN }}
