@@ -52,8 +52,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // Standalone output for Docker deployment on DigitalOcean web-01
-  output: 'standalone',
+  // Standalone output for Docker/DigitalOcean. Vercel manages its own
+  // deployment pipeline and does not need (and can conflict with) standalone mode.
+  ...(process.env['VERCEL'] !== '1' ? { output: 'standalone' as const } : {}),
   poweredByHeader: false,
   async headers() {
     return [
