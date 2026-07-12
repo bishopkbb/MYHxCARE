@@ -1,8 +1,8 @@
 'use client';
 
-import { AlertTriangle, Check, ChevronLeft, Send } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Check, ChevronLeft, RefreshCw, Send } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
 import {
@@ -45,6 +45,8 @@ const PRIORITY_CFG: Record<Priority, PriorityCfg> = {
 };
 
 const PRIORITY_ORDER: Priority[] = ['stat', 'urgent', 'routine'];
+
+type PageState = 'loading' | 'loaded' | 'error';
 
 // ── Checkbox ──────────────────────────────────────────────────────────────────
 
@@ -147,6 +149,46 @@ function LabCard({
   );
 }
 
+// ── Skeleton Lab Card ─────────────────────────────────────────────────────────
+
+const SK_TEST_WIDTHS = [90, 140, 110, 120, 80] as const;
+
+function SkeletonLabCard() {
+  return (
+    <div
+      className="flex flex-col overflow-hidden"
+      style={{ borderRadius: 12, border: '1px solid rgba(0,100,130,0.12)', background: '#FFFFFF' }}
+    >
+      <div
+        className="shrink-0 px-4"
+        style={{
+          background: '#E2EDF180',
+          borderBottom: '1px solid rgba(0,100,130,0.12)',
+          paddingTop: 8,
+          paddingBottom: 8,
+        }}
+      >
+        <div className="animate-pulse rounded bg-slate-200" style={{ width: 120, height: 18 }} />
+      </div>
+      <div className="flex flex-col p-3">
+        {SK_TEST_WIDTHS.map((w, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-[10px]"
+            style={{ borderRadius: 8, padding: '8px 12px' }}
+          >
+            <div
+              className="shrink-0 animate-pulse bg-slate-200"
+              style={{ width: 24, height: 24, borderRadius: 4 }}
+            />
+            <div className="animate-pulse rounded bg-slate-200" style={{ width: w, height: 20 }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function LabOrdersPage() {
@@ -156,6 +198,17 @@ export default function LabOrdersPage() {
   const [priority, setPriority] = useState<Priority>('stat');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [notes, setNotes] = useState('');
+  const [pageState, setPageState] = useState<PageState>('loading');
+
+  useEffect(() => {
+    const t = setTimeout(() => setPageState('loaded'), 800);
+    return () => clearTimeout(t);
+  }, []);
+
+  function handleRetry() {
+    setPageState('loading');
+    setTimeout(() => setPageState('loaded'), 800);
+  }
 
   const patient = MOCK_LAB_PATIENT;
   const totalSelected = selected.size;
@@ -307,8 +360,8 @@ export default function LabOrdersPage() {
                   key={a}
                   className="hidden shrink-0 font-sans font-medium sm:inline"
                   style={{
-                    fontSize: 12,
-                    lineHeight: '18px',
+                    fontSize: 14,
+                    lineHeight: '22px',
                     borderRadius: 4,
                     padding: '3px 8px',
                     background: 'rgba(239,68,68,0.28)',
@@ -438,11 +491,44 @@ export default function LabOrdersPage() {
             </div>
 
             {/* ── Lab category cards ───────────────────────────────────────── */}
-            <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {LAB_CATEGORIES.map((cat) => (
-                <LabCard key={cat.id} category={cat} selected={selected} onToggle={toggleTest} />
-              ))}
-            </div>
+            {pageState === 'loading' && (
+              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonLabCard key={i} />
+                ))}
+              </div>
+            )}
+            {pageState === 'error' && (
+              <div className="mb-4 flex flex-col items-center justify-center gap-3 py-12 text-center">
+                <AlertCircle style={{ width: 40, height: 40, color: '#EF4444' }} />
+                <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                  Failed to load lab tests
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRetry}
+                  className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity hover:opacity-80"
+                  style={{
+                    height: 40,
+                    borderRadius: 12,
+                    padding: '0 20px',
+                    background: '#00B4D8',
+                    fontSize: 14,
+                    lineHeight: '22px',
+                  }}
+                >
+                  <RefreshCw style={{ width: 16, height: 16 }} />
+                  Retry
+                </button>
+              </div>
+            )}
+            {pageState === 'loaded' && (
+              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {LAB_CATEGORIES.map((cat) => (
+                  <LabCard key={cat.id} category={cat} selected={selected} onToggle={toggleTest} />
+                ))}
+              </div>
+            )}
 
             {/* ── Clinical Notes for Laboratory ────────────────────────────── */}
             <div

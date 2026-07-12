@@ -2,6 +2,7 @@
 
 import {
   Activity,
+  AlertCircle,
   AlertTriangle,
   ArrowRight,
   Bell,
@@ -14,6 +15,7 @@ import {
   MapPin,
   MessageSquare,
   History,
+  RefreshCw,
   Share2,
   Stethoscope,
   Users,
@@ -21,6 +23,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '@hooks/useAuth';
 
@@ -50,6 +53,8 @@ function parseName(fullName: string): { title: string; lastName: string } {
   const lastName = parts[parts.length - 1] ?? (hasTitle ? parts[1] : parts[0]) ?? 'Doctor';
   return { title, lastName };
 }
+
+type PageState = 'loading' | 'loaded' | 'error';
 
 type QuickAction = { label: string; href: string; active?: boolean } & (
   { iconSrc: string; icon?: never } | { icon: LucideIcon; iconSrc?: never }
@@ -349,9 +354,122 @@ const MOCK_ACTIVITIES: RecentActivity[] = [
   },
 ];
 
+// ── Skeleton components ───────────────────────────────────────────────────────
+
+function SkeletonStatCard() {
+  return (
+    <div
+      className="flex flex-col rounded-[12px] p-4"
+      style={{
+        background: '#FFFFFF',
+        border: '1px solid rgba(0,180,216,0.25)',
+        borderTopWidth: 3,
+      }}
+    >
+      <div className="flex items-start justify-between">
+        <div className="animate-pulse rounded bg-slate-200" style={{ width: 120, height: 20 }} />
+        <div
+          className="shrink-0 animate-pulse rounded-[12px] bg-slate-200"
+          style={{ width: 40, height: 40 }}
+        />
+      </div>
+      <div
+        className="mt-1.5 animate-pulse rounded bg-slate-200"
+        style={{ width: 64, height: 36 }}
+      />
+      <div className="mt-1 animate-pulse rounded bg-slate-200" style={{ width: 100, height: 18 }} />
+    </div>
+  );
+}
+
+function SkeletonQueueRow({ isLast }: { isLast: boolean }) {
+  return (
+    <div
+      className="flex items-center gap-2 py-3 pr-4 pl-4 sm:gap-4.5"
+      style={{
+        borderLeft: '3px solid rgba(0,180,216,0.15)',
+        borderBottom: isLast ? undefined : '1px solid rgba(0,100,130,0.12)',
+      }}
+    >
+      <div
+        className="shrink-0 animate-pulse rounded-full bg-slate-200"
+        style={{ width: 40, height: 40 }}
+      />
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div className="animate-pulse rounded bg-slate-200" style={{ width: 130, height: 18 }} />
+        <div className="animate-pulse rounded bg-slate-200" style={{ width: 200, height: 16 }} />
+      </div>
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        <div
+          className="animate-pulse rounded-full bg-slate-200"
+          style={{ width: 70, height: 22 }}
+        />
+        <div className="animate-pulse rounded bg-slate-200" style={{ width: 60, height: 16 }} />
+      </div>
+    </div>
+  );
+}
+
+function SkeletonAlertRow({ isLast }: { isLast: boolean }) {
+  return (
+    <div
+      className="p-3.5"
+      style={{ borderBottom: isLast ? undefined : '1px solid rgba(0,180,216,0.25)' }}
+    >
+      <div className="flex gap-2.5">
+        <div className="shrink-0 pt-0.5">
+          <div
+            className="animate-pulse rounded-[8px] bg-slate-200"
+            style={{ width: 28, height: 28 }}
+          />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <div className="animate-pulse rounded bg-slate-200" style={{ width: 110, height: 18 }} />
+          <div
+            className="animate-pulse rounded bg-slate-200"
+            style={{ width: '90%', height: 16 }}
+          />
+          <div className="animate-pulse rounded bg-slate-200" style={{ width: 60, height: 16 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonActivityCard() {
+  return (
+    <div
+      className="flex gap-3 p-3.5"
+      style={{ background: '#E6F8FD', borderRight: '1px solid #00B4D8' }}
+    >
+      <div className="shrink-0 pt-1">
+        <div className="flex size-6 items-center justify-center rounded-full">
+          <div className="size-3 animate-pulse rounded-full bg-slate-300" />
+        </div>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <div className="animate-pulse rounded bg-slate-200" style={{ width: 140, height: 18 }} />
+        <div className="animate-pulse rounded bg-slate-200" style={{ width: 110, height: 16 }} />
+        <div className="animate-pulse rounded bg-slate-200" style={{ width: 60, height: 16 }} />
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const { title, lastName } = parseName(user?.name ?? '');
+  const [pageState, setPageState] = useState<PageState>('loading');
+
+  useEffect(() => {
+    const t = setTimeout(() => setPageState('loaded'), 800);
+    return () => clearTimeout(t);
+  }, []);
+
+  function handleRetry() {
+    setPageState('loading');
+    setTimeout(() => setPageState('loaded'), 800);
+  }
 
   return (
     <div className="px-4 pt-6 pb-24 sm:px-6 lg:px-12 lg:pt-10">
@@ -613,46 +731,73 @@ export default function DashboardPage() {
 
       {/* ── Stat cards ───────────────────────────────────────────────── */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-10.5">
-        {MOCK_STAT_CARDS.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={card.title}
-              className="flex cursor-pointer flex-col rounded-[12px] p-4 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md"
+        {pageState === 'loading' ? (
+          Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)
+        ) : pageState === 'error' ? (
+          <div className="col-span-full flex flex-col items-center justify-center gap-3 py-10 text-center">
+            <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
+            <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+              Failed to load dashboard data
+            </p>
+            <button
+              type="button"
+              onClick={handleRetry}
+              className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity hover:opacity-80"
               style={{
-                background: '#FFFFFF',
-                border: `1px solid ${card.accent}`,
-                borderTopWidth: '3px',
+                height: 40,
+                borderRadius: 12,
+                padding: '0 20px',
+                background: '#00B4D8',
+                fontSize: 14,
+                lineHeight: '22px',
               }}
             >
-              {/* Title row: text left, icon right */}
-              <div className="flex items-start justify-between">
-                <p className="text-base leading-6 font-semibold" style={{ color: '#25464D' }}>
-                  {card.title}
-                </p>
-                <div
-                  className="flex size-10 shrink-0 items-center justify-center rounded-[12px]"
-                  style={{ background: card.iconBg }}
-                >
-                  <Icon style={{ width: 24, height: 24, color: card.accent }} />
-                </div>
-              </div>
-
-              {/* Count — Outfit Black 30 / 36, accent colour */}
-              <p
-                className="font-display mt-1.5 text-[30px] leading-9 font-black"
-                style={{ color: card.accent }}
+              <RefreshCw style={{ width: 16, height: 16 }} />
+              Retry
+            </button>
+          </div>
+        ) : (
+          MOCK_STAT_CARDS.map((card) => {
+            const Icon = card.icon;
+            return (
+              <div
+                key={card.title}
+                className="flex cursor-pointer flex-col rounded-[12px] p-4 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                style={{
+                  background: '#FFFFFF',
+                  border: `1px solid ${card.accent}`,
+                  borderTopWidth: '3px',
+                }}
               >
-                {card.count}
-              </p>
+                {/* Title row: text left, icon right */}
+                <div className="flex items-start justify-between">
+                  <p className="text-base leading-6 font-semibold" style={{ color: '#25464D' }}>
+                    {card.title}
+                  </p>
+                  <div
+                    className="flex size-10 shrink-0 items-center justify-center rounded-[12px]"
+                    style={{ background: card.iconBg }}
+                  >
+                    <Icon style={{ width: 24, height: 24, color: card.accent }} />
+                  </div>
+                </div>
 
-              {/* Info label — DM Sans Regular 14, muted */}
-              <p className="mt-1 text-sm leading-5.5" style={{ color: '#4A7080' }}>
-                {card.info}
-              </p>
-            </div>
-          );
-        })}
+                {/* Count — Outfit Black 30 / 36, accent colour */}
+                <p
+                  className="font-display mt-1.5 text-[30px] leading-9 font-black"
+                  style={{ color: card.accent }}
+                >
+                  {card.count}
+                </p>
+
+                {/* Info label — DM Sans Regular 14, muted */}
+                <p className="mt-1 text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                  {card.info}
+                </p>
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* ── Two-panel section: Patient Queue + Alerts ────────────────── */}
@@ -709,71 +854,75 @@ export default function DashboardPage() {
 
           {/* Patient rows */}
           <div>
-            {MOCK_QUEUE.map((patient, idx) => {
-              const cfg = QUEUE_STATUS_CONFIG[patient.status];
-              const isLast = idx === MOCK_QUEUE.length - 1;
-              return (
-                <div
-                  key={patient.id}
-                  className="flex items-center gap-2 py-3 pr-4 pl-4 transition-colors duration-100 hover:bg-[#F5FBFD] sm:gap-4.5"
-                  style={{
-                    background: cfg.rowBg,
-                    borderLeft: `3px solid ${cfg.borderLeft}`,
-                    borderBottom: isLast ? undefined : '1px solid rgba(0,100,130,0.12)',
-                  }}
-                >
-                  {/* Avatar circle with initials */}
-                  <div
-                    className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-                    style={{ background: patient.avatarBg }}
-                  >
-                    {patient.initials}
-                  </div>
-
-                  {/* Name + symptoms */}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-base leading-6" style={{ color: '#00B4D8' }}>
-                      {patient.name}
-                    </p>
-                    <p className="truncate text-sm leading-5.5" style={{ color: '#25464D' }}>
-                      {patient.symptoms}
-                    </p>
-                  </div>
-
-                  {/* Status badge + wait time */}
-                  <div className="flex shrink-0 flex-col items-end gap-1">
+            {pageState === 'loading'
+              ? Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonQueueRow key={i} isLast={i === 5} />
+                ))
+              : MOCK_QUEUE.map((patient, idx) => {
+                  const cfg = QUEUE_STATUS_CONFIG[patient.status];
+                  const isLast = idx === MOCK_QUEUE.length - 1;
+                  return (
                     <div
-                      className="inline-flex items-center rounded-full border px-2 py-0.5"
-                      style={{ background: cfg.badgeBg, borderColor: cfg.badgeBorder }}
+                      key={patient.id}
+                      className="flex items-center gap-2 py-3 pr-4 pl-4 transition-colors duration-100 hover:bg-[#F5FBFD] sm:gap-4.5"
+                      style={{
+                        background: cfg.rowBg,
+                        borderLeft: `3px solid ${cfg.borderLeft}`,
+                        borderBottom: isLast ? undefined : '1px solid rgba(0,100,130,0.12)',
+                      }}
                     >
-                      <span
-                        className="text-sm leading-5.5 font-medium whitespace-nowrap"
-                        style={{ color: cfg.badgeText }}
+                      {/* Avatar circle with initials */}
+                      <div
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                        style={{ background: patient.avatarBg }}
                       >
-                        {cfg.label}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock style={{ width: 14, height: 14, color: '#25464D' }} />
-                      <span className="text-sm leading-[22px]" style={{ color: '#25464D' }}>
-                        {patient.waitTime ?? 'In progress'}
-                      </span>
-                    </div>
-                  </div>
+                        {patient.initials}
+                      </div>
 
-                  {/* Consult button — hidden on mobile, space too tight */}
-                  <div className="hidden shrink-0 pl-1 sm:block">
-                    <button
-                      type="button"
-                      className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors hover:bg-[#00B4D8] hover:text-white"
-                      style={{ border: '1px solid #00B4D8' }}
-                    >
-                      Consult
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                      {/* Name + symptoms */}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-base leading-6" style={{ color: '#00B4D8' }}>
+                          {patient.name}
+                        </p>
+                        <p className="truncate text-sm leading-5.5" style={{ color: '#25464D' }}>
+                          {patient.symptoms}
+                        </p>
+                      </div>
+
+                      {/* Status badge + wait time */}
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <div
+                          className="inline-flex items-center rounded-full border px-2 py-0.5"
+                          style={{ background: cfg.badgeBg, borderColor: cfg.badgeBorder }}
+                        >
+                          <span
+                            className="text-sm leading-5.5 font-medium whitespace-nowrap"
+                            style={{ color: cfg.badgeText }}
+                          >
+                            {cfg.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock style={{ width: 14, height: 14, color: '#25464D' }} />
+                          <span className="text-sm leading-[22px]" style={{ color: '#25464D' }}>
+                            {patient.waitTime ?? 'In progress'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Consult button — hidden on mobile, space too tight */}
+                      <div className="hidden shrink-0 pl-1 sm:block">
+                        <button
+                          type="button"
+                          className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors hover:bg-[#00B4D8] hover:text-white"
+                          style={{ border: '1px solid #00B4D8' }}
+                        >
+                          Consult
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
           </div>
         </div>
 
@@ -824,61 +973,65 @@ export default function DashboardPage() {
 
           {/* Alert rows */}
           <div>
-            {MOCK_ALERTS.map((alert, idx) => {
-              const Icon = alert.icon;
-              const isLast = idx === MOCK_ALERTS.length - 1;
-              return (
-                <div
-                  key={alert.id}
-                  className="p-3.5"
-                  style={{
-                    background: 'rgba(239,246,255,0.4)',
-                    borderBottom: isLast ? undefined : '1px solid rgba(0,180,216,0.25)',
-                  }}
-                >
-                  <div className="flex gap-2.5">
-                    {/* Icon box — 2px top offset to align with title baseline */}
-                    <div className="shrink-0 pt-0.5">
-                      <div
-                        className="flex size-7 items-center justify-center rounded-[8px]"
-                        style={{ background: alert.iconBg }}
-                      >
-                        <Icon style={{ width: 18, height: 18, color: alert.iconColor }} />
+            {pageState === 'loading'
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <SkeletonAlertRow key={i} isLast={i === 3} />
+                ))
+              : MOCK_ALERTS.map((alert, idx) => {
+                  const Icon = alert.icon;
+                  const isLast = idx === MOCK_ALERTS.length - 1;
+                  return (
+                    <div
+                      key={alert.id}
+                      className="p-3.5"
+                      style={{
+                        background: 'rgba(239,246,255,0.4)',
+                        borderBottom: isLast ? undefined : '1px solid rgba(0,180,216,0.25)',
+                      }}
+                    >
+                      <div className="flex gap-2.5">
+                        {/* Icon box — 2px top offset to align with title baseline */}
+                        <div className="shrink-0 pt-0.5">
+                          <div
+                            className="flex size-7 items-center justify-center rounded-[8px]"
+                            style={{ background: alert.iconBg }}
+                          >
+                            <Icon style={{ width: 18, height: 18, color: alert.iconColor }} />
+                          </div>
+                        </div>
+
+                        {/* Text content */}
+                        <div className="min-w-0 flex-1">
+                          {/* Title + unread dot */}
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className="text-sm leading-5.5 font-medium"
+                              style={{ color: '#00B4D8' }}
+                            >
+                              {alert.title}
+                            </span>
+                            {alert.unread && (
+                              <span
+                                className="size-1.5 shrink-0 rounded-full"
+                                style={{ background: '#00B4D8' }}
+                              />
+                            )}
+                          </div>
+
+                          {/* Body — two lines */}
+                          <p className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+                            {alert.body}
+                          </p>
+
+                          {/* Timestamp */}
+                          <p className="text-sm leading-[22px]" style={{ color: '#25464D' }}>
+                            {alert.time}
+                          </p>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Text content */}
-                    <div className="min-w-0 flex-1">
-                      {/* Title + unread dot */}
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className="text-sm leading-5.5 font-medium"
-                          style={{ color: '#00B4D8' }}
-                        >
-                          {alert.title}
-                        </span>
-                        {alert.unread && (
-                          <span
-                            className="size-1.5 shrink-0 rounded-full"
-                            style={{ background: '#00B4D8' }}
-                          />
-                        )}
-                      </div>
-
-                      {/* Body — two lines */}
-                      <p className="text-sm leading-5.5" style={{ color: '#25464D' }}>
-                        {alert.body}
-                      </p>
-
-                      {/* Timestamp */}
-                      <p className="text-sm leading-[22px]" style={{ color: '#25464D' }}>
-                        {alert.time}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                })}
           </div>
         </div>
       </div>
@@ -898,33 +1051,38 @@ export default function DashboardPage() {
 
         {/* 3-column activity grid */}
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3 xl:gap-9">
-          {MOCK_ACTIVITIES.map((activity) => (
-            <div
-              key={activity.id}
-              className="flex gap-3 p-3.5"
-              style={{ background: '#E6F8FD', borderRight: '1px solid #00B4D8' }}
-            >
-              {/* Coloured status dot — 12×12 inside a 24×24 alignment container */}
-              <div className="shrink-0 pt-1">
-                <div className="flex size-6 items-center justify-center rounded-full">
-                  <span className="size-3 rounded-full" style={{ background: activity.dotColor }} />
-                </div>
-              </div>
+          {pageState === 'loading'
+            ? Array.from({ length: 6 }).map((_, i) => <SkeletonActivityCard key={i} />)
+            : MOCK_ACTIVITIES.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex gap-3 p-3.5"
+                  style={{ background: '#E6F8FD', borderRight: '1px solid #00B4D8' }}
+                >
+                  {/* Coloured status dot — 12×12 inside a 24×24 alignment container */}
+                  <div className="shrink-0 pt-1">
+                    <div className="flex size-6 items-center justify-center rounded-full">
+                      <span
+                        className="size-3 rounded-full"
+                        style={{ background: activity.dotColor }}
+                      />
+                    </div>
+                  </div>
 
-              {/* Text stack */}
-              <div>
-                <p className="text-sm leading-5.5 font-medium" style={{ color: '#00B4D8' }}>
-                  {activity.header}
-                </p>
-                <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
-                  {activity.patient}
-                </p>
-                <p className="text-sm leading-5.5" style={{ color: '#25464D' }}>
-                  {activity.time}
-                </p>
-              </div>
-            </div>
-          ))}
+                  {/* Text stack */}
+                  <div>
+                    <p className="text-sm leading-5.5 font-medium" style={{ color: '#00B4D8' }}>
+                      {activity.header}
+                    </p>
+                    <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                      {activity.patient}
+                    </p>
+                    <p className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+                      {activity.time}
+                    </p>
+                  </div>
+                </div>
+              ))}
         </div>
       </div>
     </div>
