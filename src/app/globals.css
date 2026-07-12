@@ -149,3 +149,89 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Coming Soon animations ──────────────────────────────────────────────── */
+
+@keyframes cs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes cs-spin-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes cs-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.07);
+  }
+}
+@keyframes cs-glow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.18);
+  }
+}
+@keyframes cs-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes cs-dot {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.55);
+    opacity: 0.35;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.cs-spin {
+  animation: cs-spin 5s linear infinite;
+}
+.cs-spin-reverse {
+  animation: cs-spin-reverse 9s linear infinite;
+}
+.cs-breathe {
+  animation: cs-breathe 4s ease-in-out infinite;
+}
+.cs-glow {
+  animation: cs-glow 3s ease-in-out infinite;
+}
+.cs-fade-up {
+  animation: cs-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.cs-fade-up-2 {
+  animation: cs-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+.cs-fade-up-3 {
+  animation: cs-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both;
+}
+.cs-fade-up-4 {
+  animation: cs-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.36s both;
+}
+.cs-fade-up-5 {
+  animation: cs-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.48s both;
+}
+.cs-dot {
+  animation: cs-dot 1.4s ease-in-out infinite;
+}
