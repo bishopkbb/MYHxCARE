@@ -4,6 +4,7 @@ import {
   BedDouble,
   Bell,
   CalendarDays,
+  Clock,
   ClipboardList,
   CreditCard,
   FileCheck2,
@@ -155,6 +156,11 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
             href: '/appointments',
             icon: CalendarDays,
             iconSrc: '/icons/appointments.png',
+          },
+          {
+            label: 'My Schedule',
+            href: '/my-schedule',
+            icon: Clock,
           },
           {
             label: 'Workforce Management',
