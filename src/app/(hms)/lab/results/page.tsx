@@ -140,14 +140,14 @@ function FlagBadge({ flag }: { flag: LabFlag }) {
     <span
       className="inline-flex items-center justify-center font-sans font-semibold"
       style={{
-        width: 24,
-        height: 24,
+        width: 26,
+        height: 26,
         borderRadius: 4,
         border: `1px solid ${c.border}`,
         background: c.bg,
         color: c.color,
-        fontSize: 12,
-        lineHeight: '18px',
+        fontSize: 14,
+        lineHeight: '20px',
       }}
     >
       {flag}
@@ -161,15 +161,15 @@ function StatusBadge({ status }: { status: LabResultStatus }) {
     <span
       className="inline-flex shrink-0 items-center font-sans font-semibold"
       style={{
-        height: 22,
+        height: 24,
         borderRadius: 4,
         padding: '0 8px',
         background: c.badgeBg,
         border: `1px solid ${c.badgeBorder}`,
         color: c.badgeColor,
-        fontSize: 11,
-        lineHeight: '18px',
-        letterSpacing: '0.4px',
+        fontSize: 14,
+        lineHeight: '20px',
+        letterSpacing: '0.3px',
       }}
     >
       {c.badgeLabel}
@@ -184,14 +184,14 @@ function PriorityBadge({ priority }: { priority: LabResultPriority }) {
     <span
       className="inline-flex shrink-0 items-center font-sans font-medium"
       style={{
-        height: 22,
+        height: 24,
         borderRadius: 4,
         padding: '0 8px',
         background: c.bg,
         border: `1px solid ${c.border}`,
         color: c.color,
-        fontSize: 12,
-        lineHeight: '18px',
+        fontSize: 14,
+        lineHeight: '20px',
       }}
     >
       {label}

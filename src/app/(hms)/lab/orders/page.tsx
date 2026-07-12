@@ -236,10 +236,10 @@ export default function LabOrdersPage() {
             <span
               className="shrink-0 font-sans font-medium sm:hidden"
               style={{
-                fontSize: 12,
-                lineHeight: '18px',
+                fontSize: 14,
+                lineHeight: '20px',
                 borderRadius: 4,
-                padding: '3px 8px',
+                padding: '2px 8px',
                 background: 'rgba(245,158,11,0.30)',
                 border: '1px solid rgba(245,158,11,0.45)',
                 color: '#FCD34D',
@@ -286,10 +286,10 @@ export default function LabOrdersPage() {
               <span
                 className="font-sans font-medium sm:hidden"
                 style={{
-                  fontSize: 12,
-                  lineHeight: '18px',
+                  fontSize: 14,
+                  lineHeight: '20px',
                   borderRadius: 4,
-                  padding: '3px 8px',
+                  padding: '2px 8px',
                   background: 'rgba(239,68,68,0.28)',
                   border: '1px solid rgba(239,68,68,0.40)',
                   color: '#FCA5A5',
@@ -326,10 +326,10 @@ export default function LabOrdersPage() {
           <span
             className="hidden shrink-0 font-sans font-semibold sm:inline"
             style={{
-              fontSize: 12,
-              lineHeight: '18px',
+              fontSize: 14,
+              lineHeight: '20px',
               borderRadius: 6,
-              padding: '5px 12px',
+              padding: '4px 12px',
               background: 'rgba(245,158,11,0.22)',
               border: '1px solid rgba(245,158,11,0.40)',
               color: '#FCD34D',
