@@ -81,10 +81,12 @@ export function AppSidebar({
           'w-70',
           collapsed && 'lg:w-18',
           // Mobile: fixed overlay drawer, slides in from left
-          'fixed inset-y-0 left-0 z-50 h-screen',
+          // h-dvh = dynamic viewport height: excludes browser chrome (address bar,
+          // bottom nav strip) on iOS/Android, so the sign-out button stays visible.
+          'fixed inset-y-0 left-0 z-50 h-dvh',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
           // Desktop: in document flow, no transform needed
-          'lg:static lg:z-auto lg:h-auto lg:min-h-screen lg:translate-x-0',
+          'lg:static lg:z-auto lg:h-auto lg:min-h-dvh lg:translate-x-0',
         )}
         // Inline style handles both transitions correctly without Tailwind class-order conflicts
         style={{
