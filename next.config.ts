@@ -52,8 +52,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // standalone for Docker/DigitalOcean; Netlify sets NETLIFY=true and needs default output
-  output: process.env['NETLIFY'] ? undefined : 'standalone',
+  // Standalone output for Docker deployment on DigitalOcean web-01
+  output: 'standalone',
   poweredByHeader: false,
   async headers() {
     return [
