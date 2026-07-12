@@ -238,7 +238,7 @@ function PatientRecordsModal({
   onClose: () => void;
 }) {
   const toast = useToast();
-  const patient = records[0];
+  const patient = records[0]!;
 
   return (
     <div

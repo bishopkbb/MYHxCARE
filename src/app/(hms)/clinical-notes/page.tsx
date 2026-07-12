@@ -165,13 +165,13 @@ function exportNoteAsPDF(note: ClinicalNote) {
     <hr>
     <div class="content">${escapeHtml(note.content)}</div>
   `;
-  downloadPDF(`${note.type}-note-${note.patientName.split(' ')[0].toLowerCase()}`, body);
+  downloadPDF(`${note.type}-note-${(note.patientName.split(' ')[0] ?? '').toLowerCase()}`, body);
 }
 
 function exportNoteAsCSV(note: ClinicalNote) {
   const typeCfg = NOTE_TYPE_CFG[note.type];
   const statusCfg = STATUS_CFG[note.status];
-  downloadCSV(`${note.type}-note-${note.patientName.split(' ')[0].toLowerCase()}`, [
+  downloadCSV(`${note.type}-note-${(note.patientName.split(' ')[0] ?? '').toLowerCase()}`, [
     ['Type', 'Patient', 'MRN', 'Date', 'Time', 'Doctor', 'Status', 'Urgent', 'Content'],
     [
       typeCfg.label,
@@ -967,7 +967,7 @@ export default function ClinicalNotesPage() {
             setAmendNote(null);
           }}
           onSubmit={handleAddSubmit}
-          amendingNote={amendNote ?? undefined}
+          {...(amendNote ? { amendingNote: amendNote } : {})}
         />
       )}
     </>
