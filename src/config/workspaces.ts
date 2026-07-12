@@ -141,7 +141,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           },
           {
             label: 'Referrals',
-            href: '/patients',
+            href: '/referrals',
             icon: Share2,
             iconSrc: '/icons/referrals.png',
           },
