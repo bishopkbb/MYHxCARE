@@ -22,7 +22,7 @@ jobs:
     environment: staging
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Build and push Docker image to DigitalOcean Container Registry.
       # NEXT_PUBLIC_* vars are build args — they're inlined by Turbopack into
