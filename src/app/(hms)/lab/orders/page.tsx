@@ -54,7 +54,10 @@ function Checkbox({ checked, onChange }: { checked: boolean; onChange: () => voi
       type="button"
       role="checkbox"
       aria-checked={checked}
-      onClick={onChange}
+      onClick={(e) => {
+        e.stopPropagation();
+        onChange();
+      }}
       className="flex shrink-0 items-center justify-center transition-colors"
       style={{
         width: 24,
@@ -112,11 +115,10 @@ function LabCard({
         {category.tests.map((test) => {
           const isChecked = selected.has(test.id);
           return (
-            <button
+            <div
               key={test.id}
-              type="button"
               onClick={() => onToggle(test.id)}
-              className="flex w-full items-center gap-[10px] text-left transition-colors"
+              className="flex w-full cursor-pointer items-center gap-[10px] text-left transition-colors"
               style={{
                 borderRadius: 8,
                 padding: '8px 12px',
@@ -137,7 +139,7 @@ function LabCard({
               >
                 {test.name}
               </span>
-            </button>
+            </div>
           );
         })}
       </div>
