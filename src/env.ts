@@ -12,7 +12,9 @@ const schema = z.object({
   // those environments use mock data and never call the real backend.
   NEXT_PUBLIC_API_BASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_WS_URL: z.string().url().optional(),
-  NEXT_PUBLIC_APP_ENV: z.enum(['development', 'demo', 'staging', 'production']),
+  // Default to 'demo' when the var is absent so preview/hobby deployments
+  // that omit this var don't crash the client bundle — IS_MOCK will be true.
+  NEXT_PUBLIC_APP_ENV: z.enum(['development', 'demo', 'staging', 'production']).default('demo'),
 });
 
 const result = schema.safeParse({
@@ -20,7 +22,7 @@ const result = schema.safeParse({
   // Convert empty string → undefined so .optional() accepts it cleanly.
   NEXT_PUBLIC_API_BASE_URL: process.env['NEXT_PUBLIC_API_BASE_URL'] || undefined,
   NEXT_PUBLIC_WS_URL: process.env['NEXT_PUBLIC_WS_URL'] || undefined,
-  NEXT_PUBLIC_APP_ENV: process.env['NEXT_PUBLIC_APP_ENV'],
+  NEXT_PUBLIC_APP_ENV: process.env['NEXT_PUBLIC_APP_ENV'] || undefined,
 });
 
 if (!result.success) {
