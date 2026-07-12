@@ -322,7 +322,7 @@ function PatientRecordsModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="shrink-0 rounded-full p-1 transition-colors hover:bg-[rgba(0,0,0,0.06)]"
+            className="shrink-0 rounded-full p-1 transition-colors duration-150 hover:bg-[rgba(0,0,0,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
           >
             <X style={{ width: 20, height: 20, color: '#4A7080' }} />
           </button>
@@ -338,7 +338,7 @@ function PatientRecordsModal({
             return (
               <div
                 key={record.id}
-                className="flex cursor-pointer items-center gap-3 px-3 transition-shadow hover:shadow-sm sm:gap-4 sm:px-4"
+                className="flex cursor-pointer items-center gap-3 px-3 transition-shadow duration-150 hover:shadow-sm sm:gap-4 sm:px-4"
                 style={{
                   minHeight: 70,
                   borderRadius: 12,
@@ -428,7 +428,7 @@ function PatientRecordsModal({
             <Link
               href={`/patients/${MRN_TO_PATIENT_ID[patient.mrn]}`}
               onClick={onClose}
-              className="font-sans font-medium transition-opacity hover:opacity-70"
+              className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
             >
               View Patient Profile →
@@ -437,7 +437,7 @@ function PatientRecordsModal({
             <button
               type="button"
               onClick={() => toast.info('Not found', 'No patient profile linked to this MRN.')}
-              className="font-sans font-medium transition-opacity hover:opacity-70"
+              className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{ fontSize: 14, lineHeight: '22px', color: '#8A98A3' }}
             >
               View Patient Profile →
@@ -446,7 +446,7 @@ function PatientRecordsModal({
           <button
             type="button"
             onClick={onClose}
-            className="font-sans font-semibold transition-colors hover:bg-[rgba(0,0,0,0.04)]"
+            className="font-sans font-semibold transition-colors duration-150 hover:bg-[rgba(0,0,0,0.04)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             style={{
               height: 40,
               borderRadius: 10,
@@ -542,7 +542,7 @@ export default function MedicalRecordsPage() {
   return (
     <>
       <main
-        className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6"
+        className="flex-1 overflow-y-auto scroll-smooth px-4 py-4 sm:px-6 sm:py-6"
         style={{ background: '#F5FBFD' }}
       >
         {/* ── Page header ──────────────────────────────────────────────────────── */}
@@ -564,7 +564,7 @@ export default function MedicalRecordsPage() {
               <button
                 type="button"
                 onClick={() => toast.info('Filter', 'Advanced filters coming soon.')}
-                className="flex items-center gap-2 rounded-[10px] px-3 font-sans font-semibold transition-colors hover:bg-slate-50 sm:px-4"
+                className="flex items-center gap-2 rounded-[10px] px-3 font-sans font-semibold transition-colors duration-150 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:px-4"
                 style={{
                   fontSize: 14,
                   lineHeight: '22px',
@@ -631,7 +631,7 @@ export default function MedicalRecordsPage() {
             <button
               type="button"
               onClick={handleRetry}
-              className="mt-5 flex items-center gap-2 font-sans font-semibold transition-colors hover:bg-[rgba(0,100,130,0.06)]"
+              className="mt-5 flex items-center gap-2 font-sans font-semibold transition-colors duration-150 hover:bg-[rgba(0,100,130,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{
                 height: 40,
                 borderRadius: 10,
@@ -722,7 +722,7 @@ export default function MedicalRecordsPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
-                    className="flex shrink-0 items-center gap-1.5 rounded-[9px] px-3 font-sans font-semibold whitespace-nowrap transition-all sm:flex-1 sm:justify-center sm:gap-2 sm:px-4"
+                    className="flex shrink-0 items-center gap-1.5 rounded-[9px] px-3 font-sans font-semibold whitespace-nowrap transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:flex-1 sm:justify-center sm:gap-2 sm:px-4"
                     style={{
                       fontSize: 14,
                       lineHeight: '22px',
@@ -778,7 +778,7 @@ export default function MedicalRecordsPage() {
                   return (
                     <div
                       key={record.id}
-                      className="flex cursor-pointer items-center gap-3 px-3 transition-shadow hover:shadow-sm sm:gap-4 sm:px-4"
+                      className="flex cursor-pointer items-center gap-3 px-3 transition-shadow duration-150 hover:shadow-sm sm:gap-4 sm:px-4"
                       style={{
                         minHeight: 70,
                         borderRadius: 12,

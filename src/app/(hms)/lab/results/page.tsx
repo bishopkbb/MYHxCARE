@@ -479,7 +479,7 @@ export default function LabResultsPage() {
   }
 
   return (
-    <main className="flex-1 overflow-y-auto" style={{ background: '#F5FBFD' }}>
+    <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
       <div className="mx-auto max-w-[1200px]">
         {/* ── Page header ───────────────────────────────────────────────────── */}
         <div
@@ -512,7 +512,7 @@ export default function LabResultsPage() {
               type="button"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="flex shrink-0 items-center gap-2 font-sans font-medium transition-colors hover:bg-slate-50 disabled:opacity-60"
+              className="flex shrink-0 items-center gap-2 font-sans font-medium transition-colors duration-150 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:opacity-60"
               style={{
                 height: 38,
                 borderRadius: 10,
@@ -570,7 +570,7 @@ export default function LabResultsPage() {
               <button
                 type="button"
                 onClick={handleRetry}
-                className="mt-5 flex items-center gap-2 font-sans font-semibold transition-colors hover:bg-[rgba(0,100,130,0.06)]"
+                className="mt-5 flex items-center gap-2 font-sans font-semibold transition-colors duration-150 hover:bg-[rgba(0,100,130,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   height: 40,
                   borderRadius: 10,
@@ -645,7 +645,7 @@ export default function LabResultsPage() {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id)}
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-[9px] px-2 font-sans font-semibold transition-all sm:px-4"
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-[9px] px-2 font-sans font-semibold transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:px-4"
                       style={{
                         height: 36,
                         fontSize: 14,

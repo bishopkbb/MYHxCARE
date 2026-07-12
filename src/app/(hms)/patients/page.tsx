@@ -459,7 +459,7 @@ export default function PatientsPage() {
             <button
               type="button"
               onClick={() => setFilterOpen((o) => !o)}
-              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors hover:bg-gray-50"
+              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors duration-150 hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{
                 background: filterOpen ? '#E6F8FD' : '#FFFFFF',
                 border: `1px solid ${filterOpen ? '#00B4D8' : '#0064821F'}`,
@@ -557,7 +557,7 @@ export default function PatientsPage() {
             <button
               type="button"
               onClick={() => setExportOpen((o) => !o)}
-              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors hover:bg-gray-50"
+              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors duration-150 hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{
                 background: exportOpen ? '#E6F8FD' : '#FFFFFF',
                 border: `1px solid ${exportOpen ? '#00B4D8' : '#0064821F'}`,
@@ -623,7 +623,7 @@ export default function PatientsPage() {
                 <button
                   type="button"
                   onClick={() => setOpenDropdown(isOpen ? null : def.key)}
-                  className="flex h-9 shrink-0 items-center gap-1.5 rounded-[8px] px-3 transition-colors"
+                  className="flex h-9 shrink-0 items-center gap-1.5 rounded-[8px] px-3 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                   style={{
                     background: '#FFFFFF',
                     boxShadow:
@@ -661,7 +661,7 @@ export default function PatientsPage() {
                           key={opt.value}
                           type="button"
                           onClick={() => setQuickFilter(def.key, opt.value)}
-                          className="flex w-full items-center gap-2 px-4 py-2 text-sm leading-5.5 transition-colors hover:bg-[#E6F8FD]"
+                          className="flex w-full items-center gap-2 px-4 py-2 text-sm leading-5.5 transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                           style={{
                             color: selected ? '#00B4D8' : '#2F3A40',
                             fontWeight: selected ? 600 : 400,
@@ -682,7 +682,7 @@ export default function PatientsPage() {
         <button
           type="button"
           onClick={clearQuickFilters}
-          className="flex h-10 shrink-0 items-center gap-1.5 rounded-[8px] px-3 transition-colors hover:bg-[#E6F8FD]"
+          className="flex h-10 shrink-0 items-center gap-1.5 rounded-[8px] px-3 transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
           style={{
             background: '#FFFFFF',
             border: '1px solid #00B4D8',
@@ -896,7 +896,7 @@ export default function PatientsPage() {
                     type="button"
                     aria-label={`View ${patient.name}`}
                     onClick={() => router.push(`/patients/${patient.id}`)}
-                    className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-[8px] transition-colors hover:opacity-80"
+                    className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-[8px] transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ background: '#E2EDF1' }}
                   >
                     <Eye style={{ width: 14, height: 14, color: '#4A7080' }} />
@@ -906,7 +906,7 @@ export default function PatientsPage() {
                       <button
                         type="button"
                         onClick={() => router.push(`/patients/${patient.id}/consultation`)}
-                        className="flex-1 rounded-[8px] py-2 text-center text-sm font-medium text-white transition-opacity hover:opacity-90"
+                        className="flex-1 rounded-[8px] py-2 text-center text-sm font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         style={{ background: '#00B4D8' }}
                       >
                         Start Consultation
@@ -988,7 +988,7 @@ export default function PatientsPage() {
               <button
                 type="button"
                 onClick={handleRetry}
-                className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity hover:opacity-80"
+                className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   height: 40,
                   borderRadius: 12,
@@ -1127,7 +1127,7 @@ export default function PatientsPage() {
                         type="button"
                         aria-label={`View ${patient.name}`}
                         onClick={() => router.push(`/patients/${patient.id}`)}
-                        className="flex size-9 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
+                        className="flex size-9 cursor-pointer items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         style={{ color: '#4A7080' }}
                       >
                         <Eye style={{ width: 17, height: 17 }} />
@@ -1144,7 +1144,7 @@ export default function PatientsPage() {
                           onClick={() =>
                             setActionMenuId((prev) => (prev === patient.id ? null : patient.id))
                           }
-                          className="flex size-9 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-[#E6F8FD]"
+                          className="flex size-9 cursor-pointer items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                           style={{ color: '#4A7080' }}
                         >
                           <MoreVertical style={{ width: 16, height: 16 }} />
@@ -1197,7 +1197,7 @@ export default function PatientsPage() {
                                         'Patient discharge will be available in a future update.',
                                       );
                                   }}
-                                  className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-3 text-sm leading-5.5 transition-colors hover:bg-[#E6F8FD]"
+                                  className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-3 text-sm leading-5.5 transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                                   style={{ color: action.danger ? '#EF4444' : '#2F3A40' }}
                                 >
                                   <ActionIcon

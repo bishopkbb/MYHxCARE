@@ -127,7 +127,7 @@ export function AppSidebar({
                 type="button"
                 onClick={onToggleCollapse}
                 aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                className="flex size-8 items-center justify-center rounded-[8px] transition-colors hover:bg-white/20"
+                className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none"
                 style={{
                   background: 'rgba(255,255,255,0.1)',
                   border: '1px solid rgba(255,255,255,0.15)',
@@ -209,7 +209,7 @@ export function AppSidebar({
               aria-label="Sign out"
               title={collapsed ? 'Sign out' : undefined}
               className={cn(
-                'flex w-full items-center rounded-[8px] transition-colors hover:bg-white/5',
+                'flex w-full items-center rounded-[8px] transition-colors duration-150 hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none',
                 collapsed ? 'justify-center px-2 py-2' : 'gap-2.5 px-3 py-2',
               )}
             >
@@ -250,7 +250,7 @@ function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
         aria-current={active ? 'page' : undefined}
         title={collapsed ? item.label : undefined}
         className={cn(
-          'flex items-center rounded-[8px] transition-colors',
+          'flex items-center rounded-[8px] transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none',
           collapsed ? 'justify-center px-2 py-2' : 'gap-2.5 px-3 py-2',
           active ? 'text-white' : 'text-white/70 hover:bg-white/5 hover:text-white',
         )}

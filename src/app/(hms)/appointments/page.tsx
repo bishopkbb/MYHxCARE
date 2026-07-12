@@ -158,7 +158,7 @@ export default function AppointmentsPage() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <main className="flex-1 overflow-y-auto" style={{ background: '#F5FBFD' }}>
+      <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
         <div className="mx-auto max-w-[1200px]">
           {/* ── Page header ─────────────────────────────────────────────────── */}
           <div
@@ -211,7 +211,7 @@ export default function AppointmentsPage() {
                 <button
                   type="button"
                   onClick={handleRetry}
-                  className="flex items-center gap-2 transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  className="flex items-center gap-2 transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                   style={{
                     borderRadius: 8,
                     border: '1px solid rgba(0,100,130,0.20)',

@@ -66,7 +66,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
         type="button"
         onClick={onMenuToggle}
         aria-label="Open navigation menu"
-        className="ml-4 flex size-8 shrink-0 items-center justify-center rounded-md text-[#25464D]/60 transition-colors hover:bg-[#25464D]/5 lg:hidden"
+        className="ml-4 flex size-8 shrink-0 items-center justify-center rounded-md text-[#25464D]/60 transition-colors duration-150 hover:bg-[#25464D]/5 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none lg:hidden"
       >
         <Menu className="size-5" />
       </button>
@@ -100,7 +100,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
           <button
             type="button"
             aria-label="Refresh"
-            className="flex items-center justify-center text-[#25464D]/50 transition-colors hover:text-[#25464D]"
+            className="flex items-center justify-center text-[#25464D]/50 transition-colors duration-150 hover:text-[#25464D] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
           >
             <RefreshCw style={{ width: 18, height: 18 }} />
           </button>
@@ -110,7 +110,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
         <button
           type="button"
           aria-label="Notifications"
-          className="relative flex items-center justify-center text-[#25464D]/50 transition-colors hover:text-[#25464D]"
+          className="relative flex items-center justify-center text-[#25464D]/50 transition-colors duration-150 hover:text-[#25464D] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
         >
           <Bell style={{ width: 18, height: 18 }} />
           <span

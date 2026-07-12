@@ -532,7 +532,7 @@ export default function DashboardPage() {
           {/* Button — full-width on mobile, auto-width inline on sm+ */}
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-1.5 rounded-[12px] px-4 py-2 text-sm leading-5.5 font-medium text-white transition-opacity hover:opacity-90 sm:w-auto sm:shrink-0 sm:justify-start"
+            className="flex w-full items-center justify-center gap-1.5 rounded-[12px] px-4 py-2 text-sm leading-5.5 font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:w-auto sm:shrink-0 sm:justify-start"
             style={{ background: '#EF4444' }}
           >
             Open Record
@@ -554,7 +554,7 @@ export default function DashboardPage() {
               <Link
                 key={action.label}
                 href={action.href}
-                className="flex items-center gap-3 rounded-[12px] p-3.5 transition-opacity hover:opacity-90"
+                className="flex items-center gap-3 rounded-[12px] p-3.5 transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={
                   action.active
                     ? { background: '#00B4D8', border: '1px solid rgba(0,0,0,0.1)' }
@@ -742,7 +742,7 @@ export default function DashboardPage() {
             <button
               type="button"
               onClick={handleRetry}
-              className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity hover:opacity-80"
+              className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{
                 height: 40,
                 borderRadius: 12,
@@ -843,7 +843,7 @@ export default function DashboardPage() {
             {/* Right: View All link */}
             <button
               type="button"
-              className="flex items-center gap-0.5 transition-opacity hover:opacity-70"
+              className="flex items-center gap-0.5 transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             >
               <span className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
                 View All
@@ -914,7 +914,7 @@ export default function DashboardPage() {
                       <div className="hidden shrink-0 pl-1 sm:block">
                         <button
                           type="button"
-                          className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors hover:bg-[#00B4D8] hover:text-white"
+                          className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors duration-150 hover:bg-[#00B4D8] hover:text-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                           style={{ border: '1px solid #00B4D8' }}
                         >
                           Consult
@@ -962,7 +962,7 @@ export default function DashboardPage() {
             {/* Right: View All */}
             <button
               type="button"
-              className="flex items-center gap-0.5 transition-opacity hover:opacity-70"
+              className="flex items-center gap-0.5 transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             >
               <span className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
                 View All

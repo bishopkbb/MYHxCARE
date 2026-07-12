@@ -359,7 +359,7 @@ export default function EncountersPage() {
             <button
               type="button"
               onClick={() => setFilterOpen((o) => !o)}
-              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors hover:bg-gray-50"
+              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors duration-150 hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{
                 background: filterOpen ? '#E6F8FD' : '#FFFFFF',
                 border: `1px solid ${filterOpen ? '#00B4D8' : '#0064821F'}`,
@@ -459,7 +459,7 @@ export default function EncountersPage() {
             <button
               type="button"
               onClick={() => setExportOpen((o) => !o)}
-              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors hover:bg-gray-50"
+              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors duration-150 hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{
                 background: exportOpen ? '#E6F8FD' : '#FFFFFF',
                 border: `1px solid ${exportOpen ? '#00B4D8' : '#0064821F'}`,
@@ -484,7 +484,7 @@ export default function EncountersPage() {
                     exportCSV();
                     setExportOpen(false);
                   }}
-                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors hover:bg-[#E6F8FD]"
+                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                   style={{ color: '#2F3A40' }}
                 >
                   <FileText style={{ width: 16, height: 16, color: '#00B4D8' }} />
@@ -496,7 +496,7 @@ export default function EncountersPage() {
                     exportPDF();
                     setExportOpen(false);
                   }}
-                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors hover:bg-[#E6F8FD]"
+                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                   style={{ color: '#2F3A40' }}
                 >
                   <Printer style={{ width: 16, height: 16, color: '#00B4D8' }} />
@@ -536,7 +536,7 @@ export default function EncountersPage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className="flex shrink-0 items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-base leading-6 font-medium transition-colors"
+              className="flex shrink-0 items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-base leading-6 font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{
                 background: isActive ? '#FFFFFF' : 'transparent',
                 color: '#2F3A40',
@@ -797,7 +797,7 @@ export default function EncountersPage() {
                   <button
                     type="button"
                     onClick={() => router.push(`/patients/${patient.patientId ?? patient.id}`)}
-                    className="flex shrink-0 items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
+                    className="flex shrink-0 items-center justify-center rounded-[8px] transition-opacity duration-150 hover:opacity-75 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ width: 44, height: 44, background: '#E2EDF1' }}
                     aria-label={`View details for ${patient.name}`}
                   >
@@ -810,7 +810,7 @@ export default function EncountersPage() {
                       onClick={() =>
                         router.push(`/patients/${patient.patientId ?? patient.id}/consultation`)
                       }
-                      className="flex min-h-[44px] flex-1 items-center justify-center rounded-[8px] text-sm font-medium text-white transition-opacity disabled:cursor-default disabled:opacity-60"
+                      className="flex min-h-[44px] flex-1 items-center justify-center rounded-[8px] text-sm font-medium text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
                       style={{
                         background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
                       }}
@@ -893,7 +893,7 @@ export default function EncountersPage() {
               <button
                 type="button"
                 onClick={handleRetry}
-                className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity hover:opacity-80"
+                className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   height: 40,
                   borderRadius: 12,
@@ -1074,7 +1074,7 @@ export default function EncountersPage() {
                       <button
                         type="button"
                         onClick={() => router.push(`/patients/${patient.patientId ?? patient.id}`)}
-                        className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-[8px] transition-opacity hover:opacity-75"
+                        className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-[8px] transition-opacity duration-150 hover:opacity-75 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         style={{ background: '#E2EDF1' }}
                         aria-label={`View details for ${patient.name}`}
                       >
@@ -1087,7 +1087,7 @@ export default function EncountersPage() {
                           onClick={() =>
                             router.push(`/patients/${patient.patientId ?? patient.id}/consultation`)
                           }
-                          className="flex-1 cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-default disabled:opacity-60"
+                          className="flex-1 cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
                           style={{
                             background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
                           }}

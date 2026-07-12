@@ -433,7 +433,7 @@ function UpcomingShiftRow({
               <button
                 type="button"
                 onClick={() => onConfirm(shift.id)}
-                className="font-sans font-medium transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                className="font-sans font-medium transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   borderRadius: 8,
                   border: 'none',
@@ -451,7 +451,7 @@ function UpcomingShiftRow({
               <button
                 type="button"
                 onClick={() => onCannotAttend(shift.id)}
-                className="font-sans font-medium transition-colors hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-300/50 focus-visible:outline-none"
+                className="font-sans font-medium transition-colors duration-150 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-300/50 focus-visible:outline-none"
                 style={{
                   borderRadius: 8,
                   border: '1px solid rgba(239,68,68,0.35)',
@@ -637,7 +637,7 @@ export default function MySchedulePage() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <main className="flex-1 overflow-y-auto" style={{ background: '#F5FBFD' }}>
+      <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
         <div className="mx-auto max-w-[1200px]">
           {/* ── Page header ──────────────────────────────────────────────────── */}
           <div
@@ -788,7 +788,7 @@ export default function MySchedulePage() {
                 <button
                   type="button"
                   onClick={handleRetry}
-                  className="flex items-center gap-2 transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  className="flex items-center gap-2 transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                   style={{
                     borderRadius: 8,
                     border: '1px solid rgba(0,100,130,0.20)',
@@ -906,7 +906,7 @@ export default function MySchedulePage() {
                       ) : (
                         <button
                           type="button"
-                          className="font-sans font-medium transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          className="font-sans font-medium transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                           style={{
                             borderRadius: 20,
                             border: 'none',
@@ -956,7 +956,7 @@ export default function MySchedulePage() {
                     This Week
                   </p>
 
-                  <div className="overflow-x-auto pb-1">
+                  <div className="overflow-x-auto scroll-smooth pb-1">
                     <div className="flex gap-4 lg:gap-[50px]" style={{ minWidth: 'min-content' }}>
                       {MOCK_WEEK_DAYS.map((day) => (
                         <WeekDayCard key={day.dayName} day={day} />

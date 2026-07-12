@@ -273,7 +273,7 @@ function ViewNoteModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="shrink-0 rounded-full p-1 transition-colors hover:bg-[rgba(0,0,0,0.06)]"
+            className="shrink-0 rounded-full p-1 transition-colors duration-150 hover:bg-[rgba(0,0,0,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
           >
             <X style={{ width: 20, height: 20, color: '#4A7080' }} />
           </button>
@@ -364,7 +364,7 @@ function ViewNoteModal({
           <button
             type="button"
             onClick={onAmend}
-            className="font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+            className="font-sans font-semibold transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             style={{
               height: 40,
               borderRadius: 10,
@@ -386,7 +386,7 @@ function ViewNoteModal({
           <button
             type="button"
             onClick={onClose}
-            className="font-sans font-semibold transition-colors hover:bg-[rgba(0,0,0,0.04)]"
+            className="font-sans font-semibold transition-colors duration-150 hover:bg-[rgba(0,0,0,0.04)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             style={{
               height: 44,
               borderRadius: 12,
@@ -501,7 +501,7 @@ function AddNoteModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="shrink-0 rounded-full p-1 transition-colors hover:bg-[rgba(0,0,0,0.06)]"
+            className="shrink-0 rounded-full p-1 transition-colors duration-150 hover:bg-[rgba(0,0,0,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
           >
             <X style={{ width: 20, height: 20, color: '#4A7080' }} />
           </button>
@@ -567,7 +567,7 @@ function AddNoteModal({
                 key={s.key}
                 type="button"
                 onClick={() => jumpToSection(s.key)}
-                className="rounded-[10px] px-4 py-2.5 text-left font-sans font-medium transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+                className="rounded-[10px] px-4 py-2.5 text-left font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   fontSize: 14,
                   lineHeight: '22px',
@@ -622,7 +622,7 @@ function AddNoteModal({
           <button
             type="button"
             onClick={onClose}
-            className="font-sans font-semibold transition-colors hover:bg-[rgba(0,0,0,0.04)]"
+            className="font-sans font-semibold transition-colors duration-150 hover:bg-[rgba(0,0,0,0.04)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             style={{
               height: 44,
               borderRadius: 12,
@@ -639,7 +639,7 @@ function AddNoteModal({
           <button
             type="button"
             onClick={handleSubmit}
-            className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity hover:opacity-90"
+            className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             style={{
               height: 44,
               borderRadius: 12,
@@ -753,7 +753,7 @@ export default function ClinicalNotesPage() {
   return (
     <>
       <main
-        className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6"
+        className="flex-1 overflow-y-auto scroll-smooth px-4 py-4 sm:px-6 sm:py-6"
         style={{ background: '#F5FBFD' }}
       >
         {/* ── Page header ──────────────────────────────────────────────────────── */}
@@ -776,7 +776,7 @@ export default function ClinicalNotesPage() {
           <button
             type="button"
             onClick={() => setShowAdd(true)}
-            className="flex shrink-0 items-center gap-2 font-sans font-semibold text-white transition-opacity hover:opacity-90"
+            className="flex shrink-0 items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             style={{
               height: 40,
               borderRadius: 12,
@@ -858,7 +858,7 @@ export default function ClinicalNotesPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className="flex shrink-0 items-center justify-center rounded-[9px] px-3 font-sans font-semibold whitespace-nowrap transition-all sm:flex-1 sm:px-4"
+                className="flex shrink-0 items-center justify-center rounded-[9px] px-3 font-sans font-semibold whitespace-nowrap transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:flex-1 sm:px-4"
                 style={{
                   fontSize: 14,
                   lineHeight: '22px',
@@ -891,7 +891,7 @@ export default function ClinicalNotesPage() {
             <button
               type="button"
               onClick={handleRetry}
-              className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity hover:opacity-80"
+              className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{
                 height: 40,
                 borderRadius: 12,
@@ -1034,7 +1034,7 @@ export default function ClinicalNotesPage() {
                         <button
                           type="button"
                           onClick={() => setViewNote(note)}
-                          className="font-sans font-medium transition-opacity hover:opacity-70"
+                          className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                           style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
                         >
                           View Full Note

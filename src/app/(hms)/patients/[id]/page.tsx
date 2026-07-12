@@ -355,7 +355,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex shrink-0 items-center gap-1.5"
+            className="flex shrink-0 items-center gap-1.5 rounded-[6px] transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
           >
             <ChevronLeft style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.58)' }} />
             <span className="text-sm leading-[22px]" style={{ color: 'rgba(255,255,255,0.58)' }}>
@@ -613,7 +613,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               <button
                 type="button"
                 onClick={() => router.push(`/patients/${id}/consultation`)}
-                className="flex w-full items-center justify-center gap-2 rounded-[12px] px-4 font-semibold text-white transition-opacity hover:opacity-90 sm:w-auto sm:justify-start"
+                className="flex w-full items-center justify-center gap-2 rounded-[12px] px-4 font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:w-auto sm:justify-start"
                 style={{
                   fontFamily: 'inherit',
                   fontSize: 16,
@@ -641,7 +641,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                       'Prescription writing will be available in a future update.',
                     )
                   }
-                  className="flex flex-1 items-center justify-center gap-2 rounded-[12px] px-4 font-semibold whitespace-nowrap transition-colors hover:bg-[#E6F8FD] sm:flex-none"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-[12px] px-4 font-semibold whitespace-nowrap transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:flex-none"
                   style={{
                     fontFamily: 'inherit',
                     fontSize: 16,
@@ -667,7 +667,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   onClick={() =>
                     toast.info('Coming soon', 'Lab requests will be available in a future update.')
                   }
-                  className="flex flex-1 items-center justify-center gap-2 rounded-[12px] px-4 font-semibold whitespace-nowrap transition-colors hover:bg-[#E6F8FD] sm:flex-none"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-[12px] px-4 font-semibold whitespace-nowrap transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:flex-none"
                   style={{
                     fontFamily: 'inherit',
                     fontSize: 16,
@@ -705,7 +705,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className="font-display flex items-center gap-2 border-b-2 px-5 py-3.5 font-semibold whitespace-nowrap transition-colors"
+                  className="font-display flex items-center gap-2 border-b-2 px-5 py-3.5 font-semibold whitespace-nowrap transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                   style={{
                     fontSize: 16,
                     lineHeight: '24px',
@@ -805,7 +805,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   <button
                     type="button"
                     onClick={retryBiodata}
-                    className="mt-1 flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80"
+                    className="mt-1 flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ background: '#E2EDF1', color: '#25464D' }}
                   >
                     <RefreshCw style={{ width: 14, height: 14 }} />
@@ -1172,7 +1172,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   <button
                     type="button"
                     onClick={retryMedHist}
-                    className="mt-1 flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80"
+                    className="mt-1 flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ background: '#E2EDF1', color: '#25464D' }}
                   >
                     <RefreshCw style={{ width: 14, height: 14 }} />
@@ -1218,7 +1218,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         type="button"
                         onClick={() => toggleSection('pastDiagnoses')}
                         aria-expanded={openSections.pastDiagnoses}
-                        className="flex w-full items-center justify-between px-4 py-2"
+                        className="flex w-full items-center justify-between px-4 py-2 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                       >
                         <h4
@@ -1334,7 +1334,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         type="button"
                         onClick={() => toggleSection('familyHistory')}
                         aria-expanded={openSections.familyHistory}
-                        className="flex w-full items-center justify-between px-4 py-2"
+                        className="flex w-full items-center justify-between px-4 py-2 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                       >
                         <h4
@@ -1446,7 +1446,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         type="button"
                         onClick={() => toggleSection('immunizationHistory')}
                         aria-expanded={openSections.immunizationHistory}
-                        className="flex w-full items-center justify-between px-4 py-2"
+                        className="flex w-full items-center justify-between px-4 py-2 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                       >
                         <h4
@@ -1563,7 +1563,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         type="button"
                         onClick={() => toggleSection('surgicalHistory')}
                         aria-expanded={openSections.surgicalHistory}
-                        className="flex w-full items-center justify-between px-4 py-2"
+                        className="flex w-full items-center justify-between px-4 py-2 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                       >
                         <h4
@@ -1675,7 +1675,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         type="button"
                         onClick={() => toggleSection('chronicConditions')}
                         aria-expanded={openSections.chronicConditions}
-                        className="flex w-full items-center justify-between px-4 py-2"
+                        className="flex w-full items-center justify-between px-4 py-2 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                       >
                         <h4
@@ -1793,7 +1793,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         type="button"
                         onClick={() => toggleSection('allergiesHistory')}
                         aria-expanded={openSections.allergiesHistory}
-                        className="flex w-full items-center justify-between px-4 py-2"
+                        className="flex w-full items-center justify-between px-4 py-2 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                       >
                         <h4
@@ -1989,7 +1989,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   <button
                     type="button"
                     onClick={retryAllergies}
-                    className="mt-1 flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-opacity hover:opacity-80"
+                    className="mt-1 flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ background: '#E2EDF1', color: '#25464D' }}
                   >
                     <RefreshCw style={{ width: 14, height: 14 }} />
@@ -2190,7 +2190,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   </div>
                   <button
                     onClick={retryVitals}
-                    className="flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors hover:opacity-90"
+                    className="flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ fontSize: 14, background: '#00B4D8', color: '#FFFFFF' }}
                   >
                     <RefreshCw aria-hidden style={{ width: 15, height: 15 }} />
@@ -2364,7 +2364,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   <button
                     type="button"
                     onClick={retryConsultations}
-                    className="rounded-[8px] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                    className="rounded-[8px] px-4 py-2 text-sm font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ background: '#0D2630' }}
                   >
                     Retry
@@ -2521,7 +2521,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   <button
                     type="button"
                     onClick={retryMedications}
-                    className="rounded-[8px] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                    className="rounded-[8px] px-4 py-2 text-sm font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ background: '#0D2630' }}
                   >
                     Retry
@@ -2689,7 +2689,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   <button
                     type="button"
                     onClick={retryLabResults}
-                    className="rounded-[8px] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                    className="rounded-[8px] px-4 py-2 text-sm font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ background: '#0D2630' }}
                   >
                     Retry
