@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useEffect } from 'react';
 
 import { resolveWorkspace } from '@/types/auth.types';
@@ -76,24 +76,35 @@ export function AppSidebar({
       <aside
         aria-label="Application sidebar"
         className={cn(
-          'flex shrink-0 flex-col overflow-hidden transition-[width] duration-[250ms] ease-in-out',
-          collapsed ? 'w-18' : 'w-70',
-          // Mobile: fixed viewport-height overlay drawer with its own scroll
-          'fixed inset-y-0 left-0 z-50 h-screen transition-transform duration-[250ms] ease-in-out',
+          'flex shrink-0 flex-col overflow-hidden',
+          // Mobile: always full width; desktop: collapses to icon rail
+          'w-70',
+          collapsed && 'lg:w-18',
+          // Mobile: fixed overlay drawer, slides in from left
+          'fixed inset-y-0 left-0 z-50 h-screen',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
-          // Desktop: in document flow, grows with page content
+          // Desktop: in document flow, no transform needed
           'lg:static lg:z-auto lg:h-auto lg:min-h-screen lg:translate-x-0',
         )}
-        style={{ background: '#25464D', borderRight: '1px solid rgba(255,255,255,0.071)' }}
+        // Inline style handles both transitions correctly without Tailwind class-order conflicts
+        style={{
+          background: '#25464D',
+          borderRight: '1px solid rgba(255,255,255,0.071)',
+          transition: 'width 250ms ease-in-out, transform 250ms ease-in-out',
+        }}
       >
         {/* ── Header ───────────────────────────────────────────────────── */}
         <div
-          className={cn('shrink-0', collapsed ? 'px-[11px] py-4' : 'p-4')}
+          className={cn(
+            'shrink-0',
+            // Mobile: always expanded padding; desktop respects collapsed
+            collapsed ? 'p-4 lg:px-[11px] lg:py-4' : 'p-4',
+          )}
           style={{ borderBottom: '1px solid rgba(255,255,255,0.078)' }}
         >
-          {/* Logo + brand + toggle */}
-          <div className={cn('flex items-center gap-2.5', collapsed && 'flex-col')}>
-            {/* Logo — navigates home */}
+          {/* Logo + brand + controls */}
+          <div className={cn('flex items-center gap-2.5', collapsed && 'lg:flex-col')}>
+            {/* Logo */}
             <Link
               href="/dashboard"
               aria-label="Go to home dashboard"
@@ -109,20 +120,32 @@ export function AppSidebar({
               />
             </Link>
 
-            {/* Brand text — hidden when collapsed */}
-            {!collapsed && (
-              <div className="min-w-0 flex-1">
-                <p className="font-display truncate text-[20px] leading-7 font-semibold text-white">
-                  MyHxCare HMS
-                </p>
-                <p className="truncate text-sm leading-5.5" style={{ color: '#0098CC' }}>
-                  UNIZIK Medical Centre
-                </p>
-              </div>
-            )}
+            {/* Brand text — always visible on mobile; hidden on desktop when collapsed */}
+            <div className={cn('min-w-0 flex-1', collapsed && 'lg:hidden')}>
+              <p className="font-display truncate text-[20px] leading-7 font-semibold text-white">
+                MyHxCare HMS
+              </p>
+              <p className="truncate text-sm leading-5.5" style={{ color: '#0098CC' }}>
+                UNIZIK Medical Centre
+              </p>
+            </div>
 
-            {/* Toggle container — own separate container beside the brand name */}
-            <div className={cn('shrink-0', !collapsed && 'ml-auto')}>
+            {/* Mobile: X close button — hidden on desktop */}
+            <button
+              type="button"
+              onClick={onMobileClose}
+              aria-label="Close navigation menu"
+              className="ml-auto flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none lg:hidden"
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.15)',
+              }}
+            >
+              <X style={{ width: 16, height: 16, color: '#FFFFFF' }} />
+            </button>
+
+            {/* Desktop: collapse toggle — hidden on mobile */}
+            <div className={cn('hidden shrink-0 lg:block', !collapsed && 'lg:ml-auto')}>
               <button
                 type="button"
                 onClick={onToggleCollapse}
@@ -142,40 +165,41 @@ export function AppSidebar({
             </div>
           </div>
 
-          {/* Doctor info card — hidden when collapsed */}
-          {!collapsed && (
-            <div className="pt-4">
+          {/* Doctor info card — always visible on mobile; hidden on desktop when collapsed */}
+          <div className={cn('pt-4', collapsed && 'lg:hidden')}>
+            <div
+              className="flex items-center gap-2.5 rounded-[12px] p-2.5"
+              style={{ background: 'rgba(255,255,255,0.059)' }}
+            >
               <div
-                className="flex items-center gap-2.5 rounded-[12px] p-2.5"
-                style={{ background: 'rgba(255,255,255,0.059)' }}
+                className="flex size-12.5 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                style={{ background: '#00B4D8' }}
               >
-                <div
-                  className="flex size-12.5 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-                  style={{ background: '#00B4D8' }}
-                >
-                  {getInitials(user?.name ?? '')}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-base leading-6 text-white">{user?.name ?? '—'}</p>
-                  <p className="truncate text-sm leading-5" style={{ color: '#0098CC' }}>
-                    {user?.role ?? ''}
-                  </p>
-                </div>
+                {getInitials(user?.name ?? '')}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-base leading-6 text-white">{user?.name ?? '—'}</p>
+                <p className="truncate text-sm leading-5" style={{ color: '#0098CC' }}>
+                  {user?.role ?? ''}
+                </p>
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* ── Navigation ───────────────────────────────────────────────── */}
         <nav
           aria-label="Main navigation"
-          className="flex-1 overflow-x-hidden overflow-y-auto py-3 lg:overflow-y-visible"
+          className="flex-1 overflow-x-hidden overflow-y-auto scroll-smooth py-3"
         >
           {sections.map((section, idx) => (
             <div key={section.label ?? idx} className="mb-3 px-2">
-              {section.label && !collapsed && (
+              {section.label && (
                 <p
-                  className="px-3 text-sm leading-5 font-bold uppercase"
+                  className={cn(
+                    'px-3 text-sm leading-5 font-bold uppercase',
+                    collapsed && 'lg:hidden',
+                  )}
                   style={{ color: '#0098CC' }}
                 >
                   {section.label}
@@ -209,8 +233,8 @@ export function AppSidebar({
               aria-label="Sign out"
               title={collapsed ? 'Sign out' : undefined}
               className={cn(
-                'flex w-full items-center rounded-[8px] transition-colors duration-150 hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none',
-                collapsed ? 'justify-center px-2 py-2' : 'gap-2.5 px-3 py-2',
+                'flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2 transition-colors duration-150 hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none',
+                collapsed && 'lg:justify-center lg:gap-0 lg:px-2 lg:py-2',
               )}
             >
               <Image
@@ -221,11 +245,12 @@ export function AppSidebar({
                 aria-hidden
                 className="shrink-0"
               />
-              {!collapsed && (
-                <span className="text-sm leading-5.5" style={{ color: 'rgba(255,255,255,0.38)' }}>
-                  Sign Out
-                </span>
-              )}
+              <span
+                className={cn('text-sm leading-5.5', collapsed && 'lg:hidden')}
+                style={{ color: 'rgba(255,255,255,0.38)' }}
+              >
+                Sign Out
+              </span>
             </button>
           </div>
         </div>
@@ -250,8 +275,8 @@ function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
         aria-current={active ? 'page' : undefined}
         title={collapsed ? item.label : undefined}
         className={cn(
-          'flex items-center rounded-[8px] transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none',
-          collapsed ? 'justify-center px-2 py-2' : 'gap-2.5 px-3 py-2',
+          'flex items-center gap-2.5 rounded-[8px] px-3 py-2 transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none',
+          collapsed && 'lg:justify-center lg:gap-0 lg:px-2 lg:py-2',
           active ? 'text-white' : 'text-white/70 hover:bg-white/5 hover:text-white',
         )}
         style={active ? { background: '#1F3D43' } : undefined}
@@ -278,20 +303,22 @@ function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
           <Icon className="size-4.5 shrink-0" style={active ? { color: '#0098CC' } : undefined} />
         )}
 
-        {/* Label + badge/arrow — hidden when collapsed */}
-        {!collapsed && (
-          <>
-            <span className="flex-1 truncate text-base leading-6">{item.label}</span>
+        {/* Label — always visible on mobile; hidden on desktop when collapsed */}
+        <span className={cn('flex-1 truncate text-base leading-6', collapsed && 'lg:hidden')}>
+          {item.label}
+        </span>
 
-            {item.badge !== undefined && (
-              <span
-                className="flex size-6 shrink-0 items-center justify-center rounded-full leading-none font-black text-white"
-                style={{ background: '#FB2C36', fontSize: 14 }}
-              >
-                {item.badge}
-              </span>
+        {/* Badge — always visible on mobile; hidden on desktop when collapsed */}
+        {item.badge !== undefined && (
+          <span
+            className={cn(
+              'flex size-6 shrink-0 items-center justify-center rounded-full leading-none font-black text-white',
+              collapsed && 'lg:hidden',
             )}
-          </>
+            style={{ background: '#FB2C36', fontSize: 14 }}
+          >
+            {item.badge}
+          </span>
         )}
       </Link>
     </li>
