@@ -10,19 +10,23 @@ const schema = z.object({
   //
   // API_BASE_URL and WS_URL are optional in development/demo mode because
   // those environments use mock data and never call the real backend.
-  NEXT_PUBLIC_API_BASE_URL: z.string().url().optional(),
-  NEXT_PUBLIC_WS_URL: z.string().url().optional(),
-  // Default to 'demo' when the var is absent so preview/hobby deployments
-  // that omit this var don't crash the client bundle — IS_MOCK will be true.
-  NEXT_PUBLIC_APP_ENV: z.enum(['development', 'demo', 'staging', 'production']).default('demo'),
+  // .catch(undefined): Turbopack inlines the string "undefined" (not the JS
+  // keyword) when a NEXT_PUBLIC_* var is absent from the build environment.
+  // "undefined" is truthy so `|| undefined` does not filter it, and
+  // z.string().url() correctly rejects it. .catch() absorbs any invalid value
+  // and falls back to undefined so the build never throws on missing URL vars.
+  NEXT_PUBLIC_API_BASE_URL: z.string().url().optional().catch(undefined),
+  NEXT_PUBLIC_WS_URL: z.string().url().optional().catch(undefined),
+  // .catch('demo'): same Turbopack inlining issue applies; also guards against
+  // any typo in the Vercel env var dashboard.
+  NEXT_PUBLIC_APP_ENV: z.enum(['development', 'demo', 'staging', 'production']).catch('demo'),
 });
 
 const result = schema.safeParse({
   NODE_ENV: process.env['NODE_ENV'],
-  // Convert empty string → undefined so .optional() accepts it cleanly.
-  NEXT_PUBLIC_API_BASE_URL: process.env['NEXT_PUBLIC_API_BASE_URL'] || undefined,
-  NEXT_PUBLIC_WS_URL: process.env['NEXT_PUBLIC_WS_URL'] || undefined,
-  NEXT_PUBLIC_APP_ENV: process.env['NEXT_PUBLIC_APP_ENV'] || undefined,
+  NEXT_PUBLIC_API_BASE_URL: process.env['NEXT_PUBLIC_API_BASE_URL'],
+  NEXT_PUBLIC_WS_URL: process.env['NEXT_PUBLIC_WS_URL'],
+  NEXT_PUBLIC_APP_ENV: process.env['NEXT_PUBLIC_APP_ENV'],
 });
 
 if (!result.success) {
