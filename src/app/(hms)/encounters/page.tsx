@@ -2,6 +2,7 @@
 
 import {
   Activity,
+  AlertCircle,
   AlertTriangle,
   Clock,
   Download,
@@ -10,6 +11,7 @@ import {
   Heart,
   ListFilter,
   Printer,
+  RefreshCw,
   Search,
   Thermometer,
   Users,
@@ -220,6 +222,8 @@ function getTabCount(tabId: string): number {
   return MOCK_QUEUE.filter((p) => p.status === status).length;
 }
 
+type PageState = 'loading' | 'loaded' | 'error';
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function EncountersPage() {
@@ -233,7 +237,7 @@ export default function EncountersPage() {
     gender: 'all',
     allergies: 'all',
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [pageState, setPageState] = useState<PageState>('loading');
   const filterRef = useRef<HTMLDivElement>(null);
   const exportRef = useRef<HTMLDivElement>(null);
 
@@ -251,9 +255,14 @@ export default function EncountersPage() {
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => setIsLoading(false), 1200);
+    const t = setTimeout(() => setPageState('loaded'), 1200);
     return () => clearTimeout(t);
   }, []);
+
+  function handleRetry() {
+    setPageState('loading');
+    setTimeout(() => setPageState('loaded'), 1200);
+  }
 
   const activeFilterCount = [
     activeFilters.gender !== 'all',
@@ -557,7 +566,7 @@ export default function EncountersPage() {
 
       {/* ── Mobile card view — visible below lg ─────────────────────────── */}
       <div className="mt-6 space-y-3 lg:hidden">
-        {isLoading ? (
+        {pageState === 'loading' ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
               <div
@@ -610,6 +619,29 @@ export default function EncountersPage() {
                 </div>
               </div>
             ))}
+          </div>
+        ) : pageState === 'error' ? (
+          <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px] py-10 text-center">
+            <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
+            <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+              Failed to load encounters
+            </p>
+            <button
+              type="button"
+              onClick={handleRetry}
+              className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity hover:opacity-80"
+              style={{
+                height: 40,
+                borderRadius: 12,
+                padding: '0 20px',
+                background: '#00B4D8',
+                fontSize: 14,
+                lineHeight: '22px',
+              }}
+            >
+              <RefreshCw style={{ width: 16, height: 16 }} />
+              Retry
+            </button>
           </div>
         ) : filteredQueue.length === 0 ? (
           <div
@@ -814,7 +846,7 @@ export default function EncountersPage() {
           </div>
 
           {/* Table rows */}
-          {isLoading ? (
+          {pageState === 'loading' ? (
             <div className="flex flex-col gap-2 pt-2">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
@@ -851,6 +883,29 @@ export default function EncountersPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          ) : pageState === 'error' ? (
+            <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 py-10 text-center">
+              <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
+              <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                Failed to load encounters
+              </p>
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity hover:opacity-80"
+                style={{
+                  height: 40,
+                  borderRadius: 12,
+                  padding: '0 20px',
+                  background: '#00B4D8',
+                  fontSize: 14,
+                  lineHeight: '22px',
+                }}
+              >
+                <RefreshCw style={{ width: 16, height: 16 }} />
+                Retry
+              </button>
             </div>
           ) : filteredQueue.length === 0 ? (
             <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 py-10 text-center">
