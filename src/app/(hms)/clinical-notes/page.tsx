@@ -1,16 +1,6 @@
 'use client';
 
-import {
-  AlertTriangle,
-  ChevronDown,
-  Download,
-  FileText,
-  Info,
-  Plus,
-  Search,
-  Send,
-  X,
-} from 'lucide-react';
+import { AlertTriangle, ChevronDown, FileText, Info, Plus, Search, Send, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
@@ -20,6 +10,8 @@ import {
   type NoteStatus,
   type NoteType,
 } from '@/features/clinical-notes/__mocks__/clinicalNoteFixtures';
+import { ExportMenu } from '@/components/ExportMenu';
+import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -162,6 +154,39 @@ const TEXTAREA_STYLE: React.CSSProperties = {
   fontFamily: 'inherit',
 };
 
+// ── Export helpers ────────────────────────────────────────────────────────────
+
+function exportNoteAsPDF(note: ClinicalNote) {
+  const typeCfg = NOTE_TYPE_CFG[note.type];
+  const statusCfg = STATUS_CFG[note.status];
+  const body = `
+    <h1>${escapeHtml(typeCfg.label)} — ${escapeHtml(note.patientName)}</h1>
+    <p class="meta">${escapeHtml(note.mrn)} · ${escapeHtml(note.date)} · ${escapeHtml(note.time)} · ${escapeHtml(note.doctor)} · Status: ${escapeHtml(statusCfg.label)}</p>
+    <hr>
+    <div class="content">${escapeHtml(note.content)}</div>
+  `;
+  downloadPDF(`${note.type}-note-${note.patientName.split(' ')[0].toLowerCase()}`, body);
+}
+
+function exportNoteAsCSV(note: ClinicalNote) {
+  const typeCfg = NOTE_TYPE_CFG[note.type];
+  const statusCfg = STATUS_CFG[note.status];
+  downloadCSV(`${note.type}-note-${note.patientName.split(' ')[0].toLowerCase()}`, [
+    ['Type', 'Patient', 'MRN', 'Date', 'Time', 'Doctor', 'Status', 'Urgent', 'Content'],
+    [
+      typeCfg.label,
+      note.patientName,
+      note.mrn,
+      note.date,
+      note.time,
+      note.doctor,
+      statusCfg.label,
+      note.isUrgent ? 'Yes' : 'No',
+      note.content,
+    ],
+  ]);
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getUrgentPatients(notes: ClinicalNote[]) {
@@ -179,7 +204,6 @@ function ViewNoteModal({
   onClose: () => void;
   onAmend: () => void;
 }) {
-  const toast = useToast();
   const typeCfg = NOTE_TYPE_CFG[note.type];
   const statusCfg = STATUS_CFG[note.status];
 
@@ -341,23 +365,11 @@ function ViewNoteModal({
           >
             Amend Note
           </button>
-          <button
-            type="button"
-            onClick={() => toast.success('Export ready', `${note.patientName} note downloaded.`)}
-            className="flex items-center gap-2 rounded-[10px] font-sans font-semibold transition-colors hover:bg-slate-50"
-            style={{
-              height: 40,
-              padding: '0 20px',
-              background: '#FFFFFF',
-              border: '1px solid #0064821F',
-              fontSize: 14,
-              lineHeight: '22px',
-              color: '#0D2630',
-            }}
-          >
-            <Download style={{ width: 16, height: 16, flexShrink: 0 }} />
-            Export
-          </button>
+          <ExportMenu
+            variant="button"
+            onExportPDF={() => exportNoteAsPDF(note)}
+            onExportCSV={() => exportNoteAsCSV(note)}
+          />
           <button
             type="button"
             onClick={onClose}
@@ -636,7 +648,6 @@ function AddNoteModal({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ClinicalNotesPage() {
-  const toast = useToast();
   const [notes, setNotes] = useState<ClinicalNote[]>(MOCK_CLINICAL_NOTES);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<TabId>('all');
@@ -922,17 +933,11 @@ export default function ClinicalNotesPage() {
                       >
                         View Full Note
                       </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          toast.success('Export ready', `${note.patientName} note downloaded.`)
-                        }
-                        className="flex items-center gap-1.5 font-sans font-medium transition-opacity hover:opacity-70"
-                        style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-                      >
-                        <Download style={{ width: 14, height: 14, flexShrink: 0 }} />
-                        Export
-                      </button>
+                      <ExportMenu
+                        variant="text"
+                        onExportPDF={() => exportNoteAsPDF(note)}
+                        onExportCSV={() => exportNoteAsCSV(note)}
+                      />
                     </div>
                   </div>
                 </div>

@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   ChevronRight,
   ClipboardList,
-  Download,
   FlaskConical,
   ListFilter,
   Pill,
@@ -13,6 +12,7 @@ import {
   Stethoscope,
   X,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
@@ -22,6 +22,9 @@ import {
   type RecordStatus,
   type RecordType,
 } from '@/features/medical-records/__mocks__/medicalRecordFixtures';
+import { MOCK_PATIENTS } from '@/features/patients/__mocks__/patientFixtures';
+import { ExportMenu } from '@/components/ExportMenu';
+import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -165,6 +168,65 @@ function countByType(records: MedicalRecord[], type: RecordType) {
 function countByStatus(records: MedicalRecord[], ...statuses: RecordStatus[]) {
   return records.filter((r) => statuses.includes(r.status)).length;
 }
+
+// ── Export helpers ────────────────────────────────────────────────────────────
+
+function exportRecordsAsPDF(records: MedicalRecord[], title = 'Medical Records') {
+  const now = new Date().toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const rows = records
+    .map(
+      (r) =>
+        `<tr>
+          <td>${escapeHtml(RECORD_TYPE_CFG[r.type].label)}</td>
+          <td>${escapeHtml(r.title)}</td>
+          <td>${escapeHtml(r.patientName)}</td>
+          <td>${escapeHtml(r.mrn)}</td>
+          <td>${escapeHtml(r.date)}</td>
+          <td>${escapeHtml(r.provider)}</td>
+          <td>${escapeHtml(STATUS_CFG[r.status].label)}</td>
+          <td>${r.isCritical ? 'Yes' : ''}</td>
+        </tr>`,
+    )
+    .join('');
+  const body = `
+    <h1>${escapeHtml(title)}</h1>
+    <p class="meta">${records.length} record${records.length !== 1 ? 's' : ''} · Exported ${now}</p>
+    <hr>
+    <table>
+      <thead>
+        <tr><th>Type</th><th>Title</th><th>Patient</th><th>MRN</th>
+            <th>Date</th><th>Provider</th><th>Status</th><th>Critical</th></tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+  downloadPDF('medical-records', body);
+}
+
+function exportRecordsAsCSV(records: MedicalRecord[]) {
+  downloadCSV('medical-records', [
+    ['Type', 'Title', 'Patient', 'MRN', 'Date', 'Provider', 'Status', 'Critical'],
+    ...records.map((r) => [
+      RECORD_TYPE_CFG[r.type].label,
+      r.title,
+      r.patientName,
+      r.mrn,
+      r.date,
+      r.provider,
+      STATUS_CFG[r.status].label,
+      r.isCritical ? 'Yes' : 'No',
+    ]),
+  ]);
+}
+
+// MRN → patient page ID, built from the shared patients fixture
+const MRN_TO_PATIENT_ID: Record<string, string> = Object.fromEntries(
+  MOCK_PATIENTS.map((p) => [p.mrn, p.id]),
+);
 
 // ── Patient Records Modal ─────────────────────────────────────────────────────
 
@@ -316,14 +378,25 @@ function PatientRecordsModal({
           className="flex shrink-0 items-center justify-between gap-3 px-6 py-4"
           style={{ borderTop: '1px solid #0064821F' }}
         >
-          <button
-            type="button"
-            onClick={() => toast.info('Coming soon', 'Full patient profile is being built.')}
-            className="font-sans font-medium transition-opacity hover:opacity-70"
-            style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
-          >
-            View Patient Profile →
-          </button>
+          {MRN_TO_PATIENT_ID[patient.mrn] ? (
+            <Link
+              href={`/patients/${MRN_TO_PATIENT_ID[patient.mrn]}`}
+              onClick={onClose}
+              className="font-sans font-medium transition-opacity hover:opacity-70"
+              style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+            >
+              View Patient Profile →
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => toast.info('Not found', 'No patient profile linked to this MRN.')}
+              className="font-sans font-medium transition-opacity hover:opacity-70"
+              style={{ fontSize: 14, lineHeight: '22px', color: '#8A98A3' }}
+            >
+              View Patient Profile →
+            </button>
+          )}
           <button
             type="button"
             onClick={onClose}
@@ -396,6 +469,8 @@ export default function MedicalRecordsPage() {
     { id: 'referral', label: 'Referrals', count: countByType(allRecords, 'referral') },
   ];
 
+  const patientRecords = selectedMrn ? allRecords.filter((r) => r.mrn === selectedMrn) : [];
+
   const q = search.trim().toLowerCase();
   const filtered = allRecords.filter((r) => {
     const matchesTab = activeTab === 'all' || r.type === activeTab;
@@ -445,22 +520,12 @@ export default function MedicalRecordsPage() {
               <span className="hidden sm:inline">Filter</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => toast.success('Export ready', 'Medical records downloaded as CSV.')}
-              className="flex items-center gap-2 rounded-[10px] px-3 font-sans font-semibold transition-colors hover:bg-slate-50 sm:px-4"
-              style={{
-                fontSize: 14,
-                lineHeight: '22px',
-                height: 40,
-                color: '#0D2630',
-                border: '1px solid #0064821F',
-                background: '#FFFFFF',
-              }}
-            >
-              <Download style={{ width: 16, height: 16, flexShrink: 0 }} />
-              <span className="hidden sm:inline">Export Records</span>
-            </button>
+            <ExportMenu
+              variant="button"
+              label="Export Records"
+              onExportPDF={() => exportRecordsAsPDF(filtered)}
+              onExportCSV={() => exportRecordsAsCSV(filtered)}
+            />
           </div>
         </div>
 
@@ -676,13 +741,9 @@ export default function MedicalRecordsPage() {
       </main>
 
       {/* ── Patient records modal ───────────────────────────────────────────── */}
-      {selectedMrn &&
-        (() => {
-          const patientRecords = allRecords.filter((r) => r.mrn === selectedMrn);
-          return patientRecords.length > 0 ? (
-            <PatientRecordsModal records={patientRecords} onClose={() => setSelectedMrn(null)} />
-          ) : null;
-        })()}
+      {patientRecords.length > 0 && (
+        <PatientRecordsModal records={patientRecords} onClose={() => setSelectedMrn(null)} />
+      )}
     </>
   );
 }
