@@ -13,10 +13,10 @@ import {
 
 import { useAuth } from '@hooks/useAuth';
 import { tokenStore } from '@lib/auth/tokenStore';
+import { IS_MOCK } from '@/env';
 import type { RawWsMessage, WsEventMap } from '@/types/ws.types';
 
 const MAX_RECONNECT_ATTEMPTS = 5;
-const IS_MOCK = process.env['NEXT_PUBLIC_APP_ENV'] === 'development';
 
 export type WsContextValue = {
   isConnected: boolean;

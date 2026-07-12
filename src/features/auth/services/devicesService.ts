@@ -1,8 +1,7 @@
 import type { TrustedDevice } from '@/types/auth.types';
 import { apiClient } from '@lib/api/client';
 import type { ApiSuccessResponse } from '@lib/api/types';
-
-const IS_MOCK = process.env['NEXT_PUBLIC_APP_ENV'] === 'development';
+import { IS_MOCK } from '@/env';
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 export const devicesService = {

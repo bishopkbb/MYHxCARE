@@ -1,9 +1,8 @@
 import axios, { isAxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 import { tokenStore } from '@lib/auth/tokenStore';
+import { IS_MOCK } from '@/env';
 import { ApiError } from './types';
-
-const IS_MOCK = process.env['NEXT_PUBLIC_APP_ENV'] === 'development';
 
 // One shared in-flight refresh so concurrent 401s don't trigger multiple refreshes.
 let refreshPromise: Promise<string> | null = null;

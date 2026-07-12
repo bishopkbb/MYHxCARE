@@ -7,15 +7,19 @@ const schema = z.object({
   // These must be read with literal bracket keys here so the bundler can
   // statically analyse which NEXT_PUBLIC_* values to inline. Spreading
   // process.env defeats that analysis.
-  NEXT_PUBLIC_API_BASE_URL: z.string().url(),
-  NEXT_PUBLIC_WS_URL: z.string().url(),
-  NEXT_PUBLIC_APP_ENV: z.enum(['development', 'staging', 'production']),
+  //
+  // API_BASE_URL and WS_URL are optional in development/demo mode because
+  // those environments use mock data and never call the real backend.
+  NEXT_PUBLIC_API_BASE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_WS_URL: z.string().url().optional(),
+  NEXT_PUBLIC_APP_ENV: z.enum(['development', 'demo', 'staging', 'production']),
 });
 
 const result = schema.safeParse({
   NODE_ENV: process.env['NODE_ENV'],
-  NEXT_PUBLIC_API_BASE_URL: process.env['NEXT_PUBLIC_API_BASE_URL'],
-  NEXT_PUBLIC_WS_URL: process.env['NEXT_PUBLIC_WS_URL'],
+  // Convert empty string → undefined so .optional() accepts it cleanly.
+  NEXT_PUBLIC_API_BASE_URL: process.env['NEXT_PUBLIC_API_BASE_URL'] || undefined,
+  NEXT_PUBLIC_WS_URL: process.env['NEXT_PUBLIC_WS_URL'] || undefined,
   NEXT_PUBLIC_APP_ENV: process.env['NEXT_PUBLIC_APP_ENV'],
 });
 
@@ -34,3 +38,8 @@ if (!result.success) {
 export const env = result.data;
 
 export type Env = z.infer<typeof schema>;
+
+// Single source of truth for mock mode — true in development and demo deployments.
+// When true, all services return mock data and no real API calls are made.
+export const IS_MOCK =
+  env.NEXT_PUBLIC_APP_ENV === 'development' || env.NEXT_PUBLIC_APP_ENV === 'demo';

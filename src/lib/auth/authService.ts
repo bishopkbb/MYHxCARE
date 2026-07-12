@@ -3,11 +3,10 @@ import axios, { isAxiosError } from 'axios';
 import type { LoginCredentials, LoginResponse, User } from '@/types/auth.types';
 import { apiClient } from '@lib/api/client';
 import type { ApiSuccessResponse } from '@lib/api/types';
+import { IS_MOCK } from '@/env';
 
 import { decodeJwt } from './jwt';
 import { tokenStore } from './tokenStore';
-
-const IS_MOCK = process.env['NEXT_PUBLIC_APP_ENV'] === 'development';
 
 export class AuthError extends Error {
   constructor(
