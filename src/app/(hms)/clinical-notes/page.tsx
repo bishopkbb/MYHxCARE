@@ -170,7 +170,15 @@ function getUrgentPatients(notes: ClinicalNote[]) {
 
 // ── View Full Note Modal ──────────────────────────────────────────────────────
 
-function ViewNoteModal({ note, onClose }: { note: ClinicalNote; onClose: () => void }) {
+function ViewNoteModal({
+  note,
+  onClose,
+  onAmend,
+}: {
+  note: ClinicalNote;
+  onClose: () => void;
+  onAmend: () => void;
+}) {
   const toast = useToast();
   const typeCfg = NOTE_TYPE_CFG[note.type];
   const statusCfg = STATUS_CFG[note.status];
@@ -318,11 +326,11 @@ function ViewNoteModal({ note, onClose }: { note: ClinicalNote; onClose: () => v
         >
           <button
             type="button"
-            onClick={() => toast.info('Coming soon', 'Note amendment module is being built.')}
+            onClick={onAmend}
             className="font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
             style={{
-              height: 44,
-              borderRadius: 12,
+              height: 40,
+              borderRadius: 10,
               padding: '0 20px',
               background: '#FFFFFF',
               border: '1px solid #00B4D8',
@@ -336,16 +344,15 @@ function ViewNoteModal({ note, onClose }: { note: ClinicalNote; onClose: () => v
           <button
             type="button"
             onClick={() => toast.success('Export ready', `${note.patientName} note downloaded.`)}
-            className="flex items-center gap-2 font-sans font-semibold transition-colors hover:bg-[rgba(0,0,0,0.04)]"
+            className="flex items-center gap-2 rounded-[10px] font-sans font-semibold transition-colors hover:bg-slate-50"
             style={{
-              height: 44,
-              borderRadius: 12,
+              height: 40,
               padding: '0 20px',
               background: '#FFFFFF',
               border: '1px solid #0064821F',
               fontSize: 14,
               lineHeight: '22px',
-              color: '#4A7080',
+              color: '#0D2630',
             }}
           >
             <Download style={{ width: 16, height: 16, flexShrink: 0 }} />
@@ -379,15 +386,18 @@ function ViewNoteModal({ note, onClose }: { note: ClinicalNote; onClose: () => v
 function AddNoteModal({
   onClose,
   onSubmit,
+  amendingNote,
 }: {
   onClose: () => void;
   onSubmit: (note: ClinicalNote) => void;
+  amendingNote?: ClinicalNote;
 }) {
+  const isAmendment = Boolean(amendingNote);
   const toast = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [patient, setPatient] = useState('');
-  const [noteType, setNoteType] = useState<NoteType>('soap');
-  const [content, setContent] = useState(SOAP_TEMPLATE);
+  const [patient, setPatient] = useState(amendingNote?.patientName ?? '');
+  const [noteType, setNoteType] = useState<NoteType>(amendingNote?.type ?? 'soap');
+  const [content, setContent] = useState(amendingNote ? amendingNote.content : SOAP_TEMPLATE);
 
   function jumpToSection(key: string) {
     const ta = textareaRef.current;
@@ -406,7 +416,9 @@ function AddNoteModal({
       return;
     }
     const contentTrimmed = content.trim();
-    if (!contentTrimmed || (noteType === 'soap' && contentTrimmed === SOAP_TEMPLATE.trim())) {
+    const isBlankSoap =
+      !isAmendment && noteType === 'soap' && contentTrimmed === SOAP_TEMPLATE.trim();
+    if (!contentTrimmed || isBlankSoap) {
       toast.error('Required', 'Please add note content before submitting.');
       return;
     }
@@ -429,8 +441,8 @@ function AddNoteModal({
       doctor: 'Dr. E. Obi',
     };
     toast.success(
-      'Note submitted',
-      `${NOTE_TYPE_CFG[noteType].label} for ${patient.trim()} has been logged.`,
+      isAmendment ? 'Amendment logged' : 'Note submitted',
+      `${NOTE_TYPE_CFG[noteType].label} for ${patient.trim()} has been ${isAmendment ? 'amended' : 'logged'}.`,
     );
     onSubmit(newNote);
   }
@@ -458,7 +470,7 @@ function AddNoteModal({
             className="font-display font-semibold"
             style={{ fontSize: 28, lineHeight: '36px', color: '#0D2630' }}
           >
-            New Clinical Note
+            {isAmendment ? 'Amend Clinical Note' : 'New Clinical Note'}
           </h2>
           <button
             type="button"
@@ -613,7 +625,7 @@ function AddNoteModal({
             }}
           >
             <Send style={{ width: 16, height: 16, flexShrink: 0 }} />
-            Send Clinical Notes
+            {isAmendment ? 'Submit Amendment' : 'Send Clinical Notes'}
           </button>
         </div>
       </div>
@@ -630,6 +642,7 @@ export default function ClinicalNotesPage() {
   const [activeTab, setActiveTab] = useState<TabId>('all');
   const [viewNote, setViewNote] = useState<ClinicalNote | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [amendNote, setAmendNote] = useState<ClinicalNote | null>(null);
 
   const urgentPatients = getUrgentPatients(notes);
   const urgentCount = urgentPatients.length;
@@ -649,6 +662,7 @@ export default function ClinicalNotesPage() {
   function handleAddSubmit(newNote: ClinicalNote) {
     setNotes((prev) => [newNote, ...prev]);
     setShowAdd(false);
+    setAmendNote(null);
   }
 
   return (
@@ -931,8 +945,26 @@ export default function ClinicalNotesPage() {
       </main>
 
       {/* ── Modals ───────────────────────────────────────────────────────────── */}
-      {viewNote && <ViewNoteModal note={viewNote} onClose={() => setViewNote(null)} />}
-      {showAdd && <AddNoteModal onClose={() => setShowAdd(false)} onSubmit={handleAddSubmit} />}
+      {viewNote && (
+        <ViewNoteModal
+          note={viewNote}
+          onClose={() => setViewNote(null)}
+          onAmend={() => {
+            setAmendNote(viewNote);
+            setViewNote(null);
+          }}
+        />
+      )}
+      {(showAdd || amendNote) && (
+        <AddNoteModal
+          onClose={() => {
+            setShowAdd(false);
+            setAmendNote(null);
+          }}
+          onSubmit={handleAddSubmit}
+          amendingNote={amendNote ?? undefined}
+        />
+      )}
     </>
   );
 }
