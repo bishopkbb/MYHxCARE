@@ -1,7 +1,7 @@
 'use client';
 
-import { AlertTriangle, FlaskConical, Loader2, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+import { AlertCircle, AlertTriangle, FlaskConical, Loader2, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
 import {
@@ -13,6 +13,8 @@ import {
 } from '@/features/laboratory/__mocks__/labResultFixtures';
 
 // ── Config ────────────────────────────────────────────────────────────────────
+
+type PageState = 'loading' | 'loaded' | 'error';
 
 type StatusCfg = {
   cardBorder: string;
@@ -77,60 +79,32 @@ type PriorityCfg = {
 };
 
 const PRIORITY_CFG: Record<LabResultPriority, PriorityCfg> = {
-  stat: {
-    bg: 'rgba(0,0,0,0.06)',
-    border: 'rgba(0,0,0,0.14)',
-    color: '#0D2630',
-  },
-  urgent: {
-    bg: 'transparent',
-    border: 'rgba(245,158,11,0.55)',
-    color: '#D97706',
-  },
-  routine: {
-    bg: 'transparent',
-    border: 'rgba(0,100,130,0.25)',
-    color: '#4A7080',
-  },
+  stat: { bg: 'rgba(0,0,0,0.06)', border: 'rgba(0,0,0,0.14)', color: '#0D2630' },
+  urgent: { bg: 'transparent', border: 'rgba(245,158,11,0.55)', color: '#D97706' },
+  routine: { bg: 'transparent', border: 'rgba(0,100,130,0.25)', color: '#4A7080' },
 };
 
-type FlagCfg = {
-  bg: string;
-  border: string;
-  color: string;
-};
+type FlagCfg = { bg: string; border: string; color: string };
 
 const FLAG_CFG: Record<LabFlag, FlagCfg> = {
-  H: {
-    bg: 'rgba(239,68,68,0.12)',
-    border: 'rgba(239,68,68,0.35)',
-    color: '#DC2626',
-  },
-  L: {
-    bg: 'rgba(99,102,241,0.12)',
-    border: 'rgba(99,102,241,0.35)',
-    color: '#6366F1',
-  },
-  A: {
-    bg: 'rgba(245,158,11,0.14)',
-    border: 'rgba(245,158,11,0.40)',
-    color: '#D97706',
-  },
+  H: { bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.35)', color: '#DC2626' },
+  L: { bg: 'rgba(99,102,241,0.12)', border: 'rgba(99,102,241,0.35)', color: '#6366F1' },
+  A: { bg: 'rgba(245,158,11,0.14)', border: 'rgba(245,158,11,0.40)', color: '#D97706' },
 };
 
 type TabId = LabResultStatus;
 
-type TabCfg = {
-  id: TabId;
-  label: string;
-  countColor: string;
-};
+type TabCfg = { id: TabId; label: string; countColor: string };
 
 const TABS: TabCfg[] = [
   { id: 'critical', label: 'Critical Results', countColor: '#EF4444' },
   { id: 'pending', label: 'Pending', countColor: '#D97706' },
   { id: 'verified', label: 'Verified', countColor: '#16A34A' },
 ];
+
+// skeleton column header widths, then per-row cell widths
+const SK_HEADER_W = [100, 80, 80, 40] as const;
+const SK_ROW_W = [120, 90, 80, 26] as const;
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -199,6 +173,82 @@ function PriorityBadge({ priority }: { priority: LabResultPriority }) {
   );
 }
 
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+function SkeletonResultCard() {
+  return (
+    <div
+      className="overflow-hidden"
+      style={{
+        borderRadius: 12,
+        border: '1px solid rgba(0,100,130,0.12)',
+        background: '#FFFFFF',
+      }}
+    >
+      {/* Header */}
+      <div
+        className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+        style={{
+          background: 'rgba(0,100,130,0.04)',
+          borderBottom: '1px solid rgba(0,100,130,0.08)',
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="h-[18px] w-[18px] animate-pulse rounded bg-slate-200" />
+          <div className="h-5 w-44 animate-pulse rounded bg-slate-200" />
+          <div className="h-6 w-20 animate-pulse rounded bg-slate-200" />
+          <div className="h-6 w-16 animate-pulse rounded bg-slate-200" />
+        </div>
+        <div className="h-5 w-28 animate-pulse rounded bg-slate-200" />
+      </div>
+
+      {/* Patient row */}
+      <div className="flex items-center gap-3 px-4 py-3">
+        <div className="h-[38px] w-[38px] shrink-0 animate-pulse rounded-full bg-slate-200" />
+        <div className="flex flex-col gap-1.5">
+          <div className="h-[18px] w-36 animate-pulse rounded bg-slate-200" />
+          <div className="h-[18px] w-28 animate-pulse rounded bg-slate-200" />
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 420 }}>
+          <thead>
+            <tr style={{ background: '#F8FAFC' }}>
+              {SK_HEADER_W.map((w, i) => (
+                <th key={i} style={{ padding: '10px 16px' }}>
+                  <div
+                    className="animate-pulse rounded bg-slate-200"
+                    style={{ width: w, height: 16 }}
+                  />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <tr
+                key={i}
+                style={{ borderBottom: i < 3 ? '1px solid rgba(0,100,130,0.08)' : 'none' }}
+              >
+                {SK_ROW_W.map((w, j) => (
+                  <td key={j} style={{ padding: '10px 16px' }}>
+                    <div
+                      className="animate-pulse rounded bg-slate-200"
+                      style={{ width: w, height: j === 3 ? 26 : 18 }}
+                    />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ── Result Card ───────────────────────────────────────────────────────────────
 
 function ResultCard({ result }: { result: LabResult }) {
@@ -253,7 +303,7 @@ function ResultCard({ result }: { result: LabResult }) {
             width: 38,
             height: 38,
             background: result.patient.avatarBg,
-            fontSize: 13,
+            fontSize: 14,
             lineHeight: '20px',
           }}
         >
@@ -276,10 +326,7 @@ function ResultCard({ result }: { result: LabResult }) {
       {isPending && (
         <div
           className="mx-4 mb-4 flex items-center gap-2 px-3 py-2.5"
-          style={{
-            borderRadius: 8,
-            background: '#F1F5F9',
-          }}
+          style={{ borderRadius: 8, background: '#F1F5F9' }}
         >
           <Loader2
             className="animate-spin"
@@ -371,7 +418,6 @@ function ResultCard({ result }: { result: LabResult }) {
             </table>
           </div>
 
-          {/* Comment row */}
           {result.comment && (
             <div className="px-4 py-3" style={{ background: sc.commentBg }}>
               <p
@@ -392,8 +438,14 @@ function ResultCard({ result }: { result: LabResult }) {
 
 export default function LabResultsPage() {
   const toast = useToast();
+  const [pageState, setPageState] = useState<PageState>('loading');
   const [activeTab, setActiveTab] = useState<TabId>('critical');
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setPageState('loaded'), 800);
+    return () => clearTimeout(t);
+  }, []);
 
   const criticalResults = MOCK_LAB_RESULTS.filter((r) => r.status === 'critical');
   const pendingResults = MOCK_LAB_RESULTS.filter((r) => r.status === 'pending');
@@ -419,6 +471,11 @@ export default function LabResultsPage() {
       setRefreshing(false);
       toast.success('Results refreshed', 'Laboratory data is up to date.');
     }, 1200);
+  }
+
+  function handleRetry() {
+    setPageState('loading');
+    setTimeout(() => setPageState('loaded'), 800);
   }
 
   return (
@@ -450,138 +507,212 @@ export default function LabResultsPage() {
             </p>
           </div>
 
-          {/* Refresh */}
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="flex shrink-0 items-center gap-2 font-sans font-medium transition-colors hover:bg-slate-50 disabled:opacity-60"
-            style={{
-              height: 38,
-              borderRadius: 10,
-              padding: '0 14px',
-              border: '1px solid rgba(0,100,130,0.15)',
-              background: '#FFFFFF',
-              fontSize: 14,
-              lineHeight: '22px',
-              color: '#4A7080',
-            }}
-          >
-            <RefreshCw
-              className={refreshing ? 'animate-spin' : ''}
-              style={{ width: 15, height: 15, flexShrink: 0 }}
-            />
-            Refresh
-          </button>
+          {pageState === 'loaded' && (
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex shrink-0 items-center gap-2 font-sans font-medium transition-colors hover:bg-slate-50 disabled:opacity-60"
+              style={{
+                height: 38,
+                borderRadius: 10,
+                padding: '0 14px',
+                border: '1px solid rgba(0,100,130,0.15)',
+                background: '#FFFFFF',
+                fontSize: 14,
+                lineHeight: '22px',
+                color: '#4A7080',
+              }}
+            >
+              <RefreshCw
+                className={refreshing ? 'animate-spin' : ''}
+                style={{ width: 15, height: 15, flexShrink: 0 }}
+              />
+              Refresh
+            </button>
+          )}
         </div>
 
         <div className="px-4 py-4 sm:px-6 sm:py-5">
-          {/* ── Critical alert banner ────────────────────────────────────────── */}
-          {criticalResults.length > 0 && (
-            <div
-              className="mb-4 flex items-start gap-3 px-4 py-3"
-              style={{
-                borderRadius: 10,
-                border: '1px solid #FFC9C9',
-                background: '#FFF0F0',
-              }}
-            >
-              <AlertTriangle
-                style={{ width: 18, height: 18, color: '#EF4444', flexShrink: 0, marginTop: 2 }}
-              />
-              <div>
-                <p
-                  className="font-sans font-semibold"
-                  style={{ fontSize: 15, lineHeight: '22px', color: '#DC2626' }}
-                >
-                  {criticalResults.length} Critical Result{criticalResults.length !== 1 ? 's' : ''}{' '}
-                  — Immediate Action Required
-                </p>
-                <p
-                  className="mt-0.5 font-sans"
-                  style={{ fontSize: 14, lineHeight: '22px', color: '#B91C1C' }}
-                >
-                  {criticalResults.map((r) => r.patient.name).join(', ')}
-                </p>
-              </div>
+          {/* ── Loading ──────────────────────────────────────────────────────── */}
+          {pageState === 'loading' && (
+            <div className="flex flex-col gap-4">
+              <SkeletonResultCard />
+              <SkeletonResultCard />
+              <SkeletonResultCard />
             </div>
           )}
 
-          {/* ── Tab bar ─────────────────────────────────────────────────────── */}
-          <div
-            className="mb-4 flex gap-1"
-            style={{
-              borderRadius: 12,
-              padding: 4,
-              background: 'rgba(138,152,163,0.20)',
-            }}
-          >
-            {TABS.map((tab) => {
-              const isActive = activeTab === tab.id;
-              const count = countByTab[tab.id];
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-[9px] px-2 font-sans font-semibold transition-all sm:px-4"
-                  style={{
-                    height: 36,
-                    fontSize: 14,
-                    lineHeight: '22px',
-                    color: isActive ? '#0D2630' : '#4A7080',
-                    background: isActive ? '#FFFFFF' : 'transparent',
-                    boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.10)' : 'none',
-                    border: isActive ? '1px solid rgba(0,100,130,0.12)' : '1px solid transparent',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <span className="hidden sm:inline">{tab.label}</span>
-                  <span className="sm:hidden">
-                    {tab.id === 'critical'
-                      ? 'Critical'
-                      : tab.id.charAt(0).toUpperCase() + tab.id.slice(1)}
-                  </span>
-                  <span
-                    className="font-sans font-semibold"
-                    style={{ fontSize: 13, lineHeight: '20px', color: tab.countColor }}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* ── Result cards ─────────────────────────────────────────────────── */}
-          {visibleResults.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <FlaskConical
-                style={{ width: 40, height: 40, color: '#8A98A3', opacity: 0.4, marginBottom: 12 }}
-              />
-              <p
-                className="font-sans font-semibold"
-                style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+          {/* ── Error ────────────────────────────────────────────────────────── */}
+          {pageState === 'error' && (
+            <div
+              className="flex flex-col items-center justify-center py-16 text-center"
+              style={{ maxWidth: 420, margin: '0 auto' }}
+            >
+              <div
+                className="mb-4 flex items-center justify-center rounded-full"
+                style={{ width: 56, height: 56, background: 'rgba(239,68,68,0.08)' }}
               >
-                No {activeTab} results
+                <AlertCircle style={{ width: 26, height: 26, color: '#EF4444' }} />
+              </div>
+              <p
+                className="font-display font-semibold"
+                style={{ fontSize: 18, lineHeight: '26px', color: '#0D2630' }}
+              >
+                Failed to load results
               </p>
               <p
-                className="mt-1 font-sans"
+                className="mt-1.5 font-sans"
                 style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
               >
-                {activeTab === 'pending'
-                  ? 'All orders have been processed.'
-                  : activeTab === 'critical'
-                    ? 'No critical alerts at this time.'
-                    : 'No verified results yet.'}
+                Something went wrong while fetching laboratory results. Please try again.
               </p>
+              <button
+                type="button"
+                onClick={handleRetry}
+                className="mt-5 flex items-center gap-2 font-sans font-semibold transition-colors hover:bg-[rgba(0,100,130,0.06)]"
+                style={{
+                  height: 40,
+                  borderRadius: 10,
+                  padding: '0 20px',
+                  border: '1px solid rgba(0,100,130,0.18)',
+                  background: '#FFFFFF',
+                  fontSize: 14,
+                  lineHeight: '22px',
+                  color: '#0D2630',
+                }}
+              >
+                <RefreshCw style={{ width: 15, height: 15 }} />
+                Retry
+              </button>
             </div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {visibleResults.map((result) => (
-                <ResultCard key={result.id} result={result} />
-              ))}
-            </div>
+          )}
+
+          {/* ── Loaded ───────────────────────────────────────────────────────── */}
+          {pageState === 'loaded' && (
+            <>
+              {/* Critical alert banner */}
+              {criticalResults.length > 0 && (
+                <div
+                  className="mb-4 flex items-start gap-3 px-4 py-3"
+                  style={{
+                    borderRadius: 10,
+                    border: '1px solid #FFC9C9',
+                    background: '#FFF0F0',
+                  }}
+                >
+                  <AlertTriangle
+                    style={{
+                      width: 18,
+                      height: 18,
+                      color: '#EF4444',
+                      flexShrink: 0,
+                      marginTop: 2,
+                    }}
+                  />
+                  <div>
+                    <p
+                      className="font-sans font-semibold"
+                      style={{ fontSize: 15, lineHeight: '22px', color: '#DC2626' }}
+                    >
+                      {criticalResults.length} Critical Result
+                      {criticalResults.length !== 1 ? 's' : ''} — Immediate Action Required
+                    </p>
+                    <p
+                      className="mt-0.5 font-sans"
+                      style={{ fontSize: 14, lineHeight: '22px', color: '#B91C1C' }}
+                    >
+                      {criticalResults.map((r) => r.patient.name).join(', ')}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab bar */}
+              <div
+                className="mb-4 flex gap-1"
+                style={{
+                  borderRadius: 12,
+                  padding: 4,
+                  background: 'rgba(138,152,163,0.20)',
+                }}
+              >
+                {TABS.map((tab) => {
+                  const isActive = activeTab === tab.id;
+                  const count = countByTab[tab.id];
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-[9px] px-2 font-sans font-semibold transition-all sm:px-4"
+                      style={{
+                        height: 36,
+                        fontSize: 14,
+                        lineHeight: '22px',
+                        color: isActive ? '#0D2630' : '#4A7080',
+                        background: isActive ? '#FFFFFF' : 'transparent',
+                        boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.10)' : 'none',
+                        border: isActive
+                          ? '1px solid rgba(0,100,130,0.12)'
+                          : '1px solid transparent',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <span className="hidden sm:inline">{tab.label}</span>
+                      <span className="sm:hidden">
+                        {tab.id === 'critical'
+                          ? 'Critical'
+                          : tab.id.charAt(0).toUpperCase() + tab.id.slice(1)}
+                      </span>
+                      <span
+                        className="font-sans font-semibold"
+                        style={{ fontSize: 14, lineHeight: '20px', color: tab.countColor }}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Result cards — empty or list */}
+              {visibleResults.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <FlaskConical
+                    style={{
+                      width: 40,
+                      height: 40,
+                      color: '#8A98A3',
+                      opacity: 0.4,
+                      marginBottom: 12,
+                    }}
+                  />
+                  <p
+                    className="font-sans font-semibold"
+                    style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                  >
+                    No {activeTab} results
+                  </p>
+                  <p
+                    className="mt-1 font-sans"
+                    style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                  >
+                    {activeTab === 'pending'
+                      ? 'All orders have been processed.'
+                      : activeTab === 'critical'
+                        ? 'No critical alerts at this time.'
+                        : 'No verified results yet.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {visibleResults.map((result) => (
+                    <ResultCard key={result.id} result={result} />
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
           <div className="h-6" />

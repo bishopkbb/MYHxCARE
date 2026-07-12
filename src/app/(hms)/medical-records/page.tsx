@@ -1,19 +1,21 @@
 'use client';
 
 import {
+  AlertCircle,
   AlertTriangle,
   ChevronRight,
   ClipboardList,
   FlaskConical,
   ListFilter,
   Pill,
+  RefreshCw,
   Search,
   Share2,
   Stethoscope,
   X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
 import {
@@ -28,6 +30,7 @@ import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
+type PageState = 'loading' | 'loaded' | 'error';
 type TabId = 'all' | RecordType;
 
 type TabCfg = {
@@ -103,12 +106,7 @@ const RECORD_TYPE_CFG: Record<RecordType, RecordTypeCfg> = {
 };
 
 const STATUS_CFG: Record<RecordStatus, StatusCfg> = {
-  active: {
-    label: 'Active',
-    color: '#00B4D8',
-    border: 'rgba(0,180,216,0.40)',
-    bg: 'transparent',
-  },
+  active: { label: 'Active', color: '#00B4D8', border: 'rgba(0,180,216,0.40)', bg: 'transparent' },
   critical: {
     label: 'Critical',
     color: '#EF4444',
@@ -228,6 +226,54 @@ const MRN_TO_PATIENT_ID: Record<string, string> = Object.fromEntries(
   MOCK_PATIENTS.map((p) => [p.mrn, p.id]),
 );
 
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+function SkeletonMetricCard() {
+  return (
+    <div
+      className="flex items-center gap-3 lg:w-[200px] lg:shrink-0"
+      style={{
+        minHeight: 64,
+        borderRadius: 12,
+        borderTop: '1px solid #0064821F',
+        borderRight: '1px solid #0064821F',
+        borderBottom: '1px solid #0064821F',
+        borderLeft: '3px solid rgba(0,100,130,0.15)',
+        padding: '12px 16px',
+        background: '#FFFFFF',
+      }}
+    >
+      <div className="h-8 w-10 shrink-0 animate-pulse rounded bg-slate-200" />
+      <div className="h-5 w-24 animate-pulse rounded bg-slate-200" />
+    </div>
+  );
+}
+
+function SkeletonRecordRow() {
+  return (
+    <div
+      className="flex items-center gap-3 px-3 sm:gap-4 sm:px-4"
+      style={{
+        minHeight: 70,
+        borderRadius: 12,
+        background: '#FFFFFF',
+        border: '1px solid #0064821F',
+        paddingTop: 12,
+        paddingBottom: 12,
+      }}
+    >
+      <div className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-slate-200" />
+      <div className="min-w-0 flex-1">
+        <div className="mb-2 h-[18px] w-40 animate-pulse rounded bg-slate-200" />
+        <div className="h-[18px] w-56 animate-pulse rounded bg-slate-200" />
+      </div>
+      <div className="hidden h-6 w-24 animate-pulse rounded-full bg-slate-200 sm:block" />
+      <div className="h-6 w-20 animate-pulse rounded-full bg-slate-200" />
+      <div className="h-4 w-4 animate-pulse rounded bg-slate-200" />
+    </div>
+  );
+}
+
 // ── Patient Records Modal ─────────────────────────────────────────────────────
 
 function PatientRecordsModal({
@@ -343,8 +389,8 @@ function PatientRecordsModal({
                 <span
                   className="hidden shrink-0 rounded-full px-3 py-0.5 font-sans font-semibold tracking-wide sm:inline"
                   style={{
-                    fontSize: 12,
-                    lineHeight: '20px',
+                    fontSize: 14,
+                    lineHeight: '22px',
                     color: typeCfg.badgeColor,
                     border: `1px solid ${typeCfg.badgeBorder}`,
                     background: typeCfg.badgeBg,
@@ -424,9 +470,15 @@ function PatientRecordsModal({
 
 export default function MedicalRecordsPage() {
   const toast = useToast();
+  const [pageState, setPageState] = useState<PageState>('loading');
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<TabId>('all');
   const [selectedMrn, setSelectedMrn] = useState<string | null>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setPageState('loaded'), 800);
+    return () => clearTimeout(t);
+  }, []);
 
   const allRecords = MOCK_MEDICAL_RECORDS;
 
@@ -482,6 +534,11 @@ export default function MedicalRecordsPage() {
     return matchesTab && matchesSearch;
   });
 
+  function handleRetry() {
+    setPageState('loading');
+    setTimeout(() => setPageState('loaded'), 800);
+  }
+
   return (
     <>
       <main
@@ -502,242 +559,311 @@ export default function MedicalRecordsPage() {
             </p>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {pageState === 'loaded' && (
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => toast.info('Filter', 'Advanced filters coming soon.')}
+                className="flex items-center gap-2 rounded-[10px] px-3 font-sans font-semibold transition-colors hover:bg-slate-50 sm:px-4"
+                style={{
+                  fontSize: 14,
+                  lineHeight: '22px',
+                  height: 40,
+                  color: '#0D2630',
+                  border: '1px solid #0064821F',
+                  background: '#FFFFFF',
+                }}
+              >
+                <ListFilter style={{ width: 16, height: 16, flexShrink: 0 }} />
+                <span className="hidden sm:inline">Filter</span>
+              </button>
+
+              <ExportMenu
+                variant="button"
+                label="Export Records"
+                onExportPDF={() => exportRecordsAsPDF(filtered)}
+                onExportCSV={() => exportRecordsAsCSV(filtered)}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* ── Loading ──────────────────────────────────────────────────────────── */}
+        {pageState === 'loading' && (
+          <>
+            <div className="mb-5 grid grid-cols-2 gap-3 sm:mb-6 lg:flex lg:gap-[60px]">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonMetricCard key={i} />
+              ))}
+            </div>
+            <div className="flex flex-col gap-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonRecordRow key={i} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ── Error ────────────────────────────────────────────────────────────── */}
+        {pageState === 'error' && (
+          <div
+            className="flex flex-col items-center justify-center py-16 text-center"
+            style={{ maxWidth: 420, margin: '0 auto' }}
+          >
+            <div
+              className="mb-4 flex items-center justify-center rounded-full"
+              style={{ width: 56, height: 56, background: 'rgba(239,68,68,0.08)' }}
+            >
+              <AlertCircle style={{ width: 26, height: 26, color: '#EF4444' }} />
+            </div>
+            <p
+              className="font-display font-semibold"
+              style={{ fontSize: 18, lineHeight: '26px', color: '#0D2630' }}
+            >
+              Failed to load records
+            </p>
+            <p
+              className="mt-1.5 font-sans"
+              style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+            >
+              Something went wrong while fetching medical records. Please try again.
+            </p>
             <button
               type="button"
-              onClick={() => toast.info('Filter', 'Advanced filters coming soon.')}
-              className="flex items-center gap-2 rounded-[10px] px-3 font-sans font-semibold transition-colors hover:bg-slate-50 sm:px-4"
+              onClick={handleRetry}
+              className="mt-5 flex items-center gap-2 font-sans font-semibold transition-colors hover:bg-[rgba(0,100,130,0.06)]"
               style={{
+                height: 40,
+                borderRadius: 10,
+                padding: '0 20px',
+                border: '1px solid rgba(0,100,130,0.18)',
+                background: '#FFFFFF',
                 fontSize: 14,
                 lineHeight: '22px',
-                height: 40,
                 color: '#0D2630',
+              }}
+            >
+              <RefreshCw style={{ width: 15, height: 15 }} />
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* ── Loaded ───────────────────────────────────────────────────────────── */}
+        {pageState === 'loaded' && (
+          <>
+            {/* Metric cards */}
+            <div className="mb-5 grid grid-cols-2 gap-3 sm:mb-6 lg:flex lg:gap-[60px]">
+              {metrics.map((m) => (
+                <div
+                  key={m.label}
+                  className="flex items-center gap-3 lg:w-[200px] lg:shrink-0"
+                  style={{
+                    minHeight: 64,
+                    borderRadius: 12,
+                    borderTop: '1px solid #0064821F',
+                    borderRight: '1px solid #0064821F',
+                    borderBottom: '1px solid #0064821F',
+                    borderLeft: `3px solid ${m.borderLeft}`,
+                    padding: '12px 16px',
+                    background: m.bg,
+                  }}
+                >
+                  <span
+                    className="font-display shrink-0 font-semibold"
+                    style={{ fontSize: 26, lineHeight: '34px', color: m.color }}
+                  >
+                    {m.value}
+                  </span>
+                  <span
+                    className="font-sans"
+                    style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
+                  >
+                    {m.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Search bar */}
+            <div
+              className="mb-3 flex items-center gap-3 px-3 sm:mb-4 sm:px-4"
+              style={{
+                height: 42,
+                borderRadius: 10,
                 border: '1px solid #0064821F',
                 background: '#FFFFFF',
               }}
             >
-              <ListFilter style={{ width: 16, height: 16, flexShrink: 0 }} />
-              <span className="hidden sm:inline">Filter</span>
-            </button>
+              <Search style={{ width: 16, height: 16, color: '#8A98A3', flexShrink: 0 }} />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name, MRN, or record title..."
+                className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#8A98A3]"
+                style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+              />
+            </div>
 
-            <ExportMenu
-              variant="button"
-              label="Export Records"
-              onExportPDF={() => exportRecordsAsPDF(filtered)}
-              onExportCSV={() => exportRecordsAsCSV(filtered)}
-            />
-          </div>
-        </div>
-
-        {/* ── Metric cards — 2×2 grid on mobile, fixed-width row on lg+ ────────── */}
-        <div className="mb-5 grid grid-cols-2 gap-3 sm:mb-6 lg:flex lg:gap-[60px]">
-          {metrics.map((m) => (
+            {/* Tab bar */}
             <div
-              key={m.label}
-              className="flex items-center gap-3 lg:w-[200px] lg:shrink-0"
+              className="mb-3 flex gap-1 overflow-x-auto sm:mb-4 sm:gap-[50px]"
               style={{
-                minHeight: 64,
                 borderRadius: 12,
-                borderTop: '1px solid #0064821F',
-                borderRight: '1px solid #0064821F',
-                borderBottom: '1px solid #0064821F',
-                borderLeft: `3px solid ${m.borderLeft}`,
-                padding: '12px 16px',
-                background: m.bg,
+                padding: 4,
+                background: '#8A98A333',
               }}
             >
-              <span
-                className="font-display shrink-0 font-semibold"
-                style={{ fontSize: 26, lineHeight: '34px', color: m.color }}
-              >
-                {m.value}
-              </span>
-              <span
-                className="font-sans"
-                style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
-              >
-                {m.label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* ── Search bar ───────────────────────────────────────────────────────── */}
-        <div
-          className="mb-3 flex items-center gap-3 px-3 sm:mb-4 sm:px-4"
-          style={{
-            height: 42,
-            borderRadius: 10,
-            border: '1px solid #0064821F',
-            background: '#FFFFFF',
-          }}
-        >
-          <Search style={{ width: 16, height: 16, color: '#8A98A3', flexShrink: 0 }} />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, MRN, or record title..."
-            className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#8A98A3]"
-            style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-          />
-        </div>
-
-        {/* ── Tab bar — scrollable pills on mobile, spread flex on sm+ ─────────── */}
-        <div
-          className="mb-3 flex gap-1 overflow-x-auto sm:mb-4 sm:gap-[50px]"
-          style={{
-            borderRadius: 12,
-            padding: 4,
-            background: '#8A98A333',
-          }}
-        >
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className="flex shrink-0 items-center gap-1.5 rounded-[9px] px-3 font-sans font-semibold whitespace-nowrap transition-all sm:flex-1 sm:justify-center sm:gap-2 sm:px-4"
-                style={{
-                  fontSize: 14,
-                  lineHeight: '22px',
-                  height: 34,
-                  color: isActive ? '#0D2630' : '#4A7080',
-                  background: isActive ? '#FFFFFF' : 'transparent',
-                  boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.10)' : 'none',
-                }}
-              >
-                {tab.label}
-                <span
-                  className="flex items-center justify-center rounded-full font-bold"
-                  style={{
-                    minWidth: 20,
-                    height: 20,
-                    fontSize: 12,
-                    padding: '0 5px',
-                    background: isActive ? 'rgba(0,180,216,0.12)' : 'rgba(138,152,163,0.20)',
-                    color: isActive ? '#00B4D8' : '#4A7080',
-                  }}
-                >
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ── Record rows ──────────────────────────────────────────────────────── */}
-        <div className="flex flex-col gap-2">
-          {filtered.length === 0 ? (
-            <div
-              className="flex flex-col items-center justify-center py-16 text-center"
-              style={{ color: '#4A7080' }}
-            >
-              <ClipboardList style={{ width: 40, height: 40, opacity: 0.4, marginBottom: 12 }} />
-              <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-                No records found
-              </p>
-              <p className="mt-1" style={{ fontSize: 14 }}>
-                Try adjusting your search or filter.
-              </p>
-            </div>
-          ) : (
-            filtered.map((record) => {
-              const typeCfg = RECORD_TYPE_CFG[record.type];
-              const statusCfg = STATUS_CFG[record.status];
-              const Icon = typeCfg.icon;
-              const isCriticalRow = record.isCritical;
-
-              return (
-                <div
-                  key={record.id}
-                  className="flex cursor-pointer items-center gap-3 px-3 transition-shadow hover:shadow-sm sm:gap-4 sm:px-4"
-                  style={{
-                    minHeight: 70,
-                    borderRadius: 12,
-                    background: '#FFFFFF',
-                    borderTop: '1px solid #0064821F',
-                    borderRight: '1px solid #0064821F',
-                    borderBottom: '1px solid #0064821F',
-                    borderLeft: isCriticalRow ? '3px solid #EF4444' : '1px solid #0064821F',
-                    paddingTop: 12,
-                    paddingBottom: 12,
-                  }}
-                  onClick={() => setSelectedMrn(record.mrn)}
-                >
-                  {/* Icon circle */}
-                  <div
-                    className="flex shrink-0 items-center justify-center rounded-full"
-                    style={{ width: 40, height: 40, background: typeCfg.iconBg }}
-                  >
-                    <Icon style={{ width: 18, height: 18, color: typeCfg.iconColor }} />
-                  </div>
-
-                  {/* Title + meta */}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p
-                        className="truncate font-sans font-semibold"
-                        style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                      >
-                        {record.title}
-                      </p>
-                      {record.isCritical && (
-                        <AlertTriangle
-                          aria-hidden
-                          style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0 }}
-                        />
-                      )}
-                    </div>
-                    <p
-                      className="truncate"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-                    >
-                      {record.patientName}
-                      <span className="hidden sm:inline"> · {record.mrn}</span> · {record.date}
-                      <span className="hidden sm:inline"> · {record.provider}</span>
-                    </p>
-                  </div>
-
-                  {/* Type badge — desktop only */}
-                  <span
-                    className="hidden shrink-0 rounded-full px-3 py-0.5 font-sans font-semibold tracking-wide sm:inline"
-                    style={{
-                      fontSize: 12,
-                      lineHeight: '20px',
-                      color: typeCfg.badgeColor,
-                      border: `1px solid ${typeCfg.badgeBorder}`,
-                      background: typeCfg.badgeBg,
-                    }}
-                  >
-                    {typeCfg.label}
-                  </span>
-
-                  {/* Status badge */}
-                  <span
-                    className="shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium sm:px-3"
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className="flex shrink-0 items-center gap-1.5 rounded-[9px] px-3 font-sans font-semibold whitespace-nowrap transition-all sm:flex-1 sm:justify-center sm:gap-2 sm:px-4"
                     style={{
                       fontSize: 14,
                       lineHeight: '22px',
-                      color: statusCfg.color,
-                      border: `1px solid ${statusCfg.border}`,
-                      background: statusCfg.bg,
+                      height: 34,
+                      color: isActive ? '#0D2630' : '#4A7080',
+                      background: isActive ? '#FFFFFF' : 'transparent',
+                      boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.10)' : 'none',
                     }}
                   >
-                    {statusCfg.label}
-                  </span>
+                    {tab.label}
+                    <span
+                      className="flex items-center justify-center rounded-full font-bold"
+                      style={{
+                        minWidth: 22,
+                        height: 22,
+                        fontSize: 14,
+                        padding: '0 5px',
+                        background: isActive ? 'rgba(0,180,216,0.12)' : 'rgba(138,152,163,0.20)',
+                        color: isActive ? '#00B4D8' : '#4A7080',
+                      }}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-                  {/* Chevron */}
-                  <ChevronRight
-                    style={{ width: 16, height: 16, color: '#8A98A3', flexShrink: 0 }}
+            {/* Record rows */}
+            <div className="flex flex-col gap-2">
+              {filtered.length === 0 ? (
+                <div
+                  className="flex flex-col items-center justify-center py-16 text-center"
+                  style={{ color: '#4A7080' }}
+                >
+                  <ClipboardList
+                    style={{ width: 40, height: 40, opacity: 0.4, marginBottom: 12 }}
                   />
+                  <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                    No records found
+                  </p>
+                  <p className="mt-1" style={{ fontSize: 14 }}>
+                    Try adjusting your search or filter.
+                  </p>
                 </div>
-              );
-            })
-          )}
-        </div>
+              ) : (
+                filtered.map((record) => {
+                  const typeCfg = RECORD_TYPE_CFG[record.type];
+                  const statusCfg = STATUS_CFG[record.status];
+                  const Icon = typeCfg.icon;
+                  const isCriticalRow = record.isCritical;
+
+                  return (
+                    <div
+                      key={record.id}
+                      className="flex cursor-pointer items-center gap-3 px-3 transition-shadow hover:shadow-sm sm:gap-4 sm:px-4"
+                      style={{
+                        minHeight: 70,
+                        borderRadius: 12,
+                        background: '#FFFFFF',
+                        borderTop: '1px solid #0064821F',
+                        borderRight: '1px solid #0064821F',
+                        borderBottom: '1px solid #0064821F',
+                        borderLeft: isCriticalRow ? '3px solid #EF4444' : '1px solid #0064821F',
+                        paddingTop: 12,
+                        paddingBottom: 12,
+                      }}
+                      onClick={() => setSelectedMrn(record.mrn)}
+                    >
+                      {/* Icon circle */}
+                      <div
+                        className="flex shrink-0 items-center justify-center rounded-full"
+                        style={{ width: 40, height: 40, background: typeCfg.iconBg }}
+                      >
+                        <Icon style={{ width: 18, height: 18, color: typeCfg.iconColor }} />
+                      </div>
+
+                      {/* Title + meta */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p
+                            className="truncate font-sans font-semibold"
+                            style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                          >
+                            {record.title}
+                          </p>
+                          {record.isCritical && (
+                            <AlertTriangle
+                              aria-hidden
+                              style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0 }}
+                            />
+                          )}
+                        </div>
+                        <p
+                          className="truncate"
+                          style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                        >
+                          {record.patientName}
+                          <span className="hidden sm:inline"> · {record.mrn}</span> · {record.date}
+                          <span className="hidden sm:inline"> · {record.provider}</span>
+                        </p>
+                      </div>
+
+                      {/* Type badge — desktop only */}
+                      <span
+                        className="hidden shrink-0 rounded-full px-3 py-0.5 font-sans font-semibold tracking-wide sm:inline"
+                        style={{
+                          fontSize: 14,
+                          lineHeight: '22px',
+                          color: typeCfg.badgeColor,
+                          border: `1px solid ${typeCfg.badgeBorder}`,
+                          background: typeCfg.badgeBg,
+                        }}
+                      >
+                        {typeCfg.label}
+                      </span>
+
+                      {/* Status badge */}
+                      <span
+                        className="shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium sm:px-3"
+                        style={{
+                          fontSize: 14,
+                          lineHeight: '22px',
+                          color: statusCfg.color,
+                          border: `1px solid ${statusCfg.border}`,
+                          background: statusCfg.bg,
+                        }}
+                      >
+                        {statusCfg.label}
+                      </span>
+
+                      <ChevronRight
+                        style={{ width: 16, height: 16, color: '#8A98A3', flexShrink: 0 }}
+                      />
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </>
+        )}
       </main>
 
       {/* ── Patient records modal ───────────────────────────────────────────── */}
