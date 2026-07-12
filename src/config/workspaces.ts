@@ -152,7 +152,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           {
             label: 'Appointments',
-            href: '/duty-roster',
+            href: '/appointments',
             icon: CalendarDays,
             iconSrc: '/icons/appointments.png',
           },
