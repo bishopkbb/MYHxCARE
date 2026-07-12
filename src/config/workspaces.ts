@@ -4,7 +4,7 @@ import {
   BedDouble,
   Bell,
   CalendarDays,
-  Clock,
+  LayoutList,
   ClipboardList,
   CreditCard,
   FileCheck2,
@@ -160,7 +160,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           {
             label: 'My Schedule',
             href: '/my-schedule',
-            icon: Clock,
+            icon: LayoutList,
           },
           {
             label: 'Workforce Management',
