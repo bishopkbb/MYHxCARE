@@ -1239,7 +1239,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.pastDiagnoses && (
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto scroll-smooth">
                           <div className="min-w-[360px]">
                             <div
                               className="flex items-center px-4 py-[5px]"
@@ -1355,7 +1355,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.familyHistory && (
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto scroll-smooth">
                           <div className="min-w-[360px]">
                             <div
                               className="flex items-center px-4 py-[5px]"
@@ -1469,7 +1469,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.immunizationHistory && (
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto scroll-smooth">
                           <div className="min-w-[360px]">
                             <div
                               className="flex items-center px-4 py-[5px]"
@@ -1584,7 +1584,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.surgicalHistory && (
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto scroll-smooth">
                           <div className="min-w-[360px]">
                             <div
                               className="flex items-center px-4 py-[5px]"
@@ -1698,7 +1698,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.chronicConditions && (
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto scroll-smooth">
                           <div className="min-w-[360px]">
                             <div
                               className="flex items-center px-4 py-[5px]"
@@ -1814,7 +1814,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.allergiesHistory && (
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto scroll-smooth">
                           <div className="min-w-[440px]">
                             <div
                               className="flex items-center px-4 py-[5px]"

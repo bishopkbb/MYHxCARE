@@ -22,6 +22,8 @@ import {
   type NoteType,
 } from '@/features/clinical-notes/__mocks__/clinicalNoteFixtures';
 import { ExportMenu } from '@/components/ExportMenu';
+import { PermissionGate } from '@/components/shared/PermissionGate';
+import { PERMISSIONS } from '@/constants/permissions';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -659,12 +661,18 @@ function AddNoteModal({
       return;
     }
     const now = new Date();
-    const dateStr = now.toLocaleDateString('en-US', {
-      month: 'short',
+    const dateStr = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Africa/Lagos',
       day: 'numeric',
+      month: 'short',
       year: 'numeric',
-    });
-    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }).format(now);
+    const timeStr = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Africa/Lagos',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(now);
     const newNote: ClinicalNote = {
       id: `cn-${Date.now()}`,
       type: noteType,
@@ -693,7 +701,7 @@ function AddNoteModal({
       }}
     >
       <div
-        className="flex w-full flex-col gap-6 overflow-y-auto bg-white"
+        className="flex w-full flex-col gap-6 overflow-y-auto scroll-smooth bg-white"
         style={{
           maxWidth: 1040,
           maxHeight: 'calc(100vh - 24px)',
@@ -985,24 +993,26 @@ export default function ClinicalNotesPage() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowAdd(true)}
-            className="flex shrink-0 items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-            style={{
-              height: 40,
-              borderRadius: 12,
-              padding: '8px 16px',
-              background: '#00B4D8',
-              fontSize: 14,
-              lineHeight: '22px',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <Plus style={{ width: 16, height: 16, flexShrink: 0 }} />
-            <span className="hidden sm:inline">Write Clinical Note</span>
-            <span className="sm:hidden">New Note</span>
-          </button>
+          <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+            <button
+              type="button"
+              onClick={() => setShowAdd(true)}
+              className="flex shrink-0 items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+              style={{
+                height: 40,
+                borderRadius: 12,
+                padding: '8px 16px',
+                background: '#00B4D8',
+                fontSize: 14,
+                lineHeight: '22px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Plus style={{ width: 16, height: 16, flexShrink: 0 }} />
+              <span className="hidden sm:inline">Write Clinical Note</span>
+              <span className="sm:hidden">New Note</span>
+            </button>
+          </PermissionGate>
         </div>
 
         {/* ── Urgent banner ────────────────────────────────────────────────────── */}
@@ -1056,7 +1066,7 @@ export default function ClinicalNotesPage() {
 
         {/* ── Tab bar ──────────────────────────────────────────────────────────── */}
         <div
-          className="mb-4 flex gap-1 overflow-x-auto sm:gap-[50px]"
+          className="mb-4 flex gap-1 overflow-x-auto scroll-smooth sm:gap-[50px]"
           style={{
             borderRadius: 12,
             padding: 4,
@@ -1121,16 +1131,13 @@ export default function ClinicalNotesPage() {
         {pageState === 'loaded' && (
           <div className="flex flex-col gap-3">
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <FileText
-                  style={{
-                    width: 40,
-                    height: 40,
-                    color: '#8A98A3',
-                    opacity: 0.4,
-                    marginBottom: 12,
-                  }}
-                />
+              <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                <div
+                  className="flex size-14 items-center justify-center rounded-full"
+                  style={{ background: 'rgba(226,237,241,0.6)' }}
+                >
+                  <FileText style={{ width: 28, height: 28, color: '#8A98A3' }} />
+                </div>
                 <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
                   No notes found
                 </p>

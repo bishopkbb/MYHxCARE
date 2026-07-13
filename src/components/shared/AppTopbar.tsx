@@ -16,17 +16,19 @@ function getInitials(name: string): string {
 }
 
 function formatDateTime(date: Date): string {
-  const datePart = date.toLocaleDateString('en-US', {
+  const datePart = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos',
     weekday: 'short',
-    month: 'short',
     day: 'numeric',
+    month: 'short',
     year: 'numeric',
-  });
-  const timePart = date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
+  }).format(date);
+  const timePart = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos',
+    hour: '2-digit',
     minute: '2-digit',
-    hour12: true,
-  });
+    hour12: false,
+  }).format(date);
   return `${datePart} — ${timePart}`;
 }
 
@@ -66,7 +68,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
         type="button"
         onClick={onMenuToggle}
         aria-label="Open navigation menu"
-        className="ml-4 flex size-8 shrink-0 items-center justify-center rounded-md text-[#25464D]/60 transition-colors duration-150 hover:bg-[#25464D]/5 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none lg:hidden"
+        className="ml-4 flex size-11 shrink-0 items-center justify-center rounded-md text-[#25464D]/60 transition-colors duration-150 hover:bg-[#25464D]/5 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none lg:hidden"
       >
         <Menu className="size-5" />
       </button>

@@ -149,12 +149,13 @@ export default function AppointmentsPage() {
     setTimeout(() => setPageState('loaded'), 800);
   }
 
-  const todayLabel = new Date().toLocaleDateString('en-US', {
+  const todayLabel = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos',
     weekday: 'long',
-    year: 'numeric',
-    month: 'long',
     day: 'numeric',
-  });
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">

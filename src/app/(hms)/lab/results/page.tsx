@@ -212,7 +212,7 @@ function SkeletonResultCard() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto scroll-smooth">
         <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 420 }}>
           <thead>
             <tr style={{ background: '#F8FAFC' }}>
@@ -344,7 +344,7 @@ function ResultCard({ result }: { result: LabResult }) {
       {/* Results table */}
       {!isPending && result.rows && result.rows.length > 0 && (
         <>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scroll-smooth">
             <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 420 }}>
               <thead>
                 <tr style={{ background: '#F8FAFC' }}>
@@ -678,16 +678,13 @@ export default function LabResultsPage() {
 
               {/* Result cards — empty or list */}
               {visibleResults.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <FlaskConical
-                    style={{
-                      width: 40,
-                      height: 40,
-                      color: '#8A98A3',
-                      opacity: 0.4,
-                      marginBottom: 12,
-                    }}
-                  />
+                <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                  <div
+                    className="flex size-14 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(226,237,241,0.6)' }}
+                  >
+                    <FlaskConical style={{ width: 28, height: 28, color: '#8A98A3' }} />
+                  </div>
                   <p
                     className="font-sans font-semibold"
                     style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}

@@ -170,11 +170,12 @@ function countByStatus(records: MedicalRecord[], ...statuses: RecordStatus[]) {
 // ── Export helpers ────────────────────────────────────────────────────────────
 
 function exportRecordsAsPDF(records: MedicalRecord[], title = 'Medical Records') {
-  const now = new Date().toLocaleDateString('en-US', {
-    month: 'short',
+  const now = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos',
     day: 'numeric',
+    month: 'short',
     year: 'numeric',
-  });
+  }).format(new Date());
   const rows = records
     .map(
       (r) =>
@@ -329,7 +330,7 @@ function PatientRecordsModal({
         </div>
 
         {/* ── Record list ── */}
-        <div className="flex flex-col gap-2 overflow-y-auto px-6 py-4">
+        <div className="flex flex-col gap-2 overflow-y-auto scroll-smooth px-6 py-4">
           {records.map((record) => {
             const typeCfg = RECORD_TYPE_CFG[record.type];
             const statusCfg = STATUS_CFG[record.status];
@@ -708,7 +709,7 @@ export default function MedicalRecordsPage() {
 
             {/* Tab bar */}
             <div
-              className="mb-3 flex gap-1 overflow-x-auto sm:mb-4 sm:gap-[50px]"
+              className="mb-3 flex gap-1 overflow-x-auto scroll-smooth sm:mb-4 sm:gap-[50px]"
               style={{
                 borderRadius: 12,
                 padding: 4,
@@ -754,17 +755,17 @@ export default function MedicalRecordsPage() {
             {/* Record rows */}
             <div className="flex flex-col gap-2">
               {filtered.length === 0 ? (
-                <div
-                  className="flex flex-col items-center justify-center py-16 text-center"
-                  style={{ color: '#4A7080' }}
-                >
-                  <ClipboardList
-                    style={{ width: 40, height: 40, opacity: 0.4, marginBottom: 12 }}
-                  />
+                <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                  <div
+                    className="flex size-14 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(226,237,241,0.6)' }}
+                  >
+                    <ClipboardList style={{ width: 28, height: 28, color: '#8A98A3' }} />
+                  </div>
                   <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
                     No records found
                   </p>
-                  <p className="mt-1" style={{ fontSize: 14 }}>
+                  <p className="mt-1" style={{ fontSize: 14, color: '#4A7080' }}>
                     Try adjusting your search or filter.
                   </p>
                 </div>

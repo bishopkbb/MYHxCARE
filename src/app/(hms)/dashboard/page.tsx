@@ -23,9 +23,13 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '@hooks/useAuth';
+import { ROUTES } from '@/constants/routes';
+import { PermissionGate } from '@/components/shared/PermissionGate';
+import { PERMISSIONS } from '@/constants/permissions';
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -35,12 +39,13 @@ function getGreeting(): string {
 }
 
 function formatClinicalDate(date: Date): string {
-  return date.toLocaleDateString('en-GB', {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos',
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-  });
+  }).format(date);
 }
 
 const TITLE_PREFIXES = ['Dr.', 'Nurse', 'Mr.', 'Mrs.', 'Ms.', 'Prof.'];
@@ -458,6 +463,7 @@ function SkeletonActivityCard() {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const { title, lastName } = parseName(user?.name ?? '');
   const [pageState, setPageState] = useState<PageState>('loading');
 
@@ -532,6 +538,7 @@ export default function DashboardPage() {
           {/* Button — full-width on mobile, auto-width inline on sm+ */}
           <button
             type="button"
+            onClick={() => router.push(ROUTES.patients)}
             className="flex w-full items-center justify-center gap-1.5 rounded-[12px] px-4 py-2 text-sm leading-5.5 font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:w-auto sm:shrink-0 sm:justify-start"
             style={{ background: '#EF4444' }}
           >
@@ -707,7 +714,8 @@ export default function DashboardPage() {
           <div className="flex shrink-0 items-center px-3 py-3 2xl:ml-auto">
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-sm leading-5.5 font-medium transition-opacity hover:opacity-70"
+              onClick={() => router.push(ROUTES.dutyRoster)}
+              className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 text-sm leading-5.5 font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{
                 background: '#FFFFFF',
                 border: '1px solid rgba(0,100,130,0.12)',
@@ -843,6 +851,7 @@ export default function DashboardPage() {
             {/* Right: View All link */}
             <button
               type="button"
+              onClick={() => router.push(ROUTES.encounters)}
               className="flex items-center gap-0.5 transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             >
               <span className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
@@ -911,15 +920,17 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Consult button — hidden on mobile, space too tight */}
-                      <div className="hidden shrink-0 pl-1 sm:block">
-                        <button
-                          type="button"
-                          className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors duration-150 hover:bg-[#00B4D8] hover:text-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          style={{ border: '1px solid #00B4D8' }}
-                        >
-                          Consult
-                        </button>
-                      </div>
+                      <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                        <div className="hidden shrink-0 pl-1 sm:block">
+                          <button
+                            type="button"
+                            className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors duration-150 hover:bg-[#00B4D8] hover:text-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            style={{ border: '1px solid #00B4D8' }}
+                          >
+                            Consult
+                          </button>
+                        </div>
+                      </PermissionGate>
                     </div>
                   );
                 })}
@@ -962,6 +973,7 @@ export default function DashboardPage() {
             {/* Right: View All */}
             <button
               type="button"
+              onClick={() => router.push(ROUTES.notifications)}
               className="flex items-center gap-0.5 transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             >
               <span className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>

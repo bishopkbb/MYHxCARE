@@ -204,9 +204,14 @@ const TAB_STATUS_MAP: Partial<Record<string, PatientStatus>> = {
 
 function formatQueueDate(): string {
   const now = new Date();
-  const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
-  const month = now.toLocaleDateString('en-US', { month: 'long' });
-  return `Today — ${weekday}, ${month} ${now.getDate()}, ${now.getFullYear()}`;
+  const fmt = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  return `Today — ${fmt.format(now)}`;
 }
 
 function getTempColor(temp: number): string {
@@ -826,7 +831,7 @@ export default function EncountersPage() {
       </div>
 
       {/* ── Patient table — visible at lg+ ───────────────────────────────── */}
-      <div className="mt-6 hidden overflow-x-auto lg:block">
+      <div className="mt-6 hidden overflow-x-auto scroll-smooth lg:block">
         <div>
           {/* Table header */}
           <div
@@ -923,6 +928,16 @@ export default function EncountersPage() {
                   Try changing the tab or clearing any active filters
                 </p>
               </div>
+              {(activeFilters.gender !== 'all' || activeFilters.allergies !== 'all') && (
+                <button
+                  type="button"
+                  onClick={() => setActiveFilters({ gender: 'all', allergies: 'all' })}
+                  className="mt-1 rounded-[8px] px-4 py-2 text-sm leading-5.5 font-medium transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{ color: '#00B4D8', border: '1px solid rgba(0,180,216,0.3)' }}
+                >
+                  Clear all filters
+                </button>
+              )}
             </div>
           ) : (
             <div className="flex flex-col gap-2 pt-2">

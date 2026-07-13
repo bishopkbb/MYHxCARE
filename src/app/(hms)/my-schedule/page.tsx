@@ -633,7 +633,11 @@ export default function MySchedulePage() {
   const timeOfDay = getTimeOfDayMeta();
   const TimeIcon = timeOfDay.Icon;
 
-  const monthLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const monthLabel = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -707,7 +711,7 @@ export default function MySchedulePage() {
                     className="animate-pulse rounded bg-slate-200"
                     style={{ width: 90, height: 20 }}
                   />
-                  <div className="overflow-x-auto pb-1">
+                  <div className="overflow-x-auto scroll-smooth pb-1">
                     <div className="flex gap-4">
                       {Array.from({ length: 7 }).map((_, i) => (
                         <SkeletonWeekDayCard key={i} />

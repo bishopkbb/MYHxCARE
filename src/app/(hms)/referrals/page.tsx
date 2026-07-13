@@ -24,6 +24,9 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { MOCK_REFERRAL_PATIENT } from '@/features/referrals/__mocks__/referralFixtures';
+import { AllergyBanner } from '@components/clinical/AllergyBanner';
+import { PermissionGate } from '@/components/shared/PermissionGate';
+import { PERMISSIONS } from '@/constants/permissions';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -308,7 +311,7 @@ export default function ReferralsPage() {
               </span>
               {patient.allergies.map((a) => (
                 <span
-                  key={a}
+                  key={a.id}
                   className="hidden shrink-0 font-sans font-medium sm:inline"
                   style={{
                     fontSize: 14,
@@ -320,7 +323,7 @@ export default function ReferralsPage() {
                     color: '#FCA5A5',
                   }}
                 >
-                  {a}
+                  {a.substance}
                 </span>
               ))}
             </>
@@ -376,6 +379,13 @@ export default function ReferralsPage() {
               For {patient.name} · {patient.mrn}
             </p>
           </div>
+
+          {/* ── Allergy banner — always first, never collapsible ──────────────── */}
+          {patient.allergies.length > 0 && (
+            <div className="px-4 pt-4 sm:px-6">
+              <AllergyBanner allergies={patient.allergies} />
+            </div>
+          )}
 
           {/* ── Form body ────────────────────────────────────────────────────── */}
           <div className="flex flex-col gap-4 px-4 pt-4 pb-10 sm:px-6">
@@ -627,24 +637,26 @@ export default function ReferralsPage() {
                   >
                     Cancel
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleSend}
-                    className="flex min-h-[48px] items-center justify-center gap-2 font-sans font-medium transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:min-w-[220px]"
-                    style={{
-                      borderRadius: 30,
-                      border: 'none',
-                      background: '#00B4D8',
-                      padding: '12px 32px',
-                      fontSize: 14,
-                      lineHeight: '22px',
-                      color: '#FFFFFF',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <Send style={{ width: 16, height: 16 }} />
-                    Send Referral to Department
-                  </button>
+                  <PermissionGate permission={PERMISSIONS.REFERRALS_WRITE}>
+                    <button
+                      type="button"
+                      onClick={handleSend}
+                      className="flex min-h-[48px] items-center justify-center gap-2 font-sans font-medium transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:min-w-[220px]"
+                      style={{
+                        borderRadius: 30,
+                        border: 'none',
+                        background: '#00B4D8',
+                        padding: '12px 32px',
+                        fontSize: 14,
+                        lineHeight: '22px',
+                        color: '#FFFFFF',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <Send style={{ width: 16, height: 16 }} />
+                      Send Referral to Department
+                    </button>
+                  </PermissionGate>
                 </div>
               </>
             )}

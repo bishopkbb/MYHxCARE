@@ -896,7 +896,7 @@ export default function PatientsPage() {
                     type="button"
                     aria-label={`View ${patient.name}`}
                     onClick={() => router.push(`/patients/${patient.id}`)}
-                    className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-[8px] transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                    className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-[8px] transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ background: '#E2EDF1' }}
                   >
                     <Eye style={{ width: 14, height: 14, color: '#4A7080' }} />
@@ -921,7 +921,7 @@ export default function PatientsPage() {
       </div>
 
       {/* ── Desktop table — visible at lg+ ───────────────────────────────── */}
-      <div className="mt-6 hidden overflow-x-auto lg:block">
+      <div className="mt-6 hidden overflow-x-auto scroll-smooth lg:block">
         <div>
           {/* Table header */}
           <div

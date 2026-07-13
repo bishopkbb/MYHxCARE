@@ -66,7 +66,7 @@ export function PasswordResetSetForm({ token }: PasswordResetSetFormProps) {
     'bg-[#0E2D3A]/4 border-[#006482]/18',
     'text-[#0D2630] placeholder:text-[#0D2630]/50',
     'focus:outline-none focus:ring-2 focus:ring-[#00B4D8]/40 focus:border-[#00B4D8]',
-    'disabled:opacity-50 transition-colors',
+    'disabled:opacity-50 transition-colors duration-150',
   );
 
   if (formState === 'success') {
@@ -101,7 +101,7 @@ export function PasswordResetSetForm({ token }: PasswordResetSetFormProps) {
         </p>
         <Link
           href="/password-reset"
-          className="mt-6 flex h-13 items-center justify-center gap-2.5 rounded-[12px] text-sm font-medium text-white transition-opacity"
+          className="mt-6 flex h-13 items-center justify-center gap-2.5 rounded-[12px] text-sm font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
           style={{
             background: 'linear-gradient(135deg, #00B4D8 0%, #0077A8 100%)',
             boxShadow: '0px 4px 20px 0px rgba(0, 180, 216, 0.30)',
@@ -158,7 +158,7 @@ export function PasswordResetSetForm({ token }: PasswordResetSetFormProps) {
               tabIndex={-1}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute top-1/2 right-4 -translate-y-1/2 text-[#8A98A3] transition-colors hover:text-[#0D2630]"
+              className="absolute top-1/2 right-4 -translate-y-1/2 text-[#8A98A3] transition-colors duration-150 hover:text-[#0D2630]"
             >
               {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
@@ -194,7 +194,7 @@ export function PasswordResetSetForm({ token }: PasswordResetSetFormProps) {
               tabIndex={-1}
               aria-label={showConfirm ? 'Hide password' : 'Show password'}
               onClick={() => setShowConfirm((v) => !v)}
-              className="absolute top-1/2 right-4 -translate-y-1/2 text-[#8A98A3] transition-colors hover:text-[#0D2630]"
+              className="absolute top-1/2 right-4 -translate-y-1/2 text-[#8A98A3] transition-colors duration-150 hover:text-[#0D2630]"
             >
               {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
@@ -209,7 +209,7 @@ export function PasswordResetSetForm({ token }: PasswordResetSetFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-6 flex h-13 w-full items-center justify-center gap-2.5 rounded-[12px] text-sm leading-5.5 font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-6 flex h-13 w-full items-center justify-center gap-2.5 rounded-[12px] text-sm leading-5.5 font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           style={{
             background: 'linear-gradient(135deg, #00B4D8 0%, #0077A8 100%)',
             boxShadow: '0px 4px 20px 0px rgba(0, 180, 216, 0.30)',

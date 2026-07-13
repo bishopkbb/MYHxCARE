@@ -23,6 +23,7 @@ import {
   FALLBACK_PATIENT_DETAIL,
   MOCK_PATIENT_DETAILS,
 } from '@/features/patients/__mocks__/patientFixtures';
+import { AllergyBanner } from '@components/clinical/AllergyBanner';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -159,7 +160,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex shrink-0 items-center gap-1.5"
+            className="flex shrink-0 items-center gap-1.5 rounded focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
           >
             <ChevronLeft style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.58)' }} />
             <span className="text-sm leading-[22px]" style={{ color: 'rgba(255,255,255,0.58)' }}>
@@ -292,8 +293,11 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* ── Scrollable body ─────────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scroll-smooth">
         <div className="space-y-5 px-5 py-5">
+          {/* ── Allergy banner — always first, never collapsible ──────────────── */}
+          <AllergyBanner allergies={patient.allergies} />
+
           {/* ── Patient summary card ──────────────────────────────────────────── */}
           <div className="overflow-hidden rounded-[16px]" style={{ border: '1px solid #0064821F' }}>
             {/* Identity — height ~106px, white */}
@@ -467,7 +471,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
           >
             {/* Tab bar — 47px height, px-4, gap-[14px] */}
             <div
-              className="overflow-x-auto"
+              className="overflow-x-auto scroll-smooth"
               style={{ background: '#FFFFFF', borderBottom: '1px solid #0064821F' }}
             >
               <div className="flex min-w-max gap-[14px] px-4">
@@ -480,7 +484,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                       key={step.key}
                       type="button"
                       onClick={() => setCurrentStep(step.number)}
-                      className="font-display flex items-center gap-2 border-b-2 py-[10px] font-semibold whitespace-nowrap transition-colors"
+                      className="font-display flex items-center gap-2 border-b-2 py-[10px] font-semibold whitespace-nowrap transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                       style={{
                         fontSize: 15,
                         lineHeight: '24px',
@@ -1107,7 +1111,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
               <button
                 type="button"
                 onClick={() => toast.success('Draft saved', 'Your progress has been saved.')}
-                className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-slate-50"
+                className="rounded-[12px] px-5 font-sans font-semibold transition-colors duration-150 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   fontSize: 16,
                   lineHeight: '24px',
@@ -1124,7 +1128,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                 onClick={() =>
                   toast.warning('Patient referred', 'Referral submitted for specialist review.')
                 }
-                className="rounded-[12px] px-5 font-sans font-semibold transition-colors hover:bg-amber-50"
+                className="rounded-[12px] px-5 font-sans font-semibold transition-colors duration-150 hover:bg-amber-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   fontSize: 16,
                   lineHeight: '24px',
@@ -1142,7 +1146,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                   toast.success('Consultation complete', 'The encounter record has been saved.');
                   router.back();
                 }}
-                className="rounded-[12px] px-5 font-sans font-semibold text-white transition-opacity hover:opacity-90"
+                className="rounded-[12px] px-5 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   fontSize: 16,
                   lineHeight: '24px',
