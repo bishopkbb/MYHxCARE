@@ -42,23 +42,89 @@ export function AppSidebar({
   const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
   const { sections } = WORKSPACE_NAV[workspaceId];
 
-  // Scroll-then-stick (desktop): the sidebar flows with the page until its
-  // bottom (Sign Out) reaches the viewport bottom, then stays pinned while
-  // the page keeps scrolling. Achieved with position:sticky and
-  // top: min(0px, 100dvh - ownHeight) — 0 when the sidebar fits the viewport
-  // (pins at top), negative when taller (scrolls up by the overshoot, then
-  // sticks with Sign Out exactly at the viewport bottom). Only the height is
-  // measured via JS; 100dvh stays live CSS so window resizes need no listener.
+  // Desktop sidebar behaviour — two cooperating mechanisms:
+  //
+  // 1. Scroll-then-stick: position:sticky with
+  //    top: min(0px, 100dvh - ownHeight) — the sidebar flows with the page
+  //    until Sign Out reaches the viewport bottom, then stays pinned. Only
+  //    the height is measured; 100dvh stays live CSS.
+  //
+  // 2. Independent wheel scroll: wheeling while the pointer is over the
+  //    sidebar moves the SIDEBAR alone (via translateY within its legal
+  //    range: natural top ↔ Sign Out visible) and freezes the page. No
+  //    scroll container is involved, so no scrollbar can ever appear. When
+  //    the sidebar hits either end, wheel events pass through to the page
+  //    again, and subsequent page scrolling re-clamps the manual offset so
+  //    the sticky engine smoothly takes back control.
   useEffect(() => {
     const el = asideRef.current;
     if (!el) return;
-    const update = () => {
+
+    const lgQuery = window.matchMedia('(min-width: 64rem)');
+    let wheelOffset = 0;
+
+    // Most-negative allowed viewport top: sidebar bottom == viewport bottom
+    const stickMin = () => Math.min(0, window.innerHeight - el.offsetHeight);
+
+    const setStickVar = () => {
       el.style.setProperty('--sidebar-stick-top', `min(0px, calc(100dvh - ${el.offsetHeight}px))`);
     };
-    update();
-    const ro = new ResizeObserver(update);
+
+    // The width/slide transition must not apply to the wheel translateY on
+    // desktop, or every wheel step would animate and feel rubbery.
+    const setTransition = () => {
+      el.style.transition = lgQuery.matches
+        ? 'width 250ms ease-in-out'
+        : 'width 250ms ease-in-out, transform 250ms ease-in-out, translate 250ms ease-in-out';
+    };
+
+    const applyWheelOffset = (next: number) => {
+      wheelOffset = next;
+      el.style.transform = next === 0 ? '' : `translateY(${next}px)`;
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (!lgQuery.matches) return;
+      const min = stickMin();
+      if (min >= 0) return; // fits the viewport — nothing to scroll
+      const top = el.getBoundingClientRect().top;
+      const target = Math.min(0, Math.max(min, top - e.deltaY));
+      const delta = target - top;
+      if (delta !== 0) {
+        e.preventDefault(); // consume the wheel: page stays frozen
+        applyWheelOffset(wheelOffset + delta);
+      }
+    };
+
+    // Page scroll re-clamps the manual offset so sticky + offset never
+    // push the sidebar past its bounds (no gap above the header or below
+    // Sign Out); the offset decays naturally back to the sticky position.
+    const onScroll = () => {
+      if (!lgQuery.matches || wheelOffset === 0) return;
+      const min = stickMin();
+      const top = el.getBoundingClientRect().top;
+      if (top < min) applyWheelOffset(wheelOffset + (min - top));
+      else if (top > 0) applyWheelOffset(wheelOffset - top);
+    };
+
+    const onBreakpointChange = () => {
+      setTransition();
+      if (!lgQuery.matches) applyWheelOffset(0); // mobile drawer: clean slate
+    };
+
+    setStickVar();
+    setTransition();
+    const ro = new ResizeObserver(setStickVar);
     ro.observe(el);
-    return () => ro.disconnect();
+    el.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    lgQuery.addEventListener('change', onBreakpointChange);
+    return () => {
+      ro.disconnect();
+      el.removeEventListener('wheel', onWheel);
+      window.removeEventListener('scroll', onScroll);
+      lgQuery.removeEventListener('change', onBreakpointChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -116,11 +182,11 @@ export function AppSidebar({
           // inset-y-0. z-10 keeps the edge toggle above the content column.
           'lg:sticky lg:top-[var(--sidebar-stick-top,0px)] lg:bottom-auto lg:z-10 lg:h-auto lg:min-h-dvh lg:translate-x-0 lg:self-start',
         )}
-        // Inline style handles both transitions correctly without Tailwind class-order conflicts
+        // transition is owned by the behaviour effect above (breakpoint-aware:
+        // wheel translateY must not animate on desktop)
         style={{
           background: '#25464D',
           borderRight: '1px solid rgba(255,255,255,0.071)',
-          transition: 'width 250ms ease-in-out, transform 250ms ease-in-out',
         }}
       >
         {/* ── Desktop collapse toggle ──────────────────────────────────────
