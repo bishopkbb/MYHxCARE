@@ -245,7 +245,8 @@ const COLS = [
     headPad: 'pr-4',
     align: 'text-center',
   },
-  { key: 'status', label: 'Status', width: 'w-[12%]', headPad: 'pr-4', align: '' },
+  // Status is content-sized so the longest pill never wraps or distorts
+  { key: 'status', label: 'Status', width: 'w-30 shrink-0', headPad: 'pr-4', align: '' },
   {
     key: 'nextAppt',
     label: 'Next Appointment',
@@ -974,7 +975,7 @@ export default function PatientsPage() {
                     <div className="mx-auto h-4 w-20 rounded-md bg-slate-100" />
                     <div className="mx-auto h-3.5 w-14 rounded-md bg-slate-100" />
                   </div>
-                  <div className="w-[12%] py-5 pr-4">
+                  <div className="w-30 shrink-0 py-5 pr-4">
                     <div className="h-7 w-20 rounded-full bg-slate-100" />
                   </div>
                   <div className="w-[16%] space-y-2 py-5 pr-4">
@@ -1106,9 +1107,9 @@ export default function PatientsPage() {
                     </div>
 
                     {/* ── STATUS ── */}
-                    <div className="w-[12%] py-5 pr-4">
+                    <div className="w-30 shrink-0 py-5 pr-4">
                       <span
-                        className="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium"
+                        className="inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap"
                         style={{
                           border: `1px solid ${cfg.pillBorder}`,
                           color: cfg.pillColor,

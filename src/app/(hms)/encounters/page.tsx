@@ -185,10 +185,12 @@ const COLS = [
   { key: 'complaint', label: 'Chief Complaint', width: 'min-w-0 flex-1', headerPad: 'pr-4' },
   { key: 'vitals', label: 'Vitals', width: 'hidden xl:block xl:w-[13%]', headerPad: 'pr-4' },
   { key: 'wait', label: 'Wait Time', width: 'hidden xl:block xl:w-[12%]', headerPad: 'pr-4' },
-  { key: 'status', label: 'Status', width: 'w-[18%] xl:w-[13%]', headerPad: 'pr-4' },
+  // Status is content-sized so the longest pill ("In Consultation") never
+  // wraps or distorts at any width
+  { key: 'status', label: 'Status', width: 'w-38 shrink-0', headerPad: 'pr-4' },
   // Actions is content-sized and unshrinkable — the Start Consultation
   // button can never be pushed out of view at any width
-  { key: 'actions', label: 'Actions', width: 'w-54 shrink-0', headerPad: 'pr-4' },
+  { key: 'actions', label: 'Actions', width: 'w-52 shrink-0', headerPad: 'pr-4' },
 ] as const;
 
 // ── Tab → status mapping ──────────────────────────────────────────────────────
@@ -883,12 +885,12 @@ export default function EncountersPage() {
                   <div className="hidden w-[12%] py-5 pr-4 xl:block">
                     <div className="h-3.5 w-16 rounded-md bg-slate-100" />
                   </div>
-                  <div className="w-[18%] py-5 pr-4 xl:w-[13%]">
+                  <div className="w-38 shrink-0 py-5 pr-4">
                     <div className="h-7 w-24 rounded-full bg-slate-100" />
                   </div>
-                  <div className="flex w-54 shrink-0 items-center gap-2 py-5 pr-4">
+                  <div className="flex w-52 shrink-0 items-center gap-2 py-5 pr-4">
                     <div className="size-9 rounded-[8px] bg-slate-100" />
-                    <div className="h-9 flex-1 rounded-[8px] bg-slate-100" />
+                    <div className="h-9 w-36 rounded-[8px] bg-slate-100" />
                   </div>
                 </div>
               ))}
@@ -1075,9 +1077,9 @@ export default function EncountersPage() {
                     </div>
 
                     {/* ── STATUS ── */}
-                    <div className="w-[18%] py-5 pr-4 xl:w-[13%]">
+                    <div className="w-38 shrink-0 py-5 pr-4">
                       <span
-                        className="inline-flex items-center rounded-full px-3 py-1.5 text-sm leading-5.5 font-medium"
+                        className="inline-flex items-center rounded-full px-3 py-1.5 text-sm leading-5.5 font-medium whitespace-nowrap"
                         style={{
                           border: `1px solid ${cfg.pillBorder}`,
                           color: cfg.pillColor,
@@ -1089,7 +1091,7 @@ export default function EncountersPage() {
                     </div>
 
                     {/* ── ACTIONS ── */}
-                    <div className="flex w-54 shrink-0 items-center gap-2 py-5 pr-4">
+                    <div className="flex w-52 shrink-0 items-center gap-2 py-5 pr-4">
                       <button
                         type="button"
                         onClick={() => router.push(`/patients/${patient.patientId ?? patient.id}`)}
@@ -1106,7 +1108,7 @@ export default function EncountersPage() {
                           onClick={() =>
                             router.push(`/patients/${patient.patientId ?? patient.id}/consultation`)
                           }
-                          className="flex-1 cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium whitespace-nowrap text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
+                          className="cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium whitespace-nowrap text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
                           style={{
                             background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
                           }}
