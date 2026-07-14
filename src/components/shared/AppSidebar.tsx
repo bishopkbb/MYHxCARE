@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, X } from 'lucide-react';
 import { useEffect } from 'react';
 
 import { resolveWorkspace } from '@/types/auth.types';
@@ -76,7 +76,9 @@ export function AppSidebar({
       <aside
         aria-label="Application sidebar"
         className={cn(
-          'flex shrink-0 flex-col overflow-hidden',
+          // overflow visible on desktop so the edge-floating collapse toggle
+          // can straddle the sidebar border without being clipped
+          'flex shrink-0 flex-col overflow-hidden lg:overflow-visible',
           // Mobile: always full width; desktop: collapses to icon rail
           'w-70',
           collapsed && 'lg:w-18',
@@ -85,8 +87,9 @@ export function AppSidebar({
           // bottom nav strip) on iOS/Android, so the sign-out button stays visible.
           'fixed inset-y-0 left-0 z-50 h-dvh',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
-          // Desktop: in document flow, no transform needed
-          'lg:static lg:z-auto lg:h-auto lg:min-h-dvh lg:translate-x-0',
+          // Desktop: in document flow; relative + z-10 so the edge toggle
+          // paints above the adjacent content column
+          'lg:relative lg:z-10 lg:h-auto lg:min-h-dvh lg:translate-x-0',
         )}
         // Inline style handles both transitions correctly without Tailwind class-order conflicts
         style={{
@@ -95,6 +98,35 @@ export function AppSidebar({
           transition: 'width 250ms ease-in-out, transform 250ms ease-in-out',
         }}
       >
+        {/* ── Desktop collapse toggle ──────────────────────────────────────
+             Floats on the sidebar's right edge, centered on the border and
+             aligned with the logo, so it never crowds the brand text.
+             Hit area is 44×44 (touch-target rule); the visible circle inside
+             is 28px so it reads light. Chevron flips with state; hover fills
+             brand cyan and scales to signal interactivity. */}
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="group absolute top-4.75 -right-5.5 z-10 hidden size-11 items-center justify-center focus-visible:outline-none lg:flex"
+        >
+          <span
+            className="flex size-7 items-center justify-center rounded-full bg-white transition-[background-color,transform,box-shadow] duration-150 group-hover:scale-110 group-hover:bg-[#00B4D8] group-focus-visible:ring-2 group-focus-visible:ring-[#00B4D8]/60 group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-white"
+            style={{
+              border: '1px solid rgba(0,100,130,0.2)',
+              boxShadow: '0 1px 4px rgba(13,38,48,0.25)',
+            }}
+          >
+            <ChevronLeft
+              className={cn(
+                'size-4 text-[#25464D] transition-[transform,color] duration-200 group-hover:text-white',
+                collapsed && 'rotate-180',
+              )}
+            />
+          </span>
+        </button>
+
         {/* ── Header ───────────────────────────────────────────────────── */}
         <div
           className={cn(
@@ -145,26 +177,6 @@ export function AppSidebar({
             >
               <X style={{ width: 16, height: 16, color: '#FFFFFF' }} />
             </button>
-
-            {/* Desktop: collapse toggle — hidden on mobile */}
-            <div className={cn('hidden shrink-0 lg:block', !collapsed && 'lg:ml-auto')}>
-              <button
-                type="button"
-                onClick={onToggleCollapse}
-                aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-                className="flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none"
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                }}
-              >
-                {collapsed ? (
-                  <ChevronRight style={{ width: 16, height: 16, color: '#FFFFFF' }} />
-                ) : (
-                  <ChevronLeft style={{ width: 16, height: 16, color: '#FFFFFF' }} />
-                )}
-              </button>
-            </div>
           </div>
 
           {/* Doctor info card — always visible on mobile; hidden on desktop when collapsed */}
