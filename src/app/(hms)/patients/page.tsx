@@ -229,7 +229,15 @@ const DOCTOR_ACTIONS: {
 
 const COLS = [
   { key: 'patient', label: 'Patient', width: 'w-[26%]', headPad: 'pl-5 pr-3', align: '' },
-  { key: 'complaint', label: 'Chief Complaint', width: 'w-[26%]', headPad: 'pr-4', align: '' },
+  // Complaint is the flexible column — it absorbs/releases width so the row
+  // always sums exactly to the container and nothing overflows into scroll
+  {
+    key: 'complaint',
+    label: 'Chief Complaint',
+    width: 'min-w-0 flex-1',
+    headPad: 'pr-4',
+    align: '',
+  },
   {
     key: 'lastVisit',
     label: 'Last Visit',
@@ -245,7 +253,8 @@ const COLS = [
     headPad: 'pr-4',
     align: 'text-center',
   },
-  { key: 'actions', label: 'Actions', width: 'w-[8%]', headPad: 'pr-4', align: '' },
+  // Actions is content-sized and unshrinkable — icons stay fully visible
+  { key: 'actions', label: 'Actions', width: 'w-28 shrink-0', headPad: 'pr-4', align: '' },
 ] as const;
 
 type PageState = 'loading' | 'loaded' | 'error';
@@ -957,7 +966,7 @@ export default function PatientsPage() {
                       <div className="h-3.5 w-44 rounded-md bg-slate-100" />
                     </div>
                   </div>
-                  <div className="w-[26%] space-y-2.5 py-5 pr-4">
+                  <div className="min-w-0 flex-1 space-y-2.5 py-5 pr-4">
                     <div className="h-4 w-48 rounded-md bg-slate-100" />
                     <div className="h-3.5 w-32 rounded-md bg-slate-100" />
                   </div>
@@ -972,7 +981,7 @@ export default function PatientsPage() {
                     <div className="mx-auto h-4 w-24 rounded-md bg-slate-100" />
                     <div className="mx-auto h-3.5 w-16 rounded-md bg-slate-100" />
                   </div>
-                  <div className="flex w-[8%] items-center gap-2 py-5 pr-4">
+                  <div className="flex w-28 shrink-0 items-center gap-2 py-5 pr-4">
                     <div className="size-9 rounded-full bg-slate-100" />
                     <div className="size-9 rounded-full bg-slate-100" />
                   </div>
@@ -1068,7 +1077,7 @@ export default function PatientsPage() {
                     </div>
 
                     {/* ── CHIEF COMPLAINT ── */}
-                    <div className="w-[26%] py-5 pr-4">
+                    <div className="min-w-0 flex-1 py-5 pr-4">
                       <p className="text-base leading-6" style={{ color: '#2F3A40' }}>
                         {patient.complaint}
                       </p>
@@ -1121,7 +1130,7 @@ export default function PatientsPage() {
                     </div>
 
                     {/* ── ACTIONS ── */}
-                    <div className="flex w-[8%] items-center gap-2 py-5 pr-4">
+                    <div className="flex w-28 shrink-0 items-center gap-2 py-5 pr-4">
                       {/* View record — always accessible */}
                       <button
                         type="button"

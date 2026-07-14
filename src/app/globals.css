@@ -235,3 +235,14 @@
 .cs-dot {
   animation: cs-dot 1.4s ease-in-out infinite;
 }
+
+/* ── Hidden scrollbars — app-wide ─────────────────────────────────────────────
+   Design decision (14/07/2026): no visible scrollbars anywhere in the app.
+   Scrolling still works (wheel, touch, keyboard, drag) — only the visual
+   bar is hidden. Covers the page body and every internal scroll container. */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}

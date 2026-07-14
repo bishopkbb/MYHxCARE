@@ -180,11 +180,15 @@ const QUEUE_TABS: QueueTab[] = [
 
 const COLS = [
   { key: 'patient', label: 'Patient', width: 'w-[22%] xl:w-[21%]', headerPad: 'pl-5 pr-3' },
-  { key: 'complaint', label: 'Chief Complaint', width: 'w-[35%] xl:w-[26%]', headerPad: 'pr-4' },
+  // Complaint is the flexible column — it absorbs/releases width so the row
+  // always sums exactly to the container and nothing overflows into scroll
+  { key: 'complaint', label: 'Chief Complaint', width: 'min-w-0 flex-1', headerPad: 'pr-4' },
   { key: 'vitals', label: 'Vitals', width: 'hidden xl:block xl:w-[13%]', headerPad: 'pr-4' },
   { key: 'wait', label: 'Wait Time', width: 'hidden xl:block xl:w-[12%]', headerPad: 'pr-4' },
   { key: 'status', label: 'Status', width: 'w-[18%] xl:w-[13%]', headerPad: 'pr-4' },
-  { key: 'actions', label: 'Actions', width: 'w-[25%] xl:w-[15%]', headerPad: 'pr-4' },
+  // Actions is content-sized and unshrinkable — the Start Consultation
+  // button can never be pushed out of view at any width
+  { key: 'actions', label: 'Actions', width: 'w-54 shrink-0', headerPad: 'pr-4' },
 ] as const;
 
 // ── Tab → status mapping ──────────────────────────────────────────────────────
@@ -867,7 +871,7 @@ export default function EncountersPage() {
                       <div className="h-3.5 w-40 rounded-md bg-slate-100" />
                     </div>
                   </div>
-                  <div className="w-[35%] space-y-2.5 py-5 pr-4 xl:w-[26%]">
+                  <div className="min-w-0 flex-1 space-y-2.5 py-5 pr-4">
                     <div className="h-4 w-44 rounded-md bg-slate-100" />
                     <div className="h-3.5 w-28 rounded-md bg-slate-100" />
                   </div>
@@ -882,7 +886,7 @@ export default function EncountersPage() {
                   <div className="w-[18%] py-5 pr-4 xl:w-[13%]">
                     <div className="h-7 w-24 rounded-full bg-slate-100" />
                   </div>
-                  <div className="flex w-[25%] items-center gap-2 py-5 pr-4 xl:w-[15%]">
+                  <div className="flex w-54 shrink-0 items-center gap-2 py-5 pr-4">
                     <div className="size-9 rounded-[8px] bg-slate-100" />
                     <div className="h-9 flex-1 rounded-[8px] bg-slate-100" />
                   </div>
@@ -978,7 +982,7 @@ export default function EncountersPage() {
                     </div>
 
                     {/* ── CHIEF COMPLAINT ── */}
-                    <div className="w-[35%] py-5 pr-4 xl:w-[26%]">
+                    <div className="min-w-0 flex-1 py-5 pr-4">
                       <p className="text-base leading-6" style={{ color: '#2F3A40' }}>
                         {patient.complaint}
                       </p>
@@ -1085,7 +1089,7 @@ export default function EncountersPage() {
                     </div>
 
                     {/* ── ACTIONS ── */}
-                    <div className="flex w-[25%] items-center gap-2 py-5 pr-4 xl:w-[15%]">
+                    <div className="flex w-54 shrink-0 items-center gap-2 py-5 pr-4">
                       <button
                         type="button"
                         onClick={() => router.push(`/patients/${patient.patientId ?? patient.id}`)}
@@ -1102,7 +1106,7 @@ export default function EncountersPage() {
                           onClick={() =>
                             router.push(`/patients/${patient.patientId ?? patient.id}/consultation`)
                           }
-                          className="flex-1 cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
+                          className="flex-1 cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium whitespace-nowrap text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
                           style={{
                             background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
                           }}
