@@ -4,6 +4,7 @@ import { useCallback, useState, type ReactNode } from 'react';
 
 import { AppSidebar } from './AppSidebar';
 import { AppTopbar } from './AppTopbar';
+import { HelpBeacon } from './HelpBeacon';
 
 interface AppShellProps {
   children: ReactNode;
@@ -28,6 +29,7 @@ export function AppShell({ children }: AppShellProps) {
         <AppTopbar onMenuToggle={() => setMobileOpen(true)} />
         <main className="flex-1">{children}</main>
       </div>
+      <HelpBeacon />
     </div>
   );
 }

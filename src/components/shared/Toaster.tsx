@@ -73,7 +73,7 @@ export function Toaster() {
   return (
     <div
       aria-label="Notifications"
-      className="pointer-events-none fixed right-4 bottom-4 z-[200] flex flex-col gap-2"
+      className="pointer-events-none fixed right-4 bottom-20 z-[200] flex flex-col gap-2"
     >
       {toasts.map((toast) => (
         <ToastCard key={toast.id} toast={toast} />
