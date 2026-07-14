@@ -346,7 +346,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           sm+     : single flex-row, same as original desktop design
       */}
       <div
-        className="px-5 py-[10px] sm:flex sm:min-h-[60px] sm:items-center sm:gap-4 sm:py-0"
+        className="px-5 py-[10px] sm:flex sm:min-h-[60px] sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1 sm:py-2"
         style={{ background: '#1A3D4D', borderBottom: '1px solid rgba(255,255,255,0.10)' }}
       >
         {/* ── Row 1 (mobile) / nav block (sm+) ──────────────────────────── */}
@@ -482,23 +482,24 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               )}
             </>
           )}
-
-          {/* URGENT — sm+ slot, pinned right */}
-          {patient.isUrgent && (
-            <span
-              className="ml-auto hidden shrink-0 text-sm font-medium sm:inline"
-              style={{
-                borderRadius: 4,
-                padding: '4px 12px',
-                background: 'rgba(245,158,11,0.30)',
-                border: '1px solid rgba(245,158,11,0.45)',
-                color: '#FCD34D',
-              }}
-            >
-              URGENT
-            </span>
-          )}
         </div>
+
+        {/* URGENT — sm+ slot; outer-level sibling so it pins right on the row
+            and wraps INSIDE the bar (never clips out) when width runs out */}
+        {patient.isUrgent && (
+          <span
+            className="hidden shrink-0 text-sm font-medium sm:ml-auto sm:inline"
+            style={{
+              borderRadius: 4,
+              padding: '4px 12px',
+              background: 'rgba(245,158,11,0.30)',
+              border: '1px solid rgba(245,158,11,0.45)',
+              color: '#FCD34D',
+            }}
+          >
+            URGENT
+          </span>
+        )}
       </div>
 
       {/* ── White content shell ────────────────────────────────────────────── */}

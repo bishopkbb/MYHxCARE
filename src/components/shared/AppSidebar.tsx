@@ -87,9 +87,11 @@ export function AppSidebar({
           // bottom nav strip) on iOS/Android, so the sign-out button stays visible.
           'fixed inset-y-0 left-0 z-50 h-dvh',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
-          // Desktop: in document flow; relative + z-10 so the edge toggle
-          // paints above the adjacent content column
-          'lg:relative lg:z-10 lg:h-auto lg:min-h-dvh lg:translate-x-0',
+          // Desktop: sticky + h-dvh pins the sidebar to the viewport — it never
+          // scrolls with the page, so the nav→sign-out spacing stays constant no
+          // matter how tall the content grows; nav scrolls internally instead.
+          // z-10 keeps the edge toggle above the adjacent content column.
+          'lg:sticky lg:top-0 lg:z-10 lg:h-dvh lg:translate-x-0',
         )}
         // Inline style handles both transitions correctly without Tailwind class-order conflicts
         style={{

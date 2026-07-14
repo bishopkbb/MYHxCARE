@@ -200,7 +200,7 @@ export default function ReferralsPage() {
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* ── Patient preview bar ──────────────────────────────────────────────── */}
       <div
-        className="shrink-0 px-4 py-[10px] sm:flex sm:min-h-[56px] sm:items-center sm:gap-4 sm:px-5 sm:py-0"
+        className="shrink-0 px-4 py-[10px] sm:flex sm:min-h-[56px] sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1 sm:px-5 sm:py-2"
         style={{ background: '#1A3D4D', borderBottom: '1px solid rgba(255,255,255,0.10)' }}
       >
         {/* Row 1 (mobile) / nav block (sm+) */}
@@ -332,7 +332,7 @@ export default function ReferralsPage() {
 
         {patient.isUrgent && (
           <span
-            className="hidden shrink-0 font-sans font-semibold sm:inline"
+            className="hidden shrink-0 font-sans font-semibold sm:ml-auto sm:inline"
             style={{
               fontSize: 14,
               lineHeight: '20px',

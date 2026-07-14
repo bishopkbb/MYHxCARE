@@ -3,6 +3,8 @@
  * Swap out by pointing hooks to real endpoints in Phase 6.
  */
 
+import type { Allergy } from '@/types/patient.types';
+
 export type Priority = 'stat' | 'urgent' | 'routine';
 
 export type LabTest = {
@@ -82,7 +84,19 @@ export const LAB_CATEGORIES: LabCategory[] = [
   },
 ];
 
-export const MOCK_LAB_PATIENT = {
+export type LabPatient = {
+  initials: string;
+  avatarBg: string;
+  name: string;
+  mrn: string;
+  age: string;
+  gender: string;
+  bloodGroup: string;
+  allergies: Allergy[];
+  isUrgent: boolean;
+};
+
+export const MOCK_LAB_PATIENT: LabPatient = {
   initials: 'AO',
   avatarBg: '#EF4444',
   name: 'Adaeze Okonkwo',
@@ -90,6 +104,23 @@ export const MOCK_LAB_PATIENT = {
   age: '21y',
   gender: 'Female',
   bloodGroup: 'O+',
-  allergies: ['Penicillin', 'Sulfonamides'],
+  allergies: [
+    {
+      id: 'allergy-1',
+      substance: 'Penicillin',
+      reaction: 'Anaphylaxis',
+      severity: 'LIFE_THREATENING',
+      recordedAt: '2024-03-12T09:00:00Z',
+      recordedBy: 'Dr. Chukwuemeka',
+    },
+    {
+      id: 'allergy-2',
+      substance: 'Sulfonamides',
+      reaction: 'Skin rash, urticaria',
+      severity: 'MODERATE',
+      recordedAt: '2024-06-20T11:30:00Z',
+      recordedBy: 'Dr. Okafor',
+    },
+  ],
   isUrgent: true,
 };

@@ -11,6 +11,7 @@ import {
   type LabCategory,
   type Priority,
 } from '@/features/laboratory/__mocks__/labOrderFixtures';
+import { AllergyBanner } from '@components/clinical/AllergyBanner';
 
 // ── Priority config ───────────────────────────────────────────────────────────
 
@@ -240,7 +241,7 @@ export default function LabOrdersPage() {
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* ── Patient preview bar ──────────────────────────────────────────────── */}
       <div
-        className="shrink-0 px-4 py-[10px] sm:flex sm:min-h-[56px] sm:items-center sm:gap-4 sm:px-5 sm:py-0"
+        className="shrink-0 px-4 py-[10px] sm:flex sm:min-h-[56px] sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1 sm:px-5 sm:py-2"
         style={{ background: '#1A3D4D', borderBottom: '1px solid rgba(255,255,255,0.10)' }}
       >
         {/* Row 1 (mobile) / nav block (sm+) */}
@@ -357,7 +358,7 @@ export default function LabOrdersPage() {
               {/* sm+: individual pills */}
               {patient.allergies.map((a) => (
                 <span
-                  key={a}
+                  key={a.id}
                   className="hidden shrink-0 font-sans font-medium sm:inline"
                   style={{
                     fontSize: 14,
@@ -369,7 +370,7 @@ export default function LabOrdersPage() {
                     color: '#FCA5A5',
                   }}
                 >
-                  {a}
+                  {a.substance}
                 </span>
               ))}
             </>
@@ -379,7 +380,7 @@ export default function LabOrdersPage() {
         {/* URGENT badge — sm+ right slot */}
         {patient.isUrgent && (
           <span
-            className="hidden shrink-0 font-sans font-semibold sm:inline"
+            className="hidden shrink-0 font-sans font-semibold sm:ml-auto sm:inline"
             style={{
               fontSize: 14,
               lineHeight: '20px',
@@ -428,6 +429,13 @@ export default function LabOrdersPage() {
           </div>
 
           <div className="px-4 py-4 sm:px-6 sm:py-5">
+            {/* ── Allergy banner — always first, never collapsible ─────────── */}
+            {patient.allergies.length > 0 && (
+              <div className="mb-4">
+                <AllergyBanner allergies={patient.allergies} />
+              </div>
+            )}
+
             {/* ── Request Priority ─────────────────────────────────────────── */}
             <div
               className="mb-4"

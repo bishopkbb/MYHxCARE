@@ -153,7 +153,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
     <div className="flex h-full flex-col overflow-hidden" style={{ background: '#F5FBFD' }}>
       {/* ── Patient preview bar ────────────────────────────────────────────────── */}
       <div
-        className="px-5 py-[10px] sm:flex sm:min-h-[60px] sm:items-center sm:gap-4 sm:py-0"
+        className="px-5 py-[10px] sm:flex sm:min-h-[60px] sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1 sm:py-2"
         style={{ background: '#1A3D4D', borderBottom: '1px solid rgba(255,255,255,0.10)' }}
       >
         <div className="flex items-center gap-3">
@@ -278,7 +278,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
         {patient.isUrgent && (
           <span
-            className="hidden shrink-0 text-sm font-bold tracking-wide uppercase sm:inline"
+            className="hidden shrink-0 text-sm font-bold tracking-wide uppercase sm:ml-auto sm:inline"
             style={{
               borderRadius: 4,
               padding: '4px 10px',

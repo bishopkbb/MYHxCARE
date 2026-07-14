@@ -73,8 +73,9 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
         <Menu className="size-5" />
       </button>
 
-      {/* Search bar — 48px from topbar left edge, desktop only */}
-      <div className="ml-12 hidden lg:block">
+      {/* Search bar — desktop only; width scales with breakpoint so the topbar
+          never overflows at lg with the expanded sidebar */}
+      <div className="ml-6 hidden lg:block xl:ml-12">
         <div className="relative">
           <Search
             className="absolute top-1/2 left-[9px] -translate-y-1/2 text-[#25464D]/40"
@@ -84,7 +85,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
             type="search"
             placeholder="Search patients, records, results…"
             aria-label="Search patients, records and results"
-            className="h-9 w-96 rounded-[10px] pr-4 pl-9 text-sm leading-5 text-[#25464D] outline-none placeholder:text-[#25464D] focus:ring-2 focus:ring-[#0098CC]/30"
+            className="h-9 w-56 rounded-[10px] pr-4 pl-9 text-sm leading-5 text-[#25464D] outline-none placeholder:text-[#25464D] focus:ring-2 focus:ring-[#0098CC]/30 xl:w-96"
             style={{ background: '#E6F8FD' }}
           />
         </div>
@@ -94,7 +95,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
       <div className="flex-1" />
 
       {/* Right group */}
-      <div className="mr-4 flex items-center gap-4 lg:mr-16 lg:gap-5">
+      <div className="mr-4 flex items-center gap-4 lg:mr-6 xl:mr-16 xl:gap-5">
         {/* Clock + separator + refresh — desktop only */}
         <div className="hidden items-center gap-5 lg:flex">
           <LiveClock />
