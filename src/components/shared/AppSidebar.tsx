@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronLeft, X } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { resolveWorkspace } from '@/types/auth.types';
 import { WORKSPACE_NAV } from '@/config/workspaces';
@@ -37,9 +37,29 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const asideRef = useRef<HTMLElement>(null);
 
   const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
   const { sections } = WORKSPACE_NAV[workspaceId];
+
+  // Scroll-then-stick (desktop): the sidebar flows with the page until its
+  // bottom (Sign Out) reaches the viewport bottom, then stays pinned while
+  // the page keeps scrolling. Achieved with position:sticky and
+  // top: min(0px, 100dvh - ownHeight) — 0 when the sidebar fits the viewport
+  // (pins at top), negative when taller (scrolls up by the overshoot, then
+  // sticks with Sign Out exactly at the viewport bottom). Only the height is
+  // measured via JS; 100dvh stays live CSS so window resizes need no listener.
+  useEffect(() => {
+    const el = asideRef.current;
+    if (!el) return;
+    const update = () => {
+      el.style.setProperty('--sidebar-stick-top', `min(0px, calc(100dvh - ${el.offsetHeight}px))`);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     onMobileClose();
@@ -74,6 +94,7 @@ export function AppSidebar({
       />
 
       <aside
+        ref={asideRef}
         aria-label="Application sidebar"
         className={cn(
           // overflow visible on desktop so the edge-floating collapse toggle
@@ -87,11 +108,13 @@ export function AppSidebar({
           // bottom nav strip) on iOS/Android, so the sign-out button stays visible.
           'fixed inset-y-0 left-0 z-50 h-dvh',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
-          // Desktop: sticky + h-dvh pins the sidebar to the viewport — it never
-          // scrolls with the page, so the nav→sign-out spacing stays constant no
-          // matter how tall the content grows; nav scrolls internally instead.
+          // Desktop: scroll-then-stick. self-start stops flex-stretch so the
+          // sidebar keeps its natural height (min one viewport); the measured
+          // --sidebar-stick-top lets it scroll with the page until Sign Out is
+          // visible, then stay pinned. bottom-auto neutralises the mobile
+          // inset-y-0. No internal nav scrollbar on desktop — content flows.
           // z-10 keeps the edge toggle above the adjacent content column.
-          'lg:sticky lg:top-0 lg:z-10 lg:h-dvh lg:translate-x-0',
+          'lg:sticky lg:top-[var(--sidebar-stick-top,0px)] lg:bottom-auto lg:z-10 lg:min-h-dvh lg:translate-x-0 lg:self-start',
         )}
         // Inline style handles both transitions correctly without Tailwind class-order conflicts
         style={{

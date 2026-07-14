@@ -346,7 +346,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           sm+     : single flex-row, same as original desktop design
       */}
       <div
-        className="px-5 py-[10px] sm:flex sm:min-h-[60px] sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1 sm:py-2"
+        className="px-5 py-[10px] sm:flex sm:min-h-[60px] sm:items-center sm:gap-x-4 sm:py-2"
         style={{ background: '#1A3D4D', borderBottom: '1px solid rgba(255,255,255,0.10)' }}
       >
         {/* ── Row 1 (mobile) / nav block (sm+) ──────────────────────────── */}
@@ -402,7 +402,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* ── Row 2 (mobile) / info strip (sm+) ─────────────────────────── */}
-        <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 sm:mt-0 sm:flex-1 sm:gap-x-4">
+        <div className="mt-1.5 flex min-w-0 [scrollbar-width:none] flex-wrap items-center gap-x-3 gap-y-0.5 sm:mt-0 sm:flex-1 sm:flex-nowrap sm:gap-x-4 sm:overflow-x-auto sm:scroll-smooth sm:whitespace-nowrap [&::-webkit-scrollbar]:hidden">
           {/* Name — hidden on mobile (shown in row 1), visible sm+ */}
           <span
             className="hidden shrink-0 font-normal text-white sm:inline"
