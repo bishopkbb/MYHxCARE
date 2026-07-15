@@ -429,59 +429,6 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           >
             BG: {patient.bloodGroup}
           </span>
-
-          {patient.allergies.length > 0 && (
-            <>
-              <AlertTriangle style={{ width: 18, height: 18, color: '#FCA5A5', flexShrink: 0 }} />
-
-              {/* Mobile: compact count chip */}
-              <span
-                className="shrink-0 text-sm font-medium sm:hidden"
-                style={{
-                  borderRadius: 4,
-                  padding: '3px 8px',
-                  background: 'rgba(239,68,68,0.28)',
-                  border: '1px solid rgba(239,68,68,0.40)',
-                  color: '#FCA5A5',
-                }}
-              >
-                {patient.allergies.length === 1
-                  ? '1 allergy'
-                  : `${patient.allergies.length} allergies`}
-              </span>
-
-              {/* sm+: individual substance pills */}
-              {patient.allergies.slice(0, 2).map((allergy) => (
-                <span
-                  key={allergy.id}
-                  className="hidden shrink-0 text-sm font-medium sm:inline"
-                  style={{
-                    borderRadius: 4,
-                    padding: '3px 8px',
-                    background: 'rgba(239,68,68,0.28)',
-                    border: '1px solid rgba(239,68,68,0.40)',
-                    color: '#FCA5A5',
-                  }}
-                >
-                  {allergy.substance}
-                </span>
-              ))}
-              {patient.allergies.length > 2 && (
-                <span
-                  className="hidden shrink-0 text-sm font-medium sm:inline"
-                  style={{
-                    borderRadius: 4,
-                    padding: '3px 8px',
-                    background: 'rgba(239,68,68,0.15)',
-                    border: '1px solid rgba(239,68,68,0.25)',
-                    color: '#FCA5A5',
-                  }}
-                >
-                  +{patient.allergies.length - 2} more
-                </span>
-              )}
-            </>
-          )}
         </div>
 
         {/* URGENT — sm+ slot; outer-level sibling so it pins right on the row

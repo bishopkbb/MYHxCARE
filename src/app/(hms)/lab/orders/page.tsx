@@ -334,47 +334,6 @@ export default function LabOrdersPage() {
           >
             BG: {patient.bloodGroup}
           </span>
-
-          {patient.allergies.length > 0 && (
-            <>
-              <AlertTriangle style={{ width: 16, height: 16, color: '#FCA5A5', flexShrink: 0 }} />
-              {/* Mobile: count chip */}
-              <span
-                className="font-sans font-medium sm:hidden"
-                style={{
-                  fontSize: 14,
-                  lineHeight: '20px',
-                  borderRadius: 4,
-                  padding: '2px 8px',
-                  background: 'rgba(239,68,68,0.28)',
-                  border: '1px solid rgba(239,68,68,0.40)',
-                  color: '#FCA5A5',
-                }}
-              >
-                {patient.allergies.length === 1
-                  ? '1 allergy'
-                  : `${patient.allergies.length} allergies`}
-              </span>
-              {/* sm+: individual pills */}
-              {patient.allergies.map((a) => (
-                <span
-                  key={a.id}
-                  className="hidden shrink-0 font-sans font-medium sm:inline"
-                  style={{
-                    fontSize: 14,
-                    lineHeight: '22px',
-                    borderRadius: 4,
-                    padding: '3px 8px',
-                    background: 'rgba(239,68,68,0.28)',
-                    border: '1px solid rgba(239,68,68,0.40)',
-                    color: '#FCA5A5',
-                  }}
-                >
-                  {a.substance}
-                </span>
-              ))}
-            </>
-          )}
         </div>
 
         {/* URGENT badge — sm+ right slot */}

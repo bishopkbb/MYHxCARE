@@ -228,52 +228,6 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
           >
             BG: {patient.bloodGroup}
           </span>
-
-          {patient.allergies.length > 0 && (
-            <>
-              <AlertTriangle
-                aria-hidden
-                style={{ width: 18, height: 18, color: '#FCA5A5', flexShrink: 0 }}
-              />
-              <span
-                className="shrink-0 text-sm font-medium sm:hidden"
-                style={{
-                  borderRadius: 4,
-                  padding: '3px 8px',
-                  background: 'rgba(239,68,68,0.28)',
-                  border: '1px solid rgba(239,68,68,0.40)',
-                  color: '#FCA5A5',
-                }}
-              >
-                {patient.allergies.length === 1
-                  ? '1 allergy'
-                  : `${patient.allergies.length} allergies`}
-              </span>
-              {patient.allergies.slice(0, 2).map((a) => (
-                <span
-                  key={a.id}
-                  className="hidden shrink-0 text-sm font-medium sm:inline"
-                  style={{
-                    borderRadius: 4,
-                    padding: '3px 8px',
-                    background: 'rgba(239,68,68,0.28)',
-                    border: '1px solid rgba(239,68,68,0.40)',
-                    color: '#FCA5A5',
-                  }}
-                >
-                  {a.substance}
-                </span>
-              ))}
-              {patient.allergies.length > 2 && (
-                <span
-                  className="hidden shrink-0 text-sm sm:inline"
-                  style={{ color: 'rgba(255,255,255,0.52)' }}
-                >
-                  +{patient.allergies.length - 2} more
-                </span>
-              )}
-            </>
-          )}
         </div>
 
         {patient.isUrgent && (
