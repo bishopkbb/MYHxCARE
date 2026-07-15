@@ -107,6 +107,18 @@ const FIELD_BASE: React.CSSProperties = {
   borderRadius: 10,
 };
 
+// Textareas (Special Instruction, Pharmacy Instructions) use a lighter,
+// neutral border (#8A98A3 at 20% opacity) and a 12px radius — distinct from
+// the teal-tinted single-line FIELD_BASE recipe above.
+const TEXTAREA_FIELD: React.CSSProperties = {
+  border: '1px solid rgba(138,152,163,0.2)',
+  fontSize: 14,
+  lineHeight: '22px',
+  color: '#0D2630',
+  background: '#FFFFFF',
+  borderRadius: 12,
+};
+
 function focusBorder(
   e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
 ) {
@@ -116,6 +128,10 @@ function blurBorder(
   e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
 ) {
   e.currentTarget.style.borderColor = '#0064821F';
+}
+/** Blur handler for TEXTAREA_FIELD elements — restores its neutral border, not FIELD_BASE's. */
+function blurBorderNeutral(e: React.FocusEvent<HTMLTextAreaElement>) {
+  e.currentTarget.style.borderColor = 'rgba(138,152,163,0.2)';
 }
 
 const FOCUS_RING =
@@ -325,17 +341,17 @@ export default function PrescriptionsPage() {
                 {/* ── Active medications interaction-check banner ──────────── */}
                 {patient.activeMedications.length > 0 && (
                   <div
-                    className="mt-4 rounded-[12px] p-4"
-                    style={{ background: '#FFFBEB', border: '1px solid #FEE685' }}
+                    className="mt-4 rounded-[12px] px-2.5 py-4"
+                    style={{ background: '#FFFBEB', borderTop: '1px solid #FEE685' }}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
                       <AlertTriangle
                         className="shrink-0"
                         style={{ width: 18, height: 18, color: '#D97706' }}
                       />
                       <span
                         className="text-sm leading-5.5 font-semibold"
-                        style={{ color: '#92400E' }}
+                        style={{ color: '#F59E0B' }}
                       >
                         Active Medications — Check Interactions Before Prescribing
                       </span>
@@ -344,10 +360,10 @@ export default function PrescriptionsPage() {
                       {patient.activeMedications.map((med) => (
                         <span
                           key={med.id}
-                          className="shrink-0 rounded-full px-3 py-1 text-sm leading-5.5 font-medium whitespace-nowrap"
+                          className="shrink-0 rounded-[12px] px-3 py-1 text-sm leading-5.5 font-medium whitespace-nowrap"
                           style={{
-                            background: 'rgba(245,158,11,0.14)',
-                            border: '1px solid rgba(245,158,11,0.4)',
+                            background: '#FEF3C6',
+                            borderTop: '1px solid #FFD230',
                             color: '#92400E',
                           }}
                         >
@@ -627,10 +643,10 @@ export default function PrescriptionsPage() {
                         <button
                           type="button"
                           onClick={handleAddAnother}
-                          className={`flex h-11 w-full items-center justify-center gap-2 rounded-[10px] font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                          style={{ background: '#00B4D8', fontSize: 14, lineHeight: '22px' }}
+                          className={`flex w-full items-center justify-center gap-2.5 rounded-[12px] px-2.5 py-4 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                          style={{ background: '#00B4D8', fontSize: 16, lineHeight: '24px' }}
                         >
-                          <Plus style={{ width: 16, height: 16 }} />
+                          <Plus style={{ width: 18, height: 18 }} />
                           Add Another Medication
                         </button>
                       </div>
@@ -874,10 +890,10 @@ export default function PrescriptionsPage() {
                                 updateSelectedLine({ specialInstructions: e.target.value })
                               }
                               rows={3}
-                              className={`w-full resize-none rounded-[12px] p-4 outline-none ${FOCUS_RING}`}
-                              style={FIELD_BASE}
+                              className={`w-full resize-none rounded-[12px] px-2.5 py-4 outline-none ${FOCUS_RING}`}
+                              style={TEXTAREA_FIELD}
                               onFocus={focusBorder}
-                              onBlur={blurBorder}
+                              onBlur={blurBorderNeutral}
                             />
                             <p className="mt-1 text-sm leading-5" style={{ color: '#8A98A3' }}>
                               {selectedLine.specialInstructions.length}/200 characters
@@ -948,10 +964,10 @@ export default function PrescriptionsPage() {
                               onChange={(e) => setPharmacyNote(e.target.value)}
                               placeholder="Add note for pharmacist (e.g. preferred brand, special handling)"
                               rows={5}
-                              className={`mt-3 w-full resize-none rounded-[12px] p-4 outline-none ${FOCUS_RING}`}
-                              style={FIELD_BASE}
+                              className={`mt-3 w-full resize-none rounded-[12px] px-2.5 py-4 outline-none ${FOCUS_RING}`}
+                              style={TEXTAREA_FIELD}
                               onFocus={focusBorder}
-                              onBlur={blurBorder}
+                              onBlur={blurBorderNeutral}
                             />
                           </div>
                         </div>
