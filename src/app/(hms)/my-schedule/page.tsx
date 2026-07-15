@@ -375,105 +375,119 @@ function UpcomingShiftRow({
       className="py-4"
       style={{ borderBottom: last ? 'none' : '1px solid rgba(0,100,130,0.08)' }}
     >
-      <div className="flex items-start gap-3">
-        {/* Icon */}
-        <div className="flex shrink-0 items-start justify-center pt-1" style={{ width: 32 }}>
-          {isOff ? (
-            <span style={{ fontSize: 18, color: '#CBD5E1', lineHeight: 1 }}>—</span>
-          ) : (
-            <ShiftTypeIcon type={shift.type} size={24} />
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 flex flex-wrap items-center gap-2">
-            <span
-              className="font-sans font-semibold"
-              style={{ fontSize: 15, lineHeight: '22px', color: '#0D2630' }}
-            >
-              {shift.dayLabel}
-            </span>
-            <ShiftBadge type={shift.type} />
+      {/* flex-wrap driven by actual available width, not a guessed viewport
+          breakpoint — this card sits inside a 2-column grid at lg+, so its
+          real width shrinks independent of the viewport. A sm: breakpoint
+          previously reverted the actions row to inline mode based on
+          viewport size alone, which clipped the buttons again as soon as
+          the lg 2-column grid narrowed the card. Giving the content column a
+          min-width and letting the row wrap naturally means the actions
+          block drops to its own line whenever there truly isn't room,
+          regardless of viewport or column width. */}
+      <div className="flex flex-wrap items-start gap-x-3 gap-y-3">
+        <div className="flex min-w-[190px] flex-1 items-start gap-3">
+          {/* Icon */}
+          <div className="flex shrink-0 items-start justify-center pt-1" style={{ width: 32 }}>
+            {isOff ? (
+              <span style={{ fontSize: 18, color: '#CBD5E1', lineHeight: 1 }}>—</span>
+            ) : (
+              <ShiftTypeIcon type={shift.type} size={24} />
+            )}
           </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5">
-            <span
-              className="flex items-center gap-1 font-sans"
-              style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
-            >
-              <Clock style={{ width: 13, height: 13, flexShrink: 0 }} />
-              {shift.timeRange}
-              {shift.timeNote && <span className="ml-0.5">{shift.timeNote}</span>}
-            </span>
-            {shift.location && (
+
+          {/* Content */}
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex flex-wrap items-center gap-2">
+              <span
+                className="font-sans font-semibold"
+                style={{ fontSize: 15, lineHeight: '22px', color: '#0D2630' }}
+              >
+                {shift.dayLabel}
+              </span>
+              <ShiftBadge type={shift.type} />
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5">
               <span
                 className="flex items-center gap-1 font-sans"
                 style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
               >
-                <MapPin style={{ width: 13, height: 13, flexShrink: 0 }} />
-                {shift.location}
+                <Clock style={{ width: 13, height: 13, flexShrink: 0 }} />
+                {shift.timeRange}
+                {shift.timeNote && <span className="ml-0.5">{shift.timeNote}</span>}
               </span>
-            )}
+              {shift.location && (
+                <span
+                  className="flex items-center gap-1 font-sans"
+                  style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
+                >
+                  <MapPin style={{ width: 13, height: 13, flexShrink: 0 }} />
+                  {shift.location}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Status / Actions */}
-        <div className="flex shrink-0 items-center gap-2">
-          {showConfirmed && (
-            <span
-              className="flex items-center gap-1.5 font-sans font-medium"
-              style={{ fontSize: 14, lineHeight: '20px', color: '#16A34A' }}
-            >
-              <CheckCircle2 style={{ width: 16, height: 16 }} />
-              Confirmed
-            </span>
-          )}
-          {showActions && (
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => onConfirm(shift.id)}
-                className="font-sans font-medium transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                style={{
-                  borderRadius: 8,
-                  border: 'none',
-                  background: '#00B4D8',
-                  padding: '8px 16px',
-                  fontSize: 14,
-                  lineHeight: '20px',
-                  color: '#FFFFFF',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
+        {/* Status / Actions — wraps to its own full-width line whenever the
+            content column above needs more than its share of the row. */}
+        {(showConfirmed || showActions || shift.resolvedStatus === 'declined') && (
+          <div className="flex shrink-0 items-center gap-2">
+            {showConfirmed && (
+              <span
+                className="flex items-center gap-1.5 font-sans font-medium"
+                style={{ fontSize: 14, lineHeight: '20px', color: '#16A34A' }}
               >
-                Confirm Shift
-              </button>
-              <button
-                type="button"
-                onClick={() => onCannotAttend(shift.id)}
-                className="font-sans font-medium transition-colors duration-150 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-300/50 focus-visible:outline-none"
-                style={{
-                  borderRadius: 8,
-                  border: '1px solid rgba(239,68,68,0.35)',
-                  background: '#FFFFFF',
-                  padding: '8px 16px',
-                  fontSize: 14,
-                  lineHeight: '20px',
-                  color: '#EF4444',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Cannot Attend
-              </button>
-            </div>
-          )}
-          {shift.resolvedStatus === 'declined' && (
-            <span className="font-sans font-medium" style={{ fontSize: 14, color: '#EF4444' }}>
-              Absence reported
-            </span>
-          )}
-        </div>
+                <CheckCircle2 style={{ width: 16, height: 16 }} />
+                Confirmed
+              </span>
+            )}
+            {showActions && (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onConfirm(shift.id)}
+                  className="font-sans font-medium transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{
+                    borderRadius: 8,
+                    border: 'none',
+                    background: '#00B4D8',
+                    padding: '8px 16px',
+                    fontSize: 14,
+                    lineHeight: '20px',
+                    color: '#FFFFFF',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Confirm Shift
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onCannotAttend(shift.id)}
+                  className="font-sans font-medium transition-colors duration-150 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-300/50 focus-visible:outline-none"
+                  style={{
+                    borderRadius: 8,
+                    border: '1px solid rgba(239,68,68,0.35)',
+                    background: '#FFFFFF',
+                    padding: '8px 16px',
+                    fontSize: 14,
+                    lineHeight: '20px',
+                    color: '#EF4444',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Cannot Attend
+                </button>
+              </div>
+            )}
+            {shift.resolvedStatus === 'declined' && (
+              <span className="font-sans font-medium" style={{ fontSize: 14, color: '#EF4444' }}>
+                Absence reported
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
