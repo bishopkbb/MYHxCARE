@@ -170,7 +170,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           },
           {
             label: 'Clinical Timeline',
-            href: '/patients',
+            href: '/clinical-timeline',
             icon: Activity,
             iconSrc: '/icons/clinical%20timeline.png',
           },

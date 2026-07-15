@@ -115,6 +115,22 @@ const PATIENT_PROFILE_GUIDE: HelpGuide = {
   ],
 };
 
+const CLINICAL_TIMELINE_INDEX_GUIDE: HelpGuide = {
+  id: 'clinical-timeline-index',
+  title: 'Clinical Timeline',
+  intro: 'Pick a patient here to open their complete chronological clinical history.',
+  sections: [
+    {
+      heading: 'Finding a patient',
+      body: 'Search by name or MRN, or narrow the list with the status pills — Admitted, Active, Follow up, Referred, or Discharged.',
+    },
+    {
+      heading: 'Opening a timeline',
+      body: "Select the eye icon (or tap a patient card on mobile) to open that patient's timeline.",
+    },
+  ],
+};
+
 const CLINICAL_TIMELINE_GUIDE: HelpGuide = {
   id: 'clinical-timeline',
   title: 'Clinical Timeline',
@@ -371,6 +387,7 @@ const APPOINTMENTS_GUIDE: HelpGuide = {
  * routes are tested before their parents.
  */
 export function resolveHelpGuide(pathname: string): HelpGuide {
+  if (pathname.startsWith('/clinical-timeline')) return CLINICAL_TIMELINE_INDEX_GUIDE;
   if (/^\/patients\/[^/]+\/consultation/.test(pathname)) return CONSULTATION_GUIDE;
   if (/^\/patients\/[^/]+\/timeline/.test(pathname)) return CLINICAL_TIMELINE_GUIDE;
   if (/^\/patients\/[^/]+/.test(pathname)) return PATIENT_PROFILE_GUIDE;
