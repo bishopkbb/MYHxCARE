@@ -22,14 +22,37 @@ export type TimelineEvent = {
   actor: string;
 };
 
+// Every category card carries its own brand-color border (the pastel tint of
+// its solid `color`) — not just Emergency — so the whole timeline reads as
+// one consistent, color-coded system rather than one flagged exception.
 export const TIMELINE_CATEGORY_CONFIG: Record<
   TimelineCategory,
-  { label: string; color: string; badgeBg: string; cardBorder?: string }
+  { label: string; color: string; badgeBg: string; cardBorder: string }
 > = {
-  CONSULTATION: { label: 'Consultation', color: '#00B4D8', badgeBg: 'rgba(0,180,216,0.12)' },
-  LABORATORY: { label: 'Laboratory', color: '#3B82F6', badgeBg: 'rgba(59,130,246,0.12)' },
-  PRESCRIPTION: { label: 'Prescription', color: '#7C3AED', badgeBg: 'rgba(124,58,237,0.12)' },
-  REFERRAL: { label: 'Referral', color: '#F59E0B', badgeBg: 'rgba(245,158,11,0.12)' },
+  CONSULTATION: {
+    label: 'Consultation',
+    color: '#00B4D8',
+    badgeBg: 'rgba(0,180,216,0.12)',
+    cardBorder: '#A5F3FC',
+  },
+  LABORATORY: {
+    label: 'Laboratory',
+    color: '#3B82F6',
+    badgeBg: 'rgba(59,130,246,0.12)',
+    cardBorder: '#BFDBFE',
+  },
+  PRESCRIPTION: {
+    label: 'Prescription',
+    color: '#7C3AED',
+    badgeBg: 'rgba(124,58,237,0.12)',
+    cardBorder: '#DDD6FE',
+  },
+  REFERRAL: {
+    label: 'Referral',
+    color: '#F59E0B',
+    badgeBg: 'rgba(245,158,11,0.12)',
+    cardBorder: '#FDE68A',
+  },
   EMERGENCY: {
     label: 'Emergency',
     color: '#EF4444',

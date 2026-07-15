@@ -370,7 +370,7 @@ export default function ClinicalTimelinePage({ params }: { params: Promise<{ id:
                       className="min-w-0 flex-1 rounded-[12px] p-4"
                       style={{
                         background: '#FFFFFF',
-                        border: `1px solid ${cfg.cardBorder ?? 'rgba(0,100,130,0.12)'}`,
+                        border: `1px solid ${cfg.cardBorder}`,
                         marginBottom: isLast ? 0 : 16,
                       }}
                     >
