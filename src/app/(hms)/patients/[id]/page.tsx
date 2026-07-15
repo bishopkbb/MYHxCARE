@@ -30,6 +30,7 @@ import { use, useEffect, useRef, useState } from 'react';
 import { AllergyBanner } from '@/components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
+import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import {
   FALLBACK_PATIENT_DETAIL,
@@ -635,6 +636,29 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   Request Lab
                 </button>
               </PermissionGate>
+
+              {/* Read-only history view — not gated per PermissionGate rule
+                  (read-only content is not gated at element level) */}
+              <button
+                type="button"
+                onClick={() => router.push(ROUTES.patientTimeline(id))}
+                className="flex flex-1 items-center justify-center gap-2 rounded-[12px] px-4 font-semibold whitespace-nowrap transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:flex-none"
+                style={{
+                  fontFamily: 'inherit',
+                  fontSize: 16,
+                  lineHeight: '24px',
+                  background: '#FFFFFF',
+                  border: '1px solid #0064821F',
+                  color: '#0D2630',
+                  height: 42,
+                  minWidth: 168,
+                  paddingTop: 8,
+                  paddingBottom: 8,
+                }}
+              >
+                <Activity style={{ width: 16, height: 16, color: '#00B4D8', flexShrink: 0 }} />
+                Clinical Timeline
+              </button>
             </div>
           </div>
         </div>
