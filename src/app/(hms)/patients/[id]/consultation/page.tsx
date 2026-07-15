@@ -936,9 +936,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
                     <button
                       type="button"
-                      onClick={() =>
-                        toast.info('Coming soon', 'Lab test request module is not yet available.')
-                      }
+                      onClick={() => router.push(ROUTES.patientLabOrder(id))}
                       className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
                       style={{
                         fontSize: 14,

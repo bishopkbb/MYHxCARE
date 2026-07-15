@@ -407,6 +407,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (/^\/patients\/[^/]+\/consultation/.test(pathname)) return CONSULTATION_GUIDE;
   if (/^\/patients\/[^/]+\/timeline/.test(pathname)) return CLINICAL_TIMELINE_GUIDE;
   if (/^\/patients\/[^/]+\/referral/.test(pathname)) return REFERRALS_GUIDE;
+  if (/^\/patients\/[^/]+\/lab-order/.test(pathname)) return LAB_ORDERS_GUIDE;
   if (/^\/patients\/[^/]+/.test(pathname)) return PATIENT_PROFILE_GUIDE;
   if (pathname.startsWith('/patients')) return PATIENTS_GUIDE;
   if (pathname.startsWith('/dashboard')) return DASHBOARD_GUIDE;
