@@ -241,6 +241,30 @@ const LAB_ORDERS_GUIDE: HelpGuide = {
   ],
 };
 
+const PRESCRIPTIONS_GUIDE: HelpGuide = {
+  id: 'prescriptions',
+  title: 'Create Prescription',
+  intro: 'Build a prescription for the patient in context, one medication at a time.',
+  sections: [
+    {
+      heading: 'Adding medications',
+      body: 'Search by generic or brand name, or browse the drug list, to add a medication to the table. "Add Another Medication" quickly adds the next common drug.',
+    },
+    {
+      heading: 'Dosage & Directions',
+      body: 'Select a row in the medication table to edit its dosage, route, frequency, duration, and dates in the panel below — each medication keeps its own settings.',
+    },
+    {
+      heading: 'Safety checks',
+      body: 'Active medications and recorded allergies are shown before you prescribe. The Drug Interaction Check confirms the selected medications are safe together.',
+    },
+    {
+      heading: 'Finishing up',
+      body: 'Review the live Prescription Preview at the bottom, then Save as Draft to continue later or Send Prescription to dispatch it to pharmacy.',
+    },
+  ],
+};
+
 const LAB_RESULTS_GUIDE: HelpGuide = {
   id: 'lab-results',
   title: 'Lab Results',
@@ -326,6 +350,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (/^\/patients\/[^/]+/.test(pathname)) return PATIENT_PROFILE_GUIDE;
   if (pathname.startsWith('/patients')) return PATIENTS_GUIDE;
   if (pathname.startsWith('/dashboard')) return DASHBOARD_GUIDE;
+  if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;
   if (pathname.startsWith('/clinical-notes')) return CLINICAL_NOTES_GUIDE;
   if (pathname.startsWith('/referrals')) return REFERRALS_GUIDE;
