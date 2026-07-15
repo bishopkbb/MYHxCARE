@@ -21,6 +21,7 @@ export const ROUTES = {
   patientProfile: (id: string) => `/patients/${id}`,
   patientFolder: (id: string) => `/patients/${id}/folder`,
   patientTimeline: (id: string) => `/patients/${id}/timeline`,
+  patientReferral: (id: string) => `/patients/${id}/referral`,
 
   // Encounters sub-routes
   encounterWorkspace: (id: string) => `/encounters/${id}`,

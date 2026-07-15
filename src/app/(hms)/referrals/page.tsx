@@ -1,160 +1,113 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { AlertCircle, RefreshCw, Search, Share2, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+
+import { ROUTES } from '@/constants/routes';
 import {
-  ChevronLeft,
-  AlertCircle,
-  RefreshCw,
-  Heart,
-  Activity,
-  Scissors,
-  UserRound,
-  Eye,
-  Scale,
-  Shield,
-  BookOpen,
-  TrendingUp,
-  Droplets,
-  ArrowLeftRight,
-  Microscope,
-  Send,
-  type LucideIcon,
-} from 'lucide-react';
-import { useToast } from '@/hooks/useToast';
-import { MOCK_REFERRAL_PATIENT } from '@/features/referrals/__mocks__/referralFixtures';
-import { AllergyBanner } from '@components/clinical/AllergyBanner';
-import { PermissionGate } from '@/components/shared/PermissionGate';
-import { PERMISSIONS } from '@/constants/permissions';
+  MOCK_PATIENTS,
+  type PatientRecord,
+  type PatientRecordStatus,
+} from '@/features/patients/__mocks__/patientFixtures';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 type PageState = 'loading' | 'loaded' | 'error';
+type StatusFilter = 'all' | PatientRecordStatus;
 
-type Department = {
-  id: string;
-  label: string;
-  icon: LucideIcon;
-};
+type StatusCfg = { label: string; color: string };
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
-const DEPARTMENTS: Department[] = [
-  { id: 'cardiology', label: 'Cardiology', icon: Heart },
-  { id: 'neurology', label: 'Neurology', icon: Activity },
-  { id: 'general-surgery', label: 'General Surgery', icon: Scissors },
-  { id: 'obs-gynaecology', label: 'Obs & Gynaecology', icon: UserRound },
-  { id: 'ophthalmology', label: 'Ophthalmology', icon: Eye },
-  { id: 'orthopaedics', label: 'Orthopaedics', icon: Scale },
-  { id: 'dermatology', label: 'Dermatology', icon: Shield },
-  { id: 'psychiatry', label: 'Psychiatry', icon: BookOpen },
-  { id: 'endocrinology', label: 'Endocrinology', icon: TrendingUp },
-  { id: 'nephrology', label: 'Nephrology', icon: Droplets },
-  { id: 'pulmonology', label: 'Pulmonology', icon: ArrowLeftRight },
-  { id: 'ent', label: 'ENT', icon: Microscope },
+const STATUS_CFG: Record<PatientRecordStatus, StatusCfg> = {
+  admitted: { label: 'Admitted', color: '#EF4444' },
+  active: { label: 'Active', color: '#22C55E' },
+  'follow-up': { label: 'Follow up', color: '#F59E0B' },
+  referred: { label: 'Referred', color: '#3B82F6' },
+  discharged: { label: 'Discharged', color: '#6B7280' },
+};
+
+// Pill filter row — same visual family as the Clinical Timeline patient
+// picker, so patient-selection screens across the app read consistently.
+const STATUS_FILTERS: { key: StatusFilter; label: string; color: string }[] = [
+  { key: 'all', label: 'All Patients', color: '#25464D' },
+  { key: 'admitted', label: 'Admitted', color: '#EF4444' },
+  { key: 'active', label: 'Active', color: '#22C55E' },
+  { key: 'follow-up', label: 'Follow up', color: '#F59E0B' },
+  { key: 'referred', label: 'Referred', color: '#3B82F6' },
+  { key: 'discharged', label: 'Discharged', color: '#6B7280' },
 ];
 
-// ── Toggle ─────────────────────────────────────────────────────────────────────
-
-function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      onClick={onToggle}
-      className="shrink-0 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-      style={{
-        width: 44,
-        height: 24,
-        borderRadius: 12,
-        background: on ? '#00B4D8' : '#CBD5E1',
-        position: 'relative',
-        cursor: 'pointer',
-        border: 'none',
-        padding: 0,
-      }}
-    >
-      <span
-        className="absolute top-[2px] block transition-transform duration-200"
-        style={{
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          background: '#FFFFFF',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.20)',
-          transform: on ? 'translateX(22px)' : 'translateX(2px)',
-        }}
-      />
-    </button>
-  );
-}
+const FOCUS_RING =
+  'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
 
 // ── Skeletons ──────────────────────────────────────────────────────────────────
 
-function SkeletonToggleCard() {
+function SkeletonDesktopRow({ isLast }: { isLast: boolean }) {
   return (
     <div
-      className="flex items-center justify-between px-5 py-4"
+      className="flex animate-pulse items-center bg-white"
+      style={{ borderBottom: isLast ? undefined : '1px solid rgba(0,100,130,0.08)' }}
+    >
+      <div className="flex min-w-0 flex-1 items-center gap-3 py-4 pr-3 pl-5">
+        <div className="size-10 shrink-0 rounded-full bg-slate-100" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-36 rounded-md bg-slate-100" />
+          <div className="h-3.5 w-24 rounded-md bg-slate-100" />
+        </div>
+      </div>
+      <div className="w-32 shrink-0 py-4 pr-4">
+        <div className="h-6 w-20 rounded-full bg-slate-100" />
+      </div>
+      <div className="w-40 shrink-0 space-y-2 py-4 pr-4">
+        <div className="h-3.5 w-20 rounded-md bg-slate-100" />
+        <div className="h-3.5 w-14 rounded-md bg-slate-100" />
+      </div>
+      <div className="w-24 shrink-0 py-4 pr-5">
+        <div className="h-11 w-full rounded-[8px] bg-slate-100" />
+      </div>
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div
+      className="animate-pulse overflow-hidden rounded-[12px] bg-white"
       style={{
-        borderRadius: 12,
-        background: '#FFFFFF',
-        border: '1px solid rgba(0,100,130,0.12)',
+        border: '1px solid rgba(0,100,130,0.08)',
+        boxShadow: '0px 1px 3px rgba(0,0,0,0.05)',
       }}
     >
-      <div className="flex flex-col gap-1.5">
-        <div className="animate-pulse rounded bg-slate-200" style={{ width: 140, height: 20 }} />
-        <div className="animate-pulse rounded bg-slate-200" style={{ width: 240, height: 16 }} />
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center gap-3">
+          <div className="size-10 shrink-0 rounded-full bg-slate-100" />
+          <div className="space-y-2">
+            <div className="h-4 w-32 rounded-md bg-slate-100" />
+            <div className="h-3.5 w-20 rounded-md bg-slate-100" />
+          </div>
+        </div>
+        <div className="h-6 w-16 rounded-full bg-slate-100" />
       </div>
       <div
-        className="shrink-0 animate-pulse rounded-full bg-slate-200"
-        style={{ width: 44, height: 24 }}
-      />
-    </div>
-  );
-}
-
-function SkeletonDeptCard() {
-  return (
-    <div
-      className="flex items-center gap-3 px-4 py-3"
-      style={{
-        borderRadius: 10,
-        background: '#FFFFFF',
-        border: '1px solid rgba(0,100,130,0.12)',
-        minHeight: 52,
-      }}
-    >
-      <div
-        className="shrink-0 animate-pulse rounded bg-slate-200"
-        style={{ width: 20, height: 20 }}
-      />
-      <div className="animate-pulse rounded bg-slate-200" style={{ width: 100, height: 18 }} />
-    </div>
-  );
-}
-
-function SkeletonReasonSection() {
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="animate-pulse rounded bg-slate-200" style={{ width: 150, height: 22 }} />
-      <div className="animate-pulse rounded-lg bg-slate-200" style={{ height: 120 }} />
+        className="flex items-center justify-between border-t px-4 py-3"
+        style={{ borderColor: 'rgba(0,100,130,0.06)' }}
+      >
+        <div className="h-3.5 w-24 rounded-md bg-slate-100" />
+        <div className="h-11 w-24 rounded-[8px] bg-slate-100" />
+      </div>
     </div>
   );
 }
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
-export default function ReferralsPage() {
+export default function ReferralsIndexPage() {
   const router = useRouter();
-  const toast = useToast();
-
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [selectedDept, setSelectedDept] = useState<string | null>(null);
-  const [reason, setReason] = useState('');
-  const [isUrgent, setIsUrgent] = useState(false);
-  const [attachNote, setAttachNote] = useState(true);
-  const [notifyDoctor, setNotifyDoctor] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -166,463 +119,376 @@ export default function ReferralsPage() {
     setTimeout(() => setPageState('loaded'), 800);
   }
 
-  function handleSend() {
-    if (!selectedDept) {
-      toast.error(
-        'No department selected',
-        'Please select a department before sending the referral.',
-      );
-      return;
-    }
-    if (!reason.trim()) {
-      toast.error(
-        'Referral reason required',
-        'Describe the clinical indication and what you expect from the specialist.',
-      );
-      return;
-    }
-    const dept = DEPARTMENTS.find((d) => d.id === selectedDept);
-    toast.success(
-      'Referral sent',
-      `${patient.name} has been referred to ${dept?.label ?? 'the selected department'}.`,
-    );
-    setSelectedDept(null);
-    setReason('');
-    setIsUrgent(false);
-    setAttachNote(true);
-    setNotifyDoctor(true);
+  const filteredPatients = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return MOCK_PATIENTS.filter((p) => {
+      const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
+      const matchesSearch =
+        q === '' || p.name.toLowerCase().includes(q) || p.mrn.toLowerCase().includes(q);
+      return matchesStatus && matchesSearch;
+    });
+  }, [search, statusFilter]);
+
+  const hasActiveFilters = search.trim() !== '' || statusFilter !== 'all';
+
+  function clearFilters() {
+    setSearch('');
+    setStatusFilter('all');
   }
 
-  const patient = MOCK_REFERRAL_PATIENT;
+  function openReferral(patient: PatientRecord) {
+    router.push(ROUTES.patientReferral(patient.id));
+  }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
-      {/* ── Patient preview bar ──────────────────────────────────────────────── */}
-      <div
-        className="shrink-0 px-4 py-[10px] sm:flex sm:min-h-[56px] sm:items-center sm:gap-x-4 sm:px-5 sm:py-2"
-        style={{ background: '#1A3D4D', borderBottom: '1px solid rgba(255,255,255,0.10)' }}
-      >
-        {/* Row 1 (mobile) / nav block (sm+) */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="flex shrink-0 items-center gap-1.5 rounded-[6px] transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
-          >
-            <ChevronLeft style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.58)' }} />
-            <span
-              className="font-sans"
-              style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.58)' }}
-            >
-              Back to Queue
-            </span>
-          </button>
-
-          <div
-            className="shrink-0"
-            style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.18)' }}
-          />
-
-          <div
-            className="flex shrink-0 items-center justify-center rounded-full font-sans font-medium text-white"
-            style={{
-              width: 38,
-              height: 38,
-              background: 'rgba(255,255,255,0.15)',
-              fontSize: 14,
-              lineHeight: '22px',
-            }}
-          >
-            {patient.initials}
-          </div>
-
-          <span
-            className="min-w-0 flex-1 truncate font-sans text-white sm:hidden"
-            style={{ fontSize: 15, lineHeight: '22px' }}
-          >
-            {patient.name}
-          </span>
-
-          {patient.isUrgent && (
-            <span
-              className="shrink-0 font-sans font-medium sm:hidden"
-              style={{
-                fontSize: 14,
-                lineHeight: '20px',
-                borderRadius: 4,
-                padding: '2px 8px',
-                background: 'rgba(245,158,11,0.30)',
-                border: '1px solid rgba(245,158,11,0.45)',
-                color: '#FCD34D',
-              }}
-            >
-              URGENT
-            </span>
-          )}
-        </div>
-
-        {/* Row 2 (mobile) / info strip (sm+) */}
-        <div className="mt-1.5 flex min-w-0 [scrollbar-width:none] flex-wrap items-center gap-x-3 gap-y-0.5 sm:mt-0 sm:flex-1 sm:flex-nowrap sm:gap-x-4 sm:overflow-x-auto sm:scroll-smooth sm:whitespace-nowrap [&::-webkit-scrollbar]:hidden">
-          <span
-            className="hidden shrink-0 font-sans text-white sm:inline"
-            style={{ fontSize: 16, lineHeight: '24px' }}
-          >
-            {patient.name}
-          </span>
-
-          <span
-            className="shrink-0 font-sans"
-            style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.52)' }}
-          >
-            {patient.mrn}
-          </span>
-          <span
-            className="shrink-0 font-sans"
-            style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.52)' }}
-          >
-            {patient.age} · {patient.gender}
-          </span>
-          <span
-            className="shrink-0 font-sans"
-            style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.52)' }}
-          >
-            BG: {patient.bloodGroup}
-          </span>
-        </div>
-
-        {patient.isUrgent && (
-          <span
-            className="hidden shrink-0 font-sans font-semibold sm:ml-auto sm:inline"
-            style={{
-              fontSize: 14,
-              lineHeight: '20px',
-              borderRadius: 6,
-              padding: '4px 12px',
-              background: 'rgba(245,158,11,0.22)',
-              border: '1px solid rgba(245,158,11,0.40)',
-              color: '#FCD34D',
-              letterSpacing: '0.5px',
-            }}
-          >
-            URGENT
-          </span>
-        )}
+    <div className="px-4 pt-6 pb-24 sm:px-6 lg:px-12 lg:pt-10">
+      {/* ── Page header ────────────────────────────────────────────────── */}
+      <div>
+        <h1 className="font-display text-3xl leading-10 font-semibold" style={{ color: '#2F3A40' }}>
+          Referrals
+        </h1>
+        <p className="mt-1 text-base leading-6" style={{ color: '#4A7080' }}>
+          Select a patient to refer them to a specialist department.
+        </p>
       </div>
 
-      {/* ── Scrollable content ───────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
-        <div className="mx-auto max-w-[1200px]">
-          {/* ── Page header ─────────────────────────────────────────────────── */}
+      {/* ── Search ─────────────────────────────────────────────────────── */}
+      <div className="relative mt-6 w-full sm:max-w-md">
+        <Search
+          className="pointer-events-none absolute top-1/2 left-[10px] -translate-y-1/2"
+          style={{ width: 16, height: 16, color: '#8A98A3' }}
+        />
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name or MRN…"
+          className={`h-[42px] w-full rounded-[12px] pr-4 pl-9 text-base leading-6 outline-none placeholder:text-[#8A98A3] ${FOCUS_RING}`}
+          style={{ background: '#FFFFFF', border: '1px solid #0064821F', color: '#2F3A40' }}
+        />
+      </div>
+
+      {/* ── Status filter pills ────────────────────────────────────────── */}
+      <div className="mt-4 flex [scrollbar-width:none] flex-nowrap gap-3 overflow-x-auto scroll-smooth [&::-webkit-scrollbar]:hidden">
+        {STATUS_FILTERS.map((f) => {
+          const active = statusFilter === f.key;
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setStatusFilter(f.key)}
+              aria-pressed={active}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-sm leading-5.5 font-medium whitespace-nowrap transition-colors duration-150 ${FOCUS_RING}`}
+              style={
+                active
+                  ? { background: f.color, border: `1px solid ${f.color}`, color: '#FFFFFF' }
+                  : { background: '#FFFFFF', border: `1px solid ${f.color}66`, color: f.color }
+              }
+            >
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Desktop table — visible at lg+ ───────────────────────────────── */}
+      <div className="mt-6 hidden overflow-hidden rounded-[12px] lg:block">
+        <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}>
+          {/* Header row */}
           <div
-            className="px-4 sm:px-6"
-            style={{
-              background: '#FFFFFF',
-              borderBottom: '1px solid rgba(0,100,130,0.12)',
-              paddingTop: 16,
-              paddingBottom: 16,
-              minHeight: 88,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-            }}
+            className="flex"
+            style={{ background: 'rgba(226,237,241,0.4)', borderBottom: '1px solid #E6F8FD' }}
           >
-            <h1
-              className="font-display font-semibold"
-              style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
+            <span
+              className="min-w-0 flex-1 py-3.5 pr-3 pl-5 text-sm leading-[22px] font-bold tracking-wider uppercase"
+              style={{ color: '#4A7080' }}
             >
-              Refer Patient
-            </h1>
-            <p
-              className="font-sans"
-              style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8', marginTop: 2 }}
+              Patient
+            </span>
+            <span
+              className="w-32 shrink-0 py-3.5 pr-4 text-sm leading-[22px] font-bold tracking-wider uppercase"
+              style={{ color: '#4A7080' }}
             >
-              For {patient.name} · {patient.mrn}
-            </p>
+              Status
+            </span>
+            <span
+              className="w-40 shrink-0 py-3.5 pr-4 text-sm leading-[22px] font-bold tracking-wider uppercase"
+              style={{ color: '#4A7080' }}
+            >
+              Last Visit
+            </span>
+            <span
+              className="w-24 shrink-0 py-3.5 pr-5 text-sm leading-[22px] font-bold tracking-wider uppercase"
+              style={{ color: '#4A7080' }}
+            >
+              Refer
+            </span>
           </div>
 
-          {/* ── Allergy banner — always first, never collapsible ──────────────── */}
-          {patient.allergies.length > 0 && (
-            <div className="px-4 pt-4 sm:px-6">
-              <AllergyBanner allergies={patient.allergies} />
+          {pageState === 'loading' ? (
+            <div>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonDesktopRow key={i} isLast={i === 5} />
+              ))}
             </div>
-          )}
-
-          {/* ── Form body ────────────────────────────────────────────────────── */}
-          <div className="flex flex-col gap-4 px-4 pt-4 pb-10 sm:px-6">
-            {/* Loading */}
-            {pageState === 'loading' && (
-              <>
-                <SkeletonToggleCard />
-                <div className="flex flex-col gap-3">
-                  <div
-                    className="animate-pulse rounded bg-slate-200"
-                    style={{ width: 170, height: 22 }}
-                  />
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <SkeletonDeptCard key={i} />
-                    ))}
-                  </div>
-                </div>
-                <SkeletonReasonSection />
-                <SkeletonToggleCard />
-                <SkeletonToggleCard />
-              </>
-            )}
-
-            {/* Error */}
-            {pageState === 'error' && (
-              <div
-                className="flex flex-col items-center justify-center gap-4 py-20"
-                style={{ color: '#4A7080' }}
+          ) : pageState === 'error' ? (
+            <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 py-10 text-center">
+              <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
+              <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                Failed to load patients
+              </p>
+              <button
+                type="button"
+                onClick={handleRetry}
+                className={`flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
+                style={{
+                  height: 40,
+                  borderRadius: 12,
+                  padding: '0 20px',
+                  background: '#00B4D8',
+                  fontSize: 14,
+                  lineHeight: '22px',
+                }}
               >
-                <AlertCircle style={{ width: 40, height: 40, color: '#EF4444', opacity: 0.7 }} />
-                <div className="text-center">
-                  <p
-                    className="font-sans font-medium"
-                    style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                  >
-                    Failed to load referral form
-                  </p>
-                  <p
-                    className="font-sans"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080', marginTop: 4 }}
-                  >
-                    Check your connection and try again.
-                  </p>
-                </div>
+                <RefreshCw style={{ width: 16, height: 16 }} />
+                Retry
+              </button>
+            </div>
+          ) : filteredPatients.length === 0 ? (
+            <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 py-10 text-center">
+              <div
+                className="flex size-14 items-center justify-center rounded-full"
+                style={{ background: 'rgba(226,237,241,0.6)' }}
+              >
+                <Users style={{ width: 24, height: 24, color: '#8A98A3' }} />
+              </div>
+              <div>
+                <p className="text-base leading-6 font-medium" style={{ color: '#4A7080' }}>
+                  No patients match this filter
+                </p>
+                <p className="mt-0.5 text-sm leading-5.5" style={{ color: '#8A98A3' }}>
+                  Try adjusting your search or clearing the filters
+                </p>
+              </div>
+              {hasActiveFilters && (
                 <button
                   type="button"
-                  onClick={handleRetry}
-                  className="flex items-center gap-2 transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                  style={{
-                    borderRadius: 8,
-                    border: '1px solid rgba(0,100,130,0.20)',
-                    background: '#FFFFFF',
-                    padding: '10px 20px',
-                    fontSize: 14,
-                    lineHeight: '22px',
-                    color: '#0D2630',
-                    cursor: 'pointer',
-                  }}
+                  onClick={clearFilters}
+                  className={`mt-1 text-sm font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                  style={{ color: '#00B4D8' }}
                 >
-                  <RefreshCw style={{ width: 16, height: 16 }} />
-                  Retry
+                  Clear all filters
                 </button>
-              </div>
-            )}
-
-            {/* Loaded */}
-            {pageState === 'loaded' && (
-              <>
-                {/* Urgent Referral */}
-                <div
-                  className="flex items-center justify-between px-5 py-4"
-                  style={{
-                    borderRadius: 12,
-                    background: '#FFFFFF',
-                    border: '1px solid rgba(0,100,130,0.12)',
-                  }}
-                >
-                  <div>
-                    <p
-                      className="font-sans font-semibold"
-                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                    >
-                      Urgent Referral
-                    </p>
-                    <p
-                      className="font-sans"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080', marginTop: 2 }}
-                    >
-                      Mark as urgent for immediate specialist attention
-                    </p>
-                  </div>
-                  <Toggle on={isUrgent} onToggle={() => setIsUrgent((v) => !v)} />
-                </div>
-
-                {/* Select Department */}
-                <div className="flex flex-col gap-3">
-                  <p
-                    className="font-sans font-semibold"
-                    style={{ fontSize: 18, lineHeight: '26px', color: '#0D2630' }}
+              )}
+            </div>
+          ) : (
+            <div>
+              {filteredPatients.map((patient, idx) => {
+                const cfg = STATUS_CFG[patient.status];
+                const isLast = idx === filteredPatients.length - 1;
+                return (
+                  <div
+                    key={patient.id}
+                    className="flex items-center bg-white transition-colors duration-100 hover:bg-[#F5FBFD]"
+                    style={{ borderBottom: isLast ? undefined : '1px solid rgba(0,100,130,0.08)' }}
                   >
-                    Select Department
-                  </p>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {DEPARTMENTS.map((dept) => {
-                      const isSelected = selectedDept === dept.id;
-                      const Icon = dept.icon;
-                      return (
-                        <button
-                          key={dept.id}
-                          type="button"
-                          onClick={() => setSelectedDept(isSelected ? null : dept.id)}
-                          className="flex items-center gap-3 px-4 py-3 text-left transition-all duration-150 hover:shadow-sm focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          style={{
-                            borderRadius: 10,
-                            minHeight: 52,
-                            background: isSelected ? 'rgba(0,180,216,0.06)' : '#FFFFFF',
-                            border: isSelected
-                              ? '2px solid #00B4D8'
-                              : '1px solid rgba(0,100,130,0.12)',
-                            cursor: 'pointer',
-                          }}
+                    {/* Patient */}
+                    <div className="flex min-w-0 flex-1 items-center gap-3 py-4 pr-3 pl-5">
+                      <div
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                        style={{ background: patient.avatarBg }}
+                      >
+                        {patient.initials}
+                      </div>
+                      <div className="min-w-0">
+                        <p
+                          className="truncate text-base leading-6 font-semibold"
+                          style={{ color: '#2F3A40' }}
                         >
-                          <Icon
-                            style={{
-                              width: 20,
-                              height: 20,
-                              flexShrink: 0,
-                              color: isSelected ? '#00B4D8' : '#4A7080',
-                            }}
-                          />
-                          <span
-                            className="font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              lineHeight: '22px',
-                              color: isSelected ? '#00B4D8' : '#0D2630',
-                            }}
-                          >
-                            {dept.label}
-                          </span>
-                        </button>
-                      );
-                    })}
+                          {patient.name}
+                        </p>
+                        <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
+                          {patient.mrn}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Status */}
+                    <div className="w-32 shrink-0 py-4 pr-4">
+                      <span
+                        className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-sm font-medium whitespace-nowrap"
+                        style={{ borderColor: cfg.color, color: cfg.color }}
+                      >
+                        {cfg.label}
+                      </span>
+                    </div>
+
+                    {/* Last visit */}
+                    <div className="w-40 shrink-0 py-4 pr-4">
+                      <p
+                        className="text-sm leading-5.5 font-medium whitespace-nowrap"
+                        style={{ color: '#25464D' }}
+                      >
+                        {patient.lastVisitDate}
+                      </p>
+                      <p
+                        className="text-sm leading-5.5 whitespace-nowrap"
+                        style={{ color: '#4A7080' }}
+                      >
+                        {patient.lastVisitTime}
+                      </p>
+                    </div>
+
+                    {/* Refer */}
+                    <div className="w-24 shrink-0 py-4 pr-5">
+                      <button
+                        type="button"
+                        aria-label={`Refer ${patient.name}`}
+                        onClick={() => openReferral(patient)}
+                        className={`flex h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-[8px] text-sm font-medium whitespace-nowrap transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
+                        style={{ background: '#E6F8FD', color: '#00B4D8' }}
+                      >
+                        <Share2 style={{ width: 15, height: 15 }} />
+                        Refer
+                      </button>
+                    </div>
                   </div>
-                </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
 
-                {/* Referral Reason */}
-                <div className="flex flex-col gap-2">
-                  <p
-                    className="font-sans font-semibold"
-                    style={{ fontSize: 18, lineHeight: '26px', color: '#0D2630' }}
-                  >
-                    Referral Reason
-                  </p>
-                  <textarea
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    placeholder="Clinical indication, relevant findings, and what you expect from the specialist..."
-                    rows={5}
-                    className="w-full resize-none font-sans transition-colors duration-150 focus:outline-none"
-                    style={{
-                      borderRadius: 10,
-                      border: '1px solid rgba(0,100,130,0.20)',
-                      background: '#FFFFFF',
-                      padding: '12px 14px',
-                      fontSize: 14,
-                      lineHeight: '22px',
-                      color: '#0D2630',
-                      minHeight: 120,
-                    }}
-                    onFocus={(e) => {
-                      e.currentTarget.style.borderColor = '#00B4D8';
-                    }}
-                    onBlur={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(0,100,130,0.20)';
-                    }}
-                  />
-                </div>
-
-                {/* Attach Clinical Note */}
-                <div
-                  className="flex items-center justify-between px-5 py-4"
-                  style={{
-                    borderRadius: 12,
-                    background: '#FFFFFF',
-                    border: '1px solid rgba(0,100,130,0.12)',
-                  }}
-                >
-                  <div>
-                    <p
-                      className="font-sans font-semibold"
-                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                    >
-                      Attach Clinical Note
-                    </p>
-                    <p
-                      className="font-sans"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080', marginTop: 2 }}
-                    >
-                      Include your clinical notes with this referral
-                    </p>
-                  </div>
-                  <Toggle on={attachNote} onToggle={() => setAttachNote((v) => !v)} />
-                </div>
-
-                {/* Notify Receiving Doctor */}
-                <div
-                  className="flex items-center justify-between px-5 py-4"
-                  style={{
-                    borderRadius: 12,
-                    background: '#FFFFFF',
-                    border: '1px solid rgba(0,100,130,0.12)',
-                  }}
-                >
-                  <div>
-                    <p
-                      className="font-sans font-semibold"
-                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                    >
-                      Notify Receiving Doctor
-                    </p>
-                    <p
-                      className="font-sans"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080', marginTop: 2 }}
-                    >
-                      Send an immediate notification to the specialist
-                    </p>
-                  </div>
-                  <Toggle on={notifyDoctor} onToggle={() => setNotifyDoctor((v) => !v)} />
-                </div>
-
-                {/* Footer */}
-                <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-center">
-                  <button
-                    type="button"
-                    onClick={() => router.back()}
-                    className="flex min-h-[48px] items-center justify-center font-sans font-medium transition-colors duration-150 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:min-w-[200px]"
-                    style={{
-                      borderRadius: 30,
-                      border: '1px solid rgba(0,100,130,0.20)',
-                      background: '#FFFFFF',
-                      padding: '12px 32px',
-                      fontSize: 14,
-                      lineHeight: '22px',
-                      color: '#0D2630',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <PermissionGate permission={PERMISSIONS.REFERRALS_WRITE}>
-                    <button
-                      type="button"
-                      onClick={handleSend}
-                      className="flex min-h-[48px] items-center justify-center gap-2 font-sans font-medium transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:min-w-[220px]"
-                      style={{
-                        borderRadius: 30,
-                        border: 'none',
-                        background: '#00B4D8',
-                        padding: '12px 32px',
-                        fontSize: 14,
-                        lineHeight: '22px',
-                        color: '#FFFFFF',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Send style={{ width: 16, height: 16 }} />
-                      Send Referral to Department
-                    </button>
-                  </PermissionGate>
-                </div>
-              </>
+      {/* ── Mobile card view — visible below lg ──────────────────────────── */}
+      <div className="mt-6 space-y-3 lg:hidden">
+        {pageState === 'loading' ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : pageState === 'error' ? (
+          <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px] py-10 text-center">
+            <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
+            <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+              Failed to load patients
+            </p>
+            <button
+              type="button"
+              onClick={handleRetry}
+              className={`flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
+              style={{
+                height: 40,
+                borderRadius: 12,
+                padding: '0 20px',
+                background: '#00B4D8',
+                fontSize: 14,
+                lineHeight: '22px',
+              }}
+            >
+              <RefreshCw style={{ width: 16, height: 16 }} />
+              Retry
+            </button>
+          </div>
+        ) : filteredPatients.length === 0 ? (
+          <div
+            className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px] py-10 text-center"
+            style={{ background: 'rgba(226,237,241,0.25)' }}
+          >
+            <div
+              className="flex size-12 items-center justify-center rounded-full"
+              style={{ background: 'rgba(226,237,241,0.6)' }}
+            >
+              <Users style={{ width: 22, height: 22, color: '#8A98A3' }} />
+            </div>
+            <div>
+              <p className="text-sm leading-5.5 font-medium" style={{ color: '#4A7080' }}>
+                No patients match this filter
+              </p>
+              <p className="mt-0.5 text-sm leading-5" style={{ color: '#8A98A3' }}>
+                Adjust your search or clear filters
+              </p>
+            </div>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className={`mt-1 text-sm font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                style={{ color: '#00B4D8' }}
+              >
+                Clear all filters
+              </button>
             )}
           </div>
-        </div>
-      </main>
+        ) : (
+          filteredPatients.map((patient) => {
+            const cfg = STATUS_CFG[patient.status];
+            return (
+              <div
+                key={patient.id}
+                className="overflow-hidden rounded-[12px] bg-white transition-shadow duration-150 hover:shadow-md"
+                style={{
+                  border: '1px solid rgba(0,100,130,0.08)',
+                  boxShadow: '0px 1px 3px rgba(0,0,0,0.05)',
+                }}
+              >
+                <div className="flex items-center justify-between p-4">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      className="flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                      style={{ background: patient.avatarBg }}
+                    >
+                      {patient.initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p
+                        className="truncate text-base leading-6 font-semibold"
+                        style={{ color: '#2F3A40' }}
+                      >
+                        {patient.name}
+                      </p>
+                      <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
+                        {patient.mrn}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className="ml-2 inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 text-sm font-medium whitespace-nowrap"
+                    style={{ borderColor: cfg.color, color: cfg.color }}
+                  >
+                    {cfg.label}
+                  </span>
+                </div>
+
+                <div
+                  className="flex items-center justify-between border-t px-4 py-3"
+                  style={{ borderColor: 'rgba(0,100,130,0.06)' }}
+                >
+                  <div>
+                    <p className="text-sm leading-5.5" style={{ color: '#25464D' }}>
+                      {patient.lastVisitDate}
+                    </p>
+                    <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
+                      {patient.lastVisitTime}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={`Refer ${patient.name}`}
+                    onClick={() => openReferral(patient)}
+                    className={`flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-[8px] px-4 text-sm font-medium whitespace-nowrap transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
+                    style={{ background: '#E6F8FD', color: '#00B4D8' }}
+                  >
+                    <Share2 style={{ width: 15, height: 15 }} />
+                    Refer
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
     </div>
   );
 }

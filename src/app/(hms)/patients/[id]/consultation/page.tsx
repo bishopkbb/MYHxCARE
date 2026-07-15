@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { use, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
+import { ROUTES } from '@/constants/routes';
 import {
   FALLBACK_PATIENT_DETAIL,
   MOCK_PATIENT_DETAILS,
@@ -954,12 +955,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
                     <button
                       type="button"
-                      onClick={() =>
-                        toast.warning(
-                          'Patient referred',
-                          'Referral submitted for specialist review.',
-                        )
-                      }
+                      onClick={() => router.push(ROUTES.patientReferral(id))}
                       className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
                       style={{
                         fontSize: 14,
@@ -1079,9 +1075,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
               <button
                 type="button"
-                onClick={() =>
-                  toast.warning('Patient referred', 'Referral submitted for specialist review.')
-                }
+                onClick={() => router.push(ROUTES.patientReferral(id))}
                 className="rounded-[12px] px-5 font-sans font-semibold transition-colors duration-150 hover:bg-amber-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   fontSize: 16,

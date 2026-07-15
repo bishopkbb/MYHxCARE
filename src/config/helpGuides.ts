@@ -232,6 +232,22 @@ const CLINICAL_NOTES_GUIDE: HelpGuide = {
   ],
 };
 
+const REFERRALS_INDEX_GUIDE: HelpGuide = {
+  id: 'referrals-index',
+  title: 'Referrals',
+  intro: 'Pick a patient here to refer them to a specialist department.',
+  sections: [
+    {
+      heading: 'Finding a patient',
+      body: 'Search by name or MRN, or narrow the list with the status pills — Admitted, Active, Follow up, Referred, or Discharged.',
+    },
+    {
+      heading: 'Starting a referral',
+      body: 'Select "Refer" (or tap a patient card on mobile) to open the referral form for that patient.',
+    },
+  ],
+};
+
 const REFERRALS_GUIDE: HelpGuide = {
   id: 'referrals',
   title: 'Patient Referral',
@@ -390,13 +406,14 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/clinical-timeline')) return CLINICAL_TIMELINE_INDEX_GUIDE;
   if (/^\/patients\/[^/]+\/consultation/.test(pathname)) return CONSULTATION_GUIDE;
   if (/^\/patients\/[^/]+\/timeline/.test(pathname)) return CLINICAL_TIMELINE_GUIDE;
+  if (/^\/patients\/[^/]+\/referral/.test(pathname)) return REFERRALS_GUIDE;
   if (/^\/patients\/[^/]+/.test(pathname)) return PATIENT_PROFILE_GUIDE;
   if (pathname.startsWith('/patients')) return PATIENTS_GUIDE;
   if (pathname.startsWith('/dashboard')) return DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;
   if (pathname.startsWith('/clinical-notes')) return CLINICAL_NOTES_GUIDE;
-  if (pathname.startsWith('/referrals')) return REFERRALS_GUIDE;
+  if (pathname.startsWith('/referrals')) return REFERRALS_INDEX_GUIDE;
   if (pathname.startsWith('/lab/orders')) return LAB_ORDERS_GUIDE;
   if (pathname.startsWith('/lab/results')) return LAB_RESULTS_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
