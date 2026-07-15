@@ -115,6 +115,31 @@ const PATIENT_PROFILE_GUIDE: HelpGuide = {
   ],
 };
 
+const CLINICAL_TIMELINE_GUIDE: HelpGuide = {
+  id: 'clinical-timeline',
+  title: 'Clinical Timeline',
+  intro:
+    'A single chronological history of everything that has happened to this patient — consultations, lab activity, prescriptions, referrals, and emergencies.',
+  sections: [
+    {
+      heading: 'Reading the timeline',
+      body: 'Events run newest to oldest. Each entry shows its category, what happened, exactly when, and who recorded it.',
+    },
+    {
+      heading: 'Filtering',
+      body: 'Use the category pills to narrow the list to one type of event — Consultation, Laboratory, Prescription, Referral, or Emergency. "All Events" shows the complete history again.',
+    },
+    {
+      heading: 'Emergency events',
+      body: 'Emergency presentations are outlined in red so past critical episodes are never missed while reviewing history.',
+    },
+    {
+      heading: 'Export',
+      body: 'Export produces a PDF of the currently filtered timeline — useful for referral letters and case summaries.',
+    },
+  ],
+};
+
 const CONSULTATION_GUIDE: HelpGuide = {
   id: 'consultation',
   title: 'Consultation Workspace',
@@ -347,6 +372,7 @@ const APPOINTMENTS_GUIDE: HelpGuide = {
  */
 export function resolveHelpGuide(pathname: string): HelpGuide {
   if (/^\/patients\/[^/]+\/consultation/.test(pathname)) return CONSULTATION_GUIDE;
+  if (/^\/patients\/[^/]+\/timeline/.test(pathname)) return CLINICAL_TIMELINE_GUIDE;
   if (/^\/patients\/[^/]+/.test(pathname)) return PATIENT_PROFILE_GUIDE;
   if (pathname.startsWith('/patients')) return PATIENTS_GUIDE;
   if (pathname.startsWith('/dashboard')) return DASHBOARD_GUIDE;
