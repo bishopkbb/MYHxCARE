@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   AlertTriangle,
+  Check,
   CheckCircle2,
   ChevronDown,
   Info,
@@ -136,6 +137,44 @@ function blurBorderNeutral(e: React.FocusEvent<HTMLTextAreaElement>) {
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none focus-visible:border-[#00B4D8]';
+
+// ── Checkbox ───────────────────────────────────────────────────────────────────
+// Native OS/browser checkbox rendering (accent-color) doesn't guarantee a pure
+// white checkmark across platforms. This draws the box and checkmark itself —
+// the native <input> stays for semantics/keyboard/click, but is invisible
+// (appearance-none, checked state controlled entirely by our own styles).
+
+interface CheckboxProps {
+  checked: boolean;
+  onChange: () => void;
+  'aria-label'?: string;
+}
+
+function Checkbox({ checked, onChange, ...aria }: CheckboxProps) {
+  return (
+    <span className="relative inline-flex size-4.5 shrink-0 items-center justify-center">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        {...aria}
+        className={`absolute inset-0 size-4.5 cursor-pointer appearance-none rounded transition-colors duration-150 ${FOCUS_RING}`}
+        style={{
+          border: `1px solid ${checked ? '#00B4D8' : 'rgba(0,100,130,0.22)'}`,
+          background: checked ? '#00B4D8' : '#FFFFFF',
+        }}
+      />
+      {checked && (
+        <Check
+          className="pointer-events-none relative"
+          style={{ width: 12, height: 12, color: '#FFFFFF' }}
+          strokeWidth={3}
+          aria-hidden
+        />
+      )}
+    </span>
+  );
+}
 
 // ── Skeleton ───────────────────────────────────────────────────────────────────
 
@@ -342,7 +381,7 @@ export default function PrescriptionsPage() {
                 {patient.activeMedications.length > 0 && (
                   <div
                     className="mt-4 rounded-[12px] px-2.5 py-4"
-                    style={{ background: '#FFFBEB', borderTop: '1px solid #FEE685' }}
+                    style={{ background: '#FFFBEB', border: '1px solid #FEE685' }}
                   >
                     <div className="flex items-center gap-2.5">
                       <AlertTriangle
@@ -846,14 +885,12 @@ export default function PrescriptionsPage() {
                                   End Date
                                 </label>
                                 <label className="flex cursor-pointer items-center gap-1.5">
-                                  <input
-                                    type="checkbox"
+                                  <Checkbox
                                     checked={selectedLine.isOngoing}
-                                    onChange={(e) =>
-                                      updateSelectedLine({ isOngoing: e.target.checked })
+                                    onChange={() =>
+                                      updateSelectedLine({ isOngoing: !selectedLine.isOngoing })
                                     }
-                                    style={{ accentColor: '#00B4D8' }}
-                                    className={`size-4.5 cursor-pointer rounded border border-[#006482]/22 ${FOCUS_RING}`}
+                                    aria-label="Ongoing"
                                   />
                                   <span
                                     className="text-sm leading-5.5"
@@ -922,12 +959,10 @@ export default function PrescriptionsPage() {
                                   key={opt.key}
                                   className="flex cursor-pointer items-center gap-2.5"
                                 >
-                                  <input
-                                    type="checkbox"
+                                  <Checkbox
                                     checked={additionalOptions[opt.key]}
                                     onChange={() => toggleOption(opt.key)}
-                                    style={{ accentColor: '#00B4D8' }}
-                                    className={`size-4.5 cursor-pointer rounded border border-[#006482]/22 ${FOCUS_RING}`}
+                                    aria-label={opt.label}
                                   />
                                   <span
                                     className="text-sm leading-5.5"
