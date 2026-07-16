@@ -38,6 +38,19 @@ const eslintConfig = defineConfig([
           ],
         },
       ],
+
+      // Dead-button guard (UI compliance checklist rule #10): "Coming soon"
+      // is this codebase's one and only stub-toast fingerprint. A button
+      // isn't done until it does something real — don't ship the affordance
+      // before the destination exists.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "Literal[value='Coming soon']",
+          message:
+            'Dead button: "Coming soon" placeholders are banned. Wire this control to a real destination/behavior before committing it (see AGENTS.md, UI compliance checklist rule #10).',
+        },
+      ],
     },
   },
 

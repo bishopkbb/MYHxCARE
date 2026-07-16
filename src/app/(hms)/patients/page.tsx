@@ -10,7 +10,6 @@ import {
   FileText,
   FlaskConical,
   ListFilter,
-  LogOut,
   MoreVertical,
   Printer,
   RefreshCw,
@@ -25,6 +24,7 @@ import { Fragment, useEffect, useRef, useState } from 'react';
 
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
+import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import {
   MOCK_PATIENTS,
@@ -215,14 +215,8 @@ const DOCTOR_ACTIONS: {
     permission: PERMISSIONS.REFERRALS_WRITE,
     hideFor: ['referred', 'discharged'],
   },
-  {
-    key: 'discharge',
-    label: 'Discharge Patient',
-    icon: LogOut,
-    permission: PERMISSIONS.ENCOUNTERS_WRITE,
-    danger: true,
-    hideFor: ['discharged'],
-  },
+  // No "Discharge Patient" entry — that workflow doesn't exist yet. Ship the
+  // menu item only once a real discharge destination exists (no dead buttons).
 ];
 
 // ── Table column definitions ──────────────────────────────────────────────────
@@ -1182,30 +1176,13 @@ export default function PatientsPage() {
                                     else if (action.key === 'consult')
                                       router.push(`/patients/${patient.id}/consultation`);
                                     else if (action.key === 'note')
-                                      toast.info(
-                                        'Coming soon',
-                                        'Clinical notes will be available in a future update.',
-                                      );
+                                      router.push(ROUTES.clinicalNotes);
                                     else if (action.key === 'lab')
-                                      toast.info(
-                                        'Coming soon',
-                                        'Lab requests will be available in a future update.',
-                                      );
+                                      router.push(ROUTES.patientLabOrder(patient.id));
                                     else if (action.key === 'rx')
-                                      toast.info(
-                                        'Coming soon',
-                                        'Prescription writing will be available in a future update.',
-                                      );
+                                      router.push(ROUTES.patientPrescription(patient.id));
                                     else if (action.key === 'refer')
-                                      toast.info(
-                                        'Coming soon',
-                                        'Patient referrals will be available in a future update.',
-                                      );
-                                    else if (action.key === 'discharge')
-                                      toast.warning(
-                                        'Coming soon',
-                                        'Patient discharge will be available in a future update.',
-                                      );
+                                      router.push(ROUTES.patientReferral(patient.id));
                                   }}
                                   className="flex w-full cursor-pointer items-center gap-2.5 px-4 py-3 text-sm leading-5.5 transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                                   style={{ color: action.danger ? '#EF4444' : '#2F3A40' }}

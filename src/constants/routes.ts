@@ -6,6 +6,7 @@ export const ROUTES = {
   // HMS — top-level
   dashboard: '/dashboard',
   patients: '/patients',
+  clinicalNotes: '/clinical-notes',
   encounters: '/encounters',
   pharmacy: '/pharmacy',
   lab: '/lab',
