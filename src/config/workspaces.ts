@@ -188,7 +188,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           },
           {
             label: 'Reports',
-            href: '/notifications',
+            href: '/reports',
             icon: BarChart2,
             iconSrc: '/icons/reports.png',
           },

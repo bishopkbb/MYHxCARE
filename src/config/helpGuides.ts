@@ -382,6 +382,31 @@ const MY_SCHEDULE_GUIDE: HelpGuide = {
   ],
 };
 
+const REPORTS_GUIDE: HelpGuide = {
+  id: 'reports',
+  title: 'Clinical Reports',
+  intro:
+    'Your clinical activity at a glance — consultations, lab orders, prescriptions, and referrals.',
+  sections: [
+    {
+      heading: 'Period filter',
+      body: 'Switch between This Week, This Month, and This Quarter — the stat cards and both charts update to match.',
+    },
+    {
+      heading: 'Charts',
+      body: 'Daily/weekly/monthly consultations show as a bar chart; Diagnosis Distribution shows the split of diagnoses recorded in the period as a donut chart.',
+    },
+    {
+      heading: 'Referral report',
+      body: 'Every referral you have made, with its current status — Accepted, Pending, or Declined.',
+    },
+    {
+      heading: 'Export',
+      body: "Export downloads the current period's report as a CSV.",
+    },
+  ],
+};
+
 const COLLABORATION_GUIDE: HelpGuide = {
   id: 'collaboration',
   title: 'Clinical Messages',
@@ -452,5 +477,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/appointments')) return APPOINTMENTS_GUIDE;
   if (pathname.startsWith('/collaboration')) return COLLABORATION_GUIDE;
+  if (pathname.startsWith('/reports')) return REPORTS_GUIDE;
   return GENERAL_GUIDE;
 }

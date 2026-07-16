@@ -7,6 +7,7 @@ export const ROUTES = {
   dashboard: '/dashboard',
   patients: '/patients',
   clinicalNotes: '/clinical-notes',
+  reports: '/reports',
   encounters: '/encounters',
   pharmacy: '/pharmacy',
   lab: '/lab',
