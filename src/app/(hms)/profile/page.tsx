@@ -1,16 +1,24 @@
 'use client';
 
 import { AlertCircle, Camera, Pencil, RefreshCw, X } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRef, useState, useEffect } from 'react';
 
 import { useToast } from '@/hooks/useToast';
 import { MOCK_DOCTOR_PROFILE } from '@/features/profile/__mocks__/profileFixtures';
-import { EditProfileModal } from '@components/shared/EditProfileModal';
+import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { useAuth } from '@hooks/useAuth';
 import { useContactDetails } from '@hooks/useContactDetails';
 import { getInitials } from '@lib/utils';
 import { resizeImageToDataUrl, useAvatar } from '@providers/AvatarProvider';
+
+// Opened only by clicking "Edit Profile" — never needed for the initial
+// paint, so its code stays out of this page's main bundle until then.
+const EditProfileModal = dynamic(
+  () => import('@components/shared/EditProfileModal').then((m) => m.EditProfileModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
