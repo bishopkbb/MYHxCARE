@@ -5,6 +5,7 @@ import { ServiceWorkerRegistrar } from '@lib/pwa/ServiceWorkerRegistrar';
 import { OfflineBanner } from '@components/shared/OfflineBanner';
 import { Toaster } from '@components/shared/Toaster';
 import { AuthProvider } from '@providers/AuthProvider';
+import { AvatarProvider } from '@providers/AvatarProvider';
 import { FeatureFlagsProvider } from '@providers/FeatureFlagsProvider';
 import { ReactQueryProvider } from '@providers/ReactQueryProvider';
 import { ToastProvider } from '@providers/ToastProvider';
@@ -54,10 +55,12 @@ export default function RootLayout({
         <ReactQueryProvider>
           <FeatureFlagsProvider>
             <AuthProvider>
-              <ToastProvider>
-                {children}
-                <Toaster />
-              </ToastProvider>
+              <AvatarProvider>
+                <ToastProvider>
+                  {children}
+                  <Toaster />
+                </ToastProvider>
+              </AvatarProvider>
             </AuthProvider>
           </FeatureFlagsProvider>
         </ReactQueryProvider>

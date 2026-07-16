@@ -5,17 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { ROUTES } from '@/constants/routes';
+import { UserAvatar } from '@components/shared/UserAvatar';
 import { useAuth } from '@hooks/useAuth';
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .map((p) => p[0] ?? '')
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
+import { getInitials } from '@lib/utils';
 
 function formatDateTime(date: Date): string {
   const datePart = new Intl.DateTimeFormat('en-GB', {
@@ -127,13 +119,20 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
           />
         </button>
 
-        {/* User avatar */}
-        <div
-          className="flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white lg:size-12.5"
-          style={{ background: '#00B4D8' }}
+        {/* User avatar — opens My Profile */}
+        <button
+          type="button"
+          onClick={() => router.push(ROUTES.profile)}
+          aria-label="View profile"
+          className="shrink-0 rounded-full transition-opacity duration-150 hover:opacity-85 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
         >
-          {getInitials(user?.name ?? '')}
-        </div>
+          <span className="block lg:hidden">
+            <UserAvatar initials={getInitials(user?.name ?? '')} size={36} />
+          </span>
+          <span className="hidden lg:block">
+            <UserAvatar initials={getInitials(user?.name ?? '')} size={50} />
+          </span>
+        </button>
       </div>
     </header>
   );

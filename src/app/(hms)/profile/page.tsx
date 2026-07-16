@@ -1,18 +1,21 @@
 'use client';
 
-import { AlertCircle, Pencil, RefreshCw, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { AlertCircle, Camera, Pencil, RefreshCw, X } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
 
 import { useToast } from '@/hooks/useToast';
-import {
-  MOCK_DOCTOR_PROFILE,
-  type DoctorProfile,
-} from '@/features/profile/__mocks__/profileFixtures';
+import { MOCK_DOCTOR_PROFILE } from '@/features/profile/__mocks__/profileFixtures';
+import { UserAvatar } from '@components/shared/UserAvatar';
+import { useAuth } from '@hooks/useAuth';
+import { getInitials } from '@lib/utils';
+import { resizeImageToDataUrl, useAvatar } from '@providers/AvatarProvider';
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
 
 type PageState = 'loading' | 'loaded' | 'error';
+
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // pre-resize ceiling — generous since we downscale anyway
 
 const FIELD_BASE: React.CSSProperties = {
   border: '1px solid #0064821F',
@@ -81,20 +84,22 @@ function SkeletonProfileCard() {
 // ── Edit Profile modal — contact details only; credentials stay read-only ──
 
 function EditProfileModal({
-  profile,
+  phone,
+  email,
   onClose,
   onSave,
 }: {
-  profile: DoctorProfile;
+  phone: string;
+  email: string;
   onClose: () => void;
   onSave: (patch: { phone: string; email: string }) => void;
 }) {
-  const [phone, setPhone] = useState(profile.phone);
-  const [email, setEmail] = useState(profile.email);
+  const [phoneValue, setPhoneValue] = useState(phone);
+  const [emailValue, setEmailValue] = useState(email);
 
   function handleSave() {
-    if (!phone.trim() || !email.trim()) return;
-    onSave({ phone: phone.trim(), email: email.trim() });
+    if (!phoneValue.trim() || !emailValue.trim()) return;
+    onSave({ phone: phoneValue.trim(), email: emailValue.trim() });
   }
 
   return (
@@ -147,8 +152,8 @@ function EditProfileModal({
             </label>
             <input
               type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              value={phoneValue}
+              onChange={(e) => setPhoneValue(e.target.value)}
               onFocus={focusBorder}
               onBlur={blurBorder}
               className={`w-full px-4 transition-[border-color] duration-150 outline-none ${FOCUS_RING}`}
@@ -164,8 +169,8 @@ function EditProfileModal({
             </label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={emailValue}
+              onChange={(e) => setEmailValue(e.target.value)}
               onFocus={focusBorder}
               onBlur={blurBorder}
               className={`w-full px-4 transition-[border-color] duration-150 outline-none ${FOCUS_RING}`}
@@ -193,7 +198,7 @@ function EditProfileModal({
           <button
             type="button"
             onClick={handleSave}
-            disabled={!phone.trim() || !email.trim()}
+            disabled={!phoneValue.trim() || !emailValue.trim()}
             className={`flex h-11 items-center justify-center rounded-[10px] px-5 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
             style={{ background: '#00B4D8' }}
           >
@@ -209,9 +214,14 @@ function EditProfileModal({
 
 export default function ProfilePage() {
   const toast = useToast();
+  const { user } = useAuth();
+  const { avatarUrl, setAvatarUrl } = useAvatar();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [profile, setProfile] = useState<DoctorProfile>(MOCK_DOCTOR_PROFILE);
+  const [phone, setPhone] = useState(MOCK_DOCTOR_PROFILE.phone);
+  const [email, setEmail] = useState(user?.email ?? MOCK_DOCTOR_PROFILE.email);
   const [editOpen, setEditOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -224,10 +234,52 @@ export default function ProfilePage() {
   }
 
   function handleSave(patch: { phone: string; email: string }) {
-    setProfile((prev) => ({ ...prev, ...patch }));
+    setPhone(patch.phone);
+    setEmail(patch.email);
     setEditOpen(false);
     toast.success('Profile updated', 'Your contact details have been saved.');
   }
+
+  function handleAvatarClick() {
+    avatarInputRef.current?.click();
+  }
+
+  async function handleAvatarFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Invalid file', 'Please choose an image file (JPG, PNG, etc.).');
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      toast.error('Image too large', 'Please choose an image under 5MB.');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const dataUrl = await resizeImageToDataUrl(file);
+      setAvatarUrl(dataUrl);
+      toast.success('Profile photo updated', 'Your new photo now shows across MyHxCare.');
+    } catch {
+      toast.error('Upload failed', 'Could not read that image. Please try another file.');
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function handleRemovePhoto(e: React.MouseEvent) {
+    e.stopPropagation();
+    setAvatarUrl(null);
+    toast.info('Photo removed', 'Your profile now shows your initials again.');
+  }
+
+  const name = user?.name ?? MOCK_DOCTOR_PROFILE.name;
+  const role = user?.role ?? MOCK_DOCTOR_PROFILE.role;
+  const department = user?.department ?? MOCK_DOCTOR_PROFILE.department;
+  const initials = getInitials(name);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -304,30 +356,77 @@ export default function ProfilePage() {
               >
                 {/* Identity */}
                 <div className="flex items-start gap-4 p-5 sm:p-6">
-                  <div
-                    className="flex size-16 shrink-0 items-center justify-center font-sans font-semibold text-white"
-                    style={{ borderRadius: 14, background: profile.avatarBg, fontSize: 22 }}
-                  >
-                    {profile.initials}
+                  <div className="relative size-16 shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleAvatarClick}
+                      disabled={uploading}
+                      aria-label={avatarUrl ? 'Change profile photo' : 'Upload profile photo'}
+                      className={`group relative block size-16 overflow-hidden rounded-[14px] transition-opacity duration-150 disabled:cursor-wait ${FOCUS_RING}`}
+                    >
+                      <UserAvatar
+                        initials={initials}
+                        size={64}
+                        radius={14}
+                        textSize={22}
+                        className="pointer-events-none"
+                      />
+                      {/* Hover overlay hint */}
+                      <span
+                        className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-150 group-hover:bg-black/40 group-hover:opacity-100"
+                        aria-hidden="true"
+                      >
+                        <Camera style={{ width: 18, height: 18, color: '#FFFFFF' }} />
+                      </span>
+                      {uploading && (
+                        <span
+                          className="absolute inset-0 flex items-center justify-center bg-black/40"
+                          aria-hidden="true"
+                        >
+                          <span
+                            className="size-5 animate-spin rounded-full border-2 border-white/30"
+                            style={{ borderTopColor: '#FFFFFF' }}
+                          />
+                        </span>
+                      )}
+                    </button>
+                    {avatarUrl && !uploading && (
+                      <button
+                        type="button"
+                        onClick={handleRemovePhoto}
+                        aria-label="Remove profile photo"
+                        className={`absolute -right-1.5 -bottom-1.5 flex size-6 items-center justify-center rounded-full text-white transition-colors duration-150 before:absolute before:-inset-2 before:content-[''] hover:bg-red-600 ${FOCUS_RING}`}
+                        style={{ background: '#EF4444', border: '2px solid #FFFFFF' }}
+                      >
+                        <X style={{ width: 12, height: 12 }} />
+                      </button>
+                    )}
                   </div>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarFileChange}
+                  />
                   <div className="min-w-0">
                     <p
                       className="font-display font-semibold"
                       style={{ fontSize: 22, lineHeight: '30px', color: '#0D2630' }}
                     >
-                      {profile.name}
+                      {name}
                     </p>
                     <p
                       className="mt-0.5 font-sans"
                       style={{ fontSize: 16, lineHeight: '24px', color: '#4A7080' }}
                     >
-                      {profile.role} · {profile.platform}
+                      {role} · {MOCK_DOCTOR_PROFILE.platform}
                     </p>
                     <p
                       className="mt-0.5 font-sans"
                       style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
                     >
-                      {profile.licenseNo} · {profile.facility}
+                      {MOCK_DOCTOR_PROFILE.licenseNo} · {MOCK_DOCTOR_PROFILE.facility}
                     </p>
                   </div>
                 </div>
@@ -336,12 +435,15 @@ export default function ProfilePage() {
 
                 {/* Fields */}
                 <div className="grid grid-cols-1 gap-x-8 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
-                  <ProfileField label="Specialization" value={profile.specialization} />
-                  <ProfileField label="Medical Council No." value={profile.medicalCouncilNo} />
-                  <ProfileField label="Department" value={profile.department} />
-                  <ProfileField label="Experience" value={profile.experience} />
-                  <ProfileField label="Phone" value={profile.phone} />
-                  <ProfileField label="Email" value={profile.email} />
+                  <ProfileField label="Specialization" value={MOCK_DOCTOR_PROFILE.specialization} />
+                  <ProfileField
+                    label="Medical Council No."
+                    value={MOCK_DOCTOR_PROFILE.medicalCouncilNo}
+                  />
+                  <ProfileField label="Department" value={department} />
+                  <ProfileField label="Experience" value={MOCK_DOCTOR_PROFILE.experience} />
+                  <ProfileField label="Phone" value={phone} />
+                  <ProfileField label="Email" value={email} />
                 </div>
               </div>
             )}
@@ -353,7 +455,8 @@ export default function ProfilePage() {
 
       {editOpen && (
         <EditProfileModal
-          profile={profile}
+          phone={phone}
+          email={email}
           onClose={() => setEditOpen(false)}
           onSave={handleSave}
         />

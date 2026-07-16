@@ -9,18 +9,9 @@ import { useEffect, useRef } from 'react';
 import { resolveWorkspace } from '@/types/auth.types';
 import { WORKSPACE_NAV } from '@/config/workspaces';
 import type { NavItem } from '@/config/workspaces';
+import { UserAvatar } from '@components/shared/UserAvatar';
 import { useAuth } from '@hooks/useAuth';
-import { cn } from '@lib/utils';
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .map((part) => part[0] ?? '')
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
+import { cn, getInitials } from '@lib/utils';
 
 export interface AppSidebarProps {
   mobileOpen: boolean;
@@ -276,12 +267,7 @@ export function AppSidebar({
               className="flex items-center gap-2.5 rounded-[12px] p-2.5"
               style={{ background: 'rgba(255,255,255,0.059)' }}
             >
-              <div
-                className="flex size-12.5 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-                style={{ background: '#00B4D8' }}
-              >
-                {getInitials(user?.name ?? '')}
-              </div>
+              <UserAvatar initials={getInitials(user?.name ?? '')} size={50} />
               <div className="min-w-0">
                 <p className="truncate text-base leading-6 text-white">{user?.name ?? '—'}</p>
                 <p className="truncate text-sm leading-5" style={{ color: '#0098CC' }}>
