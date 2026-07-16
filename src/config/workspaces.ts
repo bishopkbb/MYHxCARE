@@ -206,7 +206,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           {
             label: 'Profile',
-            href: '/settings',
+            href: '/profile',
             icon: User,
             iconSrc: '/icons/profile.png',
           },

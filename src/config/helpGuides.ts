@@ -457,6 +457,23 @@ const NOTIFICATIONS_GUIDE: HelpGuide = {
   ],
 };
 
+const PROFILE_GUIDE: HelpGuide = {
+  id: 'profile',
+  title: 'My Profile',
+  intro:
+    'Your professional identity as it appears across MyHxCare — role, credentials, and contact details.',
+  sections: [
+    {
+      heading: 'Credentials',
+      body: 'License number, medical council number, specialization, and department are managed by your administrator and shown here for reference.',
+    },
+    {
+      heading: 'Editing',
+      body: '"Edit Profile" lets you update your phone number and email — the contact details patients and colleagues use to reach you.',
+    },
+  ],
+};
+
 const APPOINTMENTS_GUIDE: HelpGuide = {
   id: 'appointments',
   title: 'Appointments',
@@ -499,5 +516,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/collaboration')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/reports')) return REPORTS_GUIDE;
   if (pathname.startsWith('/notifications')) return NOTIFICATIONS_GUIDE;
+  if (pathname.startsWith('/profile')) return PROFILE_GUIDE;
   return GENERAL_GUIDE;
 }

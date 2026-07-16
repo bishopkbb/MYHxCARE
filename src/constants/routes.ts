@@ -8,6 +8,7 @@ export const ROUTES = {
   patients: '/patients',
   clinicalNotes: '/clinical-notes',
   reports: '/reports',
+  profile: '/profile',
   encounters: '/encounters',
   pharmacy: '/pharmacy',
   lab: '/lab',
