@@ -917,9 +917,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                   <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
-                      onClick={() =>
-                        toast.info('Coming soon', 'Prescription module is not yet available.')
-                      }
+                      onClick={() => router.push(ROUTES.patientPrescription(id))}
                       className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
                       style={{
                         fontSize: 14,

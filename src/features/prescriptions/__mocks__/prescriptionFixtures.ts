@@ -33,7 +33,7 @@ export type PrescriptionPatient = {
   bloodGroup: string;
   vitals: PrescriptionVital[];
   activeMedications: ActiveMedication[];
-  diagnosis: { condition: string; icd10: string };
+  diagnosis: { condition: string; icd10?: string };
   notes: string;
   allergies: Allergy[];
 };
