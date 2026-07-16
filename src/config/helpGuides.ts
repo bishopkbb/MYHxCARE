@@ -382,6 +382,36 @@ const MY_SCHEDULE_GUIDE: HelpGuide = {
   ],
 };
 
+const COLLABORATION_GUIDE: HelpGuide = {
+  id: 'collaboration',
+  title: 'Clinical Messages',
+  intro:
+    'Direct messaging between doctors — referral coordination, quick questions, case handoffs.',
+  sections: [
+    {
+      heading: 'Conversations',
+      body: 'Select a doctor from the list to open the thread. Unread conversations show a cyan count badge; search narrows the list by name or department.',
+    },
+    {
+      heading: 'Patient context',
+      body: "When a conversation relates to a referral or shared case, the patient's name and MRN appear in a strip below the doctor's name — check it before you write.",
+    },
+    {
+      heading: 'Composing',
+      body: 'Enter sends, Shift+Enter adds a new line. The toolbar can insert a quick template, reference the current patient context, or attach a file.',
+      steps: [
+        'Template icon — insert a canned clinical phrase',
+        'Stethoscope icon — insert the patient context reference',
+        'Paperclip icon — attach a file',
+      ],
+    },
+    {
+      heading: 'Conversation actions',
+      body: 'Use the call icon to start a voice call, or the "⋮" menu to mute notifications or mark a conversation unread.',
+    },
+  ],
+};
+
 const APPOINTMENTS_GUIDE: HelpGuide = {
   id: 'appointments',
   title: 'Appointments',
@@ -421,5 +451,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/appointments')) return APPOINTMENTS_GUIDE;
+  if (pathname.startsWith('/collaboration')) return COLLABORATION_GUIDE;
   return GENERAL_GUIDE;
 }

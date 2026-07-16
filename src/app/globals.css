@@ -236,6 +236,44 @@
   animation: cs-dot 1.4s ease-in-out infinite;
 }
 
+/* ── Typing indicator — roaming brand-gradient border (Clinical Messages) ── */
+
+@property --typing-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes typing-border-spin {
+  to {
+    --typing-angle: 360deg;
+  }
+}
+
+/* Conic gradient spins behind a 1.5px inset white fill, so only a thin ring
+   of brand color is visible roaming the container — deliberately subtle. */
+.typing-gradient-border {
+  --typing-angle: 0deg;
+  position: relative;
+  background: conic-gradient(
+    from var(--typing-angle),
+    #00b4d8,
+    #0d2630 22%,
+    #00b4d8 45%,
+    #8ee6f5 68%,
+    #00b4d8 100%
+  );
+  animation: typing-border-spin 3.4s linear infinite;
+}
+.typing-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 1.5px;
+  background: #ffffff;
+  border-radius: inherit;
+  z-index: 0;
+}
+
 /* ── Hidden scrollbars — app-wide ─────────────────────────────────────────────
    Design decision (14/07/2026): no visible scrollbars anywhere in the app.
    Scrolling still works (wheel, touch, keyboard, drag) — only the visual
