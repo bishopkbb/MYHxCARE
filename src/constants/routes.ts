@@ -18,6 +18,8 @@ export const ROUTES = {
   admin: '/admin',
   notifications: '/notifications',
   collaboration: '/collaboration',
+  referrals: '/referrals',
+  mySchedule: '/my-schedule',
 
   // Patients sub-routes
   patientProfile: (id: string) => `/patients/${id}`,

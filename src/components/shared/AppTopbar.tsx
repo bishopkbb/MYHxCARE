@@ -1,8 +1,10 @@
 'use client';
 
 import { Bell, Clock, Menu, RefreshCw, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@hooks/useAuth';
 
 function getInitials(name: string): string {
@@ -57,6 +59,7 @@ interface AppTopbarProps {
 
 export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
   const { user } = useAuth();
+  const router = useRouter();
 
   return (
     <header
@@ -112,6 +115,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
         {/* Notification bell + red dot */}
         <button
           type="button"
+          onClick={() => router.push(ROUTES.notifications)}
           aria-label="Notifications"
           className="relative flex items-center justify-center text-[#25464D]/50 transition-colors duration-150 hover:text-[#25464D] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
         >

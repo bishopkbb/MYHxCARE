@@ -437,6 +437,26 @@ const COLLABORATION_GUIDE: HelpGuide = {
   ],
 };
 
+const NOTIFICATIONS_GUIDE: HelpGuide = {
+  id: 'notifications',
+  title: 'Notifications',
+  intro: 'Every alert, assignment, and clinical message in one place, newest first.',
+  sections: [
+    {
+      heading: 'Unread indicator',
+      body: 'A cyan dot next to the title marks an unread notification. "Mark all as read" clears every dot at once.',
+    },
+    {
+      heading: 'Opening a notification',
+      body: 'Selecting a notification marks it read and takes you straight to the relevant patient, referral, schedule, or conversation.',
+    },
+    {
+      heading: 'Types',
+      body: 'Colour-coded by kind — red for critical/emergency alerts, green for clinical updates, purple for referrals, amber for schedule, blue for messages.',
+    },
+  ],
+};
+
 const APPOINTMENTS_GUIDE: HelpGuide = {
   id: 'appointments',
   title: 'Appointments',
@@ -478,5 +498,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/appointments')) return APPOINTMENTS_GUIDE;
   if (pathname.startsWith('/collaboration')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/reports')) return REPORTS_GUIDE;
+  if (pathname.startsWith('/notifications')) return NOTIFICATIONS_GUIDE;
   return GENERAL_GUIDE;
 }
