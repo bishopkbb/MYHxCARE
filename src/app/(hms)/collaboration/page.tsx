@@ -1034,7 +1034,7 @@ export default function CollaborationPage() {
                       onChange={handleDraftChange}
                       onKeyDown={handleDraftKeyDown}
                       rows={1}
-                      placeholder={`Message ${activeConversation.doctorName}… (Enter to send · Shift+Enter for new line)`}
+                      placeholder={`Message ${activeConversation.doctorName}…`}
                       className={`min-w-0 flex-1 resize-none rounded-[12px] px-3.5 py-2.5 font-sans outline-none placeholder:text-[#8A98A3] ${FOCUS_RING}`}
                       style={{
                         background: '#E6F8FD',
@@ -1058,6 +1058,15 @@ export default function CollaborationPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Keyboard hint — its own line so it wraps cleanly instead
+                    of clipping inside the placeholder at narrow widths. */}
+                <p
+                  className="shrink-0 px-4 pb-2 font-sans sm:px-5"
+                  style={{ fontSize: 14, lineHeight: '18px', color: '#8A98A3' }}
+                >
+                  Enter to send · Shift+Enter for new line
+                </p>
 
                 {/* Governance footer */}
                 <p
