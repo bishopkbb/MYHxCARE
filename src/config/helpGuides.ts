@@ -474,6 +474,42 @@ const PROFILE_GUIDE: HelpGuide = {
   ],
 };
 
+const SETTINGS_GUIDE: HelpGuide = {
+  id: 'settings',
+  title: 'Settings',
+  intro: 'Manage your account, notification and display preferences, and security.',
+  sections: [
+    {
+      heading: 'Account Information',
+      body: 'Your name, role, and credentials are shown for reference — "Edit" next to Email or Phone updates just those two fields; "Edit Profile" opens the full profile page (including your photo).',
+    },
+    {
+      heading: 'Preferences',
+      body: 'Notification and Display toggles take effect immediately, but only persist once you select "Save Changes" at the top of the page.',
+    },
+    {
+      heading: 'Security & Access',
+      body: 'Change your password, enable two-factor authentication, review active sessions, or open the Clinical Audit Log from here.',
+    },
+    {
+      heading: 'Role Permissions',
+      body: 'A read-only summary of what your current role can and cannot do — set by your administrator, not editable here.',
+    },
+  ],
+};
+
+const AUDIT_LOG_GUIDE: HelpGuide = {
+  id: 'audit-log',
+  title: 'Clinical Audit Log',
+  intro: 'A chronological record of your clinical and account activity.',
+  sections: [
+    {
+      heading: 'Reading the log',
+      body: 'Entries are grouped by day, newest first. Each entry is colour-coded by category — consultation, laboratory, prescription, referral, emergency, or account.',
+    },
+  ],
+};
+
 const APPOINTMENTS_GUIDE: HelpGuide = {
   id: 'appointments',
   title: 'Appointments',
@@ -517,5 +553,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/reports')) return REPORTS_GUIDE;
   if (pathname.startsWith('/notifications')) return NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/profile')) return PROFILE_GUIDE;
+  if (pathname.startsWith('/settings/audit-log')) return AUDIT_LOG_GUIDE;
+  if (pathname.startsWith('/settings')) return SETTINGS_GUIDE;
   return GENERAL_GUIDE;
 }

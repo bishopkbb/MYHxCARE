@@ -57,6 +57,8 @@ export const ROUTES = {
   wardOccupancy: (wardId: string) => `/wards/${wardId}/occupancy`,
 
   // Settings
+  settings: '/settings',
   settingsSessions: '/settings/sessions',
   settingsDevices: '/settings/devices',
+  settingsAuditLog: '/settings/audit-log',
 } as const;
