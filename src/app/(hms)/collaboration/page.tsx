@@ -963,12 +963,14 @@ export default function CollaborationPage() {
                   </div>
                 )}
 
-                {/* Input row */}
+                {/* Input row — icons and composer stack on mobile so the
+                    textarea/send pair gets its own full-width breathing
+                    room; sm+ keeps them inline as a single row. */}
                 <div
-                  className="flex shrink-0 items-end gap-2 px-4 py-3 sm:px-5"
+                  className="flex shrink-0 flex-col gap-2 px-4 py-3 sm:flex-row sm:items-end sm:px-5"
                   style={{ borderTop: '1px solid #0064821F' }}
                 >
-                  <div className="flex shrink-0 items-center gap-1 pb-1">
+                  <div className="flex shrink-0 items-center gap-1 sm:pb-1">
                     <div className="relative" ref={templateMenuRef}>
                       <button
                         type="button"
@@ -1025,34 +1027,36 @@ export default function CollaborationPage() {
                     />
                   </div>
 
-                  <textarea
-                    ref={textareaRef}
-                    value={draft}
-                    onChange={handleDraftChange}
-                    onKeyDown={handleDraftKeyDown}
-                    rows={1}
-                    placeholder={`Message ${activeConversation.doctorName}… (Enter to send · Shift+Enter for new line)`}
-                    className={`min-w-0 flex-1 resize-none rounded-[12px] px-3.5 py-2.5 font-sans outline-none placeholder:text-[#8A98A3] ${FOCUS_RING}`}
-                    style={{
-                      background: '#E6F8FD',
-                      color: '#0D2630',
-                      fontSize: 14,
-                      lineHeight: '22px',
-                      minHeight: 42,
-                      maxHeight: 120,
-                    }}
-                  />
+                  <div className="flex min-w-0 flex-1 items-end gap-2">
+                    <textarea
+                      ref={textareaRef}
+                      value={draft}
+                      onChange={handleDraftChange}
+                      onKeyDown={handleDraftKeyDown}
+                      rows={1}
+                      placeholder={`Message ${activeConversation.doctorName}… (Enter to send · Shift+Enter for new line)`}
+                      className={`min-w-0 flex-1 resize-none rounded-[12px] px-3.5 py-2.5 font-sans outline-none placeholder:text-[#8A98A3] ${FOCUS_RING}`}
+                      style={{
+                        background: '#E6F8FD',
+                        color: '#0D2630',
+                        fontSize: 14,
+                        lineHeight: '22px',
+                        minHeight: 42,
+                        maxHeight: 120,
+                      }}
+                    />
 
-                  <button
-                    type="button"
-                    onClick={handleSend}
-                    disabled={!draft.trim() && !attachedFileName}
-                    aria-label="Send message"
-                    className={`flex size-10 shrink-0 items-center justify-center rounded-[10px] transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
-                    style={{ background: '#00B4D8' }}
-                  >
-                    <Send style={{ width: 18, height: 18, color: '#FFFFFF' }} />
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleSend}
+                      disabled={!draft.trim() && !attachedFileName}
+                      aria-label="Send message"
+                      className={`flex size-10 shrink-0 items-center justify-center rounded-[10px] transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
+                      style={{ background: '#00B4D8' }}
+                    >
+                      <Send style={{ width: 18, height: 18, color: '#FFFFFF' }} />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Governance footer */}
