@@ -63,6 +63,14 @@ type FormProps = {
   setValue: UseFormSetValue<PatientInformationValues>;
 };
 
+type PatientInformationStepProps = FormProps & {
+  mrn: string | null;
+  patientId: string | null;
+  onGenerateMrn: () => void;
+  photoDataUrl: string | null;
+  onPhotoUploaded: (dataUrl: string) => void;
+};
+
 function SelectField({
   control,
   errors,
@@ -108,11 +116,19 @@ function SelectField({
   );
 }
 
-export function PatientInformationStep({ register, control, errors, watch, setValue }: FormProps) {
+export function PatientInformationStep({
+  register,
+  control,
+  errors,
+  watch,
+  setValue,
+  mrn,
+  patientId,
+  onGenerateMrn,
+  photoDataUrl,
+  onPhotoUploaded,
+}: PatientInformationStepProps) {
   const toast = useToast();
-  const [mrn, setMrn] = useState<string | null>(null);
-  const [patientId, setPatientId] = useState<string | null>(null);
-  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
@@ -125,17 +141,6 @@ export function PatientInformationStep({ register, control, errors, watch, setVa
 
   const age = computeAge(dateOfBirth);
   const lgaOptions = LGAS_BY_STATE[state] ?? [];
-
-  function handleGenerateMrn() {
-    const year = new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Africa/Lagos',
-      year: 'numeric',
-    }).format(new Date());
-    const seq = String(Math.floor(1000 + Math.random() * 9000));
-    setMrn(`MRN-${year}-${seq}`);
-    setPatientId(`PT-${seq}`);
-    toast.success('MRN generated', 'A medical record number has been assigned to this patient.');
-  }
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -154,7 +159,7 @@ export function PatientInformationStep({ register, control, errors, watch, setVa
     setUploadingPhoto(true);
     try {
       const dataUrl = await resizeImageToDataUrl(file, 400);
-      setPhotoDataUrl(dataUrl);
+      onPhotoUploaded(dataUrl);
     } catch {
       toast.error('Upload failed', 'Could not read that image. Please try another file.');
     } finally {
@@ -483,7 +488,7 @@ export function PatientInformationStep({ register, control, errors, watch, setVa
                 <FormInput id="mrn" value={mrn ?? '--'} disabled readOnly className="flex-1" />
                 <button
                   type="button"
-                  onClick={handleGenerateMrn}
+                  onClick={onGenerateMrn}
                   className="flex h-11 shrink-0 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                   style={{ fontSize: 14, color: '#00B4D8', border: '1px solid #00B4D8' }}
                 >

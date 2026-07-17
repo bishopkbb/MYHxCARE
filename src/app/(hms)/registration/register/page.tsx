@@ -1,13 +1,20 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, ChevronRight, ClipboardList, FileCheck2 } from 'lucide-react';
+import { Check, CheckCircle2, ChevronRight, IdCard, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { AdditionalDetailsStep } from '@/features/registration/components/AdditionalDetailsStep';
 import { PatientInformationStep } from '@/features/registration/components/PatientInformationStep';
+import { ReviewConfirmStep } from '@/features/registration/components/ReviewConfirmStep';
+import {
+  ADDITIONAL_DETAILS_DEFAULTS,
+  additionalDetailsSchema,
+  type AdditionalDetailsValues,
+} from '@/features/registration/schemas/additionalDetailsSchema';
 import {
   PATIENT_INFORMATION_DEFAULTS,
   patientInformationSchema,
@@ -16,6 +23,7 @@ import {
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 
 const STEPS = [
@@ -66,16 +74,25 @@ function Stepper({ currentStep }: { currentStep: StepId }) {
   );
 }
 
-function UpcomingStepPanel({
-  icon: Icon,
-  title,
-  description,
-  onBack,
+function generateMrnAndPatientId(): { mrn: string; patientId: string } {
+  const year = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos',
+    year: 'numeric',
+  }).format(new Date());
+  const seq = String(Math.floor(1000 + Math.random() * 9000));
+  return { mrn: `MRN-${year}-${seq}`, patientId: `PT-${seq}` };
+}
+
+function SuccessPanel({
+  patientName,
+  mrn,
+  onRegisterAnother,
+  onGoToDirectory,
 }: {
-  icon: typeof ClipboardList;
-  title: string;
-  description: string;
-  onBack: () => void;
+  patientName: string;
+  mrn: string;
+  onRegisterAnother: () => void;
+  onGoToDirectory: () => void;
 }) {
   return (
     <div
@@ -83,25 +100,46 @@ function UpcomingStepPanel({
       style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
     >
       <div
-        className="flex size-14 items-center justify-center rounded-full"
-        style={{ background: 'rgba(0,180,216,0.1)' }}
+        className="flex size-16 items-center justify-center rounded-full"
+        style={{ background: 'rgba(34,197,94,0.1)' }}
       >
-        <Icon style={{ width: 24, height: 24, color: '#00B4D8' }} />
+        <CheckCircle2 style={{ width: 32, height: 32, color: '#22C55E' }} />
       </div>
-      <p className="font-display font-semibold" style={{ fontSize: 18, color: '#0D2630' }}>
-        {title}
+      <p className="font-display font-semibold" style={{ fontSize: 22, color: '#0D2630' }}>
+        Registration Complete
       </p>
-      <p className="max-w-[380px]" style={{ fontSize: 14, color: '#4A7080' }}>
-        {description}
+      <p className="max-w-[420px]" style={{ fontSize: 14, color: '#4A7080' }}>
+        <span className="font-medium" style={{ color: '#0D2630' }}>
+          {patientName}
+        </span>{' '}
+        has been registered successfully.
       </p>
-      <button
-        type="button"
-        onClick={onBack}
-        className="mt-2 flex h-10 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-        style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.2)' }}
+      <span
+        className="mt-1 rounded-full px-3 py-1 font-sans font-semibold"
+        style={{ fontSize: 14, color: '#00B4D8', border: '1px solid rgba(0,180,216,0.4)' }}
       >
-        Back
-      </button>
+        {mrn}
+      </span>
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={onRegisterAnother}
+          className="flex h-11 items-center gap-1.5 rounded-[10px] px-5 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+          style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.2)' }}
+        >
+          <Users style={{ width: 15, height: 15 }} />
+          Register Another Patient
+        </button>
+        <button
+          type="button"
+          onClick={onGoToDirectory}
+          className="flex h-11 items-center gap-1.5 rounded-[10px] px-5 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+          style={{ fontSize: 14, background: '#00B4D8' }}
+        >
+          <IdCard style={{ width: 15, height: 15 }} />
+          Go to Patient Directory
+        </button>
+      </div>
     </div>
   );
 }
@@ -109,28 +147,51 @@ function UpcomingStepPanel({
 export default function RegisterPatientPage() {
   const router = useRouter();
   const toast = useToast();
-  const [currentStep, setCurrentStep] = useState<StepId>(1);
+  const { user } = useAuth();
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<PatientInformationValues>({
+  const [currentStep, setCurrentStep] = useState<StepId>(1);
+  const [step1Data, setStep1Data] = useState<PatientInformationValues | null>(null);
+  const [step2Data, setStep2Data] = useState<AdditionalDetailsValues | null>(null);
+  const [mrn, setMrn] = useState<string | null>(null);
+  const [patientId, setPatientId] = useState<string | null>(null);
+  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+
+  const step1Form = useForm<PatientInformationValues>({
     resolver: zodResolver(patientInformationSchema),
-    defaultValues: PATIENT_INFORMATION_DEFAULTS,
+    defaultValues: step1Data ?? PATIENT_INFORMATION_DEFAULTS,
     mode: 'onBlur',
   });
 
-  function onValid() {
+  const step2Form = useForm<AdditionalDetailsValues>({
+    resolver: zodResolver(additionalDetailsSchema),
+    defaultValues: step2Data ?? ADDITIONAL_DETAILS_DEFAULTS,
+    mode: 'onBlur',
+  });
+
+  function onInvalid() {
+    toast.error('Missing information', 'Please fill in all required fields correctly.');
+  }
+
+  function onStep1Valid(values: PatientInformationValues) {
+    setStep1Data(values);
     setCurrentStep(2);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function onInvalid() {
-    toast.error('Missing information', 'Please fill in all required fields correctly.');
+  function onStep2Valid(values: AdditionalDetailsValues) {
+    setStep2Data(values);
+    setCurrentStep(3);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function handleGenerateMrn() {
+    const generated = generateMrnAndPatientId();
+    setMrn(generated.mrn);
+    setPatientId(generated.patientId);
+    toast.success('MRN generated', 'A medical record number has been assigned to this patient.');
+    return generated;
   }
 
   function handleSaveDraft() {
@@ -140,6 +201,41 @@ export default function RegisterPatientPage() {
   function handleCancel() {
     router.push(ROUTES.registration);
   }
+
+  function handleEditStep(step: 1 | 2) {
+    setCurrentStep(step);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function handleFinalSubmit() {
+    if (!step1Data || !step2Data) return;
+    setIsSubmitting(true);
+    const finalIds = mrn && patientId ? { mrn, patientId } : handleGenerateMrn();
+    // Mock save latency — real endpoint wiring happens in Phase 6.
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    setMrn(finalIds.mrn);
+    setPatientId(finalIds.patientId);
+    setIsSubmitting(false);
+    setIsComplete(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function handleRegisterAnother() {
+    step1Form.reset(PATIENT_INFORMATION_DEFAULTS);
+    step2Form.reset(ADDITIONAL_DETAILS_DEFAULTS);
+    setStep1Data(null);
+    setStep2Data(null);
+    setMrn(null);
+    setPatientId(null);
+    setPhotoDataUrl(null);
+    setIsComplete(false);
+    setCurrentStep(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  const fullPatientName = step1Data
+    ? [step1Data.firstName, step1Data.middleName, step1Data.lastName].filter(Boolean).join(' ')
+    : '';
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -175,79 +271,142 @@ export default function RegisterPatientPage() {
                 Add new patient information to the system
               </p>
             </div>
-            <Stepper currentStep={currentStep} />
+            {!isComplete && <Stepper currentStep={currentStep} />}
           </div>
 
           {/* ── Step content ─────────────────────────────────────────────── */}
-          <form onSubmit={handleSubmit(onValid, onInvalid)} noValidate className="mt-5">
-            {currentStep === 1 && (
-              <PatientInformationStep
-                register={register}
-                control={control}
-                errors={errors}
-                watch={watch}
-                setValue={setValue}
+          <div className="mt-5">
+            {isComplete ? (
+              <SuccessPanel
+                patientName={fullPatientName || 'Patient'}
+                mrn={mrn ?? ''}
+                onRegisterAnother={handleRegisterAnother}
+                onGoToDirectory={() => router.push(ROUTES.registrationDirectory)}
               />
-            )}
-            {currentStep === 2 && (
-              <UpcomingStepPanel
-                icon={ClipboardList}
-                title="Additional Details"
-                description="Next-of-kin documentation, referral source, and clinical intake notes will be captured here."
-                onBack={() => setCurrentStep(1)}
-              />
-            )}
-            {currentStep === 3 && (
-              <UpcomingStepPanel
-                icon={FileCheck2}
-                title="Review & Confirm"
-                description="A full summary of the patient's information will be shown here for review before saving."
-                onBack={() => setCurrentStep(2)}
-              />
-            )}
+            ) : (
+              <>
+                {currentStep === 1 && (
+                  <form onSubmit={step1Form.handleSubmit(onStep1Valid, onInvalid)} noValidate>
+                    <PatientInformationStep
+                      register={step1Form.register}
+                      control={step1Form.control}
+                      errors={step1Form.formState.errors}
+                      watch={step1Form.watch}
+                      setValue={step1Form.setValue}
+                      mrn={mrn}
+                      patientId={patientId}
+                      onGenerateMrn={handleGenerateMrn}
+                      photoDataUrl={photoDataUrl}
+                      onPhotoUploaded={setPhotoDataUrl}
+                    />
+                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="flex h-11 items-center rounded-[10px] px-5 font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                        style={{
+                          fontSize: 14,
+                          color: '#0D2630',
+                          border: '1px solid rgba(0,100,130,0.2)',
+                        }}
+                      >
+                        Cancel
+                      </button>
+                      <div className="flex items-center gap-3">
+                        <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
+                          <button
+                            type="button"
+                            onClick={handleSaveDraft}
+                            className="flex h-11 items-center rounded-[10px] px-5 font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            style={{
+                              fontSize: 14,
+                              color: '#0D2630',
+                              border: '1px solid rgba(0,100,130,0.2)',
+                            }}
+                          >
+                            Save as Draft
+                          </button>
+                          <button
+                            type="submit"
+                            className="flex h-11 items-center gap-1.5 rounded-[10px] px-5 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            style={{ fontSize: 14, background: '#00B4D8' }}
+                          >
+                            Next: Additional Details
+                            <ChevronRight style={{ width: 16, height: 16 }} />
+                          </button>
+                        </PermissionGate>
+                      </div>
+                    </div>
+                  </form>
+                )}
 
-            {/* ── Footer actions ─────────────────────────────────────────── */}
-            {currentStep === 1 && (
-              <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="flex h-11 items-center rounded-[10px] px-5 font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                  style={{
-                    fontSize: 14,
-                    color: '#0D2630',
-                    border: '1px solid rgba(0,100,130,0.2)',
-                  }}
-                >
-                  Cancel
-                </button>
-                <div className="flex items-center gap-3">
-                  <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
-                    <button
-                      type="button"
-                      onClick={handleSaveDraft}
-                      className="flex h-11 items-center rounded-[10px] px-5 font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                      style={{
-                        fontSize: 14,
-                        color: '#0D2630',
-                        border: '1px solid rgba(0,100,130,0.2)',
-                      }}
-                    >
-                      Save as Draft
-                    </button>
-                    <button
-                      type="submit"
-                      className="flex h-11 items-center gap-1.5 rounded-[10px] px-5 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                      style={{ fontSize: 14, background: '#00B4D8' }}
-                    >
-                      Next: Additional Details
-                      <ChevronRight style={{ width: 16, height: 16 }} />
-                    </button>
-                  </PermissionGate>
-                </div>
-              </div>
+                {currentStep === 2 && (
+                  <form onSubmit={step2Form.handleSubmit(onStep2Valid, onInvalid)} noValidate>
+                    <AdditionalDetailsStep
+                      register={step2Form.register}
+                      control={step2Form.control}
+                      errors={step2Form.formState.errors}
+                      watch={step2Form.watch}
+                      setValue={step2Form.setValue}
+                    />
+                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(1)}
+                        className="flex h-11 items-center rounded-[10px] px-5 font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                        style={{
+                          fontSize: 14,
+                          color: '#0D2630',
+                          border: '1px solid rgba(0,100,130,0.2)',
+                        }}
+                      >
+                        Back
+                      </button>
+                      <div className="flex items-center gap-3">
+                        <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
+                          <button
+                            type="button"
+                            onClick={handleSaveDraft}
+                            className="flex h-11 items-center rounded-[10px] px-5 font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            style={{
+                              fontSize: 14,
+                              color: '#0D2630',
+                              border: '1px solid rgba(0,100,130,0.2)',
+                            }}
+                          >
+                            Save as Draft
+                          </button>
+                          <button
+                            type="submit"
+                            className="flex h-11 items-center gap-1.5 rounded-[10px] px-5 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            style={{ fontSize: 14, background: '#00B4D8' }}
+                          >
+                            Next: Review &amp; Confirm
+                            <ChevronRight style={{ width: 16, height: 16 }} />
+                          </button>
+                        </PermissionGate>
+                      </div>
+                    </div>
+                  </form>
+                )}
+
+                {currentStep === 3 && step1Data && step2Data && (
+                  <ReviewConfirmStep
+                    step1={step1Data}
+                    step2={step2Data}
+                    mrn={mrn}
+                    patientId={patientId}
+                    photoDataUrl={photoDataUrl}
+                    registrationOfficerName={user?.name ?? 'Registration Officer'}
+                    onEditStep={handleEditStep}
+                    onBack={() => setCurrentStep(2)}
+                    onSubmit={handleFinalSubmit}
+                    isSubmitting={isSubmitting}
+                  />
+                )}
+              </>
             )}
-          </form>
+          </div>
 
           <div className="h-4" />
         </div>

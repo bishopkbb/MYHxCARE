@@ -400,6 +400,14 @@ const REGISTER_PATIENT_GUIDE: HelpGuide = {
       body: 'Upload a JPG, PNG, or WebP photo up to 2MB, or use "Take Photo" on a device with a camera. This step is optional and can be added later from the patient\'s profile.',
     },
     {
+      heading: 'Additional Details',
+      body: 'Next of Kin (the legal contact, recorded separately from Emergency Contact), known allergies, a brief medical history screening, disability/accessibility needs, preferred language, and referral source. Treatment and NDPR data-processing consent are required to proceed.',
+    },
+    {
+      heading: 'Review & Confirm',
+      body: 'A read-only summary of everything entered — use the Edit link on any section to jump back and correct it. Check the confirmation box to enable "Complete Registration," which saves the patient and shows their MRN.',
+    },
+    {
       heading: 'Saving progress',
       body: '"Save as Draft" keeps your progress without validating every field, so you can finish it later from Patient Directory. "Next" validates the current step before moving on.',
     },
