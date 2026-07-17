@@ -55,7 +55,10 @@ export const WORKSPACE_BY_ROLE: Record<WorkspaceRole, WorkspaceId> = {
 } as const;
 
 export function resolveWorkspace(role: WorkspaceRole): WorkspaceId {
-  return WORKSPACE_BY_ROLE[role];
+  // Falls back to 'clinical' for a role that doesn't resolve (e.g. a stale
+  // session/token carrying a role from before a workspace remap) — a
+  // resumed session should never hard-crash the app over a lookup miss.
+  return WORKSPACE_BY_ROLE[role] ?? 'clinical';
 }
 
 // ─── JWT Claims ────────────────────────────────────────────────────────────
