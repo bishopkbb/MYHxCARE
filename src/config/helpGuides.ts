@@ -406,6 +406,30 @@ const REGISTER_PATIENT_GUIDE: HelpGuide = {
   ],
 };
 
+const PATIENT_DIRECTORY_GUIDE: HelpGuide = {
+  id: 'patient-directory',
+  title: 'Patient Directory',
+  intro: 'Search, filter, and manage every registered patient from one place.',
+  sections: [
+    {
+      heading: 'Search and filters',
+      body: 'Search by name, MRN, Student ID, National ID, phone, or email. The Filter panel narrows results by category, gender, faculty/department, registration date, appointment status, insurance provider, or status — Reset clears everything back to the full list.',
+    },
+    {
+      heading: 'Patient details panel',
+      body: 'Click any row to open that patient in the right-hand panel — full contact info, insurance, and registration history, plus Quick Actions to view their profile, check them in, print their card, or schedule an appointment.',
+    },
+    {
+      heading: 'Bulk actions',
+      body: 'Select multiple patients with the row checkboxes to export, print cards, assign a category, or archive records for the whole group at once.',
+    },
+    {
+      heading: 'Exporting',
+      body: 'Export downloads the currently filtered list as CSV or PDF. Export Selected in the bulk action bar exports only the checked rows.',
+    },
+  ],
+};
+
 const REGISTRATION_DASHBOARD_GUIDE: HelpGuide = {
   id: 'registration-dashboard',
   title: 'Patient Registration Dashboard',
@@ -742,6 +766,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;
+  if (pathname.startsWith('/registration/directory')) return PATIENT_DIRECTORY_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
