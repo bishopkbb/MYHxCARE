@@ -382,6 +382,30 @@ const MEDICAL_RECORDS_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const REGISTER_PATIENT_GUIDE: HelpGuide = {
+  id: 'register-patient',
+  title: 'Register Patient',
+  intro: 'A 3-step wizard for adding a new patient to the system.',
+  sections: [
+    {
+      heading: 'Patient Information',
+      body: 'Basic demographics, emergency contact, and insurance details. Fields marked with * are required — State determines which LGAs are available, and Age is calculated automatically from Date of Birth.',
+    },
+    {
+      heading: 'Medical Record Number',
+      body: 'MRN and Patient ID are generated automatically once the patient is saved. Use "Generate MRN" to assign one earlier if you need it for a physical card or referral before saving.',
+    },
+    {
+      heading: 'Patient Photograph',
+      body: 'Upload a JPG, PNG, or WebP photo up to 2MB, or use "Take Photo" on a device with a camera. This step is optional and can be added later from the patient\'s profile.',
+    },
+    {
+      heading: 'Saving progress',
+      body: '"Save as Draft" keeps your progress without validating every field, so you can finish it later from Patient Directory. "Next" validates the current step before moving on.',
+    },
+  ],
+};
+
 const REGISTRATION_DASHBOARD_GUIDE: HelpGuide = {
   id: 'registration-dashboard',
   title: 'Patient Registration Dashboard',
@@ -717,6 +741,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/lab/results')) return LAB_RESULTS_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
+  if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
