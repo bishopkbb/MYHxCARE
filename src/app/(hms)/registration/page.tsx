@@ -200,11 +200,11 @@ export default function RegistrationDashboardPage() {
                 </div>
               </div>
 
-              {/* ── Bottom row ────────────────────────────────────────────── */}
-              <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
+              {/* ── Today's Appointments + Recent Registrations ─────────────── */}
+              <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-[8fr_7fr]">
                 {/* Today's Appointments */}
                 <div
-                  className="rounded-[12px] p-4 sm:p-5 lg:col-span-1"
+                  className="rounded-[12px] p-4 sm:p-5"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
                   <div className="flex items-center justify-between">
@@ -223,45 +223,120 @@ export default function RegistrationDashboardPage() {
                       View All
                     </button>
                   </div>
-                  <div className="mt-3 flex flex-col gap-2.5">
-                    {(pageState === 'loading' ? [] : TODAY_APPOINTMENTS).map((appt) => {
-                      const cfg = APPT_STATUS_CFG[appt.status];
-                      return (
-                        <div
-                          key={appt.id}
-                          className="flex items-center justify-between gap-2 rounded-[10px] px-3 py-2.5"
-                          style={{ border: '1px solid rgba(0,100,130,0.08)' }}
-                        >
-                          <div className="min-w-0">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {appt.patient}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {appt.time} · {appt.appointmentWith}
-                            </p>
-                          </div>
+                  <div className="mt-3 overflow-x-auto scroll-smooth">
+                    <div className="min-w-[480px]">
+                      <div
+                        className="flex rounded-t-[8px]"
+                        style={{
+                          background: 'rgba(226,237,241,0.4)',
+                          borderBottom: '1px solid #E6F8FD',
+                        }}
+                      >
+                        <div className="w-24 shrink-0 py-2.5 pr-2 pl-3">
                           <span
-                            className="shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              whiteSpace: 'nowrap',
-                              color: cfg.color,
-                              border: `1px solid ${cfg.border}`,
-                              background: cfg.bg,
-                            }}
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
                           >
-                            {appt.status}
+                            Time
                           </span>
                         </div>
-                      );
-                    })}
-                    {pageState === 'loading' &&
-                      Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="h-14 animate-pulse rounded-[10px] bg-slate-100" />
-                      ))}
+                        <div className="w-30 shrink-0 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Patient
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Appointment With
+                          </span>
+                        </div>
+                        <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Status
+                          </span>
+                        </div>
+                      </div>
+
+                      {(pageState === 'loading' ? [] : TODAY_APPOINTMENTS).map((appt) => {
+                        const cfg = APPT_STATUS_CFG[appt.status];
+                        return (
+                          <div
+                            key={appt.id}
+                            className="flex items-center"
+                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                          >
+                            <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                              <p
+                                className="font-sans font-medium whitespace-nowrap"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {appt.time}
+                              </p>
+                            </div>
+                            <div className="w-30 shrink-0 py-3 pr-2">
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {appt.patient}
+                              </p>
+                            </div>
+                            <div className="min-w-0 flex-1 py-3 pr-2">
+                              <p
+                                className="truncate whitespace-nowrap"
+                                style={{ fontSize: 14, color: '#4A7080' }}
+                              >
+                                {appt.appointmentWith}
+                              </p>
+                            </div>
+                            <div className="w-24 shrink-0 py-3 pr-3 text-right">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                                style={{
+                                  fontSize: 14,
+                                  whiteSpace: 'nowrap',
+                                  color: cfg.color,
+                                  border: `1px solid ${cfg.border}`,
+                                  background: cfg.bg,
+                                }}
+                              >
+                                {appt.status}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {pageState === 'loading' &&
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center"
+                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                          >
+                            <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                              <div className="h-4 w-14 animate-pulse rounded bg-slate-100" />
+                            </div>
+                            <div className="w-30 shrink-0 py-3 pr-2">
+                              <div className="h-4 w-20 animate-pulse rounded bg-slate-100" />
+                            </div>
+                            <div className="min-w-0 flex-1 py-3 pr-2">
+                              <div className="h-4 w-32 animate-pulse rounded bg-slate-100" />
+                            </div>
+                            <div className="w-24 shrink-0 py-3 pr-3 text-right">
+                              <div className="ml-auto h-6 w-16 animate-pulse rounded-full bg-slate-100" />
+                            </div>
+                          </div>
+                        ))}
+                    </div>
                   </div>
                   <button
                     type="button"
@@ -276,7 +351,7 @@ export default function RegistrationDashboardPage() {
 
                 {/* Recent Patient Registrations */}
                 <div
-                  className="rounded-[12px] p-4 sm:p-5 lg:col-span-1"
+                  className="rounded-[12px] p-4 sm:p-5"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
                   <div className="flex items-center justify-between">
@@ -331,21 +406,21 @@ export default function RegistrationDashboardPage() {
                       ))}
                   </div>
                 </div>
+              </div>
 
-                {/* System Announcements */}
+              {/* ── System Announcements ─────────────────────────────────────── */}
+              <div className="mt-5">
                 <div
-                  className="rounded-[12px] p-4 sm:p-5 lg:col-span-1"
+                  className="rounded-[12px] p-4 sm:p-5"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
-                  <div className="flex items-center justify-between">
-                    <h2
-                      className="font-display font-semibold"
-                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                    >
-                      System Announcements
-                    </h2>
-                  </div>
-                  <div className="mt-3 flex flex-col gap-3">
+                  <h2
+                    className="font-display font-semibold"
+                    style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                  >
+                    System Announcements
+                  </h2>
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     {(pageState === 'loading' ? [] : SYSTEM_ANNOUNCEMENTS).map((ann) => {
                       const Icon = ann.icon;
                       return (
@@ -372,7 +447,7 @@ export default function RegistrationDashboardPage() {
                       );
                     })}
                     {pageState === 'loading' &&
-                      Array.from({ length: 3 }).map((_, i) => (
+                      Array.from({ length: 4 }).map((_, i) => (
                         <div key={i} className="h-12 animate-pulse rounded-[10px] bg-slate-100" />
                       ))}
                   </div>
