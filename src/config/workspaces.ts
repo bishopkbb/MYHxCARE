@@ -87,6 +87,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Medical Records Reports', href: '/medical-records/reports', icon: BarChart2 },
         ],
       },
+      {
+        label: 'COMMUNICATION',
+        items: [
+          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+        ],
+      },
+      {
+        label: 'ACCOUNT',
+        items: [
+          { label: 'Profile', href: '/profile', icon: User },
+          { label: 'Settings', href: '/settings', icon: Settings },
+        ],
+      },
     ],
   },
 
@@ -128,6 +142,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Registration Reports', href: '/registration/reports', icon: TrendingUp },
           { label: 'Daily Attendance', href: '/registration/attendance', icon: CalendarCheck },
+        ],
+      },
+      {
+        label: 'COMMUNICATION',
+        items: [
+          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+        ],
+      },
+      {
+        label: 'ACCOUNT',
+        items: [
+          { label: 'Profile', href: '/profile', icon: User },
+          { label: 'Settings', href: '/settings', icon: Settings },
         ],
       },
     ],
@@ -301,6 +329,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         label: 'Scheduling',
         items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
       },
+      {
+        label: 'COMMUNICATION',
+        items: [
+          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+        ],
+      },
+      {
+        label: 'ACCOUNT',
+        items: [
+          { label: 'Profile', href: '/profile', icon: User },
+          { label: 'Settings', href: '/settings', icon: Settings },
+        ],
+      },
     ],
   },
 
@@ -322,6 +364,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         label: 'Scheduling',
         items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
       },
+      {
+        label: 'COMMUNICATION',
+        items: [
+          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+        ],
+      },
+      {
+        label: 'ACCOUNT',
+        items: [
+          { label: 'Profile', href: '/profile', icon: User },
+          { label: 'Settings', href: '/settings', icon: Settings },
+        ],
+      },
     ],
   },
 
@@ -342,6 +398,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'Scheduling',
         items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
+      },
+      {
+        label: 'COMMUNICATION',
+        items: [
+          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+        ],
+      },
+      {
+        label: 'ACCOUNT',
+        items: [
+          { label: 'Profile', href: '/profile', icon: User },
+          { label: 'Settings', href: '/settings', icon: Settings },
+        ],
       },
     ],
   },
@@ -365,6 +435,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         label: 'Scheduling',
         items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
       },
+      {
+        label: 'COMMUNICATION',
+        items: [
+          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+        ],
+      },
+      {
+        label: 'ACCOUNT',
+        items: [
+          { label: 'Profile', href: '/profile', icon: User },
+          { label: 'Settings', href: '/settings', icon: Settings },
+        ],
+      },
     ],
   },
 
@@ -381,6 +465,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Billing & Charges', href: '/billing/charges', icon: Receipt },
           { label: 'Payments', href: '/billing/payments', icon: CreditCard },
           { label: 'Revenue', href: '/billing', icon: TrendingUp },
+        ],
+      },
+      {
+        label: 'COMMUNICATION',
+        items: [
+          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+        ],
+      },
+      {
+        label: 'ACCOUNT',
+        items: [
+          { label: 'Profile', href: '/profile', icon: User },
+          { label: 'Settings', href: '/settings', icon: Settings },
         ],
       },
     ],
@@ -401,6 +499,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Patients', href: '/patients', icon: Users },
         ],
       },
+      {
+        label: 'COMMUNICATION',
+        items: [
+          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+        ],
+      },
+      {
+        label: 'ACCOUNT',
+        items: [
+          { label: 'Profile', href: '/profile', icon: User },
+          { label: 'Settings', href: '/settings', icon: Settings },
+        ],
+      },
     ],
   },
 
@@ -416,6 +528,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Staff & Roles', href: '/admin', icon: Users },
           { label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays },
+        ],
+      },
+      {
+        label: 'COMMUNICATION',
+        items: [
+          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+        ],
+      },
+      {
+        label: 'ACCOUNT',
+        items: [
+          { label: 'Profile', href: '/profile', icon: User },
+          { label: 'Settings', href: '/settings', icon: Settings },
         ],
       },
     ],
