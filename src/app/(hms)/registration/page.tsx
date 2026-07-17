@@ -414,24 +414,39 @@ export default function RegistrationDashboardPage() {
                   className="rounded-[12px] p-4 sm:p-5"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
-                  <h2
-                    className="font-display font-semibold"
-                    style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                  >
-                    System Announcements
-                  </h2>
-                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    {(pageState === 'loading' ? [] : SYSTEM_ANNOUNCEMENTS).map((ann) => {
+                  <div className="flex items-center justify-between">
+                    <h2
+                      className="font-display font-semibold"
+                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                    >
+                      System Announcements
+                    </h2>
+                    <button
+                      type="button"
+                      className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                      style={{ fontSize: 14, color: '#00B4D8' }}
+                    >
+                      View All
+                    </button>
+                  </div>
+                  <div className="mt-3 flex flex-col">
+                    {(pageState === 'loading' ? [] : SYSTEM_ANNOUNCEMENTS).map((ann, i) => {
                       const Icon = ann.icon;
                       return (
-                        <div key={ann.id} className="flex items-start gap-2.5">
+                        <div
+                          key={ann.id}
+                          className="flex items-start gap-3 py-3"
+                          style={
+                            i > 0 ? { borderTop: '1px solid rgba(0,100,130,0.08)' } : undefined
+                          }
+                        >
                           <div
-                            className="flex size-8 shrink-0 items-center justify-center rounded-full"
+                            className="flex size-9 shrink-0 items-center justify-center rounded-full"
                             style={{ background: ann.iconBg }}
                           >
-                            <Icon style={{ width: 15, height: 15, color: ann.iconColor }} />
+                            <Icon style={{ width: 16, height: 16, color: ann.iconColor }} />
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             <p
                               className="font-sans font-medium"
                               style={{ fontSize: 14, color: '#0D2630' }}
@@ -439,16 +454,19 @@ export default function RegistrationDashboardPage() {
                               {ann.title}
                             </p>
                             <p style={{ fontSize: 14, color: '#4A7080' }}>{ann.description}</p>
-                            <p className="mt-0.5" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {ann.date}
-                            </p>
                           </div>
+                          <p
+                            className="shrink-0 whitespace-nowrap"
+                            style={{ fontSize: 14, color: '#8A98A3' }}
+                          >
+                            {ann.date}
+                          </p>
                         </div>
                       );
                     })}
                     {pageState === 'loading' &&
                       Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="h-12 animate-pulse rounded-[10px] bg-slate-100" />
+                        <div key={i} className="h-14 animate-pulse rounded-[10px] bg-slate-100" />
                       ))}
                   </div>
                 </div>
