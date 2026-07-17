@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
+import { StatMini } from '@components/shared/StatCard';
 import { ROUTES } from '@/constants/routes';
 import {
   ASSIGNMENT_STATUS_META,
@@ -32,23 +33,6 @@ const STATUS_OPTIONS: { value: AssignmentStatus; label: string }[] = [
 ];
 
 const PAGE_SIZE_OPTIONS = [10, 15, 25, 50];
-
-function StatMini({ label, value }: { label: string; value: string }) {
-  return (
-    <div
-      className="flex flex-col rounded-[12px] p-4"
-      style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
-    >
-      <p style={{ fontSize: 14, color: '#4A7080' }}>{label}</p>
-      <p
-        className="font-display mt-1.5 font-bold"
-        style={{ fontSize: 26, lineHeight: '32px', color: '#0D2630' }}
-      >
-        {value}
-      </p>
-    </div>
-  );
-}
 
 export default function StaffAssignmentPage() {
   const router = useRouter();

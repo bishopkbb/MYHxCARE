@@ -5,13 +5,11 @@ import {
   AlertTriangle,
   ChevronDown,
   ClipboardList,
-  Download,
   Eye,
   FileText,
   FlaskConical,
   ListFilter,
   MoreVertical,
-  Printer,
   RefreshCw,
   Search,
   Share2,
@@ -22,10 +20,13 @@ import type { LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Fragment, useEffect, useRef, useState } from 'react';
 
+import { ExportMenu } from '@/components/ExportMenu';
 import { PermissionGate } from '@/components/shared/PermissionGate';
+import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
+import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import {
   MOCK_PATIENTS,
   PATIENT_STAT_CARDS,
@@ -261,7 +262,6 @@ export default function PatientsPage() {
   const toast = useToast();
   const [search, setSearch] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<PanelFilterState>({
     gender: 'all',
     status: 'all',
@@ -272,14 +272,12 @@ export default function PatientsPage() {
   const [pageState, setPageState] = useState<PageState>('loading');
 
   const filterRef = useRef<HTMLDivElement>(null);
-  const exportRef = useRef<HTMLDivElement>(null);
   const quickFilterRef = useRef<HTMLDivElement>(null);
   const actionMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function onMouseDown(e: MouseEvent) {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) setFilterOpen(false);
-      if (exportRef.current && !exportRef.current.contains(e.target as Node)) setExportOpen(false);
       if (quickFilterRef.current && !quickFilterRef.current.contains(e.target as Node))
         setOpenDropdown(null);
       if (actionMenuRef.current && !actionMenuRef.current.contains(e.target as Node))
@@ -339,42 +337,40 @@ export default function PatientsPage() {
   // ── Exports ───────────────────────────────────────────────────────────────
 
   const exportCSV = () => {
-    const headers = [
-      'Name',
-      'MRN',
-      'Gender',
-      'Details',
-      'Status',
-      'Last Visit',
-      'Next Appointment',
-      'Allergies',
-    ];
-    const rows = filteredPatients.map((p) => [
-      p.name,
-      p.mrn,
-      p.meta.includes('Female') ? 'Female' : 'Male',
-      p.meta,
-      STATUS_CFG[p.status].label,
-      `${p.lastVisitDate} ${p.lastVisitTime}`,
-      `${p.nextApptDate} ${p.nextApptTime}`,
-      p.allergies.join('; '),
+    downloadCSV('patients', [
+      ['Name', 'MRN', 'Gender', 'Details', 'Status', 'Last Visit', 'Next Appointment', 'Allergies'],
+      ...filteredPatients.map((p) => [
+        p.name,
+        p.mrn,
+        p.meta.includes('Female') ? 'Female' : 'Male',
+        p.meta,
+        STATUS_CFG[p.status].label,
+        `${p.lastVisitDate} ${p.lastVisitTime}`,
+        `${p.nextApptDate} ${p.nextApptTime}`,
+        p.allergies.map((a) => a.substance).join('; '),
+      ]),
     ]);
-    const csv = [headers, ...rows]
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `patients-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
     toast.success('Export ready', `${filteredPatients.length} patient records downloaded as CSV.`);
   };
 
   const exportPDF = () => {
-    toast.info('Opening print view', 'Use your browser print dialog to save as PDF.');
-    window.print();
+    const body = `
+      <h1>Patients</h1>
+      <p class="meta">${filteredPatients.length} patient${filteredPatients.length === 1 ? '' : 's'}</p>
+      <table>
+        <thead><tr><th>Name</th><th>MRN</th><th>Details</th><th>Status</th><th>Last Visit</th><th>Allergies</th></tr></thead>
+        <tbody>
+          ${filteredPatients
+            .map(
+              (p) =>
+                `<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.mrn)}</td><td>${escapeHtml(p.meta)}</td><td>${escapeHtml(STATUS_CFG[p.status].label)}</td><td>${escapeHtml(p.lastVisitDate)} ${escapeHtml(p.lastVisitTime)}</td><td>${escapeHtml(p.allergies.map((a) => a.substance).join(', ') || 'None recorded')}</td></tr>`,
+            )
+            .join('')}
+        </tbody>
+      </table>
+    `;
+    downloadPDF('patients', body);
+    toast.success('Export ready', `${filteredPatients.length} patient records downloaded as PDF.`);
   };
 
   function setQuickFilter(key: keyof QuickFilters, value: string) {
@@ -401,42 +397,17 @@ export default function PatientsPage() {
 
       {/* ── Stat cards ─────────────────────────────────────────────────── */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
-        {PATIENT_STAT_CARDS.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={card.title}
-              className="flex cursor-pointer flex-col rounded-[12px] p-5 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md"
-              style={{
-                background: '#FFFFFF',
-                border: `1px solid ${card.accent}`,
-                borderTopWidth: '3px',
-                boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.05)',
-              }}
-            >
-              <div className="flex items-start justify-between">
-                <p className="text-base leading-6 font-semibold" style={{ color: '#25464D' }}>
-                  {card.title}
-                </p>
-                <div
-                  className="flex size-10 shrink-0 items-center justify-center rounded-[12px]"
-                  style={{ background: card.iconBg }}
-                >
-                  <Icon style={{ width: 24, height: 24, color: card.accent }} />
-                </div>
-              </div>
-              <p
-                className="font-display mt-1.5 text-[30px] leading-9 font-black"
-                style={{ color: card.accent }}
-              >
-                {card.count}
-              </p>
-              <p className="mt-1 text-sm leading-5.5" style={{ color: '#4A7080' }}>
-                {card.label}
-              </p>
-            </div>
-          );
-        })}
+        {PATIENT_STAT_CARDS.map((card) => (
+          <StatCard
+            key={card.title}
+            icon={card.icon}
+            label={card.title}
+            value={card.count}
+            info={card.label}
+            accent={card.accent}
+            iconBg={card.iconBg}
+          />
+        ))}
       </div>
 
       {/* ── Search + controls row ──────────────────────────────────────── */}
@@ -557,55 +528,7 @@ export default function PatientsPage() {
           </div>
 
           {/* ── Export menu ───────────────────────────────────────────── */}
-          <div ref={exportRef} className="relative">
-            <button
-              type="button"
-              onClick={() => setExportOpen((o) => !o)}
-              className="flex h-10 items-center gap-1.5 rounded-[8px] px-3 text-base leading-6 font-medium transition-colors duration-150 hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-              style={{
-                background: exportOpen ? '#E6F8FD' : '#FFFFFF',
-                border: `1px solid ${exportOpen ? '#00B4D8' : '#0064821F'}`,
-                color: '#2F3A40',
-              }}
-            >
-              <Download style={{ width: 16, height: 16, color: '#00B4D8' }} />
-              Export
-            </button>
-            {exportOpen && (
-              <div
-                className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-20 mt-2 w-52 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                style={{
-                  border: '1px solid rgba(0,100,130,0.12)',
-                  boxShadow: '0px 4px 16px rgba(0,0,0,0.08)',
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    exportCSV();
-                    setExportOpen(false);
-                  }}
-                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors hover:bg-[#E6F8FD]"
-                  style={{ color: '#2F3A40' }}
-                >
-                  <FileText style={{ width: 16, height: 16, color: '#00B4D8' }} />
-                  Export as CSV
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    exportPDF();
-                    setExportOpen(false);
-                  }}
-                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-base leading-6 transition-colors hover:bg-[#E6F8FD]"
-                  style={{ color: '#2F3A40' }}
-                >
-                  <Printer style={{ width: 16, height: 16, color: '#00B4D8' }} />
-                  Export as PDF
-                </button>
-              </div>
-            )}
-          </div>
+          <ExportMenu variant="button" onExportPDF={exportPDF} onExportCSV={exportCSV} />
         </div>
       </div>
 
@@ -853,7 +776,9 @@ export default function PatientsPage() {
                       />
                       <p className="text-sm leading-5">
                         <span style={{ color: '#EF4444' }}>ALLERGY: </span>
-                        <span style={{ color: '#00B4D8' }}>{patient.allergies.join(', ')}</span>
+                        <span style={{ color: '#00B4D8' }}>
+                          {patient.allergies.map((a) => a.substance).join(', ')}
+                        </span>
                       </p>
                     </div>
                   )}
@@ -1084,7 +1009,9 @@ export default function PatientsPage() {
                           />
                           <p className="text-sm leading-5.5">
                             <span style={{ color: '#EF4444' }}>ALLERGY: </span>
-                            <span style={{ color: '#00B4D8' }}>{patient.allergies.join(', ')}</span>
+                            <span style={{ color: '#00B4D8' }}>
+                              {patient.allergies.map((a) => a.substance).join(', ')}
+                            </span>
                           </p>
                         </div>
                       )}

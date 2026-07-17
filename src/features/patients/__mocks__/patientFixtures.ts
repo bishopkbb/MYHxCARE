@@ -21,7 +21,7 @@ export type PatientRecord = {
   mrn: string;
   meta: string;
   complaint: string;
-  allergies: string[];
+  allergies: Allergy[];
   lastVisitDate: string; // DD/MM/YYYY
   lastVisitTime: string; // HH:MM (24 h)
   nextApptDate: string; // DD/MM/YYYY
@@ -91,7 +91,24 @@ export const MOCK_PATIENTS: PatientRecord[] = [
     mrn: 'MRN-2024-00451',
     meta: '21y Female · Medicine & Surgery',
     complaint: 'Persistent headache and fever for 3 days',
-    allergies: ['Penicillin', 'Sulfonamides'],
+    allergies: [
+      {
+        id: 'al-p1-1',
+        substance: 'Penicillin',
+        reaction: 'Anaphylaxis',
+        severity: 'LIFE_THREATENING',
+        recordedAt: '2024-03-12T08:30:00Z',
+        recordedBy: 'Dr. A. Nwosu',
+      },
+      {
+        id: 'al-p1-2',
+        substance: 'Sulfonamides',
+        reaction: 'Urticaria and angioedema',
+        severity: 'SEVERE',
+        recordedAt: '2024-03-12T08:30:00Z',
+        recordedBy: 'Dr. A. Nwosu',
+      },
+    ],
     lastVisitDate: '28/06/2026',
     lastVisitTime: '09:15',
     nextApptDate: '12/07/2026',
@@ -107,7 +124,7 @@ export const MOCK_PATIENTS: PatientRecord[] = [
     mrn: 'MRN-2024-00592',
     meta: '20y Male · Computer Science',
     complaint: 'Suspected typhoid — high fever, abdominal pain, rose spots',
-    allergies: ['Penicillin'],
+    allergies: [],
     lastVisitDate: '28/06/2026',
     lastVisitTime: '09:15',
     nextApptDate: '14/07/2026',
@@ -123,7 +140,16 @@ export const MOCK_PATIENTS: PatientRecord[] = [
     mrn: 'MRN-2024-00512',
     meta: '23y Female · Law',
     complaint: 'Diffuse skin rash and itching for 5 days',
-    allergies: ['Penicillin', 'Sulfonamides'],
+    allergies: [
+      {
+        id: 'al-p3-1',
+        substance: 'Aspirin',
+        reaction: 'Bronchospasm and rhinitis',
+        severity: 'SEVERE',
+        recordedAt: '2024-05-18T10:00:00Z',
+        recordedBy: 'Dr. C. Obi',
+      },
+    ],
     lastVisitDate: '28/06/2026',
     lastVisitTime: '09:15',
     nextApptDate: '15/07/2026',
@@ -155,7 +181,16 @@ export const MOCK_PATIENTS: PatientRecord[] = [
     mrn: 'MRN-2024-00571',
     meta: '20y Female · Microbiology',
     complaint: 'Suspected typhoid — awaiting Widal test results, on IV fluids',
-    allergies: ['Penicillin'],
+    allergies: [
+      {
+        id: 'al-p5-1',
+        substance: 'Penicillin',
+        reaction: 'Skin rash',
+        severity: 'MODERATE',
+        recordedAt: '2024-02-10T09:00:00Z',
+        recordedBy: 'Dr. E. Obi',
+      },
+    ],
     lastVisitDate: '28/06/2026',
     lastVisitTime: '09:15',
     nextApptDate: '12/07/2026',
@@ -171,7 +206,16 @@ export const MOCK_PATIENTS: PatientRecord[] = [
     mrn: 'MRN-2024-00614',
     meta: '21y Male · Engineering',
     complaint: 'Orthopaedic referral — post-appendicitis follow-up',
-    allergies: ['NSAIDs'],
+    allergies: [
+      {
+        id: 'al-p6-1',
+        substance: 'NSAIDs',
+        reaction: 'Gastric irritation',
+        severity: 'MILD',
+        recordedAt: '2024-01-15T09:00:00Z',
+        recordedBy: 'Dr. E. Obi',
+      },
+    ],
     lastVisitDate: '28/06/2026',
     lastVisitTime: '09:15',
     nextApptDate: '18/07/2026',
@@ -187,7 +231,24 @@ export const MOCK_PATIENTS: PatientRecord[] = [
     mrn: 'MRN-2024-00234',
     meta: '21y Female · Education',
     complaint: 'Malaria — fully treated, fever resolved, appetite restored',
-    allergies: ['Penicillin', 'Sulfonamides'],
+    allergies: [
+      {
+        id: 'al-p7-1',
+        substance: 'Penicillin',
+        reaction: 'Urticaria',
+        severity: 'MODERATE',
+        recordedAt: '2023-11-02T09:00:00Z',
+        recordedBy: 'Dr. E. Obi',
+      },
+      {
+        id: 'al-p7-2',
+        substance: 'Sulfonamides',
+        reaction: 'Skin rash',
+        severity: 'MILD',
+        recordedAt: '2023-11-02T09:00:00Z',
+        recordedBy: 'Dr. E. Obi',
+      },
+    ],
     lastVisitDate: '28/06/2026',
     lastVisitTime: '09:15',
     nextApptDate: '12/07/2026',

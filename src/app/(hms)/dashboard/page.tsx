@@ -29,6 +29,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@hooks/useAuth';
 import { ROUTES } from '@/constants/routes';
 import { PermissionGate } from '@/components/shared/PermissionGate';
+import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
 
 function getGreeting(): string {
@@ -65,7 +66,7 @@ type QuickAction = { label: string; href: string; active?: boolean } & (
   { iconSrc: string; icon?: never } | { icon: LucideIcon; iconSrc?: never }
 );
 
-type StatCard = {
+type StatCardData = {
   title: string;
   icon: LucideIcon;
   count: number;
@@ -139,7 +140,7 @@ const MOCK_EMERGENCY = {
 };
 
 // Mock stat cards — will be replaced with real API data in Phase 6
-const MOCK_STAT_CARDS: StatCard[] = [
+const MOCK_STAT_CARDS: StatCardData[] = [
   {
     title: 'Assigned Patients',
     icon: Users,
@@ -765,46 +766,17 @@ export default function DashboardPage() {
             </button>
           </div>
         ) : (
-          MOCK_STAT_CARDS.map((card) => {
-            const Icon = card.icon;
-            return (
-              <div
-                key={card.title}
-                className="flex cursor-pointer flex-col rounded-[12px] p-4 transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md"
-                style={{
-                  background: '#FFFFFF',
-                  border: `1px solid ${card.accent}`,
-                  borderTopWidth: '3px',
-                }}
-              >
-                {/* Title row: text left, icon right */}
-                <div className="flex items-start justify-between">
-                  <p className="text-base leading-6 font-semibold" style={{ color: '#25464D' }}>
-                    {card.title}
-                  </p>
-                  <div
-                    className="flex size-10 shrink-0 items-center justify-center rounded-[12px]"
-                    style={{ background: card.iconBg }}
-                  >
-                    <Icon style={{ width: 24, height: 24, color: card.accent }} />
-                  </div>
-                </div>
-
-                {/* Count — Outfit Black 30 / 36, accent colour */}
-                <p
-                  className="font-display mt-1.5 text-[30px] leading-9 font-black"
-                  style={{ color: card.accent }}
-                >
-                  {card.count}
-                </p>
-
-                {/* Info label — DM Sans Regular 14, muted */}
-                <p className="mt-1 text-sm leading-5.5" style={{ color: '#4A7080' }}>
-                  {card.info}
-                </p>
-              </div>
-            );
-          })
+          MOCK_STAT_CARDS.map((card) => (
+            <StatCard
+              key={card.title}
+              icon={card.icon}
+              label={card.title}
+              value={card.count}
+              info={card.info}
+              accent={card.accent}
+              iconBg={card.iconBg}
+            />
+          ))
         )}
       </div>
 

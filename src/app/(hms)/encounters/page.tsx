@@ -179,18 +179,18 @@ const QUEUE_TABS: QueueTab[] = [
 // ── Column definitions (header + body share these widths) ─────────────────────
 
 const COLS = [
-  { key: 'patient', label: 'Patient', width: 'w-[22%] xl:w-[21%]', headerPad: 'pl-5 pr-3' },
+  { key: 'patient', label: 'Patient', width: 'w-[22%] xl:w-[21%]', headPad: 'pl-5 pr-3' },
   // Complaint is the flexible column — it absorbs/releases width so the row
   // always sums exactly to the container and nothing overflows into scroll
-  { key: 'complaint', label: 'Chief Complaint', width: 'min-w-0 flex-1', headerPad: 'pr-4' },
-  { key: 'vitals', label: 'Vitals', width: 'hidden xl:block xl:w-[13%]', headerPad: 'pr-4' },
-  { key: 'wait', label: 'Wait Time', width: 'hidden xl:block xl:w-[12%]', headerPad: 'pr-4' },
+  { key: 'complaint', label: 'Chief Complaint', width: 'min-w-0 flex-1', headPad: 'pr-4' },
+  { key: 'vitals', label: 'Vitals', width: 'hidden xl:block xl:w-[13%]', headPad: 'pr-4' },
+  { key: 'wait', label: 'Wait Time', width: 'hidden xl:block xl:w-[12%]', headPad: 'pr-4' },
   // Status is content-sized so the longest pill ("In Consultation") never
   // wraps or distorts at any width
-  { key: 'status', label: 'Status', width: 'w-38 shrink-0', headerPad: 'pr-4' },
+  { key: 'status', label: 'Status', width: 'w-38 shrink-0', headPad: 'pr-4' },
   // Actions is content-sized and unshrinkable — the Start Consultation
   // button can never be pushed out of view at any width
-  { key: 'actions', label: 'Actions', width: 'w-52 shrink-0', headerPad: 'pr-4' },
+  { key: 'actions', label: 'Actions', width: 'w-52 shrink-0', headPad: 'pr-4' },
 ] as const;
 
 // ── Tab → status mapping ──────────────────────────────────────────────────────
@@ -845,7 +845,7 @@ export default function EncountersPage() {
             style={{ background: 'rgba(226,237,241,0.4)', borderBottom: '1px solid #E6F8FD' }}
           >
             {COLS.map((col) => (
-              <div key={col.key} className={`${col.width} ${col.headerPad} py-3.5`}>
+              <div key={col.key} className={`${col.width} ${col.headPad} py-3.5`}>
                 <span
                   className="text-sm leading-[22px] font-bold tracking-wider uppercase"
                   style={{ color: '#4A7080' }}
