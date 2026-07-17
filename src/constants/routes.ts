@@ -88,6 +88,10 @@ export const ROUTES = {
   registrationCardPrinting: '/registration/card-printing',
   registrationReports: '/registration/reports',
   registrationAttendance: '/registration/attendance',
+  registrationMessages: '/registration/messages',
+  registrationNotifications: '/registration/notifications',
+  registrationAccountProfile: '/registration/account/profile',
+  registrationAccountSettings: '/registration/account/settings',
 
   // Settings
   settings: '/settings',

@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 
 import { ROUTES } from '@/constants/routes';
+import { resolveWorkspace } from '@/types/auth.types';
+import { findWorkspaceRoute } from '@/config/workspaces';
 import { useToast } from '@/hooks/useToast';
 import { MOCK_DOCTOR_PROFILE } from '@/features/profile/__mocks__/profileFixtures';
 import {
@@ -286,6 +288,8 @@ export default function SettingsPage() {
   const name = user?.name ?? MOCK_DOCTOR_PROFILE.name;
   const role = user?.role ?? MOCK_DOCTOR_PROFILE.role;
   const initials = getInitials(name);
+  const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
+  const profileHref = findWorkspaceRoute(workspaceId, 'Profile') ?? ROUTES.profile;
   const userPermissions = user?.permissions ?? [];
 
   const permitted = ROLE_PERMISSION_ITEMS.filter((item) =>
@@ -399,7 +403,7 @@ export default function SettingsPage() {
               </div>
               <button
                 type="button"
-                onClick={() => router.push(ROUTES.profile)}
+                onClick={() => router.push(profileHref)}
                 className={`flex h-11 shrink-0 items-center justify-center rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-slate-50 ${FOCUS_RING}`}
                 style={{ border: '1px solid rgba(0,100,130,0.20)', color: '#0D2630', fontSize: 14 }}
               >

@@ -147,15 +147,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'COMMUNICATION',
         items: [
-          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
-          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+          { label: 'Messages', href: '/registration/messages', icon: MessageSquare, badge: 3 },
+          {
+            label: 'Notifications',
+            href: '/registration/notifications',
+            icon: Bell,
+            badge: 8,
+          },
         ],
       },
       {
         label: 'ACCOUNT',
         items: [
-          { label: 'Profile', href: '/profile', icon: User },
-          { label: 'Settings', href: '/settings', icon: Settings },
+          { label: 'Profile', href: '/registration/account/profile', icon: User },
+          { label: 'Settings', href: '/registration/account/settings', icon: Settings },
         ],
       },
     ],
@@ -555,6 +560,19 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 export function getWorkspaceHomeRoute(workspaceRole: WorkspaceRole): string {
   const workspaceId = resolveWorkspace(workspaceRole);
   return WORKSPACE_NAV[workspaceId].homeRoute;
+}
+
+// ─── Workspace nav item lookup ─────────────────────────────────────────────
+// Used by chrome outside the sidebar (e.g. the topbar's bell/avatar buttons)
+// that needs to send the user to the SAME route their own sidebar links to,
+// rather than a route hardcoded to one workspace (historically clinical's).
+
+export function findWorkspaceRoute(workspaceId: WorkspaceId, label: string): string | undefined {
+  for (const section of WORKSPACE_NAV[workspaceId].sections) {
+    const item = section.items.find((i) => i.label === label);
+    if (item) return item.href;
+  }
+  return undefined;
 }
 
 // ─── Universal bottom nav (every workspace) ────────────────────────────────

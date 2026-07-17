@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { ROUTES } from '@/constants/routes';
+import { resolveWorkspace } from '@/types/auth.types';
+import { findWorkspaceRoute } from '@/config/workspaces';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { useAuth } from '@hooks/useAuth';
 import { getInitials } from '@lib/utils';
@@ -52,6 +54,14 @@ interface AppTopbarProps {
 export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
   const { user } = useAuth();
   const router = useRouter();
+
+  // Route to the SAME page the user's own sidebar links to, not a route
+  // hardcoded to one workspace (historically clinical's /notifications and
+  // /profile).
+  const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
+  const notificationsHref =
+    findWorkspaceRoute(workspaceId, 'Notifications') ?? ROUTES.notifications;
+  const profileHref = findWorkspaceRoute(workspaceId, 'Profile') ?? ROUTES.profile;
 
   return (
     <header
@@ -107,7 +117,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
         {/* Notification bell + red dot */}
         <button
           type="button"
-          onClick={() => router.push(ROUTES.notifications)}
+          onClick={() => router.push(notificationsHref)}
           aria-label="Notifications"
           className="relative flex items-center justify-center text-[#25464D]/50 transition-colors duration-150 hover:text-[#25464D] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
         >
@@ -122,7 +132,7 @@ export function AppTopbar({ onMenuToggle }: AppTopbarProps) {
         {/* User avatar — opens My Profile */}
         <button
           type="button"
-          onClick={() => router.push(ROUTES.profile)}
+          onClick={() => router.push(profileHref)}
           aria-label="View profile"
           className="shrink-0 rounded-full transition-opacity duration-150 hover:opacity-85 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
         >

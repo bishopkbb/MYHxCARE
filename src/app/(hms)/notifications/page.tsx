@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { ROUTES } from '@/constants/routes';
+import { resolveWorkspace, type WorkspaceId } from '@/types/auth.types';
+import { findWorkspaceRoute } from '@/config/workspaces';
+import { useAuth } from '@hooks/useAuth';
 import { toRelativeTime } from '@/utils/datetime';
 import {
   MOCK_NOTIFICATIONS,
@@ -17,7 +20,7 @@ const FOCUS_RING =
 
 type PageState = 'loading' | 'loaded' | 'error';
 
-function resolveHref(notification: Notification): string {
+function resolveHref(notification: Notification, workspaceId: WorkspaceId): string {
   const t = notification.target;
   switch (t.kind) {
     case 'patient':
@@ -29,7 +32,7 @@ function resolveHref(notification: Notification): string {
     case 'emergency':
       return ROUTES.emergency;
     case 'collaboration':
-      return ROUTES.collaboration;
+      return findWorkspaceRoute(workspaceId, 'Messages') ?? ROUTES.collaboration;
   }
 }
 
@@ -51,6 +54,8 @@ function SkeletonNotificationCard() {
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
   const [pageState, setPageState] = useState<PageState>('loading');
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
 
@@ -68,7 +73,7 @@ export default function NotificationsPage() {
     setNotifications((prev) =>
       prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
     );
-    router.push(resolveHref(notification));
+    router.push(resolveHref(notification, workspaceId));
   }
 
   function markAllAsRead() {
