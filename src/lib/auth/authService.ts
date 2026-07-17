@@ -72,12 +72,20 @@ export const authService = {
 
   async refreshToken(): Promise<string> {
     if (IS_MOCK) {
-      const { createMockAccessToken } = await import('@features/auth/__mocks__/authFixtures');
-      // Preserve the actor and workspace across refresh so the user doesn't change
+      const { createMockAccessToken, getMockUserById } =
+        await import('@features/auth/__mocks__/authFixtures');
+      // The refresh token (`mock-refresh-token-<actorId>`) is the durable
+      // source of identity — it survives page reloads and HMR resets. The
+      // in-memory access token does not: it's cleared on reload and can be
+      // wiped by a dev-server Fast Refresh, and previously this fell back to
+      // 'usr_001' (the default doctor) whenever that happened, silently
+      // switching the logged-in identity mid-session.
+      const refreshToken = tokenStore.getRefreshToken();
+      const actorIdFromRefresh = refreshToken?.match(/^mock-refresh-token-(.+)$/)?.[1];
       const current = tokenStore.getAccessToken();
       const claims = current ? decodeJwt(current) : null;
-      const actorId = claims?.actor_id ?? 'usr_001';
-      const workspaceRole = claims?.workspace_role ?? 'CONSULTANT';
+      const actorId = actorIdFromRefresh ?? claims?.actor_id ?? 'usr_001';
+      const workspaceRole = getMockUserById(actorId).workspaceRole;
       return createMockAccessToken(actorId, workspaceRole);
     }
     const refreshToken = tokenStore.getRefreshToken();
