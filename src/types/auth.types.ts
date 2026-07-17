@@ -5,6 +5,7 @@
 
 export type WorkspaceRole =
   | 'RECORDS_OFFICER'
+  | 'REGISTRATION_OFFICER'
   | 'DOCTOR'
   | 'CONSULTANT'
   | 'NURSE'
@@ -25,6 +26,7 @@ export type WorkspaceRole =
 
 export type WorkspaceId =
   | 'records'
+  | 'registration'
   | 'clinical'
   | 'nursing'
   | 'ward-management'
@@ -36,6 +38,7 @@ export type WorkspaceId =
 
 export const WORKSPACE_BY_ROLE: Record<WorkspaceRole, WorkspaceId> = {
   RECORDS_OFFICER: 'records',
+  REGISTRATION_OFFICER: 'registration',
   DOCTOR: 'clinical',
   CONSULTANT: 'clinical',
   NURSE: 'nursing',

@@ -362,6 +362,47 @@ const MEDICAL_RECORDS_GUIDE: HelpGuide = {
   ],
 };
 
+const MEDICAL_RECORDS_DASHBOARD_GUIDE: HelpGuide = {
+  id: 'medical-records-dashboard',
+  title: 'Medical Records Dashboard',
+  intro: 'Your daily overview of records activity — retrieval, uploads, and pending requests.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Each card tracks one metric against yesterday — records retrieved, archived records, pending requests, uploads, and visit entries.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: 'Jump straight to retrieving a record, uploading a document, or browsing visit history and clinical documents.',
+    },
+    {
+      heading: 'Recent activity',
+      body: 'Recent Record Requests and Recently Retrieved show the latest activity; System Announcements carries hospital-wide notices.',
+    },
+  ],
+};
+
+const REGISTRATION_DASHBOARD_GUIDE: HelpGuide = {
+  id: 'registration-dashboard',
+  title: 'Patient Registration Dashboard',
+  intro:
+    'Your daily overview of registration activity — new patients, check-ins, and appointments.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Each card tracks one metric against yesterday — patients registered, new vs returning patients, check-in queue, appointments, and emergency registrations.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: 'Jump straight to registering a patient, finding an existing one, checking someone in, scheduling an appointment, printing a patient card, or starting an emergency registration.',
+    },
+    {
+      heading: 'Recent activity',
+      body: "Today's Appointments and Recent Patient Registrations show the latest activity; System Announcements carries hospital-wide notices.",
+    },
+  ],
+};
+
 const DUTY_ROSTER_GUIDE: HelpGuide = {
   id: 'duty-roster',
   title: 'Workforce Management',
@@ -674,7 +715,9 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/referrals')) return REFERRALS_INDEX_GUIDE;
   if (pathname.startsWith('/lab/orders')) return LAB_ORDERS_GUIDE;
   if (pathname.startsWith('/lab/results')) return LAB_RESULTS_GUIDE;
+  if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
+  if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
   if (pathname.startsWith('/duty-roster/templates')) return SHIFT_TEMPLATES_GUIDE;

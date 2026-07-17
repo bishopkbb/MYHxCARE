@@ -21,6 +21,8 @@ export const ROUTES = {
   collaboration: '/collaboration',
   referrals: '/referrals',
   mySchedule: '/my-schedule',
+  medicalRecords: '/medical-records',
+  registration: '/registration',
 
   // Patients sub-routes
   patientProfile: (id: string) => `/patients/${id}`,
@@ -62,6 +64,30 @@ export const ROUTES = {
   dutyRosterOnCall: '/duty-roster/on-call',
   dutyRosterAssignments: '/duty-roster/assignments',
   dutyRosterAnalytics: '/duty-roster/analytics',
+
+  // Medical Records sub-routes
+  medicalRecordsDashboard: '/medical-records/dashboard',
+  medicalRecordsVisitHistory: '/medical-records/visit-history',
+  medicalRecordsClinicalDocuments: '/medical-records/clinical-documents',
+  medicalRecordsDocumentUpload: '/medical-records/document-upload',
+  medicalRecordsArchived: '/medical-records/archived',
+  medicalRecordsRequests: '/medical-records/requests',
+  medicalRecordsReports: '/medical-records/reports',
+
+  // Registration sub-routes
+  registrationRegister: '/registration/register',
+  registrationDirectory: '/registration/directory',
+  registrationProfile: '/registration/profile',
+  registrationCheckIn: '/registration/check-in',
+  registrationQueue: '/registration/queue',
+  registrationAppointments: '/registration/appointments',
+  registrationEmergency: '/registration/emergency',
+  registrationInsurance: '/registration/insurance',
+  registrationReferrals: '/registration/referrals',
+  registrationConsentForms: '/registration/consent-forms',
+  registrationCardPrinting: '/registration/card-printing',
+  registrationReports: '/registration/reports',
+  registrationAttendance: '/registration/attendance',
 
   // Settings
   settings: '/settings',

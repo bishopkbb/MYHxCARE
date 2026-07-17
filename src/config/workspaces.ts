@@ -1,16 +1,21 @@
 import {
   Activity,
+  Archive,
   BarChart2,
   BedDouble,
   Bell,
+  CalendarCheck,
   CalendarDays,
   LayoutList,
   ClipboardList,
   CreditCard,
   FileCheck2,
+  Files,
   FileText,
   FlaskConical,
+  History,
   LayoutDashboard,
+  ListOrdered,
   MessageSquare,
   Package,
   Receipt,
@@ -20,7 +25,9 @@ import {
   Siren,
   Stethoscope,
   TrendingUp,
+  Upload,
   User,
+  UserCheck,
   UserPlus,
   Users,
 } from 'lucide-react';
@@ -57,16 +64,70 @@ export type WorkspaceNavConfig = {
 export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
   records: {
     workspaceLabel: 'Medical Records',
-    homeRoute: '/patients',
+    homeRoute: '/medical-records/dashboard',
     sections: [
       {
-        items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
+        label: 'MAIN',
+        items: [{ label: 'Dashboard', href: '/medical-records/dashboard', icon: LayoutDashboard }],
       },
       {
-        label: 'Patient Management',
+        label: 'MEDICAL RECORDS',
         items: [
-          { label: 'Register Patient', href: '/patients', icon: UserPlus },
-          { label: 'Patient Search', href: '/patients', icon: Users },
+          { label: 'Medical Records', href: '/medical-records', icon: FileText },
+          { label: 'Visit History', href: '/medical-records/visit-history', icon: History },
+          { label: 'Clinical Documents', href: '/medical-records/clinical-documents', icon: Files },
+          { label: 'Document Upload', href: '/medical-records/document-upload', icon: Upload },
+          { label: 'Archived Records', href: '/medical-records/archived', icon: Archive },
+          { label: 'Record Requests', href: '/medical-records/requests', icon: ClipboardList },
+        ],
+      },
+      {
+        label: 'REPORTS',
+        items: [
+          { label: 'Medical Records Reports', href: '/medical-records/reports', icon: BarChart2 },
+        ],
+      },
+    ],
+  },
+
+  registration: {
+    workspaceLabel: 'Patient Registration',
+    homeRoute: '/registration',
+    sections: [
+      {
+        label: 'MAIN',
+        items: [{ label: 'Dashboard', href: '/registration', icon: LayoutDashboard }],
+      },
+      {
+        label: 'PATIENT MANAGEMENT',
+        items: [
+          { label: 'Register Patient', href: '/registration/register', icon: UserPlus },
+          { label: 'Patient Directory', href: '/registration/directory', icon: Users },
+          { label: 'Patient Profile', href: '/registration/profile', icon: User },
+          { label: 'Check-In', href: '/registration/check-in', icon: UserCheck },
+          { label: 'Queue Management', href: '/registration/queue', icon: ListOrdered },
+          {
+            label: 'Appointment Scheduling',
+            href: '/registration/appointments',
+            icon: CalendarDays,
+          },
+          { label: 'Emergency Registration', href: '/registration/emergency', icon: Siren },
+        ],
+      },
+      {
+        label: 'OPERATIONS',
+        items: [
+          { label: 'Insurance Verification', href: '/registration/insurance', icon: Shield },
+          { label: 'Referral Management', href: '/registration/referrals', icon: Share2 },
+          { label: 'Consent Forms', href: '/registration/consent-forms', icon: FileCheck2 },
+          { label: 'Patient Card Printing', href: '/registration/card-printing', icon: CreditCard },
+        ],
+      },
+      {
+        label: 'REPORTS',
+        items: [
+          { label: 'Registration Reports', href: '/registration/reports', icon: TrendingUp },
+          { label: 'Daily Attendance', href: '/registration/attendance', icon: CalendarCheck },
         ],
       },
     ],

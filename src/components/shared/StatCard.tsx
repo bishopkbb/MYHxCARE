@@ -1,4 +1,7 @@
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+
+import { Sparkline } from './Sparkline';
 
 /**
  * Standard stat card — icon top-right, large black value in the accent
@@ -124,6 +127,67 @@ export function StatMini({ label, value }: { label: string; value: string }) {
       >
         {value}
       </p>
+    </div>
+  );
+}
+
+/**
+ * Trend stat card — square icon, value, an up/down trend line, and a small
+ * sparkline chart. Used by operational dashboards (Registration, Medical
+ * Records) that track day-over-day movement, not just a point-in-time count.
+ */
+export function StatCardTrend({
+  icon: Icon,
+  label,
+  value,
+  trendPercent,
+  trendLabel = 'vs yesterday',
+  accent,
+  iconBg,
+  sparklineData,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string | number;
+  trendPercent: number;
+  trendLabel?: string;
+  accent: string;
+  iconBg: string;
+  sparklineData: number[];
+}) {
+  const isUp = trendPercent >= 0;
+  const TrendIcon = isUp ? ArrowUp : ArrowDown;
+
+  return (
+    <div
+      className="flex items-start justify-between gap-3 rounded-[12px] p-4"
+      style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+    >
+      <div className="flex min-w-0 items-start gap-3">
+        <div
+          className="flex size-11 shrink-0 items-center justify-center rounded-[12px]"
+          style={{ background: iconBg }}
+        >
+          <Icon style={{ width: 22, height: 22, color: accent }} />
+        </div>
+        <div className="min-w-0">
+          <p style={{ fontSize: 14, lineHeight: '18px', color: '#4A7080' }}>{label}</p>
+          <p
+            className="font-display mt-0.5 font-bold"
+            style={{ fontSize: 24, lineHeight: '30px', color: '#0D2630' }}
+          >
+            {value}
+          </p>
+          <p
+            className="mt-0.5 flex items-center gap-1 font-sans font-medium"
+            style={{ fontSize: 14, color: accent }}
+          >
+            <TrendIcon style={{ width: 13, height: 13, flexShrink: 0 }} />
+            {Math.abs(trendPercent)}% {trendLabel}
+          </p>
+        </div>
+      </div>
+      <Sparkline data={sparklineData} color={accent} />
     </div>
   );
 }
