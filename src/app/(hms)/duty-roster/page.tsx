@@ -1023,8 +1023,6 @@ export default function DutyRosterPage() {
             )}
           </div>
 
-          <ShiftCalendar />
-
           {/* ── Coverage Overview + Pending Acknowledgements ────────────────── */}
           <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div
@@ -1145,6 +1143,8 @@ export default function DutyRosterPage() {
               </div>
             </div>
           </div>
+
+          <ShiftCalendar />
 
           <div className="h-4" />
         </div>

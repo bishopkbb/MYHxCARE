@@ -310,9 +310,9 @@ export function ShiftCalendar() {
         </div>
       </div>
 
-      {/* ── Week view ─────────────────────────────────────────────────────── */}
+      {/* ── Week view — desktop grid (md+) ───────────────────────────────── */}
       {mode === 'week' && (
-        <div className="mt-4 overflow-x-auto scroll-smooth">
+        <div className="mt-4 hidden overflow-x-auto scroll-smooth md:block">
           <div className="min-w-[720px]">
             <div
               className="flex"
@@ -367,6 +367,45 @@ export function ShiftCalendar() {
         </div>
       )}
 
+      {/* ── Week view — stacked-by-day cards (below md) ──────────────────── */}
+      {mode === 'week' && (
+        <div className="mt-4 flex flex-col gap-2.5 md:hidden">
+          {weekDays.map((d) => (
+            <div
+              key={d.toISOString()}
+              className="rounded-[10px] p-3"
+              style={{
+                border: isSameCalendarDay(d, today)
+                  ? '1px solid rgba(0,180,216,0.35)'
+                  : '1px solid rgba(0,100,130,0.08)',
+                background: isSameCalendarDay(d, today) ? 'rgba(0,180,216,0.04)' : 'transparent',
+              }}
+            >
+              <p
+                className="font-sans font-bold tracking-wider uppercase"
+                style={{ fontSize: 14, color: isSameCalendarDay(d, today) ? '#00B4D8' : '#0D2630' }}
+              >
+                {dayLabel(d)}
+              </p>
+              <div className="mt-2 flex flex-col gap-1.5">
+                {SLOTS.map((slot) => (
+                  <div key={slot} className="flex items-center justify-between gap-2">
+                    <p className="shrink-0" style={{ fontSize: 14, color: '#8A98A3' }}>
+                      {CALENDAR_SLOT_META[slot].label}
+                    </p>
+                    <ShiftChip
+                      slot={slot}
+                      doctorName={assignmentFor(slot, d)}
+                      dimmed={filterSlot !== 'ALL' && filterSlot !== slot}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* ── Day view ──────────────────────────────────────────────────────── */}
       {mode === 'day' && (
         <div className="mt-4 flex flex-col gap-2.5">
@@ -398,7 +437,7 @@ export function ShiftCalendar() {
           {weekDays.map((d) => (
             <div
               key={d.toISOString()}
-              className="flex flex-wrap items-center gap-3 rounded-[10px] px-4 py-3"
+              className="flex flex-wrap items-start gap-3 rounded-[10px] px-4 py-3 sm:items-center"
               style={{
                 border: isSameCalendarDay(d, today)
                   ? '1px solid rgba(0,180,216,0.35)'
@@ -407,7 +446,7 @@ export function ShiftCalendar() {
               }}
             >
               <p
-                className="w-24 shrink-0 font-sans font-semibold"
+                className="w-24 shrink-0 pt-1.5 font-sans font-semibold sm:pt-0"
                 style={{ fontSize: 14, color: '#0D2630' }}
               >
                 {dayLabel(d)}
@@ -430,14 +469,15 @@ export function ShiftCalendar() {
       {/* ── Month view ────────────────────────────────────────────────────── */}
       {mode === 'month' && (
         <div className="mt-4">
-          <div className="grid grid-cols-7 gap-1.5">
+          <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
             {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((d) => (
-              <div key={d} className="px-1 py-1 text-center">
+              <div key={d} className="px-0.5 py-1 text-center sm:px-1">
                 <span
                   className="font-sans font-bold tracking-wider"
                   style={{ fontSize: 14, color: '#8A98A3' }}
                 >
-                  {d}
+                  {d.slice(0, 2)}
+                  <span className="hidden sm:inline">{d.slice(2)}</span>
                 </span>
               </div>
             ))}
@@ -451,7 +491,7 @@ export function ShiftCalendar() {
                     setMode('day');
                     setOffset(Math.round((d.getTime() - today.getTime()) / 86_400_000));
                   }}
-                  className={`flex min-h-[64px] flex-col items-start gap-1 rounded-[8px] p-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                  className={`flex min-h-14 flex-col items-center gap-1 rounded-[8px] p-1 text-left transition-colors duration-150 hover:bg-[#F5FBFD] sm:min-h-16 sm:items-start sm:p-2 ${FOCUS_RING}`}
                   style={{
                     border: isSameCalendarDay(d, today)
                       ? '1px solid #00B4D8'
@@ -465,7 +505,7 @@ export function ShiftCalendar() {
                   >
                     {DAY_NUM_FMT.format(d)}
                   </span>
-                  <span className="flex flex-wrap gap-1">
+                  <span className="flex flex-wrap justify-center gap-1 sm:justify-start">
                     {SLOTS.map((slot) => (
                       <span
                         key={slot}

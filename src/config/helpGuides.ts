@@ -386,6 +386,110 @@ const DUTY_ROSTER_GUIDE: HelpGuide = {
   ],
 };
 
+const DUTY_ROSTER_CALENDAR_GUIDE: HelpGuide = {
+  id: 'duty-roster-calendar',
+  title: 'Duty Roster Calendar',
+  intro: 'A full calendar view of shift patterns and staff availability.',
+  sections: [
+    {
+      heading: 'Switching views',
+      body: 'Use the Day, Week, Month, and Timeline tabs to change how the roster is displayed. Prev/next and Today move you through the calendar.',
+    },
+    {
+      heading: 'Reading the colour coding',
+      body: 'The legend at the top maps each colour to a shift window — Morning, Afternoon, Night, and On-Call. Use the Filter button to isolate a single shift type.',
+    },
+    {
+      heading: 'Creating a shift',
+      body: 'Create Shift opens the same shift form used on the main Workforce Management page, so new assignments stay consistent across both views.',
+    },
+  ],
+};
+
+const SHIFT_TEMPLATES_GUIDE: HelpGuide = {
+  id: 'shift-templates',
+  title: 'Shift Templates',
+  intro: 'Reusable shift patterns that speed up roster creation.',
+  sections: [
+    {
+      heading: 'Building a template',
+      body: 'A template groups shift slots — time window, required role, and headcount — under one reusable name, scoped to a department.',
+    },
+    {
+      heading: 'Applying a template',
+      body: '"Apply to Roster" generates the shifts defined in the template directly onto today\'s roster in one action, instead of creating each shift by hand.',
+    },
+    {
+      heading: 'Managing templates',
+      body: 'Duplicate a template to start a variation without editing the original. Inactive templates stay saved but are excluded from quick application.',
+    },
+  ],
+};
+
+const ON_CALL_GUIDE: HelpGuide = {
+  id: 'on-call',
+  title: 'On-Call Schedule',
+  intro: 'On-call rota, emergency cover, and escalation chains by department.',
+  sections: [
+    {
+      heading: 'Escalation chain',
+      body: 'Each department shows a Primary, Secondary, and Consultant Backup on-call doctor — escalate down the chain if the primary contact is unavailable.',
+    },
+    {
+      heading: 'Reaching an on-call doctor',
+      body: 'The call icon dials the doctor directly. Availability badges (Available, Busy, Unavailable) update as doctors report their status.',
+    },
+    {
+      heading: 'Reassigning on-call duty',
+      body: 'Use Reassign on any on-call slot to hand the duty to a different doctor and update their contact number.',
+    },
+    {
+      heading: 'Weekly schedule',
+      body: "The table below shows the full week's on-call rotation by department and level — filter by department or escalation level to narrow it down.",
+    },
+  ],
+};
+
+const STAFF_ASSIGNMENTS_GUIDE: HelpGuide = {
+  id: 'staff-assignments',
+  title: 'Assign Doctors',
+  intro: 'Ward and department allocation, with duty hand-off notes for incoming doctors.',
+  sections: [
+    {
+      heading: 'Doctor pool',
+      body: 'Every doctor shows their current ward and assignment status. Unassigned and on-leave doctors are flagged so gaps are easy to spot.',
+    },
+    {
+      heading: 'Assigning a doctor',
+      body: 'Assign or Reassign opens a form to pick a ward, an effective date, and optional hand-off notes for the incoming doctor.',
+    },
+    {
+      heading: 'Duty hand-off log',
+      body: 'Hand-off notes entered during an assignment are recorded here — a running log of what each incoming doctor was told about their ward.',
+    },
+  ],
+};
+
+const WORKFORCE_ANALYTICS_GUIDE: HelpGuide = {
+  id: 'workforce-analytics',
+  title: 'Workforce Analytics',
+  intro: 'Staff utilisation, shift coverage, and overtime tracking.',
+  sections: [
+    {
+      heading: 'Choosing a period',
+      body: 'Switch between This Week, This Month, and This Quarter to change the range for every stat and chart on the page.',
+    },
+    {
+      heading: 'Reading the charts',
+      body: 'Utilization Trend shows staffing percentage over time. Department Coverage breaks down shift volume by department.',
+    },
+    {
+      heading: 'Overtime tracking',
+      body: 'Doctors are listed with total overtime hours and shift count for the selected period — hours at or above 30 are flagged in red.',
+    },
+  ],
+};
+
 const MY_SCHEDULE_GUIDE: HelpGuide = {
   id: 'my-schedule',
   title: 'My Schedule',
@@ -572,6 +676,11 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/lab/results')) return LAB_RESULTS_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
+  if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
+  if (pathname.startsWith('/duty-roster/templates')) return SHIFT_TEMPLATES_GUIDE;
+  if (pathname.startsWith('/duty-roster/on-call')) return ON_CALL_GUIDE;
+  if (pathname.startsWith('/duty-roster/assignments')) return STAFF_ASSIGNMENTS_GUIDE;
+  if (pathname.startsWith('/duty-roster/analytics')) return WORKFORCE_ANALYTICS_GUIDE;
   if (pathname.startsWith('/duty-roster')) return DUTY_ROSTER_GUIDE;
   if (pathname.startsWith('/appointments')) return APPOINTMENTS_GUIDE;
   if (pathname.startsWith('/collaboration')) return COLLABORATION_GUIDE;
