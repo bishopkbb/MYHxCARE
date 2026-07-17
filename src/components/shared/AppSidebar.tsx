@@ -31,7 +31,7 @@ export function AppSidebar({
   const asideRef = useRef<HTMLElement>(null);
 
   const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
-  const { sections } = WORKSPACE_NAV[workspaceId];
+  const { sections, homeRoute } = WORKSPACE_NAV[workspaceId];
 
   // Desktop sidebar behaviour — two cooperating mechanisms:
   //
@@ -157,8 +157,9 @@ export function AppSidebar({
           // overflow visible on desktop so the edge-floating collapse toggle
           // can straddle the sidebar border without being clipped
           'flex shrink-0 flex-col overflow-hidden lg:overflow-visible',
-          // Mobile: always full width; desktop: collapses to icon rail
-          'w-70',
+          // Mobile: wide enough for the brand lockup to read without
+          // truncating; desktop: fixed width, collapses to icon rail
+          'w-[86%] max-w-[300px] lg:w-70',
           collapsed && 'lg:w-18',
           // Mobile: fixed overlay drawer, slides in from left
           // h-dvh = dynamic viewport height: excludes browser chrome (address bar,
@@ -219,10 +220,10 @@ export function AppSidebar({
           style={{ borderBottom: '1px solid rgba(255,255,255,0.078)' }}
         >
           {/* Logo + brand + controls */}
-          <div className={cn('flex items-center gap-2.5', collapsed && 'lg:flex-col')}>
+          <div className={cn('flex items-center gap-2 lg:gap-2.5', collapsed && 'lg:flex-col')}>
             {/* Logo */}
             <Link
-              href="/dashboard"
+              href={homeRoute}
               aria-label="Go to home dashboard"
               className="group flex size-12.5 shrink-0 items-center justify-center overflow-hidden rounded-[12px] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(0,180,216,0.55)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#25464D] focus-visible:outline-none"
               style={{ background: '#25464D' }}
@@ -238,10 +239,13 @@ export function AppSidebar({
 
             {/* Brand text — always visible on mobile; hidden on desktop when collapsed */}
             <div className={cn('min-w-0 flex-1', collapsed && 'lg:hidden')}>
-              <p className="font-display truncate text-[20px] leading-7 font-semibold text-white">
+              <p className="font-display truncate text-[17px] leading-6 font-semibold text-white lg:text-[20px] lg:leading-7">
                 MyHxCare HMS
               </p>
-              <p className="truncate text-sm leading-5.5" style={{ color: '#0098CC' }}>
+              <p
+                className="text-sm leading-5 lg:truncate lg:leading-5.5"
+                style={{ color: '#0098CC' }}
+              >
                 UNIZIK Medical Centre
               </p>
             </div>
