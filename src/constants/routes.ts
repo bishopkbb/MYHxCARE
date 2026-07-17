@@ -56,6 +56,13 @@ export const ROUTES = {
   wardBeds: (wardId: string) => `/wards/${wardId}/beds`,
   wardOccupancy: (wardId: string) => `/wards/${wardId}/occupancy`,
 
+  // Duty Roster sub-routes
+  dutyRosterCalendar: '/duty-roster/roster',
+  dutyRosterTemplates: '/duty-roster/templates',
+  dutyRosterOnCall: '/duty-roster/on-call',
+  dutyRosterAssignments: '/duty-roster/assignments',
+  dutyRosterAnalytics: '/duty-roster/analytics',
+
   // Settings
   settings: '/settings',
   settingsSessions: '/settings/sessions',

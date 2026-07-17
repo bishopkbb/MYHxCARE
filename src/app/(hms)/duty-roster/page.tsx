@@ -1,12 +1,1181 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Duty Roster' };
+import {
+  AlertCircle,
+  ArrowLeftRight,
+  BarChart3,
+  Calendar,
+  CalendarCheck,
+  CheckCircle2,
+  ChevronDown,
+  ClipboardEdit,
+  Clock,
+  Eye,
+  ListFilter,
+  Megaphone,
+  MoreVertical,
+  Pencil,
+  Phone,
+  Plus,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  UserCheck,
+  Users,
+} from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+
+import { ExportMenu } from '@/components/ExportMenu';
+import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Pagination } from '@components/shared/Pagination';
+import { ROUTES } from '@/constants/routes';
+import { useToast } from '@/hooks/useToast';
+import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
+import {
+  COVERAGE_OVERVIEW,
+  MOCK_ROSTER,
+  PENDING_ACKNOWLEDGEMENTS,
+  ROLE_OPTIONS,
+  WORKFORCE_STATS,
+  type DoctorShift,
+  type ShiftStatus,
+  type ShiftType,
+} from '@/features/workforce/__mocks__/workforceFixtures';
+import { SHIFT_TYPE_CFG, SHIFT_TYPE_OPTIONS, STATUS_CFG, STATUS_OPTIONS } from './config';
+import { ShiftCalendar } from './ShiftCalendar';
+
+// Opened only by deliberate user action (Create/Edit Shift, View Shift,
+// View All pending acknowledgements) — never needed for the initial paint,
+// so their code stays out of this page's main bundle until then.
+const CreateShiftModal = dynamic(
+  () => import('./CreateShiftModal').then((m) => m.CreateShiftModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+const ShiftDetailModal = dynamic(
+  () => import('./ShiftDetailModal').then((m) => m.ShiftDetailModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+const PendingAcknowledgementsModal = dynamic(
+  () => import('./PendingAcknowledgementsModal').then((m) => m.PendingAcknowledgementsModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type PageState = 'loading' | 'loaded' | 'error';
+
+type FilterKey = 'shiftType' | 'role' | 'status';
+
+type FilterState = {
+  shiftType: ShiftType | 'ALL';
+  role: string | 'ALL';
+  status: ShiftStatus | 'ALL';
+};
+
+const FILTER_DEFAULTS: FilterState = { shiftType: 'ALL', role: 'ALL', status: 'ALL' };
+
+type FilterDef = {
+  key: FilterKey;
+  defaultLabel: string;
+  options: { value: string; label: string }[];
+};
+
+const FILTER_DEFS: FilterDef[] = [
+  {
+    key: 'shiftType',
+    defaultLabel: 'All Shifts',
+    options: SHIFT_TYPE_OPTIONS.map((o) => ({ value: o.value, label: o.label })),
+  },
+  {
+    key: 'role',
+    defaultLabel: 'All Roles',
+    options: ROLE_OPTIONS.map((r) => ({ value: r, label: r })),
+  },
+  {
+    key: 'status',
+    defaultLabel: 'All Status',
+    options: STATUS_OPTIONS.map((o) => ({ value: o.value, label: o.label })),
+  },
+];
+
+// ── Config ────────────────────────────────────────────────────────────────────
+
+const COLS = [
+  { key: 'doctor', label: 'Doctor', width: 'w-[20%]', align: '' },
+  { key: 'role', label: 'Role', width: 'w-[10%]', align: '' },
+  { key: 'shift', label: 'Shift', width: 'w-28 shrink-0', align: '' },
+  { key: 'time', label: 'Time', width: 'w-[14%]', align: '' },
+  { key: 'ward', label: 'Ward/Clinic', width: 'min-w-0 flex-1', align: '' },
+  { key: 'status', label: 'Status', width: 'w-28 shrink-0', align: '' },
+  { key: 'ack', label: 'Acknowledged', width: 'w-32 shrink-0', align: 'text-center' },
+  { key: 'actions', label: 'Actions', width: 'w-28 shrink-0', align: '' },
+] as const;
+
+const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
+
+// ── Export helpers ────────────────────────────────────────────────────────────
+
+function exportRosterAsPDF(rows: DoctorShift[]) {
+  const body = `
+    <h1>Today's Duty Roster</h1>
+    <p class="meta">${rows.length} shift${rows.length === 1 ? '' : 's'}</p>
+    <table>
+      <thead><tr><th>Doctor</th><th>Role</th><th>Shift</th><th>Time</th><th>Ward/Clinic</th><th>Status</th></tr></thead>
+      <tbody>
+        ${rows
+          .map(
+            (r) =>
+              `<tr><td>${escapeHtml(r.doctorName)}</td><td>${escapeHtml(r.role)}</td><td>${escapeHtml(SHIFT_TYPE_CFG[r.shiftType].label)}</td><td>${escapeHtml(r.timeRange)}</td><td>${escapeHtml(r.ward)}</td><td>${escapeHtml(STATUS_CFG[r.status].label)}</td></tr>`,
+          )
+          .join('')}
+      </tbody>
+    </table>
+  `;
+  downloadPDF('duty-roster', body);
+}
+
+function exportRosterAsCSV(rows: DoctorShift[]) {
+  downloadCSV('duty-roster', [
+    ['Doctor', 'Role', 'Shift', 'Time', 'Ward/Clinic', 'Status', 'Acknowledged'],
+    ...rows.map((r) => [
+      r.doctorName,
+      r.role,
+      SHIFT_TYPE_CFG[r.shiftType].label,
+      r.timeRange,
+      r.ward,
+      STATUS_CFG[r.status].label,
+      r.acknowledged ? 'Yes' : 'Pending',
+    ]),
+  ]);
+}
+
+// ── Stat cards ────────────────────────────────────────────────────────────────
+
+function StatCard({
+  icon: Icon,
+  iconBg,
+  iconColor,
+  label,
+  value,
+  info,
+  infoColor,
+}: {
+  icon: typeof Users;
+  iconBg: string;
+  iconColor: string;
+  label: string;
+  value: string;
+  info: string;
+  infoColor: string;
+}) {
+  return (
+    <div
+      className="flex flex-col rounded-[12px] p-4"
+      style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+    >
+      <p className="font-sans" style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}>
+        {label}
+      </p>
+      <div className="mt-2 flex items-center gap-2.5">
+        <div
+          className="flex size-8 shrink-0 items-center justify-center rounded-full"
+          style={{ background: iconBg }}
+        >
+          <Icon style={{ width: 16, height: 16, color: iconColor }} />
+        </div>
+        <p
+          className="font-display font-bold"
+          style={{ fontSize: 26, lineHeight: '32px', color: '#0D2630' }}
+        >
+          {value}
+        </p>
+      </div>
+      <p
+        className="mt-1.5 font-sans font-medium"
+        style={{ fontSize: 14, lineHeight: '20px', color: infoColor }}
+      >
+        {info}
+      </p>
+    </div>
+  );
+}
+
+// ── Quick action tile ─────────────────────────────────────────────────────────
+
+function QuickAction({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: typeof Users;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-13 items-center justify-center gap-2.5 rounded-[10px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+      style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)', fontSize: 14 }}
+    >
+      <Icon style={{ width: 18, height: 18, color: '#00B4D8', flexShrink: 0 }} />
+      <span style={{ color: '#0D2630' }}>{label}</span>
+    </button>
+  );
+}
+
+// ── Skeletons ─────────────────────────────────────────────────────────────────
+
+function SkeletonStatCard() {
+  return (
+    <div
+      className="flex flex-col rounded-[12px] p-4"
+      style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+    >
+      <div className="h-3.5 w-24 animate-pulse rounded bg-slate-100" />
+      <div className="mt-2.5 h-7 w-14 animate-pulse rounded bg-slate-100" />
+      <div className="mt-2 h-3.5 w-28 animate-pulse rounded bg-slate-100" />
+    </div>
+  );
+}
+
+function SkeletonRosterRow() {
+  return (
+    <div
+      className="flex min-h-[64px] animate-pulse items-center px-2"
+      style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+    >
+      <div className="flex w-[20%] items-center gap-2.5 py-3 pr-3 pl-3">
+        <div className="size-9 shrink-0 rounded-full bg-slate-100" />
+        <div className="h-4 w-24 rounded bg-slate-100" />
+      </div>
+      <div className="w-[10%] py-3 pr-3">
+        <div className="h-4 w-16 rounded bg-slate-100" />
+      </div>
+      <div className="w-28 shrink-0 py-3 pr-3">
+        <div className="h-6 w-20 rounded-full bg-slate-100" />
+      </div>
+      <div className="w-[14%] py-3 pr-3">
+        <div className="h-4 w-24 rounded bg-slate-100" />
+      </div>
+      <div className="min-w-0 flex-1 py-3 pr-3">
+        <div className="h-4 w-28 rounded bg-slate-100" />
+      </div>
+      <div className="w-28 shrink-0 py-3 pr-3">
+        <div className="h-6 w-20 rounded-full bg-slate-100" />
+      </div>
+      <div className="flex w-32 shrink-0 justify-center py-3 pr-3">
+        <div className="size-5 rounded-full bg-slate-100" />
+      </div>
+      <div className="flex w-28 shrink-0 items-center gap-2 py-3 pr-3">
+        <div className="size-8 rounded-lg bg-slate-100" />
+        <div className="size-8 rounded-lg bg-slate-100" />
+      </div>
+    </div>
+  );
+}
+
+// ── Filter dropdown ───────────────────────────────────────────────────────────
+
+function FilterDropdown({
+  def,
+  value,
+  isOpen,
+  onToggle,
+  onSelect,
+}: {
+  def: FilterDef;
+  value: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  onSelect: (value: string) => void;
+}) {
+  const selectedLabel = def.options.find((o) => o.value === value)?.label ?? def.defaultLabel;
+  const isActive = value !== 'ALL';
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex h-11 shrink-0 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+        style={{
+          background: '#FFFFFF',
+          border: isOpen ? '1px solid #00B4D8' : '1px solid #0064821F',
+          color: isActive ? '#00B4D8' : '#0D2630',
+          fontSize: 14,
+        }}
+      >
+        {selectedLabel}
+        <ChevronDown
+          style={{
+            width: 14,
+            height: 14,
+            transition: 'transform 150ms',
+            transform: isOpen ? 'rotate(180deg)' : 'none',
+          }}
+        />
+      </button>
+      {isOpen && (
+        <div
+          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full left-0 z-30 mt-1 min-w-[170px] overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
+          style={{
+            border: '1px solid rgba(0,100,130,0.12)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => onSelect('ALL')}
+            className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+            style={{
+              fontSize: 14,
+              color: value === 'ALL' ? '#00B4D8' : '#2F3A40',
+              fontWeight: value === 'ALL' ? 600 : 400,
+            }}
+          >
+            {def.defaultLabel}
+          </button>
+          {def.options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onSelect(opt.value)}
+              className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+              style={{
+                fontSize: 14,
+                color: value === opt.value ? '#00B4D8' : '#2F3A40',
+                fontWeight: value === opt.value ? 600 : 400,
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function DutyRosterPage() {
+  const router = useRouter();
+  const toast = useToast();
+  const [pageState, setPageState] = useState<PageState>('loading');
+  const [roster, setRoster] = useState<DoctorShift[]>(MOCK_ROSTER);
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
+  const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editingShift, setEditingShift] = useState<DoctorShift | null>(null);
+  const [viewingShift, setViewingShift] = useState<DoctorShift | null>(null);
+  const [ackModalOpen, setAckModalOpen] = useState(false);
+  const [openRowMenuId, setOpenRowMenuId] = useState<string | null>(null);
+
+  const filterBarRef = useRef<HTMLDivElement>(null);
+  const rowMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    const t = setTimeout(() => setPageState('loaded'), 800);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (filterBarRef.current && !filterBarRef.current.contains(e.target as Node)) {
+        setOpenFilter(null);
+      }
+      if (
+        openRowMenuId &&
+        rowMenuRefs.current[openRowMenuId] &&
+        !rowMenuRefs.current[openRowMenuId]!.contains(e.target as Node)
+      ) {
+        setOpenRowMenuId(null);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [openRowMenuId]);
+
+  function handleRetry() {
+    setPageState('loading');
+    setTimeout(() => setPageState('loaded'), 800);
+  }
+
+  function setFilter(key: FilterKey, value: string) {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setOpenFilter(null);
+    setPage(1);
+  }
+
+  function clearFilters() {
+    setFilters(FILTER_DEFAULTS);
+    setSearch('');
+    setPage(1);
+  }
+
+  const hasActiveFilters =
+    filters.shiftType !== 'ALL' ||
+    filters.role !== 'ALL' ||
+    filters.status !== 'ALL' ||
+    search.trim() !== '';
+
+  const q = search.trim().toLowerCase();
+  const filtered = roster.filter((s) => {
+    const matchesSearch = !q || s.doctorName.toLowerCase().includes(q);
+    const matchesShift = filters.shiftType === 'ALL' || s.shiftType === filters.shiftType;
+    const matchesRole = filters.role === 'ALL' || s.role === filters.role;
+    const matchesStatus = filters.status === 'ALL' || s.status === filters.status;
+    return matchesSearch && matchesShift && matchesRole && matchesStatus;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const clampedPage = Math.min(page, totalPages);
+  const paginated = filtered.slice((clampedPage - 1) * pageSize, clampedPage * pageSize);
+
+  function handleCreateShift(shift: DoctorShift) {
+    setRoster((prev) => [shift, ...prev]);
+    setCreateOpen(false);
+    toast.success('Shift created', `${shift.doctorName}'s shift has been added to the roster.`);
+  }
+
+  function handleUpdateShift(shift: DoctorShift) {
+    setRoster((prev) => prev.map((s) => (s.id === shift.id ? shift : s)));
+    setEditingShift(null);
+    toast.success('Shift updated', `${shift.doctorName}'s shift has been updated.`);
+  }
+
+  function handleCancelShift(shift: DoctorShift) {
+    setRoster((prev) => prev.filter((s) => s.id !== shift.id));
+    setOpenRowMenuId(null);
+    toast.info('Shift cancelled', `${shift.doctorName}'s shift has been removed from the roster.`);
+  }
+
+  function handleDuplicateShift(shift: DoctorShift) {
+    setRoster((prev) => [{ ...shift, id: `shift-${Date.now()}` }, ...prev]);
+    setOpenRowMenuId(null);
+    toast.success('Shift duplicated', `A copy of ${shift.doctorName}'s shift has been added.`);
+  }
+
+  function handleSetReminder(doctorName: string) {
+    toast.success('Reminder sent', `A shift-acknowledgement reminder was sent to ${doctorName}.`);
+  }
+
+  function handlePublishRoster() {
+    toast.success('Roster published', 'Today’s roster has been published to all doctors.');
+  }
+
   return (
-    <ComingSoon
-      title="Duty Roster"
-      description="Staff scheduling, shift management, leave tracking, and department roster planning are being built."
-    />
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
+        <div className="mx-auto max-w-[1200px] px-4 py-4 sm:px-6 sm:py-5">
+          {/* ── Header ──────────────────────────────────────────────────────── */}
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1
+                className="font-display font-semibold"
+                style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
+              >
+                Workforce Management
+              </h1>
+              <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
+                Manage doctor schedules, duty rosters, on-call coverage and workforce operations.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                style={{ background: '#00B4D8', fontSize: 14 }}
+              >
+                <Plus style={{ width: 16, height: 16 }} />
+                Create Shift
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push(ROUTES.dutyRosterCalendar)}
+                className="flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,100,130,0.15)',
+                  color: '#0D2630',
+                  fontSize: 14,
+                }}
+              >
+                <Calendar style={{ width: 16, height: 16, color: '#4A7080' }} />
+                Generate Roster
+              </button>
+              <button
+                type="button"
+                onClick={handlePublishRoster}
+                className="flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,100,130,0.15)',
+                  color: '#0D2630',
+                  fontSize: 14,
+                }}
+              >
+                <CalendarCheck style={{ width: 16, height: 16, color: '#4A7080' }} />
+                Publish Roster
+              </button>
+              <ExportMenu
+                variant="button"
+                onExportPDF={() => exportRosterAsPDF(filtered)}
+                onExportCSV={() => exportRosterAsCSV(filtered)}
+              />
+            </div>
+          </div>
+
+          {/* ── Stat cards ──────────────────────────────────────────────────── */}
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+            {pageState === 'loading' ? (
+              Array.from({ length: 6 }).map((_, i) => <SkeletonStatCard key={i} />)
+            ) : pageState === 'error' ? (
+              <div
+                className="col-span-full flex flex-col items-center justify-center gap-3 rounded-[12px] py-10 text-center"
+                style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+              >
+                <AlertCircle style={{ width: 32, height: 32, color: '#EF4444' }} />
+                <p className="font-sans font-semibold" style={{ fontSize: 15, color: '#0D2630' }}>
+                  Failed to load workforce data
+                </p>
+                <button
+                  type="button"
+                  onClick={handleRetry}
+                  className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{
+                    height: 40,
+                    borderRadius: 12,
+                    padding: '0 20px',
+                    background: '#00B4D8',
+                    fontSize: 14,
+                  }}
+                >
+                  <RefreshCw style={{ width: 16, height: 16 }} />
+                  Retry
+                </button>
+              </div>
+            ) : (
+              <>
+                <StatCard
+                  icon={Users}
+                  iconBg="rgba(0,180,216,0.10)"
+                  iconColor="#00B4D8"
+                  label="Doctors on Duty"
+                  value={String(WORKFORCE_STATS.doctorsOnDuty)}
+                  info="Currently clocked in"
+                  infoColor="#22C55E"
+                />
+                <StatCard
+                  icon={Calendar}
+                  iconBg="rgba(0,180,216,0.10)"
+                  iconColor="#00B4D8"
+                  label="Today's Shift"
+                  value={String(WORKFORCE_STATS.todaysShiftTotal)}
+                  info="Morning • Afternoon • Night"
+                  infoColor="#4A7080"
+                />
+                <StatCard
+                  icon={Phone}
+                  iconBg="rgba(0,180,216,0.10)"
+                  iconColor="#00B4D8"
+                  label="On-Call Doctors"
+                  value={String(WORKFORCE_STATS.onCallDoctors)}
+                  info="Currently Available"
+                  infoColor="#4A7080"
+                />
+                <StatCard
+                  icon={UserCheck}
+                  iconBg="rgba(245,158,11,0.10)"
+                  iconColor="#F59E0B"
+                  label="Shifts Acknowledgement"
+                  value={String(WORKFORCE_STATS.shiftsAckPending)}
+                  info="Requires attention"
+                  infoColor="#F59E0B"
+                />
+                <StatCard
+                  icon={ShieldCheck}
+                  iconBg="rgba(34,197,94,0.10)"
+                  iconColor="#22C55E"
+                  label="Coverage Status"
+                  value={`${WORKFORCE_STATS.coverageStatusPercent}%`}
+                  info="Department staffed"
+                  infoColor="#4A7080"
+                />
+                <StatCard
+                  icon={ArrowLeftRight}
+                  iconBg="rgba(0,180,216,0.10)"
+                  iconColor="#00B4D8"
+                  label="Shifts Changes"
+                  value={`${WORKFORCE_STATS.shiftChangesPending} Requests`}
+                  info="Pending approval"
+                  infoColor="#4A7080"
+                />
+              </>
+            )}
+          </div>
+
+          {/* ── Quick actions ───────────────────────────────────────────────── */}
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+            <QuickAction
+              icon={ClipboardEdit}
+              label="Create Shift"
+              onClick={() => setCreateOpen(true)}
+            />
+            <QuickAction
+              icon={Calendar}
+              label="Create Weekly Roster"
+              onClick={() => router.push(ROUTES.dutyRosterCalendar)}
+            />
+            <QuickAction
+              icon={Users}
+              label="Assign Doctors"
+              onClick={() => router.push(ROUTES.dutyRosterAssignments)}
+            />
+            <QuickAction
+              icon={Phone}
+              label="Manage On-Call"
+              onClick={() => router.push(ROUTES.dutyRosterOnCall)}
+            />
+            <QuickAction icon={Megaphone} label="Publish Schedule" onClick={handlePublishRoster} />
+            <QuickAction
+              icon={BarChart3}
+              label="Workforce Report"
+              onClick={() => router.push(ROUTES.dutyRosterAnalytics)}
+            />
+          </div>
+
+          {/* ── Today's Roster ──────────────────────────────────────────────── */}
+          <div
+            className="mt-5 overflow-hidden rounded-[12px]"
+            style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+          >
+            <div className="p-4 sm:p-5">
+              <h2
+                className="font-display font-semibold"
+                style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+              >
+                Today&apos;s Roster
+              </h2>
+
+              <div ref={filterBarRef} className="mt-4 flex flex-wrap items-center gap-2.5">
+                <div
+                  className="flex h-11 min-w-[220px] flex-1 items-center gap-2.5 rounded-[10px] px-3.5"
+                  style={{ border: '1px solid #0064821F', background: '#FFFFFF' }}
+                >
+                  <Search style={{ width: 16, height: 16, color: '#8A98A3', flexShrink: 0 }} />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    placeholder="Search doctor by name"
+                    className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#8A98A3]"
+                    style={{ fontSize: 14, color: '#0D2630' }}
+                  />
+                </div>
+
+                {FILTER_DEFS.map((def) => (
+                  <FilterDropdown
+                    key={def.key}
+                    def={def}
+                    value={filters[def.key]}
+                    isOpen={openFilter === def.key}
+                    onToggle={() => setOpenFilter(openFilter === def.key ? null : def.key)}
+                    onSelect={(v) => setFilter(def.key, v)}
+                  />
+                ))}
+
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  aria-label="Clear filters"
+                  disabled={!hasActiveFilters}
+                  className="flex size-11 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed"
+                  style={{
+                    border: '1px solid #0064821F',
+                    background: '#FFFFFF',
+                    opacity: hasActiveFilters ? 1 : 0.4,
+                  }}
+                >
+                  <ListFilter style={{ width: 16, height: 16, color: '#4A7080' }} />
+                </button>
+              </div>
+            </div>
+
+            {pageState === 'loading' ? (
+              <div className="pb-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonRosterRow key={i} />
+                ))}
+              </div>
+            ) : pageState === 'error' ? null : filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center">
+                <div
+                  className="flex size-14 items-center justify-center rounded-full"
+                  style={{ background: 'rgba(226,237,241,0.6)' }}
+                >
+                  <Users style={{ width: 28, height: 28, color: '#8A98A3' }} />
+                </div>
+                <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                  No doctors match this filter
+                </p>
+                <p style={{ fontSize: 14, color: '#4A7080' }}>
+                  Try adjusting your search or filters.
+                </p>
+                {hasActiveFilters && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="mt-1 font-sans font-semibold transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                    style={{ fontSize: 14, color: '#00B4D8' }}
+                  >
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Mobile card list — below lg */}
+                <div className="flex flex-col gap-2.5 px-4 pb-4 lg:hidden">
+                  {paginated.map((shift) => {
+                    const typeCfg = SHIFT_TYPE_CFG[shift.shiftType];
+                    const statusCfg = STATUS_CFG[shift.status];
+                    return (
+                      <div
+                        key={shift.id}
+                        className="rounded-[12px] p-3.5"
+                        style={{ border: '1px solid rgba(0,100,130,0.10)' }}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex min-w-0 items-center gap-2.5">
+                            <div
+                              className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                              style={{ background: shift.avatarBg }}
+                            >
+                              {shift.initials}
+                            </div>
+                            <div className="min-w-0">
+                              <p
+                                className="truncate font-sans font-semibold"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {shift.doctorName}
+                              </p>
+                              <p style={{ fontSize: 14, color: '#4A7080' }}>{shift.role}</p>
+                            </div>
+                          </div>
+                          {shift.acknowledged ? (
+                            <CheckCircle2
+                              style={{ width: 18, height: 18, color: '#22C55E', flexShrink: 0 }}
+                            />
+                          ) : (
+                            <Clock
+                              style={{ width: 18, height: 18, color: '#F59E0B', flexShrink: 0 }}
+                            />
+                          )}
+                        </div>
+                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                          <span
+                            className="rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              color: typeCfg.color,
+                              border: `1px solid ${typeCfg.border}`,
+                              background: typeCfg.bg,
+                            }}
+                          >
+                            {typeCfg.label}
+                          </span>
+                          <span
+                            className="rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              color: statusCfg.color,
+                              border: `1px solid ${statusCfg.border}`,
+                              background: statusCfg.bg,
+                            }}
+                          >
+                            {statusCfg.label}
+                          </span>
+                        </div>
+                        <p className="mt-2" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {shift.timeRange} · {shift.ward}
+                        </p>
+                        <div
+                          className="mt-3 flex items-center gap-2"
+                          style={{ borderTop: '1px solid rgba(0,100,130,0.08)', paddingTop: 10 }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setViewingShift(shift)}
+                            className="flex flex-1 items-center justify-center gap-1.5 rounded-[8px] py-2 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            style={{
+                              border: '1px solid #0064821F',
+                              fontSize: 14,
+                              color: '#4A7080',
+                            }}
+                          >
+                            <Eye style={{ width: 14, height: 14 }} />
+                            View
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingShift(shift)}
+                            className="flex flex-1 items-center justify-center gap-1.5 rounded-[8px] py-2 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            style={{
+                              border: '1px solid #0064821F',
+                              fontSize: 14,
+                              color: '#4A7080',
+                            }}
+                          >
+                            <Pencil style={{ width: 14, height: 14 }} />
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Desktop table — lg+ */}
+                <div className="hidden overflow-x-auto scroll-smooth lg:block">
+                  <div
+                    className="flex"
+                    style={{
+                      background: 'rgba(226,237,241,0.4)',
+                      borderTop: '1px solid #0064821F',
+                      borderBottom: '1px solid #0064821F',
+                    }}
+                  >
+                    {COLS.map((col) => (
+                      <div key={col.key} className={`${col.width} min-w-0 px-3 py-3 ${col.align}`}>
+                        <span
+                          className="block truncate font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          {col.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {paginated.map((shift) => {
+                    const typeCfg = SHIFT_TYPE_CFG[shift.shiftType];
+                    const statusCfg = STATUS_CFG[shift.status];
+                    const menuOpen = openRowMenuId === shift.id;
+                    return (
+                      <div
+                        key={shift.id}
+                        className="flex items-center transition-colors duration-150 hover:bg-[#F5FBFD]"
+                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                      >
+                        <div className="flex w-[20%] min-w-0 items-center gap-2.5 px-3 py-3">
+                          <div
+                            className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                            style={{ background: shift.avatarBg }}
+                          >
+                            {shift.initials}
+                          </div>
+                          <p
+                            className="min-w-0 truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {shift.doctorName}
+                          </p>
+                        </div>
+                        <div className="w-[10%] min-w-0 px-3 py-3">
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {shift.role}
+                          </p>
+                        </div>
+                        <div className="w-28 shrink-0 px-3 py-3">
+                          <span
+                            className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              color: typeCfg.color,
+                              border: `1px solid ${typeCfg.border}`,
+                              background: typeCfg.bg,
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {typeCfg.label}
+                          </span>
+                        </div>
+                        <div className="w-[14%] min-w-0 px-3 py-3">
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {shift.timeRange}
+                          </p>
+                        </div>
+                        <div className="min-w-0 flex-1 px-3 py-3">
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {shift.ward}
+                          </p>
+                        </div>
+                        <div className="w-28 shrink-0 px-3 py-3">
+                          <span
+                            className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              color: statusCfg.color,
+                              border: `1px solid ${statusCfg.border}`,
+                              background: statusCfg.bg,
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {statusCfg.label}
+                          </span>
+                        </div>
+                        <div className="flex w-32 shrink-0 justify-center px-3 py-3">
+                          {shift.acknowledged ? (
+                            <CheckCircle2 style={{ width: 19, height: 19, color: '#22C55E' }} />
+                          ) : (
+                            <Clock style={{ width: 19, height: 19, color: '#F59E0B' }} />
+                          )}
+                        </div>
+                        <div className="flex w-28 shrink-0 items-center gap-1.5 px-3 py-3">
+                          <button
+                            type="button"
+                            onClick={() => setViewingShift(shift)}
+                            aria-label={`View ${shift.doctorName}'s shift`}
+                            className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          >
+                            <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingShift(shift)}
+                            aria-label={`Edit ${shift.doctorName}'s shift`}
+                            className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          >
+                            <Pencil style={{ width: 15, height: 15, color: '#4A7080' }} />
+                          </button>
+                          <div
+                            className="relative shrink-0"
+                            ref={(el) => {
+                              rowMenuRefs.current[shift.id] = el;
+                            }}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setOpenRowMenuId(menuOpen ? null : shift.id)}
+                              aria-label="More actions"
+                              className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            >
+                              <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
+                            </button>
+                            {menuOpen && (
+                              <div
+                                className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 min-w-[160px] overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
+                                style={{
+                                  border: '1px solid #0064821F',
+                                  boxShadow: '0 4px 16px rgba(0,0,0,0.09)',
+                                }}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => handleDuplicateShift(shift)}
+                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  Duplicate Shift
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCancelShift(shift)}
+                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                  style={{ fontSize: 14, color: '#EF4444' }}
+                                >
+                                  Cancel Shift
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <Pagination
+                  page={clampedPage}
+                  pageSize={pageSize}
+                  totalItems={filtered.length}
+                  onPageChange={setPage}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size);
+                    setPage(1);
+                  }}
+                  itemLabel="doctors"
+                  pageSizeOptions={PAGE_SIZE_OPTIONS}
+                />
+              </>
+            )}
+          </div>
+
+          <ShiftCalendar />
+
+          {/* ── Coverage Overview + Pending Acknowledgements ────────────────── */}
+          <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div
+              className="rounded-[12px] p-4 sm:p-5"
+              style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+            >
+              <div className="flex items-center justify-between">
+                <h2
+                  className="font-display font-semibold"
+                  style={{ fontSize: 18, lineHeight: '26px', color: '#0D2630' }}
+                >
+                  Coverage Overview
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => router.push(ROUTES.dutyRosterAnalytics)}
+                  className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{ fontSize: 14, color: '#00B4D8' }}
+                >
+                  View Details
+                </button>
+              </div>
+              <div className="mt-4 flex flex-col gap-3.5">
+                {COVERAGE_OVERVIEW.map((metric) => (
+                  <div key={metric.label} className="flex items-center gap-3">
+                    <p
+                      className="w-[42%] shrink-0 truncate"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      {metric.label}
+                    </p>
+                    <div
+                      className="h-2 min-w-0 flex-1 overflow-hidden rounded-full"
+                      style={{ background: '#E2EDF1' }}
+                    >
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${metric.percent}%`, background: metric.color }}
+                      />
+                    </div>
+                    <p
+                      className="w-10 shrink-0 text-right font-sans font-semibold"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      {metric.percent}%
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className="rounded-[12px] p-4 sm:p-5"
+              style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+            >
+              <div className="flex items-center justify-between">
+                <h2
+                  className="font-display font-semibold"
+                  style={{ fontSize: 18, lineHeight: '26px', color: '#0D2630' }}
+                >
+                  Pending Shifts Acknowledgement
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setAckModalOpen(true)}
+                  className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{ fontSize: 14, color: '#00B4D8' }}
+                >
+                  View All
+                </button>
+              </div>
+              <div className="mt-4 flex flex-col gap-3">
+                {PENDING_ACKNOWLEDGEMENTS.slice(0, 3).map((ack) => (
+                  <div key={ack.id} className="flex items-center gap-3">
+                    <div
+                      className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                      style={{ background: ack.avatarBg }}
+                    >
+                      {ack.initials}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="truncate font-sans font-medium"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        {ack.doctorName}
+                      </p>
+                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {ack.shiftLabel} • {ack.day}
+                      </p>
+                    </div>
+                    <span
+                      className="hidden shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium sm:inline"
+                      style={{
+                        fontSize: 14,
+                        color: '#F59E0B',
+                        border: '1px solid rgba(245,158,11,0.40)',
+                        background: 'rgba(245,158,11,0.06)',
+                      }}
+                    >
+                      Awaiting
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleSetReminder(ack.doctorName)}
+                      className="shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                      style={{
+                        fontSize: 14,
+                        color: '#00B4D8',
+                        border: '1px solid #00B4D8',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Set Reminder
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="h-4" />
+        </div>
+      </main>
+
+      {createOpen && (
+        <CreateShiftModal onClose={() => setCreateOpen(false)} onSave={handleCreateShift} />
+      )}
+      {editingShift && (
+        <CreateShiftModal
+          editingShift={editingShift}
+          onClose={() => setEditingShift(null)}
+          onSave={handleUpdateShift}
+        />
+      )}
+      {viewingShift && (
+        <ShiftDetailModal
+          shift={viewingShift}
+          onClose={() => setViewingShift(null)}
+          onEdit={() => {
+            setEditingShift(viewingShift);
+            setViewingShift(null);
+          }}
+        />
+      )}
+      {ackModalOpen && (
+        <PendingAcknowledgementsModal
+          onClose={() => setAckModalOpen(false)}
+          onSetReminder={handleSetReminder}
+        />
+      )}
+    </div>
   );
 }

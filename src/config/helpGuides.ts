@@ -362,6 +362,30 @@ const MEDICAL_RECORDS_GUIDE: HelpGuide = {
   ],
 };
 
+const DUTY_ROSTER_GUIDE: HelpGuide = {
+  id: 'duty-roster',
+  title: 'Workforce Management',
+  intro: 'Manage doctor schedules, duty rosters, on-call coverage, and workforce operations.',
+  sections: [
+    {
+      heading: 'Today’s Roster',
+      body: 'Search by doctor name or filter by shift, role, and status. Each row shows the doctor’s shift, ward, current status, and whether they’ve acknowledged the assignment.',
+    },
+    {
+      heading: 'Creating and editing shifts',
+      body: 'Use "Create Shift" to add a new assignment, or the pencil icon on any row to edit one. The three-dot menu can duplicate or cancel a shift.',
+    },
+    {
+      heading: 'Coverage and acknowledgements',
+      body: 'The Coverage Overview card tracks staffing percentage by shift window. The Pending Acknowledgement card lists doctors who haven’t confirmed their shift yet — send a reminder directly from there.',
+    },
+    {
+      heading: 'Publishing a roster',
+      body: 'Generate Roster and Create Weekly Roster open the roster calendar. Publish Roster/Publish Schedule notifies all doctors of the current roster.',
+    },
+  ],
+};
+
 const MY_SCHEDULE_GUIDE: HelpGuide = {
   id: 'my-schedule',
   title: 'My Schedule',
@@ -548,6 +572,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/lab/results')) return LAB_RESULTS_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
+  if (pathname.startsWith('/duty-roster')) return DUTY_ROSTER_GUIDE;
   if (pathname.startsWith('/appointments')) return APPOINTMENTS_GUIDE;
   if (pathname.startsWith('/collaboration')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/reports')) return REPORTS_GUIDE;
