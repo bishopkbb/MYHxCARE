@@ -2,12 +2,32 @@
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
-const STORAGE_KEY = 'myhxcare:avatarUrl';
+import { useAuth } from '@providers/AuthProvider';
 
-function readStoredAvatar(): string | null {
-  if (typeof window === 'undefined') return null;
+// Scoped per logged-in user — a single global key would leak one user's
+// uploaded photo onto every other mock identity in the same browser.
+function storageKey(userId: string): string {
+  return `myhxcare:avatarUrl:${userId}`;
+}
+
+// Pre-dates per-user scoping. Any photo left here belongs to whichever user
+// uploaded it before this fix shipped — claimed by the first user to load
+// afterward, then deleted so it can never leak to a second identity.
+const LEGACY_STORAGE_KEY = 'myhxcare:avatarUrl';
+
+function readStoredAvatar(userId: string | null): string | null {
+  if (typeof window === 'undefined' || !userId) return null;
   try {
-    return localStorage.getItem(STORAGE_KEY);
+    const scoped = localStorage.getItem(storageKey(userId));
+    if (scoped) return scoped;
+
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy) {
+      localStorage.setItem(storageKey(userId), legacy);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      return legacy;
+    }
+    return null;
   } catch {
     // Storage unavailable (private browsing, disabled) — avatar just won't
     // persist across reloads; not worth surfacing to the user.
@@ -30,17 +50,27 @@ export function useAvatar(): AvatarContextValue {
 }
 
 export function AvatarProvider({ children }: { children: ReactNode }) {
-  // Lazy initializer reads localStorage synchronously on first render —
-  // this provider (and every consumer of it) only ever mounts after
-  // AuthGuard clears its loading state, well past hydration, so there's no
-  // SSR/client markup mismatch to worry about here.
-  const [avatarUrl, setAvatarUrlState] = useState<string | null>(readStoredAvatar);
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+  const [avatarUrl, setAvatarUrlState] = useState<string | null>(() => readStoredAvatar(userId));
+
+  // Re-reads storage whenever the logged-in identity changes (login, logout,
+  // or switching mock users without a full page reload) so one user's photo
+  // never bleeds into another's session. A render-phase adjustment rather
+  // than an effect — avoids a stale-avatar frame flashing before an effect
+  // would fire.
+  const [trackedUserId, setTrackedUserId] = useState(userId);
+  if (userId !== trackedUserId) {
+    setTrackedUserId(userId);
+    setAvatarUrlState(readStoredAvatar(userId));
+  }
 
   function setAvatarUrl(url: string | null) {
     setAvatarUrlState(url);
+    if (!userId) return;
     try {
-      if (url) localStorage.setItem(STORAGE_KEY, url);
-      else localStorage.removeItem(STORAGE_KEY);
+      if (url) localStorage.setItem(storageKey(userId), url);
+      else localStorage.removeItem(storageKey(userId));
     } catch {
       // Quota exceeded or storage unavailable — the in-memory state above
       // still updates so the change is visible for the rest of the session.
