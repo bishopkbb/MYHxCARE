@@ -498,6 +498,31 @@ const APPOINTMENT_SCHEDULING_GUIDE: HelpGuide = {
   ],
 };
 
+const MEDICAL_RECORD_PATIENT_GUIDE: HelpGuide = {
+  id: 'medical-record-patient',
+  title: 'Medical Record',
+  intro:
+    'The complete clinical record for one patient — summary, documents, activity, and access history.',
+  sections: [
+    {
+      heading: 'Overview tab',
+      body: 'Medical Summary and Record Information sit side by side, followed by Documents & Files below. The other tabs (Visit History, Medical Documents, Lab Results, and more under "More") each open a focused view of one part of this same record.',
+    },
+    {
+      heading: 'Documents & Files',
+      body: 'Filter by document type with the pills above the table, then use the row actions to view, download, rename, share, or delete a document. "Link Document" attaches an existing file to this record without a fresh upload.',
+    },
+    {
+      heading: 'Record Activity and Access',
+      body: 'Activity is a timestamped trail of everything that changed on this record. Access lists everyone who has opened it — both exist to support the audit-log requirement noted at the bottom of the page.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: "Add a clinical note, request a correction to this record, jump to the full visit history, or update demographics (handled from the patient's Registration profile) — all without leaving this page.",
+    },
+  ],
+};
+
 const EMERGENCY_REGISTRATION_GUIDE: HelpGuide = {
   id: 'emergency-registration',
   title: 'Emergency Registration',
@@ -906,6 +931,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/lab/orders')) return LAB_ORDERS_GUIDE;
   if (pathname.startsWith('/lab/results')) return LAB_RESULTS_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
+  if (pathname.startsWith('/medical-records/patient')) return MEDICAL_RECORD_PATIENT_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;
   if (pathname.startsWith('/registration/directory')) return PATIENT_DIRECTORY_GUIDE;

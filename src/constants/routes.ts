@@ -67,6 +67,7 @@ export const ROUTES = {
 
   // Medical Records sub-routes
   medicalRecordsDashboard: '/medical-records/dashboard',
+  medicalRecordsPatient: '/medical-records/patient',
   medicalRecordsVisitHistory: '/medical-records/visit-history',
   medicalRecordsClinicalDocuments: '/medical-records/clinical-documents',
   medicalRecordsDocumentUpload: '/medical-records/document-upload',

@@ -4,6 +4,7 @@ import { AlertTriangle, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import type { MedicalRecord } from '@/features/medical-records/__mocks__/medicalRecordFixtures';
 import { MRN_TO_PATIENT_ID, RECORD_TYPE_CFG, STATUS_CFG } from './config';
@@ -71,21 +72,31 @@ export function PatientRecordsModal({
 
         {/* ── Footer ── */}
         <div
-          className="flex shrink-0 items-center justify-between gap-3 px-6 py-4"
+          className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-6 py-4"
           style={{ borderTop: '1px solid #0064821F' }}
         >
-          {MRN_TO_PATIENT_ID[patient.mrn] ? (
+          <div className="flex flex-wrap items-center gap-4">
+            {MRN_TO_PATIENT_ID[patient.mrn] ? (
+              <Link
+                href={`/patients/${MRN_TO_PATIENT_ID[patient.mrn]}`}
+                onClick={onClose}
+                className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+              >
+                View Patient Profile →
+              </Link>
+            ) : (
+              <ProfileNotFoundButton />
+            )}
             <Link
-              href={`/patients/${MRN_TO_PATIENT_ID[patient.mrn]}`}
+              href={ROUTES.medicalRecordsPatient}
               onClick={onClose}
               className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
             >
-              View Patient Profile →
+              View Full Medical Record →
             </Link>
-          ) : (
-            <ProfileNotFoundButton />
-          )}
+          </div>
           <button
             type="button"
             onClick={onClose}
