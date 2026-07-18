@@ -1,1 +1,7 @@
-export { default } from '@/app/(hms)/collaboration/page';
+'use client';
+
+import { StaffInboxWorkspace } from '@/features/messages/components/StaffInboxWorkspace';
+
+export default function RegistrationMessagesPage() {
+  return <StaffInboxWorkspace />;
+}

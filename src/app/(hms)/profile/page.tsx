@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic';
 import { useRef, useState, useEffect } from 'react';
 
 import { useToast } from '@/hooks/useToast';
+import { isClinicalRole } from '@/types/auth.types';
+import { ABOUT_APP_INFO } from '@/features/settings/__mocks__/settingsFixtures';
 import { MOCK_DOCTOR_PROFILE } from '@/features/profile/__mocks__/profileFixtures';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { UserAvatar } from '@components/shared/UserAvatar';
@@ -145,6 +147,7 @@ export default function ProfilePage() {
   const role = user?.role ?? MOCK_DOCTOR_PROFILE.role;
   const department = user?.department ?? MOCK_DOCTOR_PROFILE.department;
   const initials = getInitials(name);
+  const isClinical = user ? isClinicalRole(user.workspaceRole) : true;
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -291,7 +294,9 @@ export default function ProfilePage() {
                       className="mt-0.5 font-sans"
                       style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
                     >
-                      {MOCK_DOCTOR_PROFILE.licenseNo} · {MOCK_DOCTOR_PROFILE.facility}
+                      {isClinical
+                        ? `${MOCK_DOCTOR_PROFILE.licenseNo} · ${ABOUT_APP_INFO.institution}`
+                        : ABOUT_APP_INFO.institution}
                     </p>
                   </div>
                 </div>
@@ -300,13 +305,23 @@ export default function ProfilePage() {
 
                 {/* Fields */}
                 <div className="grid grid-cols-1 gap-x-8 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
-                  <ProfileField label="Specialization" value={MOCK_DOCTOR_PROFILE.specialization} />
-                  <ProfileField
-                    label="Medical Council No."
-                    value={MOCK_DOCTOR_PROFILE.medicalCouncilNo}
-                  />
+                  {isClinical && (
+                    <>
+                      <ProfileField
+                        label="Specialization"
+                        value={MOCK_DOCTOR_PROFILE.specialization}
+                      />
+                      <ProfileField
+                        label="Medical Council No."
+                        value={MOCK_DOCTOR_PROFILE.medicalCouncilNo}
+                      />
+                    </>
+                  )}
+                  <ProfileField label="Role" value={role} />
                   <ProfileField label="Department" value={department} />
-                  <ProfileField label="Experience" value={MOCK_DOCTOR_PROFILE.experience} />
+                  {isClinical && (
+                    <ProfileField label="Experience" value={MOCK_DOCTOR_PROFILE.experience} />
+                  )}
                   <ProfileField label="Phone" value={contact.phone} />
                   <ProfileField label="Email" value={contact.email} />
                 </div>

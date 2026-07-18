@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 
 import { ROUTES } from '@/constants/routes';
-import { resolveWorkspace } from '@/types/auth.types';
+import { isClinicalRole, resolveWorkspace } from '@/types/auth.types';
 import { findWorkspaceRoute } from '@/config/workspaces';
 import { useToast } from '@/hooks/useToast';
 import { MOCK_DOCTOR_PROFILE } from '@/features/profile/__mocks__/profileFixtures';
@@ -287,7 +287,9 @@ export default function SettingsPage() {
 
   const name = user?.name ?? MOCK_DOCTOR_PROFILE.name;
   const role = user?.role ?? MOCK_DOCTOR_PROFILE.role;
+  const department = user?.department ?? MOCK_DOCTOR_PROFILE.department;
   const initials = getInitials(name);
+  const isClinical = user ? isClinicalRole(user.workspaceRole) : true;
   const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
   const profileHref = findWorkspaceRoute(workspaceId, 'Profile') ?? ROUTES.profile;
   const userPermissions = user?.permissions ?? [];
@@ -391,13 +393,13 @@ export default function SettingsPage() {
                     className="mt-0.5 font-sans"
                     style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
                   >
-                    {role} · {MOCK_DOCTOR_PROFILE.medicalCouncilNo}
+                    {isClinical ? `${role} · ${MOCK_DOCTOR_PROFILE.medicalCouncilNo}` : role}
                   </p>
                   <p
                     className="mt-0.5 font-sans"
                     style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
                   >
-                    {MOCK_DOCTOR_PROFILE.department} · {MOCK_DOCTOR_PROFILE.facility}
+                    {department} · {ABOUT_APP_INFO.institution}
                   </p>
                 </div>
               </div>
@@ -422,13 +424,20 @@ export default function SettingsPage() {
               value={contact.phone}
               onEdit={() => setEditContactOpen(true)}
             />
-            <Divider />
-            <AccountFieldRow
-              label="Medical Council No."
-              value={MOCK_DOCTOR_PROFILE.medicalCouncilNo}
-            />
-            <Divider />
-            <AccountFieldRow label="Specialization" value={MOCK_DOCTOR_PROFILE.specialization} />
+            {isClinical && (
+              <>
+                <Divider />
+                <AccountFieldRow
+                  label="Medical Council No."
+                  value={MOCK_DOCTOR_PROFILE.medicalCouncilNo}
+                />
+                <Divider />
+                <AccountFieldRow
+                  label="Specialization"
+                  value={MOCK_DOCTOR_PROFILE.specialization}
+                />
+              </>
+            )}
           </SettingsSection>
 
           {/* ── Notification Preferences ──────────────────────────────────── */}

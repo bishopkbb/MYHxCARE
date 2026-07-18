@@ -61,6 +61,22 @@ export function resolveWorkspace(role: WorkspaceRole): WorkspaceId {
   return WORKSPACE_BY_ROLE[role] ?? 'clinical';
 }
 
+// Physician roles only — the ones a medical council registration and a
+// clinical specialization actually apply to. Nurses, pharmacists, lab
+// scientists, etc. are clinical-adjacent but have different credentialing
+// (nursing council, pharmacy council…) that isn't modeled yet, so they fall
+// through to the same non-clinical field set as Registration/Records.
+const CLINICAL_ROLES: ReadonlySet<WorkspaceRole> = new Set([
+  'DOCTOR',
+  'CONSULTANT',
+  'EMERGENCY_DOCTOR',
+  'HOD',
+]);
+
+export function isClinicalRole(role: WorkspaceRole): boolean {
+  return CLINICAL_ROLES.has(role);
+}
+
 // ─── JWT Claims ────────────────────────────────────────────────────────────
 
 export type JwtClaims = {
