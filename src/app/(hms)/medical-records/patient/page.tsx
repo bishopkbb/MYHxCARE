@@ -36,10 +36,17 @@ import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import { computeAge } from '@/features/registration/schemas/registerPatientSchema';
 import { MOCK_PATIENT_PROFILE } from '@/features/registration/__mocks__/patientProfileFixtures';
+import type { Allergy } from '@/types/patient.types';
 import {
   DOCUMENT_TYPE_CFG,
   MEDICAL_SUMMARY_EXTRA,
   MOCK_DOCUMENTS,
+  MOCK_IMMUNIZATIONS,
+  MOCK_INSURANCE_CLAIMS,
+  MOCK_LAB_RESULTS,
+  MOCK_PRESCRIPTIONS,
+  MOCK_REFERRALS,
+  PATIENT_VISITS,
   RECORD_ACCESS,
   RECORD_ACTIVITY,
   type DocumentType,
@@ -87,24 +94,797 @@ function BannerStat({ icon: Icon, value }: { icon: typeof Calendar; value: strin
   );
 }
 
-function ComingSoonTab({ tab }: { tab: Tab }) {
+function Pill({ label, color }: { label: string; color: string }) {
+  return (
+    <span
+      className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+      style={{ fontSize: 14, color, border: `1px solid ${color}66`, background: `${color}0F` }}
+    >
+      {label}
+    </span>
+  );
+}
+
+type TableColumn = { label: string; width: string };
+
+function SimpleTableCard({
+  title,
+  headerAction,
+  columns,
+  rows,
+  emptyMessage = 'No records found',
+}: {
+  title: string;
+  headerAction?: React.ReactNode;
+  columns: TableColumn[];
+  rows: React.ReactNode[][];
+  emptyMessage?: string;
+}) {
   return (
     <div
-      className="flex flex-col items-center justify-center gap-3 rounded-[12px] px-6 py-20 text-center"
+      className="rounded-[12px] p-4 sm:p-5"
       style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
     >
-      <div
-        className="flex size-14 items-center justify-center rounded-full"
-        style={{ background: 'rgba(0,180,216,0.1)' }}
-      >
-        <FileText style={{ width: 24, height: 24, color: '#00B4D8' }} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+          {title}
+        </h2>
+        {headerAction}
       </div>
-      <p className="font-display font-semibold" style={{ fontSize: 18, color: '#0D2630' }}>
-        {tab}
-      </p>
-      <p className="max-w-[380px]" style={{ fontSize: 14, color: '#4A7080' }}>
-        This patient&apos;s {tab.toLowerCase()} will be shown here once this tab is built.
-      </p>
+      <div className="mt-3 overflow-x-auto scroll-smooth">
+        <div style={{ minWidth: columns.length * 150 }}>
+          <div
+            className="flex rounded-t-[8px]"
+            style={{ background: 'rgba(226,237,241,0.4)', borderBottom: '1px solid #E6F8FD' }}
+          >
+            {columns.map((col, i) => (
+              <div
+                key={col.label}
+                className={`${col.width} shrink-0 py-2.5 pr-2 ${i === 0 ? 'pl-3' : ''}`}
+              >
+                <span
+                  className="font-sans font-bold tracking-wider uppercase"
+                  style={{ fontSize: 14, color: '#4A7080' }}
+                >
+                  {col.label}
+                </span>
+              </div>
+            ))}
+          </div>
+          {rows.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-14 text-center">
+              <p style={{ fontSize: 14, color: '#8A98A3' }}>{emptyMessage}</p>
+            </div>
+          ) : (
+            rows.map((row, ri) => (
+              <div
+                key={ri}
+                className="flex items-center"
+                style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+              >
+                {row.map((cell, ci) => (
+                  <div
+                    key={ci}
+                    className={`${columns[ci]?.width ?? 'flex-1'} min-w-0 shrink-0 py-3 pr-2 ${ci === 0 ? 'pl-3' : ''}`}
+                  >
+                    {cell}
+                  </div>
+                ))}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const VISIT_STATUS_COLOR: Record<string, string> = {
+  Completed: '#22C55E',
+  Scheduled: '#00B4D8',
+  Cancelled: '#8A98A3',
+};
+
+function VisitHistorySection() {
+  return (
+    <SimpleTableCard
+      title="Visit History"
+      columns={[
+        { label: 'Date', width: 'w-28' },
+        { label: 'Department', width: 'w-44' },
+        { label: 'Doctor', width: 'w-44' },
+        { label: 'Reason', width: 'flex-1' },
+        { label: 'Status', width: 'w-32' },
+      ]}
+      rows={PATIENT_VISITS.map((v) => [
+        <p key="date" style={{ fontSize: 14, color: '#0D2630' }}>
+          {formatHumanDate(v.dateTime)}
+        </p>,
+        <p key="dept" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {v.department}
+        </p>,
+        <p key="doc" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {v.doctor}
+        </p>,
+        <p key="reason" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {v.reason}
+        </p>,
+        <Pill key="status" label={v.status} color={VISIT_STATUS_COLOR[v.status] ?? '#8A98A3'} />,
+      ])}
+    />
+  );
+}
+
+const RX_STATUS_COLOR: Record<string, string> = { Active: '#00B4D8', Completed: '#22C55E' };
+
+function PrescriptionsSection() {
+  return (
+    <SimpleTableCard
+      title="Prescriptions"
+      columns={[
+        { label: 'Drug Name', width: 'flex-1' },
+        { label: 'Dosage', width: 'w-28' },
+        { label: 'Frequency', width: 'w-48' },
+        { label: 'Route', width: 'w-28' },
+        { label: 'Prescribed By', width: 'w-44' },
+        { label: 'Date', width: 'w-28' },
+        { label: 'Status', width: 'w-28' },
+      ]}
+      rows={MOCK_PRESCRIPTIONS.map((rx) => [
+        <p
+          key="drug"
+          className="truncate font-sans font-medium"
+          style={{ fontSize: 14, color: '#0D2630' }}
+        >
+          {rx.drugName}
+        </p>,
+        <p key="dose" style={{ fontSize: 14, color: '#4A7080' }}>
+          {rx.dosage}
+        </p>,
+        <p key="freq" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {rx.frequency}
+        </p>,
+        <p key="route" style={{ fontSize: 14, color: '#4A7080' }}>
+          {rx.route}
+        </p>,
+        <p key="by" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {rx.prescribedBy}
+        </p>,
+        <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
+          {formatHumanDate(rx.datePrescribed)}
+        </p>,
+        <Pill key="status" label={rx.status} color={RX_STATUS_COLOR[rx.status] ?? '#8A98A3'} />,
+      ])}
+    />
+  );
+}
+
+const LAB_FLAG_COLOR: Record<string, string> = {
+  Normal: '#22C55E',
+  High: '#EF4444',
+  Low: '#F59E0B',
+};
+
+function LabResultsSection() {
+  return (
+    <SimpleTableCard
+      title="Lab Results"
+      columns={[
+        { label: 'Test Name', width: 'flex-1' },
+        { label: 'Result', width: 'w-24' },
+        { label: 'Unit', width: 'w-24' },
+        { label: 'Reference Range', width: 'w-36' },
+        { label: 'Flag', width: 'w-24' },
+        { label: 'Date Collected', width: 'w-32' },
+        { label: 'Ordered By', width: 'w-40' },
+      ]}
+      rows={MOCK_LAB_RESULTS.map((lab) => [
+        <p
+          key="test"
+          className="truncate font-sans font-medium"
+          style={{ fontSize: 14, color: '#0D2630' }}
+        >
+          {lab.testName}
+        </p>,
+        <p key="result" style={{ fontSize: 14, color: '#0D2630' }}>
+          {lab.result}
+        </p>,
+        <p key="unit" style={{ fontSize: 14, color: '#4A7080' }}>
+          {lab.unit}
+        </p>,
+        <p key="range" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {lab.referenceRange}
+        </p>,
+        <Pill key="flag" label={lab.flag} color={LAB_FLAG_COLOR[lab.flag] ?? '#8A98A3'} />,
+        <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
+          {formatHumanDate(lab.dateCollected)}
+        </p>,
+        <p key="by" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {lab.orderedBy}
+        </p>,
+      ])}
+    />
+  );
+}
+
+function ImmunizationsSection() {
+  return (
+    <SimpleTableCard
+      title="Immunizations"
+      columns={[
+        { label: 'Vaccine', width: 'flex-1' },
+        { label: 'Dose', width: 'w-32' },
+        { label: 'Date Given', width: 'w-32' },
+        { label: 'Given By', width: 'w-44' },
+        { label: 'Next Due', width: 'w-32' },
+      ]}
+      rows={MOCK_IMMUNIZATIONS.map((imm) => [
+        <p
+          key="vaccine"
+          className="truncate font-sans font-medium"
+          style={{ fontSize: 14, color: '#0D2630' }}
+        >
+          {imm.vaccine}
+        </p>,
+        <p key="dose" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {imm.doseLabel}
+        </p>,
+        <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
+          {formatHumanDate(imm.dateGiven)}
+        </p>,
+        <p key="by" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {imm.givenBy}
+        </p>,
+        <p key="next" style={{ fontSize: 14, color: '#4A7080' }}>
+          {imm.nextDueDate ? formatHumanDate(imm.nextDueDate) : '—'}
+        </p>,
+      ])}
+    />
+  );
+}
+
+const ALLERGY_SEVERITY_COLOR: Record<string, string> = {
+  MILD: '#22C55E',
+  MODERATE: '#F59E0B',
+  SEVERE: '#EF4444',
+  LIFE_THREATENING: '#EF4444',
+};
+
+function AllergiesSection({ allergies }: { allergies: Allergy[] }) {
+  return (
+    <SimpleTableCard
+      title="Allergies"
+      emptyMessage="No known drug allergies (NKDA) on record"
+      columns={[
+        { label: 'Substance', width: 'flex-1' },
+        { label: 'Reaction', width: 'flex-1' },
+        { label: 'Severity', width: 'w-32' },
+        { label: 'Recorded On', width: 'w-32' },
+        { label: 'Recorded By', width: 'w-44' },
+      ]}
+      rows={allergies.map((a) => [
+        <p
+          key="substance"
+          className="truncate font-sans font-medium"
+          style={{ fontSize: 14, color: '#0D2630' }}
+        >
+          {a.substance}
+        </p>,
+        <p key="reaction" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {a.reaction}
+        </p>,
+        <Pill
+          key="severity"
+          label={a.severity.replace('_', ' ')}
+          color={ALLERGY_SEVERITY_COLOR[a.severity] ?? '#8A98A3'}
+        />,
+        <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
+          {formatHumanDate(a.recordedAt)}
+        </p>,
+        <p key="by" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {a.recordedBy}
+        </p>,
+      ])}
+    />
+  );
+}
+
+const REFERRAL_STATUS_COLOR: Record<string, string> = {
+  Pending: '#F59E0B',
+  Accepted: '#00B4D8',
+  Completed: '#22C55E',
+};
+
+function ReferralsSection() {
+  return (
+    <SimpleTableCard
+      title="Referrals"
+      columns={[
+        { label: 'Department', width: 'w-40' },
+        { label: 'Provider', width: 'w-44' },
+        { label: 'Reason', width: 'flex-1' },
+        { label: 'Date Referred', width: 'w-32' },
+        { label: 'Status', width: 'w-28' },
+      ]}
+      rows={MOCK_REFERRALS.map((ref) => [
+        <p
+          key="dept"
+          className="truncate font-sans font-medium"
+          style={{ fontSize: 14, color: '#0D2630' }}
+        >
+          {ref.toDepartment}
+        </p>,
+        <p key="provider" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {ref.toProvider}
+        </p>,
+        <p key="reason" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {ref.reason}
+        </p>,
+        <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
+          {formatHumanDate(ref.dateReferred)}
+        </p>,
+        <Pill
+          key="status"
+          label={ref.status}
+          color={REFERRAL_STATUS_COLOR[ref.status] ?? '#8A98A3'}
+        />,
+      ])}
+    />
+  );
+}
+
+const CLAIM_STATUS_COLOR: Record<string, string> = {
+  Submitted: '#00B4D8',
+  Approved: '#22C55E',
+  Rejected: '#EF4444',
+  Paid: '#8B5CF6',
+};
+
+function InsuranceClaimsSection() {
+  return (
+    <SimpleTableCard
+      title="Insurance Claims"
+      columns={[
+        { label: 'Claim ID', width: 'w-40' },
+        { label: 'Service', width: 'flex-1' },
+        { label: 'Amount', width: 'w-28' },
+        { label: 'Date Submitted', width: 'w-32' },
+        { label: 'Status', width: 'w-28' },
+      ]}
+      rows={MOCK_INSURANCE_CLAIMS.map((claim) => [
+        <p
+          key="id"
+          className="truncate font-sans font-medium"
+          style={{ fontSize: 14, color: '#0D2630' }}
+        >
+          {claim.claimId}
+        </p>,
+        <p key="service" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+          {claim.service}
+        </p>,
+        <p key="amount" style={{ fontSize: 14, color: '#0D2630' }}>
+          &#8358;{claim.amount.toLocaleString('en-NG')}
+        </p>,
+        <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
+          {formatHumanDate(claim.dateSubmitted)}
+        </p>,
+        <Pill
+          key="status"
+          label={claim.status}
+          color={CLAIM_STATUS_COLOR[claim.status] ?? '#8A98A3'}
+        />,
+      ])}
+    />
+  );
+}
+
+type AuditRow = { dateTime: string; type: 'Activity' | 'Access'; description: string };
+
+function AuditLogSection() {
+  const rows: AuditRow[] = [
+    ...RECORD_ACTIVITY.map((a) => ({
+      dateTime: a.dateTime,
+      type: 'Activity' as const,
+      description: `${a.label} — ${a.detail}`,
+    })),
+    ...RECORD_ACCESS.map((a) => ({
+      dateTime: a.dateTime,
+      type: 'Access' as const,
+      description: `${a.name} viewed this record`,
+    })),
+  ].sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
+
+  return (
+    <SimpleTableCard
+      title="Audit Log"
+      columns={[
+        { label: 'Date / Time', width: 'w-44' },
+        { label: 'Type', width: 'w-28' },
+        { label: 'Details', width: 'flex-1' },
+      ]}
+      rows={rows.map((r, i) => [
+        <p key="dt" style={{ fontSize: 14, color: '#4A7080' }}>
+          {formatHumanDate(r.dateTime)} {formatTime(r.dateTime)}
+        </p>,
+        <Pill key="type" label={r.type} color={r.type === 'Activity' ? '#00B4D8' : '#8B5CF6'} />,
+        <p key={`desc-${i}`} className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+          {r.description}
+        </p>,
+      ])}
+    />
+  );
+}
+
+function DocumentsAndFilesCard() {
+  const toast = useToast();
+  const [docFilter, setDocFilter] = useState<DocumentType | 'All'>('All');
+  const [documents, setDocuments] = useState<MedicalDocument[]>(MOCK_DOCUMENTS);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    function onMouseDown(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpenMenuId(null);
+    }
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [openMenuId]);
+
+  const filteredDocs = useMemo(
+    () => (docFilter === 'All' ? documents : documents.filter((d) => d.type === docFilter)),
+    [documents, docFilter],
+  );
+  const totalPages = Math.max(1, Math.ceil(filteredDocs.length / rowsPerPage));
+  const safePage = Math.min(currentPage, totalPages);
+  const pageStart = (safePage - 1) * rowsPerPage;
+  const pageDocs = filteredDocs.slice(pageStart, pageStart + rowsPerPage);
+
+  function selectFilter(value: DocumentType | 'All') {
+    setDocFilter(value);
+    setCurrentPage(1);
+  }
+
+  function deleteDocument(doc: MedicalDocument) {
+    setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+    toast.success('Document deleted', `${doc.name} was removed from this record.`);
+    setOpenMenuId(null);
+  }
+
+  return (
+    <div
+      className="rounded-[12px] p-4 sm:p-5"
+      style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+          Documents &amp; Files
+        </h2>
+        <button
+          type="button"
+          onClick={() =>
+            toast.info('Link Document', 'This action will be wired up once the endpoint is ready.')
+          }
+          className="flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+          style={{ fontSize: 14, color: '#00B4D8', border: '1px solid #00B4D8' }}
+        >
+          Link Document
+        </button>
+      </div>
+
+      <div className="mt-3 flex gap-1 overflow-x-auto scroll-smooth">
+        {DOC_FILTERS.map((f) => {
+          const active = docFilter === f.value;
+          return (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => selectFilter(f.value)}
+              className="shrink-0 rounded-full px-3.5 py-1.5 font-sans font-medium whitespace-nowrap transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+              style={{
+                fontSize: 14,
+                color: active ? '#FFFFFF' : '#4A7080',
+                background: active ? '#00B4D8' : 'rgba(226,237,241,0.5)',
+              }}
+            >
+              {f.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-3 overflow-x-auto scroll-smooth">
+        <div className="min-w-[820px]">
+          <div
+            className="flex rounded-t-[8px]"
+            style={{
+              background: 'rgba(226,237,241,0.4)',
+              borderBottom: '1px solid #E6F8FD',
+            }}
+          >
+            <div className="min-w-0 flex-1 py-2.5 pr-2 pl-3">
+              <span
+                className="font-sans font-bold tracking-wider uppercase"
+                style={{ fontSize: 14, color: '#4A7080' }}
+              >
+                Document Name
+              </span>
+            </div>
+            <div className="w-32 shrink-0 py-2.5 pr-2">
+              <span
+                className="font-sans font-bold tracking-wider uppercase"
+                style={{ fontSize: 14, color: '#4A7080' }}
+              >
+                Type
+              </span>
+            </div>
+            <div className="w-36 shrink-0 py-2.5 pr-2">
+              <span
+                className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                style={{ fontSize: 14, color: '#4A7080' }}
+              >
+                Uploaded By
+              </span>
+            </div>
+            <div className="w-32 shrink-0 py-2.5 pr-2">
+              <span
+                className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                style={{ fontSize: 14, color: '#4A7080' }}
+              >
+                Date Uploaded
+              </span>
+            </div>
+            <div className="w-28 shrink-0 py-2.5 pr-2">
+              <span
+                className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                style={{ fontSize: 14, color: '#4A7080' }}
+              >
+                Visit Date
+              </span>
+            </div>
+            <div className="w-28 shrink-0 py-2.5 pr-3 text-right">
+              <span
+                className="font-sans font-bold tracking-wider uppercase"
+                style={{ fontSize: 14, color: '#4A7080' }}
+              >
+                Actions
+              </span>
+            </div>
+          </div>
+
+          {pageDocs.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+              <div
+                className="flex size-14 items-center justify-center rounded-full"
+                style={{ background: 'rgba(226,237,241,0.6)' }}
+              >
+                <FileText style={{ width: 24, height: 24, color: '#8A98A3' }} />
+              </div>
+              <p className="font-sans font-medium" style={{ fontSize: 16, color: '#4A7080' }}>
+                No documents in this category
+              </p>
+            </div>
+          )}
+
+          {pageDocs.map((doc) => {
+            const cfg = DOCUMENT_TYPE_CFG[doc.type];
+            const Icon = cfg.icon;
+            return (
+              <div
+                key={doc.id}
+                className="flex items-center"
+                style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-2.5 py-3 pr-2 pl-3">
+                  <div
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full"
+                    style={{ background: `${cfg.iconColor}1F` }}
+                  >
+                    <Icon style={{ width: 16, height: 16, color: cfg.iconColor }} />
+                  </div>
+                  <div className="min-w-0">
+                    <p
+                      className="truncate font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      {doc.name}
+                    </p>
+                    {doc.subtitle && (
+                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {doc.subtitle}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="w-32 shrink-0 py-3 pr-2">
+                  <span
+                    className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                    style={{
+                      fontSize: 14,
+                      whiteSpace: 'nowrap',
+                      color: cfg.badgeColor,
+                      border: `1px solid ${cfg.badgeBorder}`,
+                      background: cfg.badgeBg,
+                    }}
+                  >
+                    {doc.type}
+                  </span>
+                </div>
+                <div className="w-36 shrink-0 py-3 pr-2">
+                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                    {doc.uploadedBy}
+                  </p>
+                </div>
+                <div className="w-32 shrink-0 py-3 pr-2">
+                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                    {formatHumanDate(doc.dateUploaded)} {formatTime(doc.dateUploaded)}
+                  </p>
+                </div>
+                <div className="w-28 shrink-0 py-3 pr-2">
+                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                    {formatHumanDate(doc.visitDate)}
+                  </p>
+                </div>
+                <div className="flex w-28 shrink-0 items-center justify-end gap-1 py-3 pr-3">
+                  <button
+                    type="button"
+                    onClick={() => toast.info('Opening document', `Viewing ${doc.name}.`)}
+                    aria-label={`View ${doc.name}`}
+                    className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  >
+                    <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toast.success('Download started', `${doc.name} is downloading.`)}
+                    aria-label={`Download ${doc.name}`}
+                    className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  >
+                    <Download style={{ width: 15, height: 15, color: '#4A7080' }} />
+                  </button>
+                  <div ref={openMenuId === doc.id ? menuRef : null} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setOpenMenuId((id) => (id === doc.id ? null : doc.id))}
+                      aria-label={`More actions for ${doc.name}`}
+                      className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                    >
+                      <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
+                    </button>
+                    {openMenuId === doc.id && (
+                      <div
+                        className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 w-44 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
+                        style={{
+                          border: '1px solid rgba(0,100,130,0.12)',
+                          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            toast.info('Rename document', `Renaming ${doc.name}.`);
+                            setOpenMenuId(null);
+                          }}
+                          className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                          style={{ fontSize: 14, color: '#2F3A40' }}
+                        >
+                          Rename Document
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            toast.success('Shared', `${doc.name} shared with care team.`);
+                            setOpenMenuId(null);
+                          }}
+                          className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                          style={{ fontSize: 14, color: '#2F3A40' }}
+                        >
+                          Share Document
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteDocument(doc)}
+                          className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-red-50"
+                          style={{ fontSize: 14, color: '#EF4444' }}
+                        >
+                          Delete Document
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {filteredDocs.length > 0 && (
+        <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+          <p style={{ fontSize: 14, color: '#4A7080' }}>
+            Showing {pageStart + 1} to {Math.min(pageStart + rowsPerPage, filteredDocs.length)} of{' '}
+            {filteredDocs.length} documents
+          </p>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={safePage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="flex size-9 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+              style={{ border: '1px solid rgba(0,100,130,0.18)', color: '#4A7080' }}
+              aria-label="Previous page"
+            >
+              ‹
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .reduce<(number | 'ellipsis')[]>((acc, p) => {
+                if (acc.length > 0 && typeof acc[acc.length - 1] === 'number') {
+                  const prev = acc[acc.length - 1] as number;
+                  if (p - prev > 1) acc.push('ellipsis');
+                }
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, i) =>
+                p === 'ellipsis' ? (
+                  <span key={`e-${i}`} style={{ fontSize: 14, color: '#8A98A3' }} className="px-1">
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setCurrentPage(p)}
+                    className="flex size-9 items-center justify-center rounded-[8px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                    style={{
+                      fontSize: 14,
+                      border: `1px solid ${p === safePage ? '#00B4D8' : 'rgba(0,100,130,0.18)'}`,
+                      color: p === safePage ? '#00B4D8' : '#4A7080',
+                      background: p === safePage ? '#E6F8FD' : 'transparent',
+                    }}
+                  >
+                    {p}
+                  </button>
+                ),
+              )}
+            <button
+              type="button"
+              disabled={safePage === totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="flex size-9 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+              style={{ border: '1px solid rgba(0,100,130,0.18)', color: '#4A7080' }}
+              aria-label="Next page"
+            >
+              ›
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span style={{ fontSize: 14, color: '#4A7080' }}>Rows per page:</span>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="h-9 rounded-[8px] px-2 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40"
+              style={{
+                fontSize: 14,
+                border: '1px solid rgba(0,100,130,0.18)',
+                color: '#0D2630',
+              }}
+            >
+              {ROWS_PER_PAGE_OPTIONS.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -122,44 +902,22 @@ export default function MedicalRecordPatientPage() {
   const actionsRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLDivElement>(null);
 
-  const [docFilter, setDocFilter] = useState<DocumentType | 'All'>('All');
-  const [documents, setDocuments] = useState<MedicalDocument[]>(MOCK_DOCUMENTS);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
-    if (!actionsOpen && !moreOpen && !openMenuId) return;
+    if (!actionsOpen && !moreOpen) return;
     function onMouseDown(e: MouseEvent) {
       if (actionsRef.current && !actionsRef.current.contains(e.target as Node))
         setActionsOpen(false);
       if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpenMenuId(null);
     }
     document.addEventListener('mousedown', onMouseDown);
     return () => document.removeEventListener('mousedown', onMouseDown);
-  }, [actionsOpen, moreOpen, openMenuId]);
-
-  const filteredDocs = useMemo(
-    () => (docFilter === 'All' ? documents : documents.filter((d) => d.type === docFilter)),
-    [documents, docFilter],
-  );
-  const totalPages = Math.max(1, Math.ceil(filteredDocs.length / rowsPerPage));
-  const safePage = Math.min(currentPage, totalPages);
-  const pageStart = (safePage - 1) * rowsPerPage;
-  const pageDocs = filteredDocs.slice(pageStart, pageStart + rowsPerPage);
+  }, [actionsOpen, moreOpen]);
 
   const knownAllergiesText = patient.allergies.length
     ? patient.allergies.map((a) => a.substance).join(', ')
     : 'NKDA';
   const chronicConditionsText =
     patient.medicalAlerts.find((a) => a.label === 'Chronic Condition')?.detail ?? 'None recorded';
-
-  function selectFilter(value: DocumentType | 'All') {
-    setDocFilter(value);
-    setCurrentPage(1);
-  }
 
   function notImplemented(action: string) {
     toast.info(action, 'This action will be wired up once the endpoint is ready.');
@@ -171,12 +929,6 @@ export default function MedicalRecordPatientPage() {
       'Preparing document',
       "This patient's medical record is being prepared for printing.",
     );
-  }
-
-  function deleteDocument(doc: MedicalDocument) {
-    setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
-    toast.success('Document deleted', `${doc.name} was removed from this record.`);
-    setOpenMenuId(null);
   }
 
   return (
@@ -474,9 +1226,7 @@ export default function MedicalRecordPatientPage() {
           {/* ── Tab content + sidebar ─────────────────────────────────────── */}
           <div className="mt-5 flex flex-col gap-4 xl:flex-row xl:items-start">
             <div className="min-w-0 flex-1">
-              {activeTab !== 'Overview' ? (
-                <ComingSoonTab tab={activeTab} />
-              ) : (
+              {activeTab === 'Overview' && (
                 <>
                   <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]">
                     {/* Medical Summary */}
@@ -503,34 +1253,36 @@ export default function MedicalRecordPatientPage() {
                           </button>
                         </PermissionGate>
                       </div>
-                      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3 lg:grid-cols-5">
-                        {[
-                          ['Blood Group', patient.bloodGroup],
-                          ['Genotype', MEDICAL_SUMMARY_EXTRA.genotype],
-                          ['Height', MEDICAL_SUMMARY_EXTRA.height],
-                          ['Weight', MEDICAL_SUMMARY_EXTRA.weight],
-                          ['BMI', MEDICAL_SUMMARY_EXTRA.bmi],
-                          ['Known Allergies', knownAllergiesText],
-                          ['Chronic Conditions', chronicConditionsText],
-                          ['Medications', MEDICAL_SUMMARY_EXTRA.medications],
-                          ['Last Visit', formatHumanDate(patient.lastVisit)],
-                          ['Primary Physician', physicianName],
-                        ].map(([label, value]) => (
-                          <div key={label} className="min-w-0">
-                            <p
-                              className="font-sans font-bold tracking-wider uppercase"
-                              style={{ fontSize: 14, color: '#8A98A3' }}
-                            >
-                              {label}
-                            </p>
-                            <p
-                              className="mt-0.5 font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {value}
-                            </p>
-                          </div>
-                        ))}
+                      <div className="@container mt-3">
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-4 @sm:grid-cols-3 @lg:grid-cols-4 @2xl:grid-cols-5">
+                          {[
+                            ['Blood Group', patient.bloodGroup],
+                            ['Genotype', MEDICAL_SUMMARY_EXTRA.genotype],
+                            ['Height', MEDICAL_SUMMARY_EXTRA.height],
+                            ['Weight', MEDICAL_SUMMARY_EXTRA.weight],
+                            ['BMI', MEDICAL_SUMMARY_EXTRA.bmi],
+                            ['Known Allergies', knownAllergiesText],
+                            ['Chronic Conditions', chronicConditionsText],
+                            ['Medications', MEDICAL_SUMMARY_EXTRA.medications],
+                            ['Last Visit', formatHumanDate(patient.lastVisit)],
+                            ['Primary Physician', physicianName],
+                          ].map(([label, value]) => (
+                            <div key={label} className="min-w-0">
+                              <p
+                                className="font-sans font-bold tracking-wider break-words uppercase"
+                                style={{ fontSize: 14, color: '#8A98A3' }}
+                              >
+                                {label}
+                              </p>
+                              <p
+                                className="mt-0.5 font-sans font-medium break-words"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {value}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
@@ -557,13 +1309,13 @@ export default function MedicalRecordPatientPage() {
                         ].map(([label, value]) => (
                           <div key={label} className="min-w-0">
                             <p
-                              className="font-sans font-bold tracking-wider uppercase"
+                              className="font-sans font-bold tracking-wider break-words uppercase"
                               style={{ fontSize: 14, color: '#8A98A3' }}
                             >
                               {label}
                             </p>
                             <p
-                              className="mt-0.5 font-sans font-medium"
+                              className="mt-0.5 font-sans font-medium break-words"
                               style={{ fontSize: 14, color: '#0D2630' }}
                             >
                               {value}
@@ -572,7 +1324,7 @@ export default function MedicalRecordPatientPage() {
                         ))}
                         <div>
                           <p
-                            className="font-sans font-bold tracking-wider uppercase"
+                            className="font-sans font-bold tracking-wider break-words uppercase"
                             style={{ fontSize: 14, color: '#8A98A3' }}
                           >
                             Record Status
@@ -590,13 +1342,13 @@ export default function MedicalRecordPatientPage() {
                         </div>
                         <div>
                           <p
-                            className="font-sans font-bold tracking-wider uppercase"
+                            className="font-sans font-bold tracking-wider break-words uppercase"
                             style={{ fontSize: 14, color: '#8A98A3' }}
                           >
                             Record Visibility
                           </p>
                           <p
-                            className="mt-0.5 font-sans font-medium"
+                            className="mt-0.5 font-sans font-medium break-words"
                             style={{ fontSize: 14, color: '#0D2630' }}
                           >
                             {MEDICAL_SUMMARY_EXTRA.recordVisibility}
@@ -606,369 +1358,18 @@ export default function MedicalRecordPatientPage() {
                     </div>
                   </div>
 
-                  {/* Documents & Files */}
-                  <div
-                    className="mt-4 rounded-[12px] p-4 sm:p-5"
-                    style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <h2
-                        className="font-display font-semibold"
-                        style={{ fontSize: 16, color: '#0D2630' }}
-                      >
-                        Documents &amp; Files
-                      </h2>
-                      <button
-                        type="button"
-                        onClick={() => notImplemented('Link Document')}
-                        className="flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                        style={{ fontSize: 14, color: '#00B4D8', border: '1px solid #00B4D8' }}
-                      >
-                        Link Document
-                      </button>
-                    </div>
-
-                    <div className="mt-3 flex gap-1 overflow-x-auto scroll-smooth">
-                      {DOC_FILTERS.map((f) => {
-                        const active = docFilter === f.value;
-                        return (
-                          <button
-                            key={f.value}
-                            type="button"
-                            onClick={() => selectFilter(f.value)}
-                            className="shrink-0 rounded-full px-3.5 py-1.5 font-sans font-medium whitespace-nowrap transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                            style={{
-                              fontSize: 14,
-                              color: active ? '#FFFFFF' : '#4A7080',
-                              background: active ? '#00B4D8' : 'rgba(226,237,241,0.5)',
-                            }}
-                          >
-                            {f.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="mt-3 overflow-x-auto scroll-smooth">
-                      <div className="min-w-[820px]">
-                        <div
-                          className="flex rounded-t-[8px]"
-                          style={{
-                            background: 'rgba(226,237,241,0.4)',
-                            borderBottom: '1px solid #E6F8FD',
-                          }}
-                        >
-                          <div className="min-w-0 flex-1 py-2.5 pr-2 pl-3">
-                            <span
-                              className="font-sans font-bold tracking-wider uppercase"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              Document Name
-                            </span>
-                          </div>
-                          <div className="w-32 shrink-0 py-2.5 pr-2">
-                            <span
-                              className="font-sans font-bold tracking-wider uppercase"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              Type
-                            </span>
-                          </div>
-                          <div className="w-36 shrink-0 py-2.5 pr-2">
-                            <span
-                              className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              Uploaded By
-                            </span>
-                          </div>
-                          <div className="w-32 shrink-0 py-2.5 pr-2">
-                            <span
-                              className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              Date Uploaded
-                            </span>
-                          </div>
-                          <div className="w-28 shrink-0 py-2.5 pr-2">
-                            <span
-                              className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              Visit Date
-                            </span>
-                          </div>
-                          <div className="w-28 shrink-0 py-2.5 pr-3 text-right">
-                            <span
-                              className="font-sans font-bold tracking-wider uppercase"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              Actions
-                            </span>
-                          </div>
-                        </div>
-
-                        {pageDocs.length === 0 && (
-                          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                            <div
-                              className="flex size-14 items-center justify-center rounded-full"
-                              style={{ background: 'rgba(226,237,241,0.6)' }}
-                            >
-                              <FileText style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                            </div>
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 16, color: '#4A7080' }}
-                            >
-                              No documents in this category
-                            </p>
-                          </div>
-                        )}
-
-                        {pageDocs.map((doc) => {
-                          const cfg = DOCUMENT_TYPE_CFG[doc.type];
-                          const Icon = cfg.icon;
-                          return (
-                            <div
-                              key={doc.id}
-                              className="flex items-center"
-                              style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                            >
-                              <div className="flex min-w-0 flex-1 items-center gap-2.5 py-3 pr-2 pl-3">
-                                <div
-                                  className="flex size-9 shrink-0 items-center justify-center rounded-full"
-                                  style={{ background: `${cfg.iconColor}1F` }}
-                                >
-                                  <Icon style={{ width: 16, height: 16, color: cfg.iconColor }} />
-                                </div>
-                                <div className="min-w-0">
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {doc.name}
-                                  </p>
-                                  {doc.subtitle && (
-                                    <p
-                                      className="truncate"
-                                      style={{ fontSize: 14, color: '#4A7080' }}
-                                    >
-                                      {doc.subtitle}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="w-32 shrink-0 py-3 pr-2">
-                                <span
-                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                  style={{
-                                    fontSize: 14,
-                                    whiteSpace: 'nowrap',
-                                    color: cfg.badgeColor,
-                                    border: `1px solid ${cfg.badgeBorder}`,
-                                    background: cfg.badgeBg,
-                                  }}
-                                >
-                                  {doc.type}
-                                </span>
-                              </div>
-                              <div className="w-36 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {doc.uploadedBy}
-                                </p>
-                              </div>
-                              <div className="w-32 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {formatHumanDate(doc.dateUploaded)} {formatTime(doc.dateUploaded)}
-                                </p>
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {formatHumanDate(doc.visitDate)}
-                                </p>
-                              </div>
-                              <div className="flex w-28 shrink-0 items-center justify-end gap-1 py-3 pr-3">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    toast.info('Opening document', `Viewing ${doc.name}.`)
-                                  }
-                                  aria-label={`View ${doc.name}`}
-                                  className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                >
-                                  <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    toast.success('Download started', `${doc.name} is downloading.`)
-                                  }
-                                  aria-label={`Download ${doc.name}`}
-                                  className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                >
-                                  <Download style={{ width: 15, height: 15, color: '#4A7080' }} />
-                                </button>
-                                <div
-                                  ref={openMenuId === doc.id ? menuRef : null}
-                                  className="relative"
-                                >
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setOpenMenuId((id) => (id === doc.id ? null : doc.id))
-                                    }
-                                    aria-label={`More actions for ${doc.name}`}
-                                    className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                  >
-                                    <MoreVertical
-                                      style={{ width: 15, height: 15, color: '#4A7080' }}
-                                    />
-                                  </button>
-                                  {openMenuId === doc.id && (
-                                    <div
-                                      className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 w-44 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                                      style={{
-                                        border: '1px solid rgba(0,100,130,0.12)',
-                                        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                                      }}
-                                    >
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          toast.info('Rename document', `Renaming ${doc.name}.`);
-                                          setOpenMenuId(null);
-                                        }}
-                                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                        style={{ fontSize: 14, color: '#2F3A40' }}
-                                      >
-                                        Rename Document
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          toast.success(
-                                            'Shared',
-                                            `${doc.name} shared with care team.`,
-                                          );
-                                          setOpenMenuId(null);
-                                        }}
-                                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                        style={{ fontSize: 14, color: '#2F3A40' }}
-                                      >
-                                        Share Document
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => deleteDocument(doc)}
-                                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-red-50"
-                                        style={{ fontSize: 14, color: '#EF4444' }}
-                                      >
-                                        Delete Document
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {filteredDocs.length > 0 && (
-                      <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
-                        <p style={{ fontSize: 14, color: '#4A7080' }}>
-                          Showing {pageStart + 1} to{' '}
-                          {Math.min(pageStart + rowsPerPage, filteredDocs.length)} of{' '}
-                          {filteredDocs.length} documents
-                        </p>
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            disabled={safePage === 1}
-                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            className="flex size-9 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-                            style={{ border: '1px solid rgba(0,100,130,0.18)', color: '#4A7080' }}
-                            aria-label="Previous page"
-                          >
-                            ‹
-                          </button>
-                          {Array.from({ length: totalPages }, (_, i) => i + 1)
-                            .filter(
-                              (p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1,
-                            )
-                            .reduce<(number | 'ellipsis')[]>((acc, p) => {
-                              if (acc.length > 0 && typeof acc[acc.length - 1] === 'number') {
-                                const prev = acc[acc.length - 1] as number;
-                                if (p - prev > 1) acc.push('ellipsis');
-                              }
-                              acc.push(p);
-                              return acc;
-                            }, [])
-                            .map((p, i) =>
-                              p === 'ellipsis' ? (
-                                <span
-                                  key={`e-${i}`}
-                                  style={{ fontSize: 14, color: '#8A98A3' }}
-                                  className="px-1"
-                                >
-                                  …
-                                </span>
-                              ) : (
-                                <button
-                                  key={p}
-                                  type="button"
-                                  onClick={() => setCurrentPage(p)}
-                                  className="flex size-9 items-center justify-center rounded-[8px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                  style={{
-                                    fontSize: 14,
-                                    border: `1px solid ${p === safePage ? '#00B4D8' : 'rgba(0,100,130,0.18)'}`,
-                                    color: p === safePage ? '#00B4D8' : '#4A7080',
-                                    background: p === safePage ? '#E6F8FD' : 'transparent',
-                                  }}
-                                >
-                                  {p}
-                                </button>
-                              ),
-                            )}
-                          <button
-                            type="button"
-                            disabled={safePage === totalPages}
-                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                            className="flex size-9 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-                            style={{ border: '1px solid rgba(0,100,130,0.18)', color: '#4A7080' }}
-                            aria-label="Next page"
-                          >
-                            ›
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span style={{ fontSize: 14, color: '#4A7080' }}>Rows per page:</span>
-                          <select
-                            value={rowsPerPage}
-                            onChange={(e) => {
-                              setRowsPerPage(Number(e.target.value));
-                              setCurrentPage(1);
-                            }}
-                            className="h-9 rounded-[8px] px-2 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40"
-                            style={{
-                              fontSize: 14,
-                              border: '1px solid rgba(0,100,130,0.18)',
-                              color: '#0D2630',
-                            }}
-                          >
-                            {ROWS_PER_PAGE_OPTIONS.map((n) => (
-                              <option key={n} value={n}>
-                                {n}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <DocumentsAndFilesCard />
                 </>
               )}
+              {activeTab === 'Visit History' && <VisitHistorySection />}
+              {activeTab === 'Medical Documents' && <DocumentsAndFilesCard />}
+              {activeTab === 'Lab Results' && <LabResultsSection />}
+              {activeTab === 'Prescriptions' && <PrescriptionsSection />}
+              {activeTab === 'Immunizations' && <ImmunizationsSection />}
+              {activeTab === 'Allergies' && <AllergiesSection allergies={patient.allergies} />}
+              {activeTab === 'Referrals' && <ReferralsSection />}
+              {activeTab === 'Insurance Claims' && <InsuranceClaimsSection />}
+              {activeTab === 'Audit Log' && <AuditLogSection />}
             </div>
 
             {/* ── Sidebar ───────────────────────────────────────────────── */}

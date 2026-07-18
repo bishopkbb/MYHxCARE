@@ -257,3 +257,250 @@ export const RECORD_ACCESS: RecordAccessEntry[] = [
   { id: 'acc-004', name: 'Nurse Mary Uche', dateTime: atOffset(-6, 12, 5) },
   { id: 'acc-005', name: 'Lab Dept.', dateTime: atOffset(-21, 17, 0) },
 ];
+
+// ─── Visit History ────────────────────────────────────────────────────────────
+
+export type PatientVisit = {
+  id: string;
+  dateTime: string; // ISO
+  department: string;
+  doctor: string;
+  visitType: string;
+  reason: string;
+  status: 'Completed' | 'Scheduled' | 'Cancelled';
+};
+
+export const PATIENT_VISITS: PatientVisit[] = [
+  {
+    id: 'visit-001',
+    dateTime: atOffset(-1, 9, 0),
+    department: 'General Outpatient Clinic',
+    doctor: 'Dr. Jane Ezeonu (GP)',
+    visitType: 'General Consultation',
+    reason: 'Recurrent cough and mild wheezing',
+    status: 'Completed',
+  },
+  {
+    id: 'visit-002',
+    dateTime: atOffset(-6, 13, 0),
+    department: 'Radiology',
+    doctor: 'Radiology Dept.',
+    visitType: 'Imaging',
+    reason: 'Chest X-ray to rule out chest infection',
+    status: 'Completed',
+  },
+  {
+    id: 'visit-003',
+    dateTime: atOffset(-13, 10, 30),
+    department: 'General Outpatient Clinic',
+    doctor: 'Dr. Jane Ezeonu (GP)',
+    visitType: 'Follow-up Visit',
+    reason: 'Asthma review and inhaler technique check',
+    status: 'Completed',
+  },
+  {
+    id: 'visit-004',
+    dateTime: atOffset(-21, 9, 0),
+    department: 'General Outpatient Clinic',
+    doctor: 'Dr. Jane Ezeonu (GP)',
+    visitType: 'Routine Checkup',
+    reason: 'New student medical screening',
+    status: 'Completed',
+  },
+];
+
+// ─── Prescriptions ────────────────────────────────────────────────────────────
+
+export type Prescription = {
+  id: string;
+  drugName: string;
+  dosage: string;
+  frequency: string;
+  route: string;
+  prescribedBy: string;
+  datePrescribed: string; // ISO
+  status: 'Active' | 'Completed';
+};
+
+export const MOCK_PRESCRIPTIONS: Prescription[] = [
+  {
+    id: 'rx-001',
+    drugName: 'Salbutamol Inhaler',
+    dosage: '100mcg',
+    frequency: 'As needed (PRN)',
+    route: 'Inhalation',
+    prescribedBy: 'Dr. Jane Ezeonu (GP)',
+    datePrescribed: atOffset(-1, 9, 25),
+    status: 'Active',
+  },
+  {
+    id: 'rx-002',
+    drugName: 'Paracetamol',
+    dosage: '1000mg',
+    frequency: 'Every 8 hours as needed',
+    route: 'Oral',
+    prescribedBy: 'Dr. Jane Ezeonu (GP)',
+    datePrescribed: atOffset(-6, 14, 20),
+    status: 'Completed',
+  },
+  {
+    id: 'rx-003',
+    drugName: 'Amoxicillin',
+    dosage: '500mg',
+    frequency: '3 times daily for 5 days',
+    route: 'Oral',
+    prescribedBy: 'Dr. Jane Ezeonu (GP)',
+    datePrescribed: atOffset(-21, 9, 30),
+    status: 'Completed',
+  },
+];
+
+// ─── Lab Results ──────────────────────────────────────────────────────────────
+
+export type LabResultEntry = {
+  id: string;
+  testName: string;
+  result: string;
+  unit: string;
+  referenceRange: string;
+  flag: 'Normal' | 'High' | 'Low';
+  dateCollected: string; // ISO
+  orderedBy: string;
+};
+
+export const MOCK_LAB_RESULTS: LabResultEntry[] = [
+  {
+    id: 'lab-001',
+    testName: 'Haemoglobin',
+    result: '12.8',
+    unit: 'g/dL',
+    referenceRange: '12.0 - 15.5',
+    flag: 'Normal',
+    dateCollected: atOffset(-1, 11, 5),
+    orderedBy: 'Dr. Ifeanyi Okafor',
+  },
+  {
+    id: 'lab-002',
+    testName: 'White Blood Cell Count',
+    result: '11.2',
+    unit: 'x10^9/L',
+    referenceRange: '4.0 - 11.0',
+    flag: 'High',
+    dateCollected: atOffset(-1, 11, 5),
+    orderedBy: 'Dr. Ifeanyi Okafor',
+  },
+  {
+    id: 'lab-003',
+    testName: 'Platelet Count',
+    result: '250',
+    unit: 'x10^9/L',
+    referenceRange: '150 - 410',
+    flag: 'Normal',
+    dateCollected: atOffset(-1, 11, 5),
+    orderedBy: 'Dr. Ifeanyi Okafor',
+  },
+];
+
+// ─── Immunizations ────────────────────────────────────────────────────────────
+
+export type ImmunizationEntry = {
+  id: string;
+  vaccine: string;
+  doseLabel: string;
+  dateGiven: string; // ISO
+  givenBy: string;
+  nextDueDate?: string; // ISO
+};
+
+export const MOCK_IMMUNIZATIONS: ImmunizationEntry[] = [
+  {
+    id: 'imm-001',
+    vaccine: 'Hepatitis B',
+    doseLabel: 'Dose 3 of 3',
+    dateGiven: atOffset(-21, 16, 30),
+    givenBy: 'UNIZIK Medical Centre',
+  },
+  {
+    id: 'imm-002',
+    vaccine: 'Tetanus Toxoid',
+    doseLabel: 'Dose 1',
+    dateGiven: atOffset(-21, 16, 30),
+    givenBy: 'UNIZIK Medical Centre',
+    nextDueDate: atOffset(345, 9, 0),
+  },
+  {
+    id: 'imm-003',
+    vaccine: 'COVID-19 (Booster)',
+    doseLabel: 'Booster',
+    dateGiven: atOffset(-90, 10, 0),
+    givenBy: 'UNIZIK Medical Centre',
+  },
+];
+
+// ─── Referrals ────────────────────────────────────────────────────────────────
+
+export type ReferralEntry = {
+  id: string;
+  toDepartment: string;
+  toProvider: string;
+  reason: string;
+  dateReferred: string; // ISO
+  status: 'Pending' | 'Accepted' | 'Completed';
+};
+
+export const MOCK_REFERRALS: ReferralEntry[] = [
+  {
+    id: 'ref-001',
+    toDepartment: 'Radiology',
+    toProvider: 'Radiology Dept.',
+    reason: 'Chest X-ray to rule out chest infection',
+    dateReferred: atOffset(-6, 13, 0),
+    status: 'Completed',
+  },
+  {
+    id: 'ref-002',
+    toDepartment: 'Dental Clinic',
+    toProvider: 'Dr. Ifeanyi Okafor',
+    reason: 'Routine dental checkup',
+    dateReferred: atOffset(-21, 9, 30),
+    status: 'Completed',
+  },
+];
+
+// ─── Insurance Claims ─────────────────────────────────────────────────────────
+
+export type InsuranceClaimEntry = {
+  id: string;
+  claimId: string;
+  service: string;
+  amount: number;
+  dateSubmitted: string; // ISO
+  status: 'Submitted' | 'Approved' | 'Rejected' | 'Paid';
+};
+
+export const MOCK_INSURANCE_CLAIMS: InsuranceClaimEntry[] = [
+  {
+    id: 'claim-001',
+    claimId: 'CLM-2026-00451-01',
+    service: 'General Consultation',
+    amount: 2500,
+    dateSubmitted: atOffset(-1, 10, 0),
+    status: 'Approved',
+  },
+  {
+    id: 'claim-002',
+    claimId: 'CLM-2026-00451-02',
+    service: 'Complete Blood Count (FBC)',
+    amount: 8000,
+    dateSubmitted: atOffset(-1, 11, 30),
+    status: 'Submitted',
+  },
+  {
+    id: 'claim-003',
+    claimId: 'CLM-2026-00451-03',
+    service: 'Chest X-Ray',
+    amount: 12000,
+    dateSubmitted: atOffset(-6, 15, 0),
+    status: 'Paid',
+  },
+];
