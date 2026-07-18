@@ -498,6 +498,31 @@ const APPOINTMENT_SCHEDULING_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_REGISTRATION_GUIDE: HelpGuide = {
+  id: 'emergency-registration',
+  title: 'Emergency Registration',
+  intro:
+    'The fast path for an emergency arrival — minimal required fields, immediate routing to the ED.',
+  sections: [
+    {
+      heading: 'Known vs Unknown Patient',
+      body: 'Known Patient searches the existing patient record and locks Age, Gender and Date of Birth to what is already on file. Unknown Patient (the default for an unidentified arrival) leaves every field editable and assigns a new emergency MRN automatically.',
+    },
+    {
+      heading: 'Required fields',
+      body: 'Patient Name, Age, Gender, Emergency Contact (Name, Relationship, Phone), Arrival Time, Arrival By, Triage Priority and Chief Complaint must all be filled in before registration can complete — everything else is optional context for the triage nurse.',
+    },
+    {
+      heading: 'Triage Priority',
+      body: 'Red (Immediate) through Blue (Non-Urgent) sets how urgently the triage nurse should see the patient. It drives the Status shown in the Registration Summary and is visible to the ED team the moment registration completes.',
+    },
+    {
+      heading: 'Registration Summary and Routing',
+      body: 'The right-hand panel mirrors the form live, including a preview of the emergency MRN before you submit. Routing Information confirms the patient goes straight to the Emergency Department / Triage Area, and Next Steps tracks what happens after registration.',
+    },
+  ],
+};
+
 const PATIENT_PROFILE_REGISTRATION_GUIDE: HelpGuide = {
   id: 'patient-profile-registration',
   title: 'Patient Profile',
@@ -888,6 +913,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/check-in')) return CHECK_IN_GUIDE;
   if (pathname.startsWith('/registration/queue')) return QUEUE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration/appointments')) return APPOINTMENT_SCHEDULING_GUIDE;
+  if (pathname.startsWith('/registration/emergency')) return EMERGENCY_REGISTRATION_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
