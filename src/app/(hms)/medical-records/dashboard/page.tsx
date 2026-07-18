@@ -221,45 +221,120 @@ export default function MedicalRecordsDashboardPage() {
                       View All
                     </button>
                   </div>
-                  <div className="mt-3 flex flex-col gap-2.5">
-                    {(pageState === 'loading' ? [] : RECENT_RECORD_REQUESTS).map((req) => {
-                      const cfg = REQUEST_STATUS_CFG[req.status];
-                      return (
-                        <div
-                          key={req.id}
-                          className="flex items-center justify-between gap-2 rounded-[10px] px-3 py-2.5"
-                          style={{ border: '1px solid rgba(0,100,130,0.08)' }}
-                        >
-                          <div className="min-w-0">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {req.patient}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {req.time} · {req.requestedBy}
-                            </p>
-                          </div>
+                  <div className="mt-3 overflow-x-auto scroll-smooth">
+                    <div className="min-w-[480px]">
+                      <div
+                        className="flex rounded-t-[8px]"
+                        style={{
+                          background: 'rgba(226,237,241,0.4)',
+                          borderBottom: '1px solid #E6F8FD',
+                        }}
+                      >
+                        <div className="w-24 shrink-0 py-2.5 pr-2 pl-3">
                           <span
-                            className="shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              whiteSpace: 'nowrap',
-                              color: cfg.color,
-                              border: `1px solid ${cfg.border}`,
-                              background: cfg.bg,
-                            }}
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
                           >
-                            {req.status}
+                            Time
                           </span>
                         </div>
-                      );
-                    })}
-                    {pageState === 'loading' &&
-                      Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="h-14 animate-pulse rounded-[10px] bg-slate-100" />
-                      ))}
+                        <div className="w-30 shrink-0 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Patient
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Requested By
+                          </span>
+                        </div>
+                        <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Status
+                          </span>
+                        </div>
+                      </div>
+
+                      {(pageState === 'loading' ? [] : RECENT_RECORD_REQUESTS).map((req) => {
+                        const cfg = REQUEST_STATUS_CFG[req.status];
+                        return (
+                          <div
+                            key={req.id}
+                            className="flex items-center"
+                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                          >
+                            <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                              <p
+                                className="font-sans font-medium whitespace-nowrap"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {req.time}
+                              </p>
+                            </div>
+                            <div className="w-30 shrink-0 py-3 pr-2">
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {req.patient}
+                              </p>
+                            </div>
+                            <div className="min-w-0 flex-1 py-3 pr-2">
+                              <p
+                                className="truncate whitespace-nowrap"
+                                style={{ fontSize: 14, color: '#4A7080' }}
+                              >
+                                {req.requestedBy}
+                              </p>
+                            </div>
+                            <div className="w-24 shrink-0 py-3 pr-3 text-right">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                                style={{
+                                  fontSize: 14,
+                                  whiteSpace: 'nowrap',
+                                  color: cfg.color,
+                                  border: `1px solid ${cfg.border}`,
+                                  background: cfg.bg,
+                                }}
+                              >
+                                {req.status}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {pageState === 'loading' &&
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center"
+                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                          >
+                            <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                              <div className="h-4 w-14 animate-pulse rounded bg-slate-100" />
+                            </div>
+                            <div className="w-30 shrink-0 py-3 pr-2">
+                              <div className="h-4 w-20 animate-pulse rounded bg-slate-100" />
+                            </div>
+                            <div className="min-w-0 flex-1 py-3 pr-2">
+                              <div className="h-4 w-32 animate-pulse rounded bg-slate-100" />
+                            </div>
+                            <div className="w-24 shrink-0 py-3 pr-3 text-right">
+                              <div className="ml-auto h-6 w-16 animate-pulse rounded-full bg-slate-100" />
+                            </div>
+                          </div>
+                        ))}
+                    </div>
                   </div>
                   <button
                     type="button"
