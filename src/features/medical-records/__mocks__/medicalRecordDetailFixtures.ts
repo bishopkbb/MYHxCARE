@@ -547,3 +547,116 @@ export const MOCK_INSURANCE_CLAIMS: InsuranceClaimEntry[] = [
     status: 'Paid',
   },
 ];
+
+// ─── Generated visits for any patient other than the curated persona ────────
+// Deterministic (seeded by patient id, never Math.random()) so the same
+// patient always shows the same visits on repeat views/reloads, rather than
+// reshuffling every render.
+
+const GENERIC_VISIT_TEMPLATES: {
+  department: string;
+  doctor: string;
+  credentials: string;
+  visitType: string;
+  diagnosisSummary: string;
+}[] = [
+  {
+    department: 'General Outpatient Clinic',
+    doctor: 'Dr. Jane Ezeonu (GP)',
+    credentials: 'MBBS, FMCP',
+    visitType: 'Consultation',
+    diagnosisSummary: 'Routine checkup',
+  },
+  {
+    department: 'General Outpatient Clinic',
+    doctor: 'Dr. Ada Chukwu (GP)',
+    credentials: 'MBBS, FWACP',
+    visitType: 'Consultation',
+    diagnosisSummary: 'Malaria',
+  },
+  {
+    department: 'Laboratory',
+    doctor: 'Dr. Ifeanyi Okafor',
+    credentials: 'MBBS, FMCPath',
+    visitType: 'Lab Test',
+    diagnosisSummary: 'Full Blood Count',
+  },
+  {
+    department: 'Pharmacy',
+    doctor: 'Pharmacist Chika M.',
+    credentials: 'RPh',
+    visitType: 'Medication',
+    diagnosisSummary: 'Medication refill',
+  },
+  {
+    department: 'Dental Clinic',
+    doctor: 'Dr. Onyedika Umeh',
+    credentials: 'BDS',
+    visitType: 'Consultation',
+    diagnosisSummary: 'Dental checkup',
+  },
+  {
+    department: 'Radiology',
+    doctor: 'Dr. Mary Uche',
+    credentials: 'MBBS, FWCR',
+    visitType: 'Imaging',
+    diagnosisSummary: 'X-Ray',
+  },
+  {
+    department: 'Physiotherapy',
+    doctor: 'Mrs. Ngozi A.',
+    credentials: 'DPT',
+    visitType: 'Therapy',
+    diagnosisSummary: 'Physiotherapy session',
+  },
+];
+
+function seedFromId(id: string): number {
+  const digits = id.replace(/\D/g, '');
+  return parseInt(digits, 10) || 1;
+}
+
+/** Every patient other than the curated persona (dp-001) gets a stable,
+ * plausible visit history derived from their id — same patient always
+ * produces the same visits, no randomness between renders. */
+export function generateVisitsForPatient(patient: { id: string }): PatientVisit[] {
+  const seed = seedFromId(patient.id);
+  const count = 2 + (seed % 4); // 2-5 visits
+  const visits: PatientVisit[] = [];
+  for (let i = 0; i < count; i++) {
+    const template = GENERIC_VISIT_TEMPLATES[(seed + i * 3) % GENERIC_VISIT_TEMPLATES.length]!;
+    const dayOffset = -(3 + ((seed + i * 11) % 60));
+    const hour = 8 + ((seed + i * 5) % 8);
+    const minute = (seed * 7 + i * 13) % 60;
+    visits.push({
+      id: `${patient.id}-visit-${i}`,
+      dateTime: atOffset(dayOffset, hour, minute),
+      department: template.department,
+      doctor: template.doctor,
+      credentials: template.credentials,
+      visitType: template.visitType,
+      diagnosisSummary: template.diagnosisSummary,
+      reason: template.diagnosisSummary,
+      status: 'Completed',
+    });
+  }
+  return visits;
+}
+
+/** Derives a Record Activity feed directly from a set of visits, so a
+ * generic patient's activity trail always matches what's actually in
+ * their visit table instead of showing another patient's leftover data. */
+export function generateActivityFromVisits(visits: PatientVisit[]): RecordActivityEntry[] {
+  return [...visits]
+    .sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())
+    .slice(0, 5)
+    .map((v) => ({
+      id: `${v.id}-activity`,
+      dateTime: v.dateTime,
+      label: 'Visit completed',
+      detail: `${v.department} — ${v.diagnosisSummary}`,
+      icon: FileText,
+      iconColor: '#00B4D8',
+      iconBg: 'rgba(0,180,216,0.12)',
+    }));
+}

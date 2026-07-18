@@ -1,7 +1,7 @@
 'use client';
 
-import { MedicalRecordView } from '@/features/medical-records/components/MedicalRecordView';
+import { VisitHistoryWorkspace } from '@/features/medical-records/components/VisitHistoryWorkspace';
 
 export default function VisitHistoryPage() {
-  return <MedicalRecordView initialTab="Visit History" />;
+  return <VisitHistoryWorkspace />;
 }

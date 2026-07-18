@@ -501,8 +501,13 @@ const APPOINTMENT_SCHEDULING_GUIDE: HelpGuide = {
 const VISIT_HISTORY_GUIDE: HelpGuide = {
   id: 'visit-history',
   title: 'Visit History',
-  intro: 'A filterable log of every encounter this patient has had, across every department.',
+  intro:
+    "Find any patient first, then review a filterable log of every encounter they've had, across every department.",
   sections: [
+    {
+      heading: 'Finding a patient',
+      body: 'Search by name, MRN, or Student ID across the full patient list, or browse the paginated table directly. Selecting a patient opens their visit history; "Change Patient" returns to this search at any time.',
+    },
     {
       heading: 'Filtering',
       body: 'Narrow the list by Date Range, Department, Visit Type, or Status. "Filter" confirms how many visits currently match; the table itself already updates live as you change any filter.',
