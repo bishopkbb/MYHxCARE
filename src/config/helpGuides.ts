@@ -650,6 +650,30 @@ const DOCUMENT_UPLOAD_GUIDE: HelpGuide = {
   ],
 };
 
+const MEDICAL_RECORDS_REPORTS_GUIDE: HelpGuide = {
+  id: 'medical-records-reports',
+  title: 'Medical Records Reports',
+  intro: 'Monitor record management performance and activity across every department.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Records Retrieved, Updated, New Medical Files, Archived Records, Record Requests, and Avg. Retrieval Time each compare against last month.',
+    },
+    {
+      heading: 'Filters',
+      body: 'Narrow everything below — charts and the activity table — by date range, officer, department, or record status, then Apply Filters. Reset returns to the full unfiltered view.',
+    },
+    {
+      heading: 'Charts',
+      body: 'Retrieval Trend and Archive Trend track daily volume across the selected range. Record Requests breaks down status (Pending/In Progress/Completed/Rejected). Department Usage ranks departments by records retrieved.',
+    },
+    {
+      heading: 'Medical Records Activity',
+      body: 'Every retrieval, update, and archive action, one row per event. Export PDF, Excel, or CSV exports exactly the rows currently passing your filters.',
+    },
+  ],
+};
+
 const STAFF_INBOX_GUIDE: HelpGuide = {
   id: 'staff-inbox',
   title: 'Messages',
@@ -1090,6 +1114,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/medical-records/archived')) return ARCHIVED_RECORDS_GUIDE;
   if (pathname.startsWith('/medical-records/document-upload')) return DOCUMENT_UPLOAD_GUIDE;
   if (pathname.startsWith('/medical-records/messages')) return STAFF_INBOX_GUIDE;
+  if (pathname.startsWith('/medical-records/reports')) return MEDICAL_RECORDS_REPORTS_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;
   if (pathname.startsWith('/registration/directory')) return PATIENT_DIRECTORY_GUIDE;

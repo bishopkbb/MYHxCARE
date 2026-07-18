@@ -1,24 +1,46 @@
 'use client';
 
-import { AlertCircle, ChevronDown, RefreshCw } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import {
+  AlertCircle,
+  Eye,
+  MoreVertical,
+  RefreshCw,
+  Sheet,
+  Filter as FilterIcon,
+  FileDown,
+  FileText,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import { ExportMenu } from '@/components/ExportMenu';
+import { FormDateInput } from '@components/shared/FormDateInput';
+import { FormSelect } from '@components/shared/FormSelect';
 import { useToast } from '@/hooks/useToast';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
+import { formatHumanDate, formatTime } from '@/utils/datetime';
 import {
-  DEPARTMENT_ACTIVITY,
-  MEDICAL_RECORDS_REPORT_STATS,
-  RECORDS_BY_TYPE,
-  RECORDS_RETRIEVED,
-  REPORT_PERIODS,
-  type ReportPeriod,
+  DEPARTMENT_USAGE,
+  MEDICAL_RECORDS_ACTIVITY,
+  OFFICER_OPTIONS,
+  RECORD_REQUESTS_BREAKDOWN,
+  RECORD_REQUESTS_TOTAL,
+  RECORD_STATUS_OPTIONS,
+  REPORT_DEPARTMENT_OPTIONS,
+  REPORT_STATS,
+  RETRIEVAL_TREND,
+  ARCHIVE_TREND,
+  type MedicalRecordActivity,
+  type RecordActivityStatus,
 } from '@/features/medical-records/__mocks__/medicalRecordsReportFixtures';
-
-const FOCUS_RING =
-  'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
+import { toDateInputValue } from './MedicalRecordView';
 
 type PageState = 'loading' | 'loaded' | 'error';
+const ROWS_PER_PAGE = 8;
+
+const STATUS_CFG: Record<RecordActivityStatus, { color: string; border: string; bg: string }> = {
+  Retrieved: { color: '#22C55E', border: 'rgba(34,197,94,0.40)', bg: 'rgba(34,197,94,0.06)' },
+  Updated: { color: '#00B4D8', border: 'rgba(0,180,216,0.40)', bg: 'transparent' },
+  Archived: { color: '#F59E0B', border: 'rgba(245,158,11,0.40)', bg: 'rgba(245,158,11,0.06)' },
+};
 
 function computeTick(maxValue: number): number {
   if (maxValue <= 0) return 1;
@@ -48,27 +70,42 @@ function SkeletonChartCard() {
       className="flex flex-col gap-4 p-4"
       style={{ borderRadius: 12, border: '1px solid rgba(0,100,130,0.12)', background: '#FFFFFF' }}
     >
-      <div className="h-5 w-52 animate-pulse rounded bg-slate-100" />
-      <div className="h-64 w-full animate-pulse rounded-xl bg-slate-100" />
+      <div className="h-5 w-40 animate-pulse rounded bg-slate-100" />
+      <div className="h-56 w-full animate-pulse rounded-xl bg-slate-100" />
     </div>
   );
 }
 
-function RetrievalBarChart({
+// ── Line trend chart ─────────────────────────────────────────────────────────
+
+function LineTrendChart({
   data,
+  color,
   animate,
 }: {
-  data: { label: string; count: number }[];
+  data: { label: string; value: number }[];
+  color: string;
   animate: boolean;
 }) {
-  const maxValue = Math.max(...data.map((d) => d.count), 1);
+  const maxValue = Math.max(...data.map((d) => d.value), 1);
   const tick = computeTick(maxValue);
   const niceMax = tick * 4;
   const ticks = [0, tick, tick * 2, tick * 3, tick * 4];
+  const W = 400;
+  const H = 200;
+  const stepX = W / (data.length - 1);
+  const points = data.map((d, i) => ({
+    x: i * stepX,
+    y: H - (d.value / niceMax) * H,
+  }));
+  const pathD = points
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+    .join(' ');
+  const xLabelIdx = [0, 7, 14, 21, data.length - 1].filter((v, i, a) => a.indexOf(v) === i);
 
   return (
     <div className="mt-2 flex gap-3" style={{ height: 240 }}>
-      <div className="flex shrink-0 flex-col justify-between pb-6 text-right" style={{ width: 30 }}>
+      <div className="flex shrink-0 flex-col justify-between pb-6 text-right" style={{ width: 34 }}>
         {[...ticks].reverse().map((t) => (
           <span key={t} className="font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
             {t}
@@ -81,51 +118,43 @@ function RetrievalBarChart({
           style={{ height: 'calc(100% - 24px)' }}
         >
           {[...ticks].reverse().map((t) => (
-            <div key={t} style={{ borderTop: '1px dashed rgba(0,100,130,0.22)' }} />
+            <div key={t} style={{ borderTop: '1px dashed rgba(0,100,130,0.15)' }} />
           ))}
         </div>
-        <div
-          className="absolute inset-x-0 top-0 flex items-end justify-between gap-2"
-          style={{ height: 'calc(100% - 24px)' }}
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="none"
+          className="absolute inset-x-0 top-0"
+          style={{ height: 'calc(100% - 24px)', width: '100%' }}
         >
-          {data.map((d, i) => (
-            <div key={d.label} className="flex h-full flex-1 flex-col items-center justify-end">
-              <span
-                className="mb-1.5 font-sans font-medium transition-opacity duration-300"
-                style={{
-                  fontSize: 14,
-                  lineHeight: '16px',
-                  color: '#4A7080',
-                  opacity: animate ? 1 : 0,
-                  transitionDelay: animate ? `${i * 70 + 500}ms` : '0ms',
-                }}
-              >
-                {d.count}
-              </span>
-              <div
-                className="w-full"
-                style={{
-                  maxWidth: 44,
-                  borderRadius: '6px 6px 0 0',
-                  background: '#00B4D8',
-                  height: animate ? `${(d.count / niceMax) * 100}%` : 0,
-                  transition: `height 0.7s cubic-bezier(0.22,1,0.36,1) ${i * 70}ms`,
-                }}
-              />
-            </div>
+          <path
+            d={pathD}
+            fill="none"
+            stroke={color}
+            strokeWidth={2}
+            vectorEffect="non-scaling-stroke"
+            style={{
+              strokeDasharray: 1400,
+              strokeDashoffset: animate ? 0 : 1400,
+              transition: 'stroke-dashoffset 1s cubic-bezier(0.22,1,0.36,1)',
+            }}
+          />
+          {points.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={3}
+              fill={color}
+              vectorEffect="non-scaling-stroke"
+              style={{ opacity: animate ? 1 : 0, transition: `opacity 0.3s ${i * 15}ms` }}
+            />
           ))}
-        </div>
-        <div
-          className="absolute inset-x-0 bottom-0 flex justify-between gap-2"
-          style={{ height: 24 }}
-        >
-          {data.map((d) => (
-            <span
-              key={d.label}
-              className="flex-1 text-center font-sans"
-              style={{ fontSize: 14, lineHeight: '20px', color: '#8A98A3' }}
-            >
-              {d.label}
+        </svg>
+        <div className="absolute inset-x-0 bottom-0 flex justify-between" style={{ height: 24 }}>
+          {xLabelIdx.map((i) => (
+            <span key={i} className="font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
+              {data[i]?.label}
             </span>
           ))}
         </div>
@@ -134,21 +163,17 @@ function RetrievalBarChart({
   );
 }
 
-function RecordsByTypeDonut({
-  data,
-  animate,
-}: {
-  data: { label: string; value: number; color: string }[];
-  animate: boolean;
-}) {
-  const total = data.reduce((sum, d) => sum + d.value, 0) || 1;
-  const radius = 60;
-  const strokeWidth = 24;
+// ── Record requests donut ────────────────────────────────────────────────────
+
+function RequestsDonutChart({ animate }: { animate: boolean }) {
+  const total = RECORD_REQUESTS_TOTAL || 1;
+  const radius = 54;
+  const strokeWidth = 20;
   const circumference = 2 * Math.PI * radius;
   const gapPx = 3;
 
-  type Segment = (typeof data)[number] & { length: number; offset: number };
-  const { segments } = data.reduce<{ cumulative: number; segments: Segment[] }>(
+  type Seg = (typeof RECORD_REQUESTS_BREAKDOWN)[number] & { length: number; offset: number };
+  const { segments } = RECORD_REQUESTS_BREAKDOWN.reduce<{ cumulative: number; segments: Seg[] }>(
     (acc, d) => {
       const rawLength = (d.value / total) * circumference;
       const offset = -(acc.cumulative / total) * circumference;
@@ -161,45 +186,58 @@ function RecordsByTypeDonut({
   );
 
   return (
-    <div className="mt-2 flex flex-col items-center gap-5">
-      <svg
-        viewBox="0 0 160 160"
-        style={{ width: 180, height: 180 }}
-        role="img"
-        aria-label="Records by type donut chart"
+    <div className="mt-2 flex items-center gap-5">
+      <div
+        className="relative flex shrink-0 items-center justify-center"
+        style={{ width: 150, height: 150 }}
       >
-        <g transform="rotate(-90 80 80)">
-          {segments.map((seg, i) => (
-            <circle
-              key={seg.label}
-              cx={80}
-              cy={80}
-              r={radius}
-              fill="none"
-              stroke={seg.color}
-              strokeWidth={strokeWidth}
-              strokeLinecap="butt"
-              strokeDasharray={`${animate ? seg.length : 0} ${circumference}`}
-              strokeDashoffset={seg.offset}
-              style={{
-                transition: `stroke-dasharray 0.8s cubic-bezier(0.22,1,0.36,1) ${i * 120}ms`,
-              }}
-            />
-          ))}
-        </g>
-      </svg>
-      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-        {data.map((d) => (
-          <div key={d.label} className="flex items-center gap-1.5">
+        <svg
+          viewBox="0 0 128 128"
+          style={{ width: 150, height: 150 }}
+          role="img"
+          aria-label="Record requests donut chart"
+        >
+          <g transform="rotate(-90 64 64)">
+            {segments.map((seg, i) => (
+              <circle
+                key={seg.label}
+                cx={64}
+                cy={64}
+                r={radius}
+                fill="none"
+                stroke={seg.color}
+                strokeWidth={strokeWidth}
+                strokeLinecap="butt"
+                strokeDasharray={`${animate ? seg.length : 0} ${circumference}`}
+                strokeDashoffset={seg.offset}
+                style={{
+                  transition: `stroke-dasharray 0.8s cubic-bezier(0.22,1,0.36,1) ${i * 120}ms`,
+                }}
+              />
+            ))}
+          </g>
+        </svg>
+        <div className="absolute flex flex-col items-center">
+          <span className="font-display font-bold" style={{ fontSize: 24, color: '#0D2630' }}>
+            {total}
+          </span>
+          <span style={{ fontSize: 14, color: '#8A98A3' }}>Total</span>
+        </div>
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-2.5">
+        {RECORD_REQUESTS_BREAKDOWN.map((d) => (
+          <div key={d.label} className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className="size-2.5 shrink-0 rounded-full" style={{ background: d.color }} />
+              <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                {d.label}
+              </span>
+            </div>
             <span
-              className="shrink-0 rounded-[3px]"
-              style={{ width: 10, height: 10, background: d.color }}
-            />
-            <span
-              className="font-sans"
-              style={{ fontSize: 14, lineHeight: '20px', color: d.color }}
+              className="shrink-0 font-sans font-medium"
+              style={{ fontSize: 14, color: '#0D2630' }}
             >
-              {d.label}
+              {d.value} ({d.percent.toFixed(1)}%)
             </span>
           </div>
         ))}
@@ -208,32 +246,77 @@ function RecordsByTypeDonut({
   );
 }
 
+// ── Department usage horizontal bars ─────────────────────────────────────────
+
+function DepartmentUsageBars({ animate }: { animate: boolean }) {
+  const maxValue = Math.max(...DEPARTMENT_USAGE.map((d) => d.count), 1);
+  const step = Math.max(100, Math.ceil(maxValue / 5 / 100) * 100);
+  const niceMax = step * 5;
+  const ticks = Array.from({ length: 6 }, (_, i) => i * step);
+
+  return (
+    <div className="mt-2 flex flex-col gap-3">
+      {DEPARTMENT_USAGE.map((d, i) => (
+        <div key={d.department} className="flex items-center gap-3">
+          <span
+            className="w-32 shrink-0 truncate text-right font-sans"
+            style={{ fontSize: 14, color: '#4A7080' }}
+          >
+            {d.department}
+          </span>
+          <div
+            className="relative h-5 min-w-0 flex-1 rounded-[4px]"
+            style={{ background: 'rgba(139,92,246,0.08)' }}
+          >
+            <div
+              className="h-full rounded-[4px]"
+              style={{
+                width: animate ? `${(d.count / niceMax) * 100}%` : 0,
+                background: '#8B5CF6',
+                transition: `width 0.7s cubic-bezier(0.22,1,0.36,1) ${i * 60}ms`,
+              }}
+            />
+          </div>
+          <span
+            className="w-12 shrink-0 font-sans font-medium"
+            style={{ fontSize: 14, color: '#0D2630' }}
+          >
+            {d.count}
+          </span>
+        </div>
+      ))}
+      <div className="mt-1 flex items-center gap-3">
+        <span className="w-32 shrink-0" aria-hidden="true" />
+        <div className="flex min-w-0 flex-1 justify-between">
+          {ticks.map((t) => (
+            <span key={t} className="font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
+              {t}
+            </span>
+          ))}
+        </div>
+        <span className="w-12 shrink-0" aria-hidden="true" />
+      </div>
+    </div>
+  );
+}
+
+// ── Page ───────────────────────────────────────────────────────────────────────
+
 export function MedicalRecordsReportsWorkspace() {
   const toast = useToast();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [period, setPeriod] = useState<ReportPeriod>('this-week');
-  const [periodMenuOpen, setPeriodMenuOpen] = useState(false);
   const [animateCharts, setAnimateCharts] = useState(false);
-  const periodMenuRef = useRef<HTMLDivElement>(null);
+  const [dateFrom, setDateFrom] = useState(() => toDateInputValue(new Date(2026, 5, 1)));
+  const [dateTo, setDateTo] = useState(() => toDateInputValue(new Date(2026, 5, 30)));
+  const [officer, setOfficer] = useState('');
+  const [department, setDepartment] = useState('');
+  const [recordStatus, setRecordStatus] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rows, setRows] = useState<MedicalRecordActivity[]>(MEDICAL_RECORDS_ACTIVITY);
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
     return () => clearTimeout(t);
-  }, []);
-
-  function handleRetry() {
-    setPageState('loading');
-    setTimeout(() => setPageState('loaded'), 800);
-  }
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (periodMenuRef.current && !periodMenuRef.current.contains(e.target as Node)) {
-        setPeriodMenuOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
   useEffect(() => {
@@ -248,130 +331,138 @@ export function MedicalRecordsReportsWorkspace() {
       cancelAnimationFrame(raf2);
       setAnimateCharts(false);
     };
-  }, [pageState, period]);
+  }, [pageState]);
 
-  const stats = MEDICAL_RECORDS_REPORT_STATS[period];
-  const retrievalData = RECORDS_RETRIEVED[period];
-  const typeData = RECORDS_BY_TYPE[period];
-  const departmentRows = DEPARTMENT_ACTIVITY[period];
-  const periodLabel = REPORT_PERIODS.find((p) => p.key === period)?.label ?? 'This Week';
-
-  function handleExportCSV() {
-    const rows = [
-      [
-        'Department',
-        'Requests Received',
-        'Documents Uploaded',
-        'Avg Turnaround',
-        'Fulfillment Rate',
-      ],
-      ...departmentRows.map((r) => [
-        r.department,
-        String(r.requestsReceived),
-        String(r.documentsUploaded),
-        r.avgTurnaround,
-        r.fulfillmentRate,
-      ]),
-    ];
-    downloadCSV(`medical-records-department-activity-${period}.csv`, rows);
-    toast.success('Export ready', `${periodLabel} department activity downloaded as CSV.`);
+  function handleRetry() {
+    setPageState('loading');
+    setTimeout(() => setPageState('loaded'), 800);
   }
 
+  function handleReset() {
+    setDateFrom(toDateInputValue(new Date(2026, 5, 1)));
+    setDateTo(toDateInputValue(new Date(2026, 5, 30)));
+    setOfficer('');
+    setDepartment('');
+    setRecordStatus('');
+    setRows(MEDICAL_RECORDS_ACTIVITY);
+    setCurrentPage(1);
+    toast.info('Filters reset', 'Showing all medical records activity.');
+  }
+
+  function handleApplyFilters() {
+    const filtered = MEDICAL_RECORDS_ACTIVITY.filter((r) => {
+      if (officer && r.retrievedBy !== officer) return false;
+      if (department && r.department !== department) return false;
+      if (recordStatus && r.status !== recordStatus) return false;
+      const d = r.date.slice(0, 10);
+      if (dateFrom && d < dateFrom) return false;
+      if (dateTo && d > dateTo) return false;
+      return true;
+    });
+    setRows(filtered);
+    setCurrentPage(1);
+    toast.success(
+      'Filters applied',
+      `${filtered.length} record${filtered.length !== 1 ? 's' : ''} match your filters.`,
+    );
+  }
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / ROWS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const pageStart = (safePage - 1) * ROWS_PER_PAGE;
+  const pageRows = rows.slice(pageStart, pageStart + ROWS_PER_PAGE);
+
   function handleExportPDF() {
-    const rowsHtml = departmentRows
+    const rowsHtml = rows
       .map(
         (r) =>
-          `<tr><td>${escapeHtml(r.department)}</td><td>${r.requestsReceived}</td><td>${r.documentsUploaded}</td><td>${escapeHtml(r.avgTurnaround)}</td><td>${escapeHtml(r.fulfillmentRate)}</td></tr>`,
+          `<tr><td>${escapeHtml(r.mrn)}</td><td>${escapeHtml(r.patientName)}</td><td>${escapeHtml(r.recordType)}</td><td>${escapeHtml(r.retrievedBy)}</td><td>${escapeHtml(r.department)}</td><td>${formatHumanDate(r.date)}</td><td>${r.status}</td><td>${r.retrievalTime}</td></tr>`,
       )
       .join('');
     downloadPDF(
-      `medical-records-department-activity-${period}.pdf`,
-      `<h1>Medical Records Reports — ${escapeHtml(periodLabel)}</h1>
+      'medical-records-activity',
+      `<h1>Medical Records Activity</h1>
       <table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">
-        <thead><tr><th>Department</th><th>Requests Received</th><th>Documents Uploaded</th><th>Avg Turnaround</th><th>Fulfillment Rate</th></tr></thead>
+        <thead><tr><th>MRN</th><th>Patient</th><th>Record Type</th><th>Retrieved By</th><th>Department</th><th>Date</th><th>Status</th><th>Retrieval Time</th></tr></thead>
         <tbody>${rowsHtml}</tbody>
       </table>`,
     );
-    toast.success('Export ready', `${periodLabel} department activity downloaded as PDF.`);
+    toast.success('Export ready', 'Medical Records Activity downloaded as PDF.');
+  }
+
+  function handleExportExcel() {
+    const csvRows = [
+      [
+        'MRN',
+        'Patient',
+        'Record Type',
+        'Retrieved By',
+        'Department',
+        'Date',
+        'Status',
+        'Retrieval Time',
+      ],
+      ...rows.map((r) => [
+        r.mrn,
+        r.patientName,
+        r.recordType,
+        r.retrievedBy,
+        r.department,
+        formatHumanDate(r.date),
+        r.status,
+        r.retrievalTime,
+      ]),
+    ];
+    downloadCSV('medical-records-activity-excel', csvRows);
+    toast.success('Export ready', 'Medical Records Activity downloaded for Excel.');
+  }
+
+  function handleExportCSV() {
+    const csvRows = [
+      [
+        'MRN',
+        'Patient',
+        'Record Type',
+        'Retrieved By',
+        'Department',
+        'Date',
+        'Status',
+        'Retrieval Time',
+      ],
+      ...rows.map((r) => [
+        r.mrn,
+        r.patientName,
+        r.recordType,
+        r.retrievedBy,
+        r.department,
+        formatHumanDate(r.date),
+        r.status,
+        r.retrievalTime,
+      ]),
+    ];
+    downloadCSV('medical-records-activity', csvRows);
+    toast.success('Export ready', 'Medical Records Activity downloaded as CSV.');
   }
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
-        <div className="mx-auto max-w-[1200px] px-4 py-4 sm:px-6 sm:py-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1
-                className="font-display font-semibold"
-                style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
-              >
-                Medical Records Reports
-              </h1>
-              <p
-                className="mt-0.5 font-sans"
-                style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-              >
-                Records retrieval volume, turnaround time, and archival activity
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2.5">
-              <div className="relative" ref={periodMenuRef}>
-                <button
-                  type="button"
-                  onClick={() => setPeriodMenuOpen((v) => !v)}
-                  aria-expanded={periodMenuOpen}
-                  className={`flex items-center gap-2 rounded-[10px] px-3.5 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                  style={{
-                    height: 44,
-                    background: '#FFFFFF',
-                    border: '1px solid rgba(0,100,130,0.15)',
-                    color: '#0D2630',
-                    fontSize: 14,
-                  }}
-                >
-                  {periodLabel}
-                  <ChevronDown style={{ width: 15, height: 15, color: '#4A7080' }} />
-                </button>
-                {periodMenuOpen && (
-                  <div
-                    className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-40 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                    style={{
-                      border: '1px solid rgba(0,100,130,0.15)',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
-                    }}
-                  >
-                    {REPORT_PERIODS.map((p) => (
-                      <button
-                        key={p.key}
-                        type="button"
-                        onClick={() => {
-                          setPeriod(p.key);
-                          setPeriodMenuOpen(false);
-                        }}
-                        className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                        style={{
-                          fontSize: 14,
-                          color: p.key === period ? '#00B4D8' : '#2F3A40',
-                          fontWeight: p.key === period ? 600 : 400,
-                        }}
-                      >
-                        {p.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <ExportMenu
-                onExportCSV={handleExportCSV}
-                onExportPDF={handleExportPDF}
-                variant="button"
-              />
-            </div>
-          </div>
+        <div className="mx-auto max-w-[1440px] px-4 py-4 sm:px-6 sm:py-5">
+          <h1
+            className="font-display font-semibold"
+            style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
+          >
+            Medical Records Reports
+          </h1>
+          <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
+            Monitor record management performance and activities.
+          </p>
 
           {pageState === 'error' ? (
-            <div className="flex min-h-[320px] flex-col items-center justify-center gap-3 py-10 text-center">
+            <div
+              className="mt-5 flex flex-col items-center justify-center gap-3 rounded-[12px] py-16 text-center"
+              style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+            >
               <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
               <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
                 Failed to load medical records reports
@@ -379,7 +470,7 @@ export function MedicalRecordsReportsWorkspace() {
               <button
                 type="button"
                 onClick={handleRetry}
-                className={`flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
+                className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   height: 40,
                   borderRadius: 12,
@@ -394,12 +485,13 @@ export function MedicalRecordsReportsWorkspace() {
             </div>
           ) : (
             <>
-              <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+              {/* ── Stat cards ─────────────────────────────────────────────── */}
+              <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
                 {pageState === 'loading'
-                  ? Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)
-                  : stats.map((stat) => (
+                  ? Array.from({ length: 6 }).map((_, i) => <SkeletonStatCard key={i} />)
+                  : REPORT_STATS.map((stat) => (
                       <div
-                        key={stat.label}
+                        key={stat.id}
                         className="flex flex-col p-4"
                         style={{
                           borderRadius: 12,
@@ -407,15 +499,20 @@ export function MedicalRecordsReportsWorkspace() {
                           background: '#FFFFFF',
                         }}
                       >
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="flex size-9 shrink-0 items-center justify-center rounded-full"
+                            style={{ background: stat.iconBg }}
+                          >
+                            <stat.icon style={{ width: 16, height: 16, color: stat.color }} />
+                          </div>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {stat.label}
+                          </p>
+                        </div>
                         <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
-                        >
-                          {stat.label}
-                        </p>
-                        <p
-                          className="font-display mt-1.5 font-semibold"
-                          style={{ fontSize: 28, lineHeight: '36px', color: '#0D2630' }}
+                          className="font-display mt-2 font-semibold"
+                          style={{ fontSize: 24, color: '#0D2630' }}
                         >
                           {stat.value}
                         </p>
@@ -423,19 +520,132 @@ export function MedicalRecordsReportsWorkspace() {
                           className="mt-1 font-sans font-medium"
                           style={{
                             fontSize: 14,
-                            lineHeight: '20px',
                             color: stat.direction === 'up' ? '#16A34A' : '#DC2626',
                           }}
                         >
-                          {stat.delta} vs last period
+                          {stat.direction === 'up' ? '↑' : '↓'} {stat.deltaPercent}% from last month
                         </p>
                       </div>
                     ))}
               </div>
 
-              <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {/* ── Filters ────────────────────────────────────────────────── */}
+              <div
+                className="mt-5 rounded-[12px] p-4 sm:p-5"
+                style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+              >
+                <h2
+                  className="font-display font-semibold"
+                  style={{ fontSize: 16, color: '#0D2630' }}
+                >
+                  Filters
+                </h2>
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="sm:col-span-2 lg:col-span-1">
+                    <label
+                      className="mb-1.5 block font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      Date Range
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <div className="min-w-0 flex-1">
+                        <FormDateInput
+                          value={dateFrom}
+                          onChange={(e) => setDateFrom(e.target.value)}
+                          aria-label="From date"
+                        />
+                      </div>
+                      <span className="shrink-0" style={{ fontSize: 14, color: '#8A98A3' }}>
+                        –
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <FormDateInput
+                          value={dateTo}
+                          onChange={(e) => setDateTo(e.target.value)}
+                          aria-label="To date"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label
+                      className="mb-1.5 block font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      Officer
+                    </label>
+                    <FormSelect
+                      id="report-officer"
+                      value={officer}
+                      onChange={setOfficer}
+                      options={OFFICER_OPTIONS}
+                      placeholder="All Officers"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="mb-1.5 block font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      Department
+                    </label>
+                    <FormSelect
+                      id="report-department"
+                      value={department}
+                      onChange={setDepartment}
+                      options={REPORT_DEPARTMENT_OPTIONS}
+                      placeholder="All Departments"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className="mb-1.5 block font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      Record Status
+                    </label>
+                    <FormSelect
+                      id="report-status"
+                      value={recordStatus}
+                      onChange={setRecordStatus}
+                      options={RECORD_STATUS_OPTIONS}
+                      placeholder="All Status"
+                    />
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                    style={{
+                      fontSize: 14,
+                      color: '#0D2630',
+                      border: '1px solid rgba(0,100,130,0.2)',
+                    }}
+                  >
+                    <RefreshCw style={{ width: 15, height: 15 }} />
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleApplyFilters}
+                    className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                    style={{ fontSize: 14, background: '#00B4D8' }}
+                  >
+                    <FilterIcon style={{ width: 15, height: 15 }} />
+                    Apply Filters
+                  </button>
+                </div>
+              </div>
+
+              {/* ── Charts ─────────────────────────────────────────────────── */}
+              <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {pageState === 'loading' ? (
                   <>
+                    <SkeletonChartCard />
+                    <SkeletonChartCard />
                     <SkeletonChartCard />
                     <SkeletonChartCard />
                   </>
@@ -451,11 +661,15 @@ export function MedicalRecordsReportsWorkspace() {
                     >
                       <p
                         className="font-display font-semibold"
-                        style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                        style={{ fontSize: 18, color: '#0D2630' }}
                       >
-                        Records Retrieved ({periodLabel})
+                        Retrieval Trend
                       </p>
-                      <RetrievalBarChart data={retrievalData} animate={animateCharts} />
+                      <LineTrendChart
+                        data={RETRIEVAL_TREND}
+                        color="#3B82F6"
+                        animate={animateCharts}
+                      />
                     </div>
                     <div
                       className="p-4"
@@ -467,138 +681,376 @@ export function MedicalRecordsReportsWorkspace() {
                     >
                       <p
                         className="font-display font-semibold"
-                        style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                        style={{ fontSize: 18, color: '#0D2630' }}
                       >
-                        Records by Type ({periodLabel})
+                        Archive Trend
                       </p>
-                      <RecordsByTypeDonut data={typeData} animate={animateCharts} />
+                      <LineTrendChart
+                        data={ARCHIVE_TREND}
+                        color="#22C55E"
+                        animate={animateCharts}
+                      />
+                    </div>
+                    <div
+                      className="p-4"
+                      style={{
+                        borderRadius: 12,
+                        border: '1px solid rgba(0,100,130,0.12)',
+                        background: '#FFFFFF',
+                      }}
+                    >
+                      <p
+                        className="font-display font-semibold"
+                        style={{ fontSize: 18, color: '#0D2630' }}
+                      >
+                        Record Requests
+                      </p>
+                      <RequestsDonutChart animate={animateCharts} />
+                    </div>
+                    <div
+                      className="p-4"
+                      style={{
+                        borderRadius: 12,
+                        border: '1px solid rgba(0,100,130,0.12)',
+                        background: '#FFFFFF',
+                      }}
+                    >
+                      <p
+                        className="font-display font-semibold"
+                        style={{ fontSize: 18, color: '#0D2630' }}
+                      >
+                        Department Usage (Records Retrieved)
+                      </p>
+                      <DepartmentUsageBars animate={animateCharts} />
                     </div>
                   </>
                 )}
               </div>
 
-              <div className="mt-6">
-                <div
-                  className="px-4 py-4 sm:px-5"
-                  style={{
-                    borderRadius: '12px 12px 0 0',
-                    border: '1px solid rgba(0,100,130,0.12)',
-                    borderBottom: 'none',
-                    background: '#FFFFFF',
-                  }}
-                >
-                  <p
+              {/* ── Activity table ─────────────────────────────────────────── */}
+              <div className="mt-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2
                     className="font-display font-semibold"
-                    style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
+                    style={{ fontSize: 18, color: '#0D2630' }}
                   >
-                    Department Activity
-                  </p>
-                </div>
-                <div
-                  className="overflow-x-auto scroll-smooth"
-                  style={{
-                    borderRadius: '0 0 12px 12px',
-                    border: '1px solid rgba(0,100,130,0.12)',
-                  }}
-                >
-                  <div className="min-w-[720px]">
-                    <div
-                      className="flex"
+                    Medical Records Activity
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleExportPDF}
+                      className="flex h-10 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                       style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #E6F8FD',
+                        fontSize: 14,
+                        color: '#0D2630',
+                        border: '1px solid rgba(0,100,130,0.2)',
                       }}
                     >
-                      <div className="min-w-0 flex-1 py-2.5 pr-2 pl-4">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Department
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Requests
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Documents
-                        </span>
-                      </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Avg Turnaround
-                        </span>
-                      </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-5 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Fulfillment
-                        </span>
-                      </div>
-                    </div>
-                    {(pageState === 'loading' ? [] : departmentRows).map((row) => (
+                      <FileText style={{ width: 15, height: 15, color: '#EF4444' }} />
+                      Export PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExportExcel}
+                      className="flex h-10 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                      style={{
+                        fontSize: 14,
+                        color: '#0D2630',
+                        border: '1px solid rgba(0,100,130,0.2)',
+                      }}
+                    >
+                      <Sheet style={{ width: 15, height: 15, color: '#22C55E' }} />
+                      Export Excel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExportCSV}
+                      className="flex h-10 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                      style={{
+                        fontSize: 14,
+                        color: '#0D2630',
+                        border: '1px solid rgba(0,100,130,0.2)',
+                      }}
+                    >
+                      <FileDown style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                      Export CSV
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  className="mt-3 rounded-[12px] p-4 sm:p-5"
+                  style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+                >
+                  <div className="overflow-x-auto scroll-smooth">
+                    <div className="min-w-[1180px]">
                       <div
-                        key={row.department}
-                        className="flex items-center"
+                        className="flex rounded-t-[8px]"
                         style={{
-                          borderBottom: '1px solid rgba(0,100,130,0.08)',
-                          background: '#FFFFFF',
+                          background: 'rgba(226,237,241,0.4)',
+                          borderBottom: '1px solid #E6F8FD',
                         }}
                       >
-                        <div className="min-w-0 flex-1 py-3 pr-2 pl-4">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
+                        <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
                           >
-                            {row.department}
-                          </p>
+                            MRN
+                          </span>
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2 text-right">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{row.requestsReceived}</p>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2 text-right">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{row.documentsUploaded}</p>
-                        </div>
-                        <div className="w-40 shrink-0 py-3 pr-2 text-right">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{row.avgTurnaround}</p>
-                        </div>
-                        <div className="w-40 shrink-0 py-3 pr-5 text-right">
-                          <p
-                            className="font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
+                        <div className="min-w-[160px] flex-1 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
                           >
-                            {row.fulfillmentRate}
-                          </p>
+                            Patient
+                          </span>
+                        </div>
+                        <div className="w-44 shrink-0 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Record Type
+                          </span>
+                        </div>
+                        <div className="w-36 shrink-0 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Retrieved By
+                          </span>
+                        </div>
+                        <div className="w-40 shrink-0 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Department
+                          </span>
+                        </div>
+                        <div className="w-32 shrink-0 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Date
+                          </span>
+                        </div>
+                        <div className="w-28 shrink-0 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Status
+                          </span>
+                        </div>
+                        <div className="w-36 shrink-0 py-2.5 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Retrieval Time
+                          </span>
+                        </div>
+                        <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Actions
+                          </span>
                         </div>
                       </div>
-                    ))}
-                    {pageState === 'loading' &&
-                      Array.from({ length: 5 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                        >
-                          <div className="min-w-0 flex-1 py-3 pr-2 pl-4">
-                            <div className="h-4 w-40 animate-pulse rounded bg-slate-100" />
-                          </div>
+
+                      {pageRows.length === 0 && (
+                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                          <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                            No activity matches your filters
+                          </p>
                         </div>
-                      ))}
+                      )}
+
+                      {pageRows.map((r) => {
+                        const cfg = STATUS_CFG[r.status];
+                        return (
+                          <div
+                            key={r.id}
+                            className="flex items-center"
+                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                          >
+                            <div className="w-32 shrink-0 py-3 pr-2 pl-3">
+                              <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                {r.mrn}
+                              </p>
+                            </div>
+                            <div className="flex min-w-[160px] flex-1 items-center gap-2.5 py-3 pr-2">
+                              <div
+                                className="flex size-8 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                                style={{ background: r.avatarBg }}
+                              >
+                                {r.initials}
+                              </div>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {r.patientName}
+                              </p>
+                            </div>
+                            <div className="w-44 shrink-0 py-3 pr-2">
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {r.recordType}
+                              </p>
+                            </div>
+                            <div className="w-36 shrink-0 py-3 pr-2">
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {r.retrievedBy}
+                              </p>
+                            </div>
+                            <div className="w-40 shrink-0 py-3 pr-2">
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {r.department}
+                              </p>
+                            </div>
+                            <div className="w-32 shrink-0 py-3 pr-2">
+                              <p style={{ fontSize: 14, color: '#4A7080' }}>
+                                {formatHumanDate(r.date)}
+                              </p>
+                              <p style={{ fontSize: 14, color: '#8A98A3' }}>{formatTime(r.date)}</p>
+                            </div>
+                            <div className="w-28 shrink-0 py-3 pr-2">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                                style={{
+                                  fontSize: 14,
+                                  whiteSpace: 'nowrap',
+                                  color: cfg.color,
+                                  border: `1px solid ${cfg.border}`,
+                                  background: cfg.bg,
+                                }}
+                              >
+                                {r.status}
+                              </span>
+                            </div>
+                            <div className="w-36 shrink-0 py-3 pr-2">
+                              <p style={{ fontSize: 14, color: '#4A7080' }}>{r.retrievalTime}</p>
+                            </div>
+                            <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  toast.info(
+                                    'Viewing record',
+                                    `Opening ${r.patientName}'s record activity.`,
+                                  )
+                                }
+                                aria-label={`View ${r.patientName}`}
+                                className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                              >
+                                <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  toast.info('More actions', `Additional actions for ${r.mrn}.`)
+                                }
+                                aria-label={`More actions for ${r.mrn}`}
+                                className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                              >
+                                <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
+
+                  {rows.length > 0 && (
+                    <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+                      <p style={{ fontSize: 14, color: '#4A7080' }}>
+                        Showing {pageStart + 1} to{' '}
+                        {Math.min(pageStart + ROWS_PER_PAGE, rows.length)} of {rows.length} records
+                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          disabled={safePage === 1}
+                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                          className="flex size-9 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                          style={{ border: '1px solid rgba(0,100,130,0.18)', color: '#4A7080' }}
+                          aria-label="Previous page"
+                        >
+                          ‹
+                        </button>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                          .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                          .reduce<(number | 'ellipsis')[]>((acc, p) => {
+                            if (acc.length > 0 && typeof acc[acc.length - 1] === 'number') {
+                              const prev = acc[acc.length - 1] as number;
+                              if (p - prev > 1) acc.push('ellipsis');
+                            }
+                            acc.push(p);
+                            return acc;
+                          }, [])
+                          .map((p, i) =>
+                            p === 'ellipsis' ? (
+                              <span
+                                key={`e-${i}`}
+                                style={{ fontSize: 14, color: '#8A98A3' }}
+                                className="px-1"
+                              >
+                                …
+                              </span>
+                            ) : (
+                              <button
+                                key={p}
+                                type="button"
+                                onClick={() => setCurrentPage(p)}
+                                className="flex size-9 items-center justify-center rounded-[8px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                style={{
+                                  fontSize: 14,
+                                  border: `1px solid ${p === safePage ? '#00B4D8' : 'rgba(0,100,130,0.18)'}`,
+                                  color: p === safePage ? '#00B4D8' : '#4A7080',
+                                  background: p === safePage ? '#E6F8FD' : 'transparent',
+                                }}
+                              >
+                                {p}
+                              </button>
+                            ),
+                          )}
+                        <button
+                          type="button"
+                          disabled={safePage === totalPages}
+                          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                          className="flex size-9 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                          style={{ border: '1px solid rgba(0,100,130,0.18)', color: '#4A7080' }}
+                          aria-label="Next page"
+                        >
+                          ›
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span style={{ fontSize: 14, color: '#4A7080' }}>Rows per page:</span>
+                        <select
+                          value={ROWS_PER_PAGE}
+                          disabled
+                          className="h-9 rounded-[8px] px-2 font-sans outline-none"
+                          style={{
+                            fontSize: 14,
+                            border: '1px solid rgba(0,100,130,0.18)',
+                            color: '#0D2630',
+                          }}
+                        >
+                          <option value={ROWS_PER_PAGE}>{ROWS_PER_PAGE}</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </>
