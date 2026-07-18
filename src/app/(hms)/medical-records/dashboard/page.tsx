@@ -198,11 +198,11 @@ export default function MedicalRecordsDashboardPage() {
                 </div>
               </div>
 
-              {/* ── Bottom row ────────────────────────────────────────────── */}
-              <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
+              {/* ── Recent Record Requests + Recently Retrieved ─────────────── */}
+              <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-[8fr_7fr]">
                 {/* Recent Record Requests */}
                 <div
-                  className="rounded-[12px] p-4 sm:p-5 lg:col-span-1"
+                  className="rounded-[12px] p-4 sm:p-5"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
                   <div className="flex items-center justify-between">
@@ -274,7 +274,7 @@ export default function MedicalRecordsDashboardPage() {
 
                 {/* Recently Retrieved Records */}
                 <div
-                  className="rounded-[12px] p-4 sm:p-5 lg:col-span-1"
+                  className="rounded-[12px] p-4 sm:p-5"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
                   <div className="flex items-center justify-between">
@@ -329,10 +329,12 @@ export default function MedicalRecordsDashboardPage() {
                       ))}
                   </div>
                 </div>
+              </div>
 
-                {/* System Announcements */}
+              {/* ── System Announcements ─────────────────────────────────────── */}
+              <div className="mt-5">
                 <div
-                  className="rounded-[12px] p-4 sm:p-5 lg:col-span-1"
+                  className="rounded-[12px] p-4 sm:p-5"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
                   <div className="flex items-center justify-between">
@@ -343,18 +345,24 @@ export default function MedicalRecordsDashboardPage() {
                       System Announcements
                     </h2>
                   </div>
-                  <div className="mt-3 flex flex-col gap-3">
-                    {(pageState === 'loading' ? [] : SYSTEM_ANNOUNCEMENTS).map((ann) => {
+                  <div className="mt-3 flex flex-col">
+                    {(pageState === 'loading' ? [] : SYSTEM_ANNOUNCEMENTS).map((ann, i) => {
                       const Icon = ann.icon;
                       return (
-                        <div key={ann.id} className="flex items-start gap-2.5">
+                        <div
+                          key={ann.id}
+                          className="flex items-start gap-3 py-3"
+                          style={
+                            i > 0 ? { borderTop: '1px solid rgba(0,100,130,0.08)' } : undefined
+                          }
+                        >
                           <div
-                            className="flex size-8 shrink-0 items-center justify-center rounded-full"
+                            className="flex size-9 shrink-0 items-center justify-center rounded-full"
                             style={{ background: ann.iconBg }}
                           >
-                            <Icon style={{ width: 15, height: 15, color: ann.iconColor }} />
+                            <Icon style={{ width: 16, height: 16, color: ann.iconColor }} />
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             <p
                               className="font-sans font-medium"
                               style={{ fontSize: 14, color: '#0D2630' }}
@@ -362,16 +370,19 @@ export default function MedicalRecordsDashboardPage() {
                               {ann.title}
                             </p>
                             <p style={{ fontSize: 14, color: '#4A7080' }}>{ann.description}</p>
-                            <p className="mt-0.5" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {ann.date}
-                            </p>
                           </div>
+                          <p
+                            className="shrink-0 whitespace-nowrap"
+                            style={{ fontSize: 14, color: '#8A98A3' }}
+                          >
+                            {ann.date}
+                          </p>
                         </div>
                       );
                     })}
                     {pageState === 'loading' &&
                       Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} className="h-12 animate-pulse rounded-[10px] bg-slate-100" />
+                        <div key={i} className="h-14 animate-pulse rounded-[10px] bg-slate-100" />
                       ))}
                   </div>
                 </div>
