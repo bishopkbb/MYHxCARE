@@ -13,6 +13,7 @@ export const FormDateInput = forwardRef<HTMLInputElement, FormDateInputProps>(
         <input
           ref={ref}
           type="date"
+          lang="en-GB"
           {...props}
           className={cn(
             FORM_CONTROL_CLASS,

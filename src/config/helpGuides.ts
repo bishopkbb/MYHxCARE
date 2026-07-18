@@ -470,6 +470,34 @@ const QUEUE_MANAGEMENT_GUIDE: HelpGuide = {
   ],
 };
 
+const APPOINTMENT_SCHEDULING_GUIDE: HelpGuide = {
+  id: 'appointment-scheduling',
+  title: 'Appointment Scheduling',
+  intro: "Book, reschedule, or cancel a patient appointment against any doctor's calendar.",
+  sections: [
+    {
+      heading: 'Search Patient and the booking form',
+      body: 'Find the patient first, then fill in Department, Doctor, Visit Type, Date and Time — these are required before a slot can be booked. Appointment Mode and Reason for Visit are optional context.',
+    },
+    {
+      heading: 'Doctors panel and the calendar',
+      body: 'The Doctors list is a browsing aid — search by name and pick a card to jump the booking form to that doctor and department. The calendar itself always shows every provider so you can compare availability side by side.',
+    },
+    {
+      heading: 'Reading the calendar',
+      body: 'Colored blocks are existing appointments (see the legend for what each status means); a dashed "Available Slot" outline marks the exact date/time/doctor combination currently set in the form.',
+    },
+    {
+      heading: 'Day, Week and Month views',
+      body: "Day is the full schedule for one doctor's clinic. Week and Month summarize appointment counts for the doctor currently selected in the form — click any day to jump straight to its Day view.",
+    },
+    {
+      heading: 'Reschedule and Cancel',
+      body: 'Both require an existing appointment to be selected first — click any block in the calendar. Reschedule opens an inline date/time picker; Cancel marks it Cancelled without deleting its history.',
+    },
+  ],
+};
+
 const PATIENT_PROFILE_REGISTRATION_GUIDE: HelpGuide = {
   id: 'patient-profile-registration',
   title: 'Patient Profile',
@@ -859,6 +887,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/profile')) return PATIENT_PROFILE_REGISTRATION_GUIDE;
   if (pathname.startsWith('/registration/check-in')) return CHECK_IN_GUIDE;
   if (pathname.startsWith('/registration/queue')) return QUEUE_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/registration/appointments')) return APPOINTMENT_SCHEDULING_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
