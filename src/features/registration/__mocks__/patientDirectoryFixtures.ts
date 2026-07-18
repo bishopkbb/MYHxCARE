@@ -17,6 +17,8 @@ import type { SelectOption } from '@/features/registration/__mocks__/registerPat
 
 export type DirectoryPatientStatus = 'Active' | 'Checked-In' | 'Waiting' | 'Inactive' | 'Emergency';
 
+export type MaritalStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed';
+
 export type DirectoryPatient = {
   id: string;
   initials: string;
@@ -26,11 +28,14 @@ export type DirectoryPatient = {
   phone: string;
   email: string;
   mrn: string;
+  patientId: string;
   studentId: string;
   age: number;
   gender: 'Male' | 'Female';
   dateOfBirth: string;
   faculty: string;
+  maritalStatus: MaritalStatus;
+  nationality: string;
   lastVisit: string;
   status: DirectoryPatientStatus;
   category: string;
@@ -293,6 +298,24 @@ const LAST_VISITS = [
 const CATEGORIES = ['Student', 'Staff', 'Staff Dependent', 'Regular / Private', 'NHIS / Insurance'];
 const BLOOD_GROUPS = ['O+', 'O-', 'A+', 'A-', 'B+', 'AB+'];
 const INSURANCE_PROVIDERS = ['NHIS', 'Hygeia HMO', 'UNIZIK Staff Health Scheme', 'None'];
+const MARITAL_STATUSES: MaritalStatus[] = [
+  'Single',
+  'Single',
+  'Single',
+  'Married',
+  'Married',
+  'Divorced',
+  'Widowed',
+];
+const NATIONALITIES = [
+  'Nigerian',
+  'Nigerian',
+  'Nigerian',
+  'Nigerian',
+  'Nigerian',
+  'Ghanaian',
+  'Cameroonian',
+];
 
 function getInitialsFor(first: string, last: string): string {
   return `${first[0]}${last[0]}`.toUpperCase();
@@ -310,11 +333,14 @@ export const DIRECTORY_PATIENTS: DirectoryPatient[] = NAMES.map(([first, last], 
     phone: `080${3 + (i % 6)} ${String(100 + i * 7).padStart(3, '0')} ${String(1000 + i * 13).padStart(4, '0')}`,
     email: `${first.toLowerCase()}.${last.toLowerCase()}@email.com`,
     mrn: `MRN-2026-${String(500 - i).padStart(5, '0')}`,
+    patientId: `PT-${String(500 - i).padStart(6, '0')}`,
     studentId: `2024${String(1000 + i * 17).padStart(5, '0')}`,
     age,
     gender,
     dateOfBirth: `${dobYear}-${String(1 + (i % 12)).padStart(2, '0')}-${String(1 + (i % 27)).padStart(2, '0')}`,
     faculty: FACULTIES[i % FACULTIES.length] as string,
+    maritalStatus: MARITAL_STATUSES[i % MARITAL_STATUSES.length] as MaritalStatus,
+    nationality: NATIONALITIES[i % NATIONALITIES.length] as string,
     lastVisit: LAST_VISITS[i % LAST_VISITS.length] as string,
     status: STATUSES[i % STATUSES.length] as DirectoryPatientStatus,
     category: CATEGORIES[i % CATEGORIES.length] as string,

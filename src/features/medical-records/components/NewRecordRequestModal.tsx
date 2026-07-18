@@ -8,27 +8,14 @@ import { FormInput } from '@components/shared/FormInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { useToast } from '@/hooks/useToast';
 import { DIRECTORY_PATIENTS } from '@/features/registration/__mocks__/patientDirectoryFixtures';
-import {
-  REQUEST_TYPES,
-  type RecordRequest,
-  type RequestPriority,
-  type RequestType,
+import { ARCHIVED_RECORD_TYPES } from '@/features/medical-records/__mocks__/archivedRecordFixtures';
+import type {
+  RecordRequest,
+  RequestPriority,
 } from '@/features/medical-records/__mocks__/recordRequestFixtures';
 
-const DEPARTMENT_OPTIONS = [
-  'Medical Records',
-  'General Outpatient Clinic',
-  'Surgery',
-  'Medical Ward',
-  'Emergency Department',
-  'Radiology',
-  'Dental Clinic',
-  'Physiotherapy',
-  'Family Medicine',
-].map((d) => ({ value: d, label: d }));
-
 const PRIORITY_OPTIONS: { value: RequestPriority; label: string }[] = [
-  { value: 'Routine', label: 'Routine' },
+  { value: 'Normal', label: 'Normal' },
   { value: 'Urgent', label: 'Urgent' },
 ];
 
@@ -42,11 +29,9 @@ export function NewRecordRequestModal({
   const toast = useToast();
   const [patientId, setPatientId] = useState('');
   const [requestedBy, setRequestedBy] = useState('');
-  const [requesterType, setRequesterType] = useState<RequestType>('Internal');
-  const [department, setDepartment] = useState('Medical Records');
+  const [recordType, setRecordType] = useState('');
   const [purpose, setPurpose] = useState('');
-  const [priority, setPriority] = useState<RequestPriority>('Routine');
-  const [dateNeeded, setDateNeeded] = useState('');
+  const [priority, setPriority] = useState<RequestPriority>('Normal');
   const [submitted, setSubmitted] = useState(false);
 
   const patientOptions = DIRECTORY_PATIENTS.slice(0, 60).map((p) => ({
@@ -54,7 +39,7 @@ export function NewRecordRequestModal({
     label: `${p.name} — ${p.mrn}`,
   }));
 
-  const isValid = patientId && requestedBy.trim() && purpose.trim() && dateNeeded;
+  const isValid = patientId && requestedBy.trim() && recordType && purpose.trim();
 
   function handleSubmit() {
     setSubmitted(true);
@@ -62,20 +47,20 @@ export function NewRecordRequestModal({
     const patient = DIRECTORY_PATIENTS.find((p) => p.id === patientId);
     if (!patient) return;
 
-    const now = new Date().toISOString();
     const request: RecordRequest = {
       id: `req-new-${Date.now()}`,
-      requestNumber: `REQ-2026-${String(Math.floor(1000 + Math.random() * 8999))}`,
+      requestNumber: `REQ-2026-${String(Math.floor(10000 + Math.random() * 89999))}`,
       patientName: patient.name,
+      initials: patient.initials,
+      avatarBg: patient.avatarBg,
       mrn: patient.mrn,
+      recordType: recordType as RecordRequest['recordType'],
       requestedBy: requestedBy.trim(),
-      requesterType,
+      requestDate: new Date().toISOString(),
       purpose: purpose.trim(),
-      priority,
       status: 'Pending',
-      dateRequested: now,
-      dateNeeded: new Date(`${dateNeeded}T17:00:00`).toISOString(),
-      department,
+      priority,
+      notes: '',
     };
     onCreate(request);
     toast.success('Request submitted', `${request.requestNumber} logged for ${patient.name}.`);
@@ -147,13 +132,19 @@ export function NewRecordRequestModal({
                   hasError={submitted && !requestedBy.trim()}
                 />
               </FormField>
-              <FormField label="Requester Type" htmlFor="req-type" required>
+              <FormField
+                label="Record Type"
+                htmlFor="req-record-type"
+                required
+                error={submitted && !recordType ? 'Required' : undefined}
+              >
                 <FormSelect
-                  id="req-type"
-                  value={requesterType}
-                  onChange={(v) => setRequesterType(v as RequestType)}
-                  options={REQUEST_TYPES.map((t) => ({ value: t, label: t }))}
-                  placeholder="Select type"
+                  id="req-record-type"
+                  value={recordType}
+                  onChange={setRecordType}
+                  options={ARCHIVED_RECORD_TYPES.map((t) => ({ value: t, label: t }))}
+                  placeholder="Select record type"
+                  hasError={submitted && !recordType}
                 />
               </FormField>
             </div>
@@ -179,45 +170,15 @@ export function NewRecordRequestModal({
               />
             </FormField>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <FormField label="Priority" htmlFor="req-priority" required>
-                <FormSelect
-                  id="req-priority"
-                  value={priority}
-                  onChange={(v) => setPriority(v as RequestPriority)}
-                  options={PRIORITY_OPTIONS}
-                  placeholder="Select priority"
-                />
-              </FormField>
-              <FormField label="Department" htmlFor="req-department" required>
-                <FormSelect
-                  id="req-department"
-                  value={department}
-                  onChange={setDepartment}
-                  options={DEPARTMENT_OPTIONS}
-                  placeholder="Select department"
-                />
-              </FormField>
-              <FormField
-                label="Needed By"
-                htmlFor="req-date-needed"
-                required
-                error={submitted && !dateNeeded ? 'Required' : undefined}
-              >
-                <input
-                  id="req-date-needed"
-                  type="date"
-                  value={dateNeeded}
-                  onChange={(e) => setDateNeeded(e.target.value)}
-                  className="h-11 w-full rounded-[10px] px-3.5 font-sans transition-colors duration-150 focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8]/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                  style={{
-                    fontSize: 14,
-                    color: '#0D2630',
-                    border: `1px solid ${submitted && !dateNeeded ? '#EF4444' : 'rgba(0,100,130,0.18)'}`,
-                  }}
-                />
-              </FormField>
-            </div>
+            <FormField label="Priority" htmlFor="req-priority" required>
+              <FormSelect
+                id="req-priority"
+                value={priority}
+                onChange={(v) => setPriority(v as RequestPriority)}
+                options={PRIORITY_OPTIONS}
+                placeholder="Select priority"
+              />
+            </FormField>
           </div>
         </div>
 

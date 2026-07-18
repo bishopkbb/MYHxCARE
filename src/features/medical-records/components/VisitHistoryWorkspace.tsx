@@ -16,7 +16,7 @@ import {
   generateActivityFromVisits,
   generateVisitsForPatient,
 } from '@/features/medical-records/__mocks__/medicalRecordDetailFixtures';
-import { PatientBanner } from './PatientBanner';
+import { PatientBanner, toCuratedBannerPatient } from './PatientBanner';
 import { PatientPicker } from './PatientPicker';
 import { computeVisitSummary, VisitHistorySection } from './VisitHistorySection';
 
@@ -123,7 +123,9 @@ export function VisitHistoryWorkspace() {
             </div>
           ) : (
             <>
-              <PatientBanner patient={selectedPatient} />
+              <PatientBanner
+                patient={isCurated ? toCuratedBannerPatient(selectedPatient) : selectedPatient}
+              />
 
               <AllergyBanner allergies={allergies} className="mt-4" />
 

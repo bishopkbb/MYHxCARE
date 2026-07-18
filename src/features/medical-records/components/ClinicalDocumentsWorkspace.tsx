@@ -32,7 +32,7 @@ import {
   type ClinicalDocCategory,
   type ClinicalDocumentEntry,
 } from '@/features/medical-records/__mocks__/medicalRecordDetailFixtures';
-import { PatientBanner } from './PatientBanner';
+import { PatientBanner, toCuratedBannerPatient } from './PatientBanner';
 import { PatientPicker } from './PatientPicker';
 
 const CURATED_PATIENT_ID = 'dp-001';
@@ -373,7 +373,9 @@ export function ClinicalDocumentsWorkspace() {
             </div>
           ) : (
             <>
-              <PatientBanner patient={selectedPatient} />
+              <PatientBanner
+                patient={isCurated ? toCuratedBannerPatient(selectedPatient) : selectedPatient}
+              />
               <AllergyBanner allergies={allergies} className="mt-4" />
 
               {/* ── Category tabs ─────────────────────────────────────────── */}
