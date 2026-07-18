@@ -202,9 +202,13 @@ function PatientPicker({ onSelect }: { onSelect: (patient: DirectoryPatient) => 
                   {p.status}
                 </span>
               </div>
-              <div className="flex w-20 shrink-0 items-center justify-end py-3 pr-3">
+              <div
+                className="flex w-20 shrink-0 items-center justify-end py-3 pr-3"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <button
                   type="button"
+                  onClick={() => onSelect(p)}
                   aria-label={`View visit history for ${p.name}`}
                   className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 >
