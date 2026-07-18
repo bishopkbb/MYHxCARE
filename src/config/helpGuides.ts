@@ -498,6 +498,30 @@ const APPOINTMENT_SCHEDULING_GUIDE: HelpGuide = {
   ],
 };
 
+const VISIT_HISTORY_GUIDE: HelpGuide = {
+  id: 'visit-history',
+  title: 'Visit History',
+  intro: 'A filterable log of every encounter this patient has had, across every department.',
+  sections: [
+    {
+      heading: 'Filtering',
+      body: 'Narrow the list by Date Range, Department, Visit Type, or Status. "Filter" confirms how many visits currently match; the table itself already updates live as you change any filter.',
+    },
+    {
+      heading: 'Reading a visit',
+      body: 'Each row shows the department, the attending provider with their credentials, the visit type, and a short diagnosis summary. The eye icon opens that visit; the second icon downloads a summary for it.',
+    },
+    {
+      heading: 'Visit Summary',
+      body: "The panel on the right totals this patient's visits, departments, and emergency presentations at a glance — recomputed from the same visits shown in the table below.",
+    },
+    {
+      heading: 'Export',
+      body: 'Export produces a CSV or PDF of exactly the visits currently passing your filters, not the full unfiltered history.',
+    },
+  ],
+};
+
 const MEDICAL_RECORD_PATIENT_GUIDE: HelpGuide = {
   id: 'medical-record-patient',
   title: 'Medical Record',
@@ -931,6 +955,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/lab/orders')) return LAB_ORDERS_GUIDE;
   if (pathname.startsWith('/lab/results')) return LAB_RESULTS_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
+  if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;
   if (pathname.startsWith('/medical-records/patient')) return MEDICAL_RECORD_PATIENT_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;

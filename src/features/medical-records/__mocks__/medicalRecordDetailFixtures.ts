@@ -265,9 +265,11 @@ export type PatientVisit = {
   dateTime: string; // ISO
   department: string;
   doctor: string;
+  credentials: string;
   visitType: string;
+  diagnosisSummary: string;
   reason: string;
-  status: 'Completed' | 'Scheduled' | 'Cancelled';
+  status: 'Completed' | 'Reviewed' | 'Scheduled' | 'Cancelled';
 };
 
 export const PATIENT_VISITS: PatientVisit[] = [
@@ -276,35 +278,76 @@ export const PATIENT_VISITS: PatientVisit[] = [
     dateTime: atOffset(-1, 9, 0),
     department: 'General Outpatient Clinic',
     doctor: 'Dr. Jane Ezeonu (GP)',
-    visitType: 'General Consultation',
+    credentials: 'MBBS, FMCP',
+    visitType: 'Consultation',
+    diagnosisSummary: 'Acute upper respiratory infection, Fever',
     reason: 'Recurrent cough and mild wheezing',
     status: 'Completed',
   },
   {
     id: 'visit-002',
-    dateTime: atOffset(-6, 13, 0),
-    department: 'Radiology',
-    doctor: 'Radiology Dept.',
-    visitType: 'Imaging',
-    reason: 'Chest X-ray to rule out chest infection',
+    dateTime: atOffset(-1, 11, 5),
+    department: 'Laboratory',
+    doctor: 'Dr. Ifeanyi Okafor',
+    credentials: 'MBBS, FMCPath',
+    visitType: 'Lab Test',
+    diagnosisSummary: 'Full Blood Count, Malaria Parasite',
+    reason: 'Fever and generalized body weakness',
     status: 'Completed',
   },
   {
     id: 'visit-003',
-    dateTime: atOffset(-13, 10, 30),
-    department: 'General Outpatient Clinic',
-    doctor: 'Dr. Jane Ezeonu (GP)',
-    visitType: 'Follow-up Visit',
-    reason: 'Asthma review and inhaler technique check',
+    dateTime: atOffset(-1, 11, 40),
+    department: 'Pharmacy',
+    doctor: 'Pharmacist Chika M.',
+    credentials: 'RPh',
+    visitType: 'Medication',
+    diagnosisSummary: 'Paracetamol 500mg, Amoxicillin 500mg',
+    reason: 'Medication dispensing',
     status: 'Completed',
   },
   {
     id: 'visit-004',
+    dateTime: atOffset(-6, 14, 15),
+    department: 'Radiology',
+    doctor: 'Dr. Mary Uche',
+    credentials: 'MBBS, FWCR',
+    visitType: 'Imaging',
+    diagnosisSummary: 'Chest X-Ray',
+    reason: 'Chest X-ray to rule out chest infection',
+    status: 'Reviewed',
+  },
+  {
+    id: 'visit-005',
+    dateTime: atOffset(-13, 10, 5),
+    department: 'Dental Clinic',
+    doctor: 'Dr. Onyedika Umeh',
+    credentials: 'BDS',
+    visitType: 'Consultation',
+    diagnosisSummary: 'Dental caries',
+    reason: 'Routine dental checkup',
+    status: 'Completed',
+  },
+  {
+    id: 'visit-006',
     dateTime: atOffset(-21, 9, 0),
     department: 'General Outpatient Clinic',
     doctor: 'Dr. Jane Ezeonu (GP)',
-    visitType: 'Routine Checkup',
+    credentials: 'MBBS, FMCP',
+    visitType: 'Consultation',
+    diagnosisSummary: 'Gastritis',
     reason: 'New student medical screening',
+    status: 'Completed',
+  },
+  {
+    id: 'visit-007',
+    dateTime: atOffset(-45, 9, 12),
+    department: 'Emergency Department',
+    doctor: 'Dr. Samuel A.',
+    credentials: 'MBBS, FWACS',
+    visitType: 'Emergency',
+    diagnosisSummary: 'Severe headache, Nausea',
+    reason: 'Sudden onset severe headache',
     status: 'Completed',
   },
 ];

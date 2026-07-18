@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Visit History' };
+import { MedicalRecordView } from '@/features/medical-records/components/MedicalRecordView';
 
 export default function VisitHistoryPage() {
-  return (
-    <ComingSoon
-      title="Visit History"
-      description="A chronological log of every patient visit across all departments is being built."
-    />
-  );
+  return <MedicalRecordView initialTab="Visit History" />;
 }
