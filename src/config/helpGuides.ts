@@ -442,6 +442,34 @@ const CHECK_IN_GUIDE: HelpGuide = {
   ],
 };
 
+const QUEUE_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'queue-management',
+  title: 'Queue Management',
+  intro: 'Monitor every patient waiting across departments and prioritize urgent cases.',
+  sections: [
+    {
+      heading: 'Department tabs and filters',
+      body: 'Switch between departments with the tabs, then narrow further with the Clinic and Status filters or the search box (patient name, MRN, or queue number).',
+    },
+    {
+      heading: 'Reading the queue',
+      body: 'Wait Time updates live from each arrival time. Rows in red are Emergency patients — they are pulled to the top of clinical priority regardless of arrival order.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'Each row has three quick actions: Reassign (move to another department/clinic), Prioritize (flag as Emergency), and Check-In Complete (mark the visit as served).',
+    },
+    {
+      heading: 'Queue Details panel',
+      body: 'Selecting a row opens its full detail on the right — department, clinic, attending doctor, and a timestamped history of everything that happened to this queue entry.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: 'The bottom row mirrors the panel actions for whichever patient is currently selected, plus a shortcut to register a new walk-in patient from Check-In.',
+    },
+  ],
+};
+
 const PATIENT_PROFILE_REGISTRATION_GUIDE: HelpGuide = {
   id: 'patient-profile-registration',
   title: 'Patient Profile',
@@ -830,6 +858,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/directory')) return PATIENT_DIRECTORY_GUIDE;
   if (pathname.startsWith('/registration/profile')) return PATIENT_PROFILE_REGISTRATION_GUIDE;
   if (pathname.startsWith('/registration/check-in')) return CHECK_IN_GUIDE;
+  if (pathname.startsWith('/registration/queue')) return QUEUE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
