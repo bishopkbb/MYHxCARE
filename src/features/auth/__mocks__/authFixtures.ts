@@ -193,7 +193,7 @@ const MOCK_USERS: User[] = [
     workspaceRole: 'REGISTRATION_OFFICER',
     department: 'Patient Registration',
     departmentId: 'dept_patient_registration',
-    permissions: ['patients:read', 'patients:write', 'notifications:read'],
+    permissions: ['patients:read', 'patients:write', 'referrals:write', 'notifications:read'],
   },
 ];
 

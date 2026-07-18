@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Referral Management' };
+import { ReferralManagementWorkspace } from '@/features/registration/components/ReferralManagementWorkspace';
 
 export default function RegistrationReferralManagementPage() {
-  return (
-    <ComingSoon
-      title="Referral Management"
-      description="Tracking incoming and outgoing patient referrals at the point of registration is being built."
-    />
-  );
+  return <ReferralManagementWorkspace />;
 }
