@@ -689,7 +689,7 @@ export function ConsentFormsWorkspace() {
                 </div>
 
                 <div className="mt-4 overflow-x-auto scroll-smooth">
-                  <div className="min-w-[1100px]">
+                  <div className="min-w-[1220px]">
                     <div
                       className="flex rounded-t-[8px]"
                       style={{
@@ -713,7 +713,7 @@ export function ConsentFormsWorkspace() {
                           Patient
                         </span>
                       </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <div className="w-52 shrink-0 py-2.5 pr-2">
                         <span
                           className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -745,7 +745,7 @@ export function ConsentFormsWorkspace() {
                           Date Issued
                         </span>
                       </div>
-                      <div className="w-28 shrink-0 py-2.5 pr-2">
+                      <div className="w-40 shrink-0 py-2.5 pr-2">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -828,7 +828,7 @@ export function ConsentFormsWorkspace() {
                               </p>
                             </div>
                           </div>
-                          <div className="w-36 shrink-0 py-3 pr-2">
+                          <div className="w-52 shrink-0 py-3 pr-2">
                             <span
                               className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
                               style={{
@@ -860,7 +860,7 @@ export function ConsentFormsWorkspace() {
                               {formatTime(c.dateIssued)}
                             </p>
                           </div>
-                          <div className="w-28 shrink-0 py-3 pr-2">
+                          <div className="w-40 shrink-0 py-3 pr-2">
                             <span
                               className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
                               style={{

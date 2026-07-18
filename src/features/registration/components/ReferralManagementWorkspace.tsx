@@ -434,8 +434,8 @@ export function ReferralManagementWorkspace() {
                 style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
               >
                 {/* ── Filters row ──────────────────────────────────────────── */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
-                  <div className="relative sm:col-span-2 lg:col-span-1">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="relative min-w-0 flex-1">
                     <Search
                       className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
                       style={{ width: 16, height: 16, color: '#8A98A3' }}
@@ -456,6 +456,36 @@ export function ReferralManagementWorkspace() {
                       }}
                     />
                   </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleApplyFilters}
+                      className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                      style={{
+                        fontSize: 14,
+                        color: '#0D2630',
+                        border: '1px solid rgba(0,100,130,0.2)',
+                      }}
+                    >
+                      Filters
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExport}
+                      className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                      style={{
+                        fontSize: 14,
+                        color: '#0D2630',
+                        border: '1px solid rgba(0,100,130,0.2)',
+                      }}
+                    >
+                      <Download style={{ width: 15, height: 15 }} />
+                      Export
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <FormSelect
                     id="ref-type-filter"
                     value={typeFilter}
@@ -496,33 +526,6 @@ export function ReferralManagementWorkspace() {
                     options={REGISTRATION_DATE_OPTIONS}
                     placeholder="All Date Range"
                   />
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleApplyFilters}
-                      className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-[10px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                      style={{
-                        fontSize: 14,
-                        color: '#0D2630',
-                        border: '1px solid rgba(0,100,130,0.2)',
-                      }}
-                    >
-                      Filters
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleExport}
-                      className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-[10px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                      style={{
-                        fontSize: 14,
-                        color: '#0D2630',
-                        border: '1px solid rgba(0,100,130,0.2)',
-                      }}
-                    >
-                      <Download style={{ width: 15, height: 15 }} />
-                      Export
-                    </button>
-                  </div>
                 </div>
 
                 {/* ── Table ────────────────────────────────────────────────── */}
