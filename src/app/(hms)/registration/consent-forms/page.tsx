@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Consent Forms' };
+import { ConsentFormsWorkspace } from '@/features/registration/components/ConsentFormsWorkspace';
 
 export default function ConsentFormsPage() {
-  return (
-    <ComingSoon
-      title="Consent Forms"
-      description="Digital capture and storage of patient consent forms is being built."
-    />
-  );
+  return <ConsentFormsWorkspace />;
 }

@@ -650,6 +650,34 @@ const DOCUMENT_UPLOAD_GUIDE: HelpGuide = {
   ],
 };
 
+const CONSENT_FORMS_GUIDE: HelpGuide = {
+  id: 'consent-forms',
+  title: 'Consent Forms',
+  intro: 'Manage patient consent forms and treatment authorizations.',
+  sections: [
+    {
+      heading: 'Stat cards and filters',
+      body: 'The cards summarize consent volume at a glance. Search by patient, MRN, or consent ID, then narrow by Consent Type, Department, Signature Status, Doctor, Date Created, or Procedure Type.',
+    },
+    {
+      heading: 'Consent Details panel',
+      body: 'Selecting a row opens its detail panel with Overview, Timeline, and Audit Trail tabs — patient info, consent information, required signatures, and a QR verification code.',
+    },
+    {
+      heading: 'Required Signatures',
+      body: 'Click a Pending signature badge to record it as signed. Once every required signer has signed, the consent automatically moves to Signed.',
+    },
+    {
+      heading: 'Actions',
+      body: "View, Edit, Download PDF, Print, Request Signature, and Archive are available both from each row's ⋮ menu and from the detail panel.",
+    },
+    {
+      heading: 'Quick Actions',
+      body: 'New Consent Form and Generate Consent open the creation form. Request Digital Signature, Print Consent, Upload Signed Copy, and Archive Consent act on whichever consent is currently selected.',
+    },
+  ],
+};
+
 const INSURANCE_VERIFICATION_GUIDE: HelpGuide = {
   id: 'insurance-verification',
   title: 'Insurance Verification',
@@ -1208,6 +1236,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/emergency')) return EMERGENCY_REGISTRATION_GUIDE;
   if (pathname.startsWith('/registration/insurance')) return INSURANCE_VERIFICATION_GUIDE;
   if (pathname.startsWith('/registration/referrals')) return REFERRAL_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/registration/consent-forms')) return CONSENT_FORMS_GUIDE;
   if (pathname.startsWith('/registration/messages')) return STAFF_INBOX_GUIDE;
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
