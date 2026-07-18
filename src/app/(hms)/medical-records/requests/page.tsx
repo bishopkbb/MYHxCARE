@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Record Requests' };
+import { RecordRequestsWorkspace } from '@/features/medical-records/components/RecordRequestsWorkspace';
 
 export default function RecordRequestsPage() {
-  return (
-    <ComingSoon
-      title="Record Requests"
-      description="Tracking internal and external requests for patient record copies is being built."
-    />
-  );
+  return <RecordRequestsWorkspace />;
 }

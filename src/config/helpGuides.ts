@@ -581,6 +581,100 @@ const MEDICAL_RECORD_PATIENT_GUIDE: HelpGuide = {
   ],
 };
 
+const RECORD_REQUESTS_GUIDE: HelpGuide = {
+  id: 'record-requests',
+  title: 'Record Requests',
+  intro: 'Track and act on every internal and external request for a copy of a patient record.',
+  sections: [
+    {
+      heading: 'Status tabs',
+      body: 'All Requests, Pending, In Progress, Fulfilled, and Rejected each filter the same table — the stat cards above show live counts per status.',
+    },
+    {
+      heading: 'Filtering',
+      body: 'Search by patient, MRN, or request number, or narrow by requester type (Internal, External, Insurance, Legal, Patient Self-Request).',
+    },
+    {
+      heading: 'Working a request',
+      body: 'Open the eye icon to see the full request, then Approve & Start (Pending → In Progress), Mark Fulfilled (In Progress → Fulfilled), or Reject — each transition is logged with a timestamp.',
+    },
+    {
+      heading: 'New Request',
+      body: 'Log a request on a requester’s behalf — pick the patient, who’s asking, why, and by when it’s needed.',
+    },
+  ],
+};
+
+const ARCHIVED_RECORDS_GUIDE: HelpGuide = {
+  id: 'archived-records',
+  title: 'Archived Records',
+  intro:
+    'Patient records retired from the active register — restorable on request until retention lapses.',
+  sections: [
+    {
+      heading: 'Why a record is archived',
+      body: 'Graduation/leaving the institution, transfer to another facility, death, a duplicate entry, or the records retention policy aging out an inactive record — the Reason column and filter cover all five.',
+    },
+    {
+      heading: 'Retention Expiring Soon',
+      body: 'This stat flags records whose retention window closes within 90 days — a signal to review before they become eligible for permanent deletion.',
+    },
+    {
+      heading: 'Restoring a record',
+      body: 'The restore icon moves a record back to the active register immediately after a confirmation step — it becomes searchable everywhere again, including Patient Directory.',
+    },
+  ],
+};
+
+const DOCUMENT_UPLOAD_GUIDE: HelpGuide = {
+  id: 'document-upload',
+  title: 'Document Upload',
+  intro: 'Scan or attach a document straight into a patient’s clinical record.',
+  sections: [
+    {
+      heading: 'Finding a patient',
+      body: 'Search or browse the full patient list first — everything below applies to whichever patient you select.',
+    },
+    {
+      heading: 'Adding files',
+      body: 'Drag files onto the drop zone or click to browse. PDF, JPG, and PNG are accepted up to 20MB each; remove a file from the list before uploading if you added it by mistake.',
+    },
+    {
+      heading: 'Document Type and Department',
+      body: 'Both are required — Document Type determines which Clinical Documents category and tab the file lands in once uploaded.',
+    },
+    {
+      heading: 'Link to Visit',
+      body: 'Optional, but linking a visit lets clinicians find this document from that visit’s entry in Visit History rather than only from Clinical Documents.',
+    },
+  ],
+};
+
+const STAFF_INBOX_GUIDE: HelpGuide = {
+  id: 'staff-inbox',
+  title: 'Messages',
+  intro:
+    'Internal communication across every department and staff member — not tied to one patient.',
+  sections: [
+    {
+      heading: 'Inbox, Sent, Drafts, Archived',
+      body: 'Each tab is a separate list. Selecting a message opens it in the panel on the right (or full-screen on mobile) without leaving the list.',
+    },
+    {
+      heading: 'Filtering',
+      body: 'Search by sender or subject, or narrow by staff member or department — filters apply within whichever tab is currently open.',
+    },
+    {
+      heading: 'Reading a message',
+      body: 'Attachments can be downloaded individually. Read Receipts (when present) show exactly who on the thread has seen it and when.',
+    },
+    {
+      heading: 'Replying and composing',
+      body: 'Reply directly from an open message’s composer at the bottom, or use Compose to start a fresh message to any staff member or department.',
+    },
+  ],
+};
+
 const EMERGENCY_REGISTRATION_GUIDE: HelpGuide = {
   id: 'emergency-registration',
   title: 'Emergency Registration',
@@ -992,6 +1086,10 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;
   if (pathname.startsWith('/medical-records/clinical-documents')) return CLINICAL_DOCUMENTS_GUIDE;
   if (pathname.startsWith('/medical-records/patient')) return MEDICAL_RECORD_PATIENT_GUIDE;
+  if (pathname.startsWith('/medical-records/requests')) return RECORD_REQUESTS_GUIDE;
+  if (pathname.startsWith('/medical-records/archived')) return ARCHIVED_RECORDS_GUIDE;
+  if (pathname.startsWith('/medical-records/document-upload')) return DOCUMENT_UPLOAD_GUIDE;
+  if (pathname.startsWith('/medical-records/messages')) return STAFF_INBOX_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;
   if (pathname.startsWith('/registration/directory')) return PATIENT_DIRECTORY_GUIDE;
@@ -1000,6 +1098,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/queue')) return QUEUE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration/appointments')) return APPOINTMENT_SCHEDULING_GUIDE;
   if (pathname.startsWith('/registration/emergency')) return EMERGENCY_REGISTRATION_GUIDE;
+  if (pathname.startsWith('/registration/messages')) return STAFF_INBOX_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;

@@ -90,15 +90,20 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'COMMUNICATION',
         items: [
-          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
-          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+          { label: 'Messages', href: '/medical-records/messages', icon: MessageSquare, badge: 3 },
+          {
+            label: 'Notifications',
+            href: '/medical-records/notifications',
+            icon: Bell,
+            badge: 8,
+          },
         ],
       },
       {
         label: 'ACCOUNT',
         items: [
-          { label: 'Profile', href: '/profile', icon: User },
-          { label: 'Settings', href: '/settings', icon: Settings },
+          { label: 'Profile', href: '/medical-records/account/profile', icon: User },
+          { label: 'Settings', href: '/medical-records/account/settings', icon: Settings },
         ],
       },
     ],

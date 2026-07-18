@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Medical Records Reports' };
+import { MedicalRecordsReportsWorkspace } from '@/features/medical-records/components/MedicalRecordsReportsWorkspace';
 
 export default function MedicalRecordsReportsPage() {
-  return (
-    <ComingSoon
-      title="Medical Records Reports"
-      description="Records retrieval volume, turnaround time, and archival reports are being built."
-    />
-  );
+  return <MedicalRecordsReportsWorkspace />;
 }

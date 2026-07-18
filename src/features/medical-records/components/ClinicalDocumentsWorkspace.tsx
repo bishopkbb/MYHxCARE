@@ -493,7 +493,7 @@ export function ClinicalDocumentsWorkspace() {
                     </div>
 
                     <div className="mt-3 overflow-x-auto scroll-smooth">
-                      <div className="min-w-[860px]">
+                      <div className="min-w-[910px]">
                         <div
                           className="flex rounded-t-[8px]"
                           style={{
@@ -509,7 +509,7 @@ export function ClinicalDocumentsWorkspace() {
                               Document Name
                             </span>
                           </div>
-                          <div className="w-36 shrink-0 py-2.5 pr-2">
+                          <div className="w-48 shrink-0 py-2.5 pr-2">
                             <span
                               className="font-sans font-bold tracking-wider uppercase"
                               style={{ fontSize: 14, color: '#4A7080' }}
@@ -607,7 +607,7 @@ export function ClinicalDocumentsWorkspace() {
                                   </p>
                                 </div>
                               </div>
-                              <div className="w-36 shrink-0 py-3 pr-2">
+                              <div className="w-48 shrink-0 py-3 pr-2">
                                 <span
                                   className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
                                   style={{

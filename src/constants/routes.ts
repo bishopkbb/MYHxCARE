@@ -74,6 +74,10 @@ export const ROUTES = {
   medicalRecordsArchived: '/medical-records/archived',
   medicalRecordsRequests: '/medical-records/requests',
   medicalRecordsReports: '/medical-records/reports',
+  medicalRecordsMessages: '/medical-records/messages',
+  medicalRecordsNotifications: '/medical-records/notifications',
+  medicalRecordsAccountProfile: '/medical-records/account/profile',
+  medicalRecordsAccountSettings: '/medical-records/account/settings',
 
   // Registration sub-routes
   registrationRegister: '/registration/register',

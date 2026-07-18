@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Archived Records' };
+import { ArchivedRecordsWorkspace } from '@/features/medical-records/components/ArchivedRecordsWorkspace';
 
 export default function ArchivedRecordsPage() {
-  return (
-    <ComingSoon
-      title="Archived Records"
-      description="Retired and archived patient records, with restore-on-request, are being built."
-    />
-  );
+  return <ArchivedRecordsWorkspace />;
 }

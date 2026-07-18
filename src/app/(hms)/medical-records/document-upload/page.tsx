@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Document Upload' };
+import { DocumentUploadWorkspace } from '@/features/medical-records/components/DocumentUploadWorkspace';
 
 export default function DocumentUploadPage() {
-  return (
-    <ComingSoon
-      title="Document Upload"
-      description="Scanning and uploading patient documents into the medical record is being built."
-    />
-  );
+  return <DocumentUploadWorkspace />;
 }
