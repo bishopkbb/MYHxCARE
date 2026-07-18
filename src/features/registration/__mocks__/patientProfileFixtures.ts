@@ -138,10 +138,10 @@ export const MOCK_PATIENT_PROFILE: PatientProfile = {
   },
 
   insurance: {
-    provider: 'NHIS',
-    type: 'National Health Insurance',
-    policyId: 'NHIS-2026-0056789',
-    groupNumber: 'UNIZIK-STU-2026',
+    provider: 'AXA Mansard Health',
+    type: 'HMO — Standard Plan',
+    policyId: 'AXA-5896-7788-0012',
+    groupNumber: 'UNIZIK-STAFF-2026',
     validFrom: '2026-01-01',
     validTo: '2026-12-31',
   },

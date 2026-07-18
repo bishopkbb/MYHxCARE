@@ -650,6 +650,63 @@ const DOCUMENT_UPLOAD_GUIDE: HelpGuide = {
   ],
 };
 
+const INSURANCE_VERIFICATION_GUIDE: HelpGuide = {
+  id: 'insurance-verification',
+  title: 'Insurance Verification',
+  intro:
+    'Verify a patient’s insurance coverage, check eligibility, and record authorization status.',
+  sections: [
+    {
+      heading: 'Finding a patient',
+      body: 'Search or browse the full patient list first — everything below applies to whichever patient you select.',
+    },
+    {
+      heading: 'Insurance Information and Verification',
+      body: 'Enter the policy details, then run Real-time Eligibility Check or Manual Verification. Verify Eligibility populates the Verification Result card and adds an entry to the Activity Timeline.',
+    },
+    {
+      heading: 'Coverage Details',
+      body: 'Shows the per-category coverage percentage, copay, coinsurance, and limit that apply once eligibility is confirmed.',
+    },
+    {
+      heading: 'Authorization',
+      body: 'Record whether prior authorization was granted, its reference number, and the next review date — required before completing the verification.',
+    },
+    {
+      heading: 'Saving',
+      body: 'Save as Draft keeps your progress without finalizing; Save & Complete requires Insurance Provider, Policy Number, and Policy Holder Name.',
+    },
+  ],
+};
+
+const REFERRAL_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'referral-management',
+  title: 'Referral Management',
+  intro: 'Track and manage incoming and outgoing patient referrals between departments.',
+  sections: [
+    {
+      heading: 'Tabs and filters',
+      body: 'Switch between All, Incoming, Outgoing, Pending, Completed, and Cancelled, then narrow further with search, Type, Status, Department, and Date Range.',
+    },
+    {
+      heading: 'Referral rows',
+      body: 'Click a row or the eye icon to open its full detail. The ⋮ menu offers Accept, Mark Completed, or Cancel depending on the referral’s current status.',
+    },
+    {
+      heading: 'New Referral',
+      body: 'New Referral (and the two Quick Actions) opens the same form pre-set to Outgoing or Incoming — patient, departments, referring physician, priority, and reason are required before submitting.',
+    },
+    {
+      heading: 'Referral Directory and Templates',
+      body: 'Referral Directory lists departments and contacts for outgoing referrals. Referral Templates lets you start a new referral pre-filled from a standard letter.',
+    },
+    {
+      heading: 'Referral Overview',
+      body: 'The donut chart and Recent Activity panel summarize referral volume and the latest status changes at a glance.',
+    },
+  ],
+};
+
 const MEDICAL_RECORDS_REPORTS_GUIDE: HelpGuide = {
   id: 'medical-records-reports',
   title: 'Medical Records Reports',
@@ -1149,6 +1206,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/queue')) return QUEUE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration/appointments')) return APPOINTMENT_SCHEDULING_GUIDE;
   if (pathname.startsWith('/registration/emergency')) return EMERGENCY_REGISTRATION_GUIDE;
+  if (pathname.startsWith('/registration/insurance')) return INSURANCE_VERIFICATION_GUIDE;
+  if (pathname.startsWith('/registration/referrals')) return REFERRAL_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration/messages')) return STAFF_INBOX_GUIDE;
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
