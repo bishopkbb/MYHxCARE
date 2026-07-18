@@ -414,6 +414,34 @@ const REGISTER_PATIENT_GUIDE: HelpGuide = {
   ],
 };
 
+const CHECK_IN_GUIDE: HelpGuide = {
+  id: 'check-in',
+  title: 'Check-In',
+  intro: "Verify a patient's appointment, check them in, and assign a queue number.",
+  sections: [
+    {
+      heading: 'Verify Appointment vs Walk-in Registration',
+      body: "Verify Appointment looks up today's scheduled appointment for the patient you search for. Walk-in Registration skips that lookup entirely — use it for patients arriving without a prior booking.",
+    },
+    {
+      heading: 'Finding a patient',
+      body: 'Search by name, MRN, phone, or National ID, or use Scan ID to pull up a patient instantly from their card or QR code.',
+    },
+    {
+      heading: 'Visit Details',
+      body: 'In Verify Appointment mode these fields pre-fill from the matched appointment. In Walk-in Registration mode you fill them in directly — Visit Type, Department, and Purpose of Visit are required either way.',
+    },
+    {
+      heading: 'Queue, routing, and notification',
+      body: 'Assign Queue Number generates the next number for today. Route to Clinic sets which unit and room the patient is sent to. Notify Department sends an arrival alert to that unit.',
+    },
+    {
+      heading: 'Completing check-in',
+      body: 'The progress bar at the bottom tracks all five steps. Complete Check-In only unlocks once a patient is found, Visit Details are filled in, and a queue number has been assigned.',
+    },
+  ],
+};
+
 const PATIENT_PROFILE_REGISTRATION_GUIDE: HelpGuide = {
   id: 'patient-profile-registration',
   title: 'Patient Profile',
@@ -801,6 +829,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;
   if (pathname.startsWith('/registration/directory')) return PATIENT_DIRECTORY_GUIDE;
   if (pathname.startsWith('/registration/profile')) return PATIENT_PROFILE_REGISTRATION_GUIDE;
+  if (pathname.startsWith('/registration/check-in')) return CHECK_IN_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
