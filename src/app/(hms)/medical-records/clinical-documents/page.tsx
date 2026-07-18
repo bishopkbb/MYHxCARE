@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Clinical Documents' };
+import { ClinicalDocumentsWorkspace } from '@/features/medical-records/components/ClinicalDocumentsWorkspace';
 
 export default function ClinicalDocumentsPage() {
-  return (
-    <ComingSoon
-      title="Clinical Documents"
-      description="A centralised library of scanned and generated clinical documents is being built."
-    />
-  );
+  return <ClinicalDocumentsWorkspace />;
 }

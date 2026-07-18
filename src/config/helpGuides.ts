@@ -527,6 +527,35 @@ const VISIT_HISTORY_GUIDE: HelpGuide = {
   ],
 };
 
+const CLINICAL_DOCUMENTS_GUIDE: HelpGuide = {
+  id: 'clinical-documents',
+  title: 'Clinical Documents',
+  intro:
+    'Find any patient first, then browse and organize every clinical document on their record by category.',
+  sections: [
+    {
+      heading: 'Finding a patient',
+      body: 'Search by name, MRN, or Student ID, or browse the paginated table directly. Selecting a patient opens their document library; "Change Patient" returns to this search at any time.',
+    },
+    {
+      heading: 'Category tabs and Document Categories',
+      body: 'The tabs above the table and the "Document Categories" panel on the right both filter by the same category — Consultation Notes, Discharge Summaries, Referral Letters, Medical Certificates, Imaging Reports, and Consent Forms. Use whichever is more convenient; they stay in sync.',
+    },
+    {
+      heading: 'Filtering',
+      body: 'Narrow further by Department or Date Range, then "Filter" to confirm the match count. "Reset" clears every filter, including the active category.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'The eye icon opens a document, the download icon saves it, and the overflow menu offers renaming or sharing with the care team.',
+    },
+    {
+      heading: 'Storage Summary',
+      body: "The donut chart on the right breaks this patient's documents down by file type (PDF, Image, Other) rather than by clinical category, so you can see storage composition at a glance.",
+    },
+  ],
+};
+
 const MEDICAL_RECORD_PATIENT_GUIDE: HelpGuide = {
   id: 'medical-record-patient',
   title: 'Medical Record',
@@ -961,6 +990,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/lab/results')) return LAB_RESULTS_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;
+  if (pathname.startsWith('/medical-records/clinical-documents')) return CLINICAL_DOCUMENTS_GUIDE;
   if (pathname.startsWith('/medical-records/patient')) return MEDICAL_RECORD_PATIENT_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;

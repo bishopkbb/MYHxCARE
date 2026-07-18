@@ -7,12 +7,16 @@
  */
 
 import {
+  ClipboardCheck,
   ClipboardEdit,
+  FileBadge,
+  FileSignature,
   FileText,
   FlaskConical,
   Image as ImageIcon,
   Pill,
   Plus,
+  Share2,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -659,4 +663,447 @@ export function generateActivityFromVisits(visits: PatientVisit[]): RecordActivi
       iconColor: '#00B4D8',
       iconBg: 'rgba(0,180,216,0.12)',
     }));
+}
+
+// ─── Clinical Documents ───────────────────────────────────────────────────────
+// Distinct from the generic Documents & Files repository (Overview tab) —
+// this is the formal clinical paperwork taxonomy specifically.
+
+export type ClinicalDocCategory =
+  | 'Consultation Note'
+  | 'Discharge Summary'
+  | 'Referral Letter'
+  | 'Medical Certificate'
+  | 'Imaging Report'
+  | 'Consent Form';
+
+export type ClinicalFileType = 'PDF' | 'Image' | 'Other';
+
+export const CLINICAL_DOC_CATEGORIES: ClinicalDocCategory[] = [
+  'Consultation Note',
+  'Discharge Summary',
+  'Referral Letter',
+  'Medical Certificate',
+  'Imaging Report',
+  'Consent Form',
+];
+
+export const CLINICAL_DOC_CATEGORY_CFG: Record<
+  ClinicalDocCategory,
+  { icon: LucideIcon; iconColor: string; badgeColor: string; badgeBorder: string; badgeBg: string }
+> = {
+  'Consultation Note': {
+    icon: FileText,
+    iconColor: '#EF4444',
+    badgeColor: '#EF4444',
+    badgeBorder: 'rgba(239,68,68,0.3)',
+    badgeBg: 'rgba(239,68,68,0.06)',
+  },
+  'Discharge Summary': {
+    icon: ClipboardCheck,
+    iconColor: '#22C55E',
+    badgeColor: '#22C55E',
+    badgeBorder: 'rgba(34,197,94,0.3)',
+    badgeBg: 'rgba(34,197,94,0.06)',
+  },
+  'Referral Letter': {
+    icon: Share2,
+    iconColor: '#8B5CF6',
+    badgeColor: '#8B5CF6',
+    badgeBorder: 'rgba(139,92,246,0.3)',
+    badgeBg: 'rgba(139,92,246,0.06)',
+  },
+  'Medical Certificate': {
+    icon: FileBadge,
+    iconColor: '#F59E0B',
+    badgeColor: '#F59E0B',
+    badgeBorder: 'rgba(245,158,11,0.3)',
+    badgeBg: 'rgba(245,158,11,0.06)',
+  },
+  'Imaging Report': {
+    icon: ImageIcon,
+    iconColor: '#3B82F6',
+    badgeColor: '#3B82F6',
+    badgeBorder: 'rgba(59,130,246,0.3)',
+    badgeBg: 'rgba(59,130,246,0.06)',
+  },
+  'Consent Form': {
+    icon: FileSignature,
+    iconColor: '#00B4D8',
+    badgeColor: '#00B4D8',
+    badgeBorder: 'rgba(0,180,216,0.3)',
+    badgeBg: 'rgba(0,180,216,0.06)',
+  },
+};
+
+export type ClinicalDocumentEntry = {
+  id: string;
+  name: string;
+  subtitle: string;
+  category: ClinicalDocCategory;
+  fileType: ClinicalFileType;
+  department: string;
+  createdBy: string;
+  dateCreated: string; // ISO
+  visitDate: string; // ISO
+};
+
+const FEATURED_CLINICAL_DOCS: ClinicalDocumentEntry[] = [
+  {
+    id: 'cd-001',
+    name: 'Consultation Note - Follow-up',
+    subtitle: 'Visit note',
+    category: 'Consultation Note',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic — Room 3',
+    createdBy: 'Dr. Jane Ezeonu (GP)',
+    dateCreated: atOffset(-1, 9, 20),
+    visitDate: atOffset(-1, 9, 0),
+  },
+  {
+    id: 'cd-002',
+    name: 'Discharge Summary - Admission',
+    subtitle: '3-day admission',
+    category: 'Discharge Summary',
+    fileType: 'PDF',
+    department: 'Medical Ward — Bed 12',
+    createdBy: 'Dr. Ifeanyi Okafor',
+    dateCreated: atOffset(-6, 14, 15),
+    visitDate: atOffset(-8, 10, 0),
+  },
+  {
+    id: 'cd-003',
+    name: 'Referral Letter - Oral Surgery',
+    subtitle: 'Referred to Oral Surgery',
+    category: 'Referral Letter',
+    fileType: 'PDF',
+    department: 'Dental Clinic — Room 2',
+    createdBy: 'Dr. Onyedika Umeh',
+    dateCreated: atOffset(-13, 10, 5),
+    visitDate: atOffset(-13, 9, 30),
+  },
+  {
+    id: 'cd-004',
+    name: 'Medical Certificate - Sick Leave',
+    subtitle: 'Sick leave certificate',
+    category: 'Medical Certificate',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic — Room 5',
+    createdBy: 'Dr. Jane Ezeonu (GP)',
+    dateCreated: atOffset(-21, 11, 30),
+    visitDate: atOffset(-21, 9, 0),
+  },
+  {
+    id: 'cd-005',
+    name: 'Chest X-Ray Report',
+    subtitle: 'Chest X-Ray',
+    category: 'Imaging Report',
+    fileType: 'Image',
+    department: 'Radiology — X-Ray Unit',
+    createdBy: 'Dr. Mary Uche',
+    dateCreated: atOffset(-28, 13, 45),
+    visitDate: atOffset(-28, 13, 0),
+  },
+  {
+    id: 'cd-006',
+    name: 'Consent Form - Minor Surgery',
+    subtitle: 'Procedure: Minor Surgery',
+    category: 'Consent Form',
+    fileType: 'PDF',
+    department: 'Surgery — Theatre 1',
+    createdBy: 'Dr. Samuel A.',
+    dateCreated: atOffset(-35, 9, 10),
+    visitDate: atOffset(-35, 8, 30),
+  },
+  {
+    id: 'cd-007',
+    name: 'Consultation Note - Emergency Visit',
+    subtitle: 'Emergency visit note',
+    category: 'Consultation Note',
+    fileType: 'PDF',
+    department: 'Emergency Department — Triage 1',
+    createdBy: 'Dr. Samuel A.',
+    dateCreated: atOffset(-42, 16, 50),
+    visitDate: atOffset(-42, 16, 20),
+  },
+  {
+    id: 'cd-008',
+    name: 'Referral Letter - Radiology',
+    subtitle: 'Referred to Radiology',
+    category: 'Referral Letter',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic — Room 3',
+    createdBy: 'Dr. Jane Ezeonu (GP)',
+    dateCreated: atOffset(-49, 10, 0),
+    visitDate: atOffset(-49, 9, 40),
+  },
+];
+
+const EXTRA_CLINICAL_DOC_SPECS: {
+  category: ClinicalDocCategory;
+  name: string;
+  subtitle: string;
+  fileType: ClinicalFileType;
+  department: string;
+  createdBy: string;
+  dayOffset: number;
+}[] = [
+  {
+    category: 'Consultation Note',
+    name: 'Consultation Note - Routine Checkup',
+    subtitle: 'Annual health screening',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic — Room 1',
+    createdBy: 'Dr. Ada Chukwu (GP)',
+    dayOffset: -56,
+  },
+  {
+    category: 'Consultation Note',
+    name: 'Consultation Note - Follow-up Review',
+    subtitle: 'Asthma review',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic — Room 3',
+    createdBy: 'Dr. Jane Ezeonu (GP)',
+    dayOffset: -70,
+  },
+  {
+    category: 'Consultation Note',
+    name: 'Consultation Note - Dental Checkup',
+    subtitle: 'Routine dental checkup',
+    fileType: 'PDF',
+    department: 'Dental Clinic — Room 2',
+    createdBy: 'Dr. Onyedika Umeh',
+    dayOffset: -84,
+  },
+  {
+    category: 'Consultation Note',
+    name: 'Consultation Note - Physiotherapy',
+    subtitle: 'Physiotherapy session',
+    fileType: 'PDF',
+    department: 'Physiotherapy — Room 1',
+    createdBy: 'Mrs. Ngozi A.',
+    dayOffset: -98,
+  },
+  {
+    category: 'Consultation Note',
+    name: 'Consultation Note - Lab Review',
+    subtitle: 'Blood test review',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic — Room 5',
+    createdBy: 'Dr. Jane Ezeonu (GP)',
+    dayOffset: -112,
+  },
+  {
+    category: 'Discharge Summary',
+    name: 'Discharge Summary - Day Surgery',
+    subtitle: 'Day case procedure',
+    fileType: 'PDF',
+    department: 'Surgery — Ward 2',
+    createdBy: 'Dr. Samuel A.',
+    dayOffset: -63,
+  },
+  {
+    category: 'Discharge Summary',
+    name: 'Discharge Summary - Observation',
+    subtitle: '24-hour observation',
+    fileType: 'PDF',
+    department: 'Emergency Department — Ward 1',
+    createdBy: 'Dr. Samuel A.',
+    dayOffset: -126,
+  },
+  {
+    category: 'Referral Letter',
+    name: 'Referral Letter - Ophthalmology',
+    subtitle: 'Referred to Ophthalmology',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic — Room 1',
+    createdBy: 'Dr. Ada Chukwu (GP)',
+    dayOffset: -77,
+  },
+  {
+    category: 'Referral Letter',
+    name: 'Referral Letter - Physiotherapy',
+    subtitle: 'Referred to Physiotherapy',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic — Room 3',
+    createdBy: 'Dr. Jane Ezeonu (GP)',
+    dayOffset: -140,
+  },
+  {
+    category: 'Medical Certificate',
+    name: 'Medical Certificate - Fitness to Work',
+    subtitle: 'Fitness to resume duties',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic — Room 5',
+    createdBy: 'Dr. Jane Ezeonu (GP)',
+    dayOffset: -91,
+  },
+  {
+    category: 'Imaging Report',
+    name: 'Abdominal Ultrasound Report',
+    subtitle: 'Abdominal ultrasound',
+    fileType: 'Image',
+    department: 'Radiology — Ultrasound Unit',
+    createdBy: 'Dr. Mary Uche',
+    dayOffset: -105,
+  },
+  {
+    category: 'Imaging Report',
+    name: 'Dental X-Ray Report',
+    subtitle: 'Dental X-Ray',
+    fileType: 'Image',
+    department: 'Dental Clinic — Room 2',
+    createdBy: 'Dr. Onyedika Umeh',
+    dayOffset: -119,
+  },
+  {
+    category: 'Imaging Report',
+    name: 'MRI Scan Report',
+    subtitle: 'Lumbar spine MRI',
+    fileType: 'Image',
+    department: 'Radiology — MRI Unit',
+    createdBy: 'Dr. Mary Uche',
+    dayOffset: -133,
+  },
+  {
+    category: 'Imaging Report',
+    name: 'ECG Report',
+    subtitle: 'Routine ECG',
+    fileType: 'Other',
+    department: 'General Outpatient Clinic — Room 1',
+    createdBy: 'Dr. Ada Chukwu (GP)',
+    dayOffset: -147,
+  },
+  {
+    category: 'Consent Form',
+    name: 'Consent Form - Blood Transfusion',
+    subtitle: 'Procedure: Blood Transfusion',
+    fileType: 'PDF',
+    department: 'Emergency Department — Triage 1',
+    createdBy: 'Dr. Samuel A.',
+    dayOffset: -154,
+  },
+  {
+    category: 'Consent Form',
+    name: 'Consent Form - Imaging Procedure',
+    subtitle: 'Procedure: MRI Scan',
+    fileType: 'PDF',
+    department: 'Radiology — MRI Unit',
+    createdBy: 'Dr. Mary Uche',
+    dayOffset: -161,
+  },
+];
+
+export const CURATED_CLINICAL_DOCUMENTS: ClinicalDocumentEntry[] = [
+  ...FEATURED_CLINICAL_DOCS,
+  ...EXTRA_CLINICAL_DOC_SPECS.map((spec, i) => ({
+    id: `cd-extra-${i}`,
+    name: spec.name,
+    subtitle: spec.subtitle,
+    category: spec.category,
+    fileType: spec.fileType,
+    department: spec.department,
+    createdBy: spec.createdBy,
+    dateCreated: atOffset(spec.dayOffset, 10, 0),
+    visitDate: atOffset(spec.dayOffset, 9, 30),
+  })),
+];
+
+const GENERIC_CLINICAL_DOC_TEMPLATES: {
+  category: ClinicalDocCategory;
+  name: string;
+  subtitle: string;
+  fileType: ClinicalFileType;
+  department: string;
+  createdBy: string;
+}[] = [
+  {
+    category: 'Consultation Note',
+    name: 'Consultation Note',
+    subtitle: 'Routine visit',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic',
+    createdBy: 'Dr. Jane Ezeonu (GP)',
+  },
+  {
+    category: 'Referral Letter',
+    name: 'Referral Letter',
+    subtitle: 'Specialist referral',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic',
+    createdBy: 'Dr. Ada Chukwu (GP)',
+  },
+  {
+    category: 'Imaging Report',
+    name: 'Imaging Report',
+    subtitle: 'Diagnostic imaging',
+    fileType: 'Image',
+    department: 'Radiology',
+    createdBy: 'Dr. Mary Uche',
+  },
+  {
+    category: 'Medical Certificate',
+    name: 'Medical Certificate',
+    subtitle: 'Fitness certificate',
+    fileType: 'PDF',
+    department: 'General Outpatient Clinic',
+    createdBy: 'Dr. Jane Ezeonu (GP)',
+  },
+  {
+    category: 'Consent Form',
+    name: 'Consent Form',
+    subtitle: 'Procedure consent',
+    fileType: 'PDF',
+    department: 'Surgery',
+    createdBy: 'Dr. Samuel A.',
+  },
+];
+
+/** Every patient other than the curated persona (dp-001) gets a stable,
+ * plausible set of clinical documents derived from their id — same patient
+ * always produces the same documents, no randomness between renders. */
+export function generateClinicalDocumentsForPatient(patient: {
+  id: string;
+}): ClinicalDocumentEntry[] {
+  const seed = seedFromId(patient.id);
+  const count = 2 + (seed % 4); // 2-5 documents
+  const docs: ClinicalDocumentEntry[] = [];
+  for (let i = 0; i < count; i++) {
+    const t =
+      GENERIC_CLINICAL_DOC_TEMPLATES[(seed + i * 3) % GENERIC_CLINICAL_DOC_TEMPLATES.length]!;
+    const dayOffset = -(5 + ((seed + i * 13) % 90));
+    docs.push({
+      id: `${patient.id}-doc-${i}`,
+      name: t.name,
+      subtitle: t.subtitle,
+      category: t.category,
+      fileType: t.fileType,
+      department: t.department,
+      createdBy: t.createdBy,
+      dateCreated: atOffset(dayOffset, 10, 0),
+      visitDate: atOffset(dayOffset, 9, 30),
+    });
+  }
+  return docs;
+}
+
+/** Derives a Record Activity feed directly from a set of clinical documents,
+ * mirroring generateActivityFromVisits so a generic patient's activity trail
+ * always matches what's actually in their document table. */
+export function generateDocActivityFromDocs(docs: ClinicalDocumentEntry[]): RecordActivityEntry[] {
+  return [...docs]
+    .sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime())
+    .slice(0, 5)
+    .map((d) => {
+      const cfg = CLINICAL_DOC_CATEGORY_CFG[d.category];
+      return {
+        id: `${d.id}-activity`,
+        dateTime: d.dateCreated,
+        label: 'Document uploaded',
+        detail: d.name,
+        icon: cfg.icon,
+        iconColor: cfg.iconColor,
+        iconBg: `${cfg.iconColor}1F`,
+      };
+    });
 }
