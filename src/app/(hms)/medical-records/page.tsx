@@ -12,7 +12,6 @@ import {
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
-import { useToast } from '@/hooks/useToast';
 import {
   MOCK_MEDICAL_RECORDS,
   type MedicalRecord,
@@ -167,11 +166,12 @@ function SkeletonRecordRow() {
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function MedicalRecordsPage() {
-  const toast = useToast();
   const [pageState, setPageState] = useState<PageState>('loading');
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<TabId>('all');
   const [selectedMrn, setSelectedMrn] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<RecordStatus | ''>('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -224,12 +224,13 @@ export default function MedicalRecordsPage() {
   const q = search.trim().toLowerCase();
   const filtered = allRecords.filter((r) => {
     const matchesTab = activeTab === 'all' || r.type === activeTab;
+    const matchesStatus = !statusFilter || r.status === statusFilter;
     const matchesSearch =
       !q ||
       r.title.toLowerCase().includes(q) ||
       r.patientName.toLowerCase().includes(q) ||
       r.mrn.toLowerCase().includes(q);
-    return matchesTab && matchesSearch;
+    return matchesTab && matchesStatus && matchesSearch;
   });
 
   function handleRetry() {
@@ -261,14 +262,14 @@ export default function MedicalRecordsPage() {
             <div className="flex shrink-0 items-center gap-2 sm:gap-3">
               <button
                 type="button"
-                onClick={() => toast.info('Filter', 'Advanced filters coming soon.')}
+                onClick={() => setFiltersOpen((v) => !v)}
                 className="flex items-center gap-2 rounded-[10px] px-3 font-sans font-semibold transition-colors duration-150 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none sm:px-4"
                 style={{
                   fontSize: 14,
                   lineHeight: '22px',
                   height: 40,
-                  color: '#0D2630',
-                  border: '1px solid #0064821F',
+                  color: filtersOpen || statusFilter ? '#00B4D8' : '#0D2630',
+                  border: `1px solid ${filtersOpen || statusFilter ? '#00B4D8' : '#0064821F'}`,
                   background: '#FFFFFF',
                 }}
               >
@@ -382,6 +383,41 @@ export default function MedicalRecordsPage() {
                 </div>
               ))}
             </div>
+
+            {/* Filter panel */}
+            {filtersOpen && (
+              <div
+                className="mb-3 flex flex-wrap items-center gap-3 p-3 sm:mb-4 sm:p-4"
+                style={{ borderRadius: 10, border: '1px solid #0064821F', background: '#FFFFFF' }}
+              >
+                <label className="flex items-center gap-2">
+                  <span style={{ fontSize: 14, color: '#4A7080' }}>Status</span>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as RecordStatus | '')}
+                    className="h-10 rounded-[8px] px-2.5 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40"
+                    style={{ fontSize: 14, border: '1px solid #0064821F', color: '#0D2630' }}
+                  >
+                    <option value="">All Statuses</option>
+                    {(Object.keys(STATUS_CFG) as RecordStatus[]).map((s) => (
+                      <option key={s} value={s}>
+                        {STATUS_CFG[s].label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {statusFilter && (
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter('')}
+                    className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                    style={{ fontSize: 14, color: '#00B4D8' }}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Search bar */}
             <div

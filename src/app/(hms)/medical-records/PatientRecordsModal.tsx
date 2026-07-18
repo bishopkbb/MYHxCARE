@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import type { MedicalRecord } from '@/features/medical-records/__mocks__/medicalRecordFixtures';
+import { MOCK_PATIENT_PROFILE } from '@/features/registration/__mocks__/patientProfileFixtures';
 import { MRN_TO_PATIENT_ID, RECORD_TYPE_CFG, STATUS_CFG } from './config';
 
 // ── Patient Records Modal ─────────────────────────────────────────────────────
@@ -88,14 +89,18 @@ export function PatientRecordsModal({
             ) : (
               <ProfileNotFoundButton />
             )}
-            <Link
-              href={ROUTES.medicalRecordsPatient}
-              onClick={onClose}
-              className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-              style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
-            >
-              View Full Medical Record →
-            </Link>
+            {patient.mrn === MOCK_PATIENT_PROFILE.mrn ? (
+              <Link
+                href={ROUTES.medicalRecordsPatient}
+                onClick={onClose}
+                className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+              >
+                View Full Medical Record →
+              </Link>
+            ) : (
+              <FullRecordNotAvailableButton />
+            )}
           </div>
           <button
             type="button"
@@ -130,6 +135,25 @@ function ProfileNotFoundButton() {
       style={{ fontSize: 14, lineHeight: '22px', color: '#8A98A3' }}
     >
       View Patient Profile →
+    </button>
+  );
+}
+
+function FullRecordNotAvailableButton() {
+  const toast = useToast();
+  return (
+    <button
+      type="button"
+      onClick={() =>
+        toast.info(
+          'Not available',
+          'The full Medical Record view is only built out for the demo patient so far.',
+        )
+      }
+      className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+      style={{ fontSize: 14, lineHeight: '22px', color: '#8A98A3' }}
+    >
+      View Full Medical Record →
     </button>
   );
 }

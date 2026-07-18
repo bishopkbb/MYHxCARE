@@ -1078,10 +1078,10 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                           router.push(ROUTES.medicalRecordsArchived);
                           setActionsOpen(false);
                         }}
-                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-red-50"
-                        style={{ fontSize: 14, color: '#EF4444' }}
+                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                        style={{ fontSize: 14, color: '#2F3A40' }}
                       >
-                        Archive Record
+                        View Archived Records
                       </button>
                     </div>
                   )}
