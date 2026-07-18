@@ -674,6 +674,31 @@ const MEDICAL_RECORDS_REPORTS_GUIDE: HelpGuide = {
   ],
 };
 
+const STAFF_NOTIFICATIONS_GUIDE: HelpGuide = {
+  id: 'staff-notifications',
+  title: 'Notifications',
+  intro:
+    'Real-time operational alerts — registrations, queue, consent, insurance, and records activity.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Unread, Today, This Week, and Critical Alerts summarize the list below at a glance.',
+    },
+    {
+      heading: 'Notification Categories',
+      body: 'Click a category on the left (or use the Notification Type filter) to narrow the list — they stay in sync with each other.',
+    },
+    {
+      heading: 'Filtering',
+      body: 'Combine Priority, Date, Department, and Notification Type, then Filter. Reset clears everything back to the full list.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'The eye icon marks a notification read and shows its full detail. The folder icon opens the related patient record when one is linked. The trash icon removes it from your list.',
+    },
+  ],
+};
+
 const STAFF_INBOX_GUIDE: HelpGuide = {
   id: 'staff-inbox',
   title: 'Messages',
@@ -1114,6 +1139,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/medical-records/archived')) return ARCHIVED_RECORDS_GUIDE;
   if (pathname.startsWith('/medical-records/document-upload')) return DOCUMENT_UPLOAD_GUIDE;
   if (pathname.startsWith('/medical-records/messages')) return STAFF_INBOX_GUIDE;
+  if (pathname.startsWith('/medical-records/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/medical-records/reports')) return MEDICAL_RECORDS_REPORTS_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;
@@ -1124,6 +1150,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/appointments')) return APPOINTMENT_SCHEDULING_GUIDE;
   if (pathname.startsWith('/registration/emergency')) return EMERGENCY_REGISTRATION_GUIDE;
   if (pathname.startsWith('/registration/messages')) return STAFF_INBOX_GUIDE;
+  if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
