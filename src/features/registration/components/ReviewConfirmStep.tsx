@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import type { Allergy } from '@/types/patient.types';
+import { formatHumanDate } from '@/utils/datetime';
 import {
   computeAge,
   type PatientInformationValues,
@@ -175,7 +176,10 @@ export function ReviewConfirmStep({
           <SummaryCard title="Basic Information" onEdit={() => onEditStep(1)}>
             <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
               <Field label="Full Name" value={fullName} />
-              <Field label="Date of Birth" value={step1.dateOfBirth} />
+              <Field
+                label="Date of Birth"
+                value={`${formatHumanDate(step1.dateOfBirth)} (${age ?? '—'} Yrs)`}
+              />
               <Field
                 label="Marital Status"
                 value={labelFor(MARITAL_STATUS_OPTIONS, step1.maritalStatus)}

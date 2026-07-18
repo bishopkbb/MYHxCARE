@@ -22,11 +22,23 @@ const timeFmt = new Intl.DateTimeFormat('en-GB', {
 
 const relFmt = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 
+const humanDateFmt = new Intl.DateTimeFormat('en-GB', {
+  timeZone: WAT_TZ,
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+}); // → "10 Jun 2026"
+
 // ─── Display formatters ────────────────────────────────────────────────────
 
 /** Returns "DD/MM/YYYY" in WAT. Accepts ISO string or Date. */
 export function formatDate(date: Date | string): string {
   return dateFmt.format(coerce(date));
+}
+
+/** Returns "D MMM YYYY" in WAT (e.g. "10 Jun 2026") — for prose/summary contexts. */
+export function formatHumanDate(date: Date | string): string {
+  return humanDateFmt.format(coerce(date));
 }
 
 /** Returns "HH:MM" (24 h) in WAT. */

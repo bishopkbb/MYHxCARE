@@ -26,6 +26,7 @@ import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
+import { formatHumanDate } from '@/utils/datetime';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import {
   APPOINTMENT_STATUS_OPTIONS,
@@ -51,15 +52,6 @@ const STATUS_CFG: Record<DirectoryPatientStatus, { color: string; border: string
 };
 
 const ROWS_PER_PAGE_OPTIONS = [10, 25, 50];
-
-function formatDobDisplay(dateStr: string): string {
-  return new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Africa/Lagos',
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(dateStr));
-}
 
 type Filters = {
   category: string;
@@ -1059,7 +1051,7 @@ export default function PatientDirectoryPage() {
                   {[
                     {
                       label: 'Date of Birth',
-                      value: `${formatDobDisplay(selectedPatient.dateOfBirth)} (${selectedPatient.age} Yrs)`,
+                      value: `${formatHumanDate(selectedPatient.dateOfBirth)} (${selectedPatient.age} Yrs)`,
                       icon: Calendar,
                     },
                     { label: 'Gender', value: selectedPatient.gender, icon: Users },
@@ -1117,7 +1109,7 @@ export default function PatientDirectoryPage() {
                   <div>
                     <p style={{ fontSize: 14, color: '#8A98A3' }}>Date Registered</p>
                     <p className="font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
-                      {formatDobDisplay(selectedPatient.dateRegistered)}
+                      {formatHumanDate(selectedPatient.dateRegistered)}
                     </p>
                   </div>
                   <div>
