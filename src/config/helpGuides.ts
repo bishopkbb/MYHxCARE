@@ -414,6 +414,31 @@ const REGISTER_PATIENT_GUIDE: HelpGuide = {
   ],
 };
 
+const PATIENT_PROFILE_REGISTRATION_GUIDE: HelpGuide = {
+  id: 'patient-profile-registration',
+  title: 'Patient Profile',
+  intro:
+    'A full administrative record for one patient — demographics, insurance, student details, and activity history.',
+  sections: [
+    {
+      heading: 'Overview tab',
+      body: "Personal Information, Contact Details, Next of Kin, Insurance, and Student Information are each editable independently via their own Edit link — changes to one section don't require re-entering the others.",
+    },
+    {
+      heading: 'Medical Alerts',
+      body: 'Allergies, chronic conditions, and other clinical alerts (e.g. religious or procedural restrictions) are reviewed periodically — "Add Alert" records a new one. The allergy banner above the tabs always reflects the same data.',
+    },
+    {
+      heading: 'Registration History & Visit Summary',
+      body: 'A timeline of everything that happened when this patient was registered, plus a running total of visits, the most recent one, and the next upcoming appointment.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: 'Check the patient in, schedule an appointment, jump to their medical records, print their card, or upload a document — all without leaving this page.',
+    },
+  ],
+};
+
 const PATIENT_DIRECTORY_GUIDE: HelpGuide = {
   id: 'patient-directory',
   title: 'Patient Directory',
@@ -775,6 +800,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;
   if (pathname.startsWith('/registration/directory')) return PATIENT_DIRECTORY_GUIDE;
+  if (pathname.startsWith('/registration/profile')) return PATIENT_PROFILE_REGISTRATION_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
