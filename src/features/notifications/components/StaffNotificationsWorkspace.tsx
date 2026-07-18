@@ -10,11 +10,15 @@ import {
   FolderOpen,
   Trash2,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
+import { useAuth } from '@hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
+import { ROUTES } from '@/constants/routes';
+import { resolveWorkspace } from '@/types/auth.types';
 import { formatTime } from '@/utils/datetime';
 import {
   CATEGORY_CFG,
@@ -24,6 +28,14 @@ import {
   STAFF_NOTIFICATIONS,
   type StaffNotification,
 } from '@/features/notifications/__mocks__/staffNotificationFixtures';
+
+/** Where "Open related record" lands, per workspace this shared component is
+ * mounted in — Registration doesn't have Medical Records' record-lookup
+ * tools (and vice versa), so the destination has to match whichever
+ * dashboard the user is actually on. */
+function recordsEntryPointFor(workspaceId: string): string {
+  return workspaceId === 'records' ? ROUTES.medicalRecords : ROUTES.registrationDirectory;
+}
 
 const ROWS_PER_PAGE = 8;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -45,7 +57,10 @@ function isSameWatDay(a: Date, b: Date): string | null {
 }
 
 export function StaffNotificationsWorkspace() {
+  const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
   const [notifications, setNotifications] = useState<StaffNotification[]>(STAFF_NOTIFICATIONS);
   const [priority, setPriority] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -144,8 +159,12 @@ export function StaffNotificationsWorkspace() {
 
   function handleOpenRecord(n: StaffNotification) {
     markRead(n.id);
-    if (n.patientName) toast.info('Opening record', `Opening ${n.patientName}'s record.`);
-    else toast.info('No related record', 'This notification has no linked patient record.');
+    if (!n.patientName) {
+      toast.info('No related record', 'This notification has no linked patient record.');
+      return;
+    }
+    toast.info('Opening record', `Search for ${n.patientName} (${n.mrn}) to view their record.`);
+    router.push(recordsEntryPointFor(workspaceId));
   }
 
   function handleDelete(id: string) {
