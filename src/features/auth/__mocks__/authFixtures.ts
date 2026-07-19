@@ -39,7 +39,7 @@ export function createMockAccessToken(
 //   REGISTRATION_OFFICER → register / REG-001 / adaobi
 //   MATRON          →  matron / MTN-001 / chioma
 
-const MOCK_USERS: User[] = [
+export const MOCK_USERS: User[] = [
   {
     id: 'usr_001',
     name: 'Dr. Adaeze Okonkwo',
@@ -94,7 +94,13 @@ const MOCK_USERS: User[] = [
     workspaceRole: 'RECORDS_OFFICER',
     department: 'Medical Records',
     departmentId: 'dept_medical_records',
-    permissions: ['patients:read', 'patients:write', 'notifications:read'],
+    permissions: [
+      'patients:read',
+      'patients:write',
+      'duty_roster:read',
+      'duty_roster:write',
+      'notifications:read',
+    ],
   },
   {
     id: 'usr_005',
@@ -200,7 +206,14 @@ const MOCK_USERS: User[] = [
     workspaceRole: 'REGISTRATION_OFFICER',
     department: 'Patient Registration',
     departmentId: 'dept_patient_registration',
-    permissions: ['patients:read', 'patients:write', 'referrals:write', 'notifications:read'],
+    permissions: [
+      'patients:read',
+      'patients:write',
+      'referrals:write',
+      'duty_roster:read',
+      'duty_roster:write',
+      'notifications:read',
+    ],
   },
   {
     id: 'usr_012',

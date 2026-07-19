@@ -62,7 +62,7 @@ export function PatientContextModal({
               className="mt-0.5 truncate font-sans"
               style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
             >
-              For your conversation with {activeConversation.doctorName}
+              For your conversation with {activeConversation.staffName}
             </p>
           </div>
           <button

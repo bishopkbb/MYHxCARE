@@ -1,7 +1,7 @@
 'use client';
 
-import { StaffInboxWorkspace } from '@/features/messages/components/StaffInboxWorkspace';
+import { StaffChatWorkspace } from '@/features/messages/components/StaffChatWorkspace';
 
 export default function NurseMessagesPage() {
-  return <StaffInboxWorkspace />;
+  return <StaffChatWorkspace />;
 }

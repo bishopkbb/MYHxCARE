@@ -95,6 +95,17 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         ],
       },
       {
+        label: 'SCHEDULE & WORKFORCE',
+        items: [
+          {
+            label: 'Workforce Management',
+            href: '/medical-records/workforce-management',
+            icon: CalendarDays,
+            permission: PERMISSIONS.DUTY_ROSTER_WRITE,
+          },
+        ],
+      },
+      {
         label: 'REPORTS',
         items: [
           { label: 'Medical Records Reports', href: '/medical-records/reports', icon: BarChart2 },
@@ -153,6 +164,17 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Referral Management', href: '/registration/referrals', icon: Share2 },
           { label: 'Consent Forms', href: '/registration/consent-forms', icon: FileCheck2 },
           { label: 'Patient Card Printing', href: '/registration/card-printing', icon: CreditCard },
+        ],
+      },
+      {
+        label: 'SCHEDULE & WORKFORCE',
+        items: [
+          {
+            label: 'Workforce Management',
+            href: '/registration/workforce-management',
+            icon: CalendarDays,
+            permission: PERMISSIONS.DUTY_ROSTER_WRITE,
+          },
         ],
       },
       {

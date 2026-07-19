@@ -880,31 +880,6 @@ const STAFF_NOTIFICATIONS_GUIDE: HelpGuide = {
   ],
 };
 
-const STAFF_INBOX_GUIDE: HelpGuide = {
-  id: 'staff-inbox',
-  title: 'Messages',
-  intro:
-    'Internal communication across every department and staff member — not tied to one patient.',
-  sections: [
-    {
-      heading: 'Inbox, Sent, Drafts, Archived',
-      body: 'Each tab is a separate list. Selecting a message opens it in the panel on the right (or full-screen on mobile) without leaving the list.',
-    },
-    {
-      heading: 'Filtering',
-      body: 'Search by sender or subject, or narrow by staff member or department — filters apply within whichever tab is currently open.',
-    },
-    {
-      heading: 'Reading a message',
-      body: 'Attachments can be downloaded individually. Read Receipts (when present) show exactly who on the thread has seen it and when.',
-    },
-    {
-      heading: 'Replying and composing',
-      body: 'Reply directly from an open message’s composer at the bottom, or use Compose to start a fresh message to any staff member or department.',
-    },
-  ],
-};
-
 const EMERGENCY_REGISTRATION_GUIDE: HelpGuide = {
   id: 'emergency-registration',
   title: 'Emergency Registration',
@@ -1049,6 +1024,56 @@ const NURSE_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
     {
       heading: 'Coverage and acknowledgement',
       body: 'The Coverage Overview panel tracks ward coverage by shift. Pending Shift Acknowledgement lists nurses who haven’t confirmed their shift yet, with a one-tap reminder.',
+    },
+  ],
+};
+
+const REGISTRATION_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'registration-workforce-management',
+  title: 'Workforce Management',
+  intro:
+    'Manage registration desk schedules, duty rosters, and shift coverage. Visible only to the registration supervisor.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Staff on Duty, Today’s Shifts, On-Call Staff, Shift Acknowledgement, Coverage Status, and Shift Changes summarize the roster at a glance.',
+    },
+    {
+      heading: "Today's Roster",
+      body: 'Search by staff name or filter by shift type, role, and status. Each row shows the station, shift time, and acknowledgement state.',
+    },
+    {
+      heading: 'Create and edit shifts',
+      body: 'Create Shift opens a form for staff name, role, station, shift type, and status. The pencil icon on a row reopens the same form pre-filled for editing.',
+    },
+    {
+      heading: 'Coverage and acknowledgement',
+      body: 'The Coverage Overview panel tracks desk coverage by shift. Pending Shift Acknowledgement lists staff who haven’t confirmed their shift yet, with a one-tap reminder.',
+    },
+  ],
+};
+
+const RECORDS_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'records-workforce-management',
+  title: 'Workforce Management',
+  intro:
+    'Manage medical records staff schedules, duty rosters, and shift coverage. Visible only to the records supervisor.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Staff on Duty, Today’s Shifts, On-Call Staff, Shift Acknowledgement, Coverage Status, and Shift Changes summarize the roster at a glance.',
+    },
+    {
+      heading: "Today's Roster",
+      body: 'Search by staff name or filter by shift type, role, and status. Each row shows the station, shift time, and acknowledgement state.',
+    },
+    {
+      heading: 'Create and edit shifts',
+      body: 'Create Shift opens a form for staff name, role, station, shift type, and status. The pencil icon on a row reopens the same form pre-filled for editing.',
+    },
+    {
+      heading: 'Coverage and acknowledgement',
+      body: 'The Coverage Overview panel tracks station coverage by shift. Pending Shift Acknowledgement lists staff who haven’t confirmed their shift yet, with a one-tap reminder.',
     },
   ],
 };
@@ -1304,23 +1329,27 @@ const REPORTS_GUIDE: HelpGuide = {
 
 const COLLABORATION_GUIDE: HelpGuide = {
   id: 'collaboration',
-  title: 'Clinical Messages',
+  title: 'Messages',
   intro:
-    'Direct messaging between doctors — referral coordination, quick questions, case handoffs.',
+    'Direct messaging with any staff member across departments — coordination, quick questions, case handoffs.',
   sections: [
     {
       heading: 'Conversations',
-      body: 'Select a doctor from the list to open the thread. Unread conversations show a cyan count badge; search narrows the list by name or department.',
+      body: 'Select a colleague from the list to open the thread. Unread conversations show a cyan count badge; search narrows the list by name or department.',
+    },
+    {
+      heading: 'Starting a conversation',
+      body: 'The "+ New" button lists every staff member captured in the system who isn\'t already in your conversation list — pick anyone, from any department, to start chatting.',
     },
     {
       heading: 'Patient context',
-      body: "When a conversation relates to a referral or shared case, the patient's name and MRN appear in a strip below the doctor's name — check it before you write.",
+      body: "When a conversation relates to a referral or shared case, the patient's name and MRN appear in a strip below the recipient's name — check it before you write.",
     },
     {
       heading: 'Composing',
       body: 'Enter sends, Shift+Enter adds a new line. The toolbar can insert a quick template, reference the current patient context, or attach a file.',
       steps: [
-        'Template icon — insert a canned clinical phrase',
+        'Template icon — insert a canned phrase',
         'Stethoscope icon — insert the patient context reference',
         'Paperclip icon — attach a file',
       ],
@@ -1448,9 +1477,11 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/medical-records/requests')) return RECORD_REQUESTS_GUIDE;
   if (pathname.startsWith('/medical-records/archived')) return ARCHIVED_RECORDS_GUIDE;
   if (pathname.startsWith('/medical-records/document-upload')) return DOCUMENT_UPLOAD_GUIDE;
-  if (pathname.startsWith('/medical-records/messages')) return STAFF_INBOX_GUIDE;
+  if (pathname.startsWith('/medical-records/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/medical-records/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/medical-records/reports')) return MEDICAL_RECORDS_REPORTS_GUIDE;
+  if (pathname.startsWith('/medical-records/workforce-management'))
+    return RECORDS_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
   if (pathname.startsWith('/registration/register')) return REGISTER_PATIENT_GUIDE;
   if (pathname.startsWith('/registration/directory')) return PATIENT_DIRECTORY_GUIDE;
@@ -1466,13 +1497,16 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/reports')) return REGISTRATION_REPORTS_GUIDE;
   if (pathname.startsWith('/registration/attendance')) return DAILY_ATTENDANCE_GUIDE;
   if (pathname.startsWith('/registration/patient-statistics')) return PATIENT_STATISTICS_GUIDE;
-  if (pathname.startsWith('/registration/messages')) return STAFF_INBOX_GUIDE;
+  if (pathname.startsWith('/registration/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
+  if (pathname.startsWith('/registration/workforce-management'))
+    return REGISTRATION_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
   if (/^\/nurse\/my-patients\/[^/]+/.test(pathname)) return PATIENT_RECORD_GUIDE;
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
   if (pathname.startsWith('/nurse/workforce-management')) return NURSE_WORKFORCE_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/nurse/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
