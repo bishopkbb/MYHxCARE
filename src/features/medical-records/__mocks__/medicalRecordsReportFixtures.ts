@@ -12,6 +12,7 @@ import {
   PencilLine,
   type LucideIcon,
 } from 'lucide-react';
+import { HOSPITAL_DEPARTMENT_OPTIONS } from '@/constants/departments';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -162,15 +163,7 @@ export const OFFICER_OPTIONS = ['Adeeze Okonkwo', 'Mary Uche', 'Samuel A.', 'Jan
   (o) => ({ value: o, label: o }),
 );
 
-export const REPORT_DEPARTMENT_OPTIONS = [
-  'General Outpatient Clinic',
-  'Laboratory',
-  'Radiology',
-  'Emergency Department',
-  'Surgery',
-  'Physiotherapy',
-  'Dental Clinic',
-].map((d) => ({ value: d, label: d }));
+export const REPORT_DEPARTMENT_OPTIONS = HOSPITAL_DEPARTMENT_OPTIONS;
 
 export const RECORD_STATUS_OPTIONS: { value: RecordActivityStatus; label: string }[] = [
   { value: 'Retrieved', label: 'Retrieved' },

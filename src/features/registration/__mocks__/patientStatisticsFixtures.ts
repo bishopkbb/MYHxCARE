@@ -113,6 +113,34 @@ export const FACULTY_DISTRIBUTION_STUDENTS: DistributionSlice[] = [
   { label: 'Other', value: Math.round(10352 * 0.06), percent: 6, color: '#8A98A3' },
 ];
 
+export const INSURANCE_DISTRIBUTION: DistributionSlice[] = [
+  { label: 'NHIS', value: Math.round(12458 * 0.32), percent: 32, color: '#3B82F6' },
+  {
+    label: 'UNIZIK Staff Health Scheme',
+    value: Math.round(12458 * 0.18),
+    percent: 18,
+    color: '#00B4D8',
+  },
+  { label: 'Hygeia HMO', value: Math.round(12458 * 0.14), percent: 14, color: '#22C55E' },
+  { label: 'AXA Mansard Health', value: Math.round(12458 * 0.11), percent: 11, color: '#8B5CF6' },
+  { label: 'Reliance HMO', value: Math.round(12458 * 0.09), percent: 9, color: '#F59E0B' },
+  { label: 'Leadway Assurance', value: Math.round(12458 * 0.06), percent: 6, color: '#EC4899' },
+  { label: 'AIICO Insurance', value: Math.round(12458 * 0.04), percent: 4, color: '#14B8A6' },
+  {
+    label: 'Self-Pay / Uninsured',
+    value: Math.round(12458 * 0.06),
+    percent: 6,
+    color: '#8A98A3',
+  },
+];
+
+export const EMERGENCY_REGISTRATION_BY_CATEGORY: DistributionSlice[] = [
+  { label: 'Students', value: 100, percent: 68.5, color: '#8B5CF6' },
+  { label: 'Staff', value: 36, percent: 24.7, color: '#F59E0B' },
+  { label: 'Visitors / Others', value: 10, percent: 6.8, color: '#8A98A3' },
+];
+export const TOTAL_EMERGENCY_REGISTRATIONS_DISPLAY = '146';
+
 export const VISIT_FREQUENCY: DistributionSlice[] = [
   { label: '1 Visit', value: 58, percent: 58, color: '#3B82F6' },
   { label: '2 - 3 Visits', value: 24, percent: 24, color: '#22C55E' },

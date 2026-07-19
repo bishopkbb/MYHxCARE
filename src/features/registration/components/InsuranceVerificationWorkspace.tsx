@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Shield, X } from 'lucide-react';
+import { FileDown, FileText, Search, Shield, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -14,6 +14,7 @@ import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
+import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import type { DirectoryPatient } from '@/features/registration/__mocks__/patientDirectoryFixtures';
 import {
   AUTHORIZATION_STATUS_OPTIONS,
@@ -231,6 +232,90 @@ export function InsuranceVerificationWorkspace() {
     ? Math.min(100, Math.round((record.usedAmount / record.coverageLimit) * 100))
     : 0;
 
+  function buildExportRows(): [string, string][] {
+    if (!record || !bannerPatient) return [];
+    const rows: [string, string][] = [
+      ['Patient', bannerPatient.name],
+      ['MRN', bannerPatient.mrn],
+      ['Provider', record.provider],
+      ['Plan', record.plan],
+      ['Policy Number', record.policyNumber],
+      ['Policy Holder', record.policyHolderName],
+      [
+        'Coverage Period',
+        `${formatHumanDate(record.policyStartDate)} - ${formatHumanDate(record.policyEndDate)}`,
+      ],
+      ['Group Number', record.groupNumber],
+      ['Copay', naira(record.copayAmount)],
+      ['Relationship to Patient', record.relationshipToPatient],
+      ['VIP / Special Coverage', record.isVip ? 'Yes' : 'No'],
+      ['Authorization Status', record.authorizationStatus],
+      ['Authorization Number', record.authorizationNumber || '—'],
+      ['Authorized On', record.authorizedOn ? formatHumanDate(record.authorizedOn) : '—'],
+      ['Authorized By', record.authorizedBy || '—'],
+      ['Next Review Date', record.nextReviewDate ? formatHumanDate(record.nextReviewDate) : '—'],
+    ];
+    if (hasVerified) {
+      rows.push(
+        ['Eligibility Status', record.eligibilityStatus],
+        ['Coverage', record.coverageActive ? 'Active' : 'Inactive'],
+        ['Benefit Type', record.benefitType],
+        ['Authorization Required', record.authorizationRequired ? 'Yes' : 'No'],
+        ['Coverage Limit', naira(record.coverageLimit)],
+        ['Used Amount', naira(record.usedAmount)],
+        ['Available Balance', naira(Math.max(0, record.coverageLimit - record.usedAmount))],
+        ['Verification Reference', record.verificationReference || '—'],
+        ['Verified On', record.verifiedOn ? formatDateTimeHuman(record.verifiedOn) : '—'],
+        ['Verified By', record.verifiedBy || '—'],
+      );
+    }
+    return rows;
+  }
+
+  function handleExportPDF() {
+    if (!record || !bannerPatient) return;
+    const infoRows = buildExportRows();
+    const kvHtml = infoRows
+      .map(
+        ([k, v]) =>
+          `<tr><th style="width:220px">${escapeHtml(k)}</th><td>${escapeHtml(v)}</td></tr>`,
+      )
+      .join('');
+    const coverageRowsHtml = record.coverageDetails
+      .map(
+        (row) =>
+          `<tr><td>${escapeHtml(row.category)}</td><td>${row.coveragePercent}%</td><td>${escapeHtml(naira(row.copay))}</td><td>${row.coinsurancePercent}%</td><td>${escapeHtml(row.limit)}</td><td>${row.covered ? 'Covered' : 'Not Covered'}</td></tr>`,
+      )
+      .join('');
+    downloadPDF(
+      `Insurance-Verification-${bannerPatient.mrn}`,
+      `<h1>Insurance Verification</h1>
+       <p class="meta">${escapeHtml(bannerPatient.name)} · ${escapeHtml(bannerPatient.mrn)}</p>
+       <hr />
+       <table><tbody>${kvHtml}</tbody></table>
+       <h2 style="font-size:16px;margin:20px 0 6px">Coverage Details</h2>
+       <table>
+         <thead><tr><th>Service Category</th><th>Coverage</th><th>Copay</th><th>Coinsurance</th><th>Limit</th><th>Status</th></tr></thead>
+         <tbody>${coverageRowsHtml}</tbody>
+       </table>`,
+    );
+    toast.success('Export ready', 'Insurance verification downloaded as PDF.');
+  }
+
+  function handleExportCSV() {
+    if (!record || !bannerPatient) return;
+    const rows = buildExportRows();
+    downloadCSV(`insurance-verification-${bannerPatient.mrn}`, [
+      ['Field', 'Value'],
+      ...rows,
+      ...record.coverageDetails.map((row) => [
+        `Coverage - ${row.category}`,
+        `${row.coveragePercent}% coverage, ${naira(row.copay)} copay, ${row.coinsurancePercent}% coinsurance, limit ${row.limit}, ${row.covered ? 'Covered' : 'Not Covered'}`,
+      ]),
+    ]);
+    toast.success('Export ready', 'Insurance verification downloaded as CSV.');
+  }
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
@@ -249,15 +334,47 @@ export function InsuranceVerificationWorkspace() {
                   : 'Select a patient to verify their insurance coverage'}
               </p>
             </div>
-            {selectedPatient && (
-              <button
-                type="button"
-                onClick={handleChangePatient}
-                className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.2)' }}
-              >
-                Change Patient
-              </button>
+            {selectedPatient && record && (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportPDF}
+                  className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{
+                    fontSize: 14,
+                    color: '#0D2630',
+                    border: '1px solid rgba(0,100,130,0.2)',
+                  }}
+                >
+                  <FileText style={{ width: 15, height: 15, color: '#EF4444' }} />
+                  Export PDF
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{
+                    fontSize: 14,
+                    color: '#0D2630',
+                    border: '1px solid rgba(0,100,130,0.2)',
+                  }}
+                >
+                  <FileDown style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                  Export CSV
+                </button>
+                <button
+                  type="button"
+                  onClick={handleChangePatient}
+                  className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{
+                    fontSize: 14,
+                    color: '#0D2630',
+                    border: '1px solid rgba(0,100,130,0.2)',
+                  }}
+                >
+                  Change Patient
+                </button>
+              </div>
             )}
           </div>
 

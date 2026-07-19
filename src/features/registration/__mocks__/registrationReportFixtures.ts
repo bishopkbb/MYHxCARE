@@ -11,6 +11,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
+import { HOSPITAL_DEPARTMENT_OPTIONS } from '@/constants/departments';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -102,17 +103,7 @@ export const REPORT_STATS: ReportStat[] = [
   },
 ];
 
-export const REPORT_DEPARTMENT_OPTIONS = [
-  'General Outpatient Clinic',
-  'Radiology',
-  'Laboratory',
-  'Emergency Department',
-  'Surgery',
-  'Cardiology',
-  'Physiotherapy',
-  'Dental Clinic',
-  'Pediatrics',
-].map((d) => ({ value: d, label: d }));
+export const REPORT_DEPARTMENT_OPTIONS = HOSPITAL_DEPARTMENT_OPTIONS;
 
 export type RegistrationType = 'Appointment' | 'Walk-in' | 'Emergency';
 

@@ -4,6 +4,7 @@
  */
 
 import { ArrowRightLeft, CheckCircle2, Clock, FileText, Send, type LucideIcon } from 'lucide-react';
+import { HOSPITAL_DEPARTMENTS, HOSPITAL_DEPARTMENT_OPTIONS } from '@/constants/departments';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -18,41 +19,24 @@ export type ReferralPriority = 'Normal' | 'Urgent';
 
 export const OUR_DEPARTMENT = 'General Outpatient Clinic';
 
-export const DEPARTMENT_OPTIONS = [
-  'General Outpatient Clinic',
-  'Physiotherapy',
-  'Dental Clinic',
-  'Radiology',
-  'Emergency Department',
-  'Laboratory',
-  'Surgery',
-  'Cardiology',
-  'Pediatrics',
-  'Obstetrics & Gynaecology',
-  'ENT Clinic',
-  'Ophthalmology',
-  'Orthopedics',
-  'Psychiatry',
-  'Dermatology',
-].map((d) => ({ value: d, label: d }));
+export const DEPARTMENT_OPTIONS = HOSPITAL_DEPARTMENT_OPTIONS;
 
-export const DEPARTMENT_DIRECTORY: { department: string; contact: string; phone: string }[] = [
-  { department: 'General Outpatient Clinic', contact: 'Dr. Jane Ezeonu', phone: '0803 100 2001' },
-  { department: 'Physiotherapy', contact: 'Dr. Samuel A.', phone: '0803 100 2002' },
-  { department: 'Dental Clinic', contact: 'Dr. Onyedika Umeh', phone: '0803 100 2003' },
-  { department: 'Radiology', contact: 'Dr. Ifeanyi Okafor', phone: '0803 100 2004' },
-  { department: 'Emergency Department', contact: 'Dr. Chidinma Nwosu', phone: '0803 100 2005' },
-  { department: 'Laboratory', contact: 'Dr. Mary Uche', phone: '0803 100 2006' },
-  { department: 'Surgery', contact: 'Dr. Emeka Obinna', phone: '0803 100 2007' },
-  { department: 'Cardiology', contact: 'Dr. Jane Ezeonu', phone: '0803 100 2008' },
-  { department: 'Pediatrics', contact: 'Dr. Samuel A.', phone: '0803 100 2009' },
-  { department: 'Obstetrics & Gynaecology', contact: 'Dr. Mary Uche', phone: '0803 100 2010' },
-  { department: 'ENT Clinic', contact: 'Dr. Onyedika Umeh', phone: '0803 100 2011' },
-  { department: 'Ophthalmology', contact: 'Dr. Ifeanyi Okafor', phone: '0803 100 2012' },
-  { department: 'Orthopedics', contact: 'Dr. Emeka Obinna', phone: '0803 100 2013' },
-  { department: 'Psychiatry', contact: 'Dr. Chidinma Nwosu', phone: '0803 100 2014' },
-  { department: 'Dermatology', contact: 'Dr. Jane Ezeonu', phone: '0803 100 2015' },
+const DIRECTORY_CONTACTS = [
+  'Dr. Jane Ezeonu',
+  'Dr. Samuel A.',
+  'Dr. Onyedika Umeh',
+  'Dr. Ifeanyi Okafor',
+  'Dr. Chidinma Nwosu',
+  'Dr. Mary Uche',
+  'Dr. Emeka Obinna',
 ];
+
+export const DEPARTMENT_DIRECTORY: { department: string; contact: string; phone: string }[] =
+  HOSPITAL_DEPARTMENTS.map((department, i) => ({
+    department,
+    contact: DIRECTORY_CONTACTS[i % DIRECTORY_CONTACTS.length] as string,
+    phone: `0803 100 ${String(2001 + i).padStart(4, '0')}`,
+  }));
 
 export const REFERRED_BY_OPTIONS = [
   'Dr. Jane Ezeonu (GP)',

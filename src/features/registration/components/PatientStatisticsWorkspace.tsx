@@ -10,12 +10,15 @@ import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import {
   AGE_DISTRIBUTION,
+  EMERGENCY_REGISTRATION_BY_CATEGORY,
   FACULTY_DISTRIBUTION_STUDENTS,
   GENDER_DISTRIBUTION,
+  INSURANCE_DISTRIBUTION,
   KEY_INSIGHTS,
   MONTHLY_GROWTH,
   PATIENT_STATS,
   TOP_DIAGNOSES,
+  TOTAL_EMERGENCY_REGISTRATIONS_DISPLAY,
   TOTAL_PATIENTS_DISPLAY,
   TOTAL_STUDENTS_DISPLAY,
   VISIT_FREQUENCY,
@@ -341,6 +344,16 @@ export function PatientStatisticsWorkspace() {
       ['Metric', 'Value', 'Detail'],
       ...PATIENT_STATS.map((s) => [s.label, s.value, s.subLabel]),
       ...TOP_DIAGNOSES.map((d) => [`Diagnosis: ${d.label}`, String(d.value), '']),
+      ...INSURANCE_DISTRIBUTION.map((d) => [
+        `Insurance: ${d.label}`,
+        String(d.value),
+        `${d.percent}% of total patients`,
+      ]),
+      ...EMERGENCY_REGISTRATION_BY_CATEGORY.map((d) => [
+        `Emergency Registrations: ${d.label}`,
+        String(d.value),
+        `${d.percent}% of ${TOTAL_EMERGENCY_REGISTRATIONS_DISPLAY} emergency registrations`,
+      ]),
     ];
     downloadCSV('patient-statistics-excel', rows);
     toast.success('Export ready', 'Patient Statistics downloaded for Excel.');
@@ -351,6 +364,14 @@ export function PatientStatisticsWorkspace() {
       (s) =>
         `<tr><td>${escapeHtml(s.label)}</td><td>${escapeHtml(s.value)}</td><td>${escapeHtml(s.subLabel)}</td></tr>`,
     ).join('');
+    const insuranceHtml = INSURANCE_DISTRIBUTION.map(
+      (d) =>
+        `<tr><td>${escapeHtml(d.label)}</td><td>${d.value.toLocaleString()}</td><td>${d.percent}%</td></tr>`,
+    ).join('');
+    const emergencyHtml = EMERGENCY_REGISTRATION_BY_CATEGORY.map(
+      (d) =>
+        `<tr><td>${escapeHtml(d.label)}</td><td>${d.value.toLocaleString()}</td><td>${d.percent}%</td></tr>`,
+    ).join('');
     downloadPDF(
       'patient-statistics',
       `<h1>Patient Statistics</h1>
@@ -358,6 +379,16 @@ export function PatientStatisticsWorkspace() {
       <table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">
         <thead><tr><th>Metric</th><th>Value</th><th>Detail</th></tr></thead>
         <tbody>${statsHtml}</tbody>
+      </table>
+      <h2 style="font-size:16px;margin:20px 0 6px">Insurance Details</h2>
+      <table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">
+        <thead><tr><th>Provider</th><th>Patients</th><th>% of Total</th></tr></thead>
+        <tbody>${insuranceHtml}</tbody>
+      </table>
+      <h2 style="font-size:16px;margin:20px 0 6px">Emergency Registrations by Category</h2>
+      <table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">
+        <thead><tr><th>Category</th><th>Registrations</th><th>% of Total</th></tr></thead>
+        <tbody>${emergencyHtml}</tbody>
       </table>`,
     );
     toast.success('Export ready', 'Patient Statistics downloaded as PDF.');
@@ -520,6 +551,36 @@ export function PatientStatisticsWorkspace() {
                 Top Diagnoses
               </p>
               <HorizontalBarChart data={TOP_DIAGNOSES} animate={animateCharts} />
+            </div>
+          </div>
+
+          {/* ── Insurance Details + Emergency Registration ────────────────── */}
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div
+              className="rounded-[12px] p-4 sm:p-5"
+              style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+            >
+              <p className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                Insurance Details
+              </p>
+              <DonutChart
+                data={INSURANCE_DISTRIBUTION}
+                total={TOTAL_PATIENTS_DISPLAY}
+                animate={animateCharts}
+              />
+            </div>
+            <div
+              className="rounded-[12px] p-4 sm:p-5"
+              style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+            >
+              <p className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                Emergency Registrations by Category (Student / Staff)
+              </p>
+              <DonutChart
+                data={EMERGENCY_REGISTRATION_BY_CATEGORY}
+                total={TOTAL_EMERGENCY_REGISTRATIONS_DISPLAY}
+                animate={animateCharts}
+              />
             </div>
           </div>
 

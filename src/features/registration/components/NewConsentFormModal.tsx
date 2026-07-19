@@ -16,13 +16,13 @@ import {
 
 const CONSENT_TYPE_TO_DEPARTMENT: Record<ConsentType, string> = {
   'Surgery Consent': 'Surgery',
-  'Blood Transfusion': 'Emergency Dept.',
+  'Blood Transfusion': 'Emergency Department',
   'Radiology Consent': 'Radiology',
   'Laboratory Consent': 'Laboratory',
-  'General Treatment': 'General OPD',
+  'General Treatment': 'General Outpatient Clinic',
   'Anaesthesia Consent': 'Surgery',
   'Telemedicine Consent': 'Telemedicine',
-  'Data Privacy Consent': 'General OPD',
+  'Data Privacy Consent': 'General Outpatient Clinic',
 };
 
 const CONSENT_TYPE_TO_PROCEDURE: Record<ConsentType, string> = {

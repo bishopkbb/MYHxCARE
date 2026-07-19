@@ -28,6 +28,7 @@ import { PERMISSIONS } from '@/constants/permissions';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate } from '@/utils/datetime';
+import { HOSPITAL_DEPARTMENT_OPTIONS } from '@/constants/departments';
 import type { DirectoryPatient } from '@/features/registration/__mocks__/patientDirectoryFixtures';
 import { MOCK_PATIENT_PROFILE } from '@/features/registration/__mocks__/patientProfileFixtures';
 import {
@@ -46,16 +47,7 @@ import { PatientPicker } from './PatientPicker';
 const CURATED_PATIENT_ID = 'dp-001';
 const ROWS_PER_PAGE = 10;
 
-const DEPARTMENT_OPTIONS = [
-  'General Outpatient Clinic',
-  'Surgery',
-  'Medical Ward',
-  'Emergency Department',
-  'Radiology',
-  'Dental Clinic',
-  'Physiotherapy',
-  'Family Medicine',
-].map((d) => ({ value: d, label: d }));
+const DEPARTMENT_OPTIONS = HOSPITAL_DEPARTMENT_OPTIONS;
 
 type PendingFile = { id: string; name: string; size: number };
 

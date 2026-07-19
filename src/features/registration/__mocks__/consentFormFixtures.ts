@@ -14,6 +14,7 @@ import {
   Upload,
   type LucideIcon,
 } from 'lucide-react';
+import { HOSPITAL_DEPARTMENT_OPTIONS } from '@/constants/departments';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -53,14 +54,7 @@ export const CONSENT_TYPE_OPTIONS: { value: ConsentType; label: string }[] = [
   { value: 'Data Privacy Consent', label: 'Data Privacy Consent' },
 ];
 
-export const CONSENT_DEPARTMENT_OPTIONS = [
-  'Surgery',
-  'Emergency Dept.',
-  'Radiology',
-  'Laboratory',
-  'General OPD',
-  'Telemedicine',
-].map((d) => ({ value: d, label: d }));
+export const CONSENT_DEPARTMENT_OPTIONS = HOSPITAL_DEPARTMENT_OPTIONS;
 
 export const CONSENT_STATUS_OPTIONS: { value: ConsentStatus; label: string }[] = [
   { value: 'Pending', label: 'Pending' },
@@ -99,13 +93,13 @@ const CONSENT_TYPE_TO_PROCEDURE: Record<ConsentType, string> = {
 
 const CONSENT_TYPE_TO_DEPARTMENT: Record<ConsentType, string> = {
   'Surgery Consent': 'Surgery',
-  'Blood Transfusion': 'Emergency Dept.',
+  'Blood Transfusion': 'Emergency Department',
   'Radiology Consent': 'Radiology',
   'Laboratory Consent': 'Laboratory',
-  'General Treatment': 'General OPD',
+  'General Treatment': 'General Outpatient Clinic',
   'Anaesthesia Consent': 'Surgery',
   'Telemedicine Consent': 'Telemedicine',
-  'Data Privacy Consent': 'General OPD',
+  'Data Privacy Consent': 'General Outpatient Clinic',
 };
 
 const CONSENT_TYPE_DESCRIPTIONS: Record<ConsentType, string> = {
@@ -207,7 +201,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     email: 'ifeanyi.nwosu@email.com',
     address: 'No. 8 Zik Avenue, Awka, Anambra State.',
     consentType: 'Blood Transfusion',
-    department: 'Emergency Dept.',
+    department: 'Emergency Department',
     procedure: 'Blood Transfusion',
     doctor: 'Dr. Jane Ezeonu (GP)',
     dateIssued: atOffset(0, 9, 20),
@@ -282,7 +276,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     email: 'grace.adebayo@email.com',
     address: 'No. 30 Amansea Road, Awka, Anambra State.',
     consentType: 'General Treatment',
-    department: 'General OPD',
+    department: 'General Outpatient Clinic',
     procedure: 'General Consultation',
     doctor: 'Dr. Jane Ezeonu (GP)',
     dateIssued: atOffset(-1, 11, 30),
@@ -357,7 +351,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     email: 'daniel.eze@email.com',
     address: 'No. 19 Zik Avenue, Awka, Anambra State.',
     consentType: 'Data Privacy Consent',
-    department: 'General OPD',
+    department: 'General Outpatient Clinic',
     procedure: 'Data Sharing',
     doctor: 'Dr. Ifeanyi Okafor',
     dateIssued: atOffset(-3, 16, 10),

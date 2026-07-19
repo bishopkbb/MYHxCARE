@@ -5,6 +5,7 @@
  */
 
 import { Clock, ClipboardCheck, Siren, Timer, UserX, Users, type LucideIcon } from 'lucide-react';
+import { HOSPITAL_DEPARTMENT_OPTIONS } from '@/constants/departments';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -96,15 +97,7 @@ export const ATTENDANCE_STATS: AttendanceStat[] = [
   },
 ];
 
-export const ATTENDANCE_DEPARTMENT_OPTIONS = [
-  'General Outpatient',
-  'Laboratory',
-  'Radiology',
-  'Surgery',
-  'Dental Clinic',
-  'Emergency',
-  'Cardiology',
-].map((d) => ({ value: d, label: d }));
+export const ATTENDANCE_DEPARTMENT_OPTIONS = HOSPITAL_DEPARTMENT_OPTIONS;
 
 export const ATTENDANCE_DOCTOR_OPTIONS = [
   'Dr. Jane Ezeonu (GP)',
@@ -187,7 +180,7 @@ const CURATED_ATTENDANCE: AttendanceEntry[] = [
     mrn: 'MRN-2025-00124',
     gender: 'Female',
     age: 21,
-    department: 'General Outpatient',
+    department: 'General Outpatient Clinic',
     doctor: 'Dr. Jane Ezeonu (GP)',
     checkInTime: atOffset(0, 8, 15),
     checkOutTime: atOffset(0, 9, 2),
@@ -247,7 +240,7 @@ const CURATED_ATTENDANCE: AttendanceEntry[] = [
     mrn: 'MRN-2023-00311',
     gender: 'Male',
     age: 23,
-    department: 'General Outpatient',
+    department: 'General Outpatient Clinic',
     doctor: 'Dr. Jane Ezeonu (GP)',
     checkInTime: atOffset(0, 9, 10),
     checkOutTime: atOffset(0, 9, 48),
@@ -271,7 +264,7 @@ const CURATED_ATTENDANCE: AttendanceEntry[] = [
     mrn: 'MRN-2023-00187',
     gender: 'Male',
     age: 25,
-    department: 'Emergency',
+    department: 'Emergency Department',
     doctor: 'Dr. Samuel A.',
     checkInTime: atOffset(0, 9, 35),
     checkOutTime: null,
