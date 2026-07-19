@@ -18,6 +18,7 @@ import {
   ListOrdered,
   MessageSquare,
   Package,
+  PieChart,
   Receipt,
   Settings,
   Share2,
@@ -147,6 +148,11 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Registration Reports', href: '/registration/reports', icon: TrendingUp },
           { label: 'Daily Attendance', href: '/registration/attendance', icon: CalendarCheck },
+          {
+            label: 'Patient Statistics',
+            href: '/registration/patient-statistics',
+            icon: PieChart,
+          },
         ],
       },
       {

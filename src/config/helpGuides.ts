@@ -650,6 +650,30 @@ const DOCUMENT_UPLOAD_GUIDE: HelpGuide = {
   ],
 };
 
+const PATIENT_STATISTICS_GUIDE: HelpGuide = {
+  id: 'patient-statistics',
+  title: 'Patient Statistics',
+  intro: 'Comprehensive overview of patient demographics and center performance.',
+  sections: [
+    {
+      heading: 'Stat cards and exports',
+      body: 'Total/Active Patients, Male/Female, and Students/Staff summarize the whole center. Dashboard Snapshot, Export Excel, and Export PDF capture this view for sharing.',
+    },
+    {
+      heading: 'Distribution charts',
+      body: 'Age, Gender, and Faculty Distribution (Students) break the total down by category. Top Diagnoses ranks the most common conditions seen this period.',
+    },
+    {
+      heading: 'Visit Frequency and Monthly Growth',
+      body: 'Visit Frequency shows how many patients return versus visit once. Monthly Growth tracks new patient registrations over time.',
+    },
+    {
+      heading: 'Key Insights',
+      body: 'Most Visited Department, Most Common Complaint, Repeat Visits, Average Visits Per Student, and Peak Clinic Hours highlight the standout numbers from this period at a glance.',
+    },
+  ],
+};
+
 const DAILY_ATTENDANCE_GUIDE: HelpGuide = {
   id: 'daily-attendance',
   title: 'Daily Attendance',
@@ -1287,6 +1311,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/consent-forms')) return CONSENT_FORMS_GUIDE;
   if (pathname.startsWith('/registration/reports')) return REGISTRATION_REPORTS_GUIDE;
   if (pathname.startsWith('/registration/attendance')) return DAILY_ATTENDANCE_GUIDE;
+  if (pathname.startsWith('/registration/patient-statistics')) return PATIENT_STATISTICS_GUIDE;
   if (pathname.startsWith('/registration/messages')) return STAFF_INBOX_GUIDE;
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;

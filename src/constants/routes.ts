@@ -93,6 +93,7 @@ export const ROUTES = {
   registrationCardPrinting: '/registration/card-printing',
   registrationReports: '/registration/reports',
   registrationAttendance: '/registration/attendance',
+  registrationPatientStatistics: '/registration/patient-statistics',
   registrationMessages: '/registration/messages',
   registrationNotifications: '/registration/notifications',
   registrationAccountProfile: '/registration/account/profile',
