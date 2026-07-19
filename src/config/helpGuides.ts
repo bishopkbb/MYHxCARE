@@ -650,6 +650,30 @@ const DOCUMENT_UPLOAD_GUIDE: HelpGuide = {
   ],
 };
 
+const DAILY_ATTENDANCE_GUIDE: HelpGuide = {
+  id: 'daily-attendance',
+  title: 'Daily Attendance',
+  intro: 'Real-time overview of patient attendance and visit status.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Patients Checked-In, Completed Visits, Waiting, No Shows, Emergencies, and Average Waiting Time all compare against yesterday.',
+    },
+    {
+      heading: 'Filters',
+      body: 'Narrow the charts and table by Date, Department, Doctor, Clinic, or Status, then Apply Filters. Reset returns to the full unfiltered view.',
+    },
+    {
+      heading: 'Charts',
+      body: "Hourly Attendance tracks footfall through the day. Department Attendance breaks down today's check-ins by department. Average Waiting Time compares wait times across departments.",
+    },
+    {
+      heading: 'Attendance table',
+      body: 'Click a row (or its eye icon) to select a patient, then use View Patient to jump to their record. Export and Print act on every row currently passing your filters.',
+    },
+  ],
+};
+
 const REGISTRATION_REPORTS_GUIDE: HelpGuide = {
   id: 'registration-reports',
   title: 'Registration Reports',
@@ -1262,6 +1286,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/referrals')) return REFERRAL_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration/consent-forms')) return CONSENT_FORMS_GUIDE;
   if (pathname.startsWith('/registration/reports')) return REGISTRATION_REPORTS_GUIDE;
+  if (pathname.startsWith('/registration/attendance')) return DAILY_ATTENDANCE_GUIDE;
   if (pathname.startsWith('/registration/messages')) return STAFF_INBOX_GUIDE;
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;

@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Daily Attendance' };
+import { DailyAttendanceWorkspace } from '@/features/registration/components/DailyAttendanceWorkspace';
 
 export default function DailyAttendancePage() {
-  return (
-    <ComingSoon
-      title="Daily Attendance"
-      description="Daily patient footfall and attendance tracking across departments is being built."
-    />
-  );
+  return <DailyAttendanceWorkspace />;
 }
