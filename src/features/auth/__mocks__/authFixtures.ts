@@ -37,6 +37,7 @@ export function createMockAccessToken(
 //   HOD             →  hod / obiora
 //   SYSTEM_ADMIN    →  admin / ADM-001 / kelechi
 //   REGISTRATION_OFFICER → register / REG-001 / adaobi
+//   MATRON          →  matron / MTN-001 / chioma
 
 const MOCK_USERS: User[] = [
   {
@@ -201,6 +202,22 @@ const MOCK_USERS: User[] = [
     departmentId: 'dept_patient_registration',
     permissions: ['patients:read', 'patients:write', 'referrals:write', 'notifications:read'],
   },
+  {
+    id: 'usr_012',
+    name: 'Matron Chioma Nnaji',
+    email: 'chioma.nnaji@unizikmedical.edu.ng',
+    role: 'Matron',
+    workspaceRole: 'MATRON',
+    department: 'Nursing Administration',
+    departmentId: 'dept_nursing_administration',
+    permissions: [
+      'patients:read',
+      'wards:read',
+      'duty_roster:read',
+      'duty_roster:write',
+      'notifications:read',
+    ],
+  },
 ];
 
 const MOCK_USERS_BY_ID = new Map<string, User>(MOCK_USERS.map((u) => [u.id, u]));
@@ -238,6 +255,9 @@ const IDENTIFIER_KEYWORDS: Array<[string, string]> = [
   ['register', 'usr_011'],
   ['reg-', 'usr_011'],
   ['adaobi', 'usr_011'],
+  ['matron', 'usr_012'],
+  ['mtn-', 'usr_012'],
+  ['chioma', 'usr_012'],
 ];
 
 /**

@@ -11,6 +11,7 @@ import { WORKSPACE_NAV } from '@/config/workspaces';
 import type { NavItem } from '@/config/workspaces';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { useAuth } from '@hooks/useAuth';
+import { usePermissions } from '@hooks/usePermissions';
 import { cn, getInitials } from '@lib/utils';
 
 export interface AppSidebarProps {
@@ -28,10 +29,19 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { can } = usePermissions();
   const asideRef = useRef<HTMLElement>(null);
 
   const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
-  const { sections, homeRoute } = WORKSPACE_NAV[workspaceId];
+  const { sections: allSections, homeRoute } = WORKSPACE_NAV[workspaceId];
+  // Items with a `permission` field only render for users holding it — omit
+  // the field and an item shows to everyone in the workspace, as before.
+  const sections = allSections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => !item.permission || can(item.permission)),
+    }))
+    .filter((section) => section.items.length > 0);
 
   // Desktop sidebar behaviour — two cooperating mechanisms:
   //

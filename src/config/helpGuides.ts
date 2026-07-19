@@ -1028,6 +1028,31 @@ const NURSE_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const NURSE_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'nurse-workforce-management',
+  title: 'Workforce Management',
+  intro:
+    'Manage nursing staff schedules, duty rosters, and shift coverage. Visible only to the ward Matron.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Nurses on Duty, Today’s Shifts, On-Call Nurses, Shift Acknowledgement, Coverage Status, and Shift Changes summarize the roster at a glance.',
+    },
+    {
+      heading: "Today's Roster",
+      body: 'Search by nurse name or filter by ward, shift type, role, and status. Each row shows the ward, shift time, and acknowledgement state.',
+    },
+    {
+      heading: 'Create and edit shifts',
+      body: 'Create Shift opens a form for staff name, role, ward, shift type, and status. The pencil icon on a row reopens the same form pre-filled for editing.',
+    },
+    {
+      heading: 'Coverage and acknowledgement',
+      body: 'The Coverage Overview panel tracks ward coverage by shift. Pending Shift Acknowledgement lists nurses who haven’t confirmed their shift yet, with a one-tap reminder.',
+    },
+  ],
+};
+
 const PATIENT_RECORD_GUIDE: HelpGuide = {
   id: 'patient-record',
   title: 'Patient Record',
@@ -1447,6 +1472,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
   if (/^\/nurse\/my-patients\/[^/]+/.test(pathname)) return PATIENT_RECORD_GUIDE;
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
+  if (pathname.startsWith('/nurse/workforce-management')) return NURSE_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;

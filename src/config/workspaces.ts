@@ -44,6 +44,7 @@ import {
 
 import type { LucideIcon } from 'lucide-react';
 
+import { PERMISSIONS } from '@/constants/permissions';
 import { resolveWorkspace } from '@/types/auth.types';
 import type { WorkspaceId, WorkspaceRole } from '@/types/auth.types';
 
@@ -53,6 +54,8 @@ export type NavItem = {
   icon: LucideIcon;
   iconSrc?: string;
   badge?: number;
+  /** Item only renders for users holding this permission. Omit to show to everyone in the workspace. */
+  permission?: string;
 };
 
 export type NavSection = {
@@ -381,7 +384,12 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'SCHEDULE & WORKFORCE',
         items: [
-          { label: 'Workforce Management', href: '/duty-roster', icon: CalendarDays },
+          {
+            label: 'Workforce Management',
+            href: '/nurse/workforce-management',
+            icon: CalendarDays,
+            permission: PERMISSIONS.DUTY_ROSTER_WRITE,
+          },
           { label: 'My Schedule', href: '/my-schedule', icon: LayoutList },
           { label: 'Shift Handover', href: '/nurse/shift-handover', icon: ArrowLeftRight },
         ],
