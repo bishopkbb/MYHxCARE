@@ -1028,6 +1028,34 @@ const NURSE_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const PATIENT_RECORD_GUIDE: HelpGuide = {
+  id: 'patient-record',
+  title: 'Patient Record',
+  intro: 'The full clinical chart for one patient, organised into tabs.',
+  sections: [
+    {
+      heading: 'Header',
+      body: 'Demographics, ward/bed, admission date, length of stay, and assigned doctor sit alongside risk level, allergies, code status, and the current diagnosis.',
+    },
+    {
+      heading: 'Allergy banner',
+      body: 'Recorded allergies always show at the top in red — this banner never collapses and appears on every patient screen for safety.',
+    },
+    {
+      heading: 'Overview tab',
+      body: 'Key Information, Latest Vitals, Alerts, Diagnosis & Clinical Summary, Care Plan Summary, and Intake & Output summarize the patient at a glance. The sidebar tracks Care Plan Progress, the next medication due, upcoming nursing tasks, and recent nursing notes.',
+    },
+    {
+      heading: 'Other tabs',
+      body: 'Vitals, Medication, Nursing Notes, Care Plan, Laboratory, Radiology, Clinical Timeline, and Documents each open a dedicated view — some are still being built out.',
+    },
+    {
+      heading: 'Print Record',
+      body: 'Generates a printable summary of the patient’s key information, diagnosis, and latest vitals.',
+    },
+  ],
+};
+
 const MY_PATIENTS_GUIDE: HelpGuide = {
   id: 'my-patients',
   title: 'My Patients',
@@ -1417,6 +1445,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
+  if (/^\/nurse\/my-patients\/[^/]+/.test(pathname)) return PATIENT_RECORD_GUIDE;
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;

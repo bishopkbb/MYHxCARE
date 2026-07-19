@@ -83,6 +83,7 @@ export const ROUTES = {
   nurse: '/nurse',
   nursePatientQueue: '/nurse/patient-queue',
   nurseMyPatients: '/nurse/my-patients',
+  nursePatientRecord: (id: string) => `/nurse/my-patients/${id}`,
   nurseVitalSigns: '/nurse/vital-signs',
   nurseNursingAssessment: '/nurse/nursing-assessment',
   nurseMedicationAdministration: '/nurse/medication-administration',

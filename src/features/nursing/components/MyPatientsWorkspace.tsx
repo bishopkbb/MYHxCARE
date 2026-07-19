@@ -14,7 +14,6 @@ import {
   ShieldAlert,
   Sun,
   Users,
-  X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -108,7 +107,6 @@ export function MyPatientsWorkspace() {
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filterBarRef = useRef<HTMLDivElement>(null);
 
@@ -174,9 +172,12 @@ export function MyPatientsWorkspace() {
   const pageStart = (safePage - 1) * rowsPerPage;
   const pageRows = filtered.slice(pageStart, pageStart + rowsPerPage);
 
-  const selected = selectedId ? MY_PATIENTS_ROSTER.find((p) => p.id === selectedId) : undefined;
   const highRiskCount = MY_PATIENTS_ROSTER.filter((p) => p.riskLevel === 'High').length;
   const stableCount = MY_PATIENTS_ROSTER.filter((p) => p.careStatus === 'Stable').length;
+
+  function handleViewRecord(patient: NursePatient) {
+    router.push(ROUTES.nursePatientRecord(patient.id));
+  }
 
   function handleRecordObservation(patient: NursePatient) {
     toast.info('Opening Vital Signs', `Recording observation for ${patient.patientName}.`);
@@ -494,10 +495,7 @@ export function MyPatientsWorkspace() {
                                 className="flex flex-col rounded-[12px] p-4"
                                 style={{
                                   background: '#FFFFFF',
-                                  border:
-                                    selectedId === p.id
-                                      ? '1px solid #00B4D8'
-                                      : '1px solid rgba(0,100,130,0.12)',
+                                  border: '1px solid rgba(0,100,130,0.12)',
                                 }}
                               >
                                 <span
@@ -623,7 +621,7 @@ export function MyPatientsWorkspace() {
                                 <div className="mt-3 flex flex-wrap gap-2">
                                   <button
                                     type="button"
-                                    onClick={() => setSelectedId(p.id)}
+                                    onClick={() => handleViewRecord(p)}
                                     className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[8px] px-2 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                                     style={{
                                       fontSize: 14,
@@ -715,11 +713,11 @@ export function MyPatientsWorkspace() {
                             return (
                               <div
                                 key={p.id}
-                                onClick={() => setSelectedId(p.id)}
+                                onClick={() => handleViewRecord(p)}
                                 className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
                                 style={{
                                   borderBottom: '1px solid rgba(0,100,130,0.08)',
-                                  background: selectedId === p.id ? '#E6F8FD' : 'transparent',
+                                  background: 'transparent',
                                 }}
                               >
                                 <div className="flex min-w-[180px] flex-1 items-center gap-2.5 py-3 pr-2 pl-3">
@@ -808,7 +806,7 @@ export function MyPatientsWorkspace() {
                                 >
                                   <button
                                     type="button"
-                                    onClick={() => setSelectedId(p.id)}
+                                    onClick={() => handleViewRecord(p)}
                                     aria-label={`View ${p.patientName}`}
                                     className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                                   >
@@ -919,110 +917,6 @@ export function MyPatientsWorkspace() {
                     </div>
                   )}
                 </div>
-
-                {/* ── Docked detail panel ─────────────────────────────────── */}
-                {selected && (
-                  <div
-                    className="flex w-full shrink-0 flex-col overflow-hidden xl:w-[360px]"
-                    style={{
-                      background: '#FFFFFF',
-                      border: '1px solid rgba(0,100,130,0.12)',
-                      borderRadius: 12,
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-3 px-4 py-4 sm:px-5">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p
-                            className="font-display font-semibold"
-                            style={{ fontSize: 16, color: '#0D2630' }}
-                          >
-                            {selected.patientName}
-                          </p>
-                          <span
-                            className="rounded-full px-2.5 py-0.5 font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              color: RISK_CFG[selected.riskLevel].color,
-                              border: `1px solid ${RISK_CFG[selected.riskLevel].border}`,
-                              background: RISK_CFG[selected.riskLevel].bg,
-                            }}
-                          >
-                            {selected.riskLevel} Risk
-                          </span>
-                        </div>
-                        <p style={{ fontSize: 14, color: '#00B4D8' }}>{selected.mrn}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedId(null)}
-                        aria-label="Close"
-                        className="flex size-9 shrink-0 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                      >
-                        <X style={{ width: 18, height: 18, color: '#4A7080' }} />
-                      </button>
-                    </div>
-
-                    <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth px-4 pb-4 sm:px-5">
-                      <div className="flex flex-col gap-3">
-                        {[
-                          ['Age / Gender', `${selected.age} Y / ${selected.gender}`],
-                          ['Ward', selected.ward],
-                          ['Bed', selected.bed],
-                          ['Diagnosis', selected.diagnosis],
-                          ['Assigned Doctor', selected.doctorName],
-                          [
-                            'Latest Vitals',
-                            `BP ${selected.vitals.bp} · HR ${selected.vitals.hr} · ${selected.vitals.temp}°C`,
-                          ],
-                          ['Vitals Recorded', formatTime(selected.vitals.recordedAt)],
-                          [
-                            'Next Medication',
-                            `${selected.nextMedication} — ${formatTime(selected.nextMedicationTime)}`,
-                          ],
-                          ['Care Status', selected.careStatus],
-                        ].map(([label, value]) => (
-                          <div key={label} className="flex items-center justify-between gap-2">
-                            <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
-                            <span
-                              className="max-w-[200px] truncate text-right font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {value}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
-                      <div className="flex flex-col gap-2 p-4 pt-0 sm:p-5 sm:pt-0">
-                        <button
-                          type="button"
-                          onClick={() => handleRecordObservation(selected)}
-                          className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          style={{
-                            fontSize: 14,
-                            color: '#0D2630',
-                            border: '1px solid rgba(0,100,130,0.2)',
-                          }}
-                        >
-                          <ClipboardList style={{ width: 15, height: 15 }} />
-                          Record Observation
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleAddNote(selected)}
-                          className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          style={{ fontSize: 14, background: '#00B4D8' }}
-                        >
-                          <NotebookPen style={{ width: 15, height: 15 }} />
-                          Add Nursing Note
-                        </button>
-                      </div>
-                    </PermissionGate>
-                  </div>
-                )}
               </div>
             </>
           )}
