@@ -1000,6 +1000,34 @@ const REGISTRATION_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const NURSE_DASHBOARD_GUIDE: HelpGuide = {
+  id: 'nurse-dashboard',
+  title: 'Nurse Dashboard',
+  intro: 'Your patient care overview for the shift — assigned patients, medications, and alerts.',
+  sections: [
+    {
+      heading: 'Stat cards and current shift',
+      body: 'Patients under your care, medication due, admissions today, pending vital signs, and critical alerts summarize the shift at a glance. The shift chip on the right shows your current shift and its time range.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: 'Jump straight to recording vitals, administering medication, adding a nursing note, admitting a patient, starting a shift handover, or raising an emergency response.',
+    },
+    {
+      heading: 'My Patients and Medication Due',
+      body: 'My Patients lists everyone currently assigned to you with ward, bed, and condition. Medication Due shows the next doses in order, with overdue times highlighted in red.',
+    },
+    {
+      heading: 'Alerts, Admissions, and Ward Census',
+      body: "Alerts & Notifications surfaces anything requiring immediate attention. Today's Admissions tracks new patients awaiting assessment. Ward Census Summary shows bed occupancy for the ward.",
+    },
+    {
+      heading: 'Upcoming Tasks',
+      body: 'A checklist of scheduled rounds and tasks for the rest of your shift — tick items off as you complete them, or open your full duty schedule.',
+    },
+  ],
+};
+
 const DUTY_ROSTER_GUIDE: HelpGuide = {
   id: 'duty-roster',
   title: 'Workforce Management',
@@ -1340,6 +1368,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/messages')) return STAFF_INBOX_GUIDE;
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
+  if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
   if (pathname.startsWith('/duty-roster/templates')) return SHIFT_TEMPLATES_GUIDE;
