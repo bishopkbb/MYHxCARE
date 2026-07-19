@@ -32,7 +32,7 @@ function resolveHref(notification: Notification, workspaceId: WorkspaceId): stri
     case 'emergency':
       return ROUTES.emergency;
     case 'collaboration':
-      return findWorkspaceRoute(workspaceId, 'Messages') ?? ROUTES.collaboration;
+      return findWorkspaceRoute(workspaceId, 'Messages') ?? ROUTES.messages;
   }
 }
 

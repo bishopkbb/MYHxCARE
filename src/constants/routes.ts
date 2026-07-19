@@ -18,7 +18,7 @@ export const ROUTES = {
   dutyRoster: '/duty-roster',
   admin: '/admin',
   notifications: '/notifications',
-  collaboration: '/collaboration',
+  messages: '/messages',
   referrals: '/referrals',
   mySchedule: '/my-schedule',
   medicalRecords: '/medical-records',

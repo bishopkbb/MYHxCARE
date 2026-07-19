@@ -7,6 +7,7 @@ import {
   BedSingle,
   Bell,
   CalendarCheck,
+  CalendarClock,
   CalendarDays,
   LayoutList,
   ClipboardCheck,
@@ -231,7 +232,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           {
             label: 'Clinical Notes',
             href: '/clinical-notes',
-            icon: ClipboardList,
+            icon: NotebookPen,
             iconSrc: '/icons/clinical%20notes.png',
           },
           {
@@ -249,7 +250,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           {
             label: 'Laboratory Results',
             href: '/lab/results',
-            icon: FlaskConical,
+            icon: ClipboardCheck,
             iconSrc: '/icons/laboratory%20results.png',
             badge: 1,
           },
@@ -278,13 +279,13 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           {
             label: 'Workforce Management',
             href: '/duty-roster',
-            icon: Users,
+            icon: CalendarClock,
             iconSrc: '/icons/workforce%20management.png',
           },
           {
             label: 'Clinical Timeline',
             href: '/clinical-timeline',
-            icon: Activity,
+            icon: History,
             iconSrc: '/icons/clinical%20timeline.png',
           },
         ],
@@ -294,7 +295,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           {
             label: 'Messages',
-            href: '/collaboration',
+            href: '/messages',
             icon: MessageSquare,
             iconSrc: '/icons/messages.png',
             badge: 3,
@@ -380,8 +381,8 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'SCHEDULE & WORKFORCE',
         items: [
-          { label: 'Workforce Management', href: '/duty-roster', icon: Users },
-          { label: 'My Schedule', href: '/my-schedule', icon: CalendarDays },
+          { label: 'Workforce Management', href: '/duty-roster', icon: CalendarDays },
+          { label: 'My Schedule', href: '/my-schedule', icon: LayoutList },
           { label: 'Shift Handover', href: '/nurse/shift-handover', icon: ArrowLeftRight },
         ],
       },
@@ -428,7 +429,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'COMMUNICATION',
         items: [
-          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
         ],
       },
@@ -463,7 +464,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'COMMUNICATION',
         items: [
-          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
         ],
       },
@@ -499,7 +500,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'COMMUNICATION',
         items: [
-          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
         ],
       },
@@ -531,7 +532,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'COMMUNICATION',
         items: [
-          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
         ],
       },
@@ -563,7 +564,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'COMMUNICATION',
         items: [
-          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
         ],
       },
@@ -594,7 +595,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'COMMUNICATION',
         items: [
-          { label: 'Messages', href: '/collaboration', icon: MessageSquare, badge: 3 },
+          { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
         ],
       },
@@ -635,6 +636,6 @@ export function findWorkspaceRoute(workspaceId: WorkspaceId, label: string): str
 
 export const UNIVERSAL_BOTTOM_NAV: NavItem[] = [
   { label: 'Notifications', href: '/notifications', icon: Bell },
-  { label: 'Collaboration', href: '/collaboration', icon: MessageSquare },
+  { label: 'Messages', href: '/messages', icon: MessageSquare },
   { label: 'Settings', href: '/settings', icon: Settings },
 ];

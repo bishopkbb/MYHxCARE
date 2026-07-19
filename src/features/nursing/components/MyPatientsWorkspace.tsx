@@ -37,7 +37,7 @@ import {
 
 type PageState = 'loading' | 'loaded' | 'error';
 type ViewMode = 'card' | 'list';
-const ROWS_PER_PAGE_OPTIONS = [8, 16, 25];
+const ROWS_PER_PAGE_OPTIONS = [9, 18, 27];
 
 type FilterKey = 'ward' | 'risk' | 'status';
 type FilterState = Record<FilterKey, string>;
@@ -105,7 +105,7 @@ export function MyPatientsWorkspace() {
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
-  const [rowsPerPage, setRowsPerPage] = useState(8);
+  const [rowsPerPage, setRowsPerPage] = useState(9);
   const [currentPage, setCurrentPage] = useState(1);
 
   const filterBarRef = useRef<HTMLDivElement>(null);
@@ -483,7 +483,7 @@ export function MyPatientsWorkspace() {
                       )}
                     </div>
                   ) : viewMode === 'card' ? (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {pageState === 'loading'
                         ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
                         : pageRows.map((p) => {

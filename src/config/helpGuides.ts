@@ -1456,7 +1456,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/duty-roster/analytics')) return WORKFORCE_ANALYTICS_GUIDE;
   if (pathname.startsWith('/duty-roster')) return DUTY_ROSTER_GUIDE;
   if (pathname.startsWith('/appointments')) return APPOINTMENTS_GUIDE;
-  if (pathname.startsWith('/collaboration')) return COLLABORATION_GUIDE;
+  if (pathname.startsWith('/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/reports')) return REPORTS_GUIDE;
   if (pathname.startsWith('/notifications')) return NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/profile')) return PROFILE_GUIDE;

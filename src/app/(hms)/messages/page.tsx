@@ -131,7 +131,7 @@ function SkeletonBubble({ align }: { align: 'left' | 'right' }) {
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 
-export default function CollaborationPage() {
+export default function MessagesPage() {
   const toast = useToast();
   const [pageState, setPageState] = useState<PageState>('loading');
   const [conversations, setConversations] = useState<Conversation[]>(MOCK_CONVERSATIONS);
