@@ -722,6 +722,30 @@ const REGISTRATION_REPORTS_GUIDE: HelpGuide = {
   ],
 };
 
+const PATIENT_CARD_PRINTING_GUIDE: HelpGuide = {
+  id: 'patient-card-printing',
+  title: 'Patient Card Printing',
+  intro: 'Issue, print, and manage patient identification cards.',
+  sections: [
+    {
+      heading: 'Card list and filters',
+      body: 'Search by patient name, MRN, or card ID, then narrow by Card Type, Status, or issue date. Checkboxes let you select several cards for a batch print.',
+    },
+    {
+      heading: 'Card Preview',
+      body: 'Selecting a card shows a real preview of the printed ID card alongside print history — status, print count, and who last printed it.',
+    },
+    {
+      heading: 'Actions',
+      body: "Print and Reprint generate a printable card (opens your browser's print dialog); Download PDF saves it; Report Lost/Damaged flags the card for reissue.",
+    },
+    {
+      heading: 'Quick Actions',
+      body: "New Card Print starts a fresh card for a patient. Batch Print sends every checked card to print at once. Card Templates lets you start a new card pre-set to a template's card type.",
+    },
+  ],
+};
+
 const CONSENT_FORMS_GUIDE: HelpGuide = {
   id: 'consent-forms',
   title: 'Consent Forms',
@@ -1309,6 +1333,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/insurance')) return INSURANCE_VERIFICATION_GUIDE;
   if (pathname.startsWith('/registration/referrals')) return REFERRAL_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration/consent-forms')) return CONSENT_FORMS_GUIDE;
+  if (pathname.startsWith('/registration/card-printing')) return PATIENT_CARD_PRINTING_GUIDE;
   if (pathname.startsWith('/registration/reports')) return REGISTRATION_REPORTS_GUIDE;
   if (pathname.startsWith('/registration/attendance')) return DAILY_ATTENDANCE_GUIDE;
   if (pathname.startsWith('/registration/patient-statistics')) return PATIENT_STATISTICS_GUIDE;
