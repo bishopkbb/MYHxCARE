@@ -26,18 +26,26 @@ function validityDaysFor(cardType: CardType): number {
 
 export function NewCardPrintModal({
   initialCardType,
+  initialPatientName,
+  initialMrn,
+  initialGender,
+  initialDateOfBirth,
   onClose,
   onCreate,
 }: {
   initialCardType?: CardType | undefined;
+  initialPatientName?: string | undefined;
+  initialMrn?: string | undefined;
+  initialGender?: string | undefined;
+  initialDateOfBirth?: string | undefined;
   onClose: () => void;
   onCreate: (card: PatientCard) => void;
 }) {
-  const [patientName, setPatientName] = useState('');
-  const [mrn, setMrn] = useState('');
+  const [patientName, setPatientName] = useState(initialPatientName ?? '');
+  const [mrn, setMrn] = useState(initialMrn ?? '');
   const [patientId, setPatientId] = useState('');
-  const [gender, setGender] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [gender, setGender] = useState(initialGender ?? '');
+  const [dateOfBirth, setDateOfBirth] = useState(initialDateOfBirth ?? '');
   const [bloodGroup, setBloodGroup] = useState('');
   const [cardType, setCardType] = useState<CardType | ''>(initialCardType ?? '');
   const [submitted, setSubmitted] = useState(false);

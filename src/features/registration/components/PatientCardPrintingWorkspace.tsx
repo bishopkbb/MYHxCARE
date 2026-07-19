@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
@@ -159,7 +159,64 @@ export function PatientCardPrintingWorkspace() {
   const [showDetailOnMobile, setShowDetailOnMobile] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createInitialType, setCreateInitialType] = useState<CardType | undefined>(undefined);
+  const [createPrefill, setCreatePrefill] = useState<
+    { name: string; mrn: string; gender?: string; dob?: string } | undefined
+  >(undefined);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+
+  // Consume a `?prefill=[{name,mrn,gender,dob}]` handoff from Patient Directory's
+  // Print Patient Card actions. A single patient opens New Card Print pre-filled;
+  // several are added straight to the queue as Pending (the modal is single-patient
+  // only), then the query string is cleared so a refresh doesn't re-trigger it.
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get('prefill');
+    if (!raw) return;
+    // Defer so the setState calls happen in an async callback, not
+    // synchronously in the effect body (satisfies react-hooks/set-state-in-effect).
+    const id = setTimeout(() => {
+      try {
+        const parsed = JSON.parse(raw) as {
+          name: string;
+          mrn: string;
+          gender?: string;
+          dob?: string;
+        }[];
+        if (parsed.length === 1 && parsed[0]) {
+          setCreatePrefill(parsed[0]);
+          setCreating(true);
+        } else if (parsed.length > 1) {
+          const now = new Date().toISOString();
+          const expiry = new Date();
+          expiry.setDate(expiry.getDate() + 365);
+          const added: PatientCard[] = parsed.map((p, i) => ({
+            id: `CARD-2026-BULK-${Date.now().toString().slice(-6)}${i}`,
+            patientName: p.name,
+            mrn: p.mrn,
+            patientId: `PT-${Date.now().toString().slice(-6)}${i}`,
+            gender: p.gender === 'Female' ? 'Female' : 'Male',
+            dateOfBirth: p.dob ?? '',
+            bloodGroup: 'O+',
+            cardType: 'Student',
+            issueDate: now,
+            expiryDate: expiry.toISOString().slice(0, 10),
+            status: 'Pending',
+            printCount: 0,
+            lastPrintedBy: '—',
+          }));
+          setCards((prev) => [...added, ...prev]);
+          toast.success(
+            'Added to print queue',
+            `${added.length} patients added from Patient Directory.`,
+          );
+        }
+      } catch {
+        // malformed prefill param -- ignore rather than crash the page
+      }
+      router.replace(ROUTES.registrationCardPrinting);
+    }, 0);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -279,6 +336,7 @@ export function PatientCardPrintingWorkspace() {
     setCards((prev) => [card, ...prev]);
     setCreating(false);
     setCreateInitialType(undefined);
+    setCreatePrefill(undefined);
     toast.success('Added to print queue', `${card.patientName}'s card is ready to print.`);
     selectCard(card);
   }
@@ -991,9 +1049,14 @@ export function PatientCardPrintingWorkspace() {
       {creating && (
         <NewCardPrintModal
           initialCardType={createInitialType}
+          initialPatientName={createPrefill?.name}
+          initialMrn={createPrefill?.mrn}
+          initialGender={createPrefill?.gender}
+          initialDateOfBirth={createPrefill?.dob}
           onClose={() => {
             setCreating(false);
             setCreateInitialType(undefined);
+            setCreatePrefill(undefined);
           }}
           onCreate={handleCreateCard}
         />

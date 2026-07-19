@@ -15,10 +15,12 @@ import {
   Users,
   X,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
+import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { StatCardTrend } from '@components/shared/StatCard';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { ExportMenu } from '@/components/ExportMenu';
@@ -40,6 +42,19 @@ import {
   type DirectoryPatientStatus,
 } from '@/features/registration/__mocks__/patientDirectoryFixtures';
 import { PATIENT_CATEGORY_OPTIONS } from '@/features/registration/__mocks__/registerPatientOptions';
+
+const AssignCategoryModal = dynamic(
+  () =>
+    import('@/features/registration/components/AssignCategoryModal').then(
+      (m) => m.AssignCategoryModal,
+    ),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+
+// The only directory patient with a full, richly-detailed PatientProfile
+// record (see toCuratedBannerPatient()) -- Profile navigation is honest
+// only for this one; every other row would silently show the wrong patient.
+const CURATED_PATIENT_ID = 'dp-001';
 
 type PageState = 'loading' | 'loaded' | 'error';
 
@@ -122,6 +137,7 @@ export default function PatientDirectoryPage() {
   const router = useRouter();
   const toast = useToast();
   const [pageState, setPageState] = useState<PageState>('loading');
+  const [patients, setPatients] = useState<DirectoryPatient[]>(DIRECTORY_PATIENTS);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<Filters>(FILTER_DEFAULTS);
   const [filtersOpen, setFiltersOpen] = useState(true);
@@ -131,6 +147,7 @@ export default function PatientDirectoryPage() {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
     DIRECTORY_PATIENTS[0]?.id ?? null,
   );
+  const [assignCategoryOpen, setAssignCategoryOpen] = useState(false);
   const actionMenuRef = useRef<HTMLDivElement>(null);
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
 
@@ -155,7 +172,7 @@ export default function PatientDirectoryPage() {
   }
 
   const filteredPatients = useMemo(() => {
-    return DIRECTORY_PATIENTS.filter((p) => {
+    return patients.filter((p) => {
       if (search.trim()) {
         const q = search.trim().toLowerCase();
         if (
@@ -178,13 +195,13 @@ export default function PatientDirectoryPage() {
         return false;
       return true;
     });
-  }, [search, filters]);
+  }, [patients, search, filters]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPatients.length / rowsPerPage));
   const safePage = Math.min(currentPage, totalPages);
   const pageStart = (safePage - 1) * rowsPerPage;
   const pagePatients = filteredPatients.slice(pageStart, pageStart + rowsPerPage);
-  const selectedPatient = DIRECTORY_PATIENTS.find((p) => p.id === selectedPatientId) ?? null;
+  const selectedPatient = patients.find((p) => p.id === selectedPatientId) ?? null;
 
   const hasActiveFilters = Object.values(filters).some((v) => v !== '') || search.trim() !== '';
 
@@ -261,24 +278,47 @@ export default function PatientDirectoryPage() {
   }
 
   function exportSelected() {
-    const rows = DIRECTORY_PATIENTS.filter((p) => selectedIds.has(p.id));
+    const rows = patients.filter((p) => selectedIds.has(p.id));
     if (rows.length === 0) return;
     downloadCSV('patient-directory-selected', exportRows(rows));
     toast.success('Export ready', `${rows.length} selected patients downloaded as CSV.`);
   }
 
+  function printCardsFor(targets: DirectoryPatient[]) {
+    if (targets.length === 0) return;
+    const prefill = targets.map((p) => ({
+      name: p.name,
+      mrn: p.mrn,
+      gender: p.gender,
+      dob: p.dateOfBirth,
+    }));
+    router.push(
+      `${ROUTES.registrationCardPrinting}?prefill=${encodeURIComponent(JSON.stringify(prefill))}`,
+    );
+  }
+
   function printCards() {
-    if (selectedIds.size === 0) return;
-    toast.success('Sending to printer', `${selectedIds.size} patient card(s) queued for printing.`);
+    const targets = patients.filter((p) => selectedIds.has(p.id));
+    printCardsFor(targets);
   }
 
   function assignCategory() {
     if (selectedIds.size === 0) return;
+    setAssignCategoryOpen(true);
+  }
+
+  function handleAssignCategory(category: string) {
+    setPatients((prev) => prev.map((p) => (selectedIds.has(p.id) ? { ...p, category } : p)));
     toast.success('Category assigned', `Updated category for ${selectedIds.size} patient(s).`);
+    setAssignCategoryOpen(false);
+    clearSelection();
   }
 
   function archiveRecords() {
     if (selectedIds.size === 0) return;
+    setPatients((prev) =>
+      prev.map((p) => (selectedIds.has(p.id) ? { ...p, status: 'Inactive' } : p)),
+    );
     toast.success('Records archived', `${selectedIds.size} patient record(s) archived.`);
     clearSelection();
   }
@@ -786,7 +826,16 @@ export default function PatientDirectoryPage() {
                             </button>
                             <button
                               type="button"
-                              onClick={() => router.push(ROUTES.registrationProfile)}
+                              onClick={() => {
+                                if (patient.id === CURATED_PATIENT_ID) {
+                                  router.push(ROUTES.registrationProfile);
+                                } else {
+                                  toast.info(
+                                    'Not available',
+                                    'The full Patient Profile view is only built out for the demo patient so far.',
+                                  );
+                                }
+                              }}
                               aria-label={`Edit ${patient.name}`}
                               className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                             >
@@ -841,11 +890,8 @@ export default function PatientDirectoryPage() {
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      toast.success(
-                                        'Sending to printer',
-                                        `${patient.name}'s card queued for printing.`,
-                                      );
                                       setOpenActionMenuId(null);
+                                      printCardsFor([patient]);
                                     }}
                                     className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
                                     style={{ fontSize: 14, color: '#2F3A40' }}
@@ -1130,7 +1176,16 @@ export default function PatientDirectoryPage() {
                   <div className="mt-2.5 grid grid-cols-2 gap-2.5">
                     <button
                       type="button"
-                      onClick={() => router.push(ROUTES.registrationProfile)}
+                      onClick={() => {
+                        if (selectedPatient.id === CURATED_PATIENT_ID) {
+                          router.push(ROUTES.registrationProfile);
+                        } else {
+                          toast.info(
+                            'Not available',
+                            'The full Patient Profile view is only built out for the demo patient so far.',
+                          );
+                        }
+                      }}
                       className="flex flex-col items-center gap-1.5 rounded-[10px] py-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                       style={{
                         fontSize: 14,
@@ -1158,12 +1213,7 @@ export default function PatientDirectoryPage() {
                     </PermissionGate>
                     <button
                       type="button"
-                      onClick={() =>
-                        toast.success(
-                          'Sending to printer',
-                          `${selectedPatient.name}'s card queued for printing.`,
-                        )
-                      }
+                      onClick={() => printCardsFor([selectedPatient])}
                       className="flex flex-col items-center gap-1.5 rounded-[10px] py-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                       style={{
                         fontSize: 14,
@@ -1196,6 +1246,14 @@ export default function PatientDirectoryPage() {
           <div className="h-4" />
         </div>
       </main>
+
+      {assignCategoryOpen && (
+        <AssignCategoryModal
+          patientCount={selectedIds.size}
+          onClose={() => setAssignCategoryOpen(false)}
+          onAssign={handleAssignCategory}
+        />
+      )}
     </div>
   );
 }
