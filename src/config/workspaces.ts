@@ -28,7 +28,6 @@ import {
   PieChart,
   Pill,
   Receipt,
-  Scan,
   Settings,
   Share2,
   Shield,
@@ -399,7 +398,6 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Laboratory Requests', href: '/lab/orders', icon: FlaskConical },
           { label: 'Laboratory Results', href: '/lab/results', icon: FileCheck2 },
-          { label: 'Radiology Requests', href: '/nurse/radiology-requests', icon: Scan },
           { label: 'Clinical Timeline', href: '/clinical-timeline', icon: History },
         ],
       },
