@@ -149,14 +149,14 @@ export const WORKFORCE_STATS = {
 
 // ─── Coverage overview ──────────────────────────────────────────────────────
 
-export type CoverageMetric = { label: string; percent: number };
+export type CoverageMetric = { label: string; percent: number; color: string };
 
 export const COVERAGE_OVERVIEW: CoverageMetric[] = [
-  { label: 'Overall Coverage', percent: 92 },
-  { label: 'Morning Shift', percent: 96 },
-  { label: 'Afternoon Shift', percent: 90 },
-  { label: 'Night Shift', percent: 85 },
-  { label: 'On-Call Coverage', percent: 100 },
+  { label: 'Overall Coverage', percent: 92, color: '#00B4D8' },
+  { label: 'Morning Shift', percent: 96, color: '#22C55E' },
+  { label: 'Afternoon Shift', percent: 90, color: '#00B4D8' },
+  { label: 'Night Shift', percent: 85, color: '#F59E0B' },
+  { label: 'On-Call Coverage', percent: 100, color: '#22C55E' },
 ];
 
 // ─── Pending acknowledgements ───────────────────────────────────────────────
