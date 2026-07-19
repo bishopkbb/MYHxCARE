@@ -1028,6 +1028,30 @@ const NURSE_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const MY_PATIENTS_GUIDE: HelpGuide = {
+  id: 'my-patients',
+  title: 'My Patients',
+  intro: 'The full roster of patients assigned to you during this shift.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total My Patients, High Risk Patients, Due Medications, Due Observations, and Stable Patients summarize your assigned roster.',
+    },
+    {
+      heading: 'Filters and view',
+      body: 'Narrow the roster by ward, risk level, or care status, or search by name, MRN, or diagnosis. Switch between Card View and List View with the toggle on the right.',
+    },
+    {
+      heading: 'Patient cards',
+      body: 'Each card shows risk level, ward/bed, diagnosis, assigned doctor, latest vitals, and the next medication due, plus the current care status.',
+    },
+    {
+      heading: 'Actions',
+      body: 'View Record opens full details in the side panel. Record Observation and Add Nursing Note take you straight into recording vitals or a note for that patient.',
+    },
+  ],
+};
+
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
@@ -1393,6 +1417,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
+  if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
