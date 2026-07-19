@@ -205,7 +205,7 @@ const MOCK_USERS: User[] = [
   {
     id: 'usr_012',
     name: 'Matron Chioma Nnaji',
-    email: 'chioma.nnaji@unizikmedical.edu.ng',
+    email: 'chioma.nnaji@unizik.com',
     role: 'Matron',
     workspaceRole: 'MATRON',
     department: 'Nursing Administration',
