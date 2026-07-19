@@ -1028,6 +1028,30 @@ const NURSE_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const PATIENT_QUEUE_GUIDE: HelpGuide = {
+  id: 'patient-queue',
+  title: 'Patient Queue',
+  intro: 'Every nursing task waiting to be done, ordered by due time and priority.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total in Queue, Overdue Tasks, Due Within 30 Min, Completed Today, and Patients Under My Care summarize your workload at a glance.',
+    },
+    {
+      heading: 'Filters',
+      body: 'Narrow the list by ward, priority, task type, assigned doctor, or status, or search by patient name, MRN, or task.',
+    },
+    {
+      heading: 'Task rows',
+      body: 'Each row shows the patient, ward/bed, assigned doctor, the next nursing task, and how much time is left — overdue times are shown in red.',
+    },
+    {
+      heading: 'Actions',
+      body: 'Select the eye icon (or the row) to open task details in the side panel. Use the checkmark to mark a task complete, or the panel’s buttons to move it to In Progress or Complete.',
+    },
+  ],
+};
+
 const DUTY_ROSTER_GUIDE: HelpGuide = {
   id: 'duty-roster',
   title: 'Workforce Management',
@@ -1368,6 +1392,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/messages')) return STAFF_INBOX_GUIDE;
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
+  if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;

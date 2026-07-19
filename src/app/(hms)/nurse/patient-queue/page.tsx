@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Patient Queue' };
+import { PatientQueueWorkspace } from '@/features/nursing/components/PatientQueueWorkspace';
 
-export default function NursePatientQueuePage() {
-  return (
-    <ComingSoon
-      title="Patient Queue"
-      description="A ward-level queue of patients waiting for nursing attention — triage priority, wait time, and one-tap hand-off to vitals or assessment — is on the way."
-    />
-  );
+export default function PatientQueuePage() {
+  return <PatientQueueWorkspace />;
 }

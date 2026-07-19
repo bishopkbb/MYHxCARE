@@ -67,7 +67,13 @@ const MOCK_USERS: User[] = [
     workspaceRole: 'NURSE',
     department: 'General Ward',
     departmentId: 'dept_general_ward',
-    permissions: ['patients:read', 'encounters:read', 'wards:read', 'notifications:read'],
+    permissions: [
+      'patients:read',
+      'encounters:read',
+      'encounters:write',
+      'wards:read',
+      'notifications:read',
+    ],
   },
   {
     id: 'usr_003',
