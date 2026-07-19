@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Registration Reports' };
+import { RegistrationReportsWorkspace } from '@/features/registration/components/RegistrationReportsWorkspace';
 
 export default function RegistrationReportsPage() {
-  return (
-    <ComingSoon
-      title="Registration Reports"
-      description="Registration volume, turnaround time, and front-desk performance reports are being built."
-    />
-  );
+  return <RegistrationReportsWorkspace />;
 }

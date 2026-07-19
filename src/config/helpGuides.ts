@@ -650,6 +650,30 @@ const DOCUMENT_UPLOAD_GUIDE: HelpGuide = {
   ],
 };
 
+const REGISTRATION_REPORTS_GUIDE: HelpGuide = {
+  id: 'registration-reports',
+  title: 'Registration Reports',
+  intro: 'Analytics and insights on patient registrations and operational performance.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Registrations, New Patients, Returning Patients, Walk-ins, Emergency Registrations, and Appointments each compare against last month, with a mini trend line.',
+    },
+    {
+      heading: 'Filters',
+      body: 'Narrow every chart and the table below by Date Range, Department, Registration Type, Student Category, Faculty, Gender, or Age Group, then Apply Filters. Reset returns to the full unfiltered view.',
+    },
+    {
+      heading: 'Charts',
+      body: 'Registrations by Day and by Month track volume over time. Faculty Distribution and Gender Distribution break down the same total by category. Peak Registration Hours shows when registrations happen during the day.',
+    },
+    {
+      heading: 'Registrations Details',
+      body: 'Every registration, one row per patient. Export PDF, Excel, CSV, or Print exports exactly the rows currently passing your filters.',
+    },
+  ],
+};
+
 const CONSENT_FORMS_GUIDE: HelpGuide = {
   id: 'consent-forms',
   title: 'Consent Forms',
@@ -1237,6 +1261,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/insurance')) return INSURANCE_VERIFICATION_GUIDE;
   if (pathname.startsWith('/registration/referrals')) return REFERRAL_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration/consent-forms')) return CONSENT_FORMS_GUIDE;
+  if (pathname.startsWith('/registration/reports')) return REGISTRATION_REPORTS_GUIDE;
   if (pathname.startsWith('/registration/messages')) return STAFF_INBOX_GUIDE;
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
