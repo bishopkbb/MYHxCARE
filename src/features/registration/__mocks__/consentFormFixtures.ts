@@ -98,7 +98,7 @@ const CONSENT_TYPE_TO_DEPARTMENT: Record<ConsentType, string> = {
   'Laboratory Consent': 'Laboratory',
   'General Treatment': 'General Outpatient Clinic',
   'Anaesthesia Consent': 'Surgery',
-  'Telemedicine Consent': 'Telemedicine',
+  'Telemedicine Consent': 'Family Medicine',
   'Data Privacy Consent': 'General Outpatient Clinic',
 };
 
@@ -326,7 +326,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     email: 'favour.bassey@email.com',
     address: 'No. 3 Unizik Road, Awka, Anambra State.',
     consentType: 'Telemedicine Consent',
-    department: 'Telemedicine',
+    department: 'Family Medicine',
     procedure: 'Video Consultation',
     doctor: 'Dr. Jane Ezeonu (GP)',
     dateIssued: atOffset(-2, 10, 12),

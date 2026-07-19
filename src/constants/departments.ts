@@ -34,7 +34,6 @@ export const HOSPITAL_DEPARTMENTS = [
   'Physiotherapy',
   'Anaesthesia',
   'Intensive Care Unit (ICU)',
-  'Telemedicine',
 ] as const;
 
 export type HospitalDepartment = (typeof HOSPITAL_DEPARTMENTS)[number];
