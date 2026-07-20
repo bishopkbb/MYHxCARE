@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Vital Signs' };
+import { VitalSignsWorkspace } from '@/features/nursing/components/VitalSignsWorkspace';
 
 export default function NurseVitalSignsPage() {
-  return (
-    <ComingSoon
-      title="Vital Signs"
-      description="Vital sign recording — temperature, blood pressure, pulse, respiration, and SpO2 — with trend charts per patient is on the way."
-    />
-  );
+  return <VitalSignsWorkspace />;
 }

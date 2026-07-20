@@ -1130,6 +1130,38 @@ const MY_PATIENTS_GUIDE: HelpGuide = {
   ],
 };
 
+const VITAL_SIGNS_GUIDE: HelpGuide = {
+  id: 'vital-signs',
+  title: 'Vital Signs',
+  intro: 'Monitor, record and track a patient’s vital signs and Early Warning Score.',
+  sections: [
+    {
+      heading: 'Selecting a patient',
+      body: 'Pick a patient from your assigned roster to open their vitals — search by name or MRN. "Change Patient" at the top of the header returns you to the picker.',
+    },
+    {
+      heading: 'Stat tiles',
+      body: 'Blood Pressure, Pulse, Respiratory Rate, Temperature, SpO₂, Pain Score, and Blood Sugar each show a High/Low/Normal badge; Weight and Height are recorded less often and show when they were last updated.',
+    },
+    {
+      heading: 'Trend charts',
+      body: 'Six charts track each vital over the selected window — 6 Hours, 24 Hours, 7 Days, or 30 Days.',
+    },
+    {
+      heading: 'Early Warning Score (NEWS2)',
+      body: 'A standard clinical score computed from the latest reading. Medium and High risk show an alert with the recommended monitoring level.',
+    },
+    {
+      heading: 'Recording vitals',
+      body: '"Record New Vitals" opens a form for every measurement at once; the new reading immediately updates the stat tiles, trend charts, and NEWS2 score.',
+    },
+    {
+      heading: 'Actions',
+      body: 'Escalate Patient notifies the assigned doctor for urgent review. Print Report downloads a PDF of recent readings.',
+    },
+  ],
+};
+
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
@@ -1502,6 +1534,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/workforce-management'))
     return REGISTRATION_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
+  if (pathname.startsWith('/nurse/vital-signs')) return VITAL_SIGNS_GUIDE;
   if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
   if (/^\/nurse\/my-patients\/[^/]+/.test(pathname)) return PATIENT_RECORD_GUIDE;
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
