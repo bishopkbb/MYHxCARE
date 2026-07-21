@@ -19,10 +19,16 @@ export const RISK_LEVEL_OPTIONS: { value: RiskLevel; label: string }[] = [
   { value: 'Low', label: 'Low' },
 ];
 
-export type CareStatus = 'In Progress' | 'Stable';
+export type CareStatus = 'In Progress' | 'Stable' | 'Awaiting Discharge';
 export const CARE_STATUS_OPTIONS: { value: CareStatus; label: string }[] = [
   { value: 'In Progress', label: 'In Progress' },
   { value: 'Stable', label: 'Stable' },
+  { value: 'Awaiting Discharge', label: 'Awaiting Discharge' },
+];
+
+export const FREQUENT_VITALS_OPTIONS: { value: string; label: string }[] = [
+  { value: 'Yes', label: 'Yes' },
+  { value: 'No', label: 'No' },
 ];
 
 export type Vitals = { bp: string; hr: number; temp: number; recordedAt: string };
@@ -39,11 +45,25 @@ export type NursePatient = {
   bed: string;
   diagnosis: string;
   doctorName: string;
+  /** Foreign key into `shared/__mocks__/doctorDirectory`'s `DOCTORS` — set for
+   * patients claimed via Start Triage (carried over from `QueueEntry.doctorId`);
+   * undefined for ward-admitted patients whose `doctorName` isn't yet a roster id. */
+  doctorId?: string | undefined;
   vitals: Vitals;
   nextMedication: string;
   nextMedicationTime: string;
   riskLevel: RiskLevel;
   careStatus: CareStatus;
+  frequentVitals: boolean;
+  /** True for a patient claimed via "Start Triage" from Patient Queue, not yet
+   * admitted to a ward — ward/bed are placeholders until the doctor decides. */
+  isPreAdmission?: boolean;
+  /** True only for a genuinely first-time patient (never seen at this facility
+   * before) — carried from `QueueEntry.isNewPatient`. Only meaningful alongside
+   * `isPreAdmission`; a returning patient already has a real vitals history
+   * even before today's triage, so Vital Signs shouldn't show them an empty
+   * first-capture state. */
+  isNewPatient?: boolean;
 };
 
 const CURATED_PATIENTS: NursePatient[] = [
@@ -64,6 +84,7 @@ const CURATED_PATIENTS: NursePatient[] = [
     nextMedicationTime: atOffset(0, 9, 0),
     riskLevel: 'High',
     careStatus: 'In Progress',
+    frequentVitals: true,
   },
   {
     id: 'np-002',
@@ -82,6 +103,7 @@ const CURATED_PATIENTS: NursePatient[] = [
     nextMedicationTime: atOffset(0, 10, 0),
     riskLevel: 'Medium',
     careStatus: 'Stable',
+    frequentVitals: false,
   },
   {
     id: 'np-003',
@@ -100,6 +122,7 @@ const CURATED_PATIENTS: NursePatient[] = [
     nextMedicationTime: atOffset(0, 11, 0),
     riskLevel: 'Low',
     careStatus: 'Stable',
+    frequentVitals: false,
   },
   {
     id: 'np-004',
@@ -118,6 +141,7 @@ const CURATED_PATIENTS: NursePatient[] = [
     nextMedicationTime: atOffset(0, 9, 30),
     riskLevel: 'High',
     careStatus: 'In Progress',
+    frequentVitals: true,
   },
   {
     id: 'np-005',
@@ -135,7 +159,8 @@ const CURATED_PATIENTS: NursePatient[] = [
     nextMedication: 'Paracetamol 1g (PO)',
     nextMedicationTime: atOffset(0, 14, 0),
     riskLevel: 'Low',
-    careStatus: 'Stable',
+    careStatus: 'Awaiting Discharge',
+    frequentVitals: false,
   },
   {
     id: 'np-006',
@@ -154,6 +179,7 @@ const CURATED_PATIENTS: NursePatient[] = [
     nextMedicationTime: atOffset(0, 14, 0),
     riskLevel: 'Medium',
     careStatus: 'In Progress',
+    frequentVitals: false,
   },
   {
     id: 'np-007',
@@ -172,6 +198,7 @@ const CURATED_PATIENTS: NursePatient[] = [
     nextMedicationTime: atOffset(0, 10, 30),
     riskLevel: 'Low',
     careStatus: 'Stable',
+    frequentVitals: false,
   },
   {
     id: 'np-008',
@@ -190,6 +217,7 @@ const CURATED_PATIENTS: NursePatient[] = [
     nextMedicationTime: atOffset(0, 12, 0),
     riskLevel: 'Medium',
     careStatus: 'In Progress',
+    frequentVitals: false,
   },
 ];
 
@@ -306,6 +334,7 @@ const GENERATED_PATIENTS: NursePatient[] = Array.from({ length: 10 }, (_, idx) =
     nextMedicationTime: atOffset(0, 12 + (idx % 6), (idx * 17) % 60),
     riskLevel: GEN_RISK[idx] as RiskLevel,
     careStatus: GEN_STATUS[idx] as CareStatus,
+    frequentVitals: GEN_RISK[idx] === 'High',
   };
 });
 

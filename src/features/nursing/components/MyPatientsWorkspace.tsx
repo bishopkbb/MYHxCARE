@@ -13,6 +13,7 @@ import {
   Search,
   ShieldAlert,
   Sun,
+  UserPlus,
   Users,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -27,21 +28,30 @@ import { formatTime } from '@/utils/datetime';
 import { CURRENT_SHIFT } from '@/features/nursing/__mocks__/nurseDashboardFixtures';
 import {
   CARE_STATUS_OPTIONS,
-  MY_PATIENTS_ROSTER,
+  FREQUENT_VITALS_OPTIONS,
   RISK_LEVEL_OPTIONS,
   WARD_OPTIONS,
   type CareStatus,
   type NursePatient,
   type RiskLevel,
 } from '@/features/nursing/__mocks__/myPatientsFixtures';
+import {
+  getEffectiveRoster,
+  useClaimedPatients,
+} from '@/features/nursing/store/nursingWorkflowStore';
 
 type PageState = 'loading' | 'loaded' | 'error';
 type ViewMode = 'card' | 'list';
 const ROWS_PER_PAGE_OPTIONS = [9, 18, 27];
 
-type FilterKey = 'ward' | 'risk' | 'status';
+type FilterKey = 'ward' | 'risk' | 'status' | 'frequentVitals';
 type FilterState = Record<FilterKey, string>;
-const FILTER_DEFAULTS: FilterState = { ward: 'ALL', risk: 'ALL', status: 'ALL' };
+const FILTER_DEFAULTS: FilterState = {
+  ward: 'ALL',
+  risk: 'ALL',
+  status: 'ALL',
+  frequentVitals: 'ALL',
+};
 
 const FILTER_DEFS: {
   key: FilterKey;
@@ -51,6 +61,7 @@ const FILTER_DEFS: {
   { key: 'ward', defaultLabel: 'All Wards', options: WARD_OPTIONS },
   { key: 'risk', defaultLabel: 'All Risk Levels', options: RISK_LEVEL_OPTIONS },
   { key: 'status', defaultLabel: 'All Statuses', options: CARE_STATUS_OPTIONS },
+  { key: 'frequentVitals', defaultLabel: 'Frequent Vitals: Any', options: FREQUENT_VITALS_OPTIONS },
 ];
 
 const RISK_CFG: Record<RiskLevel, { color: string; border: string; bg: string }> = {
@@ -62,6 +73,11 @@ const RISK_CFG: Record<RiskLevel, { color: string; border: string; bg: string }>
 const STATUS_CFG: Record<CareStatus, { color: string; border: string; bg: string }> = {
   'In Progress': { color: '#3B82F6', border: 'rgba(59,130,246,0.4)', bg: 'rgba(59,130,246,0.06)' },
   Stable: { color: '#22C55E', border: 'rgba(34,197,94,0.4)', bg: 'transparent' },
+  'Awaiting Discharge': {
+    color: '#8B5CF6',
+    border: 'rgba(139,92,246,0.4)',
+    bg: 'rgba(139,92,246,0.06)',
+  },
 };
 
 function SkeletonStatCard() {
@@ -108,6 +124,17 @@ export function MyPatientsWorkspace() {
   const [rowsPerPage, setRowsPerPage] = useState(9);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Re-renders whenever a patient is claimed via "Start Triage" in Patient Queue.
+  useClaimedPatients();
+  // Freshly-claimed pre-admission patients surface first — they need triage
+  // started, unlike the rest of the roster which is already under way.
+  const roster = [...getEffectiveRoster()].sort((a, b) => {
+    if (Boolean(a.isPreAdmission) !== Boolean(b.isPreAdmission)) {
+      return a.isPreAdmission ? -1 : 1;
+    }
+    return 0;
+  });
+
   const filterBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -150,13 +177,19 @@ export function MyPatientsWorkspace() {
     filters.ward !== 'ALL' ||
     filters.risk !== 'ALL' ||
     filters.status !== 'ALL' ||
+    filters.frequentVitals !== 'ALL' ||
     search.trim() !== '';
 
   const q = search.trim().toLowerCase();
-  const filtered = MY_PATIENTS_ROSTER.filter((p) => {
+  const filtered = roster.filter((p) => {
     if (filters.ward !== 'ALL' && p.ward !== filters.ward) return false;
     if (filters.risk !== 'ALL' && p.riskLevel !== filters.risk) return false;
     if (filters.status !== 'ALL' && p.careStatus !== filters.status) return false;
+    if (
+      filters.frequentVitals !== 'ALL' &&
+      (p.frequentVitals ? 'Yes' : 'No') !== filters.frequentVitals
+    )
+      return false;
     if (
       q &&
       !p.patientName.toLowerCase().includes(q) &&
@@ -172,8 +205,9 @@ export function MyPatientsWorkspace() {
   const pageStart = (safePage - 1) * rowsPerPage;
   const pageRows = filtered.slice(pageStart, pageStart + rowsPerPage);
 
-  const highRiskCount = MY_PATIENTS_ROSTER.filter((p) => p.riskLevel === 'High').length;
-  const stableCount = MY_PATIENTS_ROSTER.filter((p) => p.careStatus === 'Stable').length;
+  const highRiskCount = roster.filter((p) => p.riskLevel === 'High').length;
+  const stableCount = roster.filter((p) => p.careStatus === 'Stable').length;
+  const preAdmissionCount = roster.filter((p) => p.isPreAdmission).length;
 
   function handleViewRecord(patient: NursePatient) {
     router.push(ROUTES.nursePatientRecord(patient.id));
@@ -193,11 +227,20 @@ export function MyPatientsWorkspace() {
     {
       id: 'total',
       label: 'Total My Patients',
-      value: String(MY_PATIENTS_ROSTER.length),
+      value: String(roster.length),
       subLabel: 'Assigned this shift',
       icon: Users,
       color: '#3B82F6',
       iconBg: 'rgba(59,130,246,0.12)',
+    },
+    {
+      id: 'triage-in-progress',
+      label: 'Triage In Progress',
+      value: String(preAdmissionCount),
+      subLabel: 'Not yet admitted',
+      icon: UserPlus,
+      color: '#00B4D8',
+      iconBg: 'rgba(0,180,216,0.12)',
     },
     {
       id: 'high-risk',
@@ -267,7 +310,8 @@ export function MyPatientsWorkspace() {
                 My Patients
               </h1>
               <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-                Patients assigned to you during this shift.
+                Patients you are actively managing — admitted to your ward, or claimed from Patient
+                Queue for triage.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -331,9 +375,9 @@ export function MyPatientsWorkspace() {
           ) : (
             <>
               {/* ── Stat cards ─────────────────────────────────────────────── */}
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {pageState === 'loading'
-                  ? Array.from({ length: 5 }).map((_, i) => <SkeletonStatCard key={i} />)
+                  ? Array.from({ length: 6 }).map((_, i) => <SkeletonStatCard key={i} />)
                   : STATS.map((s) => (
                       <div
                         key={s.id}
@@ -498,17 +542,32 @@ export function MyPatientsWorkspace() {
                                   border: '1px solid rgba(0,100,130,0.12)',
                                 }}
                               >
-                                <span
-                                  className="w-fit rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                  style={{
-                                    fontSize: 14,
-                                    color: riskCfg.color,
-                                    border: `1px solid ${riskCfg.border}`,
-                                    background: riskCfg.bg,
-                                  }}
-                                >
-                                  {p.riskLevel} Risk
-                                </span>
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span
+                                    className="w-fit rounded-full px-2.5 py-0.5 font-sans font-medium"
+                                    style={{
+                                      fontSize: 14,
+                                      color: riskCfg.color,
+                                      border: `1px solid ${riskCfg.border}`,
+                                      background: riskCfg.bg,
+                                    }}
+                                  >
+                                    {p.riskLevel} Risk
+                                  </span>
+                                  {p.isPreAdmission && (
+                                    <span
+                                      className="w-fit rounded-full px-2.5 py-0.5 font-sans font-medium"
+                                      style={{
+                                        fontSize: 14,
+                                        color: '#00B4D8',
+                                        border: '1px solid rgba(0,180,216,0.4)',
+                                        background: 'rgba(0,180,216,0.08)',
+                                      }}
+                                    >
+                                      Pre-Admission
+                                    </span>
+                                  )}
+                                </div>
 
                                 <div className="mt-3 flex items-center gap-2.5">
                                   <div
@@ -559,47 +618,66 @@ export function MyPatientsWorkspace() {
                                   Doctor: <span style={{ color: '#0D2630' }}>{p.doctorName}</span>
                                 </p>
 
-                                <div
-                                  className="mt-3 grid grid-cols-2 gap-2 rounded-[10px] p-2.5"
-                                  style={{ background: 'rgba(226,237,241,0.4)' }}
-                                >
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-1">
-                                      <HeartPulse
-                                        style={{ width: 13, height: 13, color: '#EF4444' }}
-                                      />
-                                      <span style={{ fontSize: 14, color: '#8A98A3' }}>
-                                        Latest Vitals
-                                      </span>
-                                    </div>
-                                    <p
-                                      className="truncate font-sans font-medium"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      BP {p.vitals.bp}
-                                    </p>
+                                {p.isPreAdmission ? (
+                                  <div
+                                    className="mt-3 flex items-center gap-2 rounded-[10px] p-2.5"
+                                    style={{ background: 'rgba(0,180,216,0.06)' }}
+                                  >
+                                    <HeartPulse
+                                      style={{
+                                        width: 15,
+                                        height: 15,
+                                        color: '#00B4D8',
+                                        flexShrink: 0,
+                                      }}
+                                    />
                                     <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                      HR {p.vitals.hr} · {p.vitals.temp}°C
+                                      Vitals pending — continue in Vital Signs
                                     </p>
                                   </div>
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-1">
-                                      <Pill style={{ width: 13, height: 13, color: '#8B5CF6' }} />
-                                      <span style={{ fontSize: 14, color: '#8A98A3' }}>
-                                        Next Medication
-                                      </span>
+                                ) : (
+                                  <div
+                                    className="mt-3 grid grid-cols-2 gap-2 rounded-[10px] p-2.5"
+                                    style={{ background: 'rgba(226,237,241,0.4)' }}
+                                  >
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-1">
+                                        <HeartPulse
+                                          style={{ width: 13, height: 13, color: '#EF4444' }}
+                                        />
+                                        <span style={{ fontSize: 14, color: '#8A98A3' }}>
+                                          Latest Vitals
+                                        </span>
+                                      </div>
+                                      <p
+                                        className="truncate font-sans font-medium"
+                                        style={{ fontSize: 14, color: '#0D2630' }}
+                                      >
+                                        BP {p.vitals.bp}
+                                      </p>
+                                      <p style={{ fontSize: 14, color: '#4A7080' }}>
+                                        HR {p.vitals.hr} · {p.vitals.temp}°C
+                                      </p>
                                     </div>
-                                    <p
-                                      className="truncate font-sans font-medium"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {p.nextMedication}
-                                    </p>
-                                    <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                      {formatTime(p.nextMedicationTime)}
-                                    </p>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-1">
+                                        <Pill style={{ width: 13, height: 13, color: '#8B5CF6' }} />
+                                        <span style={{ fontSize: 14, color: '#8A98A3' }}>
+                                          Next Medication
+                                        </span>
+                                      </div>
+                                      <p
+                                        className="truncate font-sans font-medium"
+                                        style={{ fontSize: 14, color: '#0D2630' }}
+                                      >
+                                        {p.nextMedication}
+                                      </p>
+                                      <p style={{ fontSize: 14, color: '#4A7080' }}>
+                                        {formatTime(p.nextMedicationTime)}
+                                      </p>
+                                    </div>
                                   </div>
-                                </div>
+                                )}
 
                                 <div className="mt-3 flex items-center gap-1.5">
                                   <span style={{ fontSize: 14, color: '#8A98A3' }}>
@@ -770,21 +848,31 @@ export function MyPatientsWorkspace() {
                                   </p>
                                 </div>
                                 <div className="w-36 shrink-0 py-3 pr-2">
-                                  <p style={{ fontSize: 14, color: '#0D2630' }}>BP {p.vitals.bp}</p>
-                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                    HR {p.vitals.hr} · {p.vitals.temp}°C
-                                  </p>
+                                  {p.isPreAdmission ? (
+                                    <p style={{ fontSize: 14, color: '#00B4D8' }}>Pending</p>
+                                  ) : (
+                                    <>
+                                      <p style={{ fontSize: 14, color: '#0D2630' }}>
+                                        BP {p.vitals.bp}
+                                      </p>
+                                      <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                        HR {p.vitals.hr} · {p.vitals.temp}°C
+                                      </p>
+                                    </>
+                                  )}
                                 </div>
                                 <div className="w-44 shrink-0 py-3 pr-2">
                                   <p
                                     className="truncate font-sans font-medium"
                                     style={{ fontSize: 14, color: '#0D2630' }}
                                   >
-                                    {p.nextMedication}
+                                    {p.isPreAdmission ? 'Pending doctor review' : p.nextMedication}
                                   </p>
-                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                    {formatTime(p.nextMedicationTime)}
-                                  </p>
+                                  {!p.isPreAdmission && (
+                                    <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                      {formatTime(p.nextMedicationTime)}
+                                    </p>
+                                  )}
                                 </div>
                                 <div className="w-28 shrink-0 py-3 pr-2">
                                   <span

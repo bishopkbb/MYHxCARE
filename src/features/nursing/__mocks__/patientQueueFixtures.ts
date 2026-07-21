@@ -14,15 +14,75 @@ import {
   HeartPulse,
   Pill,
   Syringe,
+  UserPlus,
   Users,
   type LucideIcon,
 } from 'lucide-react';
+
+import {
+  QUEUE_ENTRIES,
+  type QueueEntry,
+  type QueueStatus,
+} from '@/features/registration/__mocks__/queueFixtures';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
   d.setDate(d.getDate() + dayOffset);
   d.setHours(hour, minute, 0, 0);
   return d.toISOString();
+}
+
+export const AWAITING_TRIAGE_STATUSES: QueueStatus[] = [
+  'New Arrival',
+  'Waiting',
+  'Calling Next',
+  'Emergency',
+];
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase();
+}
+
+const TRIAGE_AVATAR_PALETTE = ['#3B82F6', '#22C55E', '#8B5CF6', '#F59E0B', '#00B4D8', '#EC4899'];
+
+function hashSeed(input: string): number {
+  let h = 0;
+  for (let i = 0; i < input.length; i++) h = (Math.imul(31, h) + input.charCodeAt(i)) | 0;
+  return h >>> 0;
+}
+
+function waitLabel(arrivalTime: string): string {
+  const minutes = Math.max(0, Math.round((Date.now() - new Date(arrivalTime).getTime()) / 60_000));
+  if (minutes < 60) return `Waiting ${minutes} min`;
+  return `Waiting ${Math.floor(minutes / 60)} hr ${minutes % 60} min`;
+}
+
+/** Converts a registration queue entry into a Patient Queue row. Exported so the
+ * workspace component can recompute it from its own local `QueueEntry[]` state
+ * after a Reassign/Mark Emergency edit — the default `AWAITING_TRIAGE_TASKS`
+ * below is just this applied once, at module load, to the static fixture. */
+export function toAwaitingTriageTask(entry: QueueEntry): QueueTask {
+  return {
+    id: `triage-${entry.id}`,
+    patientName: entry.patientName,
+    initials: initialsOf(entry.patientName),
+    avatarBg: TRIAGE_AVATAR_PALETTE[hashSeed(entry.id) % TRIAGE_AVATAR_PALETTE.length] as string,
+    mrn: entry.mrn,
+    department: entry.department,
+    assignedClinic: entry.assignedClinic,
+    doctorName: entry.attendingDoctor,
+    doctorRole: entry.isEmergency ? 'On-Call' : 'Assigned Physician',
+    taskType: 'Awaiting Triage',
+    taskDetail: entry.status,
+    dueTime: entry.arrivalTime,
+    dueLabel: waitLabel(entry.arrivalTime),
+    overdue: entry.isEmergency,
+    priority: entry.isEmergency ? 'High' : 'Medium',
+    status: 'Pending',
+    preAdmissionEntryId: entry.id,
+    isEmergency: entry.isEmergency,
+  };
 }
 
 export type TrendDirection = 'up' | 'down';
@@ -49,6 +109,7 @@ export const PRIORITY_OPTIONS: { value: TaskPriority; label: string }[] = [
 ];
 
 export type TaskType =
+  | 'Awaiting Triage'
   | 'Medication Due'
   | 'Vitals Due'
   | 'Dressing Change'
@@ -58,6 +119,7 @@ export type TaskType =
   | 'Catheter Care';
 
 export const TASK_TYPE_OPTIONS: { value: TaskType; label: string }[] = [
+  { value: 'Awaiting Triage', label: 'Awaiting Triage' },
   { value: 'Medication Due', label: 'Medication Due' },
   { value: 'Vitals Due', label: 'Vitals Due' },
   { value: 'Dressing Change', label: 'Dressing Change' },
@@ -68,11 +130,12 @@ export const TASK_TYPE_OPTIONS: { value: TaskType; label: string }[] = [
 ];
 
 export const TASK_TYPE_CFG: Record<TaskType, { icon: LucideIcon; color: string; bg: string }> = {
+  'Awaiting Triage': { icon: UserPlus, color: '#00B4D8', bg: 'rgba(0,180,216,0.12)' },
   'Medication Due': { icon: Pill, color: '#8B5CF6', bg: 'rgba(139,92,246,0.12)' },
   'Vitals Due': { icon: HeartPulse, color: '#3B82F6', bg: 'rgba(59,130,246,0.12)' },
   'Dressing Change': { icon: Bandage, color: '#F59E0B', bg: 'rgba(245,158,11,0.12)' },
   Observation: { icon: Eye, color: '#6366F1', bg: 'rgba(99,102,241,0.12)' },
-  'Admission Assessment': { icon: ClipboardList, color: '#00B4D8', bg: 'rgba(0,180,216,0.12)' },
+  'Admission Assessment': { icon: ClipboardList, color: '#14B8A6', bg: 'rgba(20,184,166,0.12)' },
   'IV Review': { icon: Droplet, color: '#0EA5E9', bg: 'rgba(14,165,233,0.12)' },
   'Catheter Care': { icon: Syringe, color: '#EC4899', bg: 'rgba(236,72,153,0.12)' },
 };
@@ -104,8 +167,12 @@ export type QueueTask = {
   initials: string;
   avatarBg: string;
   mrn: string;
-  ward: string;
-  bed: string;
+  /** Ward/bed for an admitted patient — omitted for a pre-admission row, which
+   * carries `department`/`assignedClinic` instead. */
+  ward?: string;
+  bed?: string;
+  department?: string;
+  assignedClinic?: string;
   doctorName: string;
   doctorRole: string;
   taskType: TaskType;
@@ -115,6 +182,12 @@ export type QueueTask = {
   overdue: boolean;
   priority: TaskPriority;
   status: TaskStatus;
+  /** Present only on rows sourced from the registration queue — lets the row
+   * render a "Start Triage" action instead of the usual task-status buttons. */
+  preAdmissionEntryId?: string;
+  /** Registration's emergency-priority flag, carried through for rows sourced
+   * from the registration queue — disables "Mark Emergency" once already set. */
+  isEmergency?: boolean;
 };
 
 const CURATED_TASKS: QueueTask[] = [
@@ -293,6 +366,7 @@ const GEN_TASK_TYPES: TaskType[] = [
   'IV Review',
 ];
 const GEN_TASK_DETAIL: Record<TaskType, string> = {
+  'Awaiting Triage': 'Awaiting nurse triage',
   'Medication Due': 'Amoxicillin 500mg (PO)',
   'Vitals Due': 'Vitals Monitoring',
   'Dressing Change': 'Wound dressing check',
@@ -335,6 +409,12 @@ const GENERATED_TASKS: QueueTask[] = Array.from({ length: 6 }, (_, idx) => {
 });
 
 export const QUEUE_TASKS: QueueTask[] = [...CURATED_TASKS, ...GENERATED_TASKS];
+
+/** Registration patients not yet claimed by a nurse — filtered further at
+ * render time against `isTriageStarted()` so a claimed patient drops off. */
+export const AWAITING_TRIAGE_TASKS: QueueTask[] = QUEUE_ENTRIES.filter((e) =>
+  AWAITING_TRIAGE_STATUSES.includes(e.status),
+).map(toAwaitingTriageTask);
 
 export const QUEUE_STATS: QueueStat[] = [
   {
@@ -381,6 +461,15 @@ export const QUEUE_STATS: QueueStat[] = [
     value: '18',
     subLabel: 'Currently assigned',
     icon: BedDouble,
+    color: '#00B4D8',
+    iconBg: 'rgba(0,180,216,0.12)',
+  },
+  {
+    id: 'awaiting-triage',
+    label: 'Awaiting Triage',
+    value: String(AWAITING_TRIAGE_TASKS.length),
+    subLabel: 'From Registration, unclaimed',
+    icon: UserPlus,
     color: '#00B4D8',
     iconBg: 'rgba(0,180,216,0.12)',
   },

@@ -25,7 +25,7 @@ import {
   type DistributionSlice,
   type LabeledBar,
   type TrendPoint,
-} from '@/features/registration/__mocks__/patientStatisticsFixtures';
+} from '@/features/medical-records/__mocks__/patientStatisticsFixtures';
 
 function computeTick(maxValue: number): number {
   if (maxValue <= 0) return 1;
@@ -401,7 +401,7 @@ export function PatientStatisticsWorkspace() {
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5">
             <button
               type="button"
-              onClick={() => router.push(ROUTES.registration)}
+              onClick={() => router.push(ROUTES.medicalRecordsDashboard)}
               className="transition-colors duration-150 hover:text-[#00B4D8] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
               style={{ fontSize: 14, color: '#8A98A3' }}
             >

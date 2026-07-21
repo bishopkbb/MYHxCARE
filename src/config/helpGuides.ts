@@ -235,15 +235,19 @@ const CLINICAL_NOTES_GUIDE: HelpGuide = {
 const REFERRALS_INDEX_GUIDE: HelpGuide = {
   id: 'referrals-index',
   title: 'Referrals',
-  intro: 'Pick a patient here to refer them to a specialist department.',
+  intro: 'Refer a patient out, or accept a referral another department has sent to us.',
   sections: [
     {
       heading: 'Finding a patient',
-      body: 'Search by name or MRN, or narrow the list with the status pills — Admitted, Active, Follow up, Referred, or Discharged.',
+      body: 'On the "Refer a Patient" tab, search by name or MRN, or narrow the list with the status pills — Admitted, Active, Follow up, Referred, or Discharged.',
     },
     {
       heading: 'Starting a referral',
       body: 'Select "Refer" (or tap a patient card on mobile) to open the referral form for that patient.',
+    },
+    {
+      heading: 'Incoming Referrals',
+      body: 'The second tab lists referrals other departments have sent to us, with a badge showing how many are still Pending. Accept a pending referral to take it on, then Mark Completed once the consultation is done.',
     },
   ],
 };
@@ -438,34 +442,6 @@ const CHECK_IN_GUIDE: HelpGuide = {
     {
       heading: 'Completing check-in',
       body: 'The progress bar at the bottom tracks all five steps. Complete Check-In only unlocks once a patient is found, Visit Details are filled in, and a queue number has been assigned.',
-    },
-  ],
-};
-
-const QUEUE_MANAGEMENT_GUIDE: HelpGuide = {
-  id: 'queue-management',
-  title: 'Queue Management',
-  intro: 'Monitor every patient waiting across departments and prioritize urgent cases.',
-  sections: [
-    {
-      heading: 'Department tabs and filters',
-      body: 'Switch between departments with the tabs, then narrow further with the Clinic and Status filters or the search box (patient name, MRN, or queue number).',
-    },
-    {
-      heading: 'Reading the queue',
-      body: 'Wait Time updates live from each arrival time. Rows in red are Emergency patients — they are pulled to the top of clinical priority regardless of arrival order.',
-    },
-    {
-      heading: 'Row actions',
-      body: 'Each row has three quick actions: Reassign (move to another department/clinic), Prioritize (flag as Emergency), and Check-In Complete (mark the visit as served).',
-    },
-    {
-      heading: 'Queue Details panel',
-      body: 'Selecting a row opens its full detail on the right — department, clinic, attending doctor, and a timestamped history of everything that happened to this queue entry.',
-    },
-    {
-      heading: 'Quick Actions',
-      body: 'The bottom row mirrors the panel actions for whichever patient is currently selected, plus a shortcut to register a new walk-in patient from Check-In.',
     },
   ],
 };
@@ -1165,11 +1141,12 @@ const VITAL_SIGNS_GUIDE: HelpGuide = {
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
-  intro: 'Every nursing task waiting to be done, ordered by due time and priority.',
+  intro:
+    'Every patient waiting on a nurse — from Registration check-in and triage through to medication, dressing, and observation for admitted patients.',
   sections: [
     {
       heading: 'Stat cards',
-      body: 'Total in Queue, Overdue Tasks, Due Within 30 Min, Completed Today, and Patients Under My Care summarize your workload at a glance.',
+      body: 'Total in Queue, Overdue Tasks, Due Within 30 Min, Completed Today, Patients Under My Care, and Awaiting Triage summarize your workload at a glance.',
     },
     {
       heading: 'Filters',
@@ -1182,6 +1159,10 @@ const PATIENT_QUEUE_GUIDE: HelpGuide = {
     {
       heading: 'Actions',
       body: 'Select the eye icon (or the row) to open task details in the side panel. Use the checkmark to mark a task complete, or the panel’s buttons to move it to In Progress or Complete.',
+    },
+    {
+      heading: 'Awaiting Triage rows',
+      body: 'Patients fresh from Registration check-in, not yet claimed by any nurse. Reassign moves them to another department/clinic, Mark Emergency flags high-priority cases, and Start Triage claims the patient into your caseload and opens Vital Signs immediately to record their first reading.',
     },
   ],
 };
@@ -1512,6 +1493,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/medical-records/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/medical-records/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/medical-records/reports')) return MEDICAL_RECORDS_REPORTS_GUIDE;
+  if (pathname.startsWith('/medical-records/patient-statistics')) return PATIENT_STATISTICS_GUIDE;
   if (pathname.startsWith('/medical-records/workforce-management'))
     return RECORDS_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/medical-records')) return MEDICAL_RECORDS_GUIDE;
@@ -1519,7 +1501,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/directory')) return PATIENT_DIRECTORY_GUIDE;
   if (pathname.startsWith('/registration/profile')) return PATIENT_PROFILE_REGISTRATION_GUIDE;
   if (pathname.startsWith('/registration/check-in')) return CHECK_IN_GUIDE;
-  if (pathname.startsWith('/registration/queue')) return QUEUE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration/appointments')) return APPOINTMENT_SCHEDULING_GUIDE;
   if (pathname.startsWith('/registration/emergency')) return EMERGENCY_REGISTRATION_GUIDE;
   if (pathname.startsWith('/registration/insurance')) return INSURANCE_VERIFICATION_GUIDE;
@@ -1528,7 +1509,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/card-printing')) return PATIENT_CARD_PRINTING_GUIDE;
   if (pathname.startsWith('/registration/reports')) return REGISTRATION_REPORTS_GUIDE;
   if (pathname.startsWith('/registration/attendance')) return DAILY_ATTENDANCE_GUIDE;
-  if (pathname.startsWith('/registration/patient-statistics')) return PATIENT_STATISTICS_GUIDE;
   if (pathname.startsWith('/registration/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
   if (pathname.startsWith('/registration/workforce-management'))

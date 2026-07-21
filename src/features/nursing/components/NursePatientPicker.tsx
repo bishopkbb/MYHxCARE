@@ -8,6 +8,7 @@ import {
   MY_PATIENTS_ROSTER,
   type NursePatient,
 } from '@/features/nursing/__mocks__/myPatientsFixtures';
+import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
 
 const RISK_CFG: Record<string, { color: string; border: string; bg: string }> = {
   High: { color: '#EF4444', border: 'rgba(239,68,68,0.4)', bg: 'rgba(239,68,68,0.08)' },
@@ -20,13 +21,18 @@ export function NursePatientPicker({ onSelect }: { onSelect: (patient: NursePati
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
 
+  // Re-renders (and the memo below recomputes) whenever a patient is claimed
+  // via "Start Triage" in Patient Queue, so they're pickable immediately.
+  const claimedPatients = useClaimedPatients();
+
   const filtered = useMemo(() => {
+    const roster = [...MY_PATIENTS_ROSTER, ...claimedPatients];
     const q = search.trim().toLowerCase();
-    if (!q) return MY_PATIENTS_ROSTER;
-    return MY_PATIENTS_ROSTER.filter(
+    if (!q) return roster;
+    return roster.filter(
       (p) => p.patientName.toLowerCase().includes(q) || p.mrn.toLowerCase().includes(q),
     );
-  }, [search]);
+  }, [search, claimedPatients]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, totalPages);

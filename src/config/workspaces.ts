@@ -108,6 +108,11 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         label: 'REPORTS',
         items: [
           { label: 'Medical Records Reports', href: '/medical-records/reports', icon: BarChart2 },
+          {
+            label: 'Patient Statistics',
+            href: '/medical-records/patient-statistics',
+            icon: PieChart,
+          },
         ],
       },
       {
@@ -147,7 +152,6 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Patient Directory', href: '/registration/directory', icon: Users },
           { label: 'Patient Profile', href: '/registration/profile', icon: User },
           { label: 'Check-In', href: '/registration/check-in', icon: UserCheck },
-          { label: 'Queue Management', href: '/registration/queue', icon: ListOrdered },
           {
             label: 'Appointment Scheduling',
             href: '/registration/appointments',
@@ -181,11 +185,6 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Registration Reports', href: '/registration/reports', icon: TrendingUp },
           { label: 'Daily Attendance', href: '/registration/attendance', icon: CalendarCheck },
-          {
-            label: 'Patient Statistics',
-            href: '/registration/patient-statistics',
-            icon: PieChart,
-          },
         ],
       },
       {

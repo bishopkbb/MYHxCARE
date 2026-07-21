@@ -100,6 +100,12 @@ export type Referral = {
   status: ReferralStatus;
   priority: ReferralPriority;
   reason: string;
+  /** Foreign key into `shared/__mocks__/doctorDirectory`'s `DOCTORS` — only set
+   * on Incoming referrals (who at OUR_DEPARTMENT should act on it). Both
+   * doctors currently rostered to OUR_DEPARTMENT ('doc-jane' and 'usr_001',
+   * the default demo login) get a share of these so the doctor's /referrals
+   * "Incoming Referrals" tab has real per-doctor data to filter. */
+  receivingDoctorId?: string | undefined;
 };
 
 // ─── Curated rows — match the reference design exactly ─────────────────────
@@ -129,6 +135,7 @@ const CURATED_REFERRALS: Referral[] = [
     status: 'Accepted',
     priority: 'Normal',
     reason: 'Suspected systemic infection requiring general evaluation.',
+    receivingDoctorId: 'doc-jane',
   },
   {
     id: 'REF-2026-0126',
@@ -155,6 +162,7 @@ const CURATED_REFERRALS: Referral[] = [
     status: 'Pending',
     priority: 'Urgent',
     reason: 'Stabilized emergency case for outpatient follow-up.',
+    receivingDoctorId: 'usr_001',
   },
   {
     id: 'REF-2026-0124',
@@ -181,6 +189,7 @@ const CURATED_REFERRALS: Referral[] = [
     status: 'Accepted',
     priority: 'Normal',
     reason: 'Post-operative wound care and general monitoring.',
+    receivingDoctorId: 'doc-jane',
   },
   {
     id: 'REF-2026-0122',
@@ -207,6 +216,7 @@ const CURATED_REFERRALS: Referral[] = [
     status: 'Pending',
     priority: 'Normal',
     reason: 'Abnormal result flagged for clinical review.',
+    receivingDoctorId: 'usr_001',
   },
 ];
 
@@ -302,6 +312,8 @@ const GENERATED_REFERRALS: Referral[] = Array.from({ length: 120 }, (_, idx) => 
     status: statusForIndex(i),
     priority: i % 9 === 0 ? 'Urgent' : 'Normal',
     reason: GEN_REASONS[i % GEN_REASONS.length] as string,
+    receivingDoctorId:
+      direction === 'Incoming' ? (i % 4 === 0 ? 'usr_001' : 'doc-jane') : undefined,
   };
 });
 
