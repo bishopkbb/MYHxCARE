@@ -624,7 +624,7 @@ function PatientAssessmentPanel({
               </div>
             </AssessmentSection>
 
-            <AssessmentSection number={3} title="Physical Assessment">
+            <AssessmentSection number={3} title="Physical Assessment" className="lg:col-span-2">
               <div className="grid grid-cols-2 gap-3">
                 <SelectField
                   label="General Appearance"
