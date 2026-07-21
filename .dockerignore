@@ -1,11 +1,42 @@
+# Installed dependencies and generated Next.js output
 node_modules
 .next
+
+# Version control
 .git
 .github
+
+# Environment values
+.env
+.env.*
+!.env.example
+
+# Test and coverage output
 coverage
 playwright-report
 test-results
+
+# Editors and operating-system files
+.vscode
+.idea
+.DS_Store
+
+# Logs and temporary output
+*.log
+*.tmp
+tmp
+dist
+
+# Documentation
 docs
 *.md
-.env*
-!.env.example
+
+# Other package managers
+pnpm-lock.yaml
+pnpm-workspace.yaml
+yarn.lock
+bun.lock
+bun.lockb
+
+# Temporary backups
+Dockerfile.*.backup
