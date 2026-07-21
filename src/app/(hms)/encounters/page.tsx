@@ -21,7 +21,13 @@ import { useEffect, useRef, useState } from 'react';
 
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
-import { MOCK_QUEUE, type PatientStatus } from '@/features/encounters/__mocks__/encounterFixtures';
+import {
+  getDoctorQueue,
+  type PatientRow,
+  type PatientStatus,
+} from '@/features/encounters/__mocks__/encounterFixtures';
+import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -226,11 +232,11 @@ function getTempColor(temp: number): string {
   return '#25464D';
 }
 
-function getTabCount(tabId: string): number {
-  if (tabId === 'all') return MOCK_QUEUE.length;
+function getTabCount(queue: PatientRow[], tabId: string): number {
+  if (tabId === 'all') return queue.length;
   const status = TAB_STATUS_MAP[tabId];
   if (!status) return 0;
-  return MOCK_QUEUE.filter((p) => p.status === status).length;
+  return queue.filter((p) => p.status === status).length;
 }
 
 type PageState = 'loading' | 'loaded' | 'error';
@@ -240,6 +246,10 @@ type PageState = 'loading' | 'loaded' | 'error';
 export default function EncountersPage() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  // Re-renders this page when nursing marks a patient ready for a doctor.
+  useClaimedPatients();
+  const queue = getDoctorQueue(user?.id);
   const [activeTab, setActiveTab] = useState('all');
   const [search, setSearch] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
@@ -280,7 +290,7 @@ export default function EncountersPage() {
     activeFilters.allergies !== 'all',
   ].filter(Boolean).length;
 
-  const filteredQueue = MOCK_QUEUE.filter((patient) => {
+  const filteredQueue = queue.filter((patient) => {
     if (activeTab !== 'all') {
       const status = TAB_STATUS_MAP[activeTab];
       if (!status || patient.status !== status) return false;
@@ -568,7 +578,7 @@ export default function EncountersPage() {
                   color: tab.badgeColor,
                 }}
               >
-                {getTabCount(tab.id)}
+                {getTabCount(queue, tab.id)}
               </span>
             </button>
           );

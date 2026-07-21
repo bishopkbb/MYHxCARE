@@ -74,6 +74,7 @@ export const ROUTES = {
   medicalRecordsArchived: '/medical-records/archived',
   medicalRecordsRequests: '/medical-records/requests',
   medicalRecordsReports: '/medical-records/reports',
+  medicalRecordsPatientStatistics: '/medical-records/patient-statistics',
   medicalRecordsWorkforceManagement: '/medical-records/workforce-management',
   medicalRecordsMessages: '/medical-records/messages',
   medicalRecordsNotifications: '/medical-records/notifications',
@@ -109,7 +110,10 @@ export const ROUTES = {
   registrationDirectory: '/registration/directory',
   registrationProfile: '/registration/profile',
   registrationCheckIn: '/registration/check-in',
-  registrationQueue: '/registration/queue',
+  // Queue Management moved into the nurse workspace (merged into Patient
+  // Queue) — kept here pointing at its new home so Check-In/Emergency
+  // Registration's existing "View Queue" links keep working unchanged.
+  registrationQueue: '/nurse/patient-queue',
   registrationAppointments: '/registration/appointments',
   registrationEmergency: '/registration/emergency',
   registrationInsurance: '/registration/insurance',
@@ -118,7 +122,6 @@ export const ROUTES = {
   registrationCardPrinting: '/registration/card-printing',
   registrationReports: '/registration/reports',
   registrationAttendance: '/registration/attendance',
-  registrationPatientStatistics: '/registration/patient-statistics',
   registrationWorkforceManagement: '/registration/workforce-management',
   registrationMessages: '/registration/messages',
   registrationNotifications: '/registration/notifications',

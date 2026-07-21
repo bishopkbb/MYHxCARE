@@ -4,10 +4,8 @@
  */
 
 import type { Allergy } from '@/types/patient.types';
-import {
-  MY_PATIENTS_ROSTER,
-  type NursePatient,
-} from '@/features/nursing/__mocks__/myPatientsFixtures';
+import { type NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
+import { getEffectiveRoster } from '@/features/nursing/store/nursingWorkflowStore';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -810,7 +808,7 @@ function fallbackDetail(patient: NursePatient): Omit<PatientRecordDetail, 'patie
 }
 
 export function getPatientRecord(id: string): PatientRecordDetail | undefined {
-  const patient = MY_PATIENTS_ROSTER.find((p) => p.id === id);
+  const patient = getEffectiveRoster().find((p) => p.id === id);
   if (!patient) return undefined;
   const detail = CURATED_DETAIL[id] ?? fallbackDetail(patient);
   return { patient, ...detail };

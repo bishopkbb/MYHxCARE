@@ -32,6 +32,13 @@ import { downloadPDF, escapeHtml } from '@/utils/export';
 import { type NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
 import { getPatientRecord } from '@/features/nursing/__mocks__/patientRecordFixtures';
 import {
+  clearPendingVitalsPatientId,
+  getEffectiveRoster,
+  hasRecordedVitals,
+  markVitalsRecorded,
+  peekPendingVitalsPatientId,
+} from '@/features/nursing/store/nursingWorkflowStore';
+import {
   bloodSugarFlag,
   bpFlag,
   computeNews2,
@@ -179,10 +186,57 @@ function SkeletonTile() {
   );
 }
 
+function EmptyVitalsState({ onRecordVitals }: { onRecordVitals: () => void }) {
+  return (
+    <div
+      className="mt-5 flex flex-col items-center justify-center gap-3 rounded-[12px] py-16 text-center"
+      style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+    >
+      <div
+        className="flex size-14 items-center justify-center rounded-full"
+        style={{ background: 'rgba(0,180,216,0.12)' }}
+      >
+        <HeartPulse style={{ width: 24, height: 24, color: '#00B4D8' }} />
+      </div>
+      <div>
+        <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+          No vitals recorded yet
+        </p>
+        <p className="mt-0.5" style={{ fontSize: 14, color: '#8A98A3' }}>
+          This patient hasn&apos;t had a first set of vital signs taken. Record their baseline to
+          start tracking trends.
+        </p>
+      </div>
+      <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+        <button
+          type="button"
+          onClick={onRecordVitals}
+          className={`mt-1 flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+          style={{ background: '#00B4D8', fontSize: 14 }}
+        >
+          <FilePlus2 style={{ width: 16, height: 16 }} />
+          Record First Vitals
+        </button>
+      </PermissionGate>
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export function VitalSignsWorkspace() {
-  const [selectedPatient, setSelectedPatient] = useState<NursePatient | null>(null);
+  // "Start Triage" in Patient Queue hands off a patient here directly,
+  // skipping the picker — peek-only initializer so a Strict Mode
+  // double-invoke can't drop it; the effect below clears it exactly once.
+  const [selectedPatient, setSelectedPatient] = useState<NursePatient | null>(() => {
+    const pendingId = peekPendingVitalsPatientId();
+    if (!pendingId) return null;
+    return getEffectiveRoster().find((p) => p.id === pendingId) ?? null;
+  });
+
+  useEffect(() => {
+    clearPendingVitalsPatientId();
+  }, []);
 
   if (!selectedPatient) {
     return (
@@ -237,12 +291,19 @@ function PatientVitalsPanel({
 
   useEffect(() => {
     const t = setTimeout(() => {
-      setReadings(getVitalReadingsForPatient(patient.id));
+      // Only a genuinely first-time patient has no real vitals history —
+      // a returning patient (isNewPatient false/undefined) already has one
+      // even before today's triage. Don't fabricate a 30-day trend for the
+      // new-patient case until the nurse has actually recorded a first
+      // reading (see markVitalsRecorded below).
+      const isFirstEverVisit = patient.isPreAdmission && patient.isNewPatient;
+      const hasHistory = !isFirstEverVisit || hasRecordedVitals(patient.id);
+      setReadings(hasHistory ? getVitalReadingsForPatient(patient.id) : []);
       setBodyMeasurements(getBodyMeasurements(patient.id));
       setPageState('loaded');
     }, 700);
     return () => clearTimeout(t);
-  }, [patient.id]);
+  }, [patient.id, patient.isPreAdmission, patient.isNewPatient]);
 
   useEffect(() => {
     const t = setTimeout(() => setNowMs(Date.now()), 0);
@@ -261,6 +322,7 @@ function PatientVitalsPanel({
   }
 
   function handleSaveVitals(vitals: RecordedVitals) {
+    if (patient.isPreAdmission) markVitalsRecorded(patient.id);
     const newReading: VitalReading = {
       id: `${patient.id}-r${Date.now()}`,
       recordedAt: new Date().toISOString(),
@@ -523,12 +585,14 @@ function PatientVitalsPanel({
           {/* ── Allergy banner (compliance — every patient-context page) ── */}
           <AllergyBanner allergies={record.allergies} className="mt-4" />
 
-          {pageState === 'loading' || !latest || !bodyMeasurements ? (
+          {pageState === 'loading' || !bodyMeasurements ? (
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {Array.from({ length: 9 }).map((_, i) => (
                 <SkeletonTile key={i} />
               ))}
             </div>
+          ) : !latest ? (
+            <EmptyVitalsState onRecordVitals={() => setRecordModalOpen(true)} />
           ) : (
             <>
               {/* ── 9 vital stat tiles ────────────────────────────────────── */}

@@ -5,6 +5,9 @@
  * Swap out by pointing hooks to real endpoints in Phase 6.
  */
 
+import { getDoctorByName } from '@/features/shared/__mocks__/doctorDirectory';
+import { TODAY_ON_CALL } from '@/features/workforce/__mocks__/workforceFixtures';
+
 export type QueueStatus =
   'New Arrival' | 'Waiting' | 'Calling Next' | 'In Consultation' | 'Emergency' | 'Completed';
 
@@ -26,6 +29,15 @@ export type QueueEntry = {
   department: string;
   assignedClinic: string;
   attendingDoctor: string;
+  /** Foreign key into `shared/__mocks__/doctorDirectory`'s `DOCTORS` — undefined
+   * when `attendingDoctor` doesn't (yet) resolve to a roster entry. */
+  doctorId?: string | undefined;
+  /** True only for a patient who has never been seen at this facility before —
+   * everyone else ("returning") already has a real vitals history even before
+   * today's triage. Nursing's Vital Signs screen keys off this (via
+   * `NursePatient.isNewPatient`) to decide whether to show an empty
+   * first-capture state or the patient's existing trend. */
+  isNewPatient?: boolean;
   arrivalTime: string; // ISO
   status: QueueStatus;
   history: QueueHistoryEntry[];
@@ -46,18 +58,70 @@ export const DEPARTMENTS = [
   'Physiotherapy',
 ] as const;
 
-const CLINICS_BY_DEPARTMENT: Record<string, { clinic: string; doctor: string }[]> = {
+const ON_CALL_LEVEL_RANK: Record<string, number> = { PRIMARY: 0, SECONDARY: 1, CONSULTANT: 2 };
+const ON_CALL_STATUS_RANK: Record<string, number> = { AVAILABLE: 0, BUSY: 1, UNAVAILABLE: 2 };
+
+/** Whoever's actually on duty for a given Workforce/Duty-Roster department
+ * right now — prefers an AVAILABLE doctor over a BUSY/UNAVAILABLE one, then
+ * PRIMARY over SECONDARY/CONSULTANT. Returns undefined when that department
+ * has no on-call coverage at all (e.g. routine GP/specialty clinics aren't
+ * "on-call", they're scheduled) — callers fall back to a fixed clinic doctor. */
+function getOnDutyDoctor(
+  workforceDepartment: string,
+): { name: string; doctorId?: string | undefined } | undefined {
+  const onDuty = TODAY_ON_CALL.filter((a) => a.department === workforceDepartment)
+    .slice()
+    .sort((a, b) => {
+      const statusDelta =
+        (ON_CALL_STATUS_RANK[a.status] ?? 9) - (ON_CALL_STATUS_RANK[b.status] ?? 9);
+      if (statusDelta !== 0) return statusDelta;
+      return (ON_CALL_LEVEL_RANK[a.level] ?? 9) - (ON_CALL_LEVEL_RANK[b.level] ?? 9);
+    })[0];
+  if (!onDuty) return undefined;
+  return { name: onDuty.doctorName, doctorId: getDoctorByName(onDuty.doctorName)?.id };
+}
+
+const surgeryOnDuty = getOnDutyDoctor('Surgery');
+const paediatricsOnDuty = getOnDutyDoctor('Paediatrics');
+export const emergencyOnDuty = getOnDutyDoctor('Emergency Medicine');
+
+// Room 2 of General Outpatient is deliberately staffed by the default demo
+// login (Dr. Adaeze Okonkwo, usr_001) rather than an invented GP, so a nurse
+// who triages a walk-in here and a doctor logging in with the default account
+// see the same patient — the reference case for the registration -> nurse ->
+// doctor bridge (see Phase 3 of the cross-system patient flow plan). Surgery
+// and Paediatrics are staffed by whoever's actually on duty today per the
+// Workforce/Duty Roster on-call schedule (see getOnDutyDoctor above) rather
+// than a fixed room doctor — General Outpatient/Dental/Laboratory/Pharmacy/
+// Radiology/Physiotherapy aren't on-call specialties, so they keep a fixed
+// clinic doctor.
+const CLINICS_BY_DEPARTMENT: Record<
+  string,
+  { clinic: string; doctor: string; doctorId?: string }[]
+> = {
   'General Outpatient': [
-    { clinic: 'Room 1', doctor: 'Dr. Jane Ezeonu (GP)' },
-    { clinic: 'Room 2', doctor: 'Dr. Ada Chukwu (GP)' },
+    { clinic: 'Room 1', doctor: 'Dr. Jane Ezeonu (GP)', doctorId: 'doc-jane' },
+    { clinic: 'Room 2', doctor: 'Dr. Adaeze Okonkwo', doctorId: 'usr_001' },
   ],
-  Surgery: [{ clinic: 'Surgical Clinic 1', doctor: 'Dr. Chinedu A.' }],
-  Paediatrics: [{ clinic: 'Room 2', doctor: 'Dr. Michael Obi' }],
-  Dental: [{ clinic: 'Dental Clinic', doctor: 'Dr. Ifeanyi Okafor' }],
+  Surgery: [
+    {
+      clinic: 'Surgical Clinic 1',
+      doctor: surgeryOnDuty?.name ?? 'Dr. Chinedu A.',
+      doctorId: surgeryOnDuty?.doctorId ?? 'doc-chinedu',
+    },
+  ],
+  Paediatrics: [
+    {
+      clinic: 'Room 2',
+      doctor: paediatricsOnDuty?.name ?? 'Dr. Michael Obi',
+      doctorId: paediatricsOnDuty?.doctorId ?? 'doc-michael',
+    },
+  ],
+  Dental: [{ clinic: 'Dental Clinic', doctor: 'Dr. Ifeanyi Okafor', doctorId: 'doc-ifeanyi' }],
   Laboratory: [{ clinic: 'Lab Collection Unit', doctor: 'Mr. Tunde S.' }],
   Pharmacy: [{ clinic: 'Pharmacy Counter 1', doctor: 'Mrs. Amaka Eze' }],
-  Radiology: [{ clinic: 'Radiology Suite', doctor: 'Dr. Chika Nnamdi' }],
-  Physiotherapy: [{ clinic: 'Physio Room 1', doctor: 'Mrs. Ngozi A.' }],
+  Radiology: [{ clinic: 'Radiology Suite', doctor: 'Dr. Chika Nnamdi', doctorId: 'doc-chika' }],
+  Physiotherapy: [{ clinic: 'Physio Room 1', doctor: 'Mrs. Ngozi A.', doctorId: 'doc-ngozi' }],
 };
 
 function pastHistory(arrivalMinutesAgo: number, emergency: boolean): QueueHistoryEntry[] {
@@ -88,6 +152,7 @@ const FEATURED_ENTRIES: QueueEntry[] = [
     department: 'General Outpatient',
     assignedClinic: 'Room 1',
     attendingDoctor: 'Dr. Jane Ezeonu (GP)',
+    doctorId: 'doc-jane',
     arrivalTime: minutesAgo(37),
     status: 'In Consultation',
     history: pastHistory(37, false),
@@ -102,7 +167,8 @@ const FEATURED_ENTRIES: QueueEntry[] = [
     age: 24,
     department: 'Paediatrics',
     assignedClinic: 'Room 2',
-    attendingDoctor: 'Dr. Michael Obi',
+    attendingDoctor: paediatricsOnDuty?.name ?? 'Dr. Michael Obi',
+    doctorId: paediatricsOnDuty?.doctorId ?? 'doc-michael',
     arrivalTime: minutesAgo(32),
     status: 'Calling Next',
     history: pastHistory(32, false),
@@ -118,6 +184,7 @@ const FEATURED_ENTRIES: QueueEntry[] = [
     department: 'General Outpatient',
     assignedClinic: 'Room 1',
     attendingDoctor: 'Dr. Jane Ezeonu (GP)',
+    doctorId: 'doc-jane',
     arrivalTime: minutesAgo(17),
     status: 'Waiting',
     history: pastHistory(17, false),
@@ -132,7 +199,8 @@ const FEATURED_ENTRIES: QueueEntry[] = [
     age: 20,
     department: 'Surgery',
     assignedClinic: 'Surgical Clinic 1',
-    attendingDoctor: 'Dr. Chinedu A.',
+    attendingDoctor: surgeryOnDuty?.name ?? 'Dr. Chinedu A.',
+    doctorId: surgeryOnDuty?.doctorId ?? 'doc-chinedu',
     arrivalTime: minutesAgo(12),
     status: 'Waiting',
     history: pastHistory(12, false),
@@ -147,7 +215,8 @@ const FEATURED_ENTRIES: QueueEntry[] = [
     age: 28,
     department: 'General Outpatient',
     assignedClinic: 'Emergency Room',
-    attendingDoctor: 'Dr. On Duty',
+    attendingDoctor: emergencyOnDuty?.name ?? 'Dr. On Duty',
+    doctorId: emergencyOnDuty?.doctorId,
     arrivalTime: minutesAgo(7),
     status: 'Emergency',
     history: pastHistory(7, true),
@@ -163,6 +232,7 @@ const FEATURED_ENTRIES: QueueEntry[] = [
     department: 'Dental',
     assignedClinic: 'Dental Clinic',
     attendingDoctor: 'Dr. Ifeanyi Okafor',
+    doctorId: 'doc-ifeanyi',
     arrivalTime: minutesAgo(2),
     status: 'New Arrival',
     history: pastHistory(2, false),
@@ -193,6 +263,7 @@ const FEATURED_ENTRIES: QueueEntry[] = [
     department: 'Physiotherapy',
     assignedClinic: 'Physio Room 1',
     attendingDoctor: 'Mrs. Ngozi A.',
+    doctorId: 'doc-ngozi',
     arrivalTime: minutesAgo(0),
     status: 'New Arrival',
     history: pastHistory(0, false),
@@ -292,7 +363,13 @@ const EXTRA_ENTRIES: QueueEntry[] = Array.from({ length: EXTRA_COUNT }, (_, i) =
   const department = DEPARTMENTS[i % DEPARTMENTS.length] as string;
   const options =
     CLINICS_BY_DEPARTMENT[department] ?? CLINICS_BY_DEPARTMENT['General Outpatient'] ?? [];
-  const assignment = options[i % options.length] ?? {
+  // Clinic choice within a department cycles by lap (how many times we've gone
+  // through the full department list), not by `i` directly — `i % options.length`
+  // would always land on the same option for a department whose index shares a
+  // factor with DEPARTMENTS.length (e.g. General Outpatient at index 0 with a
+  // 2-option roster), never reaching the second clinic/doctor.
+  const lap = Math.floor(i / DEPARTMENTS.length);
+  const assignment = options[lap % options.length] ?? {
     clinic: 'Room 1',
     doctor: 'Dr. Jane Ezeonu (GP)',
   };
@@ -312,6 +389,10 @@ const EXTRA_ENTRIES: QueueEntry[] = Array.from({ length: EXTRA_COUNT }, (_, i) =
     department,
     assignedClinic: assignment.clinic,
     attendingDoctor: assignment.doctor,
+    doctorId: assignment.doctorId,
+    // Roughly 1 in 6 walk-ins is a genuinely first-time patient — everyone
+    // else is "returning" and already has a real vitals history.
+    isNewPatient: i % 6 === 0,
     arrivalTime: minutesAgo(arrivalMinutesAgo),
     status: isEmergency ? 'Emergency' : (EXTRA_STATUSES[i % EXTRA_STATUSES.length] as QueueStatus),
     history: pastHistory(arrivalMinutesAgo, isEmergency),

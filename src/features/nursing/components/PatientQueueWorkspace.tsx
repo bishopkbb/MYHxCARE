@@ -2,12 +2,15 @@
 
 import {
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
   ClipboardList,
   Eye,
   RefreshCw,
+  Repeat,
   Search,
   SquarePen,
+  UserPlus,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -15,12 +18,15 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { FilterDropdown } from '@components/shared/FilterDropdown';
+import { FormSelect } from '@components/shared/FormSelect';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { formatTime } from '@/utils/datetime';
 import {
+  AWAITING_TRIAGE_STATUSES,
   DOCTOR_OPTIONS,
   PRIORITY_OPTIONS,
   QUEUE_STATS,
@@ -29,10 +35,22 @@ import {
   TASK_TYPE_CFG,
   TASK_TYPE_OPTIONS,
   WARD_OPTIONS,
+  toAwaitingTriageTask,
   type QueueTask,
   type TaskPriority,
   type TaskStatus,
 } from '@/features/nursing/__mocks__/patientQueueFixtures';
+import {
+  isTriageStarted,
+  setPendingVitalsPatientId,
+  startTriage,
+  useClaimedPatients,
+} from '@/features/nursing/store/nursingWorkflowStore';
+import {
+  DEPARTMENTS,
+  QUEUE_ENTRIES,
+  type QueueEntry,
+} from '@/features/registration/__mocks__/queueFixtures';
 
 type PageState = 'loading' | 'loaded' | 'error';
 const ROWS_PER_PAGE = 8;
@@ -115,13 +133,23 @@ function SkeletonRow() {
 export function PatientQueueWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const actorName = user?.name ?? 'Nurse';
   const [pageState, setPageState] = useState<PageState>('loading');
   const [tasks, setTasks] = useState<QueueTask[]>(QUEUE_TASKS);
+  const [registrationEntries, setRegistrationEntries] = useState<QueueEntry[]>(QUEUE_ENTRIES);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [reassignOpen, setReassignOpen] = useState(false);
+  const [reassignDept, setReassignDept] = useState('');
+  const [reassignClinic, setReassignClinic] = useState('');
+
+  // Re-renders this page whenever a patient is claimed elsewhere (or here) —
+  // the shared store, not local state, is the source of truth for who's claimed.
+  useClaimedPatients();
 
   const filterBarRef = useRef<HTMLDivElement>(null);
 
@@ -165,8 +193,25 @@ export function PatientQueueWorkspace() {
     filters.status !== 'ALL' ||
     search.trim() !== '';
 
+  // Registration patients not yet claimed by any nurse — drops out the moment
+  // someone clicks "Start Triage" (this page or another nurse's session).
+  // Recomputed from local state (not the static AWAITING_TRIAGE_TASKS fixture)
+  // so a Reassign/Mark Emergency edit shows up immediately.
+  const unclaimedTriageTasks = registrationEntries
+    .filter((e) => AWAITING_TRIAGE_STATUSES.includes(e.status))
+    .map(toAwaitingTriageTask)
+    .filter((t) => !isTriageStarted(t.preAdmissionEntryId as string));
+  const PRIORITY_RANK: Record<TaskPriority, number> = { High: 0, Medium: 1, Low: 2 };
+  const allTasks = [...tasks, ...unclaimedTriageTasks].sort((a, b) => {
+    if (a.overdue !== b.overdue) return a.overdue ? -1 : 1;
+    if (PRIORITY_RANK[a.priority] !== PRIORITY_RANK[b.priority]) {
+      return PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
+    }
+    return new Date(a.dueTime).getTime() - new Date(b.dueTime).getTime();
+  });
+
   const q = search.trim().toLowerCase();
-  const filtered = tasks.filter((t) => {
+  const filtered = allTasks.filter((t) => {
     if (filters.ward !== 'ALL' && t.ward !== filters.ward) return false;
     if (filters.priority !== 'ALL' && t.priority !== filters.priority) return false;
     if (filters.taskType !== 'ALL' && t.taskType !== filters.taskType) return false;
@@ -187,8 +232,8 @@ export function PatientQueueWorkspace() {
   const pageStart = (safePage - 1) * ROWS_PER_PAGE;
   const pageRows = filtered.slice(pageStart, pageStart + ROWS_PER_PAGE);
 
-  const selected = selectedId ? tasks.find((t) => t.id === selectedId) : undefined;
-  const overdueCount = tasks.filter((t) => t.overdue).length;
+  const selected = selectedId ? allTasks.find((t) => t.id === selectedId) : undefined;
+  const overdueCount = allTasks.filter((t) => t.overdue).length;
 
   function markStatus(id: string, status: TaskStatus) {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status, overdue: false } : t)));
@@ -209,6 +254,85 @@ export function PatientQueueWorkspace() {
       `Editing "${task.taskType}" for ${task.patientName} is coming soon.`,
     );
   }
+
+  function handleStartTriage(task: QueueTask) {
+    const entry = registrationEntries.find((e) => e.id === task.preAdmissionEntryId);
+    if (!entry) return;
+    const patient = startTriage(entry);
+    if (selectedId === task.id) setSelectedId(null);
+    setPendingVitalsPatientId(patient.id);
+    toast.success('Triage started', `Opening Vital Signs for ${task.patientName}.`);
+    router.push(ROUTES.nurseVitalSigns);
+  }
+
+  // ── Reassign / Mark Emergency — relocated from Registration's Queue
+  // Management screen (now merged here; front-desk staff still reach the
+  // same queue via the "View Queue" links on Check-In / Emergency Registration).
+
+  function openReassign(task: QueueTask) {
+    setSelectedId(task.id);
+    setReassignDept(task.department ?? '');
+    setReassignClinic(task.assignedClinic ?? '');
+    setReassignOpen(true);
+  }
+
+  function confirmReassign() {
+    const entryId = selected?.preAdmissionEntryId;
+    if (!entryId || !reassignClinic) return;
+    const patientName = selected?.patientName;
+    setRegistrationEntries((prev) =>
+      prev.map((e) =>
+        e.id === entryId
+          ? {
+              ...e,
+              department: reassignDept,
+              assignedClinic: reassignClinic,
+              history: [
+                ...e.history,
+                {
+                  time: new Date().toISOString(),
+                  label: `Reassigned to ${reassignClinic}`,
+                  by: actorName,
+                },
+              ],
+            }
+          : e,
+      ),
+    );
+    toast.success('Queue reassigned', `${patientName} moved to ${reassignClinic}.`);
+    setReassignOpen(false);
+  }
+
+  function markEmergency(task: QueueTask) {
+    if (!task.preAdmissionEntryId || task.isEmergency) return;
+    const entryId = task.preAdmissionEntryId;
+    setRegistrationEntries((prev) =>
+      prev.map((e) =>
+        e.id === entryId
+          ? {
+              ...e,
+              isEmergency: true,
+              status: 'Emergency',
+              history: [
+                ...e.history,
+                {
+                  time: new Date().toISOString(),
+                  label: 'Marked as Emergency Priority',
+                  by: actorName,
+                },
+              ],
+            }
+          : e,
+      ),
+    );
+    toast.success('Marked as emergency', `${task.patientName} moved to high-priority queue.`);
+  }
+
+  const reassignClinicOptions = Array.from(
+    new Set(
+      registrationEntries.filter((e) => e.department === reassignDept).map((e) => e.assignedClinic),
+    ),
+  ).map((c) => ({ value: c, label: c }));
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -238,7 +362,8 @@ export function PatientQueueWorkspace() {
             Patient Queue
           </h1>
           <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-            View and manage nursing tasks and patient care priorities.
+            Everyone who needs a nurse — from Registration check-in and triage through to
+            medication, dressing, and observation for admitted patients.
           </p>
 
           {pageState === 'error' ? (
@@ -269,16 +394,18 @@ export function PatientQueueWorkspace() {
           ) : (
             <>
               {/* ── Stat cards ─────────────────────────────────────────────── */}
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {pageState === 'loading'
-                  ? Array.from({ length: 5 }).map((_, i) => <SkeletonStatCard key={i} />)
+                  ? Array.from({ length: 6 }).map((_, i) => <SkeletonStatCard key={i} />)
                   : QUEUE_STATS.map((s) => {
                       const value =
                         s.id === 'total-queue'
                           ? String(filtered.length)
                           : s.id === 'overdue'
                             ? String(overdueCount)
-                            : s.value;
+                            : s.id === 'awaiting-triage'
+                              ? String(unclaimedTriageTasks.length)
+                              : s.value;
                       return (
                         <div
                           key={s.id}
@@ -367,7 +494,7 @@ export function PatientQueueWorkspace() {
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
                   <div className="overflow-x-auto scroll-smooth">
-                    <div className="min-w-[1240px]">
+                    <div className="min-w-[1280px]">
                       <div
                         className="flex items-center rounded-t-[8px]"
                         style={{
@@ -377,8 +504,8 @@ export function PatientQueueWorkspace() {
                       >
                         {[
                           ['Patient', 'min-w-[180px] flex-1 pl-3'],
-                          ['Ward', 'w-28'],
-                          ['Bed', 'w-20'],
+                          ['Ward/Location', 'w-36'],
+                          ['Bed/Clinic', 'w-28'],
                           ['Assigned Doctor', 'w-44'],
                           ['Next Nursing Task', 'w-52'],
                           ['Due Time', 'w-28'],
@@ -394,7 +521,7 @@ export function PatientQueueWorkspace() {
                             </span>
                           </div>
                         ))}
-                        <div className="w-28 shrink-0 py-2.5 pr-3 text-right">
+                        <div className="w-64 shrink-0 py-2.5 pr-3 text-right">
                           <span
                             className="font-sans font-bold tracking-wider uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -420,10 +547,10 @@ export function PatientQueueWorkspace() {
                               className="font-sans font-medium"
                               style={{ fontSize: 16, color: '#4A7080' }}
                             >
-                              No nursing tasks match this filter
+                              No patients match this filter
                             </p>
                             <p className="mt-0.5" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              Try a different ward, priority, or status filter.
+                              Try a different ward, priority, task type, or status filter.
                             </p>
                           </div>
                           {hasActiveFilters && (
@@ -445,6 +572,7 @@ export function PatientQueueWorkspace() {
                           const priorityCfg = PRIORITY_CFG[task.priority];
                           const statusCfg = STATUS_CFG[task.status];
                           const TaskIcon: LucideIcon = taskCfg.icon;
+                          const isPreAdmission = Boolean(task.preAdmissionEntryId);
                           return (
                             <div
                               key={task.id}
@@ -477,13 +605,15 @@ export function PatientQueueWorkspace() {
                                   </p>
                                 </div>
                               </div>
-                              <div className="w-28 shrink-0 py-3 pr-2">
+                              <div className="w-36 shrink-0 py-3 pr-2">
                                 <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {task.ward}
+                                  {task.ward ?? task.department ?? '—'}
                                 </p>
                               </div>
-                              <div className="w-20 shrink-0 py-3 pr-2">
-                                <p style={{ fontSize: 14, color: '#4A7080' }}>{task.bed}</p>
+                              <div className="w-28 shrink-0 py-3 pr-2">
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {task.bed ?? task.assignedClinic ?? '—'}
+                                </p>
                               </div>
                               <div className="w-44 shrink-0 py-3 pr-2">
                                 <p
@@ -566,40 +696,79 @@ export function PatientQueueWorkspace() {
                                 </span>
                               </div>
                               <div
-                                className="flex w-28 shrink-0 items-center justify-end gap-1 py-3 pr-3"
+                                className="flex w-64 shrink-0 items-center justify-end gap-1 py-3 pr-3"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedId(task.id)}
-                                  aria-label={`View ${task.patientName}`}
-                                  className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                >
-                                  <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                                </button>
-                                <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleEdit(task)}
-                                    aria-label={`Edit task for ${task.patientName}`}
-                                    className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                  >
-                                    <SquarePen
-                                      style={{ width: 15, height: 15, color: '#4A7080' }}
-                                    />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => markStatus(task.id, 'Completed')}
-                                    disabled={task.status === 'Completed'}
-                                    aria-label={`Mark task complete for ${task.patientName}`}
-                                    className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
-                                  >
-                                    <CheckCircle2
-                                      style={{ width: 15, height: 15, color: '#22C55E' }}
-                                    />
-                                  </button>
-                                </PermissionGate>
+                                {isPreAdmission ? (
+                                  <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                                    <button
+                                      type="button"
+                                      onClick={() => openReassign(task)}
+                                      aria-label={`Reassign ${task.patientName}`}
+                                      className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                    >
+                                      <Repeat style={{ width: 15, height: 15, color: '#4A7080' }} />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => markEmergency(task)}
+                                      disabled={task.isEmergency}
+                                      aria-label={`Prioritize ${task.patientName} as emergency`}
+                                      className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
+                                    >
+                                      <AlertTriangle
+                                        style={{ width: 15, height: 15, color: '#EF4444' }}
+                                      />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleStartTriage(task)}
+                                      className="flex h-9 shrink-0 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                      style={{
+                                        fontSize: 14,
+                                        background: '#00B4D8',
+                                        whiteSpace: 'nowrap',
+                                      }}
+                                    >
+                                      <UserPlus style={{ width: 14, height: 14 }} />
+                                      Start Triage
+                                    </button>
+                                  </PermissionGate>
+                                ) : (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedId(task.id)}
+                                      aria-label={`View ${task.patientName}`}
+                                      className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                    >
+                                      <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                                    </button>
+                                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleEdit(task)}
+                                        aria-label={`Edit task for ${task.patientName}`}
+                                        className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                      >
+                                        <SquarePen
+                                          style={{ width: 15, height: 15, color: '#4A7080' }}
+                                        />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => markStatus(task.id, 'Completed')}
+                                        disabled={task.status === 'Completed'}
+                                        aria-label={`Mark task complete for ${task.patientName}`}
+                                        className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
+                                      >
+                                        <CheckCircle2
+                                          style={{ width: 15, height: 15, color: '#22C55E' }}
+                                        />
+                                      </button>
+                                    </PermissionGate>
+                                  </>
+                                )}
                               </div>
                             </div>
                           );
@@ -612,7 +781,7 @@ export function PatientQueueWorkspace() {
                       <p style={{ fontSize: 14, color: '#4A7080' }}>
                         Showing {pageStart + 1} to{' '}
                         {Math.min(pageStart + ROWS_PER_PAGE, filtered.length)} of {filtered.length}{' '}
-                        tasks
+                        patients
                       </p>
                       <div className="flex items-center gap-1.5">
                         <button
@@ -717,8 +886,14 @@ export function PatientQueueWorkspace() {
                     <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth px-4 pb-4 sm:px-5">
                       <div className="flex flex-col gap-3">
                         {[
-                          ['Ward', selected.ward],
-                          ['Bed', selected.bed],
+                          [
+                            selected.preAdmissionEntryId ? 'Department' : 'Ward',
+                            selected.ward ?? selected.department ?? '—',
+                          ],
+                          [
+                            selected.preAdmissionEntryId ? 'Clinic' : 'Bed',
+                            selected.bed ?? selected.assignedClinic ?? '—',
+                          ],
                           ['Assigned Doctor', `${selected.doctorName} (${selected.doctorRole})`],
                           ['Task Type', selected.taskType],
                           ['Task Detail', selected.taskDetail],
@@ -741,35 +916,139 @@ export function PatientQueueWorkspace() {
                       </div>
                     </div>
 
-                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
-                      <div className="flex flex-col gap-2 p-4 pt-0 sm:p-5 sm:pt-0">
-                        {selected.status === 'Pending' && (
-                          <button
-                            type="button"
-                            onClick={() => markStatus(selected.id, 'In Progress')}
-                            className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                            style={{
-                              fontSize: 14,
-                              color: '#0D2630',
-                              border: '1px solid rgba(0,100,130,0.2)',
+                    {selected.preAdmissionEntryId && reassignOpen ? (
+                      <div className="p-4 pt-0 sm:p-5 sm:pt-0">
+                        <div
+                          className="animate-in fade-in-0 slide-in-from-top-1 flex flex-col gap-2.5 rounded-[10px] p-3 duration-150"
+                          style={{
+                            border: '1px solid rgba(0,180,216,0.3)',
+                            background: 'rgba(0,180,216,0.04)',
+                          }}
+                        >
+                          <p
+                            className="font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            Reassign to
+                          </p>
+                          <FormSelect
+                            id="reassign-department"
+                            value={reassignDept}
+                            onChange={(v) => {
+                              setReassignDept(v);
+                              setReassignClinic('');
                             }}
-                          >
-                            Mark In Progress
-                          </button>
-                        )}
-                        {selected.status !== 'Completed' && (
-                          <button
-                            type="button"
-                            onClick={() => markStatus(selected.id, 'Completed')}
-                            className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                            style={{ fontSize: 14, background: '#00B4D8' }}
-                          >
-                            <CheckCircle2 style={{ width: 15, height: 15 }} />
-                            Mark Complete
-                          </button>
-                        )}
+                            options={DEPARTMENTS.map((d) => ({ value: d, label: d }))}
+                            placeholder="Select department"
+                          />
+                          <FormSelect
+                            id="reassign-clinic"
+                            value={reassignClinic}
+                            onChange={setReassignClinic}
+                            options={reassignClinicOptions}
+                            placeholder="Select clinic"
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={confirmReassign}
+                              disabled={!reassignClinic}
+                              className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[8px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                              style={{ fontSize: 14, background: '#00B4D8' }}
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setReassignOpen(false)}
+                              className="flex h-9 flex-1 items-center justify-center rounded-[8px] font-sans font-medium transition-colors duration-150 hover:bg-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                              style={{
+                                fontSize: 14,
+                                color: '#4A7080',
+                                border: '1px solid rgba(0,100,130,0.18)',
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </PermissionGate>
+                    ) : (
+                      <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                        <div className="flex flex-col gap-2 p-4 pt-0 sm:p-5 sm:pt-0">
+                          {selected.preAdmissionEntryId ? (
+                            <>
+                              <div className="grid grid-cols-2 gap-2.5">
+                                <button
+                                  type="button"
+                                  onClick={() => openReassign(selected)}
+                                  className="flex h-10 items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                  style={{
+                                    fontSize: 14,
+                                    color: '#00B4D8',
+                                    border: '1px solid rgba(0,180,216,0.35)',
+                                  }}
+                                >
+                                  <Repeat style={{ width: 15, height: 15 }} />
+                                  Reassign
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => markEmergency(selected)}
+                                  disabled={selected.isEmergency}
+                                  className="flex h-10 items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-red-400/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                                  style={{
+                                    fontSize: 14,
+                                    color: '#EF4444',
+                                    border: '1px solid rgba(239,68,68,0.35)',
+                                  }}
+                                >
+                                  <AlertTriangle style={{ width: 15, height: 15 }} />
+                                  Mark Emergency
+                                </button>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleStartTriage(selected)}
+                                className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                style={{ fontSize: 14, background: '#00B4D8' }}
+                              >
+                                <UserPlus style={{ width: 15, height: 15 }} />
+                                Start Triage
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              {selected.status === 'Pending' && (
+                                <button
+                                  type="button"
+                                  onClick={() => markStatus(selected.id, 'In Progress')}
+                                  className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                  style={{
+                                    fontSize: 14,
+                                    color: '#0D2630',
+                                    border: '1px solid rgba(0,100,130,0.2)',
+                                  }}
+                                >
+                                  Mark In Progress
+                                </button>
+                              )}
+                              {selected.status !== 'Completed' && (
+                                <button
+                                  type="button"
+                                  onClick={() => markStatus(selected.id, 'Completed')}
+                                  className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                  style={{ fontSize: 14, background: '#00B4D8' }}
+                                >
+                                  <CheckCircle2 style={{ width: 15, height: 15 }} />
+                                  Mark Complete
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </PermissionGate>
+                    )}
                   </div>
                 )}
               </div>

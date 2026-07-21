@@ -4,6 +4,10 @@
  * Swap out by pointing the hooks to real endpoints in Phase 6.
  */
 
+import { DOCTORS } from '@/features/shared/__mocks__/doctorDirectory';
+import { getPatientRecord } from '@/features/nursing/__mocks__/patientRecordFixtures';
+import { getPatientsReadyForDoctor } from '@/features/nursing/store/nursingWorkflowStore';
+
 export type PatientStatus =
   | 'waiting'
   | 'in-consultation'
@@ -30,9 +34,12 @@ export type PatientRow = {
   waitDisplay: string | null; // null → "In progress"
   completedAt: string | null; // HH:MM (24 h)
   status: PatientStatus;
+  /** Foreign key into `shared/__mocks__/doctorDirectory`'s `DOCTORS` — every
+   * row defaults to the demo login (see `MOCK_QUEUE` below) unless overridden. */
+  doctorId?: string | undefined;
 };
 
-export const MOCK_QUEUE: PatientRow[] = [
+const MOCK_QUEUE_ENTRIES: PatientRow[] = [
   {
     id: 'q1',
     patientId: 'p1',
@@ -457,3 +464,51 @@ export const MOCK_QUEUE: PatientRow[] = [
     status: 'under-observation',
   },
 ];
+
+// All rows default to the demo clinical login (Dr. Adaeze Okonkwo, usr_001)
+// so "my queue" filtering behaves exactly as before for that account; a row
+// nursing hands off from Start Triage carries its own real `doctorId` instead
+// (see nursingWorkflowStore.ts / Phase 3 of the cross-system patient flow plan).
+export const MOCK_QUEUE: PatientRow[] = MOCK_QUEUE_ENTRIES.map((row) => ({
+  ...row,
+  doctorId: row.doctorId ?? 'usr_001',
+}));
+
+function nursePatientToPatientRow(patientId: string): PatientRow | null {
+  const record = getPatientRecord(patientId);
+  if (!record) return null;
+  const { patient } = record;
+  return {
+    id: `triage-${patient.id}`,
+    patientId: patient.id,
+    initials: patient.initials,
+    avatarBg: patient.avatarBg,
+    name: patient.patientName,
+    mrn: patient.mrn,
+    meta: `${patient.age}y ${patient.gender} · ${patient.diagnosis}`,
+    complaint: patient.diagnosis,
+    allergies: record.allergies.map((a) => a.substance),
+    hr: patient.vitals.hr,
+    temp: patient.vitals.temp,
+    bp: patient.vitals.bp,
+    waitDisplay: 'Just triaged',
+    completedAt: null,
+    status: 'waiting',
+    doctorId: patient.doctorId,
+  };
+}
+
+/** Merges the static consultation queue with patients Nursing has triaged and
+ * recorded first vitals for (see `getPatientsReadyForDoctor`), filtered to the
+ * logged-in doctor — the bridge that lets a nurse's Start Triage work actually
+ * surface on the doctor's side. Falls back to the unfiltered merged list when
+ * the account isn't a recognized roster doctor (e.g. admin/testing). */
+export function getDoctorQueue(doctorId: string | undefined): PatientRow[] {
+  const bridged = getPatientsReadyForDoctor()
+    .map((p) => nursePatientToPatientRow(p.id))
+    .filter((row): row is PatientRow => row !== null);
+  const merged = [...MOCK_QUEUE, ...bridged];
+  const isKnownDoctor = DOCTORS.some((d) => d.id === doctorId);
+  if (!doctorId || !isKnownDoctor) return merged;
+  return merged.filter((row) => row.doctorId === doctorId);
+}

@@ -9,6 +9,13 @@
  */
 
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
+import { DOCTORS, type Doctor } from '@/features/shared/__mocks__/doctorDirectory';
+
+// Re-exported so existing imports of `DOCTORS`/`SchedulingDoctor` from this
+// file keep resolving — the roster itself now lives in the shared module so
+// every feature (registration, nursing, encounters) reads the same doctors.
+export { DOCTORS };
+export type SchedulingDoctor = Doctor;
 
 function todayAt(hour: number, minute: number): string {
   const d = new Date();
@@ -26,13 +33,6 @@ function daysFromNowAt(n: number, hour: number, minute: number): string {
 export type AppointmentStatus =
   'Confirmed' | 'Scheduled' | 'In Progress' | 'Completed' | 'Cancelled';
 
-export type SchedulingDoctor = {
-  id: string;
-  name: string;
-  department: string;
-  initials: string;
-};
-
 export type ScheduledAppointment = {
   id: string;
   doctorId: string;
@@ -42,20 +42,6 @@ export type ScheduledAppointment = {
   durationMinutes: number;
   baseStatus: 'Confirmed' | 'Scheduled' | 'Cancelled';
 };
-
-export const DOCTORS: SchedulingDoctor[] = [
-  {
-    id: 'doc-jane',
-    name: 'Dr. Jane Ezeonu (GP)',
-    department: 'General Outpatient Clinic',
-    initials: 'JE',
-  },
-  { id: 'doc-michael', name: 'Dr. Michael Obi', department: 'Paediatrics', initials: 'MO' },
-  { id: 'doc-chinedu', name: 'Dr. Chinedu Anya', department: 'Surgery', initials: 'CA' },
-  { id: 'doc-ifeanyi', name: 'Dr. Ifeanyi Okafor', department: 'Dental Clinic', initials: 'IO' },
-  { id: 'doc-ngozi', name: 'Dr. Ngozi A. Umeh', department: 'Physiotherapy', initials: 'NU' },
-  { id: 'doc-chika', name: 'Dr. Chika Nnamdi', department: 'Radiology', initials: 'CN' },
-];
 
 export const DEPARTMENT_OPTIONS: SelectOption[] = [
   { value: 'General Outpatient Clinic', label: 'General Outpatient Clinic' },

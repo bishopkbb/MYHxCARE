@@ -31,6 +31,8 @@ import { ROUTES } from '@/constants/routes';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
+import { getDoctorQueue } from '@/features/encounters/__mocks__/encounterFixtures';
+import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -212,63 +214,28 @@ const QUEUE_STATUS_CONFIG: Record<
   },
 };
 
-// Mock patient queue — will be replaced with real API data in Phase 6
-const MOCK_QUEUE: QueuePatient[] = [
-  {
-    id: 'q1',
-    initials: 'NA',
-    avatarBg: '#EF4444',
-    name: 'Ngozi Adeyemi',
-    symptoms: 'Chest pain and difficulty breathing — sudden onset',
-    status: 'emergency',
-    waitTime: '12 min',
-  },
-  {
-    id: 'q2',
-    initials: 'AO',
-    avatarBg: '#F59E0B',
-    name: 'Adaeze Okonkwo',
-    symptoms: 'Persistent headache and fever for 3 days',
-    status: 'waiting',
-    waitTime: '47 min',
-  },
-  {
-    id: 'q3',
-    initials: 'CE',
-    avatarBg: '#00B4D8',
-    name: 'Chukwuemeka Eze',
-    symptoms: 'Abdominal pain and nausea since yesterday',
-    status: 'in-consultation',
-    waitTime: null,
-  },
-  {
-    id: 'q4',
-    initials: 'CO',
-    avatarBg: '#0098CC',
-    name: 'Chinwe Okafor',
-    symptoms: 'Diffuse skin rash and itching for 5 days',
-    status: 'waiting',
-    waitTime: '31 min',
-  },
-  {
-    id: 'q5',
-    initials: 'DO',
-    avatarBg: '#F97316',
-    name: 'David Osei',
-    symptoms: 'Severe throbbing headache, photophobia, neck stiffness',
-    status: 'waiting',
-    waitTime: '58 min',
-  },
-  {
-    id: 'q6',
-    initials: 'AN',
-    avatarBg: '#22C55E',
-    name: 'Amaka Nwosu',
-    symptoms: 'Irregular menstrual cycle and pelvic pain',
-    status: 'in-consultation',
-    waitTime: null,
-  },
-];
+const DASHBOARD_QUEUE_STATUSES: ReadonlySet<string> = new Set([
+  'emergency',
+  'waiting',
+  'in-consultation',
+]);
+
+/** Same doctor-filtered queue `/encounters` shows, trimmed to the 6 rows this
+ * widget has room for — no longer a separate invented population. */
+function getDashboardQueue(doctorId: string | undefined): QueuePatient[] {
+  return getDoctorQueue(doctorId)
+    .filter((p) => DASHBOARD_QUEUE_STATUSES.has(p.status))
+    .slice(0, 6)
+    .map((p) => ({
+      id: p.id,
+      initials: p.initials,
+      avatarBg: p.avatarBg,
+      name: p.name,
+      symptoms: p.complaint,
+      status: p.status as QueueStatus,
+      waitTime: p.waitDisplay,
+    }));
+}
 
 // Mock alerts — will be replaced with real API data in Phase 6
 const MOCK_ALERTS: Alert[] = [
@@ -467,6 +434,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const { title, lastName } = parseName(user?.name ?? '');
   const [pageState, setPageState] = useState<PageState>('loading');
+  // Re-renders this widget when nursing marks a patient ready for a doctor.
+  useClaimedPatients();
+  const dashboardQueue = getDashboardQueue(user?.id);
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -815,7 +785,7 @@ export default function DashboardPage() {
                 style={{ background: '#FFFBEB', borderColor: '#FEE685' }}
               >
                 <span className="text-sm leading-5.5 font-medium" style={{ color: '#F59E0B' }}>
-                  {MOCK_QUEUE.filter((p) => p.status !== 'in-consultation').length} waiting
+                  {dashboardQueue.filter((p) => p.status !== 'in-consultation').length} waiting
                 </span>
               </div>
             </div>
@@ -839,9 +809,9 @@ export default function DashboardPage() {
               ? Array.from({ length: 6 }).map((_, i) => (
                   <SkeletonQueueRow key={i} isLast={i === 5} />
                 ))
-              : MOCK_QUEUE.map((patient, idx) => {
+              : dashboardQueue.map((patient, idx) => {
                   const cfg = QUEUE_STATUS_CONFIG[patient.status];
-                  const isLast = idx === MOCK_QUEUE.length - 1;
+                  const isLast = idx === dashboardQueue.length - 1;
                   return (
                     <div
                       key={patient.id}
