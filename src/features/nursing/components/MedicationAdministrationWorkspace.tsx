@@ -13,10 +13,12 @@ import {
   Syringe,
   XCircle,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
+import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -36,6 +38,12 @@ import {
   type MedicationStatus,
 } from '@/features/nursing/__mocks__/medicationAdministrationFixtures';
 import { NursePatientPicker } from './NursePatientPicker';
+import type { AdministerResult } from './AdministerMedicationModal';
+
+const AdministerMedicationModal = dynamic(
+  () => import('./AdministerMedicationModal').then((m) => m.AdministerMedicationModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
@@ -191,6 +199,7 @@ function PatientMARPanel({
   const [infusions, setInfusions] = useState<MedicationOrder[]>(CONTINUOUS_INFUSIONS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [administerTargetId, setAdministerTargetId] = useState<string | null>(null);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -209,18 +218,27 @@ function PatientMARPanel({
     return activeList.find((o) => o.id === id);
   }
 
+  /** Opens the Administer Medication modal — the 5-rights confirmation and
+   * remarks capture happen there; the actual state update happens in
+   * confirmAdministration once the nurse confirms. */
   function administerMedication(id: string) {
-    const order = findOrder(id);
+    setAdministerTargetId(id);
+  }
+
+  function confirmAdministration(result: AdministerResult) {
+    if (!administerTargetId) return;
+    const order = findOrder(administerTargetId);
     if (!order) return;
-    updateOrder(id, {
+    updateOrder(administerTargetId, {
       status: 'Completed',
       administeredBy: nurseName,
-      remarks: 'Administered as scheduled.',
+      remarks: result.remarks,
     });
     toast.success(
       'Medication administered',
       `${order.medication} recorded for ${patient.patientName}.`,
     );
+    setAdministerTargetId(null);
   }
 
   function holdMedication(id: string) {
@@ -635,7 +653,13 @@ function PatientMARPanel({
                         </span>
                       </div>
                     ))}
-                    <div className="w-40 shrink-0 py-2.5 pr-3 text-right">
+                    <div
+                      className="sticky right-0 z-10 w-40 shrink-0 py-2.5 pr-3 text-right"
+                      style={{
+                        background: '#E2EDF1',
+                        borderLeft: '1px solid rgba(0,100,130,0.12)',
+                      }}
+                    >
                       <span
                         className="font-sans font-bold tracking-wider uppercase"
                         style={{ fontSize: 14, color: '#4A7080' }}
@@ -753,7 +777,11 @@ function PatientMARPanel({
                           </p>
                         </div>
                         <div
-                          className="flex w-40 shrink-0 items-center justify-end gap-1 py-3 pr-3"
+                          className="sticky right-0 z-10 flex w-40 shrink-0 items-center justify-end gap-1 py-3 pr-3"
+                          style={{
+                            background: isSelected ? '#E6F8FD' : '#FFFFFF',
+                            borderLeft: '1px solid rgba(0,100,130,0.12)',
+                          }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
@@ -1057,6 +1085,21 @@ function PatientMARPanel({
           <div className="h-4" />
         </div>
       </main>
+
+      {administerTargetId &&
+        (() => {
+          const targetOrder = findOrder(administerTargetId);
+          if (!targetOrder) return null;
+          return (
+            <AdministerMedicationModal
+              order={targetOrder}
+              patientName={patient.patientName}
+              allergies={record.allergies}
+              onClose={() => setAdministerTargetId(null)}
+              onConfirm={confirmAdministration}
+            />
+          );
+        })()}
     </div>
   );
 }
