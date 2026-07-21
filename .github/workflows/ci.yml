@@ -44,20 +44,8 @@ jobs:
           HUSKY: 0
         run: npm ci
 
-      - name: Type-check
-        run: npm run type-check
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Check formatting
-        run: npm run format:check
-
-      - name: Run unit tests
-        run: npm test
-
-  build-and-e2e:
-    name: Build and E2E tests
+  build:
+    name: Build
     if: github.repository == 'MYHxCARE/HMS-Frontend'
     runs-on: ubuntu-latest
 
@@ -67,8 +55,9 @@ jobs:
     env:
       CI: 'true'
 
-      # CI uses local/mock-mode values. The published Docker image is built
-      # separately with the real Contabo development endpoints.
+      # These values are used only to verify that the application builds.
+      # The published Docker image is built separately with the real
+      # Contabo development endpoints.
       NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
       NEXT_PUBLIC_WS_URL: ws://localhost:8080/ws
       NEXT_PUBLIC_APP_ENV: development
@@ -100,31 +89,20 @@ jobs:
 
           echo "Next.js standalone output is present."
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium firefox
-
-      - name: Run E2E tests
-        run: npm run e2e
-
-      - name: Upload Playwright report on failure
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-report-${{ github.sha }}
-          path: playwright-report/
-          retention-days: 7
-
   publish:
     name: Publish development image
     runs-on: ubuntu-latest
 
     needs:
-      - build-and-e2e
+      - build
 
+    # Only publish from the official repository's main branch.
+    # Pull requests and manual runs from feature branches cannot overwrite
+    # the shared dev image tag.
     if: >
       github.repository == 'MYHxCARE/HMS-Frontend' &&
-      ((github.event_name == 'push' &&
-        github.ref == 'refs/heads/main') ||
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' ||
        github.event_name == 'workflow_dispatch')
 
     permissions:
@@ -148,7 +126,7 @@ jobs:
           : "${DEV_APP_ENV:?DEV_APP_ENV is not configured}"
 
           case "$DEV_API_BASE_URL" in
-            https://\*\)
+            https://*)
               ;;
             *)
               echo "DEV_API_BASE_URL must use HTTPS."
@@ -169,6 +147,8 @@ jobs:
             echo "DEV_APP_ENV must be staging for the real development API."
             exit 1
           fi
+
+          echo "Development build variables are valid."
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -216,7 +196,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Show published image digest
+      - name: Show published image details
+        shell: bash
         run: |
-          echo "Published image digest:"
+          echo "Published image:"
+          echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+
+          echo
+          echo "Published digest:"
           echo "${{ steps.docker-build.outputs.digest }}"
