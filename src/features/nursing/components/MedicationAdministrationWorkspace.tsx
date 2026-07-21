@@ -45,6 +45,11 @@ const AdministerMedicationModal = dynamic(
   { ssr: false, loading: () => <ModalLoadingFallback /> },
 );
 
+const AdministrationDetailsModal = dynamic(
+  () => import('./AdministrationDetailsModal').then((m) => m.AdministrationDetailsModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
 
@@ -93,7 +98,7 @@ function RowMenu({
         type="button"
         onClick={onToggle}
         aria-label="More actions"
-        className={`flex size-9 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+        className={`flex size-11 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
       >
         <MoreVertical style={{ width: 16, height: 16, color: '#4A7080' }} />
       </button>
@@ -200,6 +205,7 @@ function PatientMARPanel({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [administerTargetId, setAdministerTargetId] = useState<string | null>(null);
+  const [viewTargetId, setViewTargetId] = useState<string | null>(null);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -624,9 +630,11 @@ function PatientMARPanel({
                 </label>
               </div>
 
-              {/* Table */}
+              {/* Table — column widths kept tight so Actions is always visible
+                  without needing to scroll on a typical 1200px page; sticky
+                  right-0 on Actions is a second safety net on narrower windows. */}
               <div className="mt-4 overflow-x-auto scroll-smooth">
-                <div className="min-w-[1400px]">
+                <div className="min-w-[820px]">
                   <div
                     className="flex items-center rounded-t-[8px]"
                     style={{
@@ -635,16 +643,15 @@ function PatientMARPanel({
                     }}
                   >
                     {[
-                      ['Medication', 'min-w-[160px] flex-1 pl-3'],
-                      ['Dose', 'w-24'],
-                      ['Route', 'w-20'],
-                      ['Frequency', 'w-32'],
-                      ['Time Due', 'w-28'],
-                      ['Status', 'w-28'],
-                      ['Administered By', 'w-36'],
-                      ['Remarks', 'w-40'],
+                      ['Medication', 'min-w-[110px] flex-1 pl-3'],
+                      ['Dose', 'w-[60px]'],
+                      ['Route', 'w-14'],
+                      ['Frequency', 'w-20'],
+                      ['Time Due', 'w-14'],
+                      ['Status', 'w-24'],
+                      ['Notes', 'w-28'],
                     ].map(([label, width]) => (
-                      <div key={label} className={`${width} shrink-0 py-2.5 pr-2`}>
+                      <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -655,10 +662,7 @@ function PatientMARPanel({
                     ))}
                     <div
                       className="sticky right-0 z-10 w-40 shrink-0 py-2.5 pr-3 text-right"
-                      style={{
-                        background: '#E2EDF1',
-                        borderLeft: '1px solid rgba(0,100,130,0.12)',
-                      }}
+                      style={{ background: '#E2EDF1' }}
                     >
                       <span
                         className="font-sans font-bold tracking-wider uppercase"
@@ -712,7 +716,7 @@ function PatientMARPanel({
                           background: isSelected ? '#E6F8FD' : 'transparent',
                         }}
                       >
-                        <div className="min-w-[160px] flex-1 py-3 pr-2 pl-3">
+                        <div className="min-w-[110px] flex-1 py-3 pr-1.5 pl-3">
                           <div className="flex items-center gap-1.5">
                             <p
                               className="truncate font-sans font-medium"
@@ -731,20 +735,22 @@ function PatientMARPanel({
                             )}
                           </div>
                         </div>
-                        <div className="w-24 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{order.dose}</p>
+                        <div className="w-[60px] shrink-0 py-3 pr-1.5">
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {order.dose}
+                          </p>
                         </div>
-                        <div className="w-20 shrink-0 py-3 pr-2">
+                        <div className="w-14 shrink-0 py-3 pr-1.5">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{order.route}</p>
                         </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
+                        <div className="w-20 shrink-0 py-3 pr-1.5">
                           <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                             {order.frequency}
                           </p>
                         </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
+                        <div className="w-14 shrink-0 py-3 pr-1.5">
                           <p
-                            className="whitespace-nowrap"
+                            className="truncate"
                             style={{
                               fontSize: 14,
                               color: order.status === 'Overdue' ? '#EF4444' : '#0D2630',
@@ -753,9 +759,9 @@ function PatientMARPanel({
                             {order.timeDueLabel ?? formatTime(order.timeDue)}
                           </p>
                         </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
+                        <div className="w-24 shrink-0 py-3 pr-1.5">
                           <span
-                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                            className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
                             style={{
                               fontSize: 14,
                               color: cfg.color,
@@ -766,30 +772,34 @@ function PatientMARPanel({
                             {order.status}
                           </span>
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                            {order.administeredBy ?? '—'}
-                          </p>
-                        </div>
-                        <div className="w-40 shrink-0 py-3 pr-2">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {order.remarks ?? '—'}
-                          </p>
+                        <div className="w-28 shrink-0 py-3 pr-1.5">
+                          {order.administeredBy ? (
+                            <>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {order.administeredBy}
+                              </p>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {order.remarks}
+                              </p>
+                            </>
+                          ) : (
+                            <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
+                          )}
                         </div>
                         <div
-                          className="sticky right-0 z-10 flex w-40 shrink-0 items-center justify-end gap-1 py-3 pr-3"
-                          style={{
-                            background: isSelected ? '#E6F8FD' : '#FFFFFF',
-                            borderLeft: '1px solid rgba(0,100,130,0.12)',
-                          }}
+                          className={`sticky right-0 flex w-40 shrink-0 items-center justify-end gap-1 py-3 pr-3 ${openMenuId === order.id ? 'z-30' : 'z-10'}`}
+                          style={{ background: isSelected ? '#E6F8FD' : '#FFFFFF' }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
                             {order.status === 'Completed' ? (
                               <button
                                 type="button"
-                                onClick={() => setSelectedId(order.id)}
-                                className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                                onClick={() => setViewTargetId(order.id)}
+                                className={`flex h-11 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
                                 style={{
                                   fontSize: 14,
                                   color: '#00B4D8',
@@ -803,7 +813,7 @@ function PatientMARPanel({
                               <button
                                 type="button"
                                 onClick={() => markMissedDose(order.id)}
-                                className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                                className={`flex h-11 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium text-white shadow-sm transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
                                 style={{
                                   fontSize: 14,
                                   background: '#EF4444',
@@ -817,7 +827,7 @@ function PatientMARPanel({
                               <button
                                 type="button"
                                 onClick={() => administerMedication(order.id)}
-                                className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                                className={`flex h-11 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium text-white shadow-sm transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
                                 style={{
                                   fontSize: 14,
                                   background: '#00B4D8',
@@ -922,7 +932,7 @@ function PatientMARPanel({
             </div>
 
             {/* ── Sidebar ─────────────────────────────────────────────────── */}
-            <div className="flex w-full shrink-0 flex-col gap-4 xl:w-[320px]">
+            <div className="flex w-full shrink-0 flex-col gap-4 xl:w-[280px]">
               <div
                 className="rounded-[12px] p-4 sm:p-5"
                 style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
@@ -1097,6 +1107,19 @@ function PatientMARPanel({
               allergies={record.allergies}
               onClose={() => setAdministerTargetId(null)}
               onConfirm={confirmAdministration}
+            />
+          );
+        })()}
+
+      {viewTargetId &&
+        (() => {
+          const targetOrder = findOrder(viewTargetId);
+          if (!targetOrder) return null;
+          return (
+            <AdministrationDetailsModal
+              order={targetOrder}
+              patientName={patient.patientName}
+              onClose={() => setViewTargetId(null)}
             />
           );
         })()}

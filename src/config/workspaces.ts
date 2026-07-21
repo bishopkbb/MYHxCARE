@@ -369,17 +369,48 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'PATIENT CARE',
         items: [
-          { label: 'Patient Queue', href: '/nurse/patient-queue', icon: ListOrdered },
-          { label: 'My Patients', href: '/nurse/my-patients', icon: Users },
-          { label: 'Vital Signs', href: '/nurse/vital-signs', icon: Activity },
-          { label: 'Nursing Assessment', href: '/nurse/nursing-assessment', icon: ClipboardList },
+          {
+            label: 'Patient Queue',
+            href: '/nurse/patient-queue',
+            icon: ListOrdered,
+            permission: PERMISSIONS.ENCOUNTERS_READ,
+          },
+          {
+            label: 'My Patients',
+            href: '/nurse/my-patients',
+            icon: Users,
+            permission: PERMISSIONS.ENCOUNTERS_READ,
+          },
+          {
+            label: 'Vital Signs',
+            href: '/nurse/vital-signs',
+            icon: Activity,
+            permission: PERMISSIONS.ENCOUNTERS_READ,
+          },
+          {
+            label: 'Nursing Assessment',
+            href: '/nurse/nursing-assessment',
+            icon: ClipboardList,
+            permission: PERMISSIONS.ENCOUNTERS_READ,
+          },
           {
             label: 'Medication Administration (MAR)',
             href: '/nurse/medication-administration',
             icon: Pill,
+            permission: PERMISSIONS.ENCOUNTERS_READ,
           },
-          { label: 'Nursing Notes', href: '/nurse/nursing-notes', icon: NotebookPen },
-          { label: 'Care Plans', href: '/nurse/care-plans', icon: ClipboardCheck },
+          {
+            label: 'Nursing Notes',
+            href: '/nurse/nursing-notes',
+            icon: NotebookPen,
+            permission: PERMISSIONS.ENCOUNTERS_READ,
+          },
+          {
+            label: 'Care Plans',
+            href: '/nurse/care-plans',
+            icon: ClipboardCheck,
+            permission: PERMISSIONS.ENCOUNTERS_READ,
+          },
         ],
       },
       {

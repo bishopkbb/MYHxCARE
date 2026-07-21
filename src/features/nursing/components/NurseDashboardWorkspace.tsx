@@ -16,7 +16,9 @@ import {
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { PermissionGate } from '@components/shared/PermissionGate';
 import { QuickActionTile } from '@components/shared/QuickActionTile';
+import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@hooks/useAuth';
 import { formatTime } from '@/utils/datetime';
@@ -331,27 +333,33 @@ export function NurseDashboardWorkspace() {
                   Quick Actions
                 </h2>
                 <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                  <QuickActionTile
-                    icon={Stethoscope}
-                    label="Record Vitals"
-                    iconBg="rgba(0,180,216,0.12)"
-                    iconColor="#00B4D8"
-                    onClick={() => router.push(ROUTES.nurseVitalSigns)}
-                  />
-                  <QuickActionTile
-                    icon={Pill}
-                    label="Administer Medication"
-                    iconBg="rgba(139,92,246,0.12)"
-                    iconColor="#8B5CF6"
-                    onClick={() => router.push(ROUTES.nurseMedicationAdministration)}
-                  />
-                  <QuickActionTile
-                    icon={NotebookPen}
-                    label="Add Nursing Note"
-                    iconBg="rgba(34,197,94,0.12)"
-                    iconColor="#22C55E"
-                    onClick={() => router.push(ROUTES.nurseNursingNotes)}
-                  />
+                  <PermissionGate permission={PERMISSIONS.ENCOUNTERS_READ}>
+                    <QuickActionTile
+                      icon={Stethoscope}
+                      label="Record Vitals"
+                      iconBg="rgba(0,180,216,0.12)"
+                      iconColor="#00B4D8"
+                      onClick={() => router.push(ROUTES.nurseVitalSigns)}
+                    />
+                  </PermissionGate>
+                  <PermissionGate permission={PERMISSIONS.ENCOUNTERS_READ}>
+                    <QuickActionTile
+                      icon={Pill}
+                      label="Administer Medication"
+                      iconBg="rgba(139,92,246,0.12)"
+                      iconColor="#8B5CF6"
+                      onClick={() => router.push(ROUTES.nurseMedicationAdministration)}
+                    />
+                  </PermissionGate>
+                  <PermissionGate permission={PERMISSIONS.ENCOUNTERS_READ}>
+                    <QuickActionTile
+                      icon={NotebookPen}
+                      label="Add Nursing Note"
+                      iconBg="rgba(34,197,94,0.12)"
+                      iconColor="#22C55E"
+                      onClick={() => router.push(ROUTES.nurseNursingNotes)}
+                    />
+                  </PermissionGate>
                   <QuickActionTile
                     icon={BedDouble}
                     label="Admit Patient"
