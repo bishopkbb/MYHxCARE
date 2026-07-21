@@ -1194,6 +1194,34 @@ const MEDICATION_ADMINISTRATION_GUIDE: HelpGuide = {
   ],
 };
 
+const NURSING_NOTES_GUIDE: HelpGuide = {
+  id: 'nursing-notes',
+  title: 'Nursing Notes',
+  intro: 'View and add chronological nursing documentation for a patient.',
+  sections: [
+    {
+      heading: 'Selecting a patient',
+      body: 'Pick a patient from your assigned roster to open their nursing notes — search by name or MRN. "Change Patient" returns you to the picker.',
+    },
+    {
+      heading: 'Tabs and filters',
+      body: 'Notes List shows everything; My Notes filters to your own entries; the remaining tabs jump straight to a single note type. Search, Note Type, Date Range, and Author narrow the list further.',
+    },
+    {
+      heading: 'Adding a note',
+      body: 'Fill in Note Type, Date & Time, and Observation / Note (required), plus optional Intervention and Patient Response. Save as Draft keeps it editable; Save Note finalizes it. Add to Care Plan links the note to a care goal.',
+    },
+    {
+      heading: 'Quick Note Templates',
+      body: 'Click a template to pre-fill the note type and starter text. Manage Templates lets you add, edit, or remove templates.',
+    },
+    {
+      heading: 'Editing and deleting',
+      body: 'The ⋮ menu on each note row offers Edit Note (loads it back into the form) and Delete Note.',
+    },
+  ],
+};
+
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
@@ -1574,6 +1602,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/nursing-assessment')) return NURSING_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/nurse/medication-administration'))
     return MEDICATION_ADMINISTRATION_GUIDE;
+  if (pathname.startsWith('/nurse/nursing-notes')) return NURSING_NOTES_GUIDE;
   if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
   if (/^\/nurse\/my-patients\/[^/]+/.test(pathname)) return PATIENT_RECORD_GUIDE;
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
