@@ -576,7 +576,7 @@ function PatientAssessmentPanel({
           <AllergyBanner allergies={record.allergies} className="mt-4" />
 
           {/* ── 1-3: Chief Complaint / Initial / Physical ─────────────────── */}
-          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
             <AssessmentSection number={1} title="Chief Complaint">
               <TextAreaField
                 label=""
@@ -677,7 +677,7 @@ function PatientAssessmentPanel({
           </div>
 
           {/* ── 4-7: Pain / Fall Risk / Pressure Injury / Nutrition ───────── */}
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <AssessmentSection number={4} title="Pain Assessment">
               <PainScaleRow value={form.painScore} onChange={(v) => set('painScore', v)} />
               <SelectField
@@ -874,7 +874,7 @@ function PatientAssessmentPanel({
           </div>
 
           {/* ── 8-11: Mental Status / Mobility / Fluid Balance / Summary ──── */}
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <AssessmentSection number={8} title="Mental Status">
               <SelectField
                 label="Level of Consciousness"
