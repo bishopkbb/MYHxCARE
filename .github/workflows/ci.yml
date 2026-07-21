@@ -1,92 +1,222 @@
-name: CI
+name: Frontend CI and Development Image
 
 on:
   push:
-  pull_request:
-    branches: [main]
+    branches:
+      - main
 
-# Cancel in-progress runs on the same branch to save minutes
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: hms-frontend-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:
-  # ─── Quality gate ─────────────────────────────────────────────────────────
-  # Type check + lint + format + unit tests. Fails fast — no point building
-  # if the code doesn't compile or violates the style rules.
-  quality:
-    name: Quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: myhxcare/hms-frontend
 
-      - uses: actions/setup-node@v4
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality checks
+    if: github.repository == 'MYHxCARE/HMS-Frontend'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
+        env:
+          HUSKY: 0
         run: npm ci
 
-      - name: Type check
+      - name: Type-check
         run: npm run type-check
 
       - name: Lint
         run: npm run lint
 
-      - name: Format check
+      - name: Check formatting
         run: npm run format:check
 
-      - name: Unit tests
+      - name: Run unit tests
         run: npm test
 
-  # ─── Build + E2E ──────────────────────────────────────────────────────────
-  # Build the Next.js app then run Playwright E2E against the production build.
-  # NEXT_PUBLIC_* vars are inlined by Turbopack at build time — they must be
-  # present here, not injected at docker run time.
   build-and-e2e:
-    name: Build + E2E
+    name: Build and E2E tests
+    if: github.repository == 'MYHxCARE/HMS-Frontend'
     runs-on: ubuntu-latest
-    needs: quality
+
+    needs:
+      - quality
+
     env:
       CI: 'true'
-      # Fall back to localhost so next build doesn't fail when the staging
-      # repository variables haven't been created in GitHub yet.
-      NEXT_PUBLIC_API_BASE_URL: ${{ vars.STAGING_API_BASE_URL || 'http://localhost:8080' }}
-      NEXT_PUBLIC_WS_URL: ${{ vars.STAGING_WS_URL || 'ws://localhost:8080' }}
-      NEXT_PUBLIC_APP_ENV: staging
+
+      # CI uses local/mock-mode values. The published Docker image is built
+      # separately with the real Contabo development endpoints.
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+      NEXT_PUBLIC_WS_URL: ws://localhost:8080/ws
+      NEXT_PUBLIC_APP_ENV: development
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
+        env:
+          HUSKY: 0
         run: npm ci
 
-      - name: Build
+      - name: Build application
         run: npm run build
 
-      - name: Remove broken Microsoft APT sources
+      - name: Confirm standalone output
+        shell: bash
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list \
-                     /etc/apt/sources.list.d/azure-cli.list \
-                     /etc/apt/sources.list.d/microsoft-prod.sources \
-                     /etc/apt/sources.list.d/azure-cli.sources
+          test -f .next/standalone/server.js
+          test -d .next/static
+
+          echo "Next.js standalone output is present."
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium firefox
 
-      - name: E2E tests
+      - name: Run E2E tests
         run: npm run e2e
 
       - name: Upload Playwright report on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-${{ github.sha }}
           path: playwright-report/
           retention-days: 7
+
+  publish:
+    name: Publish development image
+    runs-on: ubuntu-latest
+
+    needs:
+      - build-and-e2e
+
+    if: >
+      github.repository == 'MYHxCARE/HMS-Frontend' &&
+      ((github.event_name == 'push' &&
+        github.ref == 'refs/heads/main') ||
+       github.event_name == 'workflow_dispatch')
+
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      DEV_API_BASE_URL: ${{ vars.DEV_API_BASE_URL }}
+      DEV_WS_URL: ${{ vars.DEV_WS_URL }}
+      DEV_APP_ENV: ${{ vars.DEV_APP_ENV }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Validate development build variables
+        shell: bash
+        run: |
+          : "${DEV_API_BASE_URL:?DEV_API_BASE_URL is not configured}"
+          : "${DEV_WS_URL:?DEV_WS_URL is not configured}"
+          : "${DEV_APP_ENV:?DEV_APP_ENV is not configured}"
+
+          case "$DEV_API_BASE_URL" in
+            https://\*\)
+              ;;
+            *)
+              echo "DEV_API_BASE_URL must use HTTPS."
+              exit 1
+              ;;
+          esac
+
+          case "$DEV_WS_URL" in
+            wss://*)
+              ;;
+            *)
+              echo "DEV_WS_URL must use WSS."
+              exit 1
+              ;;
+          esac
+
+          if [[ "$DEV_APP_ENV" != "staging" ]]; then
+            echo "DEV_APP_ENV must be staging for the real development API."
+            exit 1
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image metadata
+        id: metadata
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+          tags: |
+            type=raw,value=dev
+            type=sha,prefix=sha-,format=short
+
+          labels: |
+            org.opencontainers.image.title=MYHxCare HMS Frontend
+            org.opencontainers.image.description=MYHxCare Next.js hospital management interface
+            org.opencontainers.image.source=https://github.com/MYHxCARE/HMS-Frontend
+            org.opencontainers.image.vendor=MYHxCare
+
+      - name: Build and publish image
+        id: docker-build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: true
+
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=${{ env.DEV_API_BASE_URL }}
+            NEXT_PUBLIC_WS_URL=${{ env.DEV_WS_URL }}
+            NEXT_PUBLIC_APP_ENV=${{ env.DEV_APP_ENV }}
+
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Show published image digest
+        run: |
+          echo "Published image digest:"
+          echo "${{ steps.docker-build.outputs.digest }}"

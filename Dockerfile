@@ -1,53 +1,90 @@
 # syntax=docker/dockerfile:1
-# Multi-stage build for Next.js standalone output.
-# NEXT_PUBLIC_* vars must be passed as --build-arg — Turbopack inlines them
-# into the client bundle at build time. Runtime -e flags arrive too late.
 
-# ─── Base ──────────────────────────────────────────────────────────────────
+# ------------------------------------------------------------
+# Shared base
+# ------------------------------------------------------------
 FROM node:22-alpine AS base
 
-# ─── Dependencies ──────────────────────────────────────────────────────────
-FROM base AS deps
 RUN apk add --no-cache libc6-compat
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
 
-# ─── Builder ───────────────────────────────────────────────────────────────
-FROM base AS builder
+ENV NEXT_TELEMETRY_DISABLED=1
+
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+# ------------------------------------------------------------
+# Dependencies
+# ------------------------------------------------------------
+FROM base AS dependencies
+
+# Prevent the prepare script from trying to install Git hooks.
+ENV HUSKY=0
+
+COPY package.json package-lock.json ./
+
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
+
+# ------------------------------------------------------------
+# Application build
+# ------------------------------------------------------------
+FROM base AS builder
+
+WORKDIR /app
+
+COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
 ARG NEXT_PUBLIC_API_BASE_URL
 ARG NEXT_PUBLIC_WS_URL
 ARG NEXT_PUBLIC_APP_ENV
 
-ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL \
-    NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL \
-    NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV \
-    NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_API_BASE_URL="${NEXT_PUBLIC_API_BASE_URL}"
+ENV NEXT_PUBLIC_WS_URL="${NEXT_PUBLIC_WS_URL}"
+ENV NEXT_PUBLIC_APP_ENV="${NEXT_PUBLIC_APP_ENV}"
 
 RUN npm run build
 
-# ─── Runner ────────────────────────────────────────────────────────────────
-FROM base AS runner
+# ------------------------------------------------------------
+# Production runtime
+# ------------------------------------------------------------
+FROM node:22-alpine AS runner
+
+RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
 
-ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
-    HOSTNAME=0.0.0.0
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+RUN addgroup \
+      --system \
+      --gid 1001 \
+      nodejs \
+    && adduser \
+      --system \
+      --uid 1001 \
+      --ingroup nodejs \
+      nextjs
 
-# Standalone server + static assets + public directory
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder \
+    --chown=nextjs:nodejs \
+    /app/public \
+    ./public
 
-USER nextjs
+COPY --from=builder \
+    --chown=nextjs:nodejs \
+    /app/.next/standalone \
+    ./
+
+COPY --from=builder \
+    --chown=nextjs:nodejs \
+    /app/.next/static \
+    ./.next/static
+
+USER nextjs:nodejs
 
 EXPOSE 3000
 
