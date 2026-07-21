@@ -645,7 +645,7 @@ function PatientMARPanel({
                     {[
                       ['Medication', 'min-w-[110px] flex-1 pl-3'],
                       ['Dose', 'w-[60px]'],
-                      ['Route', 'w-14'],
+                      ['Route', 'w-16'],
                       ['Frequency', 'w-20'],
                       ['Time Due', 'w-14'],
                       ['Status', 'w-24'],
@@ -740,8 +740,10 @@ function PatientMARPanel({
                             {order.dose}
                           </p>
                         </div>
-                        <div className="w-14 shrink-0 py-3 pr-1.5">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{order.route}</p>
+                        <div className="w-16 shrink-0 py-3 pr-1.5">
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {order.route}
+                          </p>
                         </div>
                         <div className="w-20 shrink-0 py-3 pr-1.5">
                           <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
