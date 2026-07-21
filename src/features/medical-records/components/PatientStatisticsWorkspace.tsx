@@ -21,6 +21,7 @@ import {
   TOTAL_EMERGENCY_REGISTRATIONS_DISPLAY,
   TOTAL_PATIENTS_DISPLAY,
   TOTAL_STUDENTS_DISPLAY,
+  TOTAL_VISITS_DISPLAY,
   VISIT_FREQUENCY,
   type DistributionSlice,
   type LabeledBar,
@@ -539,7 +540,7 @@ export function PatientStatisticsWorkspace() {
               </p>
               <DonutChart
                 data={FACULTY_DISTRIBUTION_STUDENTS}
-                total={`${TOTAL_STUDENTS_DISPLAY} Students`}
+                total={TOTAL_STUDENTS_DISPLAY}
                 animate={animateCharts}
               />
             </div>
@@ -593,7 +594,11 @@ export function PatientStatisticsWorkspace() {
               <p className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
                 Visit Frequency (Number of Visits per Patient)
               </p>
-              <DonutChart data={VISIT_FREQUENCY} animate={animateCharts} />
+              <DonutChart
+                data={VISIT_FREQUENCY}
+                total={TOTAL_VISITS_DISPLAY}
+                animate={animateCharts}
+              />
             </div>
             <div
               className="rounded-[12px] p-4 sm:p-5"

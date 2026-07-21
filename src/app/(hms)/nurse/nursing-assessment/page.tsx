@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Nursing Assessment' };
+import { NursingAssessmentWorkspace } from '@/features/nursing/components/NursingAssessmentWorkspace';
 
 export default function NurseNursingAssessmentPage() {
-  return (
-    <ComingSoon
-      title="Nursing Assessment"
-      description="Structured admission and shift nursing assessments — pain score, fall risk, pressure injury risk, and nutrition screening — are on the way."
-    />
-  );
+  return <NursingAssessmentWorkspace />;
 }

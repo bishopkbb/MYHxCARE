@@ -1138,6 +1138,34 @@ const VITAL_SIGNS_GUIDE: HelpGuide = {
   ],
 };
 
+const NURSING_ASSESSMENT_GUIDE: HelpGuide = {
+  id: 'nursing-assessment',
+  title: 'Nursing Assessment',
+  intro: 'Complete a comprehensive nursing assessment for a patient, section by section.',
+  sections: [
+    {
+      heading: 'Selecting a patient',
+      body: 'Pick a patient from your assigned roster to start their assessment — search by name or MRN. "Change Patient" returns you to the picker.',
+    },
+    {
+      heading: 'Assessment sections',
+      body: 'Chief Complaint, Initial (ABCDE) and Physical Assessment, Pain, Fall Risk, Pressure Injury Risk, Nutrition Screening, Mental Status, Mobility, Fluid Balance, and an overall Assessment Summary — each section is scored or described independently.',
+    },
+    {
+      heading: 'Risk scores',
+      body: 'Fall Risk, Pressure Injury Risk, and Nutrition Risk each carry a Low/Moderate/High-style badge that colors to match severity, alongside the specific risk factors or interventions checked.',
+    },
+    {
+      heading: 'Save as Draft vs. Submit',
+      body: 'Save as Draft keeps your progress without finalizing it. Submit Assessment requires the Chief Complaint and Overall Assessment to be filled in, then adds the assessment to the patient record.',
+    },
+    {
+      heading: 'Assessment Checklist',
+      body: 'A running checklist of documentation steps — required fields, abnormal findings, care plan review, patient education, and follow-up — toggle each as you complete it.',
+    },
+  ],
+};
+
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
@@ -1515,6 +1543,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
     return REGISTRATION_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/nurse/vital-signs')) return VITAL_SIGNS_GUIDE;
+  if (pathname.startsWith('/nurse/nursing-assessment')) return NURSING_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
   if (/^\/nurse\/my-patients\/[^/]+/.test(pathname)) return PATIENT_RECORD_GUIDE;
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;

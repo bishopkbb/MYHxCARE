@@ -147,6 +147,7 @@ export const VISIT_FREQUENCY: DistributionSlice[] = [
   { label: '4 - 5 Visits', value: 10, percent: 10, color: '#8B5CF6' },
   { label: '6+ Visits', value: 8, percent: 8, color: '#F59E0B' },
 ];
+export const TOTAL_VISITS_DISPLAY = '18,742';
 
 export type LabeledBar = { label: string; value: number };
 

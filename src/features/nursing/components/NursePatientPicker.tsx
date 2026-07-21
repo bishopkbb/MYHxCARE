@@ -16,7 +16,15 @@ const RISK_CFG: Record<string, { color: string; border: string; bg: string }> = 
   Low: { color: '#22C55E', border: 'rgba(34,197,94,0.4)', bg: 'rgba(34,197,94,0.08)' },
 };
 
-export function NursePatientPicker({ onSelect }: { onSelect: (patient: NursePatient) => void }) {
+export function NursePatientPicker({
+  onSelect,
+  description = 'Choose a patient from your assigned roster to view or record vital signs.',
+  actionVerb = 'vital signs',
+}: {
+  onSelect: (patient: NursePatient) => void;
+  description?: string;
+  actionVerb?: string;
+}) {
   const [search, setSearch] = useState('');
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
@@ -48,7 +56,7 @@ export function NursePatientPicker({ onSelect }: { onSelect: (patient: NursePati
         Select a Patient
       </h2>
       <p className="mt-0.5" style={{ fontSize: 14, color: '#4A7080' }}>
-        Choose a patient from your assigned roster to view or record vital signs.
+        {description}
       </p>
 
       <div className="relative mt-4">
@@ -189,7 +197,7 @@ export function NursePatientPicker({ onSelect }: { onSelect: (patient: NursePati
                   <button
                     type="button"
                     onClick={() => onSelect(p)}
-                    aria-label={`View vital signs for ${p.patientName}`}
+                    aria-label={`View ${actionVerb} for ${p.patientName}`}
                     className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                   >
                     <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
