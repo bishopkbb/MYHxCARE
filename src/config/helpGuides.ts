@@ -1166,6 +1166,34 @@ const NURSING_ASSESSMENT_GUIDE: HelpGuide = {
   ],
 };
 
+const MEDICATION_ADMINISTRATION_GUIDE: HelpGuide = {
+  id: 'medication-administration',
+  title: 'Medication Administration (MAR)',
+  intro: 'View and administer scheduled medications safely, with the 5 Rights front and center.',
+  sections: [
+    {
+      heading: 'Selecting a patient',
+      body: 'Pick a patient from your assigned roster to open their medication record — search by name or MRN. "Change Patient" returns you to the picker.',
+    },
+    {
+      heading: 'Allergies and 5 Rights',
+      body: 'Allergies show in the patient header, the full allergy banner, and the 5 Rights checklist reminds you to verify patient, medication, dose, route, and time before every administration.',
+    },
+    {
+      heading: 'Scheduled, PRN, and Continuous tabs',
+      body: 'Scheduled Medications are fixed-time doses; PRN Medications are as-needed; Continuous Infusions run ongoing. Filter any tab by Overdue, Due Now, Upcoming, or Completed, and toggle "Show Held Medications".',
+    },
+    {
+      heading: 'Row actions',
+      body: 'Administer records the dose as given. Overdue doses switch to Missed Dose. The ⋮ menu on each row also offers Hold Medication and Document Reaction.',
+    },
+    {
+      heading: 'Administration Actions',
+      body: 'The sidebar mirrors the row actions for whichever medication is currently selected — select a row first.',
+    },
+  ],
+};
+
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
@@ -1544,6 +1572,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/nurse/vital-signs')) return VITAL_SIGNS_GUIDE;
   if (pathname.startsWith('/nurse/nursing-assessment')) return NURSING_ASSESSMENT_GUIDE;
+  if (pathname.startsWith('/nurse/medication-administration'))
+    return MEDICATION_ADMINISTRATION_GUIDE;
   if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
   if (/^\/nurse\/my-patients\/[^/]+/.test(pathname)) return PATIENT_RECORD_GUIDE;
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;

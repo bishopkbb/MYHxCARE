@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Medication Administration (MAR)' };
+import { MedicationAdministrationWorkspace } from '@/features/nursing/components/MedicationAdministrationWorkspace';
 
 export default function NurseMedicationAdministrationPage() {
-  return (
-    <ComingSoon
-      title="Medication Administration (MAR)"
-      description="The Medication Administration Record — due doses, route, five-rights verification, and administration sign-off — is on the way."
-    />
-  );
+  return <MedicationAdministrationWorkspace />;
 }
