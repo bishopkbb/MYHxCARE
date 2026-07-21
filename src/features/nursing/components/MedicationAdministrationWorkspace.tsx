@@ -634,7 +634,7 @@ function PatientMARPanel({
                   without needing to scroll on a typical 1200px page; sticky
                   right-0 on Actions is a second safety net on narrower windows. */}
               <div className="mt-4 overflow-x-auto scroll-smooth">
-                <div className="min-w-[820px]">
+                <div className="min-w-[850px]">
                   <div
                     className="flex items-center rounded-t-[8px]"
                     style={{
@@ -646,14 +646,14 @@ function PatientMARPanel({
                       ['Medication', 'min-w-[110px] flex-1 pl-3'],
                       ['Dose', 'w-[60px]'],
                       ['Route', 'w-16'],
-                      ['Frequency', 'w-20'],
-                      ['Time Due', 'w-14'],
+                      ['Frequency', 'w-24'],
+                      ['Time Due', 'w-24'],
                       ['Status', 'w-24'],
                       ['Notes', 'w-28'],
                     ].map(([label, width]) => (
                       <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
                         <span
-                          className="font-sans font-bold tracking-wider uppercase"
+                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
                           {label}
@@ -745,12 +745,12 @@ function PatientMARPanel({
                             {order.route}
                           </p>
                         </div>
-                        <div className="w-20 shrink-0 py-3 pr-1.5">
+                        <div className="w-24 shrink-0 py-3 pr-1.5">
                           <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                             {order.frequency}
                           </p>
                         </div>
-                        <div className="w-14 shrink-0 py-3 pr-1.5">
+                        <div className="w-24 shrink-0 py-3 pr-1.5">
                           <p
                             className="truncate"
                             style={{
