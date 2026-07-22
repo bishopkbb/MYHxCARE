@@ -711,14 +711,6 @@ export function BedManagementWorkspace() {
     }));
   }
 
-  function requireSelection(action: (bed: ResolvedBed) => void) {
-    if (!selectedBed) {
-      toast.info('Select a bed', 'Click a bed in the layout below first, then use this action.');
-      return;
-    }
-    action(selectedBed);
-  }
-
   function reserveBed(bed: ResolvedBed) {
     if (bed.status !== 'Available') {
       toast.info('Bed not available', `${bed.bedCode} must be Available to reserve it.`);
@@ -879,59 +871,16 @@ export function BedManagementWorkspace() {
             </span>
           </nav>
 
-          <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h1
-                className="font-display font-semibold"
-                style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
-              >
-                Bed Management
-              </h1>
-              <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-                Visualize ward layout and manage bed status.
-              </p>
-            </div>
-            <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
-              <div className="flex flex-wrap items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => requireSelection(openAllocate)}
-                  className={`flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                  style={{
-                    background: '#FFFFFF',
-                    border: '1px solid rgba(0,100,130,0.15)',
-                    color: '#0D2630',
-                    fontSize: 14,
-                  }}
-                >
-                  <UserPlus style={{ width: 16, height: 16 }} />
-                  Allocate Bed
-                </button>
-                <button
-                  type="button"
-                  onClick={() => requireSelection(openTransfer)}
-                  className={`flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                  style={{
-                    background: '#FFFFFF',
-                    border: '1px solid rgba(0,100,130,0.15)',
-                    color: '#0D2630',
-                    fontSize: 14,
-                  }}
-                >
-                  <ArrowLeftRight style={{ width: 16, height: 16 }} />
-                  Transfer Patient
-                </button>
-                <button
-                  type="button"
-                  onClick={() => requireSelection(dischargePatient)}
-                  className={`flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                  style={{ background: '#EF4444', fontSize: 14 }}
-                >
-                  <LogOut style={{ width: 16, height: 16 }} />
-                  Discharge Patient
-                </button>
-              </div>
-            </PermissionGate>
+          <div className="mt-2">
+            <h1
+              className="font-display font-semibold"
+              style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
+            >
+              Bed Management
+            </h1>
+            <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
+              Visualize ward layout and manage bed status. Select a bed below to act on it.
+            </p>
           </div>
 
           {/* ── Filters ─────────────────────────────────────────────────── */}
