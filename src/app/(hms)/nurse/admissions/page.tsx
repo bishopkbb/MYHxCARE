@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { AdmissionsWorkspace } from '@/features/nursing/components/AdmissionsWorkspace';
 
 export const metadata = { title: 'Admissions' };
 
 export default function NurseAdmissionsPage() {
-  return (
-    <ComingSoon
-      title="Admissions"
-      description="Nurse-side ward admission — bed assignment, initial assessment, and admitting documentation — is on the way."
-    />
-  );
+  return <AdmissionsWorkspace />;
 }

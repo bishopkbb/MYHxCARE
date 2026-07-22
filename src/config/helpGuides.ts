@@ -1307,6 +1307,34 @@ const BED_MANAGEMENT_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMISSIONS_GUIDE: HelpGuide = {
+  id: 'admissions',
+  title: 'Admissions',
+  intro: 'Track and manage newly admitted patients through the 7-step admission workflow.',
+  sections: [
+    {
+      heading: 'Admission Workflow stepper',
+      body: 'Registration, Doctor Assessment, Nursing Assessment, Assign Bed, Vital Signs, Care Plan, and Medication. Click a step to filter the table to admissions currently at that step; click again to clear it.',
+    },
+    {
+      heading: 'Tabs',
+      body: 'Current Admissions shows patients actively moving through the workflow or scheduled to arrive. Pending Admissions and Completed Today are filtered by status; All Admissions shows every record regardless of status.',
+    },
+    {
+      heading: 'Filters',
+      body: 'Search by patient name or MRN, and narrow by Status, Ward, or Admission Type. Filter applies the current search and dropdown selections.',
+    },
+    {
+      heading: 'Table and actions',
+      body: 'Each row shows the patient, MRN, admission date and time, ward, type, current step, and status. The ⋮ menu opens the patient record (once a bed is assigned), advances the workflow to the next step, or cancels the admission.',
+    },
+    {
+      heading: 'Sidebar',
+      body: 'Admissions Overview summarizes today’s totals by status. Workflow Progress shows how many admissions have reached each step. Recent Completed lists the latest finished admissions. Quick Actions starts a New Admission, opens Bed Availability, Admission Reports, or the Admission Checklist.',
+    },
+  ],
+};
+
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
@@ -1697,6 +1725,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/nurse/admissions')) return ADMISSIONS_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
   if (pathname.startsWith('/duty-roster/templates')) return SHIFT_TEMPLATES_GUIDE;
