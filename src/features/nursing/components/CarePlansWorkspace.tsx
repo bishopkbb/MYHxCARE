@@ -1070,18 +1070,23 @@ function PatientCarePlansPanel({
 
                       {detailSection === 'overview' && (
                         <>
-                          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div
-                              className="rounded-[10px] p-3.5"
+                              className="rounded-[12px] p-4 shadow-sm"
                               style={{
                                 background: 'rgba(239,68,68,0.05)',
                                 border: '1px solid rgba(239,68,68,0.2)',
                               }}
                             >
-                              <div className="flex items-center gap-1.5">
-                                <AlertTriangle
-                                  style={{ width: 15, height: 15, color: '#EF4444' }}
-                                />
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="flex size-8 shrink-0 items-center justify-center rounded-full"
+                                  style={{ background: 'rgba(239,68,68,0.12)' }}
+                                >
+                                  <AlertTriangle
+                                    style={{ width: 15, height: 15, color: '#EF4444' }}
+                                  />
+                                </div>
                                 <p
                                   className="font-sans font-semibold"
                                   style={{ fontSize: 14, color: '#7F1D1D' }}
@@ -1090,24 +1095,29 @@ function PatientCarePlansPanel({
                                 </p>
                               </div>
                               <p
-                                className="mt-1.5 font-sans font-medium"
+                                className="mt-2 font-sans font-medium"
                                 style={{ fontSize: 14, color: '#0D2630' }}
                               >
                                 {selectedPlan.problem}
                               </p>
-                              <p style={{ fontSize: 14, color: '#4A7080' }}>
+                              <p className="mt-0.5" style={{ fontSize: 14, color: '#4A7080' }}>
                                 as evidenced by patient verbalization.
                               </p>
                             </div>
                             <div
-                              className="rounded-[10px] p-3.5"
+                              className="rounded-[12px] p-4 shadow-sm"
                               style={{
                                 background: 'rgba(59,130,246,0.05)',
                                 border: '1px solid rgba(59,130,246,0.2)',
                               }}
                             >
-                              <div className="flex items-center gap-1.5">
-                                <Target style={{ width: 15, height: 15, color: '#3B82F6' }} />
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="flex size-8 shrink-0 items-center justify-center rounded-full"
+                                  style={{ background: 'rgba(59,130,246,0.12)' }}
+                                >
+                                  <Target style={{ width: 15, height: 15, color: '#3B82F6' }} />
+                                </div>
                                 <p
                                   className="font-sans font-semibold"
                                   style={{ fontSize: 14, color: '#1E3A8A' }}
@@ -1115,19 +1125,24 @@ function PatientCarePlansPanel({
                                   Goal
                                 </p>
                               </div>
-                              <p className="mt-1.5" style={{ fontSize: 14, color: '#0D2630' }}>
+                              <p className="mt-2" style={{ fontSize: 14, color: '#0D2630' }}>
                                 {selectedPlan.goal}
                               </p>
                             </div>
                             <div
-                              className="rounded-[10px] p-3.5"
+                              className="rounded-[12px] p-4 shadow-sm"
                               style={{
                                 background: 'rgba(0,180,216,0.05)',
                                 border: '1px solid rgba(0,180,216,0.2)',
                               }}
                             >
-                              <div className="flex items-center gap-1.5">
-                                <ListChecks style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="flex size-8 shrink-0 items-center justify-center rounded-full"
+                                  style={{ background: 'rgba(0,180,216,0.12)' }}
+                                >
+                                  <ListChecks style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                                </div>
                                 <p
                                   className="font-sans font-semibold"
                                   style={{ fontSize: 14, color: '#0D2630' }}
@@ -1135,7 +1150,7 @@ function PatientCarePlansPanel({
                                   Interventions
                                 </p>
                               </div>
-                              <div className="mt-1.5 flex flex-col gap-1">
+                              <div className="mt-2 flex flex-col gap-1.5">
                                 {selectedPlan.interventions.slice(0, 4).map((iv) => (
                                   <div key={iv} className="flex items-start gap-1.5">
                                     <CheckCircle2
@@ -1153,14 +1168,19 @@ function PatientCarePlansPanel({
                               </div>
                             </div>
                             <div
-                              className="rounded-[10px] p-3.5"
+                              className="rounded-[12px] p-4 shadow-sm"
                               style={{
                                 background: 'rgba(245,158,11,0.05)',
                                 border: '1px solid rgba(245,158,11,0.2)',
                               }}
                             >
-                              <div className="flex items-center gap-1.5">
-                                <Gauge style={{ width: 15, height: 15, color: '#F59E0B' }} />
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="flex size-8 shrink-0 items-center justify-center rounded-full"
+                                  style={{ background: 'rgba(245,158,11,0.12)' }}
+                                >
+                                  <Gauge style={{ width: 15, height: 15, color: '#F59E0B' }} />
+                                </div>
                                 <p
                                   className="font-sans font-semibold"
                                   style={{ fontSize: 14, color: '#0D2630' }}
@@ -1169,7 +1189,7 @@ function PatientCarePlansPanel({
                                 </p>
                               </div>
                               <p
-                                className="mt-1.5 font-sans font-medium"
+                                className="mt-2 font-sans font-medium"
                                 style={{
                                   fontSize: 14,
                                   color: EVALUATION_CFG[selectedPlan.evaluationStatus].color,
@@ -1177,7 +1197,7 @@ function PatientCarePlansPanel({
                               >
                                 {selectedPlan.evaluationStatus}
                               </p>
-                              <p style={{ fontSize: 14, color: '#4A7080' }}>
+                              <p className="mt-0.5" style={{ fontSize: 14, color: '#4A7080' }}>
                                 {selectedPlan.evaluationNote}
                               </p>
                             </div>
