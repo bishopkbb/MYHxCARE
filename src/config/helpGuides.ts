@@ -1222,6 +1222,34 @@ const NURSING_NOTES_GUIDE: HelpGuide = {
   ],
 };
 
+const CARE_PLANS_GUIDE: HelpGuide = {
+  id: 'care-plans',
+  title: 'Care Plans',
+  intro: 'View and manage individualized nursing care plans for a patient.',
+  sections: [
+    {
+      heading: 'Selecting a patient',
+      body: 'Pick a patient from your assigned roster to open their care plans — search by name or MRN. "Change Patient" returns you to the picker.',
+    },
+    {
+      heading: 'Tabs',
+      body: 'Active Care Plans, All Care Plans, and Completed Plans filter the table by status. Care Plan History shows every progress entry across every plan, most recent first.',
+    },
+    {
+      heading: 'Care plan table',
+      body: 'Each row shows the problem, goal, start date, next review countdown, status, and assigned nurse. View Plan opens it in the detail panel below; the ⋮ menu offers Edit, Mark Complete, and Discontinue.',
+    },
+    {
+      heading: 'Care Plan Details panel',
+      body: 'Overview summarizes the problem, goal, interventions, and evaluation. Interventions lets you check off completed items and add new ones. Progress Notes lets you log a new entry. Evaluations lets you update the status and note. Timeline shows every progress entry for that plan. Documents lists attached files.',
+    },
+    {
+      heading: 'Creating a care plan',
+      body: 'Create New Care Plan (or a Quick Template) opens a form for the problem, goal, dates, assigned nurse, and interventions.',
+    },
+  ],
+};
+
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
@@ -1603,6 +1631,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/medication-administration'))
     return MEDICATION_ADMINISTRATION_GUIDE;
   if (pathname.startsWith('/nurse/nursing-notes')) return NURSING_NOTES_GUIDE;
+  if (pathname.startsWith('/nurse/care-plans')) return CARE_PLANS_GUIDE;
   if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
   if (/^\/nurse\/my-patients\/[^/]+/.test(pathname)) return PATIENT_RECORD_GUIDE;
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
