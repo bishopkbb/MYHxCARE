@@ -1335,6 +1335,34 @@ const ADMISSIONS_GUIDE: HelpGuide = {
   ],
 };
 
+const DISCHARGES_GUIDE: HelpGuide = {
+  id: 'discharges',
+  title: 'Discharges',
+  intro: 'Plan, track, and complete patient discharges through the 7-step discharge workflow.',
+  sections: [
+    {
+      heading: 'Discharge Workflow stepper',
+      body: 'Discharge Order, Medication Reconciliation, Patient Education, Pending Results, Discharge Summary, Follow-up & Transport, and Bed Released. Click a step to filter the table to plans currently at that step; click again to clear it.',
+    },
+    {
+      heading: 'Tabs',
+      body: 'Active Discharge Plans shows patients still working through earlier steps. Ready for Discharge shows patients at the last step before their bed is released. Discharged Today and All Discharges show completed and every record respectively.',
+    },
+    {
+      heading: 'Filters',
+      body: 'Search by patient name or MRN, and narrow by Status, Ward, or Discharge Type. Filter applies the current search and dropdown selections.',
+    },
+    {
+      heading: 'Table and actions',
+      body: 'Each row shows the patient, MRN, ward and bed, planned discharge date and time, discharge type, current step, and status. The ⋮ menu opens the patient record, advances the plan to the next step (or completes the discharge at the final step), or cancels the plan.',
+    },
+    {
+      heading: 'Sidebar',
+      body: 'Discharges Overview summarizes plans by status. Workflow Progress shows how many plans have reached each step. Recently Discharged lists the latest patients to leave. Quick Actions starts a new Plan Discharge, opens Bed Management, Discharge Reports, or the Discharge Checklist.',
+    },
+  ],
+};
+
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
@@ -1726,6 +1754,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/nurse/admissions')) return ADMISSIONS_GUIDE;
+  if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
   if (pathname.startsWith('/duty-roster/templates')) return SHIFT_TEMPLATES_GUIDE;
