@@ -6,15 +6,20 @@ import {
   BedDouble,
   Biohazard,
   CalendarPlus,
+  CalendarX2,
   CheckCircle2,
   LayoutGrid,
   List,
+  LogOut,
   Minus,
   MoreVertical,
   Plus,
   RotateCcw,
   ShieldAlert,
   Sparkles,
+  Undo2,
+  UserPlus,
+  Wrench,
   XCircle,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -37,9 +42,15 @@ import {
   type BedStatus,
   type WardLayout,
 } from '@/features/nursing/__mocks__/bedManagementFixtures';
+import type { AllocateBedInput } from './AllocateBedModal';
 
 const TransferPatientModal = dynamic(
   () => import('./TransferPatientModal').then((m) => m.TransferPatientModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+
+const AllocateBedModal = dynamic(
+  () => import('./AllocateBedModal').then((m) => m.AllocateBedModal),
   { ssr: false, loading: () => <ModalLoadingFallback /> },
 );
 
@@ -150,15 +161,25 @@ function BedCard({
   bed,
   isSelected,
   onSelect,
+  onAllocate,
   onReserve,
-  onMarkAvailable,
+  onCancelReservation,
+  onMarkOutOfService,
+  onReturnToService,
+  onDischarge,
+  onMarkReady,
   onTransfer,
 }: {
   bed: ResolvedBed;
   isSelected: boolean;
   onSelect: () => void;
+  onAllocate: () => void;
   onReserve: () => void;
-  onMarkAvailable: () => void;
+  onCancelReservation: () => void;
+  onMarkOutOfService: () => void;
+  onReturnToService: () => void;
+  onDischarge: () => void;
+  onMarkReady: () => void;
   onTransfer: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -173,6 +194,25 @@ function BedCard({
     document.addEventListener('mousedown', onMouseDown);
     return () => document.removeEventListener('mousedown', onMouseDown);
   }, [menuOpen]);
+
+  function stopAnd(fn: () => void) {
+    return (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setMenuOpen(false);
+      fn();
+    };
+  }
+
+  const primaryAction: { label: string; onClick: (e: React.MouseEvent) => void } | null =
+    bed.status === 'Available'
+      ? { label: 'Allocate Bed', onClick: stopAnd(onAllocate) }
+      : bed.status === 'Reserved'
+        ? { label: 'Allocate Bed', onClick: stopAnd(onAllocate) }
+        : bed.status === 'Cleaning Required'
+          ? { label: 'Mark Ready', onClick: stopAnd(onMarkReady) }
+          : bed.status === 'Out of Service'
+            ? { label: 'Return to Service', onClick: stopAnd(onReturnToService) }
+            : null;
 
   return (
     <div
@@ -239,9 +279,22 @@ function BedCard({
         </div>
       )}
 
+      {primaryAction && (
+        <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+          <button
+            type="button"
+            onClick={primaryAction.onClick}
+            className={`mt-2 flex h-8 w-full items-center justify-center rounded-[8px] font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+            style={{ fontSize: 14, color: '#FFFFFF', background: cfg.color }}
+          >
+            {primaryAction.label}
+          </button>
+        </PermissionGate>
+      )}
+
       {menuOpen && (
         <div
-          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-2 z-30 mt-1 w-44 overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
+          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-2 z-30 mt-1 w-48 overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
           style={{
             border: '1px solid rgba(0,100,130,0.12)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
@@ -249,47 +302,289 @@ function BedCard({
           onClick={(e) => e.stopPropagation()}
         >
           {bed.status === 'Occupied' && (
-            <button
-              type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                onTransfer();
-              }}
-              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-              style={{ fontSize: 14, color: '#0D2630' }}
-            >
-              <ArrowLeftRight style={{ width: 15, height: 15, color: '#00B4D8' }} />
-              Transfer Patient
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={stopAnd(onTransfer)}
+                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                <ArrowLeftRight style={{ width: 15, height: 15, color: '#00B4D8' }} />
+                Transfer Patient
+              </button>
+              <button
+                type="button"
+                onClick={stopAnd(onDischarge)}
+                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                <LogOut style={{ width: 15, height: 15, color: '#EF4444' }} />
+                Discharge Patient
+              </button>
+            </>
           )}
           {bed.status === 'Available' && (
+            <>
+              <button
+                type="button"
+                onClick={stopAnd(onAllocate)}
+                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                <UserPlus style={{ width: 15, height: 15, color: '#16A34A' }} />
+                Allocate Bed
+              </button>
+              <button
+                type="button"
+                onClick={stopAnd(onReserve)}
+                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                <CalendarPlus style={{ width: 15, height: 15, color: '#8B5CF6' }} />
+                Reserve Bed
+              </button>
+              <button
+                type="button"
+                onClick={stopAnd(onMarkOutOfService)}
+                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                <Wrench style={{ width: 15, height: 15, color: '#EF4444' }} />
+                Mark Out of Service
+              </button>
+            </>
+          )}
+          {bed.status === 'Reserved' && (
+            <>
+              <button
+                type="button"
+                onClick={stopAnd(onAllocate)}
+                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                <UserPlus style={{ width: 15, height: 15, color: '#16A34A' }} />
+                Allocate Bed
+              </button>
+              <button
+                type="button"
+                onClick={stopAnd(onCancelReservation)}
+                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                <CalendarX2 style={{ width: 15, height: 15, color: '#8A98A3' }} />
+                Cancel Reservation
+              </button>
+              <button
+                type="button"
+                onClick={stopAnd(onMarkOutOfService)}
+                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                <Wrench style={{ width: 15, height: 15, color: '#EF4444' }} />
+                Mark Out of Service
+              </button>
+            </>
+          )}
+          {bed.status === 'Cleaning Required' && (
+            <>
+              <button
+                type="button"
+                onClick={stopAnd(onMarkReady)}
+                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                <CheckCircle2 style={{ width: 15, height: 15, color: '#22C55E' }} />
+                Mark Ready
+              </button>
+              <button
+                type="button"
+                onClick={stopAnd(onMarkOutOfService)}
+                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                <Wrench style={{ width: 15, height: 15, color: '#EF4444' }} />
+                Mark Out of Service
+              </button>
+            </>
+          )}
+          {bed.status === 'Out of Service' && (
             <button
               type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                onReserve();
-              }}
+              onClick={stopAnd(onReturnToService)}
               className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
               style={{ fontSize: 14, color: '#0D2630' }}
             >
-              <CalendarPlus style={{ width: 15, height: 15, color: '#8B5CF6' }} />
-              Reserve Bed
+              <Undo2 style={{ width: 15, height: 15, color: '#22C55E' }} />
+              Return to Service
             </button>
           )}
-          {bed.status !== 'Available' && (
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ListRowActions({
+  bed,
+  menuOpen,
+  onToggleMenu,
+  onAllocate,
+  onReserve,
+  onCancelReservation,
+  onMarkOutOfService,
+  onReturnToService,
+  onDischarge,
+  onMarkReady,
+  onTransfer,
+}: {
+  bed: ResolvedBed;
+  menuOpen: boolean;
+  onToggleMenu: () => void;
+  onAllocate: () => void;
+  onReserve: () => void;
+  onCancelReservation: () => void;
+  onMarkOutOfService: () => void;
+  onReturnToService: () => void;
+  onDischarge: () => void;
+  onMarkReady: () => void;
+  onTransfer: () => void;
+}) {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onMouseDown(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) onToggleMenu();
+    }
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [menuOpen, onToggleMenu]);
+
+  function stopAnd(fn: () => void) {
+    return (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (menuOpen) onToggleMenu();
+      fn();
+    };
+  }
+
+  const primary =
+    bed.status === 'Occupied'
+      ? {
+          label: 'Transfer',
+          onClick: stopAnd(onTransfer),
+          color: '#00B4D8',
+          border: 'rgba(0,180,216,0.35)',
+        }
+      : bed.status === 'Available' || bed.status === 'Reserved'
+        ? {
+            label: 'Allocate',
+            onClick: stopAnd(onAllocate),
+            color: '#16A34A',
+            border: 'rgba(34,197,94,0.35)',
+          }
+        : bed.status === 'Cleaning Required'
+          ? {
+              label: 'Ready',
+              onClick: stopAnd(onMarkReady),
+              color: '#22C55E',
+              border: 'rgba(34,197,94,0.35)',
+            }
+          : {
+              label: 'Restore',
+              onClick: stopAnd(onReturnToService),
+              color: '#22C55E',
+              border: 'rgba(34,197,94,0.35)',
+            };
+
+  const menuItems: {
+    label: string;
+    icon: typeof ArrowLeftRight;
+    color: string;
+    onClick: () => void;
+  }[] =
+    bed.status === 'Occupied'
+      ? [{ label: 'Discharge Patient', icon: LogOut, color: '#EF4444', onClick: onDischarge }]
+      : bed.status === 'Available'
+        ? [
+            { label: 'Reserve Bed', icon: CalendarPlus, color: '#8B5CF6', onClick: onReserve },
+            {
+              label: 'Mark Out of Service',
+              icon: Wrench,
+              color: '#EF4444',
+              onClick: onMarkOutOfService,
+            },
+          ]
+        : bed.status === 'Reserved'
+          ? [
+              {
+                label: 'Cancel Reservation',
+                icon: CalendarX2,
+                color: '#8A98A3',
+                onClick: onCancelReservation,
+              },
+              {
+                label: 'Mark Out of Service',
+                icon: Wrench,
+                color: '#EF4444',
+                onClick: onMarkOutOfService,
+              },
+            ]
+          : bed.status === 'Cleaning Required'
+            ? [
+                {
+                  label: 'Mark Out of Service',
+                  icon: Wrench,
+                  color: '#EF4444',
+                  onClick: onMarkOutOfService,
+                },
+              ]
+            : [];
+
+  return (
+    <div ref={rootRef} className="relative flex items-center gap-1">
+      <button
+        type="button"
+        onClick={primary.onClick}
+        className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+        style={{ fontSize: 14, color: primary.color, border: `1px solid ${primary.border}` }}
+      >
+        {primary.label}
+      </button>
+      {menuItems.length > 0 && (
+        <button
+          type="button"
+          aria-label={`More actions for ${bed.bedCode}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleMenu();
+          }}
+          className={`flex size-9 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+          style={{ border: '1px solid rgba(0,100,130,0.18)' }}
+        >
+          <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
+        </button>
+      )}
+      {menuOpen && (
+        <div
+          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 w-48 overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
+          style={{
+            border: '1px solid rgba(0,100,130,0.12)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          }}
+        >
+          {menuItems.map((item) => (
             <button
+              key={item.label}
               type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                onMarkAvailable();
-              }}
+              onClick={stopAnd(item.onClick)}
               className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
               style={{ fontSize: 14, color: '#0D2630' }}
             >
-              <CheckCircle2 style={{ width: 15, height: 15, color: '#22C55E' }} />
-              Mark Available
+              <item.icon style={{ width: 15, height: 15, color: item.color }} />
+              {item.label}
             </button>
-          )}
+          ))}
         </div>
       )}
     </div>
@@ -315,6 +610,8 @@ export function BedManagementWorkspace() {
   const [zoom, setZoom] = useState(100);
   const [selectedBedId, setSelectedBedId] = useState<string | null>(null);
   const [transferTargetBedId, setTransferTargetBedId] = useState<string | null>(null);
+  const [allocateTargetBedId, setAllocateTargetBedId] = useState<string | null>(null);
+  const [openListMenuId, setOpenListMenuId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [nowMs, setNowMs] = useState(0);
@@ -416,7 +713,7 @@ export function BedManagementWorkspace() {
 
   function requireSelection(action: (bed: ResolvedBed) => void) {
     if (!selectedBed) {
-      toast.info('Select a bed', 'Choose a bed from the layout below first.');
+      toast.info('Select a bed', 'Click a bed in the layout below first, then use this action.');
       return;
     }
     action(selectedBed);
@@ -424,20 +721,102 @@ export function BedManagementWorkspace() {
 
   function reserveBed(bed: ResolvedBed) {
     if (bed.status !== 'Available') {
-      toast.info('Bed not available', `${bed.bedCode} is not currently available to reserve.`);
+      toast.info('Bed not available', `${bed.bedCode} must be Available to reserve it.`);
       return;
     }
     setBedStatus(selectedWard.id, bed.id, 'Reserved');
     toast.success('Bed reserved', `${bed.bedCode} has been reserved.`);
   }
 
-  function markAvailable(bed: ResolvedBed) {
-    if (bed.status === 'Available') {
-      toast.info('Already available', `${bed.bedCode} is already marked available.`);
+  function cancelReservation(bed: ResolvedBed) {
+    if (bed.status !== 'Reserved') {
+      toast.info('Not reserved', `${bed.bedCode} is not currently reserved.`);
       return;
     }
-    clearBedToAvailable(selectedWard.id, bed.id);
-    toast.success('Bed marked available', `${bed.bedCode} is now available.`);
+    setBedStatus(selectedWard.id, bed.id, 'Available');
+    toast.success('Reservation cancelled', `${bed.bedCode} is available again.`);
+  }
+
+  function markOutOfService(bed: ResolvedBed) {
+    if (bed.status === 'Occupied') {
+      toast.info(
+        'Bed is occupied',
+        `Discharge the patient in ${bed.bedCode} before taking it out of service.`,
+      );
+      return;
+    }
+    if (bed.status === 'Out of Service') {
+      toast.info('Already out of service', `${bed.bedCode} is already out of service.`);
+      return;
+    }
+    setBedStatus(selectedWard.id, bed.id, 'Out of Service');
+    toast.success('Bed marked out of service', `${bed.bedCode} is now out of service.`);
+  }
+
+  function returnToService(bed: ResolvedBed) {
+    if (bed.status !== 'Out of Service') {
+      toast.info('Not out of service', `${bed.bedCode} is not currently out of service.`);
+      return;
+    }
+    setBedStatus(selectedWard.id, bed.id, 'Available');
+    toast.success('Bed returned to service', `${bed.bedCode} is now available.`);
+  }
+
+  function dischargePatient(bed: ResolvedBed) {
+    if (bed.status !== 'Occupied') {
+      toast.info('No patient to discharge', `${bed.bedCode} has no patient assigned.`);
+      return;
+    }
+    const patientName = bed.patientName;
+    setBedsByWard((prev) => ({
+      ...prev,
+      [selectedWard.id]: prev[selectedWard.id]!.map((b) => {
+        if (b.id !== bed.id) return b;
+        const {
+          patientName: _p,
+          mrn: _m,
+          diagnosis: _d,
+          doctorName: _doc,
+          admittedAt: _a,
+          ...rest
+        } = b;
+        return { ...rest, status: 'Cleaning Required' };
+      }),
+    }));
+    toast.success(
+      'Patient discharged',
+      `${patientName} discharged from ${bed.bedCode}. Bed sent for cleaning.`,
+    );
+  }
+
+  function markReady(bed: ResolvedBed) {
+    if (bed.status !== 'Cleaning Required') {
+      toast.info('Not pending cleaning', `${bed.bedCode} is not awaiting cleaning.`);
+      return;
+    }
+    setBedStatus(selectedWard.id, bed.id, 'Available');
+    toast.success('Bed marked ready', `${bed.bedCode} has been cleaned and is now available.`);
+  }
+
+  function openAllocate(bed: ResolvedBed) {
+    if (bed.status !== 'Available' && bed.status !== 'Reserved') {
+      toast.info(
+        'Cannot allocate',
+        `${bed.bedCode} must be Available or Reserved to allocate a patient.`,
+      );
+      return;
+    }
+    setAllocateTargetBedId(bed.id);
+  }
+
+  function confirmAllocate(input: AllocateBedInput) {
+    if (!allocateTargetBedId) return;
+    const bed = wardBeds.find((b) => b.id === allocateTargetBedId);
+    if (!bed) return;
+    occupyBed(selectedWard.id, bed.id, input);
+    toast.success('Bed allocated', `${input.patientName} admitted into ${bed.bedCode}.`);
+    setAllocateTargetBedId(null);
+    setSelectedBedId(bed.id);
   }
 
   function openTransfer(bed: ResolvedBed) {
@@ -471,6 +850,9 @@ export function BedManagementWorkspace() {
 
   const transferSourceBed = transferTargetBedId
     ? (wardBeds.find((b) => b.id === transferTargetBedId) ?? null)
+    : null;
+  const allocateTargetBed = allocateTargetBedId
+    ? (wardBeds.find((b) => b.id === allocateTargetBedId) ?? null)
     : null;
   const availableBedsForTransfer = wardBeds
     .filter((b) => b.status === 'Available')
@@ -513,6 +895,20 @@ export function BedManagementWorkspace() {
               <div className="flex flex-wrap items-center gap-2.5">
                 <button
                   type="button"
+                  onClick={() => requireSelection(openAllocate)}
+                  className={`flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                  style={{
+                    background: '#FFFFFF',
+                    border: '1px solid rgba(0,100,130,0.15)',
+                    color: '#0D2630',
+                    fontSize: 14,
+                  }}
+                >
+                  <UserPlus style={{ width: 16, height: 16 }} />
+                  Allocate Bed
+                </button>
+                <button
+                  type="button"
                   onClick={() => requireSelection(openTransfer)}
                   className={`flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
                   style={{
@@ -527,26 +923,12 @@ export function BedManagementWorkspace() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => requireSelection(reserveBed)}
-                  className={`flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                  style={{
-                    background: '#FFFFFF',
-                    border: '1px solid rgba(0,100,130,0.15)',
-                    color: '#0D2630',
-                    fontSize: 14,
-                  }}
-                >
-                  <CalendarPlus style={{ width: 16, height: 16 }} />
-                  Reserve Bed
-                </button>
-                <button
-                  type="button"
-                  onClick={() => requireSelection(markAvailable)}
+                  onClick={() => requireSelection(dischargePatient)}
                   className={`flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                  style={{ background: '#22C55E', fontSize: 14 }}
+                  style={{ background: '#EF4444', fontSize: 14 }}
                 >
-                  <CheckCircle2 style={{ width: 16, height: 16 }} />
-                  Mark Available
+                  <LogOut style={{ width: 16, height: 16 }} />
+                  Discharge Patient
                 </button>
               </div>
             </PermissionGate>
@@ -829,8 +1211,13 @@ export function BedManagementWorkspace() {
                               bed={bed}
                               isSelected={selectedBedId === bed.id}
                               onSelect={() => setSelectedBedId(bed.id)}
+                              onAllocate={() => openAllocate(bed)}
                               onReserve={() => reserveBed(bed)}
-                              onMarkAvailable={() => markAvailable(bed)}
+                              onCancelReservation={() => cancelReservation(bed)}
+                              onMarkOutOfService={() => markOutOfService(bed)}
+                              onReturnToService={() => returnToService(bed)}
+                              onDischarge={() => dischargePatient(bed)}
+                              onMarkReady={() => markReady(bed)}
                               onTransfer={() => openTransfer(bed)}
                             />
                           ))}
@@ -863,8 +1250,13 @@ export function BedManagementWorkspace() {
                             bed={bed}
                             isSelected={selectedBedId === bed.id}
                             onSelect={() => setSelectedBedId(bed.id)}
+                            onAllocate={() => openAllocate(bed)}
                             onReserve={() => reserveBed(bed)}
-                            onMarkAvailable={() => markAvailable(bed)}
+                            onCancelReservation={() => cancelReservation(bed)}
+                            onMarkOutOfService={() => markOutOfService(bed)}
+                            onReturnToService={() => returnToService(bed)}
+                            onDischarge={() => dischargePatient(bed)}
+                            onMarkReady={() => markReady(bed)}
                             onTransfer={() => openTransfer(bed)}
                           />
                         ))}
@@ -883,7 +1275,7 @@ export function BedManagementWorkspace() {
                 {selectedWard.name} – {selectedWard.floor}
               </h2>
               <div className="mt-3 overflow-x-auto scroll-smooth">
-                <div className="min-w-[760px]">
+                <div className="min-w-[800px]">
                   <div
                     className="flex items-center rounded-t-[8px]"
                     style={{
@@ -910,7 +1302,7 @@ export function BedManagementWorkspace() {
                       </div>
                     ))}
                     <div
-                      className="sticky right-0 z-10 w-32 shrink-0 py-2.5 pr-3 text-right"
+                      className="sticky right-0 z-10 w-40 shrink-0 py-2.5 pr-3 text-right"
                       style={{ background: '#E2EDF1' }}
                     >
                       <span
@@ -994,51 +1386,26 @@ export function BedManagementWorkspace() {
                           </p>
                         </div>
                         <div
-                          className="sticky right-0 z-10 flex w-32 shrink-0 items-center justify-end py-3 pr-3"
+                          className={`sticky right-0 flex w-40 shrink-0 items-center justify-end py-3 pr-3 ${openListMenuId === bed.id ? 'z-30' : 'z-10'}`}
                           style={{ background: isSelected ? '#E6F8FD' : '#FFFFFF' }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
-                            {bed.status === 'Occupied' ? (
-                              <button
-                                type="button"
-                                onClick={() => openTransfer(bed)}
-                                className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                                style={{
-                                  fontSize: 14,
-                                  color: '#00B4D8',
-                                  border: '1px solid rgba(0,180,216,0.35)',
-                                }}
-                              >
-                                Transfer
-                              </button>
-                            ) : bed.status === 'Available' ? (
-                              <button
-                                type="button"
-                                onClick={() => reserveBed(bed)}
-                                className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                                style={{
-                                  fontSize: 14,
-                                  color: '#8B5CF6',
-                                  border: '1px solid rgba(139,92,246,0.35)',
-                                }}
-                              >
-                                Reserve
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => markAvailable(bed)}
-                                className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                                style={{
-                                  fontSize: 14,
-                                  color: '#22C55E',
-                                  border: '1px solid rgba(34,197,94,0.35)',
-                                }}
-                              >
-                                Mark Ready
-                              </button>
-                            )}
+                            <ListRowActions
+                              bed={bed}
+                              menuOpen={openListMenuId === bed.id}
+                              onToggleMenu={() =>
+                                setOpenListMenuId(openListMenuId === bed.id ? null : bed.id)
+                              }
+                              onAllocate={() => openAllocate(bed)}
+                              onReserve={() => reserveBed(bed)}
+                              onCancelReservation={() => cancelReservation(bed)}
+                              onMarkOutOfService={() => markOutOfService(bed)}
+                              onReturnToService={() => returnToService(bed)}
+                              onDischarge={() => dischargePatient(bed)}
+                              onMarkReady={() => markReady(bed)}
+                              onTransfer={() => openTransfer(bed)}
+                            />
                           </PermissionGate>
                         </div>
                       </div>
@@ -1242,35 +1609,175 @@ export function BedManagementWorkspace() {
                   </p>
                 }
               >
-                <div className="mt-3 flex flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={() => requireSelection(openTransfer)}
-                    className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
-                    style={{ fontSize: 14, color: '#0D2630', background: 'rgba(0,180,216,0.1)' }}
-                  >
-                    <ArrowLeftRight style={{ width: 17, height: 17, color: '#00B4D8' }} />
-                    Transfer Patient
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => requireSelection(reserveBed)}
-                    className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
-                    style={{ fontSize: 14, color: '#0D2630', background: 'rgba(139,92,246,0.1)' }}
-                  >
-                    <CalendarPlus style={{ width: 17, height: 17, color: '#8B5CF6' }} />
-                    Reserve Bed
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => requireSelection(markAvailable)}
-                    className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
-                    style={{ fontSize: 14, color: '#166534', background: 'rgba(34,197,94,0.12)' }}
-                  >
-                    <CheckCircle2 style={{ width: 17, height: 17 }} />
-                    Mark Available
-                  </button>
-                </div>
+                {!selectedBed ? (
+                  <p className="mt-2" style={{ fontSize: 14, color: '#8A98A3' }}>
+                    Select a bed above to see the actions available for it.
+                  </p>
+                ) : (
+                  <div className="mt-3 flex flex-col gap-2">
+                    {selectedBed.status === 'Occupied' && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => openTransfer(selectedBed)}
+                          className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#0D2630',
+                            background: 'rgba(0,180,216,0.1)',
+                          }}
+                        >
+                          <ArrowLeftRight style={{ width: 17, height: 17, color: '#00B4D8' }} />
+                          Transfer Patient
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => dischargePatient(selectedBed)}
+                          className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#7F1D1D',
+                            background: 'rgba(239,68,68,0.1)',
+                          }}
+                        >
+                          <LogOut style={{ width: 17, height: 17, color: '#EF4444' }} />
+                          Discharge Patient
+                        </button>
+                      </>
+                    )}
+                    {selectedBed.status === 'Available' && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => openAllocate(selectedBed)}
+                          className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#166534',
+                            background: 'rgba(34,197,94,0.12)',
+                          }}
+                        >
+                          <UserPlus style={{ width: 17, height: 17 }} />
+                          Allocate Bed
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => reserveBed(selectedBed)}
+                          className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#0D2630',
+                            background: 'rgba(139,92,246,0.1)',
+                          }}
+                        >
+                          <CalendarPlus style={{ width: 17, height: 17, color: '#8B5CF6' }} />
+                          Reserve Bed
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => markOutOfService(selectedBed)}
+                          className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#7F1D1D',
+                            background: 'rgba(239,68,68,0.1)',
+                          }}
+                        >
+                          <Wrench style={{ width: 17, height: 17, color: '#EF4444' }} />
+                          Mark Out of Service
+                        </button>
+                      </>
+                    )}
+                    {selectedBed.status === 'Reserved' && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => openAllocate(selectedBed)}
+                          className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#166534',
+                            background: 'rgba(34,197,94,0.12)',
+                          }}
+                        >
+                          <UserPlus style={{ width: 17, height: 17 }} />
+                          Allocate Bed
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => cancelReservation(selectedBed)}
+                          className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#0D2630',
+                            background: 'rgba(138,152,163,0.12)',
+                          }}
+                        >
+                          <CalendarX2 style={{ width: 17, height: 17, color: '#8A98A3' }} />
+                          Cancel Reservation
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => markOutOfService(selectedBed)}
+                          className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#7F1D1D',
+                            background: 'rgba(239,68,68,0.1)',
+                          }}
+                        >
+                          <Wrench style={{ width: 17, height: 17, color: '#EF4444' }} />
+                          Mark Out of Service
+                        </button>
+                      </>
+                    )}
+                    {selectedBed.status === 'Cleaning Required' && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => markReady(selectedBed)}
+                          className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#166534',
+                            background: 'rgba(34,197,94,0.12)',
+                          }}
+                        >
+                          <CheckCircle2 style={{ width: 17, height: 17 }} />
+                          Mark Ready
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => markOutOfService(selectedBed)}
+                          className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#7F1D1D',
+                            background: 'rgba(239,68,68,0.1)',
+                          }}
+                        >
+                          <Wrench style={{ width: 17, height: 17, color: '#EF4444' }} />
+                          Mark Out of Service
+                        </button>
+                      </>
+                    )}
+                    {selectedBed.status === 'Out of Service' && (
+                      <button
+                        type="button"
+                        onClick={() => returnToService(selectedBed)}
+                        className={`flex h-11 items-center gap-2.5 rounded-[10px] px-3.5 font-sans font-medium transition-opacity duration-150 hover:opacity-85 ${FOCUS_RING}`}
+                        style={{
+                          fontSize: 14,
+                          color: '#166534',
+                          background: 'rgba(34,197,94,0.12)',
+                        }}
+                      >
+                        <Undo2 style={{ width: 17, height: 17 }} />
+                        Return to Service
+                      </button>
+                    )}
+                  </div>
+                )}
               </PermissionGate>
             </div>
 
@@ -1318,6 +1825,14 @@ export function BedManagementWorkspace() {
           availableBeds={availableBedsForTransfer}
           onClose={() => setTransferTargetBedId(null)}
           onConfirm={confirmTransfer}
+        />
+      )}
+
+      {allocateTargetBed && (
+        <AllocateBedModal
+          bedCode={allocateTargetBed.bedCode}
+          onClose={() => setAllocateTargetBedId(null)}
+          onConfirm={confirmAllocate}
         />
       )}
     </div>
