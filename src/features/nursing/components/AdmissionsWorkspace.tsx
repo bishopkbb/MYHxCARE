@@ -106,6 +106,12 @@ function stepInfo(step: number) {
   return ADMISSION_STEPS.find((s) => s.step === step);
 }
 
+function advanceActionLabel(admission: AdmissionRecord): string {
+  if (admission.status === 'Scheduled') return 'Check In';
+  if (admission.currentStep >= ADMISSION_STEPS.length - 1) return 'Complete Admission';
+  return 'Advance Workflow';
+}
+
 function RowMenu({
   admission,
   open,
@@ -172,7 +178,7 @@ function RowMenu({
               style={{ fontSize: 14, color: '#0D2630' }}
             >
               <CheckCircle2 style={{ width: 15, height: 15, color: '#22C55E' }} />
-              {admission.status === 'Scheduled' ? 'Check In' : 'Advance Workflow'}
+              {advanceActionLabel(admission)}
             </button>
           )}
           {canCancel && (
