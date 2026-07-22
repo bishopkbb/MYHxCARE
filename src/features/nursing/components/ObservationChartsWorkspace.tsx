@@ -176,13 +176,17 @@ function ObservationTrendChart({
 
   const xLabelIdx =
     dataLen > 0
-      ? Array.from(new Set([0, Math.round((dataLen - 1) / 2), dataLen - 1])).filter(
-          (v) => v >= 0 && v < dataLen,
-        )
+      ? Array.from(
+          new Set([
+            0,
+            ...[1, 2, 3, 4].map((n) => Math.round((dataLen - 1) * (n / 5))),
+            dataLen - 1,
+          ]),
+        ).filter((v) => v >= 0 && v < dataLen)
       : [];
 
   return (
-    <div className="mt-2 flex gap-3" style={{ height: 176 }}>
+    <div className="mt-2 flex gap-3" style={{ height: 200 }}>
       <div className="flex shrink-0 flex-col justify-between pb-5 text-right" style={{ width: 34 }}>
         {[...ticks].reverse().map((t) => (
           <span key={t} className="font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
@@ -287,13 +291,17 @@ function ObservationBarChart({ data, color }: { data: ChartPoint[]; color: strin
   const ticks = [0, tick, tick * 2, tick * 3, tick * 4];
   const barLabelIdx =
     data.length > 0
-      ? Array.from(new Set([0, Math.round((data.length - 1) / 2), data.length - 1])).filter(
-          (v) => v >= 0 && v < data.length,
-        )
+      ? Array.from(
+          new Set([
+            0,
+            ...[1, 2, 3, 4].map((n) => Math.round((data.length - 1) * (n / 5))),
+            data.length - 1,
+          ]),
+        ).filter((v) => v >= 0 && v < data.length)
       : [];
 
   return (
-    <div className="mt-2 flex gap-3" style={{ height: 176 }}>
+    <div className="mt-2 flex gap-3" style={{ height: 200 }}>
       <div className="flex shrink-0 flex-col justify-between pb-5 text-right" style={{ width: 34 }}>
         {[...ticks].reverse().map((t) => (
           <span key={t} className="font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
@@ -464,7 +472,7 @@ function SkeletonChartCard() {
         <div className="size-8 animate-pulse rounded-full bg-slate-100" />
         <div className="h-4 w-24 animate-pulse rounded bg-slate-100" />
       </div>
-      <div className="mt-4 h-[140px] animate-pulse rounded bg-slate-100" />
+      <div className="mt-4 h-[164px] animate-pulse rounded bg-slate-100" />
     </div>
   );
 }
@@ -960,7 +968,7 @@ function PatientObservationPanel({
           </div>
 
           {pageState === 'loading' ? (
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonChartCard key={i} />
               ))}
@@ -972,7 +980,7 @@ function PatientObservationPanel({
               <div className="min-w-0 flex-1">
                 {viewMode === 'chart' ? (
                   <>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                       <ChartCard
                         icon={Thermometer}
                         iconColor="#EF4444"
