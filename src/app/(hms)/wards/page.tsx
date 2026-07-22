@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { BedManagementWorkspace } from '@/features/nursing/components/BedManagementWorkspace';
 
-export const metadata = { title: 'Wards' };
+export const metadata = { title: 'Bed Management' };
 
 export default function WardsPage() {
-  return (
-    <ComingSoon
-      title="Wards"
-      description="Ward management, bed allocation, inpatient monitoring, and nursing station workflows are coming soon."
-    />
-  );
+  return <BedManagementWorkspace />;
 }

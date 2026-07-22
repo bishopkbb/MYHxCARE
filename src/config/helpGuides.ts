@@ -1279,6 +1279,34 @@ const WARD_CENSUS_GUIDE: HelpGuide = {
   ],
 };
 
+const BED_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'bed-management',
+  title: 'Bed Management',
+  intro: 'Visualize ward layout and manage bed status.',
+  sections: [
+    {
+      heading: 'Selecting a ward and view',
+      body: 'Select Ward switches between wards. Ward View shows a visual room layout; List View shows a sortable table of the same beds.',
+    },
+    {
+      heading: 'Filtering',
+      body: 'Filter Beds narrows by status. Show Isolation Only and Show Cleaning Required narrow further to just those beds.',
+    },
+    {
+      heading: 'Bed cards',
+      body: 'Each bed is colored by status and shows the patient and MRN when occupied. Click a bed to view its details below; the ⋮ menu offers Transfer Patient, Reserve Bed, or Mark Available depending on its current status.',
+    },
+    {
+      heading: 'Zoom',
+      body: 'The − / + controls zoom the ward layout in and out; Reset View returns to 100%.',
+    },
+    {
+      heading: 'Bed Details, Actions, and Legend',
+      body: 'Bed Details shows the selected bed’s patient, diagnosis, doctor, and length of stay. Actions repeats the three status-changing actions for the selected bed. Legend maps each color to its bed status.',
+    },
+  ],
+};
+
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
@@ -1668,6 +1696,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/workforce-management')) return NURSE_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/nurse/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
+  if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
   if (pathname.startsWith('/duty-roster/templates')) return SHIFT_TEMPLATES_GUIDE;
