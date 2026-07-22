@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { ObservationChartsWorkspace } from '@/features/nursing/components/ObservationChartsWorkspace';
 
 export const metadata = { title: 'Observation Charts' };
 
 export default function NurseObservationChartsPage() {
-  return (
-    <ComingSoon
-      title="Observation Charts"
-      description="Early warning score trend charts and observation frequency schedules per patient are on the way."
-    />
-  );
+  return <ObservationChartsWorkspace />;
 }

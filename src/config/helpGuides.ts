@@ -1138,6 +1138,34 @@ const VITAL_SIGNS_GUIDE: HelpGuide = {
   ],
 };
 
+const OBSERVATION_CHARTS_GUIDE: HelpGuide = {
+  id: 'observation-charts',
+  title: 'Observation Charts',
+  intro: 'Continuous patient monitoring and trends across every recorded observation.',
+  sections: [
+    {
+      heading: 'Selecting a patient',
+      body: 'Pick a patient from your assigned roster to open their charts — search by name or MRN. "Change Patient" at the top of the header returns you to the picker.',
+    },
+    {
+      heading: 'Time range',
+      body: 'Last 6 Hours, 12 Hours, 24 Hours, 3 Days, or 7 Days — every chart, the observation table, and the trends summary all update to the selected window.',
+    },
+    {
+      heading: 'Charts',
+      body: 'Temperature, Pulse, Respiration, Blood Pressure, Fluid Intake, Fluid Output, Pain Score, and Blood Sugar each show a trend over the selected window. "View Table" switches to a row-by-row table of the same data; "Export" downloads it as a PDF.',
+    },
+    {
+      heading: 'Early Warning Score (NEWS2)',
+      body: 'A standard clinical score computed from the latest reading. "View EWS History" shows how the score has changed across the selected window.',
+    },
+    {
+      heading: 'Recording observations',
+      body: '"Add New Observation" records a full new reading. "Input Fluid Balance" logs intake and output without a full observation. "Calculate EWS" recalculates the score from the latest reading.',
+    },
+  ],
+};
+
 const NURSING_ASSESSMENT_GUIDE: HelpGuide = {
   id: 'nursing-assessment',
   title: 'Nursing Assessment',
@@ -1740,6 +1768,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
     return REGISTRATION_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/nurse/vital-signs')) return VITAL_SIGNS_GUIDE;
+  if (pathname.startsWith('/nurse/observation-charts')) return OBSERVATION_CHARTS_GUIDE;
   if (pathname.startsWith('/nurse/nursing-assessment')) return NURSING_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/nurse/medication-administration'))
     return MEDICATION_ADMINISTRATION_GUIDE;

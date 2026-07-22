@@ -116,7 +116,7 @@ function stepInfo(step: number) {
 }
 
 function advanceActionLabel(step: number): string {
-  return step >= READY_STEP ? 'Complete Discharge' : 'Advance Workflow';
+  return step >= READY_STEP ? 'Complete Discharge' : 'Discharge';
 }
 
 function RowMenu({
