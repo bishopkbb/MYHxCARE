@@ -1250,6 +1250,35 @@ const CARE_PLANS_GUIDE: HelpGuide = {
   ],
 };
 
+const WARD_CENSUS_GUIDE: HelpGuide = {
+  id: 'ward-census',
+  title: 'Ward Census',
+  intro:
+    'A live per-ward occupancy summary — occupied, available, and reserved beds, with patient acuity mix.',
+  sections: [
+    {
+      heading: 'Facility stat cards',
+      body: 'Total Beds, Occupied, Available, Reserved, and Cleaning summarize occupancy across every ward.',
+    },
+    {
+      heading: 'Ward cards',
+      body: 'Each card shows a ward’s nurse in charge, occupied/total beds, a stacked occupancy bar, and the occupancy percentage. Click a card to view that ward’s bed-level detail below.',
+    },
+    {
+      heading: 'Bed-level table',
+      body: 'Every bed in the selected ward, with its status, patient (if occupied), assigned doctor, acuity, and admission date. View Patient opens the full patient record for beds on your own roster.',
+    },
+    {
+      heading: 'Ward Alerts',
+      body: 'Flags capacity or housekeeping concerns for a specific ward — selecting an alert jumps straight to that ward.',
+    },
+    {
+      heading: 'Refresh and print',
+      body: 'Refresh reloads the current occupancy snapshot. Print Census Report opens your browser’s print dialog for the current view.',
+    },
+  ],
+};
+
 const PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'patient-queue',
   title: 'Patient Queue',
@@ -1632,6 +1661,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
     return MEDICATION_ADMINISTRATION_GUIDE;
   if (pathname.startsWith('/nurse/nursing-notes')) return NURSING_NOTES_GUIDE;
   if (pathname.startsWith('/nurse/care-plans')) return CARE_PLANS_GUIDE;
+  if (pathname.startsWith('/nurse/ward-census')) return WARD_CENSUS_GUIDE;
   if (pathname.startsWith('/nurse/patient-queue')) return PATIENT_QUEUE_GUIDE;
   if (/^\/nurse\/my-patients\/[^/]+/.test(pathname)) return PATIENT_RECORD_GUIDE;
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
