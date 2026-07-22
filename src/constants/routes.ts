@@ -95,6 +95,7 @@ export const ROUTES = {
   nurseAdmissions: '/nurse/admissions',
   nurseDischarges: '/nurse/discharges',
   nurseObservationCharts: '/nurse/observation-charts',
+  nurseLaboratory: '/nurse/laboratory',
   nurseShiftHandover: '/nurse/shift-handover',
   nurseWorkforceManagement: '/nurse/workforce-management',
   nurseEmergencyResponse: '/nurse/emergency-response',

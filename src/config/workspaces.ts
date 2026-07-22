@@ -426,8 +426,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'CLINICAL SERVICES',
         items: [
-          { label: 'Laboratory Requests', href: '/lab/orders', icon: FlaskConical },
-          { label: 'Laboratory Results', href: '/lab/results', icon: FileCheck2 },
+          { label: 'Laboratory', href: '/nurse/laboratory', icon: FlaskConical },
           { label: 'Clinical Timeline', href: '/clinical-timeline', icon: History },
         ],
       },

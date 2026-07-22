@@ -1138,6 +1138,35 @@ const VITAL_SIGNS_GUIDE: HelpGuide = {
   ],
 };
 
+const NURSE_LABORATORY_GUIDE: HelpGuide = {
+  id: 'nurse-laboratory',
+  title: 'Laboratory',
+  intro:
+    'View laboratory tests and results, and manage specimen collection. No result editing is allowed.',
+  sections: [
+    {
+      heading: 'Tabs and stat cards',
+      body: 'Pending Tests, Completed Results, Critical Results, and Doctor Requests — click a tab or its stat card to jump straight to it. Rows are sorted with STAT priority first.',
+    },
+    {
+      heading: 'Collecting a sample',
+      body: 'From Doctor Requests, "Collect Sample" requires confirming the patient’s identity with two identifiers (name and MRN) before the sample counts as collected — and confirming fasting status first for tests that require it.',
+    },
+    {
+      heading: 'Rejected samples',
+      body: 'If the laboratory rejects a sample, it appears in Pending Tests with the reason shown — "Recollect Sample" repeats the same identity-check flow.',
+    },
+    {
+      heading: 'Critical results',
+      body: 'A critical result must be read back and acknowledged — "Acknowledge & Notify Doctor" records which doctor was notified and when. Unacknowledged critical results are flagged in the sidebar.',
+    },
+    {
+      heading: 'Overdue tests',
+      body: 'A test still pending past its expected turnaround time is flagged Overdue, with a "Follow Up with Lab" action to chase it.',
+    },
+  ],
+};
+
 const OBSERVATION_CHARTS_GUIDE: HelpGuide = {
   id: 'observation-charts',
   title: 'Observation Charts',
@@ -1769,6 +1798,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/nurse/vital-signs')) return VITAL_SIGNS_GUIDE;
   if (pathname.startsWith('/nurse/observation-charts')) return OBSERVATION_CHARTS_GUIDE;
+  if (pathname.startsWith('/nurse/laboratory')) return NURSE_LABORATORY_GUIDE;
   if (pathname.startsWith('/nurse/nursing-assessment')) return NURSING_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/nurse/medication-administration'))
     return MEDICATION_ADMINISTRATION_GUIDE;
