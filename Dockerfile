@@ -38,6 +38,14 @@ ARG NEXT_PUBLIC_API_BASE_URL
 ARG NEXT_PUBLIC_WS_URL
 ARG NEXT_PUBLIC_APP_ENV
 
+# The current published image is demo-only and intentionally leaves the API
+# and WebSocket arguments unset.
+#
+# TODO(staging/production): Supply environment-specific HTTPS/WSS endpoints
+# only after the real API contracts, authentication flow, CORS, CSP,
+# WebSocket events and end-to-end integration checks are complete. Build a
+# distinct immutable image for each environment because NEXT_PUBLIC_* values
+# are embedded at build time.
 ENV NODE_ENV=production
 ENV NEXT_PUBLIC_API_BASE_URL="${NEXT_PUBLIC_API_BASE_URL}"
 ENV NEXT_PUBLIC_WS_URL="${NEXT_PUBLIC_WS_URL}"

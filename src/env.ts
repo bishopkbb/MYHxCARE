@@ -17,8 +17,12 @@ const schema = z.object({
   // and falls back to undefined so the build never throws on missing URL vars.
   NEXT_PUBLIC_API_BASE_URL: z.string().url().optional().catch(undefined),
   NEXT_PUBLIC_WS_URL: z.string().url().optional().catch(undefined),
+  // Staging and production are reserved values, not currently deployable modes.
+  // TODO(staging/production): Enable them in publishing workflows only after the
+  // frontend/backend contracts and environment integration tests are complete.
+  //
   // .catch('demo'): same Turbopack inlining issue applies; also guards against
-  // any typo in the Vercel env var dashboard.
+  // any typo in the hosting environment configuration.
   NEXT_PUBLIC_APP_ENV: z.enum(['development', 'demo', 'staging', 'production']).catch('demo'),
 });
 
