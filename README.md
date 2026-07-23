@@ -216,8 +216,8 @@ async function getPatients(): Promise<Patient[]> {
 This means:
 
 - Every screen is fully functional before the Go backend is built for that domain
-- Mock fixtures are never bundled in staging or production builds (dynamic import + dead code elimination)
-- Switching to real API requires only setting `NEXT_PUBLIC_APP_ENV=staging` — no code changes
+- The currently published frontend image uses demo fixtures and does not call the backend
+- Staging and production values are reserved until the integration-readiness TODO below is complete
 
 ---
 
@@ -227,8 +227,7 @@ This means:
 myhxcare-hms/
 ├── .github/
 │   ├── workflows/
-│   │   ├── ci.yml                   # PR checks: lint, typecheck, test
-│   │   └── cd-staging.yml           # Deploy to staging on merge to main
+│   │   └── ci.yml                   # Verify changes and publish the demo image
 │   ├── CODEOWNERS                   # Auto-assign reviewers by directory
 │   └── dependabot.yml               # Automated dependency updates
 │
@@ -484,11 +483,24 @@ The commit will fail if ESLint reports any errors after auto-fix. This is non-ne
 
 All environment variables are validated at startup by `src/env.ts` using Zod. If any required variable is missing or invalid, the application throws immediately with a descriptive error listing the offending variables. It will not start with a broken environment.
 
-| Variable                   | Required | Values                                     | Purpose                                                                                                                                                  |
-| -------------------------- | -------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_BASE_URL` | Yes      | URL                                        | Base URL of the Go REST API. Injected into Axios `baseURL`. Also used in the CSP `connect-src` directive at build time. Example: `http://localhost:8080` |
-| `NEXT_PUBLIC_WS_URL`       | Yes      | URL                                        | WebSocket endpoint. Used by `WsProvider` to open the persistent connection. Example: `ws://localhost:8080`                                               |
-| `NEXT_PUBLIC_APP_ENV`      | Yes      | `development` \| `staging` \| `production` | Controls the IS_MOCK gate (development → mock fixtures), feature flag visibility, and logging verbosity. **This is not the same as `NODE_ENV`.**         |
+| Variable                   | Required      | Values                                               | Purpose                                                                                                                                                  |
+| -------------------------- | ------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_BASE_URL` | Real API only | URL                                                  | Base URL of the Go REST API. Injected into Axios `baseURL`. Also used in the CSP `connect-src` directive at build time. Example: `http://localhost:8080` |
+| `NEXT_PUBLIC_WS_URL`       | Real API only | URL                                                  | WebSocket endpoint. Used by `WsProvider` to open the persistent connection. Example: `ws://localhost:8080`                                               |
+| `NEXT_PUBLIC_APP_ENV`      | Yes           | `development` \| `demo` \| `staging` \| `production` | Controls the mock-data gate. Only `demo` is currently approved for deployed frontend images. **This is not the same as `NODE_ENV`.**                     |
+
+### Staging and production integration TODO
+
+Do not publish a staging or production frontend image until all of the following are complete:
+
+- Implement and verify staff login, token refresh, logout and current-user API contracts.
+- Align every frontend REST request and response payload with the backend.
+- Align authenticated WebSocket connection details and event payloads.
+- Configure separate HTTPS API and WSS endpoints, CORS allowlists and CSP origins per environment.
+- Add integration and end-to-end checks against real staging infrastructure.
+- Create separate immutable staging and production image/release workflows with an explicit promotion and rollback process.
+
+`NEXT_PUBLIC_*` values are embedded during `docker build`, so staging and production must each receive a distinct image built with their own endpoints.
 
 ### Security Considerations
 
@@ -1447,7 +1459,7 @@ feat(patients): add patient registration form
 ### Branch Strategy
 
 ```
-main          Production-ready. Protected. Deploy-on-merge to staging.
+main          Protected integration branch. Publishes the demo-only image.
 feature/*     New features (feat/patient-registration)
 fix/*         Bug fixes (fix/session-card-import)
 chore/*       Tooling, deps, config (chore/upgrade-tanstack-query)

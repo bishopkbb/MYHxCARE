@@ -1,11 +1,7 @@
-name: Frontend CI and Development Image
+name: Frontend CI and Demo Image
 
 on:
   push:
-    branches:
-      - main
-
-  pull_request:
     branches:
       - main
 
@@ -55,9 +51,9 @@ jobs:
     env:
       CI: 'true'
 
-      # These values are used only to verify that the application builds.
-      # The published Docker image is built separately with the real
-      # Contabo development endpoints.
+      # These mock values are used only to verify that the application builds.
+      # The published Docker image is also demo-only and receives no real
+      # API or WebSocket endpoints.
       NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
       NEXT_PUBLIC_WS_URL: ws://localhost:8080/ws
       NEXT_PUBLIC_APP_ENV: development
@@ -90,7 +86,7 @@ jobs:
           echo "Next.js standalone output is present."
 
   publish:
-    name: Publish development image
+    name: Publish demo image
     runs-on: ubuntu-latest
 
     needs:
@@ -109,46 +105,33 @@ jobs:
       contents: read
       packages: write
 
+    # Demo is the only deployable frontend mode while the frontend/backend
+    # contracts are still being integrated.
     env:
-      DEV_API_BASE_URL: ${{ vars.DEV_API_BASE_URL }}
-      DEV_WS_URL: ${{ vars.DEV_WS_URL }}
-      DEV_APP_ENV: ${{ vars.DEV_APP_ENV }}
+      DEV_APP_ENV: demo
+
+    # TODO(staging/production): Do not add non-demo publishing until:
+    # - staff login, refresh, logout and /me API contracts are implemented;
+    # - frontend API payloads and WebSocket events match the backend;
+    # - environment-specific HTTPS/WSS repository variables are configured;
+    # - integration/E2E checks run against each real environment; and
+    # - staging and production use separate immutable release manifests.
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
 
-      - name: Validate development build variables
+      - name: Validate demo build variables
         shell: bash
         run: |
-          : "${DEV_API_BASE_URL:?DEV_API_BASE_URL is not configured}"
-          : "${DEV_WS_URL:?DEV_WS_URL is not configured}"
           : "${DEV_APP_ENV:?DEV_APP_ENV is not configured}"
 
-          case "$DEV_API_BASE_URL" in
-            https://*)
-              ;;
-            *)
-              echo "DEV_API_BASE_URL must use HTTPS."
-              exit 1
-              ;;
-          esac
-
-          case "$DEV_WS_URL" in
-            wss://*)
-              ;;
-            *)
-              echo "DEV_WS_URL must use WSS."
-              exit 1
-              ;;
-          esac
-
-          if [[ "$DEV_APP_ENV" != "staging" ]]; then
-            echo "DEV_APP_ENV must be staging for the real development API."
+          if [[ "$DEV_APP_ENV" != "demo" ]]; then
+            echo "Only demo frontend images may be published right now."
             exit 1
           fi
 
-          echo "Development build variables are valid."
+          echo "Demo build variables are valid."
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -168,6 +151,7 @@ jobs:
 
           tags: |
             type=raw,value=dev
+            type=raw,value=demo
             type=sha,prefix=sha-,format=short
 
           labels: |
@@ -189,12 +173,34 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
 
           build-args: |
-            NEXT_PUBLIC_API_BASE_URL=${{ env.DEV_API_BASE_URL }}
-            NEXT_PUBLIC_WS_URL=${{ env.DEV_WS_URL }}
             NEXT_PUBLIC_APP_ENV=${{ env.DEV_APP_ENV }}
 
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Verify production runtime
+        shell: bash
+        env:
+          IMAGE_REF: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.docker-build.outputs.digest }}
+        run: |
+          docker run \
+            --rm \
+            --entrypoint sh \
+            "$IMAGE_REF" \
+            -eu -c '
+              command -v node
+              node --version
+              test -f /app/server.js
+
+              if command -v npm >/dev/null 2>&1 ||
+                 command -v npx >/dev/null 2>&1 ||
+                 test -e /usr/local/lib/node_modules/npm; then
+                echo "FAIL: npm build tooling remains in the production image." >&2
+                exit 1
+              fi
+
+              echo "PASS: standalone runtime is present and npm/npx are absent."
+            '
 
       - name: Show published image details
         shell: bash
