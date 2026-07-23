@@ -17,13 +17,14 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type RefObject } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormField } from '@components/shared/FormField';
 import { FormSelect } from '@components/shared/FormSelect';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/useToast';
@@ -115,6 +116,16 @@ export function DocumentUploadWorkspace() {
   const pageStart = (safePage - 1) * ROWS_PER_PAGE;
   const pageDocs = filteredDocs.slice(pageStart, pageStart + ROWS_PER_PAGE);
   const previewDoc = allDocs.find((d) => d.id === previewId) ?? allDocs[0] ?? null;
+
+  const menuButtonRefs = useMemo(() => {
+    const map = new Map<string, RefObject<HTMLButtonElement | null>>();
+    for (const doc of pageDocs) map.set(doc.id, { current: null });
+    return map;
+  }, [pageDocs]);
+
+  function getMenuButtonRef(id: string) {
+    return menuButtonRefs.get(id) ?? { current: null };
+  }
 
   function resetForm() {
     setPendingFiles([]);
@@ -693,6 +704,7 @@ export function DocumentUploadWorkspace() {
                                 </button>
                                 <div className="relative">
                                   <button
+                                    ref={getMenuButtonRef(doc.id)}
                                     type="button"
                                     onClick={() =>
                                       setOpenMenuId((id) => (id === doc.id ? null : doc.id))
@@ -704,41 +716,38 @@ export function DocumentUploadWorkspace() {
                                       style={{ width: 15, height: 15, color: '#4A7080' }}
                                     />
                                   </button>
-                                  {openMenuId === doc.id && (
-                                    <div
-                                      className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 w-44 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                                      style={{
-                                        border: '1px solid rgba(0,100,130,0.12)',
-                                        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                                  <RowMenuPortal
+                                    open={openMenuId === doc.id}
+                                    anchorRef={getMenuButtonRef(doc.id)}
+                                    onClose={() => setOpenMenuId(null)}
+                                    width={176}
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        toast.info('Rename document', `Renaming ${doc.name}.`);
+                                        setOpenMenuId(null);
                                       }}
+                                      className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                                      style={{ fontSize: 14, color: '#2F3A40' }}
                                     >
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          toast.info('Rename document', `Renaming ${doc.name}.`);
-                                          setOpenMenuId(null);
-                                        }}
-                                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                        style={{ fontSize: 14, color: '#2F3A40' }}
-                                      >
-                                        Rename Document
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          toast.success(
-                                            'Shared',
-                                            `${doc.name} shared with care team.`,
-                                          );
-                                          setOpenMenuId(null);
-                                        }}
-                                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                        style={{ fontSize: 14, color: '#2F3A40' }}
-                                      >
-                                        Share Document
-                                      </button>
-                                    </div>
-                                  )}
+                                      Rename Document
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        toast.success(
+                                          'Shared',
+                                          `${doc.name} shared with care team.`,
+                                        );
+                                        setOpenMenuId(null);
+                                      }}
+                                      className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                                      style={{ fontSize: 14, color: '#2F3A40' }}
+                                    >
+                                      Share Document
+                                    </button>
+                                  </RowMenuPortal>
                                 </div>
                               </div>
                             </div>

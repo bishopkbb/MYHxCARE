@@ -23,6 +23,7 @@ import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { getInitials } from '@lib/utils';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -157,49 +158,40 @@ function RowMenu({
   onArchive: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div className="relative">
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
-        onBlur={() => setTimeout(() => setOpen(false), 150)}
         aria-label="More actions"
         className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
       >
         <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
       </button>
-      {open && (
-        <div
-          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-48 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-          style={{
-            border: '1px solid rgba(0,100,130,0.15)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
-          }}
-        >
-          {[
-            { label: 'View Consent', onClick: onView },
-            { label: 'Edit Consent', onClick: onEdit },
-            { label: 'Print Consent', onClick: onPrint },
-            { label: 'Archive Consent', onClick: onArchive, danger: true },
-          ].map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => {
-                setOpen(false);
-                item.onClick();
-              }}
-              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-              style={{ fontSize: 14, color: item.danger ? '#EF4444' : '#2F3A40' }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
+      <RowMenuPortal open={open} anchorRef={buttonRef} onClose={() => setOpen(false)} width={192}>
+        {[
+          { label: 'View Consent', onClick: onView },
+          { label: 'Edit Consent', onClick: onEdit },
+          { label: 'Print Consent', onClick: onPrint },
+          { label: 'Archive Consent', onClick: onArchive, danger: true },
+        ].map((item) => (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              item.onClick();
+            }}
+            className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+            style={{ fontSize: 14, color: item.danger ? '#EF4444' : '#2F3A40' }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </RowMenuPortal>
     </div>
   );
 }

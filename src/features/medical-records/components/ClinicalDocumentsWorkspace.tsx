@@ -11,12 +11,13 @@ import {
   Upload,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type RefObject } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
@@ -141,7 +142,7 @@ export function ClinicalDocumentsWorkspace() {
   const toast = useToast();
   const [selectedPatient, setSelectedPatient] = useState<DirectoryPatient | null>(null);
   const [actionsOpen, setActionsOpen] = useState(false);
-  const actionsRef = useRef<HTMLDivElement>(null);
+  const actionsButtonRef = useRef<HTMLButtonElement>(null);
 
   const isCurated = selectedPatient?.id === CURATED_PATIENT_ID;
   const allDocs = useMemo(() => {
@@ -160,18 +161,6 @@ export function ClinicalDocumentsWorkspace() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!actionsOpen && !openMenuId) return;
-    function onMouseDown(e: MouseEvent) {
-      if (actionsRef.current && !actionsRef.current.contains(e.target as Node))
-        setActionsOpen(false);
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpenMenuId(null);
-    }
-    document.addEventListener('mousedown', onMouseDown);
-    return () => document.removeEventListener('mousedown', onMouseDown);
-  }, [actionsOpen, openMenuId]);
 
   const departmentOptions = useMemo(
     () =>
@@ -200,6 +189,16 @@ export function ClinicalDocumentsWorkspace() {
   const safePage = Math.min(currentPage, totalPages);
   const pageStart = (safePage - 1) * rowsPerPage;
   const pageDocs = filteredDocs.slice(pageStart, pageStart + rowsPerPage);
+
+  const docMenuButtonRefs = useMemo(() => {
+    const map = new Map<string, RefObject<HTMLButtonElement | null>>();
+    for (const doc of pageDocs) map.set(doc.id, { current: null });
+    return map;
+  }, [pageDocs]);
+
+  function getDocMenuButtonRef(id: string) {
+    return docMenuButtonRefs.get(id) ?? { current: null };
+  }
 
   function selectCategory(value: ClinicalDocCategory | 'All') {
     setCategory(value);
@@ -307,8 +306,9 @@ export function ClinicalDocumentsWorkspace() {
                     <Upload style={{ width: 15, height: 15 }} />
                     Upload Document
                   </button>
-                  <div ref={actionsRef} className="relative">
+                  <div className="relative">
                     <button
+                      ref={actionsButtonRef}
                       type="button"
                       onClick={() => setActionsOpen((o) => !o)}
                       className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
@@ -324,43 +324,40 @@ export function ClinicalDocumentsWorkspace() {
                         }}
                       />
                     </button>
-                    {actionsOpen && (
-                      <div
-                        className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-52 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                        style={{
-                          border: '1px solid rgba(0,100,130,0.12)',
-                          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                        }}
+                    <RowMenuPortal
+                      open={actionsOpen}
+                      anchorRef={actionsButtonRef}
+                      onClose={() => setActionsOpen(false)}
+                      width={208}
+                    >
+                      <button
+                        type="button"
+                        onClick={handlePrint}
+                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                        style={{ fontSize: 14, color: '#2F3A40' }}
                       >
-                        <button
-                          type="button"
-                          onClick={handlePrint}
-                          className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                          style={{ fontSize: 14, color: '#2F3A40' }}
-                        >
-                          Print Document List
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => notImplemented('Bulk Download')}
-                          className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                          style={{ fontSize: 14, color: '#2F3A40' }}
-                        >
-                          Bulk Download
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            router.push(ROUTES.medicalRecordsRequests);
-                            setActionsOpen(false);
-                          }}
-                          className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                          style={{ fontSize: 14, color: '#2F3A40' }}
-                        >
-                          Request Missing Document
-                        </button>
-                      </div>
-                    )}
+                        Print Document List
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => notImplemented('Bulk Download')}
+                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                        style={{ fontSize: 14, color: '#2F3A40' }}
+                      >
+                        Bulk Download
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          router.push(ROUTES.medicalRecordsRequests);
+                          setActionsOpen(false);
+                        }}
+                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                        style={{ fontSize: 14, color: '#2F3A40' }}
+                      >
+                        Request Missing Document
+                      </button>
+                    </RowMenuPortal>
                   </div>
                 </PermissionGate>
               </div>
@@ -662,11 +659,9 @@ export function ClinicalDocumentsWorkspace() {
                                 >
                                   <Download style={{ width: 15, height: 15, color: '#4A7080' }} />
                                 </button>
-                                <div
-                                  ref={openMenuId === doc.id ? menuRef : null}
-                                  className="relative"
-                                >
+                                <div className="relative">
                                   <button
+                                    ref={getDocMenuButtonRef(doc.id)}
                                     type="button"
                                     onClick={() =>
                                       setOpenMenuId((id) => (id === doc.id ? null : doc.id))
@@ -678,41 +673,38 @@ export function ClinicalDocumentsWorkspace() {
                                       style={{ width: 15, height: 15, color: '#4A7080' }}
                                     />
                                   </button>
-                                  {openMenuId === doc.id && (
-                                    <div
-                                      className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 w-44 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                                      style={{
-                                        border: '1px solid rgba(0,100,130,0.12)',
-                                        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                                  <RowMenuPortal
+                                    open={openMenuId === doc.id}
+                                    anchorRef={getDocMenuButtonRef(doc.id)}
+                                    onClose={() => setOpenMenuId(null)}
+                                    width={176}
+                                  >
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        toast.info('Rename document', `Renaming ${doc.name}.`);
+                                        setOpenMenuId(null);
                                       }}
+                                      className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                                      style={{ fontSize: 14, color: '#2F3A40' }}
                                     >
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          toast.info('Rename document', `Renaming ${doc.name}.`);
-                                          setOpenMenuId(null);
-                                        }}
-                                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                        style={{ fontSize: 14, color: '#2F3A40' }}
-                                      >
-                                        Rename Document
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          toast.success(
-                                            'Shared',
-                                            `${doc.name} shared with care team.`,
-                                          );
-                                          setOpenMenuId(null);
-                                        }}
-                                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                        style={{ fontSize: 14, color: '#2F3A40' }}
-                                      >
-                                        Share Document
-                                      </button>
-                                    </div>
-                                  )}
+                                      Rename Document
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        toast.success(
+                                          'Shared',
+                                          `${doc.name} shared with care team.`,
+                                        );
+                                        setOpenMenuId(null);
+                                      }}
+                                      className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                                      style={{ fontSize: 14, color: '#2F3A40' }}
+                                    >
+                                      Share Document
+                                    </button>
+                                  </RowMenuPortal>
                                 </div>
                               </div>
                             </div>

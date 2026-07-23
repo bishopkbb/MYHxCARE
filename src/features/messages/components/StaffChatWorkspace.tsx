@@ -19,6 +19,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { useAuth } from '@hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { formatTime } from '@/utils/datetime';
@@ -152,9 +153,9 @@ export function StaffChatWorkspace() {
   const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
   const [patientPickerOpen, setPatientPickerOpen] = useState(false);
 
-  const newMenuRef = useRef<HTMLDivElement>(null);
-  const chatMenuRef = useRef<HTMLDivElement>(null);
-  const templateMenuRef = useRef<HTMLDivElement>(null);
+  const newMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const chatMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const templateMenuButtonRef = useRef<HTMLButtonElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -178,20 +179,6 @@ export function StaffChatWorkspace() {
       (c) => c.staffName.toLowerCase().includes(q) || c.department.toLowerCase().includes(q),
     );
   }, [conversations, search]);
-
-  // Close popovers on outside click.
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (newMenuRef.current && !newMenuRef.current.contains(e.target as Node))
-        setNewMenuOpen(false);
-      if (chatMenuRef.current && !chatMenuRef.current.contains(e.target as Node))
-        setChatMenuOpen(false);
-      if (templateMenuRef.current && !templateMenuRef.current.contains(e.target as Node))
-        setTemplateMenuOpen(false);
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
 
   // Demo typing-indicator cycle for the active conversation — shows the
   // roaming gradient border, then hides, on repeat, so the effect is
@@ -402,8 +389,9 @@ export function StaffChatWorkspace() {
               >
                 Messages
               </h1>
-              <div className="relative" ref={newMenuRef}>
+              <div className="relative">
                 <button
+                  ref={newMenuButtonRef}
                   type="button"
                   onClick={() => setNewMenuOpen((v) => !v)}
                   aria-expanded={newMenuOpen}
@@ -413,57 +401,54 @@ export function StaffChatWorkspace() {
                   <Plus style={{ width: 16, height: 16 }} />
                   New
                 </button>
-                {newMenuOpen && (
-                  <div
-                    className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-64 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                    style={{
-                      border: '1px solid rgba(0,100,130,0.15)',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
-                    }}
+                <RowMenuPortal
+                  open={newMenuOpen}
+                  anchorRef={newMenuButtonRef}
+                  onClose={() => setNewMenuOpen(false)}
+                  width={256}
+                >
+                  <p
+                    className="px-4 pt-1 pb-2 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#8A98A3' }}
                   >
-                    <p
-                      className="px-4 pt-1 pb-2 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#8A98A3' }}
-                    >
-                      Start a conversation
+                    Start a conversation
+                  </p>
+                  {directoryAvailable.length === 0 ? (
+                    <p className="px-4 py-2 font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
+                      You&apos;re already messaging everyone in the directory.
                     </p>
-                    {directoryAvailable.length === 0 ? (
-                      <p className="px-4 py-2 font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
-                        You&apos;re already messaging everyone in the directory.
-                      </p>
-                    ) : (
-                      directoryAvailable.map((staff) => (
-                        <button
-                          key={staff.id}
-                          type="button"
-                          onClick={() => startNewConversation(staff)}
-                          className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                        >
-                          <Avatar
-                            initials={staff.initials}
-                            bg={staff.avatarBg}
-                            online={staff.online}
-                            size={32}
-                          />
-                          <span>
-                            <span
-                              className="block font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {staff.name}
-                            </span>
-                            <span
-                              className="block font-sans"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {staff.department}
-                            </span>
+                  ) : (
+                    directoryAvailable.map((staff) => (
+                      <button
+                        key={staff.id}
+                        type="button"
+                        onClick={() => startNewConversation(staff)}
+                        className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                      >
+                        <Avatar
+                          initials={staff.initials}
+                          bg={staff.avatarBg}
+                          online={staff.online}
+                          size={32}
+                        />
+                        <span>
+                          <span
+                            className="block font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {staff.name}
                           </span>
-                        </button>
-                      ))
-                    )}
-                  </div>
-                )}
+                          <span
+                            className="block font-sans"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            {staff.department}
+                          </span>
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </RowMenuPortal>
               </div>
             </div>
 
@@ -702,8 +687,9 @@ export function StaffChatWorkspace() {
                   >
                     <Phone style={{ width: 20, height: 20, color: '#4A7080' }} />
                   </button>
-                  <div className="relative shrink-0" ref={chatMenuRef}>
+                  <div className="relative shrink-0">
                     <button
+                      ref={chatMenuButtonRef}
                       type="button"
                       onClick={() => setChatMenuOpen((v) => !v)}
                       aria-expanded={chatMenuOpen}
@@ -712,55 +698,52 @@ export function StaffChatWorkspace() {
                     >
                       <MoreVertical style={{ width: 20, height: 20, color: '#4A7080' }} />
                     </button>
-                    {chatMenuOpen && (
-                      <div
-                        className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-56 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                        style={{
-                          border: '1px solid rgba(0,100,130,0.15)',
-                          boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
-                        }}
+                    <RowMenuPortal
+                      open={chatMenuOpen}
+                      anchorRef={chatMenuButtonRef}
+                      onClose={() => setChatMenuOpen(false)}
+                      width={224}
+                    >
+                      <button
+                        type="button"
+                        onClick={toggleMute}
+                        className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#2F3A40' }}
                       >
+                        {mutedIds.has(activeConversation.id)
+                          ? 'Unmute conversation'
+                          : 'Mute conversation'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={markAsUnread}
+                        className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#2F3A40' }}
+                      >
+                        Mark as unread
+                      </button>
+                      <div className="my-1 h-px" style={{ background: 'rgba(0,100,130,0.08)' }} />
+                      <button
+                        type="button"
+                        onClick={openPatientPicker}
+                        className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#2F3A40' }}
+                      >
+                        {activeConversation.patientContext
+                          ? 'Change patient context'
+                          : 'Add patient context'}
+                      </button>
+                      {activeConversation.patientContext && (
                         <button
                           type="button"
-                          onClick={toggleMute}
-                          className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                          style={{ fontSize: 14, color: '#2F3A40' }}
+                          onClick={removePatientContext}
+                          className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] ${FOCUS_RING}`}
+                          style={{ fontSize: 14, color: '#EF4444' }}
                         >
-                          {mutedIds.has(activeConversation.id)
-                            ? 'Unmute conversation'
-                            : 'Mute conversation'}
+                          Remove patient context
                         </button>
-                        <button
-                          type="button"
-                          onClick={markAsUnread}
-                          className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                          style={{ fontSize: 14, color: '#2F3A40' }}
-                        >
-                          Mark as unread
-                        </button>
-                        <div className="my-1 h-px" style={{ background: 'rgba(0,100,130,0.08)' }} />
-                        <button
-                          type="button"
-                          onClick={openPatientPicker}
-                          className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                          style={{ fontSize: 14, color: '#2F3A40' }}
-                        >
-                          {activeConversation.patientContext
-                            ? 'Change patient context'
-                            : 'Add patient context'}
-                        </button>
-                        {activeConversation.patientContext && (
-                          <button
-                            type="button"
-                            onClick={removePatientContext}
-                            className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] ${FOCUS_RING}`}
-                            style={{ fontSize: 14, color: '#EF4444' }}
-                          >
-                            Remove patient context
-                          </button>
-                        )}
-                      </div>
-                    )}
+                      )}
+                    </RowMenuPortal>
                   </div>
                 </div>
 
@@ -974,8 +957,9 @@ export function StaffChatWorkspace() {
                   style={{ borderTop: '1px solid #0064821F' }}
                 >
                   <div className="flex shrink-0 items-center gap-1 sm:pb-1">
-                    <div className="relative" ref={templateMenuRef}>
+                    <div className="relative">
                       <button
+                        ref={templateMenuButtonRef}
                         type="button"
                         onClick={() => setTemplateMenuOpen((v) => !v)}
                         aria-expanded={templateMenuOpen}
@@ -984,27 +968,25 @@ export function StaffChatWorkspace() {
                       >
                         <FileText style={{ width: 18, height: 18, color: '#4A7080' }} />
                       </button>
-                      {templateMenuOpen && (
-                        <div
-                          className="animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-1 absolute bottom-full left-0 z-30 mb-1.5 w-72 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                          style={{
-                            border: '1px solid rgba(0,100,130,0.15)',
-                            boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
-                          }}
-                        >
-                          {MESSAGE_TEMPLATES.map((tpl) => (
-                            <button
-                              key={tpl}
-                              type="button"
-                              onClick={() => insertTemplate(tpl)}
-                              className={`block w-full px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                              style={{ fontSize: 14, color: '#2F3A40' }}
-                            >
-                              {tpl}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                      <RowMenuPortal
+                        open={templateMenuOpen}
+                        anchorRef={templateMenuButtonRef}
+                        onClose={() => setTemplateMenuOpen(false)}
+                        width={288}
+                        align="left"
+                      >
+                        {MESSAGE_TEMPLATES.map((tpl) => (
+                          <button
+                            key={tpl}
+                            type="button"
+                            onClick={() => insertTemplate(tpl)}
+                            className={`block w-full px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                            style={{ fontSize: 14, color: '#2F3A40' }}
+                          >
+                            {tpl}
+                          </button>
+                        ))}
+                      </RowMenuPortal>
                     </div>
                     <button
                       type="button"

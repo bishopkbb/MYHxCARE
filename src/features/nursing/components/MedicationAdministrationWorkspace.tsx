@@ -15,11 +15,12 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/useAuth';
@@ -81,20 +82,12 @@ function RowMenu({
   onMissed: () => void;
   onReaction: () => void;
 }) {
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onMouseDown(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) onToggle();
-    }
-    document.addEventListener('mousedown', onMouseDown);
-    return () => document.removeEventListener('mousedown', onMouseDown);
-  }, [open, onToggle]);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div className="relative">
       <button
+        ref={buttonRef}
         type="button"
         onClick={onToggle}
         aria-label="More actions"
@@ -102,43 +95,35 @@ function RowMenu({
       >
         <MoreVertical style={{ width: 16, height: 16, color: '#4A7080' }} />
       </button>
-      {open && (
-        <div
-          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-52 overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
-          style={{
-            border: '1px solid rgba(0,100,130,0.12)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-          }}
+      <RowMenuPortal open={open} anchorRef={buttonRef} onClose={onToggle} width={208}>
+        <button
+          type="button"
+          onClick={onHold}
+          className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+          style={{ fontSize: 14, color: '#0D2630' }}
         >
-          <button
-            type="button"
-            onClick={onHold}
-            className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-            style={{ fontSize: 14, color: '#0D2630' }}
-          >
-            <Pause style={{ width: 15, height: 15, color: '#F59E0B' }} />
-            Hold Medication
-          </button>
-          <button
-            type="button"
-            onClick={onMissed}
-            className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-            style={{ fontSize: 14, color: '#0D2630' }}
-          >
-            <XCircle style={{ width: 15, height: 15, color: '#EF4444' }} />
-            Mark as Missed
-          </button>
-          <button
-            type="button"
-            onClick={onReaction}
-            className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-            style={{ fontSize: 14, color: '#0D2630' }}
-          >
-            <ShieldAlert style={{ width: 15, height: 15, color: '#8B5CF6' }} />
-            Document Reaction
-          </button>
-        </div>
-      )}
+          <Pause style={{ width: 15, height: 15, color: '#F59E0B' }} />
+          Hold Medication
+        </button>
+        <button
+          type="button"
+          onClick={onMissed}
+          className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+          style={{ fontSize: 14, color: '#0D2630' }}
+        >
+          <XCircle style={{ width: 15, height: 15, color: '#EF4444' }} />
+          Mark as Missed
+        </button>
+        <button
+          type="button"
+          onClick={onReaction}
+          className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+          style={{ fontSize: 14, color: '#0D2630' }}
+        >
+          <ShieldAlert style={{ width: 15, height: 15, color: '#8B5CF6' }} />
+          Document Reaction
+        </button>
+      </RowMenuPortal>
     </div>
   );
 }

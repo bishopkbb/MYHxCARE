@@ -20,6 +20,7 @@ import { useMemo, useRef, useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import {
@@ -86,7 +87,7 @@ export function StaffInboxWorkspace() {
   const [reply, setReply] = useState('');
   const [attachedFileName, setAttachedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const moreMenuButtonRef = useRef<HTMLButtonElement>(null);
 
   const listForTab: InboxMessage[] =
     tab === 'Inbox' ? inbox : tab === 'Sent' ? SENT_MESSAGES : archived;
@@ -643,8 +644,9 @@ export function StaffInboxWorkspace() {
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
-                    <div className="relative" ref={moreMenuRef}>
+                    <div className="relative">
                       <button
+                        ref={moreMenuButtonRef}
                         type="button"
                         onClick={() => setMoreMenuOpen((v) => !v)}
                         aria-label="More message actions"
@@ -652,49 +654,46 @@ export function StaffInboxWorkspace() {
                       >
                         <MoreVertical style={{ width: 17, height: 17, color: '#4A7080' }} />
                       </button>
-                      {moreMenuOpen && (
-                        <div
-                          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-52 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                          style={{
-                            border: '1px solid rgba(0,100,130,0.15)',
-                            boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
-                          }}
-                        >
-                          {tab === 'Inbox' && (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => handleMarkUnread(selected.id)}
-                                className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                style={{ fontSize: 14, color: '#2F3A40' }}
-                              >
-                                Mark as unread
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleArchive(selected.id)}
-                                className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                style={{ fontSize: 14, color: '#2F3A40' }}
-                              >
-                                Archive
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(selected.id)}
-                                className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)]"
-                                style={{ fontSize: 14, color: '#EF4444' }}
-                              >
-                                Delete
-                              </button>
-                            </>
-                          )}
-                          {tab !== 'Inbox' && (
-                            <p className="px-4 py-2.5" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              No actions available for this tab.
-                            </p>
-                          )}
-                        </div>
-                      )}
+                      <RowMenuPortal
+                        open={moreMenuOpen}
+                        anchorRef={moreMenuButtonRef}
+                        onClose={() => setMoreMenuOpen(false)}
+                        width={208}
+                      >
+                        {tab === 'Inbox' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleMarkUnread(selected.id)}
+                              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                              style={{ fontSize: 14, color: '#2F3A40' }}
+                            >
+                              Mark as unread
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleArchive(selected.id)}
+                              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                              style={{ fontSize: 14, color: '#2F3A40' }}
+                            >
+                              Archive
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(selected.id)}
+                              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)]"
+                              style={{ fontSize: 14, color: '#EF4444' }}
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+                        {tab !== 'Inbox' && (
+                          <p className="px-4 py-2.5" style={{ fontSize: 14, color: '#8A98A3' }}>
+                            No actions available for this tab.
+                          </p>
+                        )}
+                      </RowMenuPortal>
                     </div>
                     <button
                       type="button"

@@ -23,12 +23,13 @@ import {
   Users,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 
 import { ExportMenu } from '@/components/ExportMenu';
 import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { StatCardCompact } from '@components/shared/StatCard';
 import { useToast } from '@/hooks/useToast';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
@@ -302,7 +303,6 @@ export function RegistrationWorkforceManagementWorkspace() {
   const [openRowMenuId, setOpenRowMenuId] = useState<string | null>(null);
 
   const filterBarRef = useRef<HTMLDivElement>(null);
-  const rowMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const rosterSectionRef = useRef<HTMLDivElement>(null);
   const [showAllAcks, setShowAllAcks] = useState(false);
 
@@ -316,17 +316,10 @@ export function RegistrationWorkforceManagementWorkspace() {
       if (filterBarRef.current && !filterBarRef.current.contains(e.target as Node)) {
         setOpenFilter(null);
       }
-      if (
-        openRowMenuId &&
-        rowMenuRefs.current[openRowMenuId] &&
-        !rowMenuRefs.current[openRowMenuId]!.contains(e.target as Node)
-      ) {
-        setOpenRowMenuId(null);
-      }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [openRowMenuId]);
+  }, []);
 
   function handleRetry() {
     setPageState('loading');
@@ -363,6 +356,16 @@ export function RegistrationWorkforceManagementWorkspace() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const clampedPage = Math.min(page, totalPages);
   const paginated = filtered.slice((clampedPage - 1) * pageSize, clampedPage * pageSize);
+
+  const rowMenuButtonRefs = useMemo(() => {
+    const map = new Map<string, RefObject<HTMLButtonElement | null>>();
+    for (const shift of paginated) map.set(shift.id, { current: null });
+    return map;
+  }, [paginated]);
+
+  function getRowMenuButtonRef(id: string) {
+    return rowMenuButtonRefs.get(id) ?? { current: null };
+  }
 
   function handleManageOnCall() {
     setFilters((prev) => ({ ...prev, status: 'ON_CALL' }));
@@ -869,13 +872,9 @@ export function RegistrationWorkforceManagementWorkspace() {
                           >
                             <Pencil style={{ width: 15, height: 15, color: '#4A7080' }} />
                           </button>
-                          <div
-                            className="relative shrink-0"
-                            ref={(el) => {
-                              rowMenuRefs.current[shift.id] = el;
-                            }}
-                          >
+                          <div className="relative shrink-0">
                             <button
+                              ref={getRowMenuButtonRef(shift.id)}
                               type="button"
                               onClick={() => setOpenRowMenuId(menuOpen ? null : shift.id)}
                               aria-label="More actions"
@@ -883,32 +882,29 @@ export function RegistrationWorkforceManagementWorkspace() {
                             >
                               <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
                             </button>
-                            {menuOpen && (
-                              <div
-                                className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 min-w-[160px] overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
-                                style={{
-                                  border: '1px solid #0064821F',
-                                  boxShadow: '0 4px 16px rgba(0,0,0,0.09)',
-                                }}
+                            <RowMenuPortal
+                              open={menuOpen}
+                              anchorRef={getRowMenuButtonRef(shift.id)}
+                              onClose={() => setOpenRowMenuId(null)}
+                              width={160}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => handleDuplicateShift(shift)}
+                                className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                style={{ fontSize: 14, color: '#0D2630' }}
                               >
-                                <button
-                                  type="button"
-                                  onClick={() => handleDuplicateShift(shift)}
-                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  Duplicate Shift
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleCancelShift(shift)}
-                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                  style={{ fontSize: 14, color: '#EF4444' }}
-                                >
-                                  Cancel Shift
-                                </button>
-                              </div>
-                            )}
+                                Duplicate Shift
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleCancelShift(shift)}
+                                className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                style={{ fontSize: 14, color: '#EF4444' }}
+                              >
+                                Cancel Shift
+                              </button>
+                            </RowMenuPortal>
                           </div>
                         </div>
                       </div>

@@ -24,10 +24,11 @@ import {
   UserCog,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type RefObject } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { QuickActionTile } from '@components/shared/QuickActionTile';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -545,16 +546,6 @@ function DocumentsAndFilesCard() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!openMenuId) return;
-    function onMouseDown(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpenMenuId(null);
-    }
-    document.addEventListener('mousedown', onMouseDown);
-    return () => document.removeEventListener('mousedown', onMouseDown);
-  }, [openMenuId]);
 
   const filteredDocs = useMemo(
     () => (docFilter === 'All' ? documents : documents.filter((d) => d.type === docFilter)),
@@ -564,6 +555,16 @@ function DocumentsAndFilesCard() {
   const safePage = Math.min(currentPage, totalPages);
   const pageStart = (safePage - 1) * rowsPerPage;
   const pageDocs = filteredDocs.slice(pageStart, pageStart + rowsPerPage);
+
+  const docMenuButtonRefs = useMemo(() => {
+    const map = new Map<string, RefObject<HTMLButtonElement | null>>();
+    for (const doc of pageDocs) map.set(doc.id, { current: null });
+    return map;
+  }, [pageDocs]);
+
+  function getDocMenuButtonRef(id: string) {
+    return docMenuButtonRefs.get(id) ?? { current: null };
+  }
 
   function selectFilter(value: DocumentType | 'All') {
     setDocFilter(value);
@@ -767,8 +768,9 @@ function DocumentsAndFilesCard() {
                   >
                     <Download style={{ width: 15, height: 15, color: '#4A7080' }} />
                   </button>
-                  <div ref={openMenuId === doc.id ? menuRef : null} className="relative">
+                  <div className="relative">
                     <button
+                      ref={getDocMenuButtonRef(doc.id)}
                       type="button"
                       onClick={() => setOpenMenuId((id) => (id === doc.id ? null : doc.id))}
                       aria-label={`More actions for ${doc.name}`}
@@ -776,46 +778,43 @@ function DocumentsAndFilesCard() {
                     >
                       <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
                     </button>
-                    {openMenuId === doc.id && (
-                      <div
-                        className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 w-44 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                        style={{
-                          border: '1px solid rgba(0,100,130,0.12)',
-                          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                    <RowMenuPortal
+                      open={openMenuId === doc.id}
+                      anchorRef={getDocMenuButtonRef(doc.id)}
+                      onClose={() => setOpenMenuId(null)}
+                      width={176}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          toast.info('Rename document', `Renaming ${doc.name}.`);
+                          setOpenMenuId(null);
                         }}
+                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                        style={{ fontSize: 14, color: '#2F3A40' }}
                       >
-                        <button
-                          type="button"
-                          onClick={() => {
-                            toast.info('Rename document', `Renaming ${doc.name}.`);
-                            setOpenMenuId(null);
-                          }}
-                          className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                          style={{ fontSize: 14, color: '#2F3A40' }}
-                        >
-                          Rename Document
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            toast.success('Shared', `${doc.name} shared with care team.`);
-                            setOpenMenuId(null);
-                          }}
-                          className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                          style={{ fontSize: 14, color: '#2F3A40' }}
-                        >
-                          Share Document
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteDocument(doc)}
-                          className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-red-50"
-                          style={{ fontSize: 14, color: '#EF4444' }}
-                        >
-                          Delete Document
-                        </button>
-                      </div>
-                    )}
+                        Rename Document
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          toast.success('Shared', `${doc.name} shared with care team.`);
+                          setOpenMenuId(null);
+                        }}
+                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                        style={{ fontSize: 14, color: '#2F3A40' }}
+                      >
+                        Share Document
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteDocument(doc)}
+                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-red-50"
+                        style={{ fontSize: 14, color: '#EF4444' }}
+                      >
+                        Delete Document
+                      </button>
+                    </RowMenuPortal>
                   </div>
                 </div>
               </div>
@@ -922,19 +921,8 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-  const actionsRef = useRef<HTMLDivElement>(null);
-  const moreRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!actionsOpen && !moreOpen) return;
-    function onMouseDown(e: MouseEvent) {
-      if (actionsRef.current && !actionsRef.current.contains(e.target as Node))
-        setActionsOpen(false);
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
-    }
-    document.addEventListener('mousedown', onMouseDown);
-    return () => document.removeEventListener('mousedown', onMouseDown);
-  }, [actionsOpen, moreOpen]);
+  const actionsButtonRef = useRef<HTMLButtonElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
 
   const knownAllergiesText = patient.allergies.length
     ? patient.allergies.map((a) => a.substance).join(', ')
@@ -1016,8 +1004,9 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                 Upload Document
               </button>
               <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
-                <div ref={actionsRef} className="relative">
+                <div className="relative">
                   <button
+                    ref={actionsButtonRef}
                     type="button"
                     onClick={() => setActionsOpen((o) => !o)}
                     className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
@@ -1033,58 +1022,55 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                       }}
                     />
                   </button>
-                  {actionsOpen && (
-                    <div
-                      className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-56 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                      style={{
-                        border: '1px solid rgba(0,100,130,0.12)',
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                      }}
+                  <RowMenuPortal
+                    open={actionsOpen}
+                    anchorRef={actionsButtonRef}
+                    onClose={() => setActionsOpen(false)}
+                    width={224}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => notImplemented('Amend Record')}
+                      className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                      style={{ fontSize: 14, color: '#2F3A40' }}
                     >
-                      <button
-                        type="button"
-                        onClick={() => notImplemented('Amend Record')}
-                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                        style={{ fontSize: 14, color: '#2F3A40' }}
-                      >
-                        Amend Record
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => notImplemented('Share with Provider')}
-                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                        style={{ fontSize: 14, color: '#2F3A40' }}
-                      >
-                        Share with Provider
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          router.push(ROUTES.medicalRecordsRequests);
-                          setActionsOpen(false);
-                        }}
-                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                        style={{ fontSize: 14, color: '#2F3A40' }}
-                      >
-                        Request Record Correction
-                      </button>
-                      <div
-                        className="my-1.5"
-                        style={{ borderTop: '1px solid rgba(0,100,130,0.08)' }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          router.push(ROUTES.medicalRecordsArchived);
-                          setActionsOpen(false);
-                        }}
-                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                        style={{ fontSize: 14, color: '#2F3A40' }}
-                      >
-                        View Archived Records
-                      </button>
-                    </div>
-                  )}
+                      Amend Record
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => notImplemented('Share with Provider')}
+                      className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                      style={{ fontSize: 14, color: '#2F3A40' }}
+                    >
+                      Share with Provider
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push(ROUTES.medicalRecordsRequests);
+                        setActionsOpen(false);
+                      }}
+                      className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                      style={{ fontSize: 14, color: '#2F3A40' }}
+                    >
+                      Request Record Correction
+                    </button>
+                    <div
+                      className="my-1.5"
+                      style={{ borderTop: '1px solid rgba(0,100,130,0.08)' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push(ROUTES.medicalRecordsArchived);
+                        setActionsOpen(false);
+                      }}
+                      className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                      style={{ fontSize: 14, color: '#2F3A40' }}
+                    >
+                      View Archived Records
+                    </button>
+                  </RowMenuPortal>
                 </div>
               </PermissionGate>
             </div>
@@ -1189,8 +1175,9 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                   {tab}
                 </button>
               ))}
-              <div ref={moreRef} className="relative shrink-0">
+              <div className="relative shrink-0">
                 <button
+                  ref={moreButtonRef}
                   type="button"
                   onClick={() => setMoreOpen((o) => !o)}
                   className="flex shrink-0 items-center gap-1 px-3.5 py-2.5 font-sans font-medium whitespace-nowrap transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
@@ -1214,34 +1201,31 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                     }}
                   />
                 </button>
-                {moreOpen && (
-                  <div
-                    className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-48 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                    style={{
-                      border: '1px solid rgba(0,100,130,0.12)',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                    }}
-                  >
-                    {MORE_TABS.map((tab) => (
-                      <button
-                        key={tab}
-                        type="button"
-                        onClick={() => {
-                          setActiveTab(tab);
-                          setMoreOpen(false);
-                        }}
-                        className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                        style={{
-                          fontSize: 14,
-                          color: activeTab === tab ? '#00B4D8' : '#2F3A40',
-                          fontWeight: activeTab === tab ? 600 : 400,
-                        }}
-                      >
-                        {tab}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <RowMenuPortal
+                  open={moreOpen}
+                  anchorRef={moreButtonRef}
+                  onClose={() => setMoreOpen(false)}
+                  width={192}
+                >
+                  {MORE_TABS.map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(tab);
+                        setMoreOpen(false);
+                      }}
+                      className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                      style={{
+                        fontSize: 14,
+                        color: activeTab === tab ? '#00B4D8' : '#2F3A40',
+                        fontWeight: activeTab === tab ? 600 : 400,
+                      }}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </RowMenuPortal>
               </div>
             </div>
           </div>

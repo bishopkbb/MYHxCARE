@@ -13,11 +13,12 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { getInitials } from '@lib/utils';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -112,20 +113,12 @@ function RowMenu({
   onCancel: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onMouseDown(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener('mousedown', onMouseDown);
-    return () => document.removeEventListener('mousedown', onMouseDown);
-  }, [open]);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div className="relative">
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={`More actions for ${referral.id}`}
@@ -133,66 +126,58 @@ function RowMenu({
       >
         <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
       </button>
-      {open && (
-        <div
-          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-52 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-          style={{
-            border: '1px solid rgba(0,100,130,0.15)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
+      <RowMenuPortal open={open} anchorRef={buttonRef} onClose={() => setOpen(false)} width={208}>
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false);
+            onView();
           }}
+          className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+          style={{ fontSize: 14, color: '#2F3A40' }}
         >
+          View Details
+        </button>
+        {referral.status === 'Pending' && (
           <button
             type="button"
             onClick={() => {
               setOpen(false);
-              onView();
+              onAccept();
             }}
             className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
             style={{ fontSize: 14, color: '#2F3A40' }}
           >
-            View Details
+            Accept Referral
           </button>
-          {referral.status === 'Pending' && (
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onAccept();
-              }}
-              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-              style={{ fontSize: 14, color: '#2F3A40' }}
-            >
-              Accept Referral
-            </button>
-          )}
-          {referral.status === 'Accepted' && (
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onComplete();
-              }}
-              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-              style={{ fontSize: 14, color: '#2F3A40' }}
-            >
-              Mark Completed
-            </button>
-          )}
-          {(referral.status === 'Pending' || referral.status === 'Accepted') && (
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onCancel();
-              }}
-              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)]"
-              style={{ fontSize: 14, color: '#EF4444' }}
-            >
-              Cancel Referral
-            </button>
-          )}
-        </div>
-      )}
+        )}
+        {referral.status === 'Accepted' && (
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onComplete();
+            }}
+            className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+            style={{ fontSize: 14, color: '#2F3A40' }}
+          >
+            Mark Completed
+          </button>
+        )}
+        {(referral.status === 'Pending' || referral.status === 'Accepted') && (
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onCancel();
+            }}
+            className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)]"
+            style={{ fontSize: 14, color: '#EF4444' }}
+          >
+            Cancel Referral
+          </button>
+        )}
+      </RowMenuPortal>
     </div>
   );
 }
