@@ -111,7 +111,7 @@ This system operates in a **clinical environment**. Errors in clinical software 
 | Animations         | tw-animate-css           | 1.4.x      | Provides `animate-in`, `fade-in`, `slide-in-from-*` utilities compatible with Tailwind v4.                                                                                             |
 | Offline Storage    | idb                      | 8.x        | IndexedDB wrapper used in the offline request queue layer.                                                                                                                             |
 | PWA                | Service Worker           | —          | Custom SW in `public/sw.js` handles asset caching and offline page fallback.                                                                                                           |
-| CI/CD              | GitHub Actions           | —          | CI verifies pull requests and publishes the current demo-only frontend image from `main`.                                                                                              |
+| CI/CD              | GitHub Actions           | —          | Separate workflows for CI (lint, typecheck, test on PR) and CD (deploy to staging on merge to main).                                                                                   |
 | Deployment         | Docker → DigitalOcean    | —          | `next build` with `output: standalone` produces a minimal image. Deployed to a DigitalOcean web-01 droplet.                                                                            |
 
 ### Why Next.js and not Vite + React Router?
