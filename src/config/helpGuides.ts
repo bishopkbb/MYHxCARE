@@ -332,16 +332,24 @@ const LAB_RESULTS_GUIDE: HelpGuide = {
   intro: 'Review returned laboratory results for your patients.',
   sections: [
     {
-      heading: 'Tabs',
-      body: 'Pending shows orders still in the lab; Critical needs immediate attention; Verified holds validated results.',
-    },
-    {
-      heading: 'Critical values',
-      body: 'Critical results are flagged red and must be acknowledged — they also raise a dashboard alert the moment they arrive.',
+      heading: 'Tabs and filters',
+      body: 'Critical needs immediate attention; Pending shows orders still in the lab; Verified holds validated results. Search by patient, MRN, or test, and narrow by department or priority.',
     },
     {
       heading: 'Reading a result',
-      body: 'Expand a result card to see each analyte with its reference range; values outside range are highlighted.',
+      body: 'Each result card shows every analyte with its reference range; values outside range are highlighted and flagged H (high), L (low), or A (abnormal).',
+    },
+    {
+      heading: 'Critical values',
+      body: 'A critical result is marked "Action Required" until you mark it reviewed — this is a record that you have seen and acted on it, separate from the nurse having relayed it to you.',
+    },
+    {
+      heading: 'Reviewing and documenting',
+      body: '"Mark as Reviewed" records your sign-off with a timestamp. "Add Clinical Note" attaches your own note to the result — e.g. a follow-up plan or medication change.',
+    },
+    {
+      heading: 'Patient chart',
+      body: '"View Patient Chart" opens the full record for results tied to a patient already in your roster.',
     },
   ],
 };

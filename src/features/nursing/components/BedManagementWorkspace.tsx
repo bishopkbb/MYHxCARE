@@ -29,6 +29,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
@@ -183,17 +184,8 @@ function BedCard({
   onTransfer: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const cfg = BED_STATUS_CFG[bed.status];
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    function onMouseDown(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setMenuOpen(false);
-    }
-    document.addEventListener('mousedown', onMouseDown);
-    return () => document.removeEventListener('mousedown', onMouseDown);
-  }, [menuOpen]);
 
   function stopAnd(fn: () => void) {
     return (e: React.MouseEvent) => {
@@ -216,7 +208,6 @@ function BedCard({
 
   return (
     <div
-      ref={rootRef}
       className={`relative flex w-full min-w-[150px] flex-col rounded-[10px] p-3 text-left transition-colors duration-150 ${FOCUS_RING}`}
       style={{
         background: cfg.bg,
@@ -241,6 +232,7 @@ function BedCard({
         </div>
         <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
           <button
+            ref={menuButtonRef}
             type="button"
             aria-label={`More actions for ${bed.bedCode}`}
             onClick={(e) => {
@@ -292,134 +284,130 @@ function BedCard({
         </PermissionGate>
       )}
 
-      {menuOpen && (
-        <div
-          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-2 z-30 mt-1 w-48 overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
-          style={{
-            border: '1px solid rgba(0,100,130,0.12)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {bed.status === 'Occupied' && (
-            <>
-              <button
-                type="button"
-                onClick={stopAnd(onTransfer)}
-                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                <ArrowLeftRight style={{ width: 15, height: 15, color: '#00B4D8' }} />
-                Transfer Patient
-              </button>
-              <button
-                type="button"
-                onClick={stopAnd(onDischarge)}
-                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                <LogOut style={{ width: 15, height: 15, color: '#EF4444' }} />
-                Discharge Patient
-              </button>
-            </>
-          )}
-          {bed.status === 'Available' && (
-            <>
-              <button
-                type="button"
-                onClick={stopAnd(onAllocate)}
-                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                <UserPlus style={{ width: 15, height: 15, color: '#16A34A' }} />
-                Allocate Bed
-              </button>
-              <button
-                type="button"
-                onClick={stopAnd(onReserve)}
-                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                <CalendarPlus style={{ width: 15, height: 15, color: '#8B5CF6' }} />
-                Reserve Bed
-              </button>
-              <button
-                type="button"
-                onClick={stopAnd(onMarkOutOfService)}
-                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                <Wrench style={{ width: 15, height: 15, color: '#EF4444' }} />
-                Mark Out of Service
-              </button>
-            </>
-          )}
-          {bed.status === 'Reserved' && (
-            <>
-              <button
-                type="button"
-                onClick={stopAnd(onAllocate)}
-                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                <UserPlus style={{ width: 15, height: 15, color: '#16A34A' }} />
-                Allocate Bed
-              </button>
-              <button
-                type="button"
-                onClick={stopAnd(onCancelReservation)}
-                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                <CalendarX2 style={{ width: 15, height: 15, color: '#8A98A3' }} />
-                Cancel Reservation
-              </button>
-              <button
-                type="button"
-                onClick={stopAnd(onMarkOutOfService)}
-                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                <Wrench style={{ width: 15, height: 15, color: '#EF4444' }} />
-                Mark Out of Service
-              </button>
-            </>
-          )}
-          {bed.status === 'Cleaning Required' && (
-            <>
-              <button
-                type="button"
-                onClick={stopAnd(onMarkReady)}
-                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                <CheckCircle2 style={{ width: 15, height: 15, color: '#22C55E' }} />
-                Mark Ready
-              </button>
-              <button
-                type="button"
-                onClick={stopAnd(onMarkOutOfService)}
-                className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                <Wrench style={{ width: 15, height: 15, color: '#EF4444' }} />
-                Mark Out of Service
-              </button>
-            </>
-          )}
-          {bed.status === 'Out of Service' && (
+      <RowMenuPortal
+        open={menuOpen}
+        anchorRef={menuButtonRef}
+        onClose={() => setMenuOpen(false)}
+        width={192}
+      >
+        {bed.status === 'Occupied' && (
+          <>
             <button
               type="button"
-              onClick={stopAnd(onReturnToService)}
+              onClick={stopAnd(onTransfer)}
               className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
               style={{ fontSize: 14, color: '#0D2630' }}
             >
-              <Undo2 style={{ width: 15, height: 15, color: '#22C55E' }} />
-              Return to Service
+              <ArrowLeftRight style={{ width: 15, height: 15, color: '#00B4D8' }} />
+              Transfer Patient
             </button>
-          )}
-        </div>
-      )}
+            <button
+              type="button"
+              onClick={stopAnd(onDischarge)}
+              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              <LogOut style={{ width: 15, height: 15, color: '#EF4444' }} />
+              Discharge Patient
+            </button>
+          </>
+        )}
+        {bed.status === 'Available' && (
+          <>
+            <button
+              type="button"
+              onClick={stopAnd(onAllocate)}
+              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              <UserPlus style={{ width: 15, height: 15, color: '#16A34A' }} />
+              Allocate Bed
+            </button>
+            <button
+              type="button"
+              onClick={stopAnd(onReserve)}
+              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              <CalendarPlus style={{ width: 15, height: 15, color: '#8B5CF6' }} />
+              Reserve Bed
+            </button>
+            <button
+              type="button"
+              onClick={stopAnd(onMarkOutOfService)}
+              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              <Wrench style={{ width: 15, height: 15, color: '#EF4444' }} />
+              Mark Out of Service
+            </button>
+          </>
+        )}
+        {bed.status === 'Reserved' && (
+          <>
+            <button
+              type="button"
+              onClick={stopAnd(onAllocate)}
+              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              <UserPlus style={{ width: 15, height: 15, color: '#16A34A' }} />
+              Allocate Bed
+            </button>
+            <button
+              type="button"
+              onClick={stopAnd(onCancelReservation)}
+              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              <CalendarX2 style={{ width: 15, height: 15, color: '#8A98A3' }} />
+              Cancel Reservation
+            </button>
+            <button
+              type="button"
+              onClick={stopAnd(onMarkOutOfService)}
+              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              <Wrench style={{ width: 15, height: 15, color: '#EF4444' }} />
+              Mark Out of Service
+            </button>
+          </>
+        )}
+        {bed.status === 'Cleaning Required' && (
+          <>
+            <button
+              type="button"
+              onClick={stopAnd(onMarkReady)}
+              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              <CheckCircle2 style={{ width: 15, height: 15, color: '#22C55E' }} />
+              Mark Ready
+            </button>
+            <button
+              type="button"
+              onClick={stopAnd(onMarkOutOfService)}
+              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              <Wrench style={{ width: 15, height: 15, color: '#EF4444' }} />
+              Mark Out of Service
+            </button>
+          </>
+        )}
+        {bed.status === 'Out of Service' && (
+          <button
+            type="button"
+            onClick={stopAnd(onReturnToService)}
+            className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+            style={{ fontSize: 14, color: '#0D2630' }}
+          >
+            <Undo2 style={{ width: 15, height: 15, color: '#22C55E' }} />
+            Return to Service
+          </button>
+        )}
+      </RowMenuPortal>
     </div>
   );
 }
@@ -449,16 +437,7 @@ function ListRowActions({
   onMarkReady: () => void;
   onTransfer: () => void;
 }) {
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    function onMouseDown(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) onToggleMenu();
-    }
-    document.addEventListener('mousedown', onMouseDown);
-    return () => document.removeEventListener('mousedown', onMouseDown);
-  }, [menuOpen, onToggleMenu]);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   function stopAnd(fn: () => void) {
     return (e: React.MouseEvent) => {
@@ -542,7 +521,7 @@ function ListRowActions({
             : [];
 
   return (
-    <div ref={rootRef} className="relative flex items-center gap-1">
+    <div className="relative flex items-center gap-1">
       <button
         type="button"
         onClick={primary.onClick}
@@ -553,6 +532,7 @@ function ListRowActions({
       </button>
       {menuItems.length > 0 && (
         <button
+          ref={menuButtonRef}
           type="button"
           aria-label={`More actions for ${bed.bedCode}`}
           onClick={(e) => {
@@ -565,28 +545,20 @@ function ListRowActions({
           <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
         </button>
       )}
-      {menuOpen && (
-        <div
-          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 w-48 overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
-          style={{
-            border: '1px solid rgba(0,100,130,0.12)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-          }}
-        >
-          {menuItems.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={stopAnd(item.onClick)}
-              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-              style={{ fontSize: 14, color: '#0D2630' }}
-            >
-              <item.icon style={{ width: 15, height: 15, color: item.color }} />
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
+      <RowMenuPortal open={menuOpen} anchorRef={menuButtonRef} onClose={onToggleMenu} width={192}>
+        {menuItems.map((item) => (
+          <button
+            key={item.label}
+            type="button"
+            onClick={stopAnd(item.onClick)}
+            className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+            style={{ fontSize: 14, color: '#0D2630' }}
+          >
+            <item.icon style={{ width: 15, height: 15, color: item.color }} />
+            {item.label}
+          </button>
+        ))}
+      </RowMenuPortal>
     </div>
   );
 }

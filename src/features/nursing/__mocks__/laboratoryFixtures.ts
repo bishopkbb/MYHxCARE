@@ -81,6 +81,8 @@ export type LabTestOrder = {
   criticalValueLabel?: string; // e.g. "Potassium (K+) 6.2 mmol/L"
   criticalAcknowledgedAt?: string;
   criticalAcknowledgedBy?: string;
+  lastFollowUpAt?: string;
+  followUpCount?: number;
 };
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {

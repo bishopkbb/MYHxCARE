@@ -95,6 +95,16 @@ export function LabResultDetailModal({
                 />
               )}
               <Row label="Status" value={order.status} />
+              {order.lastFollowUpAt && (
+                <Row
+                  label="Last Followed Up"
+                  value={`${formatHumanDate(order.lastFollowUpAt)}, ${formatTime(order.lastFollowUpAt)}${
+                    order.followUpCount && order.followUpCount > 1
+                      ? ` (×${order.followUpCount})`
+                      : ''
+                  }`}
+                />
+              )}
             </div>
 
             {order.rejectionReason && (

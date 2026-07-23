@@ -24,10 +24,11 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
-import { formatDate, formatTime } from '@/utils/datetime';
+import { formatDate, formatTime, toRelativeTime } from '@/utils/datetime';
 import {
   DEPARTMENT_OPTIONS,
   FASTING_REQUIRED_TESTS,
@@ -143,20 +144,12 @@ function RowMenu({
   onAcknowledge?: (() => void) | undefined;
   onFollowUp?: (() => void) | undefined;
 }) {
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onMouseDown(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) onToggle();
-    }
-    document.addEventListener('mousedown', onMouseDown);
-    return () => document.removeEventListener('mousedown', onMouseDown);
-  }, [open, onToggle]);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div ref={rootRef} className="relative">
+    <div className="relative">
       <button
+        ref={buttonRef}
         type="button"
         onClick={onToggle}
         aria-label={`More actions for ${order.patientName}`}
@@ -164,58 +157,50 @@ function RowMenu({
       >
         <MoreVertical style={{ width: 16, height: 16, color: '#4A7080' }} />
       </button>
-      {open && (
-        <div
-          className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1.5 w-60 overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
-          style={{
-            border: '1px solid rgba(0,100,130,0.12)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-          }}
+      <RowMenuPortal open={open} anchorRef={buttonRef} onClose={onToggle} width={240}>
+        <button
+          type="button"
+          onClick={onView}
+          className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+          style={{ fontSize: 14, color: '#0D2630' }}
         >
+          <ClipboardList style={{ width: 15, height: 15, color: '#00B4D8' }} />
+          View Details
+        </button>
+        {onCollect && (
           <button
             type="button"
-            onClick={onView}
+            onClick={onCollect}
             className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
             style={{ fontSize: 14, color: '#0D2630' }}
           >
-            <ClipboardList style={{ width: 15, height: 15, color: '#00B4D8' }} />
-            View Details
+            <TestTube2 style={{ width: 15, height: 15, color: '#22C55E' }} />
+            {order.status === 'Rejected' ? 'Recollect Sample' : 'Collect Sample'}
           </button>
-          {onCollect && (
-            <button
-              type="button"
-              onClick={onCollect}
-              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-              style={{ fontSize: 14, color: '#0D2630' }}
-            >
-              <TestTube2 style={{ width: 15, height: 15, color: '#22C55E' }} />
-              {order.status === 'Rejected' ? 'Recollect Sample' : 'Collect Sample'}
-            </button>
-          )}
-          {onAcknowledge && (
-            <button
-              type="button"
-              onClick={onAcknowledge}
-              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-              style={{ fontSize: 14, color: '#EF4444' }}
-            >
-              <PhoneCall style={{ width: 15, height: 15, color: '#EF4444' }} />
-              Acknowledge &amp; Notify Doctor
-            </button>
-          )}
-          {onFollowUp && (
-            <button
-              type="button"
-              onClick={onFollowUp}
-              className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-              style={{ fontSize: 14, color: '#0D2630' }}
-            >
-              <PhoneCall style={{ width: 15, height: 15, color: '#F59E0B' }} />
-              Follow Up with Lab
-            </button>
-          )}
-        </div>
-      )}
+        )}
+        {onAcknowledge && (
+          <button
+            type="button"
+            onClick={onAcknowledge}
+            className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+            style={{ fontSize: 14, color: '#EF4444' }}
+          >
+            <PhoneCall style={{ width: 15, height: 15, color: '#EF4444' }} />
+            Acknowledge &amp; Notify Doctor
+          </button>
+        )}
+        {onFollowUp && (
+          <button
+            type="button"
+            onClick={onFollowUp}
+            className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+            style={{ fontSize: 14, color: '#0D2630' }}
+          >
+            <PhoneCall style={{ width: 15, height: 15, color: '#F59E0B' }} />
+            Follow Up with Lab
+          </button>
+        )}
+      </RowMenuPortal>
     </div>
   );
 }
@@ -396,9 +381,16 @@ export function LaboratoryWorkspace() {
   }
 
   function handleFollowUp(order: LabTestOrder) {
+    const nextCount = (order.followUpCount ?? 0) + 1;
+    updateOrder(order.id, {
+      lastFollowUpAt: new Date().toISOString(),
+      followUpCount: nextCount,
+    });
     toast.info(
       'Lab contacted',
-      `Follow-up sent to the laboratory about ${order.testName} for ${order.patientName}.`,
+      `Follow-up sent to the laboratory about ${order.testName} for ${order.patientName}${
+        nextCount > 1 ? ` (${nextCount} follow-ups so far)` : ''
+      }.`,
     );
     setOpenMenuId(null);
   }
@@ -875,6 +867,11 @@ export function LaboratoryWorkspace() {
                                   >
                                     <Clock style={{ width: 12, height: 12 }} />
                                     Overdue
+                                  </p>
+                                )}
+                                {o.lastFollowUpAt && (
+                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                    Followed up {toRelativeTime(o.lastFollowUpAt)}
                                   </p>
                                 )}
                                 {o.status === 'Completed' && o.resultFlag && (
