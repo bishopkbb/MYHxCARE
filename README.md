@@ -216,7 +216,7 @@ async function getPatients(): Promise<Patient[]> {
 This means:
 
 - Every screen is fully functional before the Go backend is built for that domain
-- The currently published frontend image uses demo fixtures and does not call the backend
+- The currently published development image uses mock fixtures and does not call the backend
 - Staging and production values are reserved until the integration-readiness TODO below is complete
 
 ---
@@ -227,7 +227,7 @@ This means:
 myhxcare-hms/
 ├── .github/
 │   ├── workflows/
-│   │   └── ci.yml                   # Verify changes and publish the demo image
+│   │   └── ci.yml                   # Verify changes and publish the development image
 │   ├── CODEOWNERS                   # Auto-assign reviewers by directory
 │   └── dependabot.yml               # Automated dependency updates
 │
@@ -487,7 +487,7 @@ All environment variables are validated at startup by `src/env.ts` using Zod. If
 | -------------------------- | ------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_API_BASE_URL` | Real API only | URL                                                  | Base URL of the Go REST API. Injected into Axios `baseURL`. Also used in the CSP `connect-src` directive at build time. Example: `http://localhost:8080` |
 | `NEXT_PUBLIC_WS_URL`       | Real API only | URL                                                  | WebSocket endpoint. Used by `WsProvider` to open the persistent connection. Example: `ws://localhost:8080`                                               |
-| `NEXT_PUBLIC_APP_ENV`      | Yes           | `development` \| `demo` \| `staging` \| `production` | Controls the mock-data gate. Only `demo` is currently approved for deployed frontend images. **This is not the same as `NODE_ENV`.**                     |
+| `NEXT_PUBLIC_APP_ENV`      | Yes           | `development` \| `demo` \| `staging` \| `production` | Controls the mock-data gate. CI currently publishes only `development`. **This is not the same as `NODE_ENV`.**                                          |
 
 ### Staging and production integration TODO
 
@@ -1459,7 +1459,7 @@ feat(patients): add patient registration form
 ### Branch Strategy
 
 ```
-main          Protected integration branch. Publishes the demo-only image.
+main          Protected integration branch. Publishes the development image.
 feature/*     New features (feat/patient-registration)
 fix/*         Bug fixes (fix/session-card-import)
 chore/*       Tooling, deps, config (chore/upgrade-tanstack-query)
