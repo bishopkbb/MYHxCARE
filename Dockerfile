@@ -92,6 +92,14 @@ COPY --from=builder \
     /app/.next/static \
     ./.next/static
 
+# The standalone Next.js runtime starts with `node server.js`; npm and npx are
+# build tools and must not be carried into the production image.
+USER root
+
+RUN rm -rf /usr/local/lib/node_modules/npm \
+    && rm -f /usr/local/bin/npm \
+              /usr/local/bin/npx
+
 USER nextjs:nodejs
 
 EXPOSE 3000

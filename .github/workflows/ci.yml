@@ -178,6 +178,30 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Verify production runtime
+        shell: bash
+        env:
+          IMAGE_REF: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.docker-build.outputs.digest }}
+        run: |
+          docker run \
+            --rm \
+            --entrypoint sh \
+            "$IMAGE_REF" \
+            -eu -c '
+              command -v node
+              node --version
+              test -f /app/server.js
+
+              if command -v npm >/dev/null 2>&1 ||
+                 command -v npx >/dev/null 2>&1 ||
+                 test -e /usr/local/lib/node_modules/npm; then
+                echo "FAIL: npm build tooling remains in the production image." >&2
+                exit 1
+              fi
+
+              echo "PASS: standalone runtime is present and npm/npx are absent."
+            '
+
       - name: Show published image details
         shell: bash
         run: |
