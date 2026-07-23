@@ -1,4 +1,4 @@
-name: Frontend CI and Demo Image
+name: Frontend CI and Development Image
 
 on:
   push:
@@ -52,8 +52,8 @@ jobs:
       CI: 'true'
 
       # These mock values are used only to verify that the application builds.
-      # The published Docker image is also demo-only and receives no real
-      # API or WebSocket endpoints.
+      # The published development image also uses mock data and receives no
+      # real API or WebSocket endpoints.
       NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
       NEXT_PUBLIC_WS_URL: ws://localhost:8080/ws
       NEXT_PUBLIC_APP_ENV: development
@@ -86,11 +86,14 @@ jobs:
           echo "Next.js standalone output is present."
 
   publish:
-    name: Publish demo image
+    name: Publish development image
     runs-on: ubuntu-latest
 
     needs:
       - build
+
+    outputs:
+      FRONTEND_IMAGE_REF: ${{ steps.publish.outputs.image_ref }}
 
     # Only publish from the official repository's main branch.
     # Pull requests and manual runs from feature branches cannot overwrite
@@ -105,12 +108,12 @@ jobs:
       contents: read
       packages: write
 
-    # Demo is the only deployable frontend mode while the frontend/backend
-    # contracts are still being integrated.
+    # Development is the only published frontend mode while the
+    # frontend/backend contracts are still being integrated.
     env:
-      DEV_APP_ENV: demo
+      DEV_APP_ENV: development
 
-    # TODO(staging/production): Do not add non-demo publishing until:
+    # TODO(staging/production): Do not add real-environment publishing until:
     # - staff login, refresh, logout and /me API contracts are implemented;
     # - frontend API payloads and WebSocket events match the backend;
     # - environment-specific HTTPS/WSS repository variables are configured;
@@ -121,27 +124,20 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
-      - name: Validate demo build variables
+      - name: Validate development build variables
         shell: bash
         run: |
           : "${DEV_APP_ENV:?DEV_APP_ENV is not configured}"
 
-          if [[ "$DEV_APP_ENV" != "demo" ]]; then
-            echo "Only demo frontend images may be published right now."
+          if [[ "$DEV_APP_ENV" != "development" ]]; then
+            echo "Only development frontend images may be published right now."
             exit 1
           fi
 
-          echo "Demo build variables are valid."
+          echo "Development build variables are valid."
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate image metadata
         id: metadata
@@ -151,8 +147,7 @@ jobs:
 
           tags: |
             type=raw,value=dev
-            type=raw,value=demo
-            type=sha,prefix=sha-,format=short
+            type=raw,value=sha-${{ github.sha }}
 
           labels: |
             org.opencontainers.image.title=MYHxCare HMS Frontend
@@ -160,14 +155,14 @@ jobs:
             org.opencontainers.image.source=https://github.com/MYHxCARE/HMS-Frontend
             org.opencontainers.image.vendor=MYHxCare
 
-      - name: Build and publish image
-        id: docker-build
+      - name: Build and load image
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64
-          push: true
+          load: true
+          push: false
 
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
@@ -181,7 +176,7 @@ jobs:
       - name: Verify production runtime
         shell: bash
         env:
-          IMAGE_REF: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.docker-build.outputs.digest }}
+          IMAGE_REF: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev
         run: |
           docker run \
             --rm \
@@ -202,12 +197,48 @@ jobs:
               echo "PASS: standalone runtime is present and npm/npx are absent."
             '
 
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish validated image
+        id: publish
+        shell: bash
+        env:
+          IMAGE_REPOSITORY: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          IMMUTABLE_IMAGE_REF: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          DEV_IMAGE_REF: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev
+        run: |
+          docker push "$IMMUTABLE_IMAGE_REF"
+          docker push "$DEV_IMAGE_REF"
+
+          digest="$(
+            docker buildx imagetools inspect "$IMMUTABLE_IMAGE_REF" |
+              awk '$1 == "Digest:" { print $2; exit }'
+          )"
+
+          if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "Unable to resolve the published image digest." >&2
+            exit 1
+          fi
+
+          image_ref="${IMAGE_REPOSITORY}@${digest}"
+
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "image_ref=$image_ref" >> "$GITHUB_OUTPUT"
+
       - name: Show published image details
         shell: bash
+        env:
+          FRONTEND_IMAGE_REF: ${{ steps.publish.outputs.image_ref }}
         run: |
-          echo "Published image:"
-          echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-
+          echo "Published development tag:"
+          echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev"
           echo
-          echo "Published digest:"
-          echo "${{ steps.docker-build.outputs.digest }}"
+          echo "Published immutable tag:"
+          echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}"
+          echo
+          echo "FRONTEND_IMAGE_REF=$FRONTEND_IMAGE_REF"
