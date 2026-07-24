@@ -42,6 +42,10 @@ import {
   type DirectoryPatientStatus,
 } from '@/features/registration/__mocks__/patientDirectoryFixtures';
 import { PATIENT_CATEGORY_OPTIONS } from '@/features/registration/__mocks__/registerPatientOptions';
+import {
+  bulkUpdatePatients,
+  useDirectoryPatients,
+} from '@/features/registration/store/patientDirectoryStore';
 
 const AssignCategoryModal = dynamic(
   () =>
@@ -137,7 +141,7 @@ export default function PatientDirectoryPage() {
   const router = useRouter();
   const toast = useToast();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [patients, setPatients] = useState<DirectoryPatient[]>(DIRECTORY_PATIENTS);
+  const patients = useDirectoryPatients();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<Filters>(FILTER_DEFAULTS);
   const [filtersOpen, setFiltersOpen] = useState(true);
@@ -308,7 +312,7 @@ export default function PatientDirectoryPage() {
   }
 
   function handleAssignCategory(category: string) {
-    setPatients((prev) => prev.map((p) => (selectedIds.has(p.id) ? { ...p, category } : p)));
+    bulkUpdatePatients(selectedIds, { category });
     toast.success('Category assigned', `Updated category for ${selectedIds.size} patient(s).`);
     setAssignCategoryOpen(false);
     clearSelection();
@@ -316,9 +320,7 @@ export default function PatientDirectoryPage() {
 
   function archiveRecords() {
     if (selectedIds.size === 0) return;
-    setPatients((prev) =>
-      prev.map((p) => (selectedIds.has(p.id) ? { ...p, status: 'Inactive' } : p)),
-    );
+    bulkUpdatePatients(selectedIds, { status: 'Inactive' });
     toast.success('Records archived', `${selectedIds.size} patient record(s) archived.`);
     clearSelection();
   }

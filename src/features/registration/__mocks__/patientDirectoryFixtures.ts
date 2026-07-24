@@ -17,7 +17,7 @@ import type { SelectOption } from '@/features/registration/__mocks__/registerPat
 
 export type DirectoryPatientStatus = 'Active' | 'Checked-In' | 'Waiting' | 'Inactive' | 'Emergency';
 
-export type MaritalStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed';
+export type MaritalStatus = 'Single' | 'Married' | 'Divorced' | 'Widowed' | 'Separated';
 
 export type DirectoryPatient = {
   id: string;
