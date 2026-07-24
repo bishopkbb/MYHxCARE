@@ -29,11 +29,15 @@ import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import { formatDate, formatTime } from '@/utils/datetime';
 import {
-  ADMISSIONS,
   ADMISSION_STEPS,
   STATUS_CFG,
   type AdmissionRecord,
 } from '@/features/nursing/__mocks__/admissionsFixtures';
+import {
+  addAdmission,
+  updateAdmission,
+  useAdmissions,
+} from '@/features/nursing/store/admissionsStore';
 import type { NewAdmissionInput } from './NewAdmissionModal';
 
 const NewAdmissionModal = dynamic(
@@ -199,7 +203,7 @@ export function AdmissionsWorkspace() {
   const router = useRouter();
   const toast = useToast();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [admissions, setAdmissions] = useState<AdmissionRecord[]>(ADMISSIONS);
+  const admissions = useAdmissions();
   const [activeTab, setActiveTab] = useState<TabKey>('current');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -211,7 +215,6 @@ export function AdmissionsWorkspace() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [showNewAdmission, setShowNewAdmission] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
-  const idCounterRef = useRef(1);
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 700);
@@ -312,10 +315,6 @@ export function AdmissionsWorkspace() {
     setCurrentPage(1);
   }
 
-  function updateAdmission(id: string, patch: Partial<AdmissionRecord>) {
-    setAdmissions((prev) => prev.map((a) => (a.id === id ? { ...a, ...patch } : a)));
-  }
-
   function viewPatient(a: AdmissionRecord) {
     if (!a.patientId) return;
     router.push(ROUTES.nursePatientRecord(a.patientId));
@@ -357,24 +356,10 @@ export function AdmissionsWorkspace() {
   }
 
   function handleCreateAdmission(input: NewAdmissionInput) {
-    const isFuture = new Date(input.admittedAt).getTime() > Date.now();
-    const newAdmission: AdmissionRecord = {
-      id: `adm-new-${idCounterRef.current++}`,
-      patientName: input.patientName,
-      mrn: input.mrn,
-      age: input.age,
-      gender: input.gender,
-      admittedAt: input.admittedAt,
-      ward: input.ward,
-      admissionType: input.admissionType,
-      currentStep: isFuture ? 0 : 1,
-      status: isFuture ? 'Scheduled' : 'Pending',
-      assignedDoctor: input.assignedDoctor || 'Unassigned',
-    };
-    setAdmissions((prev) => [newAdmission, ...prev]);
+    const created = addAdmission(input);
     setShowNewAdmission(false);
     toast.success(
-      isFuture ? 'Admission scheduled' : 'Admission created',
+      created.status === 'Scheduled' ? 'Admission scheduled' : 'Admission created',
       `${input.patientName} has been added to the admission workflow.`,
     );
   }

@@ -2,6 +2,7 @@
 
 import {
   AlertTriangle,
+  BedDouble,
   BookOpen,
   ChevronLeft,
   ClipboardList,
@@ -15,8 +16,9 @@ import {
   Stethoscope,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { use, useState } from 'react';
+import { use, useMemo, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,7 +29,15 @@ import {
 } from '@/features/patients/__mocks__/patientFixtures';
 import { completeEncounterQueueRow } from '@/features/encounters/store/encounterQueueStore';
 import { completeEncounter } from '@/features/encounters/store/encounterStore';
+import { addAdmission, useAdmissions } from '@/features/nursing/store/admissionsStore';
+import type { NewAdmissionInput } from '@/features/nursing/components/NewAdmissionModal';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
+import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+
+const NewAdmissionModal = dynamic(
+  () => import('@/features/nursing/components/NewAdmissionModal').then((m) => m.NewAdmissionModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -145,6 +155,8 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [form, setForm] = useState<ConsultationForm>(INITIAL_FORM);
+  const [showRequestAdmission, setShowRequestAdmission] = useState(false);
+  const admissionsForWards = useAdmissions();
 
   function setField<K extends keyof ConsultationForm>(key: K, value: ConsultationForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -153,6 +165,26 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
   const activeMedications = patient.medications.filter((m) => m.status === 'active');
   const summaryVitals = patient.vitalSigns.readings.filter((r) => SUMMARY_VITAL_KEYS.has(r.key));
   const sliderPct = ((form.severity - 1) / 9) * 100;
+
+  // Same wards Nursing's own Admissions screen offers — derived from the
+  // shared store rather than a second hardcoded list.
+  const wardOptions = useMemo(
+    () =>
+      Array.from(new Set(admissionsForWards.map((a) => a.ward))).map((w) => ({
+        value: w,
+        label: w,
+      })),
+    [admissionsForWards],
+  );
+
+  function handleRequestAdmission(input: NewAdmissionInput) {
+    addAdmission(input);
+    setShowRequestAdmission(false);
+    toast.success(
+      'Admission requested',
+      `${patient.name} has been added to the admission workflow.`,
+    );
+  }
 
   function handleCompleteConsultation() {
     const vitalsSummary = summaryVitals
@@ -994,6 +1026,23 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                       <Share2 style={{ width: 16, height: 16, flexShrink: 0 }} />
                       Refer Patient
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowRequestAdmission(true)}
+                      className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+                      style={{
+                        fontSize: 14,
+                        lineHeight: '22px',
+                        height: 44,
+                        color: '#00B4D8',
+                        border: '1px solid #00B4D8',
+                        background: '#FFFFFF',
+                      }}
+                    >
+                      <BedDouble style={{ width: 16, height: 16, flexShrink: 0 }} />
+                      Request Admission
+                    </button>
                   </div>
 
                   {/* Follow-up Instructions */}
@@ -1133,6 +1182,21 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
           <div className="h-4" />
         </div>
       </div>
+
+      {showRequestAdmission && (
+        <NewAdmissionModal
+          wardOptions={wardOptions}
+          initialValues={{
+            patientName: patient.name,
+            mrn: patient.mrn,
+            age: parseInt(patient.age, 10) || undefined,
+            gender: patient.gender === 'Female' ? 'Female' : 'Male',
+            assignedDoctor: user?.name,
+          }}
+          onClose={() => setShowRequestAdmission(false)}
+          onConfirm={handleRequestAdmission}
+        />
+      )}
     </div>
   );
 }

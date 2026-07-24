@@ -37,20 +37,33 @@ function toLocalInputValue(date: Date): string {
 
 export function NewAdmissionModal({
   wardOptions,
+  initialValues,
   onClose,
   onConfirm,
 }: {
   wardOptions: { value: string; label: string }[];
+  /** Prefills the form when opened with a patient already in context (e.g.
+   * the doctor's "Request Admission" action on Consultation) — omit for the
+   * blank form Nursing's own "New Admission" button opens. */
+  initialValues?:
+    | {
+        patientName?: string | undefined;
+        mrn?: string | undefined;
+        age?: number | undefined;
+        gender?: 'Male' | 'Female' | undefined;
+        assignedDoctor?: string | undefined;
+      }
+    | undefined;
   onClose: () => void;
   onConfirm: (input: NewAdmissionInput) => void;
 }) {
-  const [patientName, setPatientName] = useState('');
-  const [mrn, setMrn] = useState('');
-  const [age, setAge] = useState('');
-  const [gender, setGender] = useState<'Male' | 'Female'>('Female');
+  const [patientName, setPatientName] = useState(initialValues?.patientName ?? '');
+  const [mrn, setMrn] = useState(initialValues?.mrn ?? '');
+  const [age, setAge] = useState(initialValues?.age ? String(initialValues.age) : '');
+  const [gender, setGender] = useState<'Male' | 'Female'>(initialValues?.gender ?? 'Female');
   const [admissionType, setAdmissionType] = useState<'Medical' | 'Surgical'>('Medical');
   const [ward, setWard] = useState(wardOptions[0]?.value ?? '');
-  const [assignedDoctor, setAssignedDoctor] = useState('');
+  const [assignedDoctor, setAssignedDoctor] = useState(initialValues?.assignedDoctor ?? '');
   const [admittedAt, setAdmittedAt] = useState(toLocalInputValue(new Date()));
 
   const canSave = patientName.trim() !== '' && mrn.trim() !== '' && ward !== '';
