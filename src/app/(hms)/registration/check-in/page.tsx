@@ -30,7 +30,10 @@ import { PermissionGate } from '@components/shared/PermissionGate';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
+import { getDoctorByName } from '@/features/shared/__mocks__/doctorDirectory';
+import { addQueueEntry } from '@/features/registration/store/registrationQueueStore';
 import { formatDateTime, formatHumanDate, formatTime } from '@/utils/datetime';
 import {
   CHECKIN_PATIENT_SEARCH_KEYS,
@@ -163,6 +166,8 @@ const EMPTY_VISIT_DETAILS = {
 export default function CheckInPage() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const actorName = user?.name ?? 'Registration Officer';
 
   const [mode, setMode] = useState<Mode>('verify');
   const [searchQuery, setSearchQuery] = useState('');
@@ -281,16 +286,41 @@ export default function CheckInPage() {
   const canCompleteCheckIn = patient !== null && queueNumber !== null && visitDetailsValid;
 
   function handleCompleteCheckIn() {
-    if (!canCompleteCheckIn) {
+    if (!canCompleteCheckIn || !patient) {
       toast.error(
         'Cannot complete check-in',
         'Find a patient, fill in visit details, and assign a queue number first.',
       );
       return;
     }
+
+    const physicianLabel = visitDetails.physician
+      ? labelFor(PHYSICIAN_OPTIONS, visitDetails.physician)
+      : undefined;
+
+    // This is what actually moves the patient from Registration onto the
+    // Nurse Patient Queue — without it, completing check-in only issued a
+    // local queue number and the patient could never be triaged.
+    addQueueEntry({
+      patientName: patient.fullName,
+      mrn: patient.mrn,
+      gender: patient.gender === 'Female' ? 'Female' : 'Male',
+      age: patient.age,
+      checkinDepartment: visitDetails.department,
+      isEmergency: visitDetails.visitType === 'emergency',
+      isNewPatient: mode === 'walkin' && !appointment,
+      physician: physicianLabel
+        ? { label: physicianLabel, doctorId: getDoctorByName(physicianLabel)?.id }
+        : undefined,
+      consultingRoomLabel: consultingRoom
+        ? labelFor(CONSULTING_ROOM_OPTIONS, consultingRoom)
+        : undefined,
+      checkedInBy: actorName,
+    });
+
     setCheckInDateTime(new Date().toISOString());
     setIsComplete(true);
-    toast.success('Check-in complete', `${patient?.fullName} has been checked in.`);
+    toast.success('Check-in complete', `${patient.fullName} has been checked in.`);
   }
 
   function handleCancelCheckIn() {

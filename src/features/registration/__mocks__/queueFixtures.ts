@@ -95,7 +95,7 @@ export const emergencyOnDuty = getOnDutyDoctor('Emergency Medicine');
 // than a fixed room doctor — General Outpatient/Dental/Laboratory/Pharmacy/
 // Radiology/Physiotherapy aren't on-call specialties, so they keep a fixed
 // clinic doctor.
-const CLINICS_BY_DEPARTMENT: Record<
+export const CLINICS_BY_DEPARTMENT: Record<
   string,
   { clinic: string; doctor: string; doctorId?: string }[]
 > = {
@@ -400,6 +400,17 @@ const EXTRA_ENTRIES: QueueEntry[] = Array.from({ length: EXTRA_COUNT }, (_, i) =
 });
 
 export const QUEUE_ENTRIES: QueueEntry[] = [...FEATURED_ENTRIES, ...EXTRA_ENTRIES];
+
+/** The first (primary) clinic/doctor on duty for a given queue department —
+ * the same assignment rule `EXTRA_ENTRIES` above was generated with. Reused
+ * by `registrationQueueStore.addQueueEntry()` so a check-in-created entry is
+ * assigned exactly the way this file's own generated entries are, rather
+ * than duplicating a second assignment table. */
+export function pickClinicForDepartment(
+  department: string,
+): { clinic: string; doctor: string; doctorId?: string } | undefined {
+  return CLINICS_BY_DEPARTMENT[department]?.[0];
+}
 
 export const CHECKED_IN_TODAY = 86;
 export const CHECKED_IN_TREND_PERCENT = 12;

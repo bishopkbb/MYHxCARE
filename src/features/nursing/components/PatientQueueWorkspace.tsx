@@ -46,11 +46,12 @@ import {
   startTriage,
   useClaimedPatients,
 } from '@/features/nursing/store/nursingWorkflowStore';
+import { DEPARTMENTS } from '@/features/registration/__mocks__/queueFixtures';
 import {
-  DEPARTMENTS,
-  QUEUE_ENTRIES,
-  type QueueEntry,
-} from '@/features/registration/__mocks__/queueFixtures';
+  markQueueEntryEmergency,
+  reassignQueueEntry,
+  useQueueEntries,
+} from '@/features/registration/store/registrationQueueStore';
 
 type PageState = 'loading' | 'loaded' | 'error';
 const ROWS_PER_PAGE = 8;
@@ -137,7 +138,7 @@ export function PatientQueueWorkspace() {
   const actorName = user?.name ?? 'Nurse';
   const [pageState, setPageState] = useState<PageState>('loading');
   const [tasks, setTasks] = useState<QueueTask[]>(QUEUE_TASKS);
-  const [registrationEntries, setRegistrationEntries] = useState<QueueEntry[]>(QUEUE_ENTRIES);
+  const registrationEntries = useQueueEntries();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
@@ -280,51 +281,14 @@ export function PatientQueueWorkspace() {
     const entryId = selected?.preAdmissionEntryId;
     if (!entryId || !reassignClinic) return;
     const patientName = selected?.patientName;
-    setRegistrationEntries((prev) =>
-      prev.map((e) =>
-        e.id === entryId
-          ? {
-              ...e,
-              department: reassignDept,
-              assignedClinic: reassignClinic,
-              history: [
-                ...e.history,
-                {
-                  time: new Date().toISOString(),
-                  label: `Reassigned to ${reassignClinic}`,
-                  by: actorName,
-                },
-              ],
-            }
-          : e,
-      ),
-    );
+    reassignQueueEntry(entryId, reassignDept, reassignClinic, actorName);
     toast.success('Queue reassigned', `${patientName} moved to ${reassignClinic}.`);
     setReassignOpen(false);
   }
 
   function markEmergency(task: QueueTask) {
     if (!task.preAdmissionEntryId || task.isEmergency) return;
-    const entryId = task.preAdmissionEntryId;
-    setRegistrationEntries((prev) =>
-      prev.map((e) =>
-        e.id === entryId
-          ? {
-              ...e,
-              isEmergency: true,
-              status: 'Emergency',
-              history: [
-                ...e.history,
-                {
-                  time: new Date().toISOString(),
-                  label: 'Marked as Emergency Priority',
-                  by: actorName,
-                },
-              ],
-            }
-          : e,
-      ),
-    );
+    markQueueEntryEmergency(task.preAdmissionEntryId, actorName);
     toast.success('Marked as emergency', `${task.patientName} moved to high-priority queue.`);
   }
 
