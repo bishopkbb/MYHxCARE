@@ -864,6 +864,55 @@ const STAFF_NOTIFICATIONS_GUIDE: HelpGuide = {
   ],
 };
 
+const NURSE_NOTIFICATIONS_GUIDE: HelpGuide = {
+  id: 'nurse-notifications',
+  title: 'Notifications',
+  intro:
+    'Real-time alerts for your patients, ward, and shift — critical results, medication due, vitals, and more.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Unread, Today, This Week, and Critical Alerts summarize the list below at a glance.',
+    },
+    {
+      heading: 'Notification Categories',
+      body: 'Click a category on the left (or use the Notification Type filter) to narrow the list — Critical Lab Result, Medication Due, Patient Assigned, Vitals Alert, Care Plan Update, Discharge Ready, Shift Handover Reminder, and System Announcement.',
+    },
+    {
+      heading: 'Filtering',
+      body: 'Combine Priority, Date, Ward, and Notification Type, then Filter. Reset clears everything back to the full list.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'The open-arrow icon marks a notification read and takes you straight to the relevant screen — Laboratory for a critical result, Medication Administration for a dose due, and so on. The trash icon removes it from your list.',
+    },
+  ],
+};
+
+const NURSE_ANNOUNCEMENTS_GUIDE: HelpGuide = {
+  id: 'nurse-announcements',
+  title: 'Announcements',
+  intro: 'Hospital-wide and department-specific announcements, with read tracking and pinning.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total, Unread, and Pinned announcements, plus a Departmental vs System Wide breakdown.',
+    },
+    {
+      heading: 'Finding an announcement',
+      body: 'Use the All / Unread / Pinned pills, the Department dropdown, Filter (by priority), or search — select a row to view its full detail on the right.',
+    },
+    {
+      heading: 'Reading an announcement',
+      body: 'The detail panel shows the full message, any attachment, target audience, and read/unread recipient stats. "Mark as Read" records that you have read it; "Share Announcement" copies a link.',
+    },
+    {
+      heading: 'Posting and managing',
+      body: '"New Announcement" opens the compose form — set scope, department, priority, message, and target audience. The "⋮" menu on an open announcement lets you pin/unpin or delete it.',
+    },
+  ],
+};
+
 const EMERGENCY_REGISTRATION_GUIDE: HelpGuide = {
   id: 'emergency-registration',
   title: 'Emergency Registration',
@@ -1888,6 +1937,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/clinical-timeline')) return NURSE_CLINICAL_TIMELINE_GUIDE;
   if (pathname.startsWith('/nurse/my-schedule')) return NURSE_MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/nurse/shift-handover')) return SHIFT_HANDOVER_GUIDE;
+  if (pathname.startsWith('/nurse/notifications')) return NURSE_NOTIFICATIONS_GUIDE;
+  if (pathname.startsWith('/nurse/announcements')) return NURSE_ANNOUNCEMENTS_GUIDE;
   if (pathname.startsWith('/nurse/nursing-assessment')) return NURSING_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/nurse/medication-administration'))
     return MEDICATION_ADMINISTRATION_GUIDE;

@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Announcements' };
+import { NurseAnnouncementsWorkspace } from '@/features/nursing/components/NurseAnnouncementsWorkspace';
 
 export default function NurseAnnouncementsPage() {
-  return (
-    <ComingSoon
-      title="Announcements"
-      description="Centre-wide and ward-specific announcements from nursing administration are on the way."
-    />
-  );
+  return <NurseAnnouncementsWorkspace />;
 }

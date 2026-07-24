@@ -1,7 +1,7 @@
 'use client';
 
-import { StaffNotificationsWorkspace } from '@/features/notifications/components/StaffNotificationsWorkspace';
+import { NurseNotificationsWorkspace } from '@/features/nursing/components/NurseNotificationsWorkspace';
 
 export default function NurseNotificationsPage() {
-  return <StaffNotificationsWorkspace />;
+  return <NurseNotificationsWorkspace />;
 }
