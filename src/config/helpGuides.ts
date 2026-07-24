@@ -1658,6 +1658,31 @@ const NURSE_MY_SCHEDULE_GUIDE: HelpGuide = {
   ],
 };
 
+const SHIFT_HANDOVER_GUIDE: HelpGuide = {
+  id: 'shift-handover',
+  title: 'Shift Handover',
+  intro:
+    'A structured record of ward status, tasks, and patients handed from one shift to the next.',
+  sections: [
+    {
+      heading: 'Patient Summary',
+      body: 'Ward occupancy and a snapshot of every patient — bed, diagnosis, length of stay, condition, and handover notes. "View All Patients" opens the full roster.',
+    },
+    {
+      heading: 'Outstanding Tasks and Critical Patients',
+      body: '"View All Tasks" opens a checklist you can tick off as you brief the incoming nurse. "View All Critical Patients" lets you mark each one reviewed at handover.',
+    },
+    {
+      heading: 'Medication Due and Pending Investigations',
+      body: 'What needs attention in the next few hours. "View All" on either card opens the full Medication Administration or Laboratory screen.',
+    },
+    {
+      heading: 'Signatures and completing handover',
+      body: 'The incoming nurse must "Sign as Incoming Nurse" before "Complete Handover" becomes available — this formally transfers responsibility for the ward. "Save as Draft" keeps your progress without completing it.',
+    },
+  ],
+};
+
 const REPORTS_GUIDE: HelpGuide = {
   id: 'reports',
   title: 'Clinical Reports',
@@ -1862,6 +1887,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/laboratory')) return NURSE_LABORATORY_GUIDE;
   if (pathname.startsWith('/nurse/clinical-timeline')) return NURSE_CLINICAL_TIMELINE_GUIDE;
   if (pathname.startsWith('/nurse/my-schedule')) return NURSE_MY_SCHEDULE_GUIDE;
+  if (pathname.startsWith('/nurse/shift-handover')) return SHIFT_HANDOVER_GUIDE;
   if (pathname.startsWith('/nurse/nursing-assessment')) return NURSING_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/nurse/medication-administration'))
     return MEDICATION_ADMINISTRATION_GUIDE;

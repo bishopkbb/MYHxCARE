@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Shift Handover' };
+import { ShiftHandoverWorkspace } from '@/features/nursing/components/ShiftHandoverWorkspace';
 
 export default function NurseShiftHandoverPage() {
-  return (
-    <ComingSoon
-      title="Shift Handover"
-      description="Structured SBAR shift handover — outgoing summary, outstanding tasks, and incoming acknowledgement — is on the way."
-    />
-  );
+  return <ShiftHandoverWorkspace />;
 }
