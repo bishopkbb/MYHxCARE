@@ -1175,6 +1175,35 @@ const NURSE_LABORATORY_GUIDE: HelpGuide = {
   ],
 };
 
+const NURSE_CLINICAL_TIMELINE_GUIDE: HelpGuide = {
+  id: 'nurse-clinical-timeline',
+  title: 'Clinical Timeline',
+  intro:
+    'A single chronological history of one patient’s care — registration, assessments, vitals, medication, laboratory activity, notes, transfers, and discharge.',
+  sections: [
+    {
+      heading: 'Selecting a patient',
+      body: 'Pick a patient from your assigned roster to open their timeline — search by name or MRN. "Change Patient" at the top returns you to the picker.',
+    },
+    {
+      heading: 'Reading the timeline',
+      body: 'Events run oldest to newest, exactly as care unfolded. Each entry shows its category, what happened, exactly when, and who recorded it — "View Details" opens the full record.',
+    },
+    {
+      heading: 'Filtering',
+      body: 'Use the category pills to narrow the list to one type of event, or "Filter" to set a date range. "View as List" switches to a compact table of the same events.',
+    },
+    {
+      heading: 'Export',
+      body: '"Export Timeline" produces a PDF of the currently filtered events — useful for handover notes and case summaries.',
+    },
+    {
+      heading: 'Read-only',
+      body: 'This screen never edits clinical data — use the Quick Actions panel to jump to Nursing Notes, the full Patient Record, Care Plan, Laboratory Results, or Discharges to make changes.',
+    },
+  ],
+};
+
 const OBSERVATION_CHARTS_GUIDE: HelpGuide = {
   id: 'observation-charts',
   title: 'Observation Charts',
@@ -1807,6 +1836,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/vital-signs')) return VITAL_SIGNS_GUIDE;
   if (pathname.startsWith('/nurse/observation-charts')) return OBSERVATION_CHARTS_GUIDE;
   if (pathname.startsWith('/nurse/laboratory')) return NURSE_LABORATORY_GUIDE;
+  if (pathname.startsWith('/nurse/clinical-timeline')) return NURSE_CLINICAL_TIMELINE_GUIDE;
   if (pathname.startsWith('/nurse/nursing-assessment')) return NURSING_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/nurse/medication-administration'))
     return MEDICATION_ADMINISTRATION_GUIDE;
