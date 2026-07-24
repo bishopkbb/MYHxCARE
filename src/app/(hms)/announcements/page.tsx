@@ -2,6 +2,6 @@
 
 import { AnnouncementsWorkspace } from '@/features/announcements/components/AnnouncementsWorkspace';
 
-export default function NurseAnnouncementsPage() {
+export default function AnnouncementsPage() {
   return <AnnouncementsWorkspace />;
 }

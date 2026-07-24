@@ -19,6 +19,7 @@ export const ROUTES = {
   admin: '/admin',
   notifications: '/notifications',
   messages: '/messages',
+  announcements: '/announcements',
   referrals: '/referrals',
   mySchedule: '/my-schedule',
   medicalRecords: '/medical-records',
@@ -78,6 +79,7 @@ export const ROUTES = {
   medicalRecordsWorkforceManagement: '/medical-records/workforce-management',
   medicalRecordsMessages: '/medical-records/messages',
   medicalRecordsNotifications: '/medical-records/notifications',
+  medicalRecordsAnnouncements: '/medical-records/announcements',
   medicalRecordsAccountProfile: '/medical-records/account/profile',
   medicalRecordsAccountSettings: '/medical-records/account/settings',
 
@@ -128,6 +130,7 @@ export const ROUTES = {
   registrationWorkforceManagement: '/registration/workforce-management',
   registrationMessages: '/registration/messages',
   registrationNotifications: '/registration/notifications',
+  registrationAnnouncements: '/registration/announcements',
   registrationAccountProfile: '/registration/account/profile',
   registrationAccountSettings: '/registration/account/settings',
 

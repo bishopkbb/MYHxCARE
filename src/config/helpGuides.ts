@@ -889,8 +889,8 @@ const NURSE_NOTIFICATIONS_GUIDE: HelpGuide = {
   ],
 };
 
-const NURSE_ANNOUNCEMENTS_GUIDE: HelpGuide = {
-  id: 'nurse-announcements',
+const ANNOUNCEMENTS_GUIDE: HelpGuide = {
+  id: 'announcements',
   title: 'Announcements',
   intro: 'Hospital-wide and department-specific announcements, with read tracking and pinning.',
   sections: [
@@ -1909,6 +1909,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/medical-records/document-upload')) return DOCUMENT_UPLOAD_GUIDE;
   if (pathname.startsWith('/medical-records/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/medical-records/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
+  if (pathname.startsWith('/medical-records/announcements')) return ANNOUNCEMENTS_GUIDE;
   if (pathname.startsWith('/medical-records/reports')) return MEDICAL_RECORDS_REPORTS_GUIDE;
   if (pathname.startsWith('/medical-records/patient-statistics')) return PATIENT_STATISTICS_GUIDE;
   if (pathname.startsWith('/medical-records/workforce-management'))
@@ -1928,6 +1929,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/attendance')) return DAILY_ATTENDANCE_GUIDE;
   if (pathname.startsWith('/registration/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/registration/notifications')) return STAFF_NOTIFICATIONS_GUIDE;
+  if (pathname.startsWith('/registration/announcements')) return ANNOUNCEMENTS_GUIDE;
   if (pathname.startsWith('/registration/workforce-management'))
     return REGISTRATION_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
@@ -1938,7 +1940,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/my-schedule')) return NURSE_MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/nurse/shift-handover')) return SHIFT_HANDOVER_GUIDE;
   if (pathname.startsWith('/nurse/notifications')) return NURSE_NOTIFICATIONS_GUIDE;
-  if (pathname.startsWith('/nurse/announcements')) return NURSE_ANNOUNCEMENTS_GUIDE;
+  if (pathname.startsWith('/nurse/announcements')) return ANNOUNCEMENTS_GUIDE;
   if (pathname.startsWith('/nurse/nursing-assessment')) return NURSING_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/nurse/medication-administration'))
     return MEDICATION_ADMINISTRATION_GUIDE;
@@ -1965,6 +1967,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/reports')) return REPORTS_GUIDE;
   if (pathname.startsWith('/notifications')) return NOTIFICATIONS_GUIDE;
+  if (pathname.startsWith('/announcements')) return ANNOUNCEMENTS_GUIDE;
   if (pathname.startsWith('/profile')) return PROFILE_GUIDE;
   if (pathname.startsWith('/settings/audit-log')) return AUDIT_LOG_GUIDE;
   if (pathname.startsWith('/settings')) return SETTINGS_GUIDE;

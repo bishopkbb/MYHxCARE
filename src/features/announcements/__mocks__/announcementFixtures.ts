@@ -1,5 +1,7 @@
 /**
- * Mock fixtures for the nurse-scoped Announcements screen.
+ * Mock fixtures for the Announcements screen — shared across every
+ * workspace's dashboard (see announcementsStore.ts for why this is a single
+ * cross-workspace feed rather than a per-workspace copy).
  * Swap out by pointing hooks to a real announcements endpoint in Phase 6.
  */
 

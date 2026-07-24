@@ -125,6 +125,11 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
             icon: Bell,
             badge: 8,
           },
+          {
+            label: 'Announcements',
+            href: '/medical-records/announcements',
+            icon: Megaphone,
+          },
         ],
       },
       {
@@ -196,6 +201,11 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
             href: '/registration/notifications',
             icon: Bell,
             badge: 8,
+          },
+          {
+            label: 'Announcements',
+            href: '/registration/announcements',
+            icon: Megaphone,
           },
         ],
       },
@@ -335,6 +345,11 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
             icon: Bell,
             iconSrc: '/icons/notifications.png',
             badge: 8,
+          },
+          {
+            label: 'Announcements',
+            href: '/announcements',
+            icon: Megaphone,
           },
         ],
       },
@@ -488,6 +503,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+          { label: 'Announcements', href: '/announcements', icon: Megaphone },
         ],
       },
       {
@@ -523,6 +539,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+          { label: 'Announcements', href: '/announcements', icon: Megaphone },
         ],
       },
       {
@@ -559,6 +576,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+          { label: 'Announcements', href: '/announcements', icon: Megaphone },
         ],
       },
       {
@@ -591,6 +609,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+          { label: 'Announcements', href: '/announcements', icon: Megaphone },
         ],
       },
       {
@@ -623,6 +642,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+          { label: 'Announcements', href: '/announcements', icon: Megaphone },
         ],
       },
       {
@@ -654,6 +674,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+          { label: 'Announcements', href: '/announcements', icon: Megaphone },
         ],
       },
       {

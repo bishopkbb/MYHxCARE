@@ -25,12 +25,18 @@ import { PERMISSIONS } from '@/constants/permissions';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import {
-  ANNOUNCEMENTS,
   CATEGORY_CFG,
   DEPARTMENT_OPTIONS,
   type Announcement,
   type AnnouncementPriority,
-} from '@/features/nursing/__mocks__/announcementFixtures';
+} from '@/features/announcements/__mocks__/announcementFixtures';
+import {
+  addAnnouncement,
+  deleteAnnouncement,
+  markAnnouncementRead,
+  toggleAnnouncementPin,
+  useAnnouncements,
+} from '@/features/announcements/store/announcementsStore';
 
 const NewAnnouncementModal = dynamic(
   () => import('./NewAnnouncementModal').then((m) => m.NewAnnouncementModal),
@@ -56,15 +62,15 @@ function relativeTime(iso: string): string {
   return `${days} days ago`;
 }
 
-export function NurseAnnouncementsWorkspace() {
+export function AnnouncementsWorkspace() {
   const toast = useToast();
-  const [announcements, setAnnouncements] = useState<Announcement[]>(ANNOUNCEMENTS);
+  const announcements = useAnnouncements();
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [department, setDepartment] = useState('');
   const [priority, setPriority] = useState<AnnouncementPriority | ''>('');
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedId, setSelectedId] = useState<string | null>(ANNOUNCEMENTS[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(announcements[0]?.id ?? null);
   const [newModalOpen, setNewModalOpen] = useState(false);
   const [departmentMenuOpen, setDepartmentMenuOpen] = useState(false);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
@@ -108,17 +114,13 @@ export function NurseAnnouncementsWorkspace() {
 
   const selected = announcements.find((a) => a.id === effectiveSelectedId) ?? null;
 
-  function markRead(id: string) {
-    setAnnouncements((prev) => prev.map((a) => (a.id === id ? { ...a, read: true } : a)));
-  }
-
   function togglePin(id: string) {
-    setAnnouncements((prev) => prev.map((a) => (a.id === id ? { ...a, pinned: !a.pinned } : a)));
+    toggleAnnouncementPin(id);
     setMoreMenuOpen(false);
   }
 
   function handleDelete(id: string) {
-    setAnnouncements((prev) => prev.filter((a) => a.id !== id));
+    deleteAnnouncement(id);
     setMoreMenuOpen(false);
     toast.success('Announcement deleted', 'It has been removed from the list.');
   }
@@ -137,10 +139,13 @@ export function NurseAnnouncementsWorkspace() {
   }
 
   function handleCreate(announcement: Announcement) {
-    setAnnouncements((prev) => [announcement, ...prev]);
+    addAnnouncement(announcement);
     setSelectedId(announcement.id);
     setNewModalOpen(false);
-    toast.success('Announcement posted', `"${announcement.title}" has been published.`);
+    toast.success(
+      'Announcement posted',
+      `"${announcement.title}" has been published to every workspace.`,
+    );
   }
 
   return (
@@ -848,7 +853,7 @@ export function NurseAnnouncementsWorkspace() {
                   <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
                     <button
                       type="button"
-                      onClick={() => markRead(selected.id)}
+                      onClick={() => markAnnouncementRead(selected.id)}
                       disabled={selected.read}
                       className={`flex h-11 flex-1 items-center justify-center gap-2 rounded-[10px] font-sans font-semibold transition-colors duration-150 hover:bg-[#F5FBFD] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
                       style={{

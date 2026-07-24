@@ -12,7 +12,7 @@ import {
   type Announcement,
   type AnnouncementPriority,
   type AnnouncementScope,
-} from '@/features/nursing/__mocks__/announcementFixtures';
+} from '@/features/announcements/__mocks__/announcementFixtures';
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
@@ -52,7 +52,7 @@ export function NewAnnouncementModal({
       title: title.trim(),
       scope,
       department: scope === 'System Wide' ? 'Administration' : department,
-      author: user?.name ?? 'Staff Nurse',
+      author: user?.name ?? 'Staff Member',
       category: 'Administration',
       priority,
       pinned,
