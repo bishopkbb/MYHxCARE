@@ -102,9 +102,13 @@ export function getClaimedPatients(): NursePatient[] {
   return cachedClaimed;
 }
 
-/** Admitted ward patients plus whichever pre-admission patients this nurse has claimed. */
+/** Admitted ward patients plus whichever pre-admission patients this nurse has
+ * claimed, minus anyone Discharges has completed (see `markPatientDischarged`
+ * below) — a discharged patient has left the ward and should disappear from
+ * every screen that reads the roster, the same way they've already left Bed
+ * Management's occupied bed. */
 export function getEffectiveRoster(): NursePatient[] {
-  return [...MY_PATIENTS_ROSTER, ...cachedClaimed];
+  return [...MY_PATIENTS_ROSTER, ...cachedClaimed].filter((p) => !dischargedPatientIds.has(p.id));
 }
 
 function subscribe(listener: () => void): () => void {
@@ -169,4 +173,29 @@ export function hasRecordedVitals(patientId: string): boolean {
  * on the assigned doctor's queue (see encounterFixtures.ts's getDoctorQueue). */
 export function getPatientsReadyForDoctor(): NursePatient[] {
   return cachedClaimed.filter((p) => hasRecordedVitals(p.id));
+}
+
+// ── Discharge tracking ───────────────────────────────────────────────────────
+// Completing a discharge (DischargesWorkspace) removes the patient from the
+// effective roster here, which is what makes their bed show as vacated back
+// on Bed Management (a roster-slot bed with no matching roster patient
+// resolves to Available — the same rule that already applies to every other
+// empty roster slot) without a manual "go update Bed Management too" step.
+
+const dischargedPatientIds = new Set<string>();
+
+export function markPatientDischarged(patientId: string): void {
+  dischargedPatientIds.add(patientId);
+  // useSyncExternalStore bails out of re-rendering a subscriber when
+  // getSnapshot() returns the same reference as last time — recomputing
+  // gives cachedClaimed a fresh array identity so useClaimedPatients()
+  // subscribers (Bed Management's roster-bed refresh, the doctor queue,
+  // the dashboard widget) actually re-render, even though the claimed Map
+  // itself didn't change.
+  recomputeSnapshot();
+  emit();
+}
+
+export function isPatientDischarged(patientId: string): boolean {
+  return dischargedPatientIds.has(patientId);
 }

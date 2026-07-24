@@ -34,7 +34,11 @@ import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import { formatDateTime } from '@/utils/datetime';
-import { getEffectiveRoster } from '@/features/nursing/store/nursingWorkflowStore';
+import {
+  getEffectiveRoster,
+  isPatientDischarged,
+  useClaimedPatients,
+} from '@/features/nursing/store/nursingWorkflowStore';
 import type { NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
 import {
   BED_STATUS_CFG,
@@ -588,13 +592,35 @@ export function BedManagementWorkspace() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [nowMs, setNowMs] = useState(0);
 
+  // Its identity changes on every nursing-store emit (a patient claimed, or —
+  // the case this exists for — a discharge completing) — used below purely
+  // as a memo dependency to force `wardBeds` to recheck `isPatientDischarged`.
+  const claimedPatients = useClaimedPatients();
+
   useEffect(() => {
     const t = setTimeout(() => setNowMs(Date.now()), 0);
     return () => clearTimeout(t);
   }, []);
 
   const selectedWard = WARD_LAYOUTS.find((w) => w.id === selectedWardId) ?? WARD_LAYOUTS[0]!;
-  const wardBeds = useMemo(() => bedsByWard[selectedWard.id] ?? [], [bedsByWard, selectedWard.id]);
+  const wardBeds = useMemo(() => {
+    const local = bedsByWard[selectedWard.id] ?? [];
+    // Only ever vacates a roster-slot bed whose *specific* occupant has been
+    // discharged through the formal Discharges workflow (`isPatientDischarged`
+    // — for a roster slot, `bed.id` is the occupying patient's id). This
+    // screen's own Reserve / Discharge Patient / Out of Service quick actions
+    // are untouched, since none of those mark a patient discharged.
+    return local.map((bed, i) => {
+      const slot = selectedWard.beds[i];
+      if (!slot?.rosterSlot || bed.status !== 'Occupied' || !isPatientDischarged(bed.id)) {
+        return bed;
+      }
+      return { id: bed.id, bedCode: bed.bedCode, room: bed.room, status: 'Available' as const };
+    });
+    // claimedPatients is a re-trigger signal (its identity changes on every
+    // relevant nursing-store emit), not a value read inside the memo body.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bedsByWard, selectedWard, claimedPatients]);
   const counts = useMemo(() => countBeds(wardBeds), [wardBeds]);
   const selectedBed = wardBeds.find((b) => b.id === selectedBedId) ?? null;
 

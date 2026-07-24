@@ -32,7 +32,10 @@ import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import { formatDate, formatTime } from '@/utils/datetime';
-import { getEffectiveRoster } from '@/features/nursing/store/nursingWorkflowStore';
+import {
+  getEffectiveRoster,
+  markPatientDischarged,
+} from '@/features/nursing/store/nursingWorkflowStore';
 import {
   DISCHARGES,
   DISCHARGE_STEPS,
@@ -367,10 +370,11 @@ export function DischargesWorkspace() {
           };
         }),
       );
-      toast.success(
-        'Patient discharged',
-        `${record.patientName} has been discharged. Remember to release their bed in Bed Management.`,
-      );
+      // Vacates their bed in Bed Management automatically — a discharged
+      // patient leaves the effective roster, and a roster-slot bed with no
+      // matching patient resolves back to Available.
+      if (record.patientId) markPatientDischarged(record.patientId);
+      toast.success('Patient discharged', `${record.patientName} has been discharged.`);
     } else {
       updateDischarge(record.id, { currentStep: nextStep });
       toast.success(
