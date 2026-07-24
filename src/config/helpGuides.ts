@@ -913,6 +913,27 @@ const ANNOUNCEMENTS_GUIDE: HelpGuide = {
   ],
 };
 
+const NURSING_REPORTS_GUIDE: HelpGuide = {
+  id: 'nursing-reports',
+  title: 'Nursing Reports',
+  intro:
+    'Eight ward and clinical reports in one place, each viewable in full and exportable individually or together.',
+  sections: [
+    {
+      heading: 'The report cards',
+      body: 'Medication Administration, Shift, Ward Census, Vital Signs, Admission, Discharge, Patient Observation, and Medication Due — each shows key stats plus a preview table or chart.',
+    },
+    {
+      heading: 'Date range and filtering',
+      body: 'The date range button at the top sets the reporting period and refreshes every card. "Filter" narrows the grid down to specific report categories.',
+    },
+    {
+      heading: 'Viewing and exporting',
+      body: '"View Report" opens the full underlying data for that card. "Export" downloads a single report; "Export All" downloads every currently visible report in one file.',
+    },
+  ],
+};
+
 const EMERGENCY_REGISTRATION_GUIDE: HelpGuide = {
   id: 'emergency-registration',
   title: 'Emergency Registration',
@@ -1952,6 +1973,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
   if (pathname.startsWith('/nurse/workforce-management')) return NURSE_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/nurse/messages')) return COLLABORATION_GUIDE;
+  if (pathname.startsWith('/nurse/reports')) return NURSING_REPORTS_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/nurse/admissions')) return ADMISSIONS_GUIDE;

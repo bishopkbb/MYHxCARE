@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Nursing Reports' };
+import { NursingReportsWorkspace } from '@/features/nursing/components/NursingReportsWorkspace';
 
 export default function NurseReportsPage() {
-  return (
-    <ComingSoon
-      title="Nursing Reports"
-      description="Shift summaries, medication compliance, and ward workload reports for nursing management are on the way."
-    />
-  );
+  return <NursingReportsWorkspace />;
 }
