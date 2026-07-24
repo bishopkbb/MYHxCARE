@@ -19,11 +19,14 @@ import { useRouter } from 'next/navigation';
 import { use, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/constants/routes';
 import {
   FALLBACK_PATIENT_DETAIL,
   MOCK_PATIENT_DETAILS,
 } from '@/features/patients/__mocks__/patientFixtures';
+import { completeEncounterQueueRow } from '@/features/encounters/store/encounterQueueStore';
+import { completeEncounter } from '@/features/encounters/store/encounterStore';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -139,6 +142,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
   const patient = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
 
   const toast = useToast();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [form, setForm] = useState<ConsultationForm>(INITIAL_FORM);
 
@@ -149,6 +153,31 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
   const activeMedications = patient.medications.filter((m) => m.status === 'active');
   const summaryVitals = patient.vitalSigns.readings.filter((r) => SUMMARY_VITAL_KEYS.has(r.key));
   const sliderPct = ((form.severity - 1) / 9) * 100;
+
+  function handleCompleteConsultation() {
+    const vitalsSummary = summaryVitals
+      .map((r) => `${VITAL_SHORT_LABEL[r.key] ?? r.key} ${r.value}`)
+      .join(' · ');
+
+    completeEncounter({
+      patientId: patient.id,
+      patientName: patient.name,
+      mrn: patient.mrn,
+      fileNumber: patient.fileNumber,
+      departmentId: user?.departmentId ?? 'dept-unknown',
+      departmentName: user?.department ?? 'General',
+      attendingPhysicianId: user?.id ?? 'unknown',
+      attendingPhysicianName: user?.name ?? 'Attending Physician',
+      chiefComplaint: form.chiefComplaint,
+      vitalsSummary,
+      diagnosis: form.primaryDiagnosis,
+      treatmentPlan: form.treatmentPlan,
+    });
+    completeEncounterQueueRow(patient.id, new Date().toISOString());
+
+    toast.success('Consultation complete', 'The encounter record has been saved.');
+    router.back();
+  }
 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: '#F5FBFD' }}>
@@ -1086,10 +1115,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
               <button
                 type="button"
-                onClick={() => {
-                  toast.success('Consultation complete', 'The encounter record has been saved.');
-                  router.back();
-                }}
+                onClick={handleCompleteConsultation}
                 className="rounded-[12px] px-5 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{
                   fontSize: 16,

@@ -13,11 +13,11 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
 import {
-  MOCK_MEDICAL_RECORDS,
   type MedicalRecord,
   type RecordStatus,
   type RecordType,
 } from '@/features/medical-records/__mocks__/medicalRecordFixtures';
+import { useMedicalRecords } from '@/features/medical-records/store/medicalRecordsStore';
 import { ExportMenu } from '@/components/ExportMenu';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
@@ -178,7 +178,7 @@ export default function MedicalRecordsPage() {
     return () => clearTimeout(t);
   }, []);
 
-  const allRecords = MOCK_MEDICAL_RECORDS;
+  const allRecords = useMedicalRecords();
 
   const metrics: MetricCard[] = [
     {

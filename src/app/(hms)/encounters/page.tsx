@@ -22,10 +22,11 @@ import { useEffect, useRef, useState } from 'react';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import {
-  getDoctorQueue,
+  getDoctorQueueFrom,
   type PatientRow,
   type PatientStatus,
 } from '@/features/encounters/__mocks__/encounterFixtures';
+import { useEncounterQueueEntries } from '@/features/encounters/store/encounterQueueStore';
 import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
@@ -249,7 +250,8 @@ export default function EncountersPage() {
   const { user } = useAuth();
   // Re-renders this page when nursing marks a patient ready for a doctor.
   useClaimedPatients();
-  const queue = getDoctorQueue(user?.id);
+  const baseQueueEntries = useEncounterQueueEntries();
+  const queue = getDoctorQueueFrom(baseQueueEntries, user?.id);
   const [activeTab, setActiveTab] = useState('all');
   const [search, setSearch] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);

@@ -31,7 +31,11 @@ import { ROUTES } from '@/constants/routes';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
-import { getDoctorQueue } from '@/features/encounters/__mocks__/encounterFixtures';
+import {
+  getDoctorQueueFrom,
+  type PatientRow,
+} from '@/features/encounters/__mocks__/encounterFixtures';
+import { useEncounterQueueEntries } from '@/features/encounters/store/encounterQueueStore';
 import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
 
 function getGreeting(): string {
@@ -81,6 +85,8 @@ type QueueStatus = 'emergency' | 'waiting' | 'in-consultation';
 
 type QueuePatient = {
   id: string;
+  /** Links to `MOCK_PATIENT_DETAILS` — undefined when no matching patient detail page exists yet. */
+  patientId?: string | undefined;
   initials: string;
   avatarBg: string;
   name: string;
@@ -221,13 +227,19 @@ const DASHBOARD_QUEUE_STATUSES: ReadonlySet<string> = new Set([
 ]);
 
 /** Same doctor-filtered queue `/encounters` shows, trimmed to the 6 rows this
- * widget has room for — no longer a separate invented population. */
-function getDashboardQueue(doctorId: string | undefined): QueuePatient[] {
-  return getDoctorQueue(doctorId)
+ * widget has room for — no longer a separate invented population. `baseEntries`
+ * is the live snapshot from `useEncounterQueueEntries()` so a row completed
+ * from Consultation drops off this widget immediately, not just on `/encounters`. */
+function getDashboardQueue(
+  baseEntries: PatientRow[],
+  doctorId: string | undefined,
+): QueuePatient[] {
+  return getDoctorQueueFrom(baseEntries, doctorId)
     .filter((p) => DASHBOARD_QUEUE_STATUSES.has(p.status))
     .slice(0, 6)
     .map((p) => ({
       id: p.id,
+      patientId: p.patientId,
       initials: p.initials,
       avatarBg: p.avatarBg,
       name: p.name,
@@ -436,7 +448,8 @@ export default function DashboardPage() {
   const [pageState, setPageState] = useState<PageState>('loading');
   // Re-renders this widget when nursing marks a patient ready for a doctor.
   useClaimedPatients();
-  const dashboardQueue = getDashboardQueue(user?.id);
+  const baseQueueEntries = useEncounterQueueEntries();
+  const dashboardQueue = getDashboardQueue(baseQueueEntries, user?.id);
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -866,6 +879,11 @@ export default function DashboardPage() {
                         <div className="hidden shrink-0 pl-1 sm:block">
                           <button
                             type="button"
+                            onClick={() =>
+                              router.push(
+                                `/patients/${patient.patientId ?? patient.id}/consultation`,
+                              )
+                            }
                             className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors duration-150 hover:bg-[#00B4D8] hover:text-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                             style={{ border: '1px solid #00B4D8' }}
                           >

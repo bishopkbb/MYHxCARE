@@ -498,16 +498,23 @@ function nursePatientToPatientRow(patientId: string): PatientRow | null {
   };
 }
 
-/** Merges the static consultation queue with patients Nursing has triaged and
- * recorded first vitals for (see `getPatientsReadyForDoctor`), filtered to the
- * logged-in doctor — the bridge that lets a nurse's Start Triage work actually
- * surface on the doctor's side. Falls back to the unfiltered merged list when
- * the account isn't a recognized roster doctor (e.g. admin/testing). */
-export function getDoctorQueue(doctorId: string | undefined): PatientRow[] {
+/** Merges a base consultation queue (live from `encounterQueueStore`, seeded
+ * from `MOCK_QUEUE`) with patients Nursing has triaged and recorded first
+ * vitals for (see `getPatientsReadyForDoctor`), filtered to the logged-in
+ * doctor — the bridge that lets a nurse's Start Triage work actually surface
+ * on the doctor's side. Falls back to the unfiltered merged list when the
+ * account isn't a recognized roster doctor (e.g. admin/testing). Takes the
+ * base entries as a parameter (rather than reading `MOCK_QUEUE` directly) so
+ * callers can pass the live, mutable snapshot from `useEncounterQueueEntries()`
+ * — completing a consultation needs to be visible here without a reload. */
+export function getDoctorQueueFrom(
+  baseEntries: PatientRow[],
+  doctorId: string | undefined,
+): PatientRow[] {
   const bridged = getPatientsReadyForDoctor()
     .map((p) => nursePatientToPatientRow(p.id))
     .filter((row): row is PatientRow => row !== null);
-  const merged = [...MOCK_QUEUE, ...bridged];
+  const merged = [...baseEntries, ...bridged];
   const isKnownDoctor = DOCTORS.some((d) => d.id === doctorId);
   if (!doctorId || !isKnownDoctor) return merged;
   return merged.filter((row) => row.doctorId === doctorId);
