@@ -94,7 +94,7 @@ jobs:
 
     outputs:
       FRONTEND_IMAGE_REF: ${{ steps.publish.outputs.image_ref }}
-      digest: ${{ steps.build-image.outputs.digest }}
+      digest: ${{ steps.publish.outputs.digest }}
 
     # Only publish from the official repository's main branch.
     # Pull requests and manual runs from feature branches cannot overwrite
