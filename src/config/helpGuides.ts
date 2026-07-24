@@ -1851,8 +1851,8 @@ const PROFILE_GUIDE: HelpGuide = {
       body: 'Update your login password directly from this tab — no need to leave the page.',
     },
     {
-      heading: 'Preferences',
-      body: 'Notification and display toggles, shared with Settings — a change here shows up there too.',
+      heading: 'Notification & display preferences',
+      body: "Managed from Settings, not here — open it from the sidebar to change what you're notified about or how screens display.",
     },
   ],
 };

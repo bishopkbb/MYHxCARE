@@ -35,18 +35,10 @@ import {
   type RecentActivityItem,
   type StaffProfile,
 } from '@/features/profile/__mocks__/profileFixtures';
-import {
-  ABOUT_APP_INFO,
-  getDisplayPrefDefs,
-  getNotificationPrefDefs,
-  readStoredPrefs,
-  PREFS_STORAGE_KEY,
-  type SettingsPrefs,
-} from '@/features/settings/__mocks__/settingsFixtures';
+import { ABOUT_APP_INFO, readStoredPrefs } from '@/features/settings/__mocks__/settingsFixtures';
 import { resolveWorkspace, type WorkspaceId } from '@/types/auth.types';
 import { formatDate, formatDateTime, formatHumanDate, toRelativeTime } from '@/utils/datetime';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
-import { PreferenceToggle } from '@components/shared/PreferenceToggle';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { useAuth } from '@hooks/useAuth';
 import { useContactDetails } from '@hooks/useContactDetails';
@@ -68,7 +60,6 @@ const TABS = [
   'Personal Information',
   'Professional Information',
   'Change Password',
-  'Preferences',
 ] as const;
 type Tab = (typeof TABS)[number];
 
@@ -335,7 +326,7 @@ export function ProfileWorkspace() {
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
   const [uploading, setUploading] = useState(false);
   const [editContactOpen, setEditContactOpen] = useState(false);
-  const [prefs, setPrefs] = useState<SettingsPrefs>(readStoredPrefs);
+  const prefs = readStoredPrefs();
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
@@ -417,33 +408,6 @@ export function ProfileWorkspace() {
     toast.info(action, 'This action will be wired up once the endpoint is ready.');
   }
 
-  function toggleNotification(key: keyof SettingsPrefs['notifications']) {
-    setPrefs((prev) => {
-      const next = {
-        ...prev,
-        notifications: { ...prev.notifications, [key]: !prev.notifications[key] },
-      };
-      try {
-        localStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // Best-effort persistence only — in-memory state above still updates.
-      }
-      return next;
-    });
-  }
-
-  function toggleDisplay(key: keyof SettingsPrefs['display']) {
-    setPrefs((prev) => {
-      const next = { ...prev, display: { ...prev.display, [key]: !prev.display[key] } };
-      try {
-        localStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // Best-effort persistence only — in-memory state above still updates.
-      }
-      return next;
-    });
-  }
-
   function handlePasswordSubmit() {
     if (!currentPw || !newPw || !confirmPw) {
       setPwError('Please fill in every field.');
@@ -479,7 +443,7 @@ export function ProfileWorkspace() {
                 My Profile
               </h1>
               <p className="mt-0.5 font-sans" style={{ fontSize: 14, color: '#4A7080' }}>
-                Your identity, credentials, and preferences across MyHxCare
+                Your identity and credentials across MyHxCare
               </p>
             </div>
           </div>
@@ -963,123 +927,6 @@ export function ProfileWorkspace() {
                         Update Password
                       </button>
                     </div>
-                  </div>
-                )}
-
-                {activeTab === 'Preferences' && (
-                  <div className="flex flex-col gap-4">
-                    <div
-                      className="overflow-hidden"
-                      style={{
-                        borderRadius: 12,
-                        border: '1px solid rgba(0,100,130,0.12)',
-                        background: '#FFFFFF',
-                      }}
-                    >
-                      <div
-                        className="px-4 py-3.5 sm:px-5"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.1)' }}
-                      >
-                        <p
-                          className="font-display font-semibold"
-                          style={{ fontSize: 16, color: '#0D2630' }}
-                        >
-                          Notification Preferences
-                        </p>
-                      </div>
-                      {getNotificationPrefDefs(workspaceId).map((def, i) => (
-                        <div
-                          key={def.key}
-                          className="flex items-center gap-3 px-4 py-4 sm:px-5"
-                          style={
-                            i > 0 ? { borderTop: '1px solid rgba(0,100,130,0.08)' } : undefined
-                          }
-                        >
-                          <div
-                            className="flex size-10 shrink-0 items-center justify-center rounded-[10px]"
-                            style={{ background: 'rgba(226,237,241,0.6)' }}
-                          >
-                            <def.icon style={{ width: 18, height: 18, color: '#4A7080' }} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p
-                              className="font-sans font-semibold"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {def.label}
-                            </p>
-                            <p className="mt-0.5" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {def.description}
-                            </p>
-                          </div>
-                          <PreferenceToggle
-                            on={prefs.notifications[def.key]}
-                            onToggle={() => toggleNotification(def.key)}
-                            ariaLabel={def.label}
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    <div
-                      className="overflow-hidden"
-                      style={{
-                        borderRadius: 12,
-                        border: '1px solid rgba(0,100,130,0.12)',
-                        background: '#FFFFFF',
-                      }}
-                    >
-                      <div
-                        className="px-4 py-3.5 sm:px-5"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.1)' }}
-                      >
-                        <p
-                          className="font-display font-semibold"
-                          style={{ fontSize: 16, color: '#0D2630' }}
-                        >
-                          Display & Clinical Preferences
-                        </p>
-                      </div>
-                      {getDisplayPrefDefs(workspaceId).map((def, i) => (
-                        <div
-                          key={def.key}
-                          className="flex items-center gap-3 px-4 py-4 sm:px-5"
-                          style={
-                            i > 0 ? { borderTop: '1px solid rgba(0,100,130,0.08)' } : undefined
-                          }
-                        >
-                          <div className="min-w-0 flex-1">
-                            <p
-                              className="font-sans font-semibold"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {def.label}
-                            </p>
-                            <p className="mt-0.5" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {def.description}
-                            </p>
-                          </div>
-                          <PreferenceToggle
-                            on={prefs.display[def.key]}
-                            onToggle={() => toggleDisplay(def.key)}
-                            ariaLabel={def.label}
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                      Preferences take effect immediately and are shared with{' '}
-                      <button
-                        type="button"
-                        onClick={() => router.push(ROUTES.settings)}
-                        className={`font-sans font-semibold transition-opacity duration-150 hover:opacity-75 ${FOCUS_RING}`}
-                        style={{ fontSize: 14, color: '#00B4D8' }}
-                      >
-                        Settings
-                      </button>
-                      .
-                    </p>
                   </div>
                 )}
               </div>
