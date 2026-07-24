@@ -94,6 +94,7 @@ jobs:
 
     outputs:
       FRONTEND_IMAGE_REF: ${{ steps.publish.outputs.image_ref }}
+      digest: ${{ steps.publish.outputs.digest }}
 
     # Only publish from the official repository's main branch.
     # Pull requests and manual runs from feature branches cannot overwrite
@@ -156,6 +157,7 @@ jobs:
             org.opencontainers.image.vendor=MYHxCare
 
       - name: Build and load image
+        id: build-image
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -242,3 +244,95 @@ jobs:
           echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}"
           echo
           echo "FRONTEND_IMAGE_REF=$FRONTEND_IMAGE_REF"
+
+  dispatch-development-deployment:
+    name: Dispatch frontend development deployment
+
+    needs:
+      - publish
+
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.publish.result == 'success'
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Create deployment-dispatch token
+        id: release-app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.MYHXCARE_RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.MYHXCARE_RELEASE_APP_PRIVATE_KEY }}
+          owner: MYHxCARE
+          repositories: deployment
+          permission-contents: write
+
+      - name: Validate published digest
+        env:
+          DIGEST: ${{ needs.publish.outputs.digest }}
+        run: |
+          set -Eeuo pipefail
+
+          if [[ ! "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+            echo "Invalid frontend image digest: ${DIGEST}" >&2
+            exit 1
+          fi
+
+          echo "Frontend image digest is valid."
+
+      - name: Notify deployment repository
+        env:
+          GH_TOKEN: ${{ steps.release-app-token.outputs.token }}
+          DIGEST: ${{ needs.publish.outputs.digest }}
+          IMAGE: ghcr.io/myhxcare/hms-frontend
+        run: |
+          set -Eeuo pipefail
+
+          published_at="$(
+            date -u +%FT%TZ
+          )"
+
+          source_run_url="$(
+            printf '%s/%s/actions/runs/%s' \
+              "$GITHUB_SERVER_URL" \
+              "$GITHUB_REPOSITORY" \
+              "$GITHUB_RUN_ID"
+          )"
+
+          jq -n \
+            --arg service "frontend" \
+            --arg environment "development" \
+            --arg source_repository "$GITHUB_REPOSITORY" \
+            --arg source_commit "$GITHUB_SHA" \
+            --arg source_ref "$GITHUB_REF_NAME" \
+            --arg source_run_url "$source_run_url" \
+            --arg image "$IMAGE" \
+            --arg digest "$DIGEST" \
+            --arg published_at "$published_at" \
+            '{
+              event_type: "application-image-published",
+              client_payload: {
+                service: $service,
+                environment: $environment,
+                source_repository: $source_repository,
+                source_commit: $source_commit,
+                source_ref: $source_ref,
+                source_run_url: $source_run_url,
+                image: $image,
+                digest: $digest,
+                published_at: $published_at
+              }
+            }' \
+            > "$RUNNER_TEMP/deployment-dispatch.json"
+
+          gh api \
+            --method POST \
+            "/repos/MYHxCARE/deployment/dispatches" \
+            --input "$RUNNER_TEMP/deployment-dispatch.json"
+
+          echo "Frontend deployment dispatch accepted."
