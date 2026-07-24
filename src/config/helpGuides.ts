@@ -1836,15 +1836,23 @@ const PROFILE_GUIDE: HelpGuide = {
   id: 'profile',
   title: 'My Profile',
   intro:
-    'Your professional identity as it appears across MyHxCare — role, credentials, and contact details.',
+    'Your professional identity as it appears across MyHxCare — content is tailored to your role (nursing, clinical, registration, medical records, and beyond).',
   sections: [
     {
-      heading: 'Credentials',
-      body: 'License number, medical council number, specialization, and department are managed by your administrator and shown here for reference.',
+      heading: 'Overview',
+      body: 'Everything at a glance: personal and professional details, work schedule, account security, and your recent activity feed.',
     },
     {
-      heading: 'Editing',
-      body: '"Edit Profile" lets you update your phone number and email — the contact details patients and colleagues use to reach you.',
+      heading: 'Personal & Professional Information',
+      body: 'Dedicated tabs for the same details as Overview. "Edit" next to Personal Information updates your phone and email — other fields are managed by your administrator.',
+    },
+    {
+      heading: 'Change Password',
+      body: 'Update your login password directly from this tab — no need to leave the page.',
+    },
+    {
+      heading: 'Preferences',
+      body: 'Notification and display toggles, shared with Settings — a change here shows up there too.',
     },
   ],
 };

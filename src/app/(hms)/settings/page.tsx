@@ -9,17 +9,19 @@ import { ROUTES } from '@/constants/routes';
 import { isClinicalRole, resolveWorkspace } from '@/types/auth.types';
 import { findWorkspaceRoute } from '@/config/workspaces';
 import { useToast } from '@/hooks/useToast';
-import { MOCK_DOCTOR_PROFILE } from '@/features/profile/__mocks__/profileFixtures';
+import { MOCK_DOCTOR_PROFILE, getStaffProfile } from '@/features/profile/__mocks__/profileFixtures';
 import {
   ABOUT_APP_INFO,
-  DISPLAY_PREF_DEFS,
-  NOTIFICATION_PREF_DEFS,
+  PREFS_STORAGE_KEY,
   ROLE_PERMISSION_ITEMS,
-  buildDefaultPrefs,
+  getDisplayPrefDefs,
+  getNotificationPrefDefs,
+  readStoredPrefs,
   type SettingsPrefs,
 } from '@/features/settings/__mocks__/settingsFixtures';
 import { formatDate } from '@/utils/datetime';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { PreferenceToggle } from '@components/shared/PreferenceToggle';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { useAuth } from '@hooks/useAuth';
 import { useContactDetails } from '@hooks/useContactDetails';
@@ -43,69 +45,6 @@ const TwoFactorModal = dynamic(() => import('./TwoFactorModal').then((m) => m.Tw
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
-
-const PREFS_STORAGE_KEY = 'myhxcare:settingsPrefs';
-
-function readStoredPrefs(): SettingsPrefs {
-  if (typeof window === 'undefined') return buildDefaultPrefs();
-  try {
-    const raw = localStorage.getItem(PREFS_STORAGE_KEY);
-    if (!raw) return buildDefaultPrefs();
-    return { ...buildDefaultPrefs(), ...(JSON.parse(raw) as Partial<SettingsPrefs>) };
-  } catch {
-    return buildDefaultPrefs();
-  }
-}
-
-// ── Toggle — exact spec: 65×34 track, 30×30 knob, #00B4D8 / #D1D5DB ─────────
-// The visual track stays pinned to spec size; the button itself is 44px tall
-// so the hit area still clears the touch-target floor without inflating the
-// switch's appearance (the "small-visual/full-hit-area" pattern).
-
-function Toggle({
-  on,
-  onToggle,
-  ariaLabel,
-}: {
-  on: boolean;
-  onToggle: () => void;
-  ariaLabel: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={ariaLabel}
-      onClick={onToggle}
-      className={`relative flex shrink-0 items-center justify-center ${FOCUS_RING}`}
-      style={{ width: 65, height: 44, border: 'none', background: 'transparent', padding: 0 }}
-    >
-      <span
-        className="absolute transition-colors duration-200"
-        style={{
-          width: 65,
-          height: 34,
-          borderRadius: 9999,
-          background: on ? '#00B4D8' : '#D1D5DB',
-        }}
-      />
-      <span
-        className="absolute transition-[left] duration-200"
-        style={{
-          width: 30,
-          height: 30,
-          borderRadius: '50%',
-          background: '#FFFFFF',
-          top: '50%',
-          marginTop: -15,
-          left: on ? 65 - 30 - 3 : 3,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-        }}
-      />
-    </button>
-  );
-}
 
 // ── Section chrome ───────────────────────────────────────────────────────────
 
@@ -185,7 +124,7 @@ function PreferenceRow({
           {description}
         </p>
       </div>
-      <Toggle on={on} onToggle={onToggle} ariaLabel={label} />
+      <PreferenceToggle on={on} onToggle={onToggle} ariaLabel={label} />
     </div>
   );
 }
@@ -276,10 +215,6 @@ export default function SettingsPage() {
   const toast = useToast();
   const router = useRouter();
   const { user } = useAuth();
-  const { contact, setContact } = useContactDetails({
-    phone: MOCK_DOCTOR_PROFILE.phone,
-    email: user?.email ?? MOCK_DOCTOR_PROFILE.email,
-  });
   const [prefs, setPrefs] = useState<SettingsPrefs>(readStoredPrefs);
   const [editContactOpen, setEditContactOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -292,6 +227,12 @@ export default function SettingsPage() {
   const isClinical = user ? isClinicalRole(user.workspaceRole) : true;
   const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
   const profileHref = findWorkspaceRoute(workspaceId, 'Profile') ?? ROUTES.profile;
+  const staffProfile = getStaffProfile(workspaceId, role, department);
+
+  const { contact, setContact } = useContactDetails({
+    phone: staffProfile.phone,
+    email: user?.email ?? MOCK_DOCTOR_PROFILE.email,
+  });
   const userPermissions = user?.permissions ?? [];
 
   const permitted = ROLE_PERMISSION_ITEMS.filter((item) =>
@@ -442,7 +383,7 @@ export default function SettingsPage() {
 
           {/* ── Notification Preferences ──────────────────────────────────── */}
           <SettingsSection title="Notification Preferences">
-            {NOTIFICATION_PREF_DEFS.map((def, i) => (
+            {getNotificationPrefDefs(workspaceId).map((def, i) => (
               <div key={def.key}>
                 {i > 0 && <Divider />}
                 <PreferenceRow
@@ -458,7 +399,7 @@ export default function SettingsPage() {
 
           {/* ── Display & Clinical Preferences ────────────────────────────── */}
           <SettingsSection title="Display & Clinical Preferences">
-            {DISPLAY_PREF_DEFS.map((def, i) => (
+            {getDisplayPrefDefs(workspaceId).map((def, i) => (
               <div key={def.key}>
                 {i > 0 && <Divider />}
                 <PreferenceRow
