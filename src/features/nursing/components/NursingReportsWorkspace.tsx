@@ -757,7 +757,7 @@ export function NursingReportsWorkspace() {
 
           {/* ── Content ─────────────────────────────────────────────────── */}
           {pageState === 'loading' && (
-            <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
@@ -817,7 +817,7 @@ export function NursingReportsWorkspace() {
                   </button>
                 </div>
               ) : (
-                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {visibleReports.map((report) => (
                     <ReportCard
                       key={report.id}
