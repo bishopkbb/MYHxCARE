@@ -1634,6 +1634,30 @@ const MY_SCHEDULE_GUIDE: HelpGuide = {
   ],
 };
 
+const NURSE_MY_SCHEDULE_GUIDE: HelpGuide = {
+  id: 'nurse-my-schedule',
+  title: 'My Schedule',
+  intro: 'Your personal shift calendar, ward coverage, and monthly shift summary.',
+  sections: [
+    {
+      heading: "Today's shift",
+      body: 'The card at the top shows your current or next shift with its time, ward, and remaining duration.',
+    },
+    {
+      heading: 'Acknowledging shifts',
+      body: 'Newly published shifts require acknowledgement — "Confirm Shift" or "Cannot Attend" appears on shifts awaiting your response, and your choice is recorded immediately.',
+    },
+    {
+      heading: 'This Week',
+      body: 'A day-by-day strip of your shifts — colour-coded by type (Morning, Afternoon, Night, On-Call), with a checkmark once acknowledged.',
+    },
+    {
+      heading: 'Ward On-Call Rota',
+      body: 'Shows who is covering your ward now and over the next 7 days, with your own on-call assignments highlighted.',
+    },
+  ],
+};
+
 const REPORTS_GUIDE: HelpGuide = {
   id: 'reports',
   title: 'Clinical Reports',
@@ -1837,6 +1861,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/observation-charts')) return OBSERVATION_CHARTS_GUIDE;
   if (pathname.startsWith('/nurse/laboratory')) return NURSE_LABORATORY_GUIDE;
   if (pathname.startsWith('/nurse/clinical-timeline')) return NURSE_CLINICAL_TIMELINE_GUIDE;
+  if (pathname.startsWith('/nurse/my-schedule')) return NURSE_MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/nurse/nursing-assessment')) return NURSING_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/nurse/medication-administration'))
     return MEDICATION_ADMINISTRATION_GUIDE;

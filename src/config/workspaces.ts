@@ -439,7 +439,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
             icon: CalendarDays,
             permission: PERMISSIONS.DUTY_ROSTER_WRITE,
           },
-          { label: 'My Schedule', href: '/my-schedule', icon: LayoutList },
+          { label: 'My Schedule', href: '/nurse/my-schedule', icon: LayoutList },
           { label: 'Shift Handover', href: '/nurse/shift-handover', icon: ArrowLeftRight },
         ],
       },

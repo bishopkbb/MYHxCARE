@@ -83,6 +83,7 @@ export const ROUTES = {
 
   // Nurse workspace
   nurse: '/nurse',
+  nurseMySchedule: '/nurse/my-schedule',
   nursePatientQueue: '/nurse/patient-queue',
   nurseMyPatients: '/nurse/my-patients',
   nursePatientRecord: (id: string) => `/nurse/my-patients/${id}`,
