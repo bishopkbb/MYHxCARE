@@ -152,7 +152,11 @@ export function ClinicalDocumentsWorkspace() {
       : generateClinicalDocumentsForPatient(selectedPatient);
   }, [selectedPatient, isCurated]);
   const activity = useMemo(() => generateDocActivityFromDocs(allDocs), [allDocs]);
-  const allergies = isCurated ? MOCK_PATIENT_PROFILE.allergies : [];
+  // Curated persona uses the richer PatientProfile allergy records; every
+  // other patient uses whatever's actually on their DirectoryPatient row —
+  // never hardcode to empty, since a patient registered with a real reported
+  // allergy (post registration-wizard fix) genuinely has data here now.
+  const allergies = isCurated ? MOCK_PATIENT_PROFILE.allergies : (selectedPatient?.allergies ?? []);
 
   const [category, setCategory] = useState<ClinicalDocCategory | 'All'>('All');
   const [department, setDepartment] = useState('');

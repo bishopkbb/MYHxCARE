@@ -24,7 +24,7 @@ import {
   UserCog,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo, useRef, useState, type RefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { PermissionGate } from '@components/shared/PermissionGate';
@@ -36,7 +36,12 @@ import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import { computeAge } from '@/features/registration/schemas/registerPatientSchema';
-import { MOCK_PATIENT_PROFILE } from '@/features/registration/__mocks__/patientProfileFixtures';
+import {
+  MOCK_PATIENT_PROFILE,
+  directoryPatientToProfile,
+  type PatientProfile,
+} from '@/features/registration/__mocks__/patientProfileFixtures';
+import { useDirectoryPatients } from '@/features/registration/store/patientDirectoryStore';
 import type { Allergy } from '@/types/patient.types';
 import {
   DOCUMENT_TYPE_CFG,
@@ -50,10 +55,48 @@ import {
   PATIENT_VISITS,
   RECORD_ACCESS,
   RECORD_ACTIVITY,
+  generateActivityFromVisits,
+  generateClinicalDocumentsForPatient,
+  generateVisitsForPatient,
+  type ClinicalDocumentEntry,
   type DocumentType,
+  type ImmunizationEntry,
+  type InsuranceClaimEntry,
+  type LabResultEntry,
   type MedicalDocument,
+  type Prescription,
+  type RecordActivityEntry,
+  type RecordAccessEntry,
+  type ReferralEntry,
 } from '@/features/medical-records/__mocks__/medicalRecordDetailFixtures';
 import { computeVisitSummary, VisitHistorySection } from './VisitHistorySection';
+
+const CURATED_PATIENT_ID = 'dp-001';
+
+/** `ClinicalDocumentEntry` (the richer, formal taxonomy used by the standalone
+ * Clinical Documents workspace) is the canonical document shape per
+ * `03-domain-entities.md` §3.7 — this maps it onto the Overview tab's looser
+ * `MedicalDocument` shape for display, rather than maintaining a second
+ * generator for a patient who isn't the curated demo persona. */
+function clinicalDocToMedicalDoc(doc: ClinicalDocumentEntry): MedicalDocument {
+  const CATEGORY_TO_TYPE: Record<ClinicalDocumentEntry['category'], DocumentType> = {
+    'Consultation Note': 'Clinical Note',
+    'Discharge Summary': 'Other',
+    'Referral Letter': 'Other',
+    'Medical Certificate': 'Other',
+    'Imaging Report': 'Imaging',
+    'Consent Form': 'Other',
+  };
+  return {
+    id: doc.id,
+    name: doc.name,
+    subtitle: doc.subtitle,
+    type: CATEGORY_TO_TYPE[doc.category],
+    uploadedBy: doc.createdBy,
+    dateUploaded: doc.dateCreated,
+    visitDate: doc.visitDate,
+  };
+}
 
 const PRIMARY_TABS = [
   'Overview',
@@ -241,7 +284,7 @@ export function SimpleTableCard({
 
 const RX_STATUS_COLOR: Record<string, string> = { Active: '#00B4D8', Completed: '#22C55E' };
 
-function PrescriptionsSection() {
+function PrescriptionsSection({ prescriptions }: { prescriptions: Prescription[] }) {
   return (
     <SimpleTableCard
       title="Prescriptions"
@@ -254,7 +297,7 @@ function PrescriptionsSection() {
         { label: 'Date', width: 'w-28' },
         { label: 'Status', width: 'w-28' },
       ]}
-      rows={MOCK_PRESCRIPTIONS.map((rx) => [
+      rows={prescriptions.map((rx) => [
         <p
           key="drug"
           className="truncate font-sans font-medium"
@@ -287,9 +330,10 @@ const LAB_FLAG_COLOR: Record<string, string> = {
   Normal: '#22C55E',
   High: '#EF4444',
   Low: '#F59E0B',
+  Critical: '#991B1B',
 };
 
-function LabResultsSection() {
+function LabResultsSection({ labResults }: { labResults: LabResultEntry[] }) {
   return (
     <SimpleTableCard
       title="Lab Results"
@@ -302,7 +346,7 @@ function LabResultsSection() {
         { label: 'Date Collected', width: 'w-32' },
         { label: 'Ordered By', width: 'w-40' },
       ]}
-      rows={MOCK_LAB_RESULTS.map((lab) => [
+      rows={labResults.map((lab) => [
         <p
           key="test"
           className="truncate font-sans font-medium"
@@ -331,7 +375,7 @@ function LabResultsSection() {
   );
 }
 
-function ImmunizationsSection() {
+function ImmunizationsSection({ immunizations }: { immunizations: ImmunizationEntry[] }) {
   return (
     <SimpleTableCard
       title="Immunizations"
@@ -342,7 +386,7 @@ function ImmunizationsSection() {
         { label: 'Given By', width: 'w-44' },
         { label: 'Next Due', width: 'w-32' },
       ]}
-      rows={MOCK_IMMUNIZATIONS.map((imm) => [
+      rows={immunizations.map((imm) => [
         <p
           key="vaccine"
           className="truncate font-sans font-medium"
@@ -419,7 +463,7 @@ const REFERRAL_STATUS_COLOR: Record<string, string> = {
   Completed: '#22C55E',
 };
 
-function ReferralsSection() {
+function ReferralsSection({ referrals }: { referrals: ReferralEntry[] }) {
   return (
     <SimpleTableCard
       title="Referrals"
@@ -430,7 +474,7 @@ function ReferralsSection() {
         { label: 'Date Referred', width: 'w-32' },
         { label: 'Status', width: 'w-28' },
       ]}
-      rows={MOCK_REFERRALS.map((ref) => [
+      rows={referrals.map((ref) => [
         <p
           key="dept"
           className="truncate font-sans font-medium"
@@ -464,7 +508,7 @@ const CLAIM_STATUS_COLOR: Record<string, string> = {
   Paid: '#8B5CF6',
 };
 
-function InsuranceClaimsSection() {
+function InsuranceClaimsSection({ insuranceClaims }: { insuranceClaims: InsuranceClaimEntry[] }) {
   return (
     <SimpleTableCard
       title="Insurance Claims"
@@ -475,7 +519,7 @@ function InsuranceClaimsSection() {
         { label: 'Date Submitted', width: 'w-32' },
         { label: 'Status', width: 'w-28' },
       ]}
-      rows={MOCK_INSURANCE_CLAIMS.map((claim) => [
+      rows={insuranceClaims.map((claim) => [
         <p
           key="id"
           className="truncate font-sans font-medium"
@@ -504,14 +548,20 @@ function InsuranceClaimsSection() {
 
 type AuditRow = { dateTime: string; type: 'Activity' | 'Access'; description: string };
 
-function AuditLogSection() {
+function AuditLogSection({
+  activity,
+  access,
+}: {
+  activity: RecordActivityEntry[];
+  access: RecordAccessEntry[];
+}) {
   const rows: AuditRow[] = [
-    ...RECORD_ACTIVITY.map((a) => ({
+    ...activity.map((a) => ({
       dateTime: a.dateTime,
       type: 'Activity' as const,
       description: `${a.label} — ${a.detail}`,
     })),
-    ...RECORD_ACCESS.map((a) => ({
+    ...access.map((a) => ({
       dateTime: a.dateTime,
       type: 'Access' as const,
       description: `${a.name} viewed this record`,
@@ -539,10 +589,10 @@ function AuditLogSection() {
   );
 }
 
-function DocumentsAndFilesCard() {
+function DocumentsAndFilesCard({ initialDocuments }: { initialDocuments: MedicalDocument[] }) {
   const toast = useToast();
   const [docFilter, setDocFilter] = useState<DocumentType | 'All'>('All');
-  const [documents, setDocuments] = useState<MedicalDocument[]>(MOCK_DOCUMENTS);
+  const [documents, setDocuments] = useState<MedicalDocument[]>(initialDocuments);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -914,7 +964,49 @@ function DocumentsAndFilesCard() {
 export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Tab } = {}) {
   const router = useRouter();
   const toast = useToast();
-  const patient = MOCK_PATIENT_PROFILE;
+
+  // Read via `window.location.search` in an effect (same convention as
+  // Patient Card Printing's `?prefill=` handoff and Registration's Patient
+  // Profile fix) rather than `useSearchParams()`, which would opt this route
+  // out of static optimization unless wrapped in a Suspense boundary.
+  const [patientId, setPatientId] = useState<string | null>(null);
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setPatientId(new URLSearchParams(window.location.search).get('patientId'));
+    }, 0);
+    return () => clearTimeout(id);
+  }, []);
+  const directoryPatients = useDirectoryPatients();
+  const directoryMatch = patientId
+    ? (directoryPatients.find((p) => p.id === patientId) ?? null)
+    : null;
+  // No id, or the curated demo id, keeps today's default (the one richly
+  // detailed persona, with real per-patient Lab Results/Prescriptions/
+  // Immunizations/Referrals/Insurance Claims); any other real patient renders
+  // from the directory, with those five sections honestly empty rather than
+  // fabricated (this module has no per-patient generator for them — only
+  // Visit History and Clinical Documents do) — still falling back to the
+  // demo persona if the id somehow doesn't resolve, rather than crashing.
+  const isCuratedOrDemo = !patientId || patientId === CURATED_PATIENT_ID;
+  const patient: PatientProfile = isCuratedOrDemo
+    ? MOCK_PATIENT_PROFILE
+    : directoryMatch
+      ? directoryPatientToProfile(directoryMatch)
+      : MOCK_PATIENT_PROFILE;
+
+  const visits = isCuratedOrDemo ? PATIENT_VISITS : generateVisitsForPatient(patient);
+  const clinicalDocs = isCuratedOrDemo ? null : generateClinicalDocumentsForPatient(patient);
+  const documents: MedicalDocument[] = isCuratedOrDemo
+    ? MOCK_DOCUMENTS
+    : (clinicalDocs ?? []).map(clinicalDocToMedicalDoc);
+  const labResults = isCuratedOrDemo ? MOCK_LAB_RESULTS : [];
+  const prescriptions = isCuratedOrDemo ? MOCK_PRESCRIPTIONS : [];
+  const immunizations = isCuratedOrDemo ? MOCK_IMMUNIZATIONS : [];
+  const referrals = isCuratedOrDemo ? MOCK_REFERRALS : [];
+  const insuranceClaims = isCuratedOrDemo ? MOCK_INSURANCE_CLAIMS : [];
+  const recordActivity = isCuratedOrDemo ? RECORD_ACTIVITY : generateActivityFromVisits(visits);
+  const recordAccess = isCuratedOrDemo ? RECORD_ACCESS : [];
+
   const age = computeAge(patient.dateOfBirth);
   const physicianName = `${patient.primaryPhysician.name} (${physicianAbbrev(patient.primaryPhysician.role)})`;
 
@@ -1365,20 +1457,30 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                     </div>
                   </div>
 
-                  <DocumentsAndFilesCard />
+                  <DocumentsAndFilesCard key={patient.id} initialDocuments={documents} />
                 </>
               )}
               {activeTab === 'Visit History' && (
-                <VisitHistorySection visits={PATIENT_VISITS} patientName={patient.fullName} />
+                <VisitHistorySection visits={visits} patientName={patient.fullName} />
               )}
-              {activeTab === 'Medical Documents' && <DocumentsAndFilesCard />}
-              {activeTab === 'Lab Results' && <LabResultsSection />}
-              {activeTab === 'Prescriptions' && <PrescriptionsSection />}
-              {activeTab === 'Immunizations' && <ImmunizationsSection />}
+              {activeTab === 'Medical Documents' && (
+                <DocumentsAndFilesCard key={patient.id} initialDocuments={documents} />
+              )}
+              {activeTab === 'Lab Results' && <LabResultsSection labResults={labResults} />}
+              {activeTab === 'Prescriptions' && (
+                <PrescriptionsSection prescriptions={prescriptions} />
+              )}
+              {activeTab === 'Immunizations' && (
+                <ImmunizationsSection immunizations={immunizations} />
+              )}
               {activeTab === 'Allergies' && <AllergiesSection allergies={patient.allergies} />}
-              {activeTab === 'Referrals' && <ReferralsSection />}
-              {activeTab === 'Insurance Claims' && <InsuranceClaimsSection />}
-              {activeTab === 'Audit Log' && <AuditLogSection />}
+              {activeTab === 'Referrals' && <ReferralsSection referrals={referrals} />}
+              {activeTab === 'Insurance Claims' && (
+                <InsuranceClaimsSection insuranceClaims={insuranceClaims} />
+              )}
+              {activeTab === 'Audit Log' && (
+                <AuditLogSection activity={recordActivity} access={recordAccess} />
+              )}
             </div>
 
             {/* ── Sidebar ───────────────────────────────────────────────── */}
@@ -1399,7 +1501,7 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                   </div>
                   <div className="mt-3 flex flex-col gap-2.5">
                     {(() => {
-                      const summary = computeVisitSummary(PATIENT_VISITS);
+                      const summary = computeVisitSummary(visits);
                       return [
                         ['Total Visits', String(summary.totalVisits)],
                         [
@@ -1449,7 +1551,7 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                   </button>
                 </div>
                 <div className="mt-3 flex flex-col gap-3">
-                  {RECORD_ACTIVITY.map((act) => {
+                  {recordActivity.map((act) => {
                     const Icon = act.icon;
                     return (
                       <div key={act.id} className="flex items-start gap-2.5">
@@ -1498,7 +1600,7 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                   </button>
                 </div>
                 <div className="mt-3 flex flex-col gap-2.5">
-                  {RECORD_ACCESS.map((acc) => (
+                  {recordAccess.map((acc) => (
                     <div key={acc.id} className="flex items-center justify-between gap-2">
                       <p
                         className="truncate font-sans font-medium"
@@ -1552,7 +1654,9 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                       label="Update Demographics"
                       iconBg="rgba(139,92,246,0.12)"
                       iconColor="#8B5CF6"
-                      onClick={() => router.push(ROUTES.registrationProfile)}
+                      onClick={() =>
+                        router.push(`${ROUTES.registrationProfile}?patientId=${patient.id}`)
+                      }
                     />
                   </div>
                 </div>

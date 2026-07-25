@@ -8,36 +8,26 @@ import { FormInput } from '@components/shared/FormInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/hooks/useToast';
+import { HOSPITAL_DEPARTMENT_OPTIONS } from '@/constants/departments';
 import { DIRECTORY_PATIENTS } from '@/features/registration/__mocks__/patientDirectoryFixtures';
-import { ARCHIVED_RECORD_TYPES } from '@/features/medical-records/__mocks__/archivedRecordFixtures';
-import { reserveRequestNumber } from '@/features/medical-records/__mocks__/recordRequestFixtures';
-import type {
-  RecordRequest,
-  RequestPriority,
-} from '@/features/medical-records/__mocks__/recordRequestFixtures';
+import {
+  ARCHIVED_RECORD_TYPES,
+  type ArchivedRecord,
+} from '@/features/medical-records/__mocks__/archivedRecordFixtures';
 
-const PRIORITY_OPTIONS: { value: RequestPriority; label: string }[] = [
-  { value: 'Normal', label: 'Normal' },
-  { value: 'Urgent', label: 'Urgent' },
-];
-
-export function NewRecordRequestModal({
+export function NewArchiveRecordModal({
   onClose,
   onCreate,
 }: {
   onClose: () => void;
-  onCreate: (request: RecordRequest) => void;
+  onCreate: (record: ArchivedRecord) => void;
 }) {
   const toast = useToast();
   const { user } = useAuth();
   const [patientId, setPatientId] = useState('');
-  // Defaults to the logged-in staff member requesting on the app's behalf —
-  // still editable, since a request can legitimately come from an external
-  // party with no session (insurer, legal office, the patient themselves).
-  const [requestedBy, setRequestedBy] = useState(user?.name ?? '');
   const [recordType, setRecordType] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [priority, setPriority] = useState<RequestPriority>('Normal');
+  const [department, setDepartment] = useState('');
+  const [reason, setReason] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   const patientOptions = DIRECTORY_PATIENTS.slice(0, 60).map((p) => ({
@@ -45,7 +35,7 @@ export function NewRecordRequestModal({
     label: `${p.name} — ${p.mrn}`,
   }));
 
-  const isValid = patientId && requestedBy.trim() && recordType && purpose.trim();
+  const isValid = patientId && recordType && department && reason.trim();
 
   function handleSubmit() {
     setSubmitted(true);
@@ -53,23 +43,24 @@ export function NewRecordRequestModal({
     const patient = DIRECTORY_PATIENTS.find((p) => p.id === patientId);
     if (!patient) return;
 
-    const request: RecordRequest = {
-      id: `req-new-${Date.now()}`,
-      requestNumber: reserveRequestNumber(),
+    const now = new Date().toISOString();
+    const actor = user?.name ?? 'Unknown Staff';
+    const record: ArchivedRecord = {
+      id: `arc-new-${Date.now()}`,
       patientName: patient.name,
       initials: patient.initials,
       avatarBg: patient.avatarBg,
       mrn: patient.mrn,
-      recordType: recordType as RecordRequest['recordType'],
-      requestedBy: requestedBy.trim(),
-      requestDate: new Date().toISOString(),
-      purpose: purpose.trim(),
-      status: 'Pending',
-      priority,
-      notes: '',
+      recordType: recordType as ArchivedRecord['recordType'],
+      department,
+      archiveDate: now,
+      reason: reason.trim(),
+      status: 'Archived',
+      archivedBy: actor,
+      auditTrail: [{ dateTime: now, label: 'Record archived', actor }],
     };
-    onCreate(request);
-    toast.success('Request submitted', `${request.requestNumber} logged for ${patient.name}.`);
+    onCreate(record);
+    toast.success('Record archived', `${patient.name}'s record has been archived.`);
     onClose();
   }
 
@@ -93,7 +84,7 @@ export function NewRecordRequestModal({
             className="font-display font-semibold"
             style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
           >
-            New Record Request
+            Archive Record
           </h2>
           <button
             type="button"
@@ -109,12 +100,12 @@ export function NewRecordRequestModal({
           <div className="flex flex-col gap-4">
             <FormField
               label="Patient"
-              htmlFor="req-patient"
+              htmlFor="arc-patient"
               required
               error={submitted && !patientId ? 'Select a patient' : undefined}
             >
               <FormSelect
-                id="req-patient"
+                id="arc-patient"
                 value={patientId}
                 onChange={setPatientId}
                 options={patientOptions}
@@ -125,27 +116,13 @@ export function NewRecordRequestModal({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
-                label="Requested By"
-                htmlFor="req-requested-by"
-                required
-                error={submitted && !requestedBy.trim() ? 'Required' : undefined}
-              >
-                <FormInput
-                  id="req-requested-by"
-                  placeholder="e.g. Dr. Jane Ezeonu"
-                  value={requestedBy}
-                  onChange={(e) => setRequestedBy(e.target.value)}
-                  hasError={submitted && !requestedBy.trim()}
-                />
-              </FormField>
-              <FormField
                 label="Record Type"
-                htmlFor="req-record-type"
+                htmlFor="arc-record-type"
                 required
                 error={submitted && !recordType ? 'Required' : undefined}
               >
                 <FormSelect
-                  id="req-record-type"
+                  id="arc-record-type"
                   value={recordType}
                   onChange={setRecordType}
                   options={ARCHIVED_RECORD_TYPES.map((t) => ({ value: t, label: t }))}
@@ -153,36 +130,35 @@ export function NewRecordRequestModal({
                   hasError={submitted && !recordType}
                 />
               </FormField>
+              <FormField
+                label="Department"
+                htmlFor="arc-department"
+                required
+                error={submitted && !department ? 'Required' : undefined}
+              >
+                <FormSelect
+                  id="arc-department"
+                  value={department}
+                  onChange={setDepartment}
+                  options={HOSPITAL_DEPARTMENT_OPTIONS}
+                  placeholder="Select department"
+                  hasError={submitted && !department}
+                />
+              </FormField>
             </div>
 
             <FormField
-              label="Purpose"
-              htmlFor="req-purpose"
+              label="Reason"
+              htmlFor="arc-reason"
               required
-              error={submitted && !purpose.trim() ? 'Required' : undefined}
+              error={submitted && !reason.trim() ? 'Required' : undefined}
             >
-              <textarea
-                id="req-purpose"
-                rows={3}
-                value={purpose}
-                onChange={(e) => setPurpose(e.target.value)}
-                placeholder="Why is this record needed?"
-                className="w-full resize-none rounded-[10px] px-3.5 py-2.5 font-sans transition-colors duration-150 placeholder:text-[#8A98A3] focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8]/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                style={{
-                  fontSize: 14,
-                  color: '#0D2630',
-                  border: `1px solid ${submitted && !purpose.trim() ? '#EF4444' : 'rgba(0,100,130,0.18)'}`,
-                }}
-              />
-            </FormField>
-
-            <FormField label="Priority" htmlFor="req-priority" required>
-              <FormSelect
-                id="req-priority"
-                value={priority}
-                onChange={(v) => setPriority(v as RequestPriority)}
-                options={PRIORITY_OPTIONS}
-                placeholder="Select priority"
+              <FormInput
+                id="arc-reason"
+                placeholder="e.g. Inactive - No visit for 3 years"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                hasError={submitted && !reason.trim()}
               />
             </FormField>
           </div>
@@ -206,7 +182,7 @@ export function NewRecordRequestModal({
             className="flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             style={{ fontSize: 14, background: '#00B4D8' }}
           >
-            Submit Request
+            Archive Record
           </button>
         </div>
       </div>

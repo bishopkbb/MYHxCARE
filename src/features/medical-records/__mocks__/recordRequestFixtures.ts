@@ -217,3 +217,21 @@ export const RECORD_REQUESTS: RecordRequest[] = [
     notes: 'Historical imaging queued for retrieval.',
   },
 ];
+
+// ── Request number reservation ───────────────────────────────────────────────
+// A module-level monotonic counter, not `Math.random()` — two staff members
+// submitting requests seconds apart used to have a real (if small) chance of
+// generating the same 5-digit suffix, same class of bug as Stage 1's MRN
+// generation fix. Real atomicity needs a server-side sequence (Phase 6); this
+// is the best available mitigation at the mock layer.
+
+let requestSeq = Math.max(...RECORD_REQUESTS.map((r) => Number(r.requestNumber.split('-').pop())));
+
+export function reserveRequestNumber(): string {
+  requestSeq += 1;
+  const year = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos',
+    year: 'numeric',
+  }).format(new Date());
+  return `REQ-${year}-${String(requestSeq).padStart(5, '0')}`;
+}

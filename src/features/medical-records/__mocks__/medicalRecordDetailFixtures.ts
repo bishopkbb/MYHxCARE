@@ -410,7 +410,7 @@ export type LabResultEntry = {
   result: string;
   unit: string;
   referenceRange: string;
-  flag: 'Normal' | 'High' | 'Low';
+  flag: 'Normal' | 'High' | 'Low' | 'Critical';
   dateCollected: string; // ISO
   orderedBy: string;
 };
@@ -443,6 +443,16 @@ export const MOCK_LAB_RESULTS: LabResultEntry[] = [
     unit: 'x10^9/L',
     referenceRange: '150 - 410',
     flag: 'Normal',
+    dateCollected: atOffset(-1, 11, 5),
+    orderedBy: 'Dr. Ifeanyi Okafor',
+  },
+  {
+    id: 'lab-004',
+    testName: 'Serum Potassium',
+    result: '6.8',
+    unit: 'mmol/L',
+    referenceRange: '3.5 - 5.1',
+    flag: 'Critical',
     dateCollected: atOffset(-1, 11, 5),
     orderedBy: 'Dr. Ifeanyi Okafor',
   },

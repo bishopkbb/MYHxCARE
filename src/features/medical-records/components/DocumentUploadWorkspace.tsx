@@ -49,6 +49,7 @@ const CURATED_PATIENT_ID = 'dp-001';
 const ROWS_PER_PAGE = 10;
 
 const DEPARTMENT_OPTIONS = HOSPITAL_DEPARTMENT_OPTIONS;
+const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024;
 
 type PendingFile = { id: string; name: string; size: number };
 
@@ -95,7 +96,11 @@ export function DocumentUploadWorkspace() {
     if (!selectedPatient) return [];
     return isCurated ? PATIENT_VISITS : generateVisitsForPatient(selectedPatient);
   }, [selectedPatient, isCurated]);
-  const allergies = isCurated ? MOCK_PATIENT_PROFILE.allergies : [];
+  // Curated persona uses the richer PatientProfile allergy records; every
+  // other patient uses whatever's actually on their DirectoryPatient row —
+  // never hardcode to empty, since a patient registered with a real reported
+  // allergy (post registration-wizard fix) genuinely has data here now.
+  const allergies = isCurated ? MOCK_PATIENT_PROFILE.allergies : (selectedPatient?.allergies ?? []);
 
   const allDocs = useMemo(
     () =>
@@ -140,7 +145,18 @@ export function DocumentUploadWorkspace() {
 
   function addFiles(fileList: FileList | null) {
     if (!fileList) return;
-    const next: PendingFile[] = Array.from(fileList).map((f, i) => ({
+    const incoming = Array.from(fileList);
+    const oversized = incoming.filter((f) => f.size > MAX_FILE_SIZE_BYTES);
+    const accepted = incoming.filter((f) => f.size <= MAX_FILE_SIZE_BYTES);
+
+    if (oversized.length > 0) {
+      toast.error(
+        oversized.length === 1 ? 'File too large' : `${oversized.length} files too large`,
+        `${oversized.map((f) => f.name).join(', ')} exceed${oversized.length === 1 ? 's' : ''} the 20MB per-file limit and ${oversized.length === 1 ? 'was' : 'were'} not added.`,
+      );
+    }
+
+    const next: PendingFile[] = accepted.map((f, i) => ({
       id: `${Date.now()}-${i}`,
       name: f.name,
       size: f.size,

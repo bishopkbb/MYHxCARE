@@ -8,16 +8,20 @@ import {
   Eye,
   Filter,
   MoreVertical,
+  Plus,
   RefreshCw,
   Search,
   X,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
 
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
+import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
+import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/hooks/useToast';
 import { downloadCSV } from '@/utils/export';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
@@ -27,6 +31,11 @@ import {
   ARCHIVE_STATUSES,
   type ArchivedRecord,
 } from '@/features/medical-records/__mocks__/archivedRecordFixtures';
+
+const NewArchiveRecordModal = dynamic(
+  () => import('./NewArchiveRecordModal').then((m) => m.NewArchiveRecordModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
 
 type PageState = 'loading' | 'loaded' | 'error';
 
@@ -66,6 +75,7 @@ function formatHumanDateTime(date: string): string {
 
 export function ArchivedRecordsWorkspace() {
   const toast = useToast();
+  const { user } = useAuth();
   const [pageState, setPageState] = useState<PageState>('loaded');
   const [records, setRecords] = useState<ArchivedRecord[]>(ARCHIVED_RECORDS);
   const [search, setSearch] = useState('');
@@ -76,6 +86,7 @@ export function ArchivedRecordsWorkspace() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const departmentOptions = useMemo(
     () =>
@@ -133,7 +144,7 @@ export function ArchivedRecordsWorkspace() {
                 {
                   dateTime: new Date().toISOString(),
                   label: 'Record restored',
-                  actor: 'Mrs. Ngozi Asogwa',
+                  actor: user?.name ?? 'Unknown Staff',
                 },
                 ...r.auditTrail,
               ],
@@ -143,6 +154,35 @@ export function ArchivedRecordsWorkspace() {
     );
     toast.success('Record retrieved', `${record.patientName} is now active again.`);
     setSelectedId(null);
+  }
+
+  function handleFlagForDeletion(id: string) {
+    const record = records.find((r) => r.id === id);
+    if (!record) return;
+    setRecords((prev) =>
+      prev.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              status: 'Pending Deletion',
+              auditTrail: [
+                {
+                  dateTime: new Date().toISOString(),
+                  label: 'Flagged for deletion',
+                  actor: user?.name ?? 'Unknown Staff',
+                },
+                ...r.auditTrail,
+              ],
+            }
+          : r,
+      ),
+    );
+    toast.info('Flagged for deletion', `${record.patientName}'s record is now pending deletion.`);
+  }
+
+  function handleCreateArchive(record: ArchivedRecord) {
+    setRecords((prev) => [record, ...prev]);
+    setCreateOpen(false);
   }
 
   function handleExport() {
@@ -179,15 +219,30 @@ export function ArchivedRecordsWorkspace() {
     <div className="flex flex-1 flex-col overflow-hidden">
       <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
         <div className="mx-auto max-w-[1440px] px-4 py-4 sm:px-6 sm:py-5">
-          <h1
-            className="font-display font-semibold"
-            style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
-          >
-            Archived Records
-          </h1>
-          <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-            View and manage archived or inactive patient records
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1
+                className="font-display font-semibold"
+                style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
+              >
+                Archived Records
+              </h1>
+              <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
+                View and manage archived or inactive patient records
+              </p>
+            </div>
+            <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                style={{ background: '#00B4D8', fontSize: 14 }}
+              >
+                <Plus style={{ width: 16, height: 16 }} />
+                Archive Record
+              </button>
+            </PermissionGate>
+          </div>
 
           {pageState === 'error' ? (
             <div
@@ -708,7 +763,7 @@ export function ArchivedRecordsWorkspace() {
 
                   <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
                     {selected.status !== 'Restored' && (
-                      <div className="p-4 pt-0 sm:p-5 sm:pt-0">
+                      <div className="flex flex-col gap-2 p-4 pt-0 sm:p-5 sm:pt-0">
                         <button
                           type="button"
                           onClick={() => handleRetrieve(selected.id)}
@@ -718,6 +773,21 @@ export function ArchivedRecordsWorkspace() {
                           <ArchiveRestore style={{ width: 15, height: 15 }} />
                           Retrieve Record
                         </button>
+                        {selected.status === 'Archived' && (
+                          <button
+                            type="button"
+                            onClick={() => handleFlagForDeletion(selected.id)}
+                            className="flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            style={{
+                              fontSize: 14,
+                              color: '#EF4444',
+                              border: '1px solid rgba(239,68,68,0.35)',
+                            }}
+                          >
+                            <AlertCircle style={{ width: 15, height: 15 }} />
+                            Flag for Deletion
+                          </button>
+                        )}
                       </div>
                     )}
                   </PermissionGate>
@@ -729,6 +799,13 @@ export function ArchivedRecordsWorkspace() {
           <div className="h-4" />
         </div>
       </main>
+
+      {createOpen && (
+        <NewArchiveRecordModal
+          onClose={() => setCreateOpen(false)}
+          onCreate={handleCreateArchive}
+        />
+      )}
     </div>
   );
 }

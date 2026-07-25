@@ -75,6 +75,12 @@ const STATUS_CFG: Record<
     border: 'rgba(107,114,128,0.40)',
     bg: 'transparent',
   },
+  CANCELLED: {
+    label: 'Cancelled',
+    color: '#EF4444',
+    border: 'rgba(239,68,68,0.40)',
+    bg: 'rgba(239,68,68,0.06)',
+  },
 };
 
 function DetailField({ label, value }: { label: string; value: string }) {

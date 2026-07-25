@@ -4,7 +4,8 @@
  * list). Swap out by pointing hooks to real endpoints in Phase 6.
  */
 
-import type { Allergy } from '@/types/patient.types';
+import type { Allergy, AllergySeverity } from '@/types/patient.types';
+import type { DirectoryPatient } from '@/features/registration/__mocks__/patientDirectoryFixtures';
 
 // ─── Time helpers ────────────────────────────────────────────────────────
 // Computed relative to "now" rather than hardcoded so the profile always
@@ -218,3 +219,96 @@ export const MOCK_PATIENT_PROFILE: PatientProfile = {
   upcomingAppointment: { dateTime: atOffset(7, 10, 0) },
   primaryPhysician: { name: 'Dr. Jane Ezeonu', role: 'General Practitioner' },
 };
+
+// ─── Directory patient → full profile adapter ───────────────────────────────
+// Shared by every screen that needs to render an arbitrary registered
+// patient in this screen's full shape (Registration's Patient Profile,
+// Medical Records' Patient Medical Record view) — one adapter, not one per
+// screen, so a future field addition here doesn't need updating twice.
+
+const ALLERGY_TO_ALERT_SEVERITY: Record<AllergySeverity, MedicalAlertSeverity> = {
+  LIFE_THREATENING: 'Severe',
+  SEVERE: 'Severe',
+  MODERATE: 'Moderate',
+  MILD: 'Important',
+};
+
+/** Renders any registered patient in the full-profile shape, not just the
+ * one curated demo persona. `DirectoryPatient` doesn't carry everything
+ * `PatientProfile` does (next of kin, insurance policy detail, student
+ * programme info, registration history, visit summary) — those sections
+ * honestly show '—'/empty rather than fabricated data, exactly like every
+ * other screen in this app already does for fields it doesn't have.
+ * Allergies are real (carried on `DirectoryPatient` since the
+ * registration-wizard fix), and are also surfaced as Medical Alerts so a
+ * freshly registered patient with a reported allergy isn't blank there
+ * either. */
+export function directoryPatientToProfile(dp: DirectoryPatient): PatientProfile {
+  const medicalAlerts: MedicalAlert[] = dp.allergies.map((a) => ({
+    id: `ma-${a.id}`,
+    label: 'Allergy',
+    detail: `${a.substance} — ${a.reaction}`,
+    severity: ALLERGY_TO_ALERT_SEVERITY[a.severity],
+  }));
+
+  return {
+    id: dp.id,
+    mrn: dp.mrn,
+    patientId: dp.patientId,
+    studentId: dp.studentId,
+    fullName: dp.name,
+    status: dp.status === 'Inactive' ? 'Inactive' : 'Active',
+    ...(dp.photoUrl ? { photoUrl: dp.photoUrl } : {}),
+    gender: dp.gender,
+    bloodGroup: dp.bloodGroup,
+    maritalStatus: dp.maritalStatus,
+    nationality: dp.nationality,
+    dateRegistered: dp.dateRegistered,
+    registeredBy: '—',
+    lastUpdated: dp.dateRegistered,
+    lastUpdatedBy: '—',
+    dateOfBirth: dp.dateOfBirth,
+    religion: '',
+    occupation: '',
+    phone: dp.phone,
+    email: dp.email,
+    address: dp.address,
+    stateOfOrigin: '',
+    lga: '',
+    nextOfKin: { name: '', relationship: '', phone: '', email: '', address: '' },
+    // No policy dates on file for a directory-only record — left blank
+    // rather than borrowing dateRegistered as a fake "valid from".
+    insurance: {
+      provider: dp.insuranceProvider,
+      type: '',
+      policyId: '',
+      groupNumber: '',
+      validFrom: '',
+      validTo: '',
+    },
+    student: {
+      facultyDepartment: dp.faculty,
+      level: '',
+      programme: '',
+      matricNumber: dp.studentId,
+      admissionYear: '',
+      hostel: '',
+    },
+    allergies: dp.allergies,
+    medicalAlerts,
+    alertsLastReviewed: dp.dateRegistered,
+    alertsLastReviewedBy: '—',
+    registrationHistory: [
+      {
+        id: 'rh-auto-1',
+        dateTime: `${dp.dateRegistered}T00:00:00.000Z`,
+        label: 'Patient Registered',
+        detail: dp.category,
+      },
+    ],
+    totalVisits: 0,
+    lastVisit: dp.dateRegistered,
+    upcomingAppointment: null,
+    primaryPhysician: { name: '—', role: '—' },
+  };
+}

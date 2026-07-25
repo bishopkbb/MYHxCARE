@@ -36,7 +36,11 @@ export function VisitHistoryWorkspace() {
     if (!selectedPatient) return [];
     return isCurated ? RECORD_ACTIVITY : generateActivityFromVisits(visits);
   }, [selectedPatient, isCurated, visits]);
-  const allergies = isCurated ? MOCK_PATIENT_PROFILE.allergies : [];
+  // Curated persona uses the richer PatientProfile allergy records; every
+  // other patient uses whatever's actually on their DirectoryPatient row —
+  // never hardcode to empty, since a patient registered with a real reported
+  // allergy (post registration-wizard fix) genuinely has data here now.
+  const allergies = isCurated ? MOCK_PATIENT_PROFILE.allergies : (selectedPatient?.allergies ?? []);
 
   function handlePrint() {
     toast.success(
@@ -227,20 +231,22 @@ export function VisitHistoryWorkspace() {
                       Quick Actions
                     </h2>
                     <div className="mt-3 grid grid-cols-1 gap-2.5">
-                      {isCurated && (
-                        <button
-                          type="button"
-                          onClick={() => router.push(ROUTES.medicalRecordsPatient)}
-                          className="flex h-11 items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          style={{
-                            fontSize: 14,
-                            color: '#00B4D8',
-                            border: '1px solid rgba(0,180,216,0.35)',
-                          }}
-                        >
-                          View Full Medical Record
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            `${ROUTES.medicalRecordsPatient}?patientId=${selectedPatient.id}`,
+                          )
+                        }
+                        className="flex h-11 items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                        style={{
+                          fontSize: 14,
+                          color: '#00B4D8',
+                          border: '1px solid rgba(0,180,216,0.35)',
+                        }}
+                      >
+                        View Full Medical Record
+                      </button>
                       <button
                         type="button"
                         onClick={() => router.push(ROUTES.registrationDirectory)}

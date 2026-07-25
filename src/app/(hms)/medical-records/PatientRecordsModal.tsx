@@ -8,6 +8,7 @@ import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import type { MedicalRecord } from '@/features/medical-records/__mocks__/medicalRecordFixtures';
 import { MOCK_PATIENT_PROFILE } from '@/features/registration/__mocks__/patientProfileFixtures';
+import { useDirectoryPatients } from '@/features/registration/store/patientDirectoryStore';
 import { MRN_TO_PATIENT_ID, RECORD_TYPE_CFG, STATUS_CFG } from './config';
 
 // ── Patient Records Modal ─────────────────────────────────────────────────────
@@ -22,6 +23,15 @@ export function PatientRecordsModal({
   const patient = records[0]!;
   const [viewingId, setViewingId] = useState<string | null>(null);
   const viewingRecord = viewingId ? records.find((r) => r.id === viewingId) : undefined;
+
+  // Resolve the full Medical Record view against whichever population
+  // actually carries this MRN — the curated demo persona, or a registered
+  // directory patient — rather than only ever matching the one hardcoded
+  // demo MRN, which left this link permanently dead for every other row.
+  const directoryPatients = useDirectoryPatients();
+  const directoryMatch = directoryPatients.find((dp) => dp.mrn === patient.mrn);
+  const isCurated = patient.mrn === MOCK_PATIENT_PROFILE.mrn;
+  const fullRecordPatientId = isCurated ? MOCK_PATIENT_PROFILE.id : directoryMatch?.id;
 
   return (
     <div
@@ -89,9 +99,9 @@ export function PatientRecordsModal({
             ) : (
               <ProfileNotFoundButton />
             )}
-            {patient.mrn === MOCK_PATIENT_PROFILE.mrn ? (
+            {fullRecordPatientId ? (
               <Link
-                href={ROUTES.medicalRecordsPatient}
+                href={`${ROUTES.medicalRecordsPatient}?patientId=${fullRecordPatientId}`}
                 onClick={onClose}
                 className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
