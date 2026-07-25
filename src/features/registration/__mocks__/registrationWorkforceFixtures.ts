@@ -49,6 +49,12 @@ export type RegistrationShift = {
   timeRange: string;
   status: ShiftStatus;
   acknowledged: boolean;
+  /** Foreign key into a real staff/login account — undefined for most
+   * generated rows (this roster predates real staff accounts), but set on
+   * the one entry deliberately staffed by the default Registration Officer
+   * demo login (`usr_011`, Mrs. Adaobi Nwankwo) so My Shift has real,
+   * non-fabricated data to show for that account. */
+  staffId?: string | undefined;
 };
 
 const SHIFT_TIME_RANGE: Record<ShiftType, string> = {
@@ -113,14 +119,25 @@ const GEN_STATUS: ShiftStatus[] = [
 ];
 const GEN_AVATAR_BG = ['#3B82F6', '#22C55E', '#8B5CF6', '#F59E0B', '#00B4D8', '#EC4899'];
 
+// Row 0 is deliberately staffed by the default Registration Officer demo
+// login (usr_011, Mrs. Adaobi Nwankwo) — same convention as
+// queueFixtures.ts's Room 2 doctor — so logging in as `register` sees real
+// data on My Shift instead of an empty state.
+const DEMO_OFFICER = { staffId: 'usr_011', firstName: 'Adaobi', lastName: 'Nwankwo' };
+
 export const MOCK_REGISTRATION_ROSTER: RegistrationShift[] = Array.from({ length: 20 }, (_, i) => {
-  const firstName = GEN_FIRST_NAMES[i % GEN_FIRST_NAMES.length] as string;
-  const lastName = GEN_LAST_NAMES[(i * 5) % GEN_LAST_NAMES.length] as string;
+  const isDemoOfficer = i === 0;
+  const firstName = isDemoOfficer
+    ? DEMO_OFFICER.firstName
+    : (GEN_FIRST_NAMES[i % GEN_FIRST_NAMES.length] as string);
+  const lastName = isDemoOfficer
+    ? DEMO_OFFICER.lastName
+    : (GEN_LAST_NAMES[(i * 5) % GEN_LAST_NAMES.length] as string);
   const ward = GEN_STATIONS[i % GEN_STATIONS.length] as string;
   const roles = STATION_ROLE[ward] as string[];
-  const role = roles[i % roles.length] as string;
+  const role = isDemoOfficer ? 'Senior Registration Officer' : (roles[i % roles.length] as string);
   const shiftType = GEN_SHIFT_TYPES[i % GEN_SHIFT_TYPES.length] as ShiftType;
-  const status = GEN_STATUS[i % GEN_STATUS.length] as ShiftStatus;
+  const status = isDemoOfficer ? 'ON_DUTY' : (GEN_STATUS[i % GEN_STATUS.length] as ShiftStatus);
   return {
     id: `rgs-${String(i + 1).padStart(3, '0')}`,
     staffName: `${firstName} ${lastName}`,
@@ -131,7 +148,8 @@ export const MOCK_REGISTRATION_ROSTER: RegistrationShift[] = Array.from({ length
     shiftType,
     timeRange: SHIFT_TIME_RANGE[shiftType],
     status,
-    acknowledged: status !== 'SCHEDULED' || i % 3 !== 0,
+    acknowledged: isDemoOfficer ? false : status !== 'SCHEDULED' || i % 3 !== 0,
+    ...(isDemoOfficer ? { staffId: DEMO_OFFICER.staffId } : {}),
   };
 });
 

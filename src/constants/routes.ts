@@ -128,6 +128,7 @@ export const ROUTES = {
   registrationReports: '/registration/reports',
   registrationAttendance: '/registration/attendance',
   registrationWorkforceManagement: '/registration/workforce-management',
+  registrationMyShift: '/registration/my-shift',
   registrationMessages: '/registration/messages',
   registrationNotifications: '/registration/notifications',
   registrationAnnouncements: '/registration/announcements',

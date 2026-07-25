@@ -183,6 +183,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
             icon: CalendarDays,
             permission: PERMISSIONS.DUTY_ROSTER_WRITE,
           },
+          { label: 'My Shift', href: '/registration/my-shift', icon: LayoutList },
         ],
       },
       {

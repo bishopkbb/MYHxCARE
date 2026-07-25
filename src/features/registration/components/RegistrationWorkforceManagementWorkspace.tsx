@@ -35,7 +35,6 @@ import { useToast } from '@/hooks/useToast';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import {
   COVERAGE_OVERVIEW,
-  MOCK_REGISTRATION_ROSTER,
   ROLE_OPTIONS,
   SHIFT_TYPE_OPTIONS,
   STATUS_OPTIONS,
@@ -44,6 +43,14 @@ import {
   type ShiftStatus,
   type ShiftType,
 } from '@/features/registration/__mocks__/registrationWorkforceFixtures';
+import {
+  acknowledgeShift as acknowledgeShiftInStore,
+  addShift,
+  cancelShift as cancelShiftInStore,
+  duplicateShift as duplicateShiftInStore,
+  updateShift as updateShiftInStore,
+  useRegistrationShifts,
+} from '@/features/registration/store/registrationShiftStore';
 
 const CreateEditRegistrationShiftModal = dynamic(
   () =>
@@ -296,7 +303,7 @@ function SkeletonRosterRow() {
 export function RegistrationWorkforceManagementWorkspace() {
   const toast = useToast();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [roster, setRoster] = useState<RegistrationShift[]>(MOCK_REGISTRATION_ROSTER);
+  const roster = useRegistrationShifts();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
@@ -398,29 +405,25 @@ export function RegistrationWorkforceManagementWorkspace() {
   }
 
   function handleCreateShift(shift: RegistrationShift) {
-    setRoster((prev) => [shift, ...prev]);
+    addShift(shift);
     setCreateOpen(false);
     toast.success('Shift created', `${shift.staffName}'s shift has been added to the roster.`);
   }
 
   function handleUpdateShift(shift: RegistrationShift) {
-    setRoster((prev) => prev.map((s) => (s.id === shift.id ? shift : s)));
+    updateShiftInStore(shift);
     setEditingShift(null);
     toast.success('Shift updated', `${shift.staffName}'s shift has been updated.`);
   }
 
   function handleCancelShift(shift: RegistrationShift) {
-    // A status transition, not a delete — the cancelled shift stays on the
-    // roster (filterable, auditable) instead of silently disappearing.
-    setRoster((prev) =>
-      prev.map((s) => (s.id === shift.id ? { ...s, status: 'CANCELLED' as const } : s)),
-    );
+    cancelShiftInStore(shift.id);
     setOpenRowMenuId(null);
     toast.info('Shift cancelled', `${shift.staffName}'s shift has been marked as cancelled.`);
   }
 
   function handleDuplicateShift(shift: RegistrationShift) {
-    setRoster((prev) => [{ ...shift, id: `rgs-dup-${Date.now()}` }, ...prev]);
+    duplicateShiftInStore(shift);
     setOpenRowMenuId(null);
     toast.success('Shift duplicated', `A copy of ${shift.staffName}'s shift has been added.`);
   }
@@ -433,7 +436,7 @@ export function RegistrationWorkforceManagementWorkspace() {
   // action anywhere that actually flipped a shift to acknowledged.
   function handleAcknowledgeShift(shiftId: string) {
     const shift = roster.find((s) => s.id === shiftId);
-    setRoster((prev) => prev.map((s) => (s.id === shiftId ? { ...s, acknowledged: true } : s)));
+    acknowledgeShiftInStore(shiftId);
     if (shift)
       toast.success('Shift acknowledged', `${shift.staffName}'s shift is now acknowledged.`);
     setViewingShift(null);

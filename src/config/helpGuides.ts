@@ -1107,6 +1107,30 @@ const REGISTRATION_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
   ],
 };
 
+const REGISTRATION_MY_SHIFT_GUIDE: HelpGuide = {
+  id: 'registration-my-shift',
+  title: 'My Shift',
+  intro: 'Your own shift assignment for today, and who else is currently on duty.',
+  sections: [
+    {
+      heading: 'Your shift',
+      body: 'The card at the top shows your station, role, shift time, and status — pulled from the same roster your supervisor manages in Workforce Management, so both screens always agree.',
+    },
+    {
+      heading: 'Acknowledging your shift',
+      body: '"Acknowledge Shift" appears when your shift hasn\'t been confirmed yet. Acknowledging it is available to you directly — no supervisor permission is needed to confirm your own shift.',
+    },
+    {
+      heading: 'No shift assigned',
+      body: 'If nothing shows here, no shift has been assigned to your account yet — check with your supervisor.',
+    },
+    {
+      heading: 'Team on Duty Now',
+      body: 'A live list of everyone else currently marked On Duty on the registration roster, with their station and shift time.',
+    },
+  ],
+};
+
 const RECORDS_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'records-workforce-management',
   title: 'Workforce Management',
@@ -1961,6 +1985,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/registration/announcements')) return ANNOUNCEMENTS_GUIDE;
   if (pathname.startsWith('/registration/workforce-management'))
     return REGISTRATION_WORKFORCE_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/registration/my-shift')) return REGISTRATION_MY_SHIFT_GUIDE;
   if (pathname.startsWith('/registration')) return REGISTRATION_DASHBOARD_GUIDE;
   if (pathname.startsWith('/nurse/vital-signs')) return VITAL_SIGNS_GUIDE;
   if (pathname.startsWith('/nurse/observation-charts')) return OBSERVATION_CHARTS_GUIDE;
