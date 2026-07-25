@@ -380,6 +380,11 @@ export function DailyAttendanceWorkspace() {
       if (department && r.department !== department) return false;
       if (doctor && r.doctor !== doctor) return false;
       if (status && r.status !== status) return false;
+      if (date && r.checkInTime.slice(0, 10) !== date) return false;
+      // `clinic` is collected here but AttendanceEntry carries no clinic
+      // field — there's no data to filter against yet (attendance is
+      // recorded per-department, not per-clinic, today). Known limitation,
+      // not fabricated.
       return true;
     });
     setRows(filtered);

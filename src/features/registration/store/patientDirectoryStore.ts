@@ -15,6 +15,7 @@
 
 import { useSyncExternalStore } from 'react';
 
+import type { AllergySeverity } from '@/types/patient.types';
 import { computeAge } from '@/features/registration/schemas/registerPatientSchema';
 import {
   DIRECTORY_PATIENTS,
@@ -82,6 +83,27 @@ export function findPotentialDuplicates(input: DuplicateCheckInput): DirectoryPa
   });
 }
 
+// ── Identifier reservation ───────────────────────────────────────────────────
+// A module-level monotonic counter, not `Math.random()` — two officers
+// registering patients seconds apart used to have a real (if small) chance of
+// generating the same 4-digit MRN suffix. This is only as collision-resistant
+// as JS's single-threaded execution allows (every tab still starts its own
+// counter) — genuine atomicity needs a real server-side sequence, which is
+// exactly what `POST /patients/reserve-identifier` in the backend API
+// contract calls for. This is the best available mitigation at the mock layer.
+
+let identifierSeq = DIRECTORY_PATIENTS.length;
+
+export function reserveIdentifier(): { mrn: string; patientId: string } {
+  identifierSeq += 1;
+  const year = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Africa/Lagos',
+    year: 'numeric',
+  }).format(new Date());
+  const seq = String(identifierSeq).padStart(5, '0');
+  return { mrn: `MRN-${year}-${seq}`, patientId: `PT-${seq}` };
+}
+
 // ── Register Patient → Directory (the arrival→identity bridge) ─────────────
 
 const AVATAR_PALETTE = [
@@ -126,6 +148,14 @@ export type NewDirectoryPatientInput = {
   insuranceProviderLabel?: string | undefined;
   mrn: string;
   patientId: string;
+  /** Step 2's "Known Allergies" entries — same shape as
+   * `additionalDetailsSchema.ts`'s `AllergyEntry`. Previously captured on
+   * screen and validated, then dropped entirely: `addDirectoryPatient` had no
+   * field for it, so a patient with a documented severe allergy registered
+   * with an empty allergy list. */
+  allergies?: { substance: string; reaction: string; severity: AllergySeverity }[] | undefined;
+  /** Who to attribute the allergy capture to — the logged-in registration officer. */
+  registeredByName?: string | undefined;
 };
 
 /** Register Patient's "Complete Registration" calling this is what makes a
@@ -138,6 +168,8 @@ export function addDirectoryPatient(input: NewDirectoryPatientInput): DirectoryP
   const fullName = [input.firstName, input.middleName, input.lastName].filter(Boolean).join(' ');
   const initials = `${input.firstName[0] ?? ''}${input.lastName[0] ?? ''}`.toUpperCase();
   const age = computeAge(input.dateOfBirth) ?? 0;
+  const recordedAt = new Date().toISOString();
+  const recordedBy = input.registeredByName ?? 'Registration Officer';
 
   const patient: DirectoryPatient = {
     id: `dp-reg-${Date.now()}`,
@@ -162,6 +194,14 @@ export function addDirectoryPatient(input: NewDirectoryPatientInput): DirectoryP
     bloodGroup: 'Unknown',
     address: input.address,
     dateRegistered: new Date().toISOString().slice(0, 10),
+    allergies: (input.allergies ?? []).map((a, i) => ({
+      id: `alg-reg-${Date.now()}-${i}`,
+      substance: a.substance,
+      reaction: a.reaction,
+      severity: a.severity,
+      recordedAt,
+      recordedBy,
+    })),
   };
 
   patients = [patient, ...patients];

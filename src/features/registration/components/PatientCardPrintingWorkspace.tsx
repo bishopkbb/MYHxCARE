@@ -26,6 +26,7 @@ import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { getInitials } from '@lib/utils';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { downloadPDF, escapeHtml } from '@/utils/export';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
@@ -58,6 +59,18 @@ const TYPE_CFG: Record<CardType, { color: string; border: string; bg: string }> 
   Dependent: { color: '#22C55E', border: 'rgba(34,197,94,0.35)', bg: 'rgba(34,197,94,0.08)' },
   Visitor: { color: '#F59E0B', border: 'rgba(245,158,11,0.35)', bg: 'rgba(245,158,11,0.08)' },
 };
+
+// Computed at read time, not stored — a card whose `expiryDate` has passed
+// displays (and filters) as Expired even though nothing ever explicitly
+// transitioned its stored `status`, closing the dead-state gap where
+// `EXPIRED` previously only ever appeared in seed data. Lost/Damaged and
+// Reprint Requested are more specific staff-recorded states and are never
+// silently overridden just because the card also happens to be past expiry.
+function getEffectiveStatus(card: PatientCard): CardStatus {
+  if (card.status === 'Lost/Damaged' || card.status === 'Reprint Requested') return card.status;
+  if (new Date(card.expiryDate).getTime() < Date.now()) return 'Expired';
+  return card.status;
+}
 
 const STATUS_CFG: Record<CardStatus, { color: string; border: string; bg: string }> = {
   Printed: { color: '#22C55E', border: 'rgba(34,197,94,0.40)', bg: 'transparent' },
@@ -93,10 +106,12 @@ function buildCardHtml(card: PatientCard): string {
 function RowMenu({
   onView,
   onReprint,
+  onFlagForReprint,
   onReportLost,
 }: {
   onView: () => void;
   onReprint: () => void;
+  onFlagForReprint: () => void;
   onReportLost: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -117,6 +132,7 @@ function RowMenu({
         {[
           { label: 'View Card', onClick: onView },
           { label: 'Reprint Card', onClick: onReprint },
+          { label: 'Flag for Reprint', onClick: onFlagForReprint },
           { label: 'Report Lost/Damaged', onClick: onReportLost, danger: true },
         ].map((item) => (
           <button
@@ -140,6 +156,8 @@ function RowMenu({
 export function PatientCardPrintingWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const actorName = user?.name ?? 'Registration Officer';
   const [cards, setCards] = useState<PatientCard[]>(PATIENT_CARDS);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -214,7 +232,7 @@ export function PatientCardPrintingWorkspace() {
     const q = search.trim().toLowerCase();
     return cards.filter((c) => {
       if (typeFilter && c.cardType !== typeFilter) return false;
-      if (statusFilter && c.status !== statusFilter) return false;
+      if (statusFilter && getEffectiveStatus(c) !== statusFilter) return false;
       if (dateFilter && c.issueDate.slice(0, 10) !== dateFilter) return false;
       if (
         q &&
@@ -263,7 +281,7 @@ export function PatientCardPrintingWorkspace() {
       ...c,
       status: 'Printed',
       printCount: c.printCount + 1,
-      lastPrintedBy: 'Adaobi Nwankwo',
+      lastPrintedBy: actorName,
     }));
     downloadPDF(`card-${card.id}`, buildCardHtml(card));
     toast.success(
@@ -277,7 +295,7 @@ export function PatientCardPrintingWorkspace() {
       ...c,
       status: 'Printed',
       printCount: c.printCount + 1,
-      lastPrintedBy: 'Adaobi Nwankwo',
+      lastPrintedBy: actorName,
     }));
     downloadPDF(`card-${card.id}-reprint`, buildCardHtml(card));
     toast.success('Reprint sent', `A reprint of ${card.patientName}'s card has been queued.`);
@@ -286,6 +304,15 @@ export function PatientCardPrintingWorkspace() {
   function handleReportLost(card: PatientCard) {
     updateCard(card.id, (c) => ({ ...c, status: 'Lost/Damaged' }));
     toast.info('Reported lost/damaged', `${card.patientName}'s card has been flagged for reprint.`);
+  }
+
+  // Staff-mediated equivalent of a patient calling in to ask for a reprint —
+  // there's no patient self-service portal in this system, so the front
+  // desk logs the request on the patient's behalf instead of it being a
+  // silent seed-data-only status with no way to actually reach it.
+  function handleFlagForReprint(card: PatientCard) {
+    updateCard(card.id, (c) => ({ ...c, status: 'Reprint Requested' }));
+    toast.success('Flagged for reprint', `${card.patientName}'s card is queued for a reprint.`);
   }
 
   function handleDownload(card: PatientCard) {
@@ -312,7 +339,7 @@ export function PatientCardPrintingWorkspace() {
               ...c,
               status: 'Printed',
               printCount: c.printCount + 1,
-              lastPrintedBy: 'Adaobi Nwankwo',
+              lastPrintedBy: actorName,
             }
           : c,
       ),
@@ -707,8 +734,9 @@ export function PatientCardPrintingWorkspace() {
 
                     {pageRows.map((c, i) => {
                       const typeCfg = TYPE_CFG[c.cardType];
-                      const statusCfg = STATUS_CFG[c.status];
-                      const isExpired = c.status === 'Expired';
+                      const effectiveStatus = getEffectiveStatus(c);
+                      const statusCfg = STATUS_CFG[effectiveStatus];
+                      const isExpired = effectiveStatus === 'Expired';
                       return (
                         <div
                           key={c.id}
@@ -794,7 +822,7 @@ export function PatientCardPrintingWorkspace() {
                                 background: statusCfg.bg,
                               }}
                             >
-                              {c.status}
+                              {effectiveStatus}
                             </span>
                           </div>
                           <div
@@ -812,6 +840,7 @@ export function PatientCardPrintingWorkspace() {
                             <RowMenu
                               onView={() => selectCard(c)}
                               onReprint={() => handleReprint(c)}
+                              onFlagForReprint={() => handleFlagForReprint(c)}
                               onReportLost={() => handleReportLost(c)}
                             />
                           </div>
@@ -928,7 +957,7 @@ export function PatientCardPrintingWorkspace() {
 
                   <div className="mt-5 flex flex-col gap-2.5">
                     {[
-                      ['Status', selected.status],
+                      ['Status', getEffectiveStatus(selected)],
                       ['Print Count', String(selected.printCount)],
                       ['Last Printed By', selected.lastPrintedBy],
                       [
@@ -1012,6 +1041,21 @@ export function PatientCardPrintingWorkspace() {
                         <Copy style={{ width: 14, height: 14 }} />
                         Copy MRN
                       </button>
+                      <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
+                        <button
+                          type="button"
+                          onClick={() => handleFlagForReprint(selected)}
+                          className="col-span-2 flex h-10 items-center justify-center gap-1.5 rounded-[8px] font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          style={{
+                            fontSize: 14,
+                            color: '#00B4D8',
+                            border: '1px solid rgba(0,180,216,0.35)',
+                          }}
+                        >
+                          <FileSignature style={{ width: 14, height: 14 }} />
+                          Flag for Reprint
+                        </button>
+                      </PermissionGate>
                       <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
                         <button
                           type="button"

@@ -55,11 +55,6 @@ const AssignCategoryModal = dynamic(
   { ssr: false, loading: () => <ModalLoadingFallback /> },
 );
 
-// The only directory patient with a full, richly-detailed PatientProfile
-// record (see toCuratedBannerPatient()) -- Profile navigation is honest
-// only for this one; every other row would silently show the wrong patient.
-const CURATED_PATIENT_ID = 'dp-001';
-
 type PageState = 'loading' | 'loaded' | 'error';
 
 const STATUS_CFG: Record<DirectoryPatientStatus, { color: string; border: string; bg: string }> = {
@@ -828,16 +823,9 @@ export default function PatientDirectoryPage() {
                             </button>
                             <button
                               type="button"
-                              onClick={() => {
-                                if (patient.id === CURATED_PATIENT_ID) {
-                                  router.push(ROUTES.registrationProfile);
-                                } else {
-                                  toast.info(
-                                    'Not available',
-                                    'The full Patient Profile view is only built out for the demo patient so far.',
-                                  );
-                                }
-                              }}
+                              onClick={() =>
+                                router.push(`${ROUTES.registrationProfile}?patientId=${patient.id}`)
+                              }
                               aria-label={`Edit ${patient.name}`}
                               className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                             >
@@ -1178,16 +1166,9 @@ export default function PatientDirectoryPage() {
                   <div className="mt-2.5 grid grid-cols-2 gap-2.5">
                     <button
                       type="button"
-                      onClick={() => {
-                        if (selectedPatient.id === CURATED_PATIENT_ID) {
-                          router.push(ROUTES.registrationProfile);
-                        } else {
-                          toast.info(
-                            'Not available',
-                            'The full Patient Profile view is only built out for the demo patient so far.',
-                          );
-                        }
-                      }}
+                      onClick={() =>
+                        router.push(`${ROUTES.registrationProfile}?patientId=${selectedPatient.id}`)
+                      }
                       className="flex flex-col items-center gap-1.5 rounded-[10px] py-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                       style={{
                         fontSize: 14,

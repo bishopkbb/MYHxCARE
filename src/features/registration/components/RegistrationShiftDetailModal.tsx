@@ -75,6 +75,12 @@ const STATUS_CFG: Record<
     border: 'rgba(107,114,128,0.40)',
     bg: 'transparent',
   },
+  CANCELLED: {
+    label: 'Cancelled',
+    color: '#EF4444',
+    border: 'rgba(239,68,68,0.40)',
+    bg: 'rgba(239,68,68,0.06)',
+  },
 };
 
 function DetailField({ label, value }: { label: string; value: string }) {
@@ -100,10 +106,12 @@ export function RegistrationShiftDetailModal({
   shift,
   onClose,
   onEdit,
+  onAcknowledge,
 }: {
   shift: RegistrationShift;
   onClose: () => void;
   onEdit: () => void;
+  onAcknowledge: () => void;
 }) {
   const typeCfg = SHIFT_TYPE_CFG[shift.shiftType];
   const statusCfg = STATUS_CFG[shift.status];
@@ -216,6 +224,25 @@ export function RegistrationShiftDetailModal({
           >
             Close
           </button>
+          {!shift.acknowledged && (
+            <button
+              type="button"
+              onClick={onAcknowledge}
+              className={`flex items-center gap-1.5 font-sans font-semibold transition-colors duration-150 hover:bg-[rgba(34,197,94,0.06)] ${FOCUS_RING}`}
+              style={{
+                height: 44,
+                borderRadius: 12,
+                padding: '0 20px',
+                background: '#FFFFFF',
+                border: '1px solid rgba(34,197,94,0.4)',
+                fontSize: 14,
+                color: '#22C55E',
+              }}
+            >
+              <CheckCircle2 style={{ width: 16, height: 16 }} />
+              Mark as Acknowledged
+            </button>
+          )}
           <button
             type="button"
             onClick={onEdit}

@@ -7,6 +7,7 @@ import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormField } from '@components/shared/FormField';
 import { FormInput } from '@components/shared/FormInput';
 import { FormSelect } from '@components/shared/FormSelect';
+import { useAuth } from '@/hooks/useAuth';
 import {
   CONSENT_DOCTOR_OPTIONS,
   CONSENT_TYPE_OPTIONS,
@@ -50,6 +51,8 @@ export function NewConsentFormModal({
   onClose: () => void;
   onSave: (consent: ConsentForm) => void;
 }) {
+  const { user } = useAuth();
+  const actorName = user?.name ?? 'Registration Officer';
   const isEdit = Boolean(existing);
   const [patientName, setPatientName] = useState(existing?.patientName ?? '');
   const [mrn, setMrn] = useState(existing?.mrn ?? '');
@@ -111,7 +114,8 @@ export function NewConsentFormModal({
               bg: 'rgba(0,180,216,0.12)',
             },
           ],
-          audit: [{ id: 'au-1', action: 'Created', actor: 'Adaobi Nwankwo', dateTime: now }],
+          audit: [{ id: 'au-1', action: 'Created', actor: actorName, dateTime: now }],
+          attachments: [],
         };
     onSave(consent);
   }

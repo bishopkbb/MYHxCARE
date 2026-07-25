@@ -17,10 +17,12 @@ import {
 } from '@/features/patients/__mocks__/patientFixtures';
 import {
   OUR_DEPARTMENT,
-  REFERRALS,
-  type Referral,
   type ReferralStatus,
 } from '@/features/registration/__mocks__/referralFixtures';
+import {
+  setReferralStatus as setReferralStatusInStore,
+  useReferrals,
+} from '@/features/registration/store/referralStore';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -124,7 +126,7 @@ export default function ReferralsIndexPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [activeTab, setActiveTab] = useState<ReferralsTab>('refer');
-  const [referrals, setReferrals] = useState<Referral[]>(REFERRALS);
+  const referrals = useReferrals();
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -171,9 +173,9 @@ export default function ReferralsIndexPage() {
   });
   const incomingCount = incomingReferrals.filter((r) => r.status === 'Pending').length;
 
-  function setReferralStatus(id: string, status: ReferralStatus) {
+  function handleReferralStatusChange(id: string, status: ReferralStatus) {
     const referral = referrals.find((r) => r.id === id);
-    setReferrals((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+    setReferralStatusInStore(id, status);
     if (referral) {
       toast.success(
         status === 'Accepted' ? 'Referral accepted' : 'Referral completed',
@@ -686,7 +688,7 @@ export default function ReferralsIndexPage() {
                         {referral.status === 'Pending' && (
                           <button
                             type="button"
-                            onClick={() => setReferralStatus(referral.id, 'Accepted')}
+                            onClick={() => handleReferralStatusChange(referral.id, 'Accepted')}
                             className={`flex h-11 shrink-0 items-center gap-1.5 rounded-[8px] px-3 text-sm font-medium whitespace-nowrap transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
                             style={{ background: '#E6F8FD', color: '#00B4D8' }}
                           >
@@ -697,7 +699,7 @@ export default function ReferralsIndexPage() {
                         {referral.status === 'Accepted' && (
                           <button
                             type="button"
-                            onClick={() => setReferralStatus(referral.id, 'Completed')}
+                            onClick={() => handleReferralStatusChange(referral.id, 'Completed')}
                             className={`flex h-11 shrink-0 items-center gap-1.5 rounded-[8px] px-3 text-sm font-medium whitespace-nowrap transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
                             style={{ background: '#00B4D8', color: '#FFFFFF' }}
                           >

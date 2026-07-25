@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import type { Allergy } from '@/types/patient.types';
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
 
 export type DirectoryPatientStatus = 'Active' | 'Checked-In' | 'Waiting' | 'Inactive' | 'Emergency';
@@ -43,6 +44,11 @@ export type DirectoryPatient = {
   bloodGroup: string;
   address: string;
   dateRegistered: string;
+  /** Captured at registration Step 2 ("Known Allergies"). Empty for seeded
+   * demo rows (none of the generated fixtures below model a registration-time
+   * allergy capture) — real allergy data only exists for patients registered
+   * through `patientDirectoryStore.addDirectoryPatient()`. */
+  allergies: Allergy[];
 };
 
 export type DirectoryStat = {
@@ -348,5 +354,6 @@ export const DIRECTORY_PATIENTS: DirectoryPatient[] = NAMES.map(([first, last], 
     bloodGroup: BLOOD_GROUPS[i % BLOOD_GROUPS.length] as string,
     address: `No. ${12 + i} Nnamdi Azikiwe Street, Awka, Anambra State.`,
     dateRegistered: `2026-${String(1 + (i % 7)).padStart(2, '0')}-${String(3 + (i % 25)).padStart(2, '0')}`,
+    allergies: [],
   };
 });

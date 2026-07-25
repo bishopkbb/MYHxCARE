@@ -23,6 +23,7 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import {
@@ -31,6 +32,8 @@ import {
 } from '@/features/registration/__mocks__/checkInFixtures';
 import { MOCK_PATIENT_PROFILE } from '@/features/registration/__mocks__/patientProfileFixtures';
 import { RELATIONSHIP_OPTIONS } from '@/features/registration/__mocks__/registerPatientOptions';
+import { emergencyOnDuty } from '@/features/registration/__mocks__/queueFixtures';
+import { addQueueEntry } from '@/features/registration/store/registrationQueueStore';
 import {
   ARRIVAL_MODE_OPTIONS,
   EMERGENCY_MRN_START,
@@ -134,6 +137,8 @@ const STATUS_LABEL_BY_STEP = ['To Be Triage', 'In Triage', 'Triage Complete', 'W
 export default function EmergencyRegistrationPage() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const actorName = user?.name ?? 'Registration Officer';
 
   const [patientType, setPatientType] = useState<PatientType>('unknown');
   const [patientSearch, setPatientSearch] = useState('');
@@ -242,6 +247,25 @@ export default function EmergencyRegistrationPage() {
     }
     const finalMrn = matchedKnown ? matchedKnown.mrn : formatEmergencyMrn(emrCounter);
     if (!matchedKnown) setEmrCounter((n) => n + 1);
+
+    // This is what actually routes the patient to the ED queue — without it,
+    // "Complete Registration & Route to ED" only showed a success screen
+    // claiming the patient was routed, while nobody on Nursing's side could
+    // ever see them.
+    addQueueEntry({
+      patientName: patientName.trim(),
+      mrn: finalMrn,
+      gender: gender === 'Female' ? 'Female' : 'Male',
+      age: Number(age) || (matchedKnown ? matchedKnown.age : 0),
+      checkinDepartment: 'emergency',
+      isEmergency: true,
+      isNewPatient: !matchedKnown,
+      physician: emergencyOnDuty
+        ? { label: emergencyOnDuty.name, doctorId: emergencyOnDuty.doctorId }
+        : undefined,
+      checkedInBy: actorName,
+    });
+
     setRegisteredMrn(finalMrn);
     setRegisteredName(patientName.trim());
     setIsComplete(true);
@@ -886,7 +910,7 @@ export default function EmergencyRegistrationPage() {
               >
                 Clear Form
               </button>
-              <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
+              <PermissionGate permission={PERMISSIONS.EMERGENCY_WRITE}>
                 <button
                   type="button"
                   onClick={handleSubmit}

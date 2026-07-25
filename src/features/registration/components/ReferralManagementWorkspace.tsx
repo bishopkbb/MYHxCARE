@@ -29,7 +29,6 @@ import { REGISTRATION_DATE_OPTIONS } from '@/features/registration/__mocks__/pat
 import {
   DEPARTMENT_OPTIONS,
   DIRECTION_OPTIONS,
-  REFERRALS,
   REFERRAL_OVERVIEW_BREAKDOWN,
   REFERRAL_RECENT_ACTIVITY,
   REFERRAL_STATS,
@@ -38,6 +37,11 @@ import {
   type ReferralDirection,
   type ReferralStatus,
 } from '@/features/registration/__mocks__/referralFixtures';
+import {
+  addReferral,
+  setReferralStatus,
+  useReferrals,
+} from '@/features/registration/store/referralStore';
 
 const NewReferralModal = dynamic(
   () => import('./NewReferralModal').then((m) => m.NewReferralModal),
@@ -138,45 +142,47 @@ function RowMenu({
         >
           View Details
         </button>
-        {referral.status === 'Pending' && (
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-              onAccept();
-            }}
-            className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-            style={{ fontSize: 14, color: '#2F3A40' }}
-          >
-            Accept Referral
-          </button>
-        )}
-        {referral.status === 'Accepted' && (
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-              onComplete();
-            }}
-            className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-            style={{ fontSize: 14, color: '#2F3A40' }}
-          >
-            Mark Completed
-          </button>
-        )}
-        {(referral.status === 'Pending' || referral.status === 'Accepted') && (
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-              onCancel();
-            }}
-            className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)]"
-            style={{ fontSize: 14, color: '#EF4444' }}
-          >
-            Cancel Referral
-          </button>
-        )}
+        <PermissionGate permission={PERMISSIONS.REFERRALS_WRITE}>
+          {referral.status === 'Pending' && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onAccept();
+              }}
+              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+              style={{ fontSize: 14, color: '#2F3A40' }}
+            >
+              Accept Referral
+            </button>
+          )}
+          {referral.status === 'Accepted' && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onComplete();
+              }}
+              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+              style={{ fontSize: 14, color: '#2F3A40' }}
+            >
+              Mark Completed
+            </button>
+          )}
+          {(referral.status === 'Pending' || referral.status === 'Accepted') && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onCancel();
+              }}
+              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)]"
+              style={{ fontSize: 14, color: '#EF4444' }}
+            >
+              Cancel Referral
+            </button>
+          )}
+        </PermissionGate>
       </RowMenuPortal>
     </div>
   );
@@ -185,7 +191,7 @@ function RowMenu({
 export function ReferralManagementWorkspace() {
   const router = useRouter();
   const toast = useToast();
-  const [referrals, setReferrals] = useState<Referral[]>(REFERRALS);
+  const referrals = useReferrals();
   const [tab, setTab] = useState<Tab>('All Referrals');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -265,25 +271,25 @@ export function ReferralManagementWorkspace() {
   }
 
   function handleAccept(id: string) {
-    setReferrals((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'Accepted' } : r)));
+    setReferralStatus(id, 'Accepted');
     toast.success('Referral accepted', `${id} has been accepted.`);
     setDetailId(null);
   }
 
   function handleComplete(id: string) {
-    setReferrals((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'Completed' } : r)));
+    setReferralStatus(id, 'Completed');
     toast.success('Referral completed', `${id} has been marked as completed.`);
     setDetailId(null);
   }
 
   function handleCancel(id: string) {
-    setReferrals((prev) => prev.map((r) => (r.id === id ? { ...r, status: 'Cancelled' } : r)));
+    setReferralStatus(id, 'Cancelled');
     toast.info('Referral cancelled', `${id} has been cancelled.`);
     setDetailId(null);
   }
 
   function handleCreate(referral: Referral) {
-    setReferrals((prev) => [referral, ...prev]);
+    addReferral(referral);
     setCreating(null);
     setCreateReason('');
     toast.success('Referral created', `${referral.id} has been submitted as ${referral.status}.`);

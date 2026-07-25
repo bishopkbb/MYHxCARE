@@ -27,6 +27,7 @@ import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { getInitials } from '@lib/utils';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { computeAge } from '@/features/registration/schemas/registerPatientSchema';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
@@ -199,7 +200,11 @@ function RowMenu({
 export function ConsentFormsWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const actorName = user?.name ?? 'Registration Officer';
   const [consents, setConsents] = useState<ConsentForm[]>(CONSENT_FORMS);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadTargetId, setUploadTargetId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [deptFilter, setDeptFilter] = useState('');
@@ -322,7 +327,7 @@ export function ConsentFormsWorkspace() {
         {
           id: `au-${Date.now()}`,
           action: 'Signature requested',
-          actor: 'Adaobi Nwankwo',
+          actor: actorName,
           dateTime: now,
         },
       ],
@@ -340,12 +345,49 @@ export function ConsentFormsWorkspace() {
     toast.success('Consent archived', `${consent.id} has been archived.`);
   }
 
+  // "Upload Signed Copy" opens the browser's real file picker; there's no
+  // server to send the bytes to yet, so what's captured and persisted onto
+  // the record is the file's real metadata (name, size, who, when) — not a
+  // toast pretending a file was attached with nothing behind it.
   function handleUpload(consent: ConsentForm | null) {
     if (!consent) {
       toast.info('Select a consent form', 'Choose a consent form from the list first.');
       return;
     }
-    toast.success('Signed copy uploaded', `A signed copy has been attached to ${consent.id}.`);
+    setUploadTargetId(consent.id);
+    fileInputRef.current?.click();
+  }
+
+  function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    const targetId = uploadTargetId;
+    e.target.value = '';
+    setUploadTargetId(null);
+    if (!file || !targetId) return;
+    const now = new Date().toISOString();
+    updateConsent(targetId, (c) => ({
+      ...c,
+      attachments: [
+        ...c.attachments,
+        {
+          id: `att-${Date.now()}`,
+          fileName: file.name,
+          fileSize: file.size,
+          uploadedAt: now,
+          uploadedBy: actorName,
+        },
+      ],
+      audit: [
+        ...c.audit,
+        {
+          id: `au-${Date.now()}`,
+          action: `Signed copy uploaded (${file.name})`,
+          actor: actorName,
+          dateTime: now,
+        },
+      ],
+    }));
+    toast.success('Signed copy uploaded', `${file.name} has been attached to ${targetId}.`);
   }
 
   function handlePrint(consent: ConsentForm | null) {
@@ -1243,6 +1285,42 @@ export function ConsentFormsWorkspace() {
                         </div>
                       </div>
 
+                      {selected.attachments.length > 0 && (
+                        <div className="mt-5">
+                          <p
+                            className="font-sans font-semibold"
+                            style={{ fontSize: 16, color: '#0D2630' }}
+                          >
+                            Attachments
+                          </p>
+                          <div className="mt-2 flex flex-col gap-2">
+                            {selected.attachments.map((a) => (
+                              <div
+                                key={a.id}
+                                className="flex items-center gap-2.5 rounded-[8px] px-3 py-2.5"
+                                style={{ border: '1px solid rgba(0,100,130,0.10)' }}
+                              >
+                                <FileSignature
+                                  style={{ width: 15, height: 15, color: '#8A98A3', flexShrink: 0 }}
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {a.fileName}
+                                  </p>
+                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                    {(a.fileSize / 1024).toFixed(0)} KB · uploaded by {a.uploadedBy}{' '}
+                                    · {formatDateTimeHuman(a.uploadedAt)}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="mt-5">
                         <p
                           className="font-sans font-semibold"
@@ -1460,6 +1538,14 @@ export function ConsentFormsWorkspace() {
       {previewing && (
         <ConsentPreviewModal consent={previewing} onClose={() => setPreviewing(null)} />
       )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={handleFileSelected}
+      />
     </div>
   );
 }

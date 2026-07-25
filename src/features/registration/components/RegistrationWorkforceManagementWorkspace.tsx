@@ -36,7 +36,6 @@ import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import {
   COVERAGE_OVERVIEW,
   MOCK_REGISTRATION_ROSTER,
-  PENDING_ACKNOWLEDGEMENTS,
   ROLE_OPTIONS,
   SHIFT_TYPE_OPTIONS,
   STATUS_OPTIONS,
@@ -159,6 +158,12 @@ const STATUS_CFG: Record<
     color: '#6B7280',
     border: 'rgba(107,114,128,0.40)',
     bg: 'transparent',
+  },
+  CANCELLED: {
+    label: 'CANCELLED',
+    color: '#EF4444',
+    border: 'rgba(239,68,68,0.40)',
+    bg: 'rgba(239,68,68,0.06)',
   },
 };
 
@@ -363,6 +368,24 @@ export function RegistrationWorkforceManagementWorkspace() {
     return map;
   }, [paginated]);
 
+  // Derived from the live roster (not the static PENDING_ACKNOWLEDGEMENTS
+  // fixture) so acknowledging a shift actually removes it from this list.
+  const pendingAcks = useMemo(
+    () =>
+      roster
+        .filter((s) => !s.acknowledged)
+        .slice(0, 5)
+        .map((s) => ({
+          id: s.id,
+          staffName: s.staffName,
+          initials: s.initials,
+          avatarBg: s.avatarBg,
+          shiftLabel: `${SHIFT_TYPE_OPTIONS.find((o) => o.value === s.shiftType)?.label} Shift`,
+          day: 'Today',
+        })),
+    [roster],
+  );
+
   function getRowMenuButtonRef(id: string) {
     return rowMenuButtonRefs.get(id) ?? { current: null };
   }
@@ -387,9 +410,13 @@ export function RegistrationWorkforceManagementWorkspace() {
   }
 
   function handleCancelShift(shift: RegistrationShift) {
-    setRoster((prev) => prev.filter((s) => s.id !== shift.id));
+    // A status transition, not a delete — the cancelled shift stays on the
+    // roster (filterable, auditable) instead of silently disappearing.
+    setRoster((prev) =>
+      prev.map((s) => (s.id === shift.id ? { ...s, status: 'CANCELLED' as const } : s)),
+    );
     setOpenRowMenuId(null);
-    toast.info('Shift cancelled', `${shift.staffName}'s shift has been removed from the roster.`);
+    toast.info('Shift cancelled', `${shift.staffName}'s shift has been marked as cancelled.`);
   }
 
   function handleDuplicateShift(shift: RegistrationShift) {
@@ -400,6 +427,16 @@ export function RegistrationWorkforceManagementWorkspace() {
 
   function handleSetReminder(staffName: string) {
     toast.success('Reminder sent', `A shift-acknowledgement reminder was sent to ${staffName}.`);
+  }
+
+  // Closes the loop "Set Reminder" started but never finished — there was no
+  // action anywhere that actually flipped a shift to acknowledged.
+  function handleAcknowledgeShift(shiftId: string) {
+    const shift = roster.find((s) => s.id === shiftId);
+    setRoster((prev) => prev.map((s) => (s.id === shiftId ? { ...s, acknowledged: true } : s)));
+    if (shift)
+      toast.success('Shift acknowledged', `${shift.staffName}'s shift is now acknowledged.`);
+    setViewingShift(null);
   }
 
   function handlePublishRoster() {
@@ -899,7 +936,10 @@ export function RegistrationWorkforceManagementWorkspace() {
                               <button
                                 type="button"
                                 onClick={() => handleCancelShift(shift)}
-                                className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                disabled={
+                                  shift.status === 'CANCELLED' || shift.status === 'COMPLETED'
+                                }
+                                className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
                                 style={{ fontSize: 14, color: '#EF4444' }}
                               >
                                 Cancel Shift
@@ -980,27 +1020,24 @@ export function RegistrationWorkforceManagementWorkspace() {
                 >
                   Pending Shifts Acknowledgement
                 </h2>
-                {PENDING_ACKNOWLEDGEMENTS.length > 3 && (
+                {pendingAcks.length > 3 && (
                   <button
                     type="button"
                     onClick={() => setShowAllAcks((prev) => !prev)}
                     className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ fontSize: 14, color: '#00B4D8' }}
                   >
-                    {showAllAcks ? 'Show Less' : `View All (${PENDING_ACKNOWLEDGEMENTS.length})`}
+                    {showAllAcks ? 'Show Less' : `View All (${pendingAcks.length})`}
                   </button>
                 )}
               </div>
               <div className="mt-4 flex flex-col gap-3">
-                {PENDING_ACKNOWLEDGEMENTS.length === 0 ? (
+                {pendingAcks.length === 0 ? (
                   <p style={{ fontSize: 14, color: '#8A98A3' }}>
                     Everyone has acknowledged their shift.
                   </p>
                 ) : (
-                  (showAllAcks
-                    ? PENDING_ACKNOWLEDGEMENTS
-                    : PENDING_ACKNOWLEDGEMENTS.slice(0, 3)
-                  ).map((ack) => (
+                  (showAllAcks ? pendingAcks : pendingAcks.slice(0, 3)).map((ack) => (
                     <div key={ack.id} className="flex items-center gap-3">
                       <div
                         className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
@@ -1030,19 +1067,34 @@ export function RegistrationWorkforceManagementWorkspace() {
                       >
                         Awaiting
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => handleSetReminder(ack.staffName)}
-                        className="shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                        style={{
-                          fontSize: 14,
-                          color: '#00B4D8',
-                          border: '1px solid #00B4D8',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        Set Reminder
-                      </button>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSetReminder(ack.staffName)}
+                          className="shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          style={{
+                            fontSize: 14,
+                            color: '#00B4D8',
+                            border: '1px solid #00B4D8',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Set Reminder
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAcknowledgeShift(ack.id)}
+                          className="shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(34,197,94,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          style={{
+                            fontSize: 14,
+                            color: '#22C55E',
+                            border: '1px solid rgba(34,197,94,0.4)',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Acknowledge
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}
@@ -1075,6 +1127,7 @@ export function RegistrationWorkforceManagementWorkspace() {
             setEditingShift(viewingShift);
             setViewingShift(null);
           }}
+          onAcknowledge={() => handleAcknowledgeShift(viewingShift.id)}
         />
       )}
     </div>

@@ -135,6 +135,14 @@ export type ConsentAuditEntry = {
   dateTime: string;
 };
 
+export type ConsentAttachment = {
+  id: string;
+  fileName: string;
+  fileSize: number; // bytes
+  uploadedAt: string; // ISO
+  uploadedBy: string;
+};
+
 export type ConsentForm = {
   id: string;
   patientName: string;
@@ -155,6 +163,7 @@ export type ConsentForm = {
   signatures: SignatureRow[];
   timeline: ConsentTimelineEntry[];
   audit: ConsentAuditEntry[];
+  attachments: ConsentAttachment[];
 };
 
 function deriveStatus(signatures: SignatureRow[]): ConsentStatus {
@@ -190,6 +199,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     ],
     timeline: [],
     audit: [],
+    attachments: [],
   },
   {
     id: 'CON-2026-0147',
@@ -215,6 +225,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     ],
     timeline: [],
     audit: [],
+    attachments: [],
   },
   {
     id: 'CON-2026-0146',
@@ -240,6 +251,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     ],
     timeline: [],
     audit: [],
+    attachments: [],
   },
   {
     id: 'CON-2026-0145',
@@ -265,6 +277,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     ],
     timeline: [],
     audit: [],
+    attachments: [],
   },
   {
     id: 'CON-2026-0144',
@@ -290,6 +303,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     ],
     timeline: [],
     audit: [],
+    attachments: [],
   },
   {
     id: 'CON-2026-0143',
@@ -315,6 +329,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     ],
     timeline: [],
     audit: [],
+    attachments: [],
   },
   {
     id: 'CON-2026-0142',
@@ -340,6 +355,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     ],
     timeline: [],
     audit: [],
+    attachments: [],
   },
   {
     id: 'CON-2026-0141',
@@ -365,6 +381,7 @@ const CURATED_CONSENTS: ConsentForm[] = [
     ],
     timeline: [],
     audit: [],
+    attachments: [],
   },
 ];
 
@@ -504,6 +521,7 @@ const GENERATED_CONSENTS: ConsentForm[] = Array.from({ length: 16 }, (_, idx) =>
     signatures,
     timeline: [],
     audit: [],
+    attachments: [],
   };
   const built = buildTimelineAndAudit(consent);
   consent.timeline = built.timeline;

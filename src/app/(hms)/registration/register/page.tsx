@@ -38,6 +38,7 @@ import type { DirectoryPatient } from '@/features/registration/__mocks__/patient
 import {
   addDirectoryPatient,
   findPotentialDuplicates,
+  reserveIdentifier,
 } from '@/features/registration/store/patientDirectoryStore';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -177,15 +178,6 @@ function Stepper({ currentStep }: { currentStep: StepId }) {
   );
 }
 
-function generateMrnAndPatientId(): { mrn: string; patientId: string } {
-  const year = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Africa/Lagos',
-    year: 'numeric',
-  }).format(new Date());
-  const seq = String(Math.floor(1000 + Math.random() * 9000));
-  return { mrn: `MRN-${year}-${seq}`, patientId: `PT-${seq}` };
-}
-
 function SuccessPanel({
   patientName,
   mrn,
@@ -317,7 +309,7 @@ export default function RegisterPatientPage() {
   }
 
   function handleGenerateMrn() {
-    const generated = generateMrnAndPatientId();
+    const generated = reserveIdentifier();
     setMrn(generated.mrn);
     setPatientId(generated.patientId);
     toast.success('MRN generated', 'A medical record number has been assigned to this patient.');
@@ -366,6 +358,8 @@ export default function RegisterPatientPage() {
         : undefined,
       mrn: finalIds.mrn,
       patientId: finalIds.patientId,
+      allergies: step2Data.hasNoKnownAllergies ? [] : step2Data.allergies,
+      registeredByName: user?.name,
     });
 
     setMrn(finalIds.mrn);

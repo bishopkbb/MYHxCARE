@@ -12,6 +12,7 @@ import { PermissionGate } from '@components/shared/PermissionGate';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
@@ -51,6 +52,8 @@ function formatDateTimeHuman(iso: string): string {
 export function InsuranceVerificationWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const actorName = user?.name ?? 'Registration Officer';
   const [selectedPatient, setSelectedPatient] = useState<DirectoryPatient | null>(null);
   const isCurated = selectedPatient?.id === CURATED_PATIENT_ID;
 
@@ -158,7 +161,7 @@ export function InsuranceVerificationWorkspace() {
             eligibilityStatus: eligible ? 'Eligible' : 'Not Eligible',
             coverageActive: eligible,
             verifiedOn: now,
-            verifiedBy: 'Adaobi Nwankwo',
+            verifiedBy: actorName,
             verificationReference:
               prev.verificationReference || `VERIF-2026-${Date.now().toString().slice(-6)}`,
           }
@@ -168,7 +171,7 @@ export function InsuranceVerificationWorkspace() {
       kind: eligible ? 'success' : 'info',
       label: eligible ? 'Eligibility verified successfully' : 'Eligibility verification failed',
       dateTime: now,
-      actor: 'Adaobi Nwankwo',
+      actor: actorName,
     });
     toast.success(
       eligible ? 'Eligible' : 'Not eligible',
@@ -205,7 +208,7 @@ export function InsuranceVerificationWorkspace() {
       kind: 'info',
       label: 'Insurance information saved as draft',
       dateTime: now,
-      actor: 'Adaobi Nwankwo',
+      actor: actorName,
     });
     toast.success('Draft saved', 'Insurance verification saved as a draft.');
   }
@@ -223,7 +226,7 @@ export function InsuranceVerificationWorkspace() {
       kind: 'success',
       label: 'Insurance information updated',
       dateTime: now,
-      actor: 'Adaobi Nwankwo',
+      actor: actorName,
     });
     toast.success('Saved', 'Insurance verification has been completed and saved.');
   }
@@ -440,16 +443,9 @@ export function InsuranceVerificationWorkspace() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (isCurated) {
-                      router.push(ROUTES.registrationProfile);
-                    } else {
-                      toast.info(
-                        'Not available',
-                        'The full Patient Record view is only built out for the demo patient so far.',
-                      );
-                    }
-                  }}
+                  onClick={() =>
+                    router.push(`${ROUTES.registrationProfile}?patientId=${selectedPatient.id}`)
+                  }
                   className="flex h-11 shrink-0 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                   style={{
                     fontSize: 14,

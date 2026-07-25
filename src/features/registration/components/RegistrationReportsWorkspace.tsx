@@ -35,6 +35,16 @@ import {
 const ROWS_PER_PAGE = 8;
 const AVATAR_COLORS = ['#3B82F6', '#F59E0B', '#22C55E', '#8B5CF6', '#EC4899', '#00B4D8', '#EF4444'];
 
+function isInAgeGroup(age: number, group: string): boolean {
+  if (group === 'Under 18') return age < 18;
+  if (group === '18-25') return age >= 18 && age <= 25;
+  if (group === '26-35') return age >= 26 && age <= 35;
+  if (group === '36-45') return age >= 36 && age <= 45;
+  if (group === '46-60') return age >= 46 && age <= 60;
+  if (group === 'Over 60') return age > 60;
+  return true;
+}
+
 const TYPE_CFG: Record<string, { color: string; border: string; bg: string }> = {
   Appointment: { color: '#3B82F6', border: 'rgba(59,130,246,0.35)', bg: 'rgba(59,130,246,0.08)' },
   'Walk-in': { color: '#F59E0B', border: 'rgba(245,158,11,0.35)', bg: 'rgba(245,158,11,0.08)' },
@@ -372,9 +382,14 @@ export function RegistrationReportsWorkspace() {
       if (department && r.department !== department) return false;
       if (registrationType && r.registrationType !== registrationType) return false;
       if (gender && r.gender !== gender) return false;
+      if (ageGroup && !isInAgeGroup(r.age, ageGroup)) return false;
       const d = r.date.slice(0, 10);
       if (dateFrom && d < dateFrom) return false;
       if (dateTo && d > dateTo) return false;
+      // studentCategory/faculty are collected here but RegistrationRecord
+      // carries neither field — there's no data to filter against yet
+      // (registration doesn't currently capture faculty/student-category on
+      // this record). Left as a known limitation rather than fabricated.
       return true;
     });
     setRows(filtered);
