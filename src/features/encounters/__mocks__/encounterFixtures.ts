@@ -7,6 +7,7 @@
 import { DOCTORS } from '@/features/shared/__mocks__/doctorDirectory';
 import { getPatientRecord } from '@/features/nursing/__mocks__/patientRecordFixtures';
 import { getPatientsReadyForDoctor } from '@/features/nursing/store/nursingWorkflowStore';
+import type { Encounter, VisitStatus } from '@/types/visit.types';
 
 export type PatientStatus =
   | 'waiting'
@@ -498,6 +499,45 @@ function nursePatientToPatientRow(patientId: string): PatientRow | null {
   };
 }
 
+// The one real mapping between the canonical `VisitStatus` state machine
+// (`src/types/visit.types.ts`, correctly used by `Encounter.status`) and this
+// screen's own `PatientStatus` tab/badge vocabulary — see
+// MYHXCARE_SYSTEM_CONSISTENCY_REGISTER.md SYS-002. Only 3 of `PatientStatus`'s
+// 8 values are genuinely encounter-lifecycle states; the other 5
+// (`emergency`/`follow-up` — priority and visit-type labels, not lifecycle
+// stages — and `new-admissions`/`discharged`/`under-observation` — ward/
+// admission concepts, not OPD-encounter concepts) are deliberately left
+// unmapped, not a gap still to close. `CANCELLED`/`DNA` are also unmapped: no
+// queue tab represents either today, so a row whose encounter reaches one
+// keeps its last known display value rather than vanishing or showing a
+// nonsensical status.
+const VISIT_STATUS_TO_PATIENT_STATUS: Partial<Record<VisitStatus, PatientStatus>> = {
+  REGISTERED: 'waiting',
+  WAITING: 'waiting',
+  IN_CONSULTATION: 'in-consultation',
+  INVESTIGATIONS_PENDING: 'in-consultation',
+  PENDING_REVIEW: 'in-consultation',
+  ADMITTED: 'new-admissions',
+  REFERRED: 'completed',
+  COMPLETED: 'completed',
+};
+
+/** Derives a queue row's display status from its patient's real `Encounter`
+ * when one exists (created by `startEncounter()`/`completeEncounter()`),
+ * falling back to the row's own static/seed status for a patient who hasn't
+ * started a consultation yet this session — the 23 demo rows in
+ * `MOCK_QUEUE_ENTRIES` that only ever carry a decorative `emergency`/
+ * `follow-up`/`new-admissions`/`discharged`/`under-observation` value have no
+ * real workflow that changes them, so this intentionally leaves those alone. */
+export function resolveQueueStatus(row: PatientRow, encounters: Encounter[]): PatientStatus {
+  if (!row.patientId) return row.status;
+  const latest = encounters
+    .filter((e) => e.patientId === row.patientId)
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0];
+  if (!latest) return row.status;
+  return VISIT_STATUS_TO_PATIENT_STATUS[latest.status] ?? row.status;
+}
+
 /** Merges a base consultation queue (live from `encounterQueueStore`, seeded
  * from `MOCK_QUEUE`) with patients Nursing has triaged and recorded first
  * vitals for (see `getPatientsReadyForDoctor`), filtered to the logged-in
@@ -506,15 +546,22 @@ function nursePatientToPatientRow(patientId: string): PatientRow | null {
  * account isn't a recognized roster doctor (e.g. admin/testing). Takes the
  * base entries as a parameter (rather than reading `MOCK_QUEUE` directly) so
  * callers can pass the live, mutable snapshot from `useEncounterQueueEntries()`
- * — completing a consultation needs to be visible here without a reload. */
+ * — completing a consultation needs to be visible here without a reload.
+ * `encounters` (from `useEncounters()`) resolves each row's real status via
+ * `resolveQueueStatus()` — defaults to `[]` so existing callers that haven't
+ * been updated yet still compile and behave exactly as before. */
 export function getDoctorQueueFrom(
   baseEntries: PatientRow[],
   doctorId: string | undefined,
+  encounters: Encounter[] = [],
 ): PatientRow[] {
   const bridged = getPatientsReadyForDoctor()
     .map((p) => nursePatientToPatientRow(p.id))
     .filter((row): row is PatientRow => row !== null);
-  const merged = [...baseEntries, ...bridged];
+  const merged = [...baseEntries, ...bridged].map((row) => ({
+    ...row,
+    status: resolveQueueStatus(row, encounters),
+  }));
   const isKnownDoctor = DOCTORS.some((d) => d.id === doctorId);
   if (!doctorId || !isKnownDoctor) return merged;
   return merged.filter((row) => row.doctorId === doctorId);

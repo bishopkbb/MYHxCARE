@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import { startEncounterQueueRow } from '@/features/encounters/store/encounterQueueStore';
+import { startEncounter } from '@/features/encounters/store/encounterStore';
 import {
   MOCK_PATIENTS,
   PATIENT_STAT_CARDS,
@@ -855,6 +856,13 @@ export default function PatientsPage() {
                         type="button"
                         onClick={() => {
                           startEncounterQueueRow(patient.id);
+                          startEncounter({
+                            patientId: patient.id,
+                            patientName: patient.name,
+                            mrn: patient.mrn,
+                            attendingPhysicianId: user?.id,
+                            attendingPhysicianName: user?.name,
+                          });
                           router.push(`/patients/${patient.id}/consultation`);
                         }}
                         className="flex-1 rounded-[8px] py-2 text-center text-sm font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
@@ -1124,6 +1132,13 @@ export default function PatientsPage() {
                                       router.push(`/patients/${patient.id}`);
                                     else if (action.key === 'consult') {
                                       startEncounterQueueRow(patient.id);
+                                      startEncounter({
+                                        patientId: patient.id,
+                                        patientName: patient.name,
+                                        mrn: patient.mrn,
+                                        attendingPhysicianId: user?.id,
+                                        attendingPhysicianName: user?.name,
+                                      });
                                       router.push(`/patients/${patient.id}/consultation`);
                                     } else if (action.key === 'note')
                                       router.push(ROUTES.clinicalNotes);

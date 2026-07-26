@@ -30,6 +30,7 @@ import {
   startEncounterQueueRow,
   useEncounterQueueEntries,
 } from '@/features/encounters/store/encounterQueueStore';
+import { startEncounter, useEncounters } from '@/features/encounters/store/encounterStore';
 import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
@@ -254,7 +255,8 @@ export default function EncountersPage() {
   // Re-renders this page when nursing marks a patient ready for a doctor.
   useClaimedPatients();
   const baseQueueEntries = useEncounterQueueEntries();
-  const queue = getDoctorQueueFrom(baseQueueEntries, user?.id);
+  const encounters = useEncounters();
+  const queue = getDoctorQueueFrom(baseQueueEntries, user?.id, encounters);
   const [activeTab, setActiveTab] = useState('all');
   const [search, setSearch] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
@@ -834,7 +836,16 @@ export default function EncountersPage() {
                       type="button"
                       disabled={patient.status === 'completed'}
                       onClick={() => {
-                        if (patient.patientId) startEncounterQueueRow(patient.patientId);
+                        if (patient.patientId) {
+                          startEncounterQueueRow(patient.patientId);
+                          startEncounter({
+                            patientId: patient.patientId,
+                            patientName: patient.name,
+                            mrn: patient.mrn,
+                            attendingPhysicianId: user?.id,
+                            attendingPhysicianName: user?.name,
+                          });
+                        }
                         router.push(`/patients/${patient.patientId ?? patient.id}/consultation`);
                       }}
                       className="flex min-h-[44px] flex-1 items-center justify-center rounded-[8px] text-sm font-medium text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
@@ -1122,7 +1133,16 @@ export default function EncountersPage() {
                           type="button"
                           disabled={patient.status === 'completed'}
                           onClick={() => {
-                            if (patient.patientId) startEncounterQueueRow(patient.patientId);
+                            if (patient.patientId) {
+                              startEncounterQueueRow(patient.patientId);
+                              startEncounter({
+                                patientId: patient.patientId,
+                                patientName: patient.name,
+                                mrn: patient.mrn,
+                                attendingPhysicianId: user?.id,
+                                attendingPhysicianName: user?.name,
+                              });
+                            }
                             router.push(
                               `/patients/${patient.patientId ?? patient.id}/consultation`,
                             );

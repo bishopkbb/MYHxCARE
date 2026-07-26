@@ -17,7 +17,7 @@ import { useSyncExternalStore } from 'react';
 
 import type { MedicalRecord } from '@/features/medical-records/__mocks__/medicalRecordFixtures';
 import { addMedicalRecord } from '@/features/medical-records/store/medicalRecordsStore';
-import type { Encounter } from '@/types/visit.types';
+import { isTerminalStatus, type Encounter } from '@/types/visit.types';
 import { formatHumanDate } from '@/utils/datetime';
 
 let encounters: Encounter[] = [];
@@ -43,6 +43,61 @@ function getServerSnapshot(): Encounter[] {
 /** Reactive hook — re-renders the caller whenever a new encounter completes. */
 export function useEncounters(): Encounter[] {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+export type StartEncounterInput = {
+  patientId: string;
+  patientName: string;
+  mrn: string;
+  attendingPhysicianId?: string | undefined;
+  attendingPhysicianName?: string | undefined;
+};
+
+/** Called the moment a doctor clicks "Start Consultation" (every entry point —
+ * `/encounters`, `/dashboard`, `/patients`) — this is what gives `Encounter`
+ * a real, live status *during* a visit instead of the record only existing
+ * once `completeEncounter()` runs at the very end (see
+ * MYHXCARE_CROSS_MODULE_WORKFLOW_MAP.md stage 7, and SYS-002 in the
+ * consistency register). Idempotent: returns the existing in-progress
+ * encounter rather than creating a duplicate if one is already open for this
+ * patient. `fileNumber`/`departmentId`/`departmentName` aren't known yet at
+ * this point in the flow — left honestly blank/placeholder rather than
+ * fabricated; `completeEncounter()` fills them in once the doctor has that
+ * context. */
+export function startEncounter(input: StartEncounterInput): Encounter {
+  const activeIdx = encounters.findIndex(
+    (e) => e.patientId === input.patientId && !isTerminalStatus(e.status),
+  );
+  if (activeIdx !== -1) return encounters[activeIdx]!;
+
+  const now = new Date().toISOString();
+  const [firstName, ...rest] = input.patientName.trim().split(/\s+/);
+  const lastName = rest.join(' ') || (firstName ?? '');
+
+  const encounter: Encounter = {
+    id: `enc-${Date.now()}`,
+    patientId: input.patientId,
+    patientSummary: {
+      fileNumber: '',
+      firstName: firstName ?? input.patientName,
+      lastName,
+    },
+    type: 'OPD',
+    status: 'IN_CONSULTATION',
+    departmentId: 'dept-unknown',
+    departmentName: 'General',
+    ...(input.attendingPhysicianId ? { attendingPhysicianId: input.attendingPhysicianId } : {}),
+    ...(input.attendingPhysicianName
+      ? { attendingPhysicianName: input.attendingPhysicianName }
+      : {}),
+    checkedInAt: now,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  encounters = [encounter, ...encounters];
+  emit();
+  return encounter;
 }
 
 export type CompleteEncounterInput = {
@@ -73,28 +128,57 @@ export function completeEncounter(input: CompleteEncounterInput): Encounter {
   const [firstName, ...rest] = input.patientName.trim().split(/\s+/);
   const lastName = rest.join(' ') || (firstName ?? '');
 
-  const encounter: Encounter = {
-    id: `enc-${Date.now()}`,
-    patientId: input.patientId,
-    patientSummary: {
-      fileNumber: input.fileNumber,
-      firstName: firstName ?? input.patientName,
-      lastName,
-    },
-    type: 'OPD',
-    status: 'COMPLETED',
-    departmentId: input.departmentId,
-    departmentName: input.departmentName,
-    attendingPhysicianId: input.attendingPhysicianId,
-    attendingPhysicianName: input.attendingPhysicianName,
-    ...(input.chiefComplaint ? { chiefComplaint: input.chiefComplaint } : {}),
-    checkedInAt: now,
-    completedAt: now,
-    createdAt: now,
-    updatedAt: now,
+  // Update the in-progress encounter `startEncounter()` created when the
+  // doctor clicked "Start Consultation", rather than always creating a fresh
+  // row — this is what makes `Encounter.status` a real, single-source-of-truth
+  // lifecycle (IN_CONSULTATION -> COMPLETED) instead of jumping straight to
+  // COMPLETED with no prior state ever having existed. Falls back to
+  // create-fresh-and-complete for any caller that reaches completion without
+  // having started one (kept for resilience, not expected in normal use).
+  const activeIdx = encounters.findIndex(
+    (e) => e.patientId === input.patientId && !isTerminalStatus(e.status),
+  );
+
+  const patientSummary = {
+    fileNumber: input.fileNumber,
+    firstName: firstName ?? input.patientName,
+    lastName,
   };
 
-  encounters = [encounter, ...encounters];
+  let encounter: Encounter;
+  if (activeIdx !== -1) {
+    encounter = {
+      ...encounters[activeIdx]!,
+      patientSummary,
+      departmentId: input.departmentId,
+      departmentName: input.departmentName,
+      attendingPhysicianId: input.attendingPhysicianId,
+      attendingPhysicianName: input.attendingPhysicianName,
+      status: 'COMPLETED',
+      ...(input.chiefComplaint ? { chiefComplaint: input.chiefComplaint } : {}),
+      completedAt: now,
+      updatedAt: now,
+    };
+    encounters = encounters.map((e, i) => (i === activeIdx ? encounter : e));
+  } else {
+    encounter = {
+      id: `enc-${Date.now()}`,
+      patientId: input.patientId,
+      patientSummary,
+      type: 'OPD',
+      status: 'COMPLETED',
+      departmentId: input.departmentId,
+      departmentName: input.departmentName,
+      attendingPhysicianId: input.attendingPhysicianId,
+      attendingPhysicianName: input.attendingPhysicianName,
+      ...(input.chiefComplaint ? { chiefComplaint: input.chiefComplaint } : {}),
+      checkedInAt: now,
+      completedAt: now,
+      createdAt: now,
+      updatedAt: now,
+    };
+    encounters = [encounter, ...encounters];
+  }
   emit();
 
   const record: MedicalRecord = {

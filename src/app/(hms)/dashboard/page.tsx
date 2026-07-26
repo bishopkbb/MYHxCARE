@@ -39,7 +39,9 @@ import {
   startEncounterQueueRow,
   useEncounterQueueEntries,
 } from '@/features/encounters/store/encounterQueueStore';
+import { startEncounter, useEncounters } from '@/features/encounters/store/encounterStore';
 import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
+import type { Encounter } from '@/types/visit.types';
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -93,6 +95,7 @@ type QueuePatient = {
   initials: string;
   avatarBg: string;
   name: string;
+  mrn: string;
   symptoms: string;
   status: QueueStatus;
   waitTime: string | null; // null → "In progress" (patient is already being seen)
@@ -232,12 +235,15 @@ const DASHBOARD_QUEUE_STATUSES: ReadonlySet<string> = new Set([
 /** Same doctor-filtered queue `/encounters` shows, trimmed to the 6 rows this
  * widget has room for — no longer a separate invented population. `baseEntries`
  * is the live snapshot from `useEncounterQueueEntries()` so a row completed
- * from Consultation drops off this widget immediately, not just on `/encounters`. */
+ * from Consultation drops off this widget immediately, not just on `/encounters`.
+ * `encounters` (from `useEncounters()`) resolves each row's real status the
+ * same way `/encounters` does — see `resolveQueueStatus()`. */
 function getDashboardQueue(
   baseEntries: PatientRow[],
   doctorId: string | undefined,
+  encounters: Encounter[],
 ): QueuePatient[] {
-  return getDoctorQueueFrom(baseEntries, doctorId)
+  return getDoctorQueueFrom(baseEntries, doctorId, encounters)
     .filter((p) => DASHBOARD_QUEUE_STATUSES.has(p.status))
     .slice(0, 6)
     .map((p) => ({
@@ -246,6 +252,7 @@ function getDashboardQueue(
       initials: p.initials,
       avatarBg: p.avatarBg,
       name: p.name,
+      mrn: p.mrn,
       symptoms: p.complaint,
       status: p.status as QueueStatus,
       waitTime: p.waitDisplay,
@@ -452,7 +459,8 @@ export default function DashboardPage() {
   // Re-renders this widget when nursing marks a patient ready for a doctor.
   useClaimedPatients();
   const baseQueueEntries = useEncounterQueueEntries();
-  const dashboardQueue = getDashboardQueue(baseQueueEntries, user?.id);
+  const encounters = useEncounters();
+  const dashboardQueue = getDashboardQueue(baseQueueEntries, user?.id, encounters);
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -883,7 +891,16 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={() => {
-                              if (patient.patientId) startEncounterQueueRow(patient.patientId);
+                              if (patient.patientId) {
+                                startEncounterQueueRow(patient.patientId);
+                                startEncounter({
+                                  patientId: patient.patientId,
+                                  patientName: patient.name,
+                                  mrn: patient.mrn,
+                                  attendingPhysicianId: user?.id,
+                                  attendingPhysicianName: user?.name,
+                                });
+                              }
                               router.push(
                                 `/patients/${patient.patientId ?? patient.id}/consultation`,
                               );
