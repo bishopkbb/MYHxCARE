@@ -12,6 +12,7 @@ import type { DirectoryPatient } from '@/features/registration/__mocks__/patient
 import { getDirectoryPatientsSnapshot } from '@/features/registration/store/patientDirectoryStore';
 import type { NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
 import { getEffectiveRoster } from '@/features/nursing/store/nursingWorkflowStore';
+import { getPrescriptionsForPatient } from '@/features/prescriptions/store/prescriptionStore';
 
 // ── Patients list view ────────────────────────────────────────────────────────
 
@@ -1123,7 +1124,7 @@ function buildPatientDetailFromNursePatient(np: NursePatient): PatientDetailMock
   };
 }
 
-export function getPatientDetail(id: string): PatientDetailMock {
+function resolveBasePatientDetail(id: string): PatientDetailMock {
   const curated = MOCK_PATIENT_DETAILS[id];
   if (curated) return curated;
   const record = MOCK_PATIENTS.find((p) => p.id === id);
@@ -1133,6 +1134,15 @@ export function getPatientDetail(id: string): PatientDetailMock {
   const nursePatient = getEffectiveRoster().find((p) => p.id === id);
   if (nursePatient) return buildPatientDetailFromNursePatient(nursePatient);
   return FALLBACK_PATIENT_DETAIL;
+}
+
+/** Merges in live prescriptions (prescriptionStore.ts — SYS-011) centrally,
+ * so every consumer of this resolver sees a sent prescription automatically
+ * instead of each screen needing its own separate merge. */
+export function getPatientDetail(id: string): PatientDetailMock {
+  const base = resolveBasePatientDetail(id);
+  const live = getPrescriptionsForPatient(id);
+  return live.length === 0 ? base : { ...base, medications: [...live, ...base.medications] };
 }
 
 /** Given an mrn, finds which real population owns it and returns that

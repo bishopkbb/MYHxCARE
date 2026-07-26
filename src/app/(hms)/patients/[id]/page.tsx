@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useMemo, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 
 import { AllergyBanner } from '@/components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
@@ -37,7 +37,6 @@ import {
   type Consultation,
   type LabResult,
 } from '@/features/patients/__mocks__/patientFixtures';
-import { getPrescriptionsForPatient } from '@/features/prescriptions/store/prescriptionStore';
 import { useLabResults } from '@/features/laboratory/store/labResultStore';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 
@@ -151,9 +150,9 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const patient = getPatientDetail(id);
   // Prescriptions sent from this patient's own Consultation/Prescription
-  // screens are stored here rather than discarded — merged in so "Send
-  // Prescription" no longer claims a hand-off that leaves nothing visible.
-  const medications = [...getPrescriptionsForPatient(id), ...patient.medications];
+  // screens are merged into patient.medications by getPatientDetail() itself
+  // (SYS-011) — no separate merge needed here.
+  const medications = patient.medications;
   // Real completed encounters (from "Complete Consultation") merged ahead of
   // the fixture list — the encounter entity has no diagnosis/plan fields yet,
   // so those render as "—" rather than fabricated content.
@@ -173,32 +172,24 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   // patient identity namespace doesn't line up with the canonical entity's
   // patientId (see SYS-001/SYS-003 for why MRN is the working bridge today).
   const canonicalLabResults = useLabResults();
-  const realLabResults: LabResult[] = useMemo(
-    () =>
-      canonicalLabResults
-        .filter(
-          (r) => r.mrn === patient.mrn && (r.status === 'RESULTED' || r.status === 'VERIFIED'),
-        )
-        .map((r) => ({
-          id: r.id,
-          testName: r.testName,
-          status: r.flag === 'CRITICAL' ? 'critical' : 'verified',
-          orderedAt: `${formatHumanDate(r.resultAt ?? r.orderedAt)} ${formatTime(r.resultAt ?? r.orderedAt)}`,
-          items: (r.rows ?? []).map((row) => ({
-            name: row.parameter,
-            value: row.value,
-            flag: row.flag ?? null,
-            refRange: row.reference,
-            isAbnormal: row.valueAbnormal ?? false,
-          })),
-          inlineNote: r.comment ?? null,
-          criticalNote:
-            r.flag === 'CRITICAL'
-              ? (r.comment ?? 'Critical value — urgent review required.')
-              : null,
-        })),
-    [canonicalLabResults, patient.mrn],
-  );
+  const realLabResults: LabResult[] = canonicalLabResults
+    .filter((r) => r.mrn === patient.mrn && (r.status === 'RESULTED' || r.status === 'VERIFIED'))
+    .map((r) => ({
+      id: r.id,
+      testName: r.testName,
+      status: r.flag === 'CRITICAL' ? 'critical' : 'verified',
+      orderedAt: `${formatHumanDate(r.resultAt ?? r.orderedAt)} ${formatTime(r.resultAt ?? r.orderedAt)}`,
+      items: (r.rows ?? []).map((row) => ({
+        name: row.parameter,
+        value: row.value,
+        flag: row.flag ?? null,
+        refRange: row.reference,
+        isAbnormal: row.valueAbnormal ?? false,
+      })),
+      inlineNote: r.comment ?? null,
+      criticalNote:
+        r.flag === 'CRITICAL' ? (r.comment ?? 'Critical value — urgent review required.') : null,
+    }));
   const labResults = [...realLabResults, ...patient.labResults];
   const [activeTab, setActiveTab] = useState('biodata');
 

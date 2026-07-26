@@ -42,6 +42,11 @@ import {
   type PatientProfile,
 } from '@/features/registration/__mocks__/patientProfileFixtures';
 import { useDirectoryPatients } from '@/features/registration/store/patientDirectoryStore';
+import {
+  getPatientDetail,
+  resolvePatientIdByMrn,
+  type Medication,
+} from '@/features/patients/__mocks__/patientFixtures';
 import type { Allergy } from '@/types/patient.types';
 import {
   DOCUMENT_TYPE_CFG,
@@ -316,7 +321,28 @@ export function SimpleTableCard({
   );
 }
 
-const RX_STATUS_COLOR: Record<string, string> = { Active: '#00B4D8', Completed: '#22C55E' };
+const RX_STATUS_COLOR: Record<string, string> = {
+  Active: '#00B4D8',
+  Completed: '#22C55E',
+  Discontinued: '#8A98A3',
+};
+
+/** Converts a real, live Medication (prescriptionStore.ts's canonical shape —
+ * SYS-011) into this tab's own long-standing Prescription display shape,
+ * the same adapter convention already proven for SYS-004/005/007. */
+function medicationToPrescription(m: Medication): Prescription {
+  return {
+    id: m.id,
+    drugName: m.name,
+    dosage: m.dose,
+    frequency: m.frequency,
+    route: m.route,
+    prescribedBy: m.prescribedBy,
+    datePrescribed: m.startedDate,
+    status:
+      m.status === 'active' ? 'Active' : m.status === 'completed' ? 'Completed' : 'Discontinued',
+  };
+}
 
 function PrescriptionsSection({ prescriptions }: { prescriptions: Prescription[] }) {
   return (
@@ -1082,7 +1108,17 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
     [allLabResults, patient.mrn],
   );
   const labResults = [...realLabResultEntries, ...(isCuratedOrDemo ? MOCK_LAB_RESULTS : [])];
-  const prescriptions = isCuratedOrDemo ? MOCK_PRESCRIPTIONS : [];
+  // Real, live prescriptions (prescriptionStore.ts's canonical Medication —
+  // SYS-011), merged ahead of the fixture/empty list. Joined by MRN — same
+  // identity-namespace bridge used for the Visit History/Lab Results merges
+  // above (Medical Records resolves patients via DirectoryPatient.id, a
+  // different namespace from Doctor's Dashboard's own patient ids).
+  const resolvedPatientId = resolvePatientIdByMrn(patient.mrn);
+  const realMedications = resolvedPatientId ? getPatientDetail(resolvedPatientId).medications : [];
+  const prescriptions: Prescription[] = [
+    ...realMedications.map(medicationToPrescription),
+    ...(isCuratedOrDemo ? MOCK_PRESCRIPTIONS : []),
+  ];
   const immunizations = isCuratedOrDemo ? MOCK_IMMUNIZATIONS : [];
   const referrals = isCuratedOrDemo ? MOCK_REFERRALS : [];
   const insuranceClaims = isCuratedOrDemo ? MOCK_INSURANCE_CLAIMS : [];

@@ -366,7 +366,7 @@ export type Prescription = {
   route: string;
   prescribedBy: string;
   datePrescribed: string; // ISO
-  status: 'Active' | 'Completed';
+  status: 'Active' | 'Completed' | 'Discontinued';
 };
 
 export const MOCK_PRESCRIPTIONS: Prescription[] = [
