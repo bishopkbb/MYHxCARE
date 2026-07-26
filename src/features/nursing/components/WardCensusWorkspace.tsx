@@ -9,6 +9,7 @@ import {
   Sparkles,
   Stethoscope,
   Users,
+  XCircle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -69,7 +70,8 @@ function buildWardBeds(ward: Ward, roster: NursePatient[]): WardBed[] {
       });
     } else {
       const cycle = n % 5;
-      const status: BedStatus = cycle === 0 ? 'Cleaning' : cycle === 1 ? 'Reserved' : 'Available';
+      const status: BedStatus =
+        cycle === 0 ? 'Cleaning Required' : cycle === 1 ? 'Reserved' : 'Available';
       beds.push({ id: `${ward.id}-b${n}`, bedNumber: `Bed ${n}`, status });
     }
   }
@@ -81,7 +83,8 @@ function countByStatus(beds: WardBed[]) {
     occupied: beds.filter((b) => b.status === 'Occupied').length,
     available: beds.filter((b) => b.status === 'Available').length,
     reserved: beds.filter((b) => b.status === 'Reserved').length,
-    cleaning: beds.filter((b) => b.status === 'Cleaning').length,
+    cleaning: beds.filter((b) => b.status === 'Cleaning Required').length,
+    outOfService: beds.filter((b) => b.status === 'Out of Service').length,
   };
 }
 
@@ -161,6 +164,7 @@ export function WardCensusWorkspace() {
     let available = 0;
     let reserved = 0;
     let cleaning = 0;
+    let outOfService = 0;
     for (const ward of WARDS) {
       const beds = bedsByWard[ward.id] ?? [];
       total += ward.totalBeds;
@@ -169,8 +173,9 @@ export function WardCensusWorkspace() {
       available += c.available;
       reserved += c.reserved;
       cleaning += c.cleaning;
+      outOfService += c.outOfService;
     }
-    return { total, occupied, available, reserved, cleaning };
+    return { total, occupied, available, reserved, cleaning, outOfService };
   }, [bedsByWard]);
 
   const occupancyRate = facilityTotals.total
@@ -295,9 +300,9 @@ export function WardCensusWorkspace() {
           ) : (
             <>
               {/* ── Facility stat cards ─────────────────────────────────────── */}
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {pageState === 'loading' ? (
-                  Array.from({ length: 5 }).map((_, i) => <SkeletonStatCard key={i} />)
+                  Array.from({ length: 6 }).map((_, i) => <SkeletonStatCard key={i} />)
                 ) : (
                   <>
                     {(
@@ -335,12 +340,20 @@ export function WardCensusWorkspace() {
                           icon: AlertTriangle,
                         },
                         {
-                          label: 'Cleaning',
+                          label: 'Cleaning Required',
                           value: facilityTotals.cleaning,
                           sub: 'Housekeeping turnaround',
                           color: '#8A98A3',
                           bg: 'rgba(138,152,163,0.1)',
                           icon: Sparkles,
+                        },
+                        {
+                          label: 'Out of Service',
+                          value: facilityTotals.outOfService,
+                          sub: 'Not available for use',
+                          color: '#EF4444',
+                          bg: 'rgba(239,68,68,0.1)',
+                          icon: XCircle,
                         },
                       ] as {
                         label: string;
@@ -439,7 +452,8 @@ export function WardCensusWorkspace() {
                                   [
                                     ['Occupied', counts.occupied],
                                     ['Reserved', counts.reserved],
-                                    ['Cleaning', counts.cleaning],
+                                    ['Cleaning Required', counts.cleaning],
+                                    ['Out of Service', counts.outOfService],
                                   ] as [BedStatus, number][]
                                 ).map(([status, count]) =>
                                   count > 0 ? (
@@ -853,6 +867,7 @@ function FacilityOccupancyDonut({
     available: number;
     reserved: number;
     cleaning: number;
+    outOfService: number;
   };
 }) {
   const [animate, setAnimate] = useState(false);
@@ -872,7 +887,16 @@ function FacilityOccupancyDonut({
     { label: 'Occupied', value: totals.occupied, color: BED_STATUS_CFG.Occupied.color },
     { label: 'Available', value: totals.available, color: BED_STATUS_CFG.Available.color },
     { label: 'Reserved', value: totals.reserved, color: BED_STATUS_CFG.Reserved.color },
-    { label: 'Cleaning', value: totals.cleaning, color: BED_STATUS_CFG.Cleaning.color },
+    {
+      label: 'Cleaning Required',
+      value: totals.cleaning,
+      color: BED_STATUS_CFG['Cleaning Required'].color,
+    },
+    {
+      label: 'Out of Service',
+      value: totals.outOfService,
+      color: BED_STATUS_CFG['Out of Service'].color,
+    },
   ];
   const sum = totals.total || 1;
   const radius = 54;

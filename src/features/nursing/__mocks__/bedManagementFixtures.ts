@@ -1,19 +1,10 @@
-import { STATIC_WARD_BEDS } from './wardCensusFixtures';
+import { BED_STATUS_CFG, STATIC_WARD_BEDS, type BedStatus } from './wardCensusFixtures';
 
-export type BedStatus =
-  'Occupied' | 'Available' | 'Reserved' | 'Cleaning Required' | 'Out of Service';
-
-export const BED_STATUS_CFG: Record<BedStatus, { color: string; border: string; bg: string }> = {
-  Occupied: { color: '#16A34A', border: 'rgba(34,197,94,0.4)', bg: 'rgba(34,197,94,0.1)' },
-  Available: { color: '#3B82F6', border: 'rgba(59,130,246,0.4)', bg: 'rgba(59,130,246,0.1)' },
-  Reserved: { color: '#8B5CF6', border: 'rgba(139,92,246,0.4)', bg: 'rgba(139,92,246,0.1)' },
-  'Cleaning Required': {
-    color: '#F59E0B',
-    border: 'rgba(245,158,11,0.4)',
-    bg: 'rgba(245,158,11,0.1)',
-  },
-  'Out of Service': { color: '#EF4444', border: 'rgba(239,68,68,0.4)', bg: 'rgba(239,68,68,0.1)' },
-};
+// BedStatus/BED_STATUS_CFG are canonical in wardCensusFixtures.ts (SYS-007) —
+// re-exported here so this file's own consumers don't need to change their
+// import path.
+export { BED_STATUS_CFG };
+export type { BedStatus };
 
 export type BedSlot = {
   bedCode: string;
@@ -53,7 +44,7 @@ function fromCensusBeds(wardId: string, room: string): BedSlot[] {
   return beds.map((b) => ({
     bedCode: b.bedNumber,
     room,
-    status: b.status === 'Cleaning' ? 'Cleaning Required' : (b.status as BedStatus),
+    status: b.status,
     ...(b.patientName ? { patientName: b.patientName } : {}),
     ...(b.mrn ? { mrn: b.mrn } : {}),
     ...(b.doctorName ? { doctorName: b.doctorName } : {}),

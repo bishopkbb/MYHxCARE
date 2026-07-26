@@ -1,11 +1,22 @@
-export type BedStatus = 'Occupied' | 'Available' | 'Reserved' | 'Cleaning';
+// Canonical BedStatus for both Bed Management and Ward Census (SYS-007) — lives
+// here rather than in bedManagementFixtures.ts (the register's Part A.1
+// recommendation) because that file already imports STATIC_WARD_BEDS from
+// this one; declaring it there too would create a circular import, since
+// WARD_LAYOUTS calls fromCensusBeds() at module-eval time.
+export type BedStatus =
+  'Occupied' | 'Available' | 'Reserved' | 'Cleaning Required' | 'Out of Service';
 export type Acuity = 'Critical' | 'High' | 'Medium' | 'Low';
 
 export const BED_STATUS_CFG: Record<BedStatus, { color: string; border: string; bg: string }> = {
-  Occupied: { color: '#3B82F6', border: 'rgba(59,130,246,0.4)', bg: 'rgba(59,130,246,0.1)' },
-  Available: { color: '#22C55E', border: 'rgba(34,197,94,0.4)', bg: 'rgba(34,197,94,0.1)' },
-  Reserved: { color: '#F59E0B', border: 'rgba(245,158,11,0.4)', bg: 'rgba(245,158,11,0.1)' },
-  Cleaning: { color: '#8A98A3', border: 'rgba(138,152,163,0.4)', bg: 'rgba(138,152,163,0.1)' },
+  Occupied: { color: '#16A34A', border: 'rgba(34,197,94,0.4)', bg: 'rgba(34,197,94,0.1)' },
+  Available: { color: '#3B82F6', border: 'rgba(59,130,246,0.4)', bg: 'rgba(59,130,246,0.1)' },
+  Reserved: { color: '#8B5CF6', border: 'rgba(139,92,246,0.4)', bg: 'rgba(139,92,246,0.1)' },
+  'Cleaning Required': {
+    color: '#F59E0B',
+    border: 'rgba(245,158,11,0.4)',
+    bg: 'rgba(245,158,11,0.1)',
+  },
+  'Out of Service': { color: '#EF4444', border: 'rgba(239,68,68,0.4)', bg: 'rgba(239,68,68,0.1)' },
 };
 
 export const ACUITY_CFG: Record<Acuity, { color: string }> = {
@@ -127,7 +138,7 @@ export const STATIC_WARD_BEDS: Record<string, WardBed[]> = {
     { id: 'icu-5', bedNumber: 'ICU 5', status: 'Reserved' },
     { id: 'icu-6', bedNumber: 'ICU 6', status: 'Available' },
     { id: 'icu-7', bedNumber: 'ICU 7', status: 'Available' },
-    { id: 'icu-8', bedNumber: 'ICU 8', status: 'Cleaning' },
+    { id: 'icu-8', bedNumber: 'ICU 8', status: 'Cleaning Required' },
     {
       id: 'icu-9',
       bedNumber: 'ICU 9',
@@ -185,7 +196,7 @@ export const STATIC_WARD_BEDS: Record<string, WardBed[]> = {
       admittedAt: atOffset(-3, 11, 0),
     },
     { id: 'mat-8', bedNumber: 'Bed 8', status: 'Available' },
-    { id: 'mat-9', bedNumber: 'Bed 9', status: 'Cleaning' },
+    { id: 'mat-9', bedNumber: 'Bed 9', status: 'Cleaning Required' },
     { id: 'mat-10', bedNumber: 'Bed 10', status: 'Available' },
     { id: 'mat-11', bedNumber: 'Bed 11', status: 'Available' },
     { id: 'mat-12', bedNumber: 'Bed 12', status: 'Reserved' },
@@ -228,7 +239,7 @@ export const STATIC_WARD_BEDS: Record<string, WardBed[]> = {
     { id: 'ped-5', bedNumber: 'Bed 5', status: 'Available' },
     { id: 'ped-6', bedNumber: 'Bed 6', status: 'Reserved' },
     { id: 'ped-7', bedNumber: 'Bed 7', status: 'Available' },
-    { id: 'ped-8', bedNumber: 'Bed 8', status: 'Cleaning' },
+    { id: 'ped-8', bedNumber: 'Bed 8', status: 'Cleaning Required' },
     { id: 'ped-9', bedNumber: 'Bed 9', status: 'Available' },
     { id: 'ped-10', bedNumber: 'Bed 10', status: 'Available' },
     {
