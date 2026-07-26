@@ -25,16 +25,21 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useRef, useState } from 'react';
+import { use, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AllergyBanner } from '@/components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useEncounters } from '@/features/encounters/store/encounterStore';
-import { getPatientDetail, type Consultation } from '@/features/patients/__mocks__/patientFixtures';
+import {
+  getPatientDetail,
+  type Consultation,
+  type LabResult,
+} from '@/features/patients/__mocks__/patientFixtures';
 import { getPrescriptionsForPatient } from '@/features/prescriptions/store/prescriptionStore';
-import { formatHumanDate } from '@/utils/datetime';
+import { useLabResults } from '@/features/laboratory/store/labResultStore';
+import { formatHumanDate, formatTime } from '@/utils/datetime';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -163,6 +168,38 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
       plan: '—',
     }));
   const consultations = [...realConsultations, ...patient.consultations];
+  // Real, resulted lab tests (from the canonical LabResult store — SYS-004)
+  // merged ahead of the fixture list, joined by MRN since this chart's own
+  // patient identity namespace doesn't line up with the canonical entity's
+  // patientId (see SYS-001/SYS-003 for why MRN is the working bridge today).
+  const canonicalLabResults = useLabResults();
+  const realLabResults: LabResult[] = useMemo(
+    () =>
+      canonicalLabResults
+        .filter(
+          (r) => r.mrn === patient.mrn && (r.status === 'RESULTED' || r.status === 'VERIFIED'),
+        )
+        .map((r) => ({
+          id: r.id,
+          testName: r.testName,
+          status: r.flag === 'CRITICAL' ? 'critical' : 'verified',
+          orderedAt: `${formatHumanDate(r.resultAt ?? r.orderedAt)} ${formatTime(r.resultAt ?? r.orderedAt)}`,
+          items: (r.rows ?? []).map((row) => ({
+            name: row.parameter,
+            value: row.value,
+            flag: row.flag ?? null,
+            refRange: row.reference,
+            isAbnormal: row.valueAbnormal ?? false,
+          })),
+          inlineNote: r.comment ?? null,
+          criticalNote:
+            r.flag === 'CRITICAL'
+              ? (r.comment ?? 'Critical value — urgent review required.')
+              : null,
+        })),
+    [canonicalLabResults, patient.mrn],
+  );
+  const labResults = [...realLabResults, ...patient.labResults];
   const [activeTab, setActiveTab] = useState('biodata');
 
   // ── Biodata fetch simulation ────────────────────────────────────────────────
@@ -2707,7 +2744,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               {/* ── Loaded ────────────────────────────────────────────────── */}
               {labResultsStatus === 'loaded' && (
                 <div className="flex flex-col gap-4">
-                  {patient.labResults.map((result) => {
+                  {labResults.map((result) => {
                     const cfg = LAB_STATUS_CONFIG[result.status];
                     return (
                       <div

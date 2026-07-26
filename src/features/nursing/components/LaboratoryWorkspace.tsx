@@ -34,14 +34,86 @@ import { formatDate, formatTime, toRelativeTime } from '@/utils/datetime';
 import {
   DEPARTMENT_OPTIONS,
   FASTING_REQUIRED_TESTS,
-  LAB_ORDERS,
   PRIORITY_OPTIONS,
   TEST_TAT_HOURS,
   type LabTestOrder,
   type LabTestStatus,
 } from '@/features/nursing/__mocks__/laboratoryFixtures';
+import {
+  acknowledgeCritical,
+  collectSample,
+  recordFollowUp,
+  useLabResults,
+  type LabResult as CanonicalLabResult,
+} from '@/features/laboratory/store/labResultStore';
 import type { CriticalAcknowledgementInput } from './AcknowledgeCriticalResultModal';
 import type { SampleCollectionInput } from './CollectSampleModal';
+
+const CANONICAL_STATUS_TO_NURSE_STATUS: Record<CanonicalLabResult['status'], LabTestStatus> = {
+  ORDERED: 'Ordered',
+  SAMPLE_COLLECTED: 'Sample Collected',
+  IN_PROCESS: 'In Process',
+  REJECTED: 'Rejected',
+  // Both RESULTED and VERIFIED read as "Completed" from the nurse's own
+  // perspective — the lab has produced a result either way; whether a
+  // doctor has since verified it is the doctor-facing screen's own concern,
+  // not something Nursing's UI (which has no verify step of its own) needs
+  // to distinguish.
+  RESULTED: 'Completed',
+  VERIFIED: 'Completed',
+};
+
+const CANONICAL_PRIORITY_TO_NURSE_PRIORITY: Record<
+  CanonicalLabResult['priority'],
+  LabTestOrder['priority']
+> = {
+  STAT: 'STAT',
+  URGENT: 'Urgent',
+  ROUTINE: 'Routine',
+};
+
+const CANONICAL_FLAG_TO_NURSE_FLAG: Record<
+  NonNullable<CanonicalLabResult['flag']>,
+  NonNullable<LabTestOrder['resultFlag']>
+> = {
+  NORMAL: 'Normal',
+  ABNORMAL: 'Abnormal',
+  CRITICAL: 'Critical',
+};
+
+/** Derives this screen's own long-standing `LabTestOrder` display shape from
+ * the real, canonical, shared `LabResult` — see SYS-004. Keeps every one of
+ * this file's ~1200 lines of tab/table/sidebar JSX unchanged. */
+function toNurseView(r: CanonicalLabResult): LabTestOrder {
+  return {
+    id: r.id,
+    ...(r.patientId ? { patientId: r.patientId } : {}),
+    patientName: r.patientName,
+    mrn: r.mrn,
+    ...(r.age !== undefined ? { age: r.age } : {}),
+    ...(r.gender ? { gender: r.gender } : {}),
+    ...(r.ward ? { ward: r.ward } : {}),
+    ...(r.bed ? { bed: r.bed } : {}),
+    testName: r.testName,
+    department: r.department,
+    priority: CANONICAL_PRIORITY_TO_NURSE_PRIORITY[r.priority],
+    orderedBy: r.orderedBy,
+    orderedAt: r.orderedAt,
+    status: CANONICAL_STATUS_TO_NURSE_STATUS[r.status],
+    ...(r.sampleCollectedAt ? { sampleCollectedAt: r.sampleCollectedAt } : {}),
+    ...(r.sampleCollectedBy ? { sampleCollectedBy: r.sampleCollectedBy } : {}),
+    ...(r.rejectionReason ? { rejectionReason: r.rejectionReason } : {}),
+    ...(r.resultAt ? { resultAt: r.resultAt } : {}),
+    ...(r.flag ? { resultFlag: CANONICAL_FLAG_TO_NURSE_FLAG[r.flag] } : {}),
+    ...(r.rows ? { resultRows: r.rows } : {}),
+    ...(r.comment ? { resultComment: r.comment } : {}),
+    ...(r.criticalValueLabel ? { criticalValueLabel: r.criticalValueLabel } : {}),
+    ...(r.criticalAcknowledgedAt ? { criticalAcknowledgedAt: r.criticalAcknowledgedAt } : {}),
+    ...(r.criticalAcknowledgedBy ? { criticalAcknowledgedBy: r.criticalAcknowledgedBy } : {}),
+    ...(r.lastFollowUpAt ? { lastFollowUpAt: r.lastFollowUpAt } : {}),
+    ...(r.followUpCount !== undefined ? { followUpCount: r.followUpCount } : {}),
+  };
+}
 
 const CollectSampleModal = dynamic(
   () => import('./CollectSampleModal').then((m) => m.CollectSampleModal),
@@ -224,7 +296,12 @@ export function LaboratoryWorkspace() {
   const toast = useToast();
   const { user } = useAuth();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [orders, setOrders] = useState<LabTestOrder[]>(LAB_ORDERS);
+  // Real, shared data — see toNurseView() above. A lab order the doctor
+  // places is visible here immediately; a sample collection or critical-
+  // value acknowledgment here is visible on the doctor's own /lab/results
+  // immediately, since both screens now read the same canonical store.
+  const canonicalResults = useLabResults();
+  const orders = useMemo(() => canonicalResults.map(toNurseView), [canonicalResults]);
   const [activeTab, setActiveTab] = useState<TabKey>('pending');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -354,25 +431,10 @@ export function LaboratoryWorkspace() {
     setCurrentPage(1);
   }
 
-  function updateOrder(id: string, patch: Partial<LabTestOrder>) {
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, ...patch } : o)));
-  }
-
   function handleCollectSample(input: SampleCollectionInput) {
     if (!collectTarget) return;
     const wasRejected = collectTarget.status === 'Rejected';
-    setOrders((prev) =>
-      prev.map((o) => {
-        if (o.id !== collectTarget.id) return o;
-        const { rejectionReason: _rejectionReason, ...rest } = o;
-        return {
-          ...rest,
-          status: 'Sample Collected',
-          sampleCollectedAt: input.collectedAt,
-          sampleCollectedBy: user?.name ?? 'Unknown Staff',
-        };
-      }),
-    );
+    collectSample(collectTarget.id, user?.name ?? 'Unknown Staff', input.collectedAt);
     toast.success(
       wasRejected ? 'Sample recollected' : 'Sample collected',
       `${collectTarget.testName} for ${collectTarget.patientName} is on its way to the lab.`,
@@ -383,10 +445,7 @@ export function LaboratoryWorkspace() {
 
   function handleAcknowledgeCritical(input: CriticalAcknowledgementInput) {
     if (!acknowledgeTarget) return;
-    updateOrder(acknowledgeTarget.id, {
-      criticalAcknowledgedAt: new Date().toISOString(),
-      criticalAcknowledgedBy: user?.name ?? 'Unknown Staff',
-    });
+    acknowledgeCritical(acknowledgeTarget.id, user?.name ?? 'Unknown Staff');
     toast.success(
       'Critical result acknowledged',
       `${input.notifiedDoctor} has been notified about ${acknowledgeTarget.patientName}'s ${acknowledgeTarget.testName}.`,
@@ -396,11 +455,7 @@ export function LaboratoryWorkspace() {
   }
 
   function handleFollowUp(order: LabTestOrder) {
-    const nextCount = (order.followUpCount ?? 0) + 1;
-    updateOrder(order.id, {
-      lastFollowUpAt: new Date().toISOString(),
-      followUpCount: nextCount,
-    });
+    const nextCount = recordFollowUp(order.id);
     toast.info(
       'Lab contacted',
       `Follow-up sent to the laboratory about ${order.testName} for ${order.patientName}${
@@ -808,7 +863,9 @@ export function LaboratoryWorkspace() {
                                       {o.patientName}
                                     </p>
                                     <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                      {o.age} Y / {o.gender[0]}
+                                      {o.age !== undefined && o.gender
+                                        ? `${o.age} Y / ${o.gender[0]}`
+                                        : '—'}
                                     </p>
                                   </div>
                                 </div>

@@ -5,16 +5,23 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, use } from 'react';
 
 import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/hooks/useAuth';
 import {
   LAB_CATEGORIES,
   type LabCategory,
   type Priority,
 } from '@/features/laboratory/__mocks__/labOrderFixtures';
 import { MOCK_PATIENTS, getPatientDetail } from '@/features/patients/__mocks__/patientFixtures';
-import { addLabOrders } from '@/features/laboratory/store/labOrderStore';
+import { addLabOrder } from '@/features/laboratory/store/labResultStore';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
+
+const PRIORITY_TO_CANONICAL: Record<Priority, 'STAT' | 'URGENT' | 'ROUTINE'> = {
+  stat: 'STAT',
+  urgent: 'URGENT',
+  routine: 'ROUTINE',
+};
 
 // ── Priority config ───────────────────────────────────────────────────────────
 
@@ -198,6 +205,7 @@ function SkeletonLabCard() {
 export default function PatientLabOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
   const { id } = use(params);
   const patient = getPatientDetail(id);
   // MOCK_PATIENTS (list view) carries the avatar color used across list/queue
@@ -236,16 +244,20 @@ export default function PatientLabOrderPage({ params }: { params: Promise<{ id: 
       toast.error('No tests selected', 'Please select at least one test to submit.');
       return;
     }
-    // Persists as real, pending LabResult rows visible on /lab/results —
-    // previously this only ever showed a toast and created nothing anywhere.
-    addLabOrders({
+    // Persists as real, ORDERED LabResult rows — visible on the doctor's own
+    // /lab/results *and* on the nurse's Laboratory workspace ("Doctor
+    // Requests") immediately, since both now read the same canonical store.
+    const parsedAge = parseInt(patient.age, 10);
+    addLabOrder({
       ...(patient.id !== 'unknown' ? { patientId: patient.id } : {}),
       patientName: patient.name,
       mrn: patient.mrn,
       initials: patient.initials,
       avatarBg,
+      ...(Number.isFinite(parsedAge) ? { age: parsedAge } : {}),
       testIds: Array.from(selected),
-      priority,
+      priority: PRIORITY_TO_CANONICAL[priority],
+      orderedBy: user?.name ?? 'Unknown Doctor',
     });
     toast.success(
       'Request sent',

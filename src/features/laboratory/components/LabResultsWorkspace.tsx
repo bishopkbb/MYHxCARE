@@ -23,14 +23,72 @@ import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { formatDate, formatTime } from '@/utils/datetime';
-import { getLabOrders } from '@/features/laboratory/store/labOrderStore';
 import {
-  MOCK_LAB_RESULTS,
-  type LabFlag,
-  type LabResult,
-  type LabResultPriority,
-  type LabResultStatus,
+  addNote as storeAddNote,
+  markDoctorReviewed,
+  useLabResults,
+  verifyResult as storeVerifyResult,
+  type LabResult as CanonicalLabResult,
+} from '@/features/laboratory/store/labResultStore';
+import type {
+  LabDepartment,
+  LabResultRow,
+  LabResultNote,
 } from '@/features/laboratory/__mocks__/labResultFixtures';
+
+// This screen's own display vocabulary — kept exactly as it was before the
+// canonical LabResult entity existed (SYS-004), so none of this file's ~900
+// lines of tab/badge/filter JSX needed to change. `toDoctorView()` below
+// derives it from the real canonical row; this is a display projection, not
+// a second independently-mutable population.
+export type LabResultStatus = 'critical' | 'pending' | 'verified';
+export type LabResultPriority = 'stat' | 'urgent' | 'routine';
+export type LabFlag = 'H' | 'L' | 'A';
+export type LabResult = {
+  id: string;
+  testName: string;
+  department: LabDepartment;
+  status: LabResultStatus;
+  priority: LabResultPriority;
+  resultAt: string;
+  patient: {
+    patientId?: string | undefined;
+    initials: string;
+    avatarBg: string;
+    name: string;
+    mrn: string;
+  };
+  rows?: LabResultRow[] | undefined;
+  comment?: string | undefined;
+  doctorReviewedAt?: string | undefined;
+  doctorReviewedBy?: string | undefined;
+  notes?: LabResultNote[] | undefined;
+};
+
+function toDoctorView(r: CanonicalLabResult): LabResult {
+  const status: LabResultStatus =
+    r.status === 'VERIFIED' ? 'verified' : r.flag === 'CRITICAL' ? 'critical' : 'pending';
+  return {
+    id: r.id,
+    testName: r.testName,
+    department: r.department,
+    status,
+    priority: r.priority.toLowerCase() as LabResultPriority,
+    resultAt: r.resultAt ?? r.orderedAt,
+    patient: {
+      ...(r.patientId ? { patientId: r.patientId } : {}),
+      initials: r.initials,
+      avatarBg: r.avatarBg,
+      name: r.patientName,
+      mrn: r.mrn,
+    },
+    ...(r.rows ? { rows: r.rows } : {}),
+    ...(r.comment ? { comment: r.comment } : {}),
+    ...(r.doctorReviewedAt ? { doctorReviewedAt: r.doctorReviewedAt } : {}),
+    ...(r.doctorReviewedBy ? { doctorReviewedBy: r.doctorReviewedBy } : {}),
+    ...(r.notes ? { notes: r.notes } : {}),
+  };
+}
 
 const AddClinicalNoteModal = dynamic(
   () => import('./AddClinicalNoteModal').then((m) => m.AddClinicalNoteModal),
@@ -569,10 +627,14 @@ export function LabResultsWorkspace() {
   const toast = useToast();
   const { user } = useAuth();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [results, setResults] = useState<LabResult[]>(() => [
-    ...getLabOrders(),
-    ...MOCK_LAB_RESULTS,
-  ]);
+  // Real, shared data — see toDoctorView() above. REJECTED rows never
+  // reached this screen's own fixture before either (a rejected sample is
+  // Nurse Station's problem to recollect, not the doctor's to review).
+  const canonicalResults = useLabResults();
+  const results = useMemo(
+    () => canonicalResults.filter((r) => r.status !== 'REJECTED').map(toDoctorView),
+    [canonicalResults],
+  );
   const [activeTab, setActiveTab] = useState<TabId>('critical');
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
@@ -641,17 +703,7 @@ export function LabResultsWorkspace() {
   }
 
   function handleMarkReviewed(result: LabResult) {
-    setResults((prev) =>
-      prev.map((r) =>
-        r.id === result.id
-          ? {
-              ...r,
-              doctorReviewedAt: new Date().toISOString(),
-              doctorReviewedBy: user?.name ?? 'Unknown Doctor',
-            }
-          : r,
-      ),
-    );
+    markDoctorReviewed(result.id, user?.name ?? 'Unknown Doctor');
     toast.success(
       'Result reviewed',
       `${result.testName} for ${result.patient.name} marked as reviewed.`,
@@ -659,34 +711,17 @@ export function LabResultsWorkspace() {
   }
 
   function handleVerifyResult(result: LabResult) {
-    setResults((prev) =>
-      prev.map((r) =>
-        r.id === result.id
-          ? {
-              ...r,
-              status: 'verified',
-              doctorReviewedAt: new Date().toISOString(),
-              doctorReviewedBy: user?.name ?? 'Unknown Doctor',
-            }
-          : r,
-      ),
-    );
+    storeVerifyResult(result.id, user?.name ?? 'Unknown Doctor');
     toast.success('Result verified', `${result.testName} for ${result.patient.name} verified.`);
   }
 
   function handleSaveNote(text: string) {
     if (!noteTarget) return;
-    const newNote = {
-      id: `note-${noteTarget.id}-${(noteTarget.notes?.length ?? 0) + 1}`,
+    storeAddNote(noteTarget.id, {
       text,
       author: user?.name ?? 'Unknown Doctor',
       createdAt: new Date().toISOString(),
-    };
-    setResults((prev) =>
-      prev.map((r) =>
-        r.id === noteTarget.id ? { ...r, notes: [...(r.notes ?? []), newNote] } : r,
-      ),
-    );
+    });
     toast.success('Note added', `Clinical note saved for ${noteTarget.patient.name}.`);
     setNoteTarget(null);
   }

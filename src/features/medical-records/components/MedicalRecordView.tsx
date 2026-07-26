@@ -71,6 +71,7 @@ import {
   type ReferralEntry,
 } from '@/features/medical-records/__mocks__/medicalRecordDetailFixtures';
 import { useEncounters } from '@/features/encounters/store/encounterStore';
+import { useLabResults } from '@/features/laboratory/store/labResultStore';
 import type { Encounter } from '@/types/visit.types';
 import { computeVisitSummary, VisitHistorySection } from './VisitHistorySection';
 
@@ -1047,7 +1048,40 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
   const documents: MedicalDocument[] = isCuratedOrDemo
     ? MOCK_DOCUMENTS
     : (clinicalDocs ?? []).map(clinicalDocToMedicalDoc);
-  const labResults = isCuratedOrDemo ? MOCK_LAB_RESULTS : [];
+  // Real, resulted lab tests (canonical LabResult store — SYS-004), flattened
+  // one row per parameter to match this tab's own per-parameter LabResultEntry
+  // shape, merged ahead of the fixture/empty list. Joined by MRN — same
+  // identity-namespace bridge used for the Visit History merge above.
+  const allLabResults = useLabResults();
+  const realLabResultEntries: LabResultEntry[] = useMemo(
+    () =>
+      allLabResults
+        .filter(
+          (r) => r.mrn === patient.mrn && (r.status === 'RESULTED' || r.status === 'VERIFIED'),
+        )
+        .flatMap((r) =>
+          (r.rows ?? []).map((row, i) => ({
+            id: `${r.id}-${i}`,
+            testName: row.parameter,
+            result: row.value,
+            unit: '',
+            referenceRange: row.reference,
+            flag: (row.flag === 'H'
+              ? 'High'
+              : row.flag === 'L'
+                ? 'Low'
+                : row.flag === 'A'
+                  ? 'Critical'
+                  : r.flag === 'CRITICAL'
+                    ? 'Critical'
+                    : 'Normal') as LabResultEntry['flag'],
+            dateCollected: r.resultAt ?? r.orderedAt,
+            orderedBy: r.orderedBy,
+          })),
+        ),
+    [allLabResults, patient.mrn],
+  );
+  const labResults = [...realLabResultEntries, ...(isCuratedOrDemo ? MOCK_LAB_RESULTS : [])];
   const prescriptions = isCuratedOrDemo ? MOCK_PRESCRIPTIONS : [];
   const immunizations = isCuratedOrDemo ? MOCK_IMMUNIZATIONS : [];
   const referrals = isCuratedOrDemo ? MOCK_REFERRALS : [];
