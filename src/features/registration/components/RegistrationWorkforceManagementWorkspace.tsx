@@ -49,8 +49,20 @@ import {
   cancelShift as cancelShiftInStore,
   duplicateShift as duplicateShiftInStore,
   updateShift as updateShiftInStore,
-  useRegistrationShifts,
-} from '@/features/registration/store/registrationShiftStore';
+  useStaffShifts,
+  type StaffShift,
+} from '@/features/workforce/store/staffShiftStore';
+
+// This screen's own display shape (`RegistrationShift`) predates the
+// canonical `StaffShift` unification (SYS-005) and is kept untouched here —
+// only the state source changed. These two converters are the seam.
+function toRegistrationView(s: StaffShift): RegistrationShift {
+  const { homeModule: _homeModule, department: _department, ...rest } = s;
+  return rest;
+}
+function fromRegistrationView(s: RegistrationShift): StaffShift {
+  return { ...s, homeModule: 'registration' };
+}
 
 const CreateEditRegistrationShiftModal = dynamic(
   () =>
@@ -303,7 +315,9 @@ function SkeletonRosterRow() {
 export function RegistrationWorkforceManagementWorkspace() {
   const toast = useToast();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const roster = useRegistrationShifts();
+  const roster = useStaffShifts()
+    .filter((s) => s.homeModule === 'registration')
+    .map(toRegistrationView);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
@@ -405,13 +419,13 @@ export function RegistrationWorkforceManagementWorkspace() {
   }
 
   function handleCreateShift(shift: RegistrationShift) {
-    addShift(shift);
+    addShift(fromRegistrationView(shift));
     setCreateOpen(false);
     toast.success('Shift created', `${shift.staffName}'s shift has been added to the roster.`);
   }
 
   function handleUpdateShift(shift: RegistrationShift) {
-    updateShiftInStore(shift);
+    updateShiftInStore(fromRegistrationView(shift));
     setEditingShift(null);
     toast.success('Shift updated', `${shift.staffName}'s shift has been updated.`);
   }
@@ -423,7 +437,7 @@ export function RegistrationWorkforceManagementWorkspace() {
   }
 
   function handleDuplicateShift(shift: RegistrationShift) {
-    duplicateShiftInStore(shift);
+    duplicateShiftInStore(fromRegistrationView(shift));
     setOpenRowMenuId(null);
     toast.success('Shift duplicated', `A copy of ${shift.staffName}'s shift has been added.`);
   }

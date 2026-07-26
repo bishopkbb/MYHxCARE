@@ -35,8 +35,6 @@ import { useToast } from '@/hooks/useToast';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import {
   COVERAGE_OVERVIEW,
-  MOCK_RECORDS_ROSTER,
-  PENDING_ACKNOWLEDGEMENTS,
   ROLE_OPTIONS,
   SHIFT_TYPE_OPTIONS,
   STATUS_OPTIONS,
@@ -45,6 +43,26 @@ import {
   type ShiftStatus,
   type ShiftType,
 } from '@/features/medical-records/__mocks__/recordsWorkforceFixtures';
+import {
+  acknowledgeShift as acknowledgeShiftInStore,
+  addShift,
+  cancelShift as cancelShiftInStore,
+  duplicateShift as duplicateShiftInStore,
+  updateShift as updateShiftInStore,
+  useStaffShifts,
+  type StaffShift,
+} from '@/features/workforce/store/staffShiftStore';
+
+// This screen's own display shape (`RecordsShift`) predates the canonical
+// `StaffShift` unification (SYS-005) and is kept untouched here — only the
+// state source changed. These two converters are the seam.
+function toRecordsView(s: StaffShift): RecordsShift {
+  const { homeModule: _homeModule, department: _department, ...rest } = s;
+  return rest;
+}
+function fromRecordsView(s: RecordsShift): StaffShift {
+  return { ...s, homeModule: 'medical-records' };
+}
 
 const CreateEditRecordsShiftModal = dynamic(
   () => import('./CreateEditRecordsShiftModal').then((m) => m.CreateEditRecordsShiftModal),
@@ -296,7 +314,9 @@ function SkeletonRosterRow() {
 export function RecordsWorkforceManagementWorkspace() {
   const toast = useToast();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [roster, setRoster] = useState<RecordsShift[]>(MOCK_RECORDS_ROSTER);
+  const roster = useStaffShifts()
+    .filter((s) => s.homeModule === 'medical-records')
+    .map(toRecordsView);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
@@ -368,6 +388,24 @@ export function RecordsWorkforceManagementWorkspace() {
     return map;
   }, [paginated]);
 
+  // Derived from the live roster (not a static PENDING_ACKNOWLEDGEMENTS
+  // fixture) so acknowledging a shift actually removes it from this list.
+  const pendingAcks = useMemo(
+    () =>
+      roster
+        .filter((s) => !s.acknowledged)
+        .slice(0, 5)
+        .map((s) => ({
+          id: s.id,
+          staffName: s.staffName,
+          initials: s.initials,
+          avatarBg: s.avatarBg,
+          shiftLabel: `${SHIFT_TYPE_OPTIONS.find((o) => o.value === s.shiftType)?.label} Shift`,
+          day: 'Today',
+        })),
+    [roster],
+  );
+
   function getRowMenuButtonRef(id: string) {
     return rowMenuButtonRefs.get(id) ?? { current: null };
   }
@@ -380,33 +418,41 @@ export function RecordsWorkforceManagementWorkspace() {
   }
 
   function handleCreateShift(shift: RecordsShift) {
-    setRoster((prev) => [shift, ...prev]);
+    addShift(fromRecordsView(shift));
     setCreateOpen(false);
     toast.success('Shift created', `${shift.staffName}'s shift has been added to the roster.`);
   }
 
   function handleUpdateShift(shift: RecordsShift) {
-    setRoster((prev) => prev.map((s) => (s.id === shift.id ? shift : s)));
+    updateShiftInStore(fromRecordsView(shift));
     setEditingShift(null);
     toast.success('Shift updated', `${shift.staffName}'s shift has been updated.`);
   }
 
   function handleCancelShift(shift: RecordsShift) {
-    setRoster((prev) =>
-      prev.map((s) => (s.id === shift.id ? { ...s, status: 'CANCELLED' as const } : s)),
-    );
+    cancelShiftInStore(shift.id);
     setOpenRowMenuId(null);
     toast.info('Shift cancelled', `${shift.staffName}'s shift has been marked as cancelled.`);
   }
 
   function handleDuplicateShift(shift: RecordsShift) {
-    setRoster((prev) => [{ ...shift, id: `rds-dup-${Date.now()}` }, ...prev]);
+    duplicateShiftInStore(fromRecordsView(shift));
     setOpenRowMenuId(null);
     toast.success('Shift duplicated', `A copy of ${shift.staffName}'s shift has been added.`);
   }
 
   function handleSetReminder(staffName: string) {
     toast.success('Reminder sent', `A shift-acknowledgement reminder was sent to ${staffName}.`);
+  }
+
+  // Closes the loop "Set Reminder" started but never finished — there was no
+  // action anywhere that actually flipped a shift to acknowledged.
+  function handleAcknowledgeShift(shiftId: string) {
+    const shift = roster.find((s) => s.id === shiftId);
+    acknowledgeShiftInStore(shiftId);
+    if (shift)
+      toast.success('Shift acknowledged', `${shift.staffName}'s shift is now acknowledged.`);
+    setViewingShift(null);
   }
 
   function handlePublishRoster() {
@@ -987,27 +1033,24 @@ export function RecordsWorkforceManagementWorkspace() {
                 >
                   Pending Shifts Acknowledgement
                 </h2>
-                {PENDING_ACKNOWLEDGEMENTS.length > 3 && (
+                {pendingAcks.length > 3 && (
                   <button
                     type="button"
                     onClick={() => setShowAllAcks((prev) => !prev)}
                     className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                     style={{ fontSize: 14, color: '#00B4D8' }}
                   >
-                    {showAllAcks ? 'Show Less' : `View All (${PENDING_ACKNOWLEDGEMENTS.length})`}
+                    {showAllAcks ? 'Show Less' : `View All (${pendingAcks.length})`}
                   </button>
                 )}
               </div>
               <div className="mt-4 flex flex-col gap-3">
-                {PENDING_ACKNOWLEDGEMENTS.length === 0 ? (
+                {pendingAcks.length === 0 ? (
                   <p style={{ fontSize: 14, color: '#8A98A3' }}>
                     Everyone has acknowledged their shift.
                   </p>
                 ) : (
-                  (showAllAcks
-                    ? PENDING_ACKNOWLEDGEMENTS
-                    : PENDING_ACKNOWLEDGEMENTS.slice(0, 3)
-                  ).map((ack) => (
+                  (showAllAcks ? pendingAcks : pendingAcks.slice(0, 3)).map((ack) => (
                     <div key={ack.id} className="flex items-center gap-3">
                       <div
                         className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
@@ -1037,19 +1080,34 @@ export function RecordsWorkforceManagementWorkspace() {
                       >
                         Awaiting
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => handleSetReminder(ack.staffName)}
-                        className="shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                        style={{
-                          fontSize: 14,
-                          color: '#00B4D8',
-                          border: '1px solid #00B4D8',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        Set Reminder
-                      </button>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSetReminder(ack.staffName)}
+                          className="shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          style={{
+                            fontSize: 14,
+                            color: '#00B4D8',
+                            border: '1px solid #00B4D8',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Set Reminder
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAcknowledgeShift(ack.id)}
+                          className="shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(34,197,94,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          style={{
+                            fontSize: 14,
+                            color: '#22C55E',
+                            border: '1px solid rgba(34,197,94,0.4)',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Acknowledge
+                        </button>
+                      </div>
                     </div>
                   ))
                 )}
@@ -1082,6 +1140,7 @@ export function RecordsWorkforceManagementWorkspace() {
             setEditingShift(viewingShift);
             setViewingShift(null);
           }}
+          onAcknowledge={() => handleAcknowledgeShift(viewingShift.id)}
         />
       )}
     </div>

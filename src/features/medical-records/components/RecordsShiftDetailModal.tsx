@@ -106,10 +106,12 @@ export function RecordsShiftDetailModal({
   shift,
   onClose,
   onEdit,
+  onAcknowledge,
 }: {
   shift: RecordsShift;
   onClose: () => void;
   onEdit: () => void;
+  onAcknowledge: () => void;
 }) {
   const typeCfg = SHIFT_TYPE_CFG[shift.shiftType];
   const statusCfg = STATUS_CFG[shift.status];
@@ -222,6 +224,25 @@ export function RecordsShiftDetailModal({
           >
             Close
           </button>
+          {!shift.acknowledged && (
+            <button
+              type="button"
+              onClick={onAcknowledge}
+              className={`flex items-center gap-1.5 font-sans font-semibold transition-colors duration-150 hover:bg-[rgba(34,197,94,0.06)] ${FOCUS_RING}`}
+              style={{
+                height: 44,
+                borderRadius: 12,
+                padding: '0 20px',
+                background: '#FFFFFF',
+                border: '1px solid rgba(34,197,94,0.4)',
+                fontSize: 14,
+                color: '#22C55E',
+              }}
+            >
+              <CheckCircle2 style={{ width: 16, height: 16 }} />
+              Mark as Acknowledged
+            </button>
+          )}
           <button
             type="button"
             onClick={onEdit}

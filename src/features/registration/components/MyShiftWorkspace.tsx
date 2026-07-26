@@ -23,8 +23,14 @@ import {
 } from '@/features/registration/__mocks__/registrationWorkforceFixtures';
 import {
   acknowledgeShift,
-  useRegistrationShifts,
-} from '@/features/registration/store/registrationShiftStore';
+  useStaffShifts,
+  type StaffShift,
+} from '@/features/workforce/store/staffShiftStore';
+
+function toRegistrationView(s: StaffShift): RegistrationShift {
+  const { homeModule: _homeModule, department: _department, ...rest } = s;
+  return rest;
+}
 
 type PageState = 'loading' | 'loaded' | 'error';
 
@@ -47,7 +53,9 @@ export function MyShiftWorkspace() {
   const router = useRouter();
   const toast = useToast();
   const { user } = useAuth();
-  const shifts = useRegistrationShifts();
+  const shifts = useStaffShifts()
+    .filter((s) => s.homeModule === 'registration')
+    .map(toRegistrationView);
   const [pageState, setPageState] = useState<PageState>('loading');
 
   useEffect(() => {

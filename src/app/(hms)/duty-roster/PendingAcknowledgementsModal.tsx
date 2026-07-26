@@ -2,17 +2,28 @@
 
 import { X } from 'lucide-react';
 
-import { PENDING_ACKNOWLEDGEMENTS } from '@/features/workforce/__mocks__/workforceFixtures';
-
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
 
+type PendingAck = {
+  id: string;
+  doctorName: string;
+  initials: string;
+  avatarBg: string;
+  shiftLabel: string;
+  day: string;
+};
+
 export function PendingAcknowledgementsModal({
+  pendingAcks,
   onClose,
   onSetReminder,
+  onAcknowledge,
 }: {
+  pendingAcks: PendingAck[];
   onClose: () => void;
   onSetReminder: (doctorName: string) => void;
+  onAcknowledge: (shiftId: string) => void;
 }) {
   return (
     <div
@@ -38,7 +49,7 @@ export function PendingAcknowledgementsModal({
               Pending Shifts Acknowledgement
             </h2>
             <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-              {PENDING_ACKNOWLEDGEMENTS.length} doctors awaiting acknowledgement
+              {pendingAcks.length} doctors awaiting acknowledgement
             </p>
           </div>
           <button
@@ -52,55 +63,74 @@ export function PendingAcknowledgementsModal({
         </div>
 
         <div className="flex flex-col gap-2 overflow-y-auto scroll-smooth px-4 py-3">
-          {PENDING_ACKNOWLEDGEMENTS.map((ack) => (
-            <div
-              key={ack.id}
-              className="flex items-center gap-3 rounded-[10px] px-2 py-2.5"
-              style={{ border: '1px solid rgba(0,100,130,0.08)' }}
-            >
+          {pendingAcks.length === 0 ? (
+            <p style={{ fontSize: 14, color: '#8A98A3' }}>Everyone has acknowledged their shift.</p>
+          ) : (
+            pendingAcks.map((ack) => (
               <div
-                className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
-                style={{ background: ack.avatarBg }}
+                key={ack.id}
+                className="flex items-center gap-3 rounded-[10px] px-2 py-2.5"
+                style={{ border: '1px solid rgba(0,100,130,0.08)' }}
               >
-                {ack.initials}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p
-                  className="truncate font-sans font-medium"
-                  style={{ fontSize: 14, color: '#0D2630' }}
+                <div
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                  style={{ background: ack.avatarBg }}
                 >
-                  {ack.doctorName}
-                </p>
-                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                  {ack.shiftLabel} • {ack.day}
-                </p>
+                  {ack.initials}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className="truncate font-sans font-medium"
+                    style={{ fontSize: 14, color: '#0D2630' }}
+                  >
+                    {ack.doctorName}
+                  </p>
+                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                    {ack.shiftLabel} • {ack.day}
+                  </p>
+                </div>
+                <span
+                  className="hidden shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium sm:inline"
+                  style={{
+                    fontSize: 14,
+                    color: '#F59E0B',
+                    border: '1px solid rgba(245,158,11,0.40)',
+                    background: 'rgba(245,158,11,0.06)',
+                  }}
+                >
+                  Awaiting
+                </span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onSetReminder(ack.doctorName)}
+                    className={`shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] ${FOCUS_RING}`}
+                    style={{
+                      fontSize: 14,
+                      color: '#00B4D8',
+                      border: '1px solid #00B4D8',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Set Reminder
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onAcknowledge(ack.id)}
+                    className={`shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(34,197,94,0.06)] ${FOCUS_RING}`}
+                    style={{
+                      fontSize: 14,
+                      color: '#22C55E',
+                      border: '1px solid rgba(34,197,94,0.4)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Acknowledge
+                  </button>
+                </div>
               </div>
-              <span
-                className="hidden shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium sm:inline"
-                style={{
-                  fontSize: 14,
-                  color: '#F59E0B',
-                  border: '1px solid rgba(245,158,11,0.40)',
-                  background: 'rgba(245,158,11,0.06)',
-                }}
-              >
-                Awaiting
-              </span>
-              <button
-                type="button"
-                onClick={() => onSetReminder(ack.doctorName)}
-                className={`shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] ${FOCUS_RING}`}
-                style={{
-                  fontSize: 14,
-                  color: '#00B4D8',
-                  border: '1px solid #00B4D8',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Set Reminder
-              </button>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         <div

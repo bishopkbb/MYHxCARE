@@ -38,16 +38,35 @@ import { useToast } from '@/hooks/useToast';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import {
   COVERAGE_OVERVIEW,
-  MOCK_ROSTER,
-  PENDING_ACKNOWLEDGEMENTS,
   ROLE_OPTIONS,
   WORKFORCE_STATS,
   type DoctorShift,
   type ShiftStatus,
   type ShiftType,
 } from '@/features/workforce/__mocks__/workforceFixtures';
+import {
+  acknowledgeShift as acknowledgeShiftInStore,
+  addShift,
+  cancelShift as cancelShiftInStore,
+  duplicateShift as duplicateShiftInStore,
+  updateShift as updateShiftInStore,
+  useStaffShifts,
+  type StaffShift,
+} from '@/features/workforce/store/staffShiftStore';
 import { SHIFT_TYPE_CFG, SHIFT_TYPE_OPTIONS, STATUS_CFG, STATUS_OPTIONS } from './config';
 import { ShiftCalendar } from './ShiftCalendar';
+
+// This screen's own display shape (`DoctorShift`) predates the canonical
+// `StaffShift` unification (SYS-005) and is kept untouched here — only the
+// state source changed. These two converters are the seam.
+function toDoctorView(s: StaffShift): DoctorShift {
+  const { homeModule: _homeModule, staffId: _staffId, staffName, department, ...rest } = s;
+  return { ...rest, doctorName: staffName, department: department ?? '' };
+}
+function fromDoctorView(s: DoctorShift): StaffShift {
+  const { doctorName, ...rest } = s;
+  return { ...rest, staffName: doctorName, homeModule: 'clinical' };
+}
 
 // Opened only by deliberate user action (Create/Edit Shift, View Shift,
 // View All pending acknowledgements) — never needed for the initial paint,
@@ -235,7 +254,9 @@ export default function DutyRosterPage() {
   const router = useRouter();
   const toast = useToast();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [roster, setRoster] = useState<DoctorShift[]>(MOCK_ROSTER);
+  const roster = useStaffShifts()
+    .filter((s) => s.homeModule === 'clinical')
+    .map(toDoctorView);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
@@ -308,34 +329,56 @@ export default function DutyRosterPage() {
   const clampedPage = Math.min(page, totalPages);
   const paginated = filtered.slice((clampedPage - 1) * pageSize, clampedPage * pageSize);
 
+  // Derived from the live roster (not a static PENDING_ACKNOWLEDGEMENTS
+  // fixture) so acknowledging a shift actually removes it from this list.
+  const pendingAcks = roster
+    .filter((s) => !s.acknowledged)
+    .slice(0, 5)
+    .map((s) => ({
+      id: s.id,
+      doctorName: s.doctorName,
+      initials: s.initials,
+      avatarBg: s.avatarBg,
+      shiftLabel: `${SHIFT_TYPE_OPTIONS.find((o) => o.value === s.shiftType)?.label} Shift`,
+      day: 'Today',
+    }));
+
   function handleCreateShift(shift: DoctorShift) {
-    setRoster((prev) => [shift, ...prev]);
+    addShift(fromDoctorView(shift));
     setCreateOpen(false);
     toast.success('Shift created', `${shift.doctorName}'s shift has been added to the roster.`);
   }
 
   function handleUpdateShift(shift: DoctorShift) {
-    setRoster((prev) => prev.map((s) => (s.id === shift.id ? shift : s)));
+    updateShiftInStore(fromDoctorView(shift));
     setEditingShift(null);
     toast.success('Shift updated', `${shift.doctorName}'s shift has been updated.`);
   }
 
   function handleCancelShift(shift: DoctorShift) {
-    setRoster((prev) =>
-      prev.map((s) => (s.id === shift.id ? { ...s, status: 'CANCELLED' as const } : s)),
-    );
+    cancelShiftInStore(shift.id);
     setOpenRowMenuId(null);
     toast.info('Shift cancelled', `${shift.doctorName}'s shift has been marked as cancelled.`);
   }
 
   function handleDuplicateShift(shift: DoctorShift) {
-    setRoster((prev) => [{ ...shift, id: `shift-${Date.now()}` }, ...prev]);
+    duplicateShiftInStore(fromDoctorView(shift));
     setOpenRowMenuId(null);
     toast.success('Shift duplicated', `A copy of ${shift.doctorName}'s shift has been added.`);
   }
 
   function handleSetReminder(doctorName: string) {
     toast.success('Reminder sent', `A shift-acknowledgement reminder was sent to ${doctorName}.`);
+  }
+
+  // Closes the loop "Set Reminder" started but never finished — there was no
+  // action anywhere that actually flipped a shift to acknowledged.
+  function handleAcknowledgeShift(shiftId: string) {
+    const shift = roster.find((s) => s.id === shiftId);
+    acknowledgeShiftInStore(shiftId);
+    if (shift)
+      toast.success('Shift acknowledged', `${shift.doctorName}'s shift is now acknowledged.`);
+    setViewingShift(null);
   }
 
   function handlePublishRoster() {
@@ -978,51 +1021,72 @@ export default function DutyRosterPage() {
                 </button>
               </div>
               <div className="mt-4 flex flex-col gap-3">
-                {PENDING_ACKNOWLEDGEMENTS.slice(0, 3).map((ack) => (
-                  <div key={ack.id} className="flex items-center gap-3">
-                    <div
-                      className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
-                      style={{ background: ack.avatarBg }}
-                    >
-                      {ack.initials}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p
-                        className="truncate font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
+                {pendingAcks.length === 0 ? (
+                  <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                    Everyone has acknowledged their shift.
+                  </p>
+                ) : (
+                  pendingAcks.slice(0, 3).map((ack) => (
+                    <div key={ack.id} className="flex items-center gap-3">
+                      <div
+                        className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                        style={{ background: ack.avatarBg }}
                       >
-                        {ack.doctorName}
-                      </p>
-                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                        {ack.shiftLabel} • {ack.day}
-                      </p>
+                        {ack.initials}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {ack.doctorName}
+                        </p>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {ack.shiftLabel} • {ack.day}
+                        </p>
+                      </div>
+                      <span
+                        className="hidden shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium sm:inline"
+                        style={{
+                          fontSize: 14,
+                          color: '#F59E0B',
+                          border: '1px solid rgba(245,158,11,0.40)',
+                          background: 'rgba(245,158,11,0.06)',
+                        }}
+                      >
+                        Awaiting
+                      </span>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSetReminder(ack.doctorName)}
+                          className="shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          style={{
+                            fontSize: 14,
+                            color: '#00B4D8',
+                            border: '1px solid #00B4D8',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Set Reminder
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAcknowledgeShift(ack.id)}
+                          className="shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(34,197,94,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          style={{
+                            fontSize: 14,
+                            color: '#22C55E',
+                            border: '1px solid rgba(34,197,94,0.4)',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Acknowledge
+                        </button>
+                      </div>
                     </div>
-                    <span
-                      className="hidden shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium sm:inline"
-                      style={{
-                        fontSize: 14,
-                        color: '#F59E0B',
-                        border: '1px solid rgba(245,158,11,0.40)',
-                        background: 'rgba(245,158,11,0.06)',
-                      }}
-                    >
-                      Awaiting
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleSetReminder(ack.doctorName)}
-                      className="shrink-0 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                      style={{
-                        fontSize: 14,
-                        color: '#00B4D8',
-                        border: '1px solid #00B4D8',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      Set Reminder
-                    </button>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -1051,12 +1115,15 @@ export default function DutyRosterPage() {
             setEditingShift(viewingShift);
             setViewingShift(null);
           }}
+          onAcknowledge={() => handleAcknowledgeShift(viewingShift.id)}
         />
       )}
       {ackModalOpen && (
         <PendingAcknowledgementsModal
+          pendingAcks={pendingAcks}
           onClose={() => setAckModalOpen(false)}
           onSetReminder={handleSetReminder}
+          onAcknowledge={handleAcknowledgeShift}
         />
       )}
     </div>
