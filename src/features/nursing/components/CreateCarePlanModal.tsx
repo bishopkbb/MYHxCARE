@@ -31,17 +31,27 @@ export type CarePlanDraftInput = {
 
 export function CreateCarePlanModal({
   patientName,
+  nurseName,
   initial,
   isEdit,
   onClose,
   onSave,
 }: {
   patientName: string;
+  /** The logged-in nurse's session name — merged into the Assigned Nurse
+   * options so a plan created/edited by someone other than the three
+   * hardcoded seed nurses is attributed to who's actually logged in, not
+   * silently misattributed to one of them. */
+  nurseName: string;
   initial?: Partial<CarePlanDraftInput> & { startDateIso?: string; nextReviewIso?: string };
   isEdit?: boolean;
   onClose: () => void;
   onSave: (draft: CarePlanDraftInput) => void;
 }) {
+  const nurseOptions = NURSE_OPTIONS.some((o) => o.value.startsWith(`${nurseName}|`))
+    ? NURSE_OPTIONS
+    : [{ value: `${nurseName}|`, label: nurseName }, ...NURSE_OPTIONS];
+
   const [problem, setProblem] = useState(initial?.problem ?? '');
   const [problemDetail, setProblemDetail] = useState(initial?.problemDetail ?? 'Related to ');
   const [goal, setGoal] = useState(initial?.goal ?? '');
@@ -54,7 +64,7 @@ export function CreateCarePlanModal({
     initial?.nextReviewIso ? toDateInputValue(initial.nextReviewIso) : '',
   );
   const [assignedNurse, setAssignedNurse] = useState(
-    initial?.assignedNurse ?? NURSE_OPTIONS[0]!.value,
+    initial?.assignedNurse ?? nurseOptions[0]!.value,
   );
   const [interventions, setInterventions] = useState<string[]>(
     initial?.interventions && initial.interventions.length > 0 ? initial.interventions : [''],
@@ -195,7 +205,7 @@ export function CreateCarePlanModal({
                 id="cp-nurse"
                 value={assignedNurse}
                 onChange={setAssignedNurse}
-                options={NURSE_OPTIONS}
+                options={nurseOptions}
                 placeholder="Select nurse"
               />
             </FormField>

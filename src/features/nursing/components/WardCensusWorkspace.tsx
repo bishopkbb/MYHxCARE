@@ -16,7 +16,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import { formatDate, formatDateTime } from '@/utils/datetime';
-import { getEffectiveRoster } from '@/features/nursing/store/nursingWorkflowStore';
+import {
+  getEffectiveRoster,
+  useClaimedPatients,
+} from '@/features/nursing/store/nursingWorkflowStore';
 import type { NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
 import {
   ACUITY_CFG,
@@ -119,12 +122,20 @@ export function WardCensusWorkspace() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const [bedsByWard] = useState<Record<string, WardBed[]>>(() => {
+  // Re-derived on every nursing-store emit (a patient claimed, or — the case
+  // this matters for — a discharge completing) rather than computed once at
+  // mount, so a discharge is reflected here immediately instead of only after
+  // a full page remount.
+  const claimedPatients = useClaimedPatients();
+  const bedsByWard = useMemo<Record<string, WardBed[]>>(() => {
     const roster = getEffectiveRoster();
     const map: Record<string, WardBed[]> = {};
     for (const ward of WARDS) map[ward.id] = buildWardBeds(ward, roster);
     return map;
-  });
+    // claimedPatients is a re-trigger signal (its identity changes on every
+    // relevant nursing-store emit), not a value read inside the memo body.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claimedPatients]);
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 700);

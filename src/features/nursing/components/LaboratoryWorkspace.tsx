@@ -15,6 +15,7 @@ import {
   Search,
   ShieldAlert,
   TestTube2,
+  UserRound,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
@@ -28,6 +29,7 @@ import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/providers/AuthProvider';
 import { formatDate, formatTime, toRelativeTime } from '@/utils/datetime';
 import {
   DEPARTMENT_OPTIONS,
@@ -62,7 +64,6 @@ const FOCUS_RING =
 type PageState = 'loading' | 'loaded' | 'error';
 type TabKey = 'pending' | 'completed' | 'critical' | 'requests';
 
-const NURSE_NAME = 'Nurse Chidinma Eze';
 const DEFAULT_TAT_HOURS = 6;
 
 const STATUS_CFG: Record<LabTestStatus, { color: string; border: string; bg: string }> = {
@@ -132,6 +133,7 @@ function RowMenu({
   open,
   onToggle,
   onView,
+  onViewPatient,
   onCollect,
   onAcknowledge,
   onFollowUp,
@@ -140,6 +142,7 @@ function RowMenu({
   open: boolean;
   onToggle: () => void;
   onView: () => void;
+  onViewPatient?: (() => void) | undefined;
   onCollect?: (() => void) | undefined;
   onAcknowledge?: (() => void) | undefined;
   onFollowUp?: (() => void) | undefined;
@@ -167,6 +170,17 @@ function RowMenu({
           <ClipboardList style={{ width: 15, height: 15, color: '#00B4D8' }} />
           View Details
         </button>
+        {onViewPatient && (
+          <button
+            type="button"
+            onClick={onViewPatient}
+            className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+            style={{ fontSize: 14, color: '#0D2630' }}
+          >
+            <UserRound style={{ width: 15, height: 15, color: '#00B4D8' }} />
+            View Patient
+          </button>
+        )}
         {onCollect && (
           <button
             type="button"
@@ -208,6 +222,7 @@ function RowMenu({
 export function LaboratoryWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
   const [pageState, setPageState] = useState<PageState>('loading');
   const [orders, setOrders] = useState<LabTestOrder[]>(LAB_ORDERS);
   const [activeTab, setActiveTab] = useState<TabKey>('pending');
@@ -354,7 +369,7 @@ export function LaboratoryWorkspace() {
           ...rest,
           status: 'Sample Collected',
           sampleCollectedAt: input.collectedAt,
-          sampleCollectedBy: NURSE_NAME,
+          sampleCollectedBy: user?.name ?? 'Unknown Staff',
         };
       }),
     );
@@ -370,7 +385,7 @@ export function LaboratoryWorkspace() {
     if (!acknowledgeTarget) return;
     updateOrder(acknowledgeTarget.id, {
       criticalAcknowledgedAt: new Date().toISOString(),
-      criticalAcknowledgedBy: NURSE_NAME,
+      criticalAcknowledgedBy: user?.name ?? 'Unknown Staff',
     });
     toast.success(
       'Critical result acknowledged',
@@ -901,6 +916,14 @@ export function LaboratoryWorkspace() {
                                       setOpenMenuId(null);
                                       setViewTarget(o);
                                     }}
+                                    onViewPatient={
+                                      o.patientId
+                                        ? () => {
+                                            setOpenMenuId(null);
+                                            router.push(ROUTES.nursePatientRecord(o.patientId!));
+                                          }
+                                        : undefined
+                                    }
                                     onCollect={
                                       o.status === 'Ordered' || o.status === 'Rejected'
                                         ? () => {

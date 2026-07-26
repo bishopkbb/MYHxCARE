@@ -31,7 +31,9 @@ import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/providers/AuthProvider';
 import { formatDate, formatTime } from '@/utils/datetime';
+import { releaseBedForPatient } from '@/features/nursing/store/bedAllocationStore';
 import {
   getEffectiveRoster,
   markPatientDischarged,
@@ -212,6 +214,8 @@ function SkeletonStatCard() {
 export function DischargesWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const nurseName = user?.name ?? 'Nurse';
   const [pageState, setPageState] = useState<PageState>('loading');
   const [discharges, setDischarges] = useState<DischargeRecord[]>(DISCHARGES);
   const [activeTab, setActiveTab] = useState<TabKey>('active');
@@ -367,16 +371,21 @@ export function DischargesWorkspace() {
             currentStep: LAST_STEP,
             status: 'Discharged',
             dischargedAt: new Date().toISOString(),
+            lastUpdatedBy: nurseName,
           };
         }),
       );
       // Vacates their bed in Bed Management automatically — a discharged
       // patient leaves the effective roster, and a roster-slot bed with no
-      // matching patient resolves back to Available.
-      if (record.patientId) markPatientDischarged(record.patientId);
+      // matching patient resolves back to Available. Also releases any bed
+      // Admissions' "Assign Bed" step allocated for them via bedAllocationStore.
+      if (record.patientId) {
+        markPatientDischarged(record.patientId);
+        releaseBedForPatient(record.patientId);
+      }
       toast.success('Patient discharged', `${record.patientName} has been discharged.`);
     } else {
-      updateDischarge(record.id, { currentStep: nextStep });
+      updateDischarge(record.id, { currentStep: nextStep, lastUpdatedBy: nurseName });
       toast.success(
         'Discharge workflow advanced',
         `${record.patientName} moved to ${stepInfo(nextStep)?.label}.`,
@@ -386,7 +395,7 @@ export function DischargesWorkspace() {
   }
 
   function cancelDischarge(record: DischargeRecord) {
-    updateDischarge(record.id, { status: 'Cancelled' });
+    updateDischarge(record.id, { status: 'Cancelled', lastUpdatedBy: nurseName });
     toast.info(
       'Discharge plan cancelled',
       `${record.patientName}'s discharge plan has been cancelled.`,
@@ -412,6 +421,7 @@ export function DischargesWorkspace() {
       plannedDischargeAt: input.plannedDischargeAt,
       currentStep: 1,
       status: 'Planned',
+      lastUpdatedBy: nurseName,
       ...(input.notes ? { notes: input.notes } : {}),
     };
     setDischarges((prev) => [newRecord, ...prev]);

@@ -26,6 +26,11 @@ import { formatHumanDate, formatTime } from '@/utils/datetime';
 import { type NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
 import { getPatientRecord } from '@/features/nursing/__mocks__/patientRecordFixtures';
 import {
+  getStoredAssessment,
+  saveAssessmentDraft,
+  submitAssessment,
+} from '@/features/nursing/store/nursingAssessmentStore';
+import {
   AIRWAY_OPTIONS,
   APPETITE_OPTIONS,
   ASSESSMENT_TYPE_OPTIONS,
@@ -313,8 +318,8 @@ function PatientAssessmentPanel({
   const nurseName = user?.name ?? 'Nurse';
   const record = getPatientRecord(patient.id)!;
 
-  const [form, setForm] = useState<NursingAssessmentForm>(() =>
-    getAssessmentForPatient(patient.id, nurseName),
+  const [form, setForm] = useState<NursingAssessmentForm>(
+    () => getStoredAssessment(patient.id)?.form ?? getAssessmentForPatient(patient.id, nurseName),
   );
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
@@ -344,6 +349,7 @@ function PatientAssessmentPanel({
   }
 
   function handleSaveDraft() {
+    saveAssessmentDraft(patient.id, form);
     toast.success('Draft saved', `Nursing assessment draft saved for ${patient.patientName}.`);
   }
 
@@ -356,6 +362,7 @@ function PatientAssessmentPanel({
       );
       return;
     }
+    submitAssessment(patient.id, form);
     toast.success(
       'Assessment submitted',
       `Nursing assessment for ${patient.patientName} has been added to the patient record.`,

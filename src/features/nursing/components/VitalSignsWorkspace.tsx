@@ -37,6 +37,7 @@ import {
   hasRecordedVitals,
   markVitalsRecorded,
   peekPendingVitalsPatientId,
+  updatePatientVitals,
 } from '@/features/nursing/store/nursingWorkflowStore';
 import {
   bloodSugarFlag,
@@ -341,6 +342,15 @@ function PatientVitalsPanel({
       weightRecordedAt: newReading.recordedAt,
       height: vitals.height,
       heightRecordedAt: newReading.recordedAt,
+    });
+    // Writes the real reading back onto the shared roster/doctor-queue
+    // projection — without this, the doctor-queue bridge kept showing the
+    // neutral placeholder stamped at triage-claim time forever after.
+    updatePatientVitals(patient.id, {
+      bp: `${vitals.systolic}/${vitals.diastolic}`,
+      hr: vitals.pulse,
+      temp: vitals.temp,
+      recordedAt: newReading.recordedAt,
     });
     setRecordModalOpen(false);
     toast.success('Vitals recorded', `New vitals saved for ${patient.patientName}.`);

@@ -37,6 +37,7 @@ import {
   clearPendingVitalsPatientId,
   hasRecordedVitals,
   markVitalsRecorded,
+  updatePatientVitals,
 } from '@/features/nursing/store/nursingWorkflowStore';
 import {
   bloodSugarFlag,
@@ -634,6 +635,14 @@ function PatientObservationPanel({
       bloodSugar: vitals.bloodSugar,
     };
     setReadings((prev) => [newReading, ...prev]);
+    // Writes the real reading back onto the shared roster/doctor-queue
+    // projection — same fix as Vital Signs' own save handler.
+    updatePatientVitals(patient.id, {
+      bp: `${vitals.systolic}/${vitals.diastolic}`,
+      hr: vitals.pulse,
+      temp: vitals.temp,
+      recordedAt: newReading.recordedAt,
+    });
     setRecordModalOpen(false);
     toast.success('Observation recorded', `New observation saved for ${patient.patientName}.`);
   }

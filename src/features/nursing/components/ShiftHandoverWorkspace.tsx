@@ -1015,20 +1015,22 @@ export function ShiftHandoverWorkspace() {
                   </>
                 ) : (
                   <>
-                    <button
-                      type="button"
-                      onClick={() => setSignModalOpen(true)}
-                      disabled={completed}
-                      className={`mt-3 flex h-10 items-center gap-2 rounded-[8px] px-4 font-sans font-semibold transition-colors duration-150 hover:bg-[#E6F8FD] disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS_RING}`}
-                      style={{
-                        border: '1.5px dashed rgba(0,180,216,0.5)',
-                        color: '#00B4D8',
-                        fontSize: 14,
-                      }}
-                    >
-                      <PenLine style={{ width: 15, height: 15 }} />
-                      Sign as Incoming Nurse
-                    </button>
+                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                      <button
+                        type="button"
+                        onClick={() => setSignModalOpen(true)}
+                        disabled={completed}
+                        className={`mt-3 flex h-10 items-center gap-2 rounded-[8px] px-4 font-sans font-semibold transition-colors duration-150 hover:bg-[#E6F8FD] disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS_RING}`}
+                        style={{
+                          border: '1.5px dashed rgba(0,180,216,0.5)',
+                          color: '#00B4D8',
+                          fontSize: 14,
+                        }}
+                      >
+                        <PenLine style={{ width: 15, height: 15 }} />
+                        Sign as Incoming Nurse
+                      </button>
+                    </PermissionGate>
                     <p className="mt-1" style={{ fontSize: 14, color: '#8A98A3' }}>
                       Signed at: —
                     </p>

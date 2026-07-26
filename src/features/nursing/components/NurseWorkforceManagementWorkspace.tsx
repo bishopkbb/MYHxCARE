@@ -159,6 +159,12 @@ const STATUS_CFG: Record<
     border: 'rgba(107,114,128,0.40)',
     bg: 'transparent',
   },
+  CANCELLED: {
+    label: 'CANCELLED',
+    color: '#EF4444',
+    border: 'rgba(239,68,68,0.40)',
+    bg: 'rgba(239,68,68,0.06)',
+  },
 };
 
 const COLS = [
@@ -386,9 +392,11 @@ export function NurseWorkforceManagementWorkspace() {
   }
 
   function handleCancelShift(shift: NurseShift) {
-    setRoster((prev) => prev.filter((s) => s.id !== shift.id));
+    setRoster((prev) =>
+      prev.map((s) => (s.id === shift.id ? { ...s, status: 'CANCELLED' as const } : s)),
+    );
     setOpenRowMenuId(null);
-    toast.info('Shift cancelled', `${shift.staffName}'s shift has been removed from the roster.`);
+    toast.info('Shift cancelled', `${shift.staffName}'s shift has been marked as cancelled.`);
   }
 
   function handleDuplicateShift(shift: NurseShift) {
@@ -895,7 +903,10 @@ export function NurseWorkforceManagementWorkspace() {
                               <button
                                 type="button"
                                 onClick={() => handleCancelShift(shift)}
-                                className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                disabled={
+                                  shift.status === 'CANCELLED' || shift.status === 'COMPLETED'
+                                }
+                                className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
                                 style={{ fontSize: 14, color: '#EF4444' }}
                               >
                                 Cancel Shift

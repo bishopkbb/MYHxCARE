@@ -23,19 +23,27 @@ import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@hooks/useAuth';
 import { formatTime } from '@/utils/datetime';
 import {
+  getEffectiveRoster,
+  useClaimedPatients,
+} from '@/features/nursing/store/nursingWorkflowStore';
+import {
   CURRENT_SHIFT,
   MEDICATION_DUE,
-  MY_PATIENTS,
   NURSE_ALERTS,
   NURSE_DASHBOARD_STATS,
   TODAYS_ADMISSIONS,
   TOTAL_MEDICATIONS_DUE,
-  TOTAL_PATIENTS_UNDER_CARE,
   UPCOMING_TASKS,
   WARD_CENSUS,
   TOTAL_BEDS,
   type PatientCondition,
 } from '@/features/nursing/__mocks__/nurseDashboardFixtures';
+
+function riskToCondition(risk: 'Low' | 'Medium' | 'High'): PatientCondition {
+  if (risk === 'High') return 'Critical';
+  if (risk === 'Medium') return 'Fair';
+  return 'Stable';
+}
 
 type PageState = 'loading' | 'loaded' | 'error';
 
@@ -180,6 +188,21 @@ export function NurseDashboardWorkspace() {
   const [animateChart, setAnimateChart] = useState(false);
   const [taskDone, setTaskDone] = useState<Record<string, boolean>>({});
 
+  // Reactive to the shared roster — a patient claimed via Start Triage or
+  // discharged now actually changes what this widget/stat shows, instead of
+  // both being frozen fixture snapshots disconnected from the real caseload.
+  useClaimedPatients();
+  const roster = getEffectiveRoster();
+  const myPatientsRows = roster.slice(0, 5).map((p) => ({
+    id: p.id,
+    patientName: p.patientName,
+    initials: p.initials,
+    avatarBg: p.avatarBg,
+    ward: p.ward,
+    bed: p.bed,
+    condition: riskToCondition(p.riskLevel),
+  }));
+
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
     return () => clearTimeout(t);
@@ -283,6 +306,7 @@ export function NurseDashboardWorkspace() {
                   : NURSE_DASHBOARD_STATS.map((s) => {
                       const isGood =
                         s.direction && s.goodDirection ? s.direction === s.goodDirection : true;
+                      const value = s.id === 'my-patients' ? String(roster.length) : s.value;
                       return (
                         <div
                           key={s.id}
@@ -307,7 +331,7 @@ export function NurseDashboardWorkspace() {
                             className="font-display mt-2 font-semibold"
                             style={{ fontSize: 22, color: '#0D2630' }}
                           >
-                            {s.value}
+                            {value}
                           </p>
                           <p
                             className="mt-0.5 font-sans font-medium"
@@ -412,11 +436,11 @@ export function NurseDashboardWorkspace() {
                       Array.from({ length: 5 }).map((_, i) => (
                         <div key={i} className="h-10 animate-pulse rounded-[10px] bg-slate-100" />
                       ))}
-                    {pageState === 'loaded' && MY_PATIENTS.length === 0 && (
+                    {pageState === 'loaded' && myPatientsRows.length === 0 && (
                       <EmptyRow label="No patients currently assigned to you." />
                     )}
                     {pageState === 'loaded' &&
-                      MY_PATIENTS.map((p) => {
+                      myPatientsRows.map((p) => {
                         const cfg = CONDITION_CFG[p.condition];
                         return (
                           <div key={p.id} className="flex items-center gap-2.5">
@@ -458,7 +482,7 @@ export function NurseDashboardWorkspace() {
                     style={{ borderTop: '1px solid rgba(0,100,130,0.08)' }}
                   >
                     <p style={{ fontSize: 14, color: '#4A7080' }}>
-                      Total Patients: {TOTAL_PATIENTS_UNDER_CARE}
+                      Total Patients: {roster.length}
                     </p>
                     <button
                       type="button"

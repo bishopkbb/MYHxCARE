@@ -11,7 +11,7 @@ function atOffset(dayOffset: number, hour: number, minute: number): string {
 }
 
 export type ShiftType = 'MORNING' | 'AFTERNOON' | 'NIGHT' | 'ON_CALL' | 'EMERGENCY';
-export type ShiftStatus = 'ON_DUTY' | 'SCHEDULED' | 'ON_CALL' | 'COMPLETED';
+export type ShiftStatus = 'ON_DUTY' | 'SCHEDULED' | 'ON_CALL' | 'COMPLETED' | 'CANCELLED';
 
 export const WARD_OPTIONS = [
   'Female Ward',
@@ -34,6 +34,7 @@ export const STATUS_OPTIONS: { value: ShiftStatus; label: string }[] = [
   { value: 'SCHEDULED', label: 'Scheduled' },
   { value: 'ON_CALL', label: 'On-Call' },
   { value: 'COMPLETED', label: 'Completed' },
+  { value: 'CANCELLED', label: 'Cancelled' },
 ];
 
 export const ROLE_OPTIONS = [

@@ -50,6 +50,9 @@ export type DischargeRecord = {
   status: DischargeStatus;
   notes?: string;
   dischargedAt?: string; // ISO, only when status === 'Discharged'
+  /** Who last advanced/cancelled this discharge — set from the logged-in
+   * session, not captured at all before this field existed. */
+  lastUpdatedBy?: string;
 };
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {

@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/providers/AuthProvider';
 import {
   MOCK_NURSE,
   MOCK_ACTIVE_SHIFT,
@@ -593,10 +594,20 @@ function MonthStatCard({ stat }: { stat: MonthStat }) {
 export function NurseScheduleWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
 
   const [pageState, setPageState] = useState<PageState>('loading');
   const [confirmedIds, setConfirmedIds] = useState<Set<string>>(new Set());
   const [declinedIds, setDeclinedIds] = useState<Set<string>>(new Set());
+  const [shiftAcknowledged, setShiftAcknowledged] = useState(
+    MOCK_ACTIVE_SHIFT.status === 'acknowledged',
+  );
+  const nurseName = user?.name ?? MOCK_NURSE.name;
+
+  function handleAcknowledgeShift() {
+    setShiftAcknowledged(true);
+    toast.success('Shift acknowledged', 'Your active shift has been acknowledged.');
+  }
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -681,7 +692,7 @@ export function NurseScheduleWorkspace() {
                   className="font-sans"
                   style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080', marginTop: 2 }}
                 >
-                  {MOCK_NURSE.name} · {MOCK_NURSE.role} · {MOCK_NURSE.ward} · Week of{' '}
+                  {nurseName} · {MOCK_NURSE.role} · {MOCK_NURSE.ward} · Week of{' '}
                   {MOCK_NURSE.weekLabel}
                 </p>
               </div>
@@ -901,7 +912,7 @@ export function NurseScheduleWorkspace() {
                     </div>
 
                     <div className="flex shrink-0 flex-row items-center gap-3 sm:flex-col sm:items-end sm:gap-2">
-                      {MOCK_ACTIVE_SHIFT.status === 'acknowledged' ? (
+                      {shiftAcknowledged ? (
                         <div
                           className="flex items-center gap-2 font-sans font-medium"
                           style={{
@@ -921,6 +932,7 @@ export function NurseScheduleWorkspace() {
                       ) : (
                         <button
                           type="button"
+                          onClick={handleAcknowledgeShift}
                           className={`font-sans font-medium transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
                           style={{
                             borderRadius: 20,

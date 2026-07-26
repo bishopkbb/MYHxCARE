@@ -35,6 +35,11 @@ import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import { formatDateTime } from '@/utils/datetime';
 import {
+  getAllocationForBed,
+  releaseBedForPatient,
+  useBedAllocations,
+} from '@/features/nursing/store/bedAllocationStore';
+import {
   getEffectiveRoster,
   isPatientDischarged,
   useClaimedPatients,
@@ -234,7 +239,7 @@ function BedCard({
             <Biohazard style={{ width: 13, height: 13, color: '#F59E0B', flexShrink: 0 }} />
           )}
         </div>
-        <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+        <PermissionGate permission={PERMISSIONS.WARDS_WRITE}>
           <button
             ref={menuButtonRef}
             type="button"
@@ -276,7 +281,7 @@ function BedCard({
       )}
 
       {primaryAction && (
-        <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+        <PermissionGate permission={PERMISSIONS.WARDS_WRITE}>
           <button
             type="button"
             onClick={primaryAction.onClick}
@@ -596,6 +601,10 @@ export function BedManagementWorkspace() {
   // the case this exists for — a discharge completing) — used below purely
   // as a memo dependency to force `wardBeds` to recheck `isPatientDischarged`.
   const claimedPatients = useClaimedPatients();
+  // Reactive re-trigger for the Admissions "Assign Bed" overlay below — same
+  // reasoning as claimedPatients: its identity change is the signal, not a
+  // value read directly in the memo body.
+  const bedAllocations = useBedAllocations();
 
   useEffect(() => {
     const t = setTimeout(() => setNowMs(Date.now()), 0);
@@ -612,15 +621,32 @@ export function BedManagementWorkspace() {
     // are untouched, since none of those mark a patient discharged.
     return local.map((bed, i) => {
       const slot = selectedWard.beds[i];
-      if (!slot?.rosterSlot || bed.status !== 'Occupied' || !isPatientDischarged(bed.id)) {
-        return bed;
+      if (slot?.rosterSlot && bed.status === 'Occupied' && isPatientDischarged(bed.id)) {
+        return { id: bed.id, bedCode: bed.bedCode, room: bed.room, status: 'Available' as const };
       }
-      return { id: bed.id, bedCode: bed.bedCode, room: bed.room, status: 'Available' as const };
+      // Admissions' "Assign Bed" step allocates into a real bed here — a
+      // static-Available slot with a live allocation renders Occupied without
+      // this screen's own Allocate action ever having been used.
+      if (!slot?.rosterSlot && bed.status !== 'Occupied') {
+        const allocation = getAllocationForBed(selectedWard.id, bed.bedCode);
+        if (allocation) {
+          return {
+            id: bed.id,
+            bedCode: bed.bedCode,
+            room: bed.room,
+            status: 'Occupied' as const,
+            patientName: allocation.patientName,
+            mrn: allocation.mrn,
+            admittedAt: allocation.admittedAt,
+          };
+        }
+      }
+      return bed;
     });
-    // claimedPatients is a re-trigger signal (its identity changes on every
-    // relevant nursing-store emit), not a value read inside the memo body.
+    // claimedPatients/bedAllocations are re-trigger signals (their identity
+    // changes on every relevant store emit), not values read inside the memo body.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bedsByWard, selectedWard, claimedPatients]);
+  }, [bedsByWard, selectedWard, claimedPatients, bedAllocations]);
   const counts = useMemo(() => countBeds(wardBeds), [wardBeds]);
   const selectedBed = wardBeds.find((b) => b.id === selectedBedId) ?? null;
 
@@ -757,6 +783,11 @@ export function BedManagementWorkspace() {
       toast.info('No patient to discharge', `${bed.bedCode} has no patient assigned.`);
       return;
     }
+    // Release an Admissions-made allocation too, so this bed's Occupied
+    // status doesn't get re-applied by the allocation overlay above the
+    // instant this local state flips it to Cleaning Required.
+    const allocation = getAllocationForBed(selectedWard.id, bed.bedCode);
+    if (allocation) releaseBedForPatient(allocation.patientKey);
     const patientName = bed.patientName;
     setBedsByWard((prev) => ({
       ...prev,
@@ -1337,7 +1368,7 @@ export function BedManagementWorkspace() {
                           style={{ background: isSelected ? '#E6F8FD' : '#FFFFFF' }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                          <PermissionGate permission={PERMISSIONS.WARDS_WRITE}>
                             <ListRowActions
                               bed={bed}
                               menuOpen={openListMenuId === bed.id}
@@ -1549,7 +1580,7 @@ export function BedManagementWorkspace() {
                 Actions
               </h2>
               <PermissionGate
-                permission={PERMISSIONS.ENCOUNTERS_WRITE}
+                permission={PERMISSIONS.WARDS_WRITE}
                 fallback={
                   <p className="mt-2" style={{ fontSize: 14, color: '#8A98A3' }}>
                     You don&apos;t have permission to manage beds.

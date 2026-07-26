@@ -29,6 +29,7 @@ import { formatTime } from '@/utils/datetime';
 import { type NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
 import { getPatientRecord } from '@/features/nursing/__mocks__/patientRecordFixtures';
 import { getBodyMeasurements } from '@/features/nursing/__mocks__/vitalSignsFixtures';
+import { updateNextMedication } from '@/features/nursing/store/nursingWorkflowStore';
 import {
   CLINICAL_ALERTS,
   CONTINUOUS_INFUSIONS,
@@ -225,6 +226,24 @@ function PatientMARPanel({
       administeredBy: nurseName,
       remarks: result.remarks,
     });
+    // Writes the new "next due" medication back onto the shared roster card
+    // (My Patients) — without this, that card kept showing whatever was next
+    // at claim time, unchanged even by the dose it named just being given.
+    const stillDue = scheduled
+      .filter(
+        (o) =>
+          o.id !== administerTargetId &&
+          o.status !== 'Completed' &&
+          o.status !== 'Held' &&
+          o.status !== 'Missed',
+      )
+      .sort((a, b) => new Date(a.timeDue).getTime() - new Date(b.timeDue).getTime());
+    const next = stillDue[0];
+    updateNextMedication(
+      patient.id,
+      next ? next.medication : 'None scheduled',
+      next ? next.timeDue : new Date().toISOString(),
+    );
     toast.success(
       'Medication administered',
       `${order.medication} recorded for ${patient.patientName}.`,

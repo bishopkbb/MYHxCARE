@@ -106,9 +106,16 @@ export function getClaimedPatients(): NursePatient[] {
  * claimed, minus anyone Discharges has completed (see `markPatientDischarged`
  * below) — a discharged patient has left the ward and should disappear from
  * every screen that reads the roster, the same way they've already left Bed
- * Management's occupied bed. */
+ * Management's occupied bed. Applies `vitalsOverrides` (see `updatePatientVitals`
+ * below) so a recorded reading is reflected here, not just in Vital Signs' own
+ * local history. */
 export function getEffectiveRoster(): NursePatient[] {
-  return [...MY_PATIENTS_ROSTER, ...cachedClaimed].filter((p) => !dischargedPatientIds.has(p.id));
+  return [...MY_PATIENTS_ROSTER, ...cachedClaimed]
+    .filter((p) => !dischargedPatientIds.has(p.id))
+    .map((p) => (vitalsOverrides.has(p.id) ? { ...p, vitals: vitalsOverrides.get(p.id)! } : p))
+    .map((p) =>
+      nextMedicationOverrides.has(p.id) ? { ...p, ...nextMedicationOverrides.get(p.id)! } : p,
+    );
 }
 
 function subscribe(listener: () => void): () => void {
@@ -172,7 +179,48 @@ export function hasRecordedVitals(patientId: string): boolean {
 /** Claimed patients whose first vitals have been recorded — ready to appear
  * on the assigned doctor's queue (see encounterFixtures.ts's getDoctorQueue). */
 export function getPatientsReadyForDoctor(): NursePatient[] {
-  return cachedClaimed.filter((p) => hasRecordedVitals(p.id));
+  return cachedClaimed
+    .filter((p) => hasRecordedVitals(p.id))
+    .map((p) => (vitalsOverrides.has(p.id) ? { ...p, vitals: vitalsOverrides.get(p.id)! } : p));
+}
+
+// ── Recorded-vitals write-back ───────────────────────────────────────────────
+// A reading entered in Vital Signs/Observation Charts used to only ever be
+// appended to that screen's own local history — the roster/doctor-queue
+// projection kept showing the neutral placeholder stamped at triage-claim
+// time forever after. This is what makes a real recorded reading actually
+// show up everywhere `NursePatient.vitals` is read.
+
+const vitalsOverrides = new Map<string, NursePatient['vitals']>();
+
+export function updatePatientVitals(patientId: string, vitals: NursePatient['vitals']): void {
+  vitalsOverrides.set(patientId, vitals);
+  const claimedPatient = claimed.get(patientId);
+  if (claimedPatient) {
+    claimed.set(patientId, { ...claimedPatient, vitals });
+    recomputeSnapshot();
+  }
+  emit();
+}
+
+// ── Next-medication write-back ───────────────────────────────────────────────
+// Administering a scheduled medication used to only ever update Medication
+// Administration's own local order list — My Patients' roster card kept
+// showing whatever "next medication" was true when the patient was claimed,
+// even immediately after the very dose it named had just been given.
+
+const nextMedicationOverrides = new Map<
+  string,
+  { nextMedication: string; nextMedicationTime: string }
+>();
+
+export function updateNextMedication(
+  patientId: string,
+  nextMedication: string,
+  nextMedicationTime: string,
+): void {
+  nextMedicationOverrides.set(patientId, { nextMedication, nextMedicationTime });
+  emit();
 }
 
 // ── Discharge tracking ───────────────────────────────────────────────────────

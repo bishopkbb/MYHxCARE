@@ -27,18 +27,47 @@ import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/providers/AuthProvider';
 import { formatDate, formatTime } from '@/utils/datetime';
 import {
   ADMISSION_STEPS,
   STATUS_CFG,
   type AdmissionRecord,
 } from '@/features/nursing/__mocks__/admissionsFixtures';
+import { WARD_LAYOUTS } from '@/features/nursing/__mocks__/bedManagementFixtures';
 import {
   addAdmission,
   updateAdmission,
   useAdmissions,
 } from '@/features/nursing/store/admissionsStore';
+import { allocateBed, findAvailableBedCode } from '@/features/nursing/store/bedAllocationStore';
 import type { NewAdmissionInput } from './NewAdmissionModal';
+
+const ASSIGN_BED_STEP = 4;
+
+/** "Assign Bed" (step 4) must actually occupy a real bed in Bed Management's
+ * ward layout, not just increment a step counter — picks the first bed in
+ * the matching ward whose static seed status is 'Available' and isn't
+ * already allocated this session. Returns null when the ward has no bed
+ * codes correlated in bedManagementFixtures.ts, or none are free. */
+function assignBedFor(admission: AdmissionRecord): string | null {
+  const layout = WARD_LAYOUTS.find((w) => w.name === admission.ward);
+  if (!layout) return null;
+  const candidateCodes = layout.beds
+    .filter((slot) => !slot.rosterSlot && slot.status === 'Available')
+    .map((slot) => slot.bedCode);
+  const bedCode = findAvailableBedCode(layout.id, candidateCodes);
+  if (!bedCode) return null;
+  allocateBed({
+    wardId: layout.id,
+    bedCode,
+    patientKey: admission.patientId ?? admission.id,
+    patientName: admission.patientName,
+    mrn: admission.mrn,
+    admittedAt: new Date().toISOString(),
+  });
+  return bedCode;
+}
 
 const NewAdmissionModal = dynamic(
   () => import('./NewAdmissionModal').then((m) => m.NewAdmissionModal),
@@ -202,6 +231,8 @@ function SkeletonStatCard() {
 export function AdmissionsWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const nurseName = user?.name ?? 'Nurse';
   const [pageState, setPageState] = useState<PageState>('loading');
   const admissions = useAdmissions();
   const [activeTab, setActiveTab] = useState<TabKey>('current');
@@ -322,7 +353,7 @@ export function AdmissionsWorkspace() {
 
   function advanceWorkflow(a: AdmissionRecord) {
     if (a.status === 'Scheduled') {
-      updateAdmission(a.id, { currentStep: 1, status: 'Pending' });
+      updateAdmission(a.id, { currentStep: 1, status: 'Pending', lastUpdatedBy: nurseName });
       toast.success(
         'Patient checked in',
         `${a.patientName} has arrived and started the admission workflow.`,
@@ -332,25 +363,52 @@ export function AdmissionsWorkspace() {
     }
     if (a.currentStep >= 7) return;
     const nextStep = a.currentStep + 1;
+
+    if (nextStep === ASSIGN_BED_STEP) {
+      const bedCode = assignBedFor(a);
+      if (!bedCode) {
+        toast.error(
+          'No bed available',
+          `No available bed found in ${a.ward}. Free up a bed in Bed Management first.`,
+        );
+        setOpenMenuId(null);
+        return;
+      }
+      updateAdmission(a.id, {
+        currentStep: nextStep,
+        status: 'In Progress',
+        bed: bedCode,
+        lastUpdatedBy: nurseName,
+      });
+      toast.success('Bed assigned', `${a.patientName} assigned to bed ${bedCode} in ${a.ward}.`);
+      setOpenMenuId(null);
+      return;
+    }
+
     if (nextStep >= 7) {
       updateAdmission(a.id, {
         currentStep: 7,
         status: 'Completed',
         completedAt: new Date().toISOString(),
+        lastUpdatedBy: nurseName,
       });
       toast.success(
         'Admission completed',
         `${a.patientName} has completed the admission workflow.`,
       );
     } else {
-      updateAdmission(a.id, { currentStep: nextStep, status: 'In Progress' });
+      updateAdmission(a.id, {
+        currentStep: nextStep,
+        status: 'In Progress',
+        lastUpdatedBy: nurseName,
+      });
       toast.success('Workflow advanced', `${a.patientName} moved to ${stepInfo(nextStep)?.label}.`);
     }
     setOpenMenuId(null);
   }
 
   function cancelAdmission(a: AdmissionRecord) {
-    updateAdmission(a.id, { status: 'Cancelled' });
+    updateAdmission(a.id, { status: 'Cancelled', lastUpdatedBy: nurseName });
     toast.info('Admission cancelled', `${a.patientName}'s admission has been cancelled.`);
     setOpenMenuId(null);
   }

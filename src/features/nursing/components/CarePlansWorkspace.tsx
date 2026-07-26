@@ -1740,6 +1740,7 @@ function PatientCarePlansPanel({
           return (
             <CreateCarePlanModal
               patientName={patient.patientName}
+              nurseName={nurseName}
               isEdit={Boolean(editingPlanId)}
               {...(initialValue ? { initial: initialValue } : {})}
               onClose={() => {

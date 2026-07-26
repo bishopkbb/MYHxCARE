@@ -39,6 +39,9 @@ export type AdmissionRecord = {
   status: AdmissionStatus;
   assignedDoctor: string;
   completedAt?: string; // ISO, only when status === 'Completed'
+  /** Who last checked in / advanced / cancelled this admission — set from the
+   * logged-in session, not captured at all before this field existed. */
+  lastUpdatedBy?: string;
 };
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
