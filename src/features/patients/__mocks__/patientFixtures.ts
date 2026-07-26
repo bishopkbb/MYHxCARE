@@ -8,6 +8,10 @@ import { Activity, Share2, Stethoscope, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import type { Allergy } from '@/types/patient.types';
+import type { DirectoryPatient } from '@/features/registration/__mocks__/patientDirectoryFixtures';
+import { getDirectoryPatientsSnapshot } from '@/features/registration/store/patientDirectoryStore';
+import type { NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
+import { getEffectiveRoster } from '@/features/nursing/store/nursingWorkflowStore';
 
 // ── Patients list view ────────────────────────────────────────────────────────
 
@@ -1040,10 +1044,108 @@ function buildPatientDetailFromRecord(record: PatientRecord): PatientDetailMock 
   };
 }
 
+function buildPatientDetailFromDirectory(dp: DirectoryPatient): PatientDetailMock {
+  return {
+    id: dp.id,
+    initials: dp.initials,
+    name: dp.name,
+    mrn: dp.mrn,
+    dob: dp.dateOfBirth,
+    age: `${dp.age} years`,
+    gender: dp.gender,
+    bloodGroup: dp.bloodGroup,
+    faculty: dp.faculty,
+    level: '—',
+    fileNumber: '—',
+    address: dp.address,
+    phone: dp.phone,
+    email: dp.email,
+    queueStatus: dp.status,
+    allergies: dp.allergies,
+    isUrgent: dp.status === 'Emergency',
+    medicalHistory: {
+      pastDiagnoses: [],
+      familyHistory: [],
+      immunizationHistory: [],
+      surgicalHistory: [],
+      chronicConditions: [],
+      allergiesHistory: [],
+    },
+    vitalSigns: { recordedAt: '', readings: [] },
+    consultations: [],
+    medications: [],
+    labResults: [],
+  };
+}
+
+function buildPatientDetailFromNursePatient(np: NursePatient): PatientDetailMock {
+  return {
+    id: np.id,
+    initials: np.initials,
+    name: np.patientName,
+    mrn: np.mrn,
+    dob: '—',
+    age: `${np.age} years`,
+    gender: np.gender,
+    bloodGroup: '—',
+    faculty: '—',
+    level: '—',
+    fileNumber: '—',
+    address: '—',
+    phone: '—',
+    email: '—',
+    queueStatus: np.careStatus,
+    allergies: [],
+    isUrgent: np.riskLevel === 'High',
+    medicalHistory: {
+      pastDiagnoses: [],
+      familyHistory: [],
+      immunizationHistory: [],
+      surgicalHistory: [],
+      chronicConditions: [],
+      allergiesHistory: [],
+    },
+    // The only one of the four populations that carries real vitals —
+    // surfaced here rather than left empty, since it's real data, not fabricated.
+    // status: 'normal' is a simplification — no abnormal-threshold logic exists
+    // for these raw values, not a real clinical evaluation.
+    vitalSigns: {
+      recordedAt: np.vitals.recordedAt,
+      readings: [
+        { key: 'blood-pressure', value: np.vitals.bp, status: 'normal' },
+        { key: 'pulse-rate', value: `${np.vitals.hr} bpm`, status: 'normal' },
+        { key: 'temperature', value: `${np.vitals.temp}°C`, status: 'normal' },
+      ],
+    },
+    consultations: [],
+    medications: [],
+    labResults: [],
+  };
+}
+
 export function getPatientDetail(id: string): PatientDetailMock {
   const curated = MOCK_PATIENT_DETAILS[id];
   if (curated) return curated;
   const record = MOCK_PATIENTS.find((p) => p.id === id);
   if (record) return buildPatientDetailFromRecord(record);
+  const directoryPatient = getDirectoryPatientsSnapshot().find((p) => p.id === id);
+  if (directoryPatient) return buildPatientDetailFromDirectory(directoryPatient);
+  const nursePatient = getEffectiveRoster().find((p) => p.id === id);
+  if (nursePatient) return buildPatientDetailFromNursePatient(nursePatient);
   return FALLBACK_PATIENT_DETAIL;
+}
+
+/** Given an mrn, finds which real population owns it and returns that
+ * population's own id — the id getPatientDetail() above can then resolve.
+ * Replaces per-screen single-population mrn→id lookups (e.g. Medical
+ * Records' old MOCK_PATIENTS-only MRN_TO_PATIENT_ID) that silently broke
+ * for any patient outside that one population. */
+export function resolvePatientIdByMrn(mrn: string): string | null {
+  const record = MOCK_PATIENTS.find((p) => p.mrn === mrn);
+  if (record) return record.id;
+  const directoryPatient = getDirectoryPatientsSnapshot().find((p) => p.mrn === mrn);
+  if (directoryPatient) return directoryPatient.id;
+  const nursePatient = getEffectiveRoster().find((p) => p.mrn === mrn);
+  if (nursePatient) return nursePatient.id;
+  return null;
 }

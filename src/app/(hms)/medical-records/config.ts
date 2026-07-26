@@ -4,7 +4,6 @@ import type {
   RecordStatus,
   RecordType,
 } from '@/features/medical-records/__mocks__/medicalRecordFixtures';
-import { MOCK_PATIENTS } from '@/features/patients/__mocks__/patientFixtures';
 
 // Shared between the record list (page.tsx) and the drill-down modal — kept
 // here so both can import it without either owning the other's definitions.
@@ -116,8 +115,3 @@ export const STATUS_CFG: Record<RecordStatus, StatusCfg> = {
     bg: 'rgba(239,68,68,0.06)',
   },
 };
-
-// MRN → patient page ID, built from the shared patients fixture
-export const MRN_TO_PATIENT_ID: Record<string, string> = Object.fromEntries(
-  MOCK_PATIENTS.map((p) => [p.mrn, p.id]),
-);

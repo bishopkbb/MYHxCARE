@@ -48,6 +48,13 @@ export function useDirectoryPatients(): DirectoryPatient[] {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
+/** Non-reactive read for cross-module resolvers that can't use a React hook
+ * (e.g. patientFixtures.ts's getPatientDetail()/resolvePatientIdByMrn()) —
+ * same plain-function pattern nursing's getEffectiveRoster() already uses. */
+export function getDirectoryPatientsSnapshot(): DirectoryPatient[] {
+  return getSnapshot();
+}
+
 // ── Duplicate detection ──────────────────────────────────────────────────────
 
 function normalizePhone(phone: string): string {

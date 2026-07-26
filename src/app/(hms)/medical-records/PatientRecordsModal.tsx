@@ -7,9 +7,10 @@ import { useState } from 'react';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import type { MedicalRecord } from '@/features/medical-records/__mocks__/medicalRecordFixtures';
+import { resolvePatientIdByMrn } from '@/features/patients/__mocks__/patientFixtures';
 import { MOCK_PATIENT_PROFILE } from '@/features/registration/__mocks__/patientProfileFixtures';
 import { useDirectoryPatients } from '@/features/registration/store/patientDirectoryStore';
-import { MRN_TO_PATIENT_ID, RECORD_TYPE_CFG, STATUS_CFG } from './config';
+import { RECORD_TYPE_CFG, STATUS_CFG } from './config';
 
 // ── Patient Records Modal ─────────────────────────────────────────────────────
 
@@ -32,6 +33,7 @@ export function PatientRecordsModal({
   const directoryMatch = directoryPatients.find((dp) => dp.mrn === patient.mrn);
   const isCurated = patient.mrn === MOCK_PATIENT_PROFILE.mrn;
   const fullRecordPatientId = isCurated ? MOCK_PATIENT_PROFILE.id : directoryMatch?.id;
+  const profilePatientId = resolvePatientIdByMrn(patient.mrn);
 
   return (
     <div
@@ -87,9 +89,9 @@ export function PatientRecordsModal({
           style={{ borderTop: '1px solid #0064821F' }}
         >
           <div className="flex flex-wrap items-center gap-4">
-            {MRN_TO_PATIENT_ID[patient.mrn] ? (
+            {profilePatientId ? (
               <Link
-                href={`/patients/${MRN_TO_PATIENT_ID[patient.mrn]}`}
+                href={`/patients/${profilePatientId}`}
                 onClick={onClose}
                 className="font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                 style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
