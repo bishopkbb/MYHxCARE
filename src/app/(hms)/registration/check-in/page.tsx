@@ -304,7 +304,8 @@ export default function CheckInPage() {
     addQueueEntry({
       patientName: patient.fullName,
       mrn: patient.mrn,
-      gender: patient.gender === 'Female' ? 'Female' : 'Male',
+      gender:
+        patient.gender === 'Female' ? 'Female' : patient.gender === 'Other' ? 'Other' : 'Male',
       age: patient.age,
       checkinDepartment: visitDetails.department,
       isEmergency: visitDetails.visitType === 'emergency',

@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 import { FormField } from '@components/shared/FormField';
 import { FormSelect } from '@components/shared/FormSelect';
+import type { Gender } from '@/types/patient.types';
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
@@ -12,6 +13,7 @@ const FOCUS_RING =
 const GENDER_OPTIONS = [
   { value: 'Female', label: 'Female' },
   { value: 'Male', label: 'Male' },
+  { value: 'Other', label: 'Other' },
 ];
 
 const ADMISSION_TYPE_OPTIONS = [
@@ -23,7 +25,7 @@ export type NewAdmissionInput = {
   patientName: string;
   mrn: string;
   age: number;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   admissionType: 'Medical' | 'Surgical';
   ward: string;
   assignedDoctor: string;
@@ -50,7 +52,7 @@ export function NewAdmissionModal({
         patientName?: string | undefined;
         mrn?: string | undefined;
         age?: number | undefined;
-        gender?: 'Male' | 'Female' | undefined;
+        gender?: Gender | undefined;
         assignedDoctor?: string | undefined;
       }
     | undefined;
@@ -60,7 +62,7 @@ export function NewAdmissionModal({
   const [patientName, setPatientName] = useState(initialValues?.patientName ?? '');
   const [mrn, setMrn] = useState(initialValues?.mrn ?? '');
   const [age, setAge] = useState(initialValues?.age ? String(initialValues.age) : '');
-  const [gender, setGender] = useState<'Male' | 'Female'>(initialValues?.gender ?? 'Female');
+  const [gender, setGender] = useState<Gender>(initialValues?.gender ?? 'Female');
   const [admissionType, setAdmissionType] = useState<'Medical' | 'Surgical'>('Medical');
   const [ward, setWard] = useState(wardOptions[0]?.value ?? '');
   const [assignedDoctor, setAssignedDoctor] = useState(initialValues?.assignedDoctor ?? '');
@@ -167,7 +169,7 @@ export function NewAdmissionModal({
                 <FormSelect
                   id="na-gender"
                   value={gender}
-                  onChange={(v) => setGender(v as 'Male' | 'Female')}
+                  onChange={(v) => setGender(v as Gender)}
                   options={GENDER_OPTIONS}
                   placeholder="Select gender"
                 />

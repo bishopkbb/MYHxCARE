@@ -203,7 +203,7 @@ export function PatientCardPrintingWorkspace() {
             patientName: p.name,
             mrn: p.mrn,
             patientId: `PT-${Date.now().toString().slice(-6)}${i}`,
-            gender: p.gender === 'Female' ? 'Female' : 'Male',
+            gender: p.gender === 'Female' ? 'Female' : p.gender === 'Other' ? 'Other' : 'Male',
             dateOfBirth: p.dob ?? '',
             bloodGroup: 'O+',
             cardType: 'Student',

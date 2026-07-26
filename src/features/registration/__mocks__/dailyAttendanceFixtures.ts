@@ -6,6 +6,7 @@
 
 import { Clock, ClipboardCheck, Siren, Timer, UserX, Users, type LucideIcon } from 'lucide-react';
 import { HOSPITAL_DEPARTMENT_OPTIONS } from '@/constants/departments';
+import type { Gender } from '@/types/patient.types';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -164,7 +165,7 @@ export type AttendanceEntry = {
   id: string; // Q-0001
   patientName: string;
   mrn: string;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   age: number;
   department: string;
   doctor: string;

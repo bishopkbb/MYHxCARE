@@ -21,7 +21,7 @@ export type WorkspaceRole =
   | 'SYSTEM_ADMIN';
 
 // ─── Workspace Identity ────────────────────────────────────────────────────
-// The 9 role-based workspaces in the HMS. Each WorkspaceRole maps to exactly
+// The 10 role-based workspaces in the HMS. Each WorkspaceRole maps to exactly
 // one WorkspaceId. HOD maps to 'clinical' (their primary workspace).
 
 export type WorkspaceId =

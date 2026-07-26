@@ -4,7 +4,7 @@
  * list). Swap out by pointing hooks to real endpoints in Phase 6.
  */
 
-import type { Allergy, AllergySeverity } from '@/types/patient.types';
+import type { Allergy, AllergySeverity, Gender } from '@/types/patient.types';
 import type { DirectoryPatient } from '@/features/registration/__mocks__/patientDirectoryFixtures';
 
 // ─── Time helpers ────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ export type PatientProfile = {
   fullName: string;
   status: 'Active' | 'Inactive';
   photoUrl?: string;
-  gender: string;
+  gender: Gender;
   bloodGroup: string;
   maritalStatus: string;
   nationality: string;

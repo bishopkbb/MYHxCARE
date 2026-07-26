@@ -21,6 +21,7 @@ import {
   type QueueEntry,
   type QueueStatus,
 } from '@/features/registration/__mocks__/queueFixtures';
+import type { Gender } from '@/types/patient.types';
 
 let entries: QueueEntry[] = [...QUEUE_ENTRIES];
 const listeners = new Set<() => void>();
@@ -76,7 +77,7 @@ const CHECKIN_DEPARTMENT_FALLBACK_CLINIC: Record<string, string> = {
 export type NewQueueEntryInput = {
   patientName: string;
   mrn: string;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   age: number;
   /** Raw `checkInFixtures.DEPARTMENT_OPTIONS` value, e.g. `'general-opd'`. */
   checkinDepartment: string;

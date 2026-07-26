@@ -182,7 +182,8 @@ export function addDirectoryPatient(input: NewDirectoryPatientInput): DirectoryP
     patientId: input.patientId,
     studentId: '—',
     age,
-    gender: input.genderValue === 'female' ? 'Female' : 'Male',
+    gender:
+      input.genderValue === 'female' ? 'Female' : input.genderValue === 'other' ? 'Other' : 'Male',
     dateOfBirth: input.dateOfBirth,
     faculty: '—',
     maritalStatus: MARITAL_LABELS[input.maritalStatusValue ?? ''] ?? 'Single',

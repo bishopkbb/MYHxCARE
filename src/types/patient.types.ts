@@ -1,7 +1,13 @@
 // Core patient entity types — referenced across admission, clinical,
 // billing, pharmacy, lab, and ward screens.
 
-export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+// Title-Case values (not UPPER_SNAKE) — this type had zero real importers when
+// audited (every module inlined its own 'Male' | 'Female' union instead, all
+// Title-Case, none with an 'Other' option). Matching the dominant real
+// convention here avoids inventing new display-label mapping in the dozen+
+// places that already render the raw string as UI text. See
+// MYHXCARE_SYSTEM_CONSISTENCY_REGISTER.md SYS-001.
+export type Gender = 'Male' | 'Female' | 'Other';
 
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 

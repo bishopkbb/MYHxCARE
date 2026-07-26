@@ -6,6 +6,7 @@
 import type { Allergy } from '@/types/patient.types';
 import { type NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
 import { getEffectiveRoster } from '@/features/nursing/store/nursingWorkflowStore';
+import type { CarePlanStatus } from '@/features/nursing/__mocks__/carePlansFixtures';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -32,7 +33,9 @@ export type AlertItem = {
   description: string;
 };
 
-export type CarePlanStatus = 'In Progress' | 'Planned' | 'Completed';
+// CarePlanStatus is imported from carePlansFixtures.ts — this file used to
+// declare its own competing 3-value enum with the same name; see
+// MYHXCARE_SYSTEM_CONSISTENCY_REGISTER.md SYS-013.
 export type CarePlanItem = { id: string; label: string; status: CarePlanStatus };
 
 export type TaskStatus = 'Due Soon' | 'Pending' | 'Completed';

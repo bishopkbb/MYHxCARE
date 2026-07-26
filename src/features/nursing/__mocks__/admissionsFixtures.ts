@@ -1,3 +1,5 @@
+import type { Gender } from '@/types/patient.types';
+
 export type AdmissionStatus = 'Pending' | 'Scheduled' | 'In Progress' | 'Completed' | 'Cancelled';
 export type AdmissionType = 'Medical' | 'Surgical';
 
@@ -30,7 +32,7 @@ export type AdmissionRecord = {
   patientName: string;
   mrn: string;
   age: number;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   admittedAt: string; // ISO — a future date for Scheduled admissions
   ward: string;
   bed?: string;

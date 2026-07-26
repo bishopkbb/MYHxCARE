@@ -68,6 +68,7 @@ const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
 
 const STATUS_CFG: Record<CarePlanStatus, { color: string; border: string; bg: string }> = {
+  Planned: { color: '#00B4D8', border: 'rgba(0,180,216,0.4)', bg: 'rgba(0,180,216,0.08)' },
   'In Progress': { color: '#16A34A', border: 'rgba(34,197,94,0.4)', bg: 'rgba(34,197,94,0.1)' },
   Completed: { color: '#3B82F6', border: 'rgba(59,130,246,0.4)', bg: 'rgba(59,130,246,0.1)' },
   Discontinued: { color: '#8A98A3', border: 'rgba(138,152,163,0.4)', bg: 'rgba(138,152,163,0.1)' },

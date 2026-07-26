@@ -16,7 +16,11 @@ export type LabResultRow = {
   flag?: LabFlag;
 };
 
-export type ClinicalNote = {
+// Named LabResultNote (not ClinicalNote) — this is a comment thread on a lab
+// result, unrelated to the clinical-notes feature's ClinicalNote chart entry.
+// Two unrelated concepts previously shared the same type name in different
+// files; see MYHXCARE_SYSTEM_CONSISTENCY_REGISTER.md SYS-013.
+export type LabResultNote = {
   id: string;
   text: string;
   author: string;
@@ -43,7 +47,7 @@ export type LabResult = {
   comment?: string;
   doctorReviewedAt?: string;
   doctorReviewedBy?: string;
-  notes?: ClinicalNote[];
+  notes?: LabResultNote[];
 };
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {

@@ -3,6 +3,8 @@
  * Swap out by pointing hooks to a real ward-roster endpoint in Phase 6.
  */
 
+import type { Gender } from '@/types/patient.types';
+
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
   d.setDate(d.getDate() + dayOffset);
@@ -40,7 +42,7 @@ export type NursePatient = {
   avatarBg: string;
   mrn: string;
   age: number;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   ward: string;
   bed: string;
   diagnosis: string;

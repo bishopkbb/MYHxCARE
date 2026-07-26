@@ -1,4 +1,8 @@
-export type CarePlanStatus = 'In Progress' | 'Completed' | 'Discontinued';
+// The one CarePlanStatus for the whole app — patientRecordFixtures.ts used to
+// declare its own competing 3-value enum (no 'Discontinued', had 'Planned'
+// instead); merged here as the superset. See
+// MYHXCARE_SYSTEM_CONSISTENCY_REGISTER.md SYS-013.
+export type CarePlanStatus = 'Planned' | 'In Progress' | 'Completed' | 'Discontinued';
 export type EvaluationStatus = 'Progressing' | 'Achieved' | 'Not Progressing' | 'Stalled';
 
 export const EVALUATION_CFG: Record<EvaluationStatus, { color: string }> = {

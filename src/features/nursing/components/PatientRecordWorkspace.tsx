@@ -33,6 +33,7 @@ import { ROUTES } from '@/constants/routes';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import { downloadPDF, escapeHtml } from '@/utils/export';
 import { getPatientRecord } from '@/features/nursing/__mocks__/patientRecordFixtures';
+import type { CarePlanStatus } from '@/features/nursing/__mocks__/carePlansFixtures';
 
 type PageState = 'loading' | 'loaded' | 'error';
 
@@ -65,10 +66,11 @@ const RISK_CFG: Record<string, { color: string; border: string; bg: string }> = 
   Low: { color: '#22C55E', border: 'rgba(34,197,94,0.4)', bg: 'rgba(34,197,94,0.08)' },
 };
 
-const CARE_PLAN_CFG: Record<string, { color: string; border: string; bg: string }> = {
+const CARE_PLAN_CFG: Record<CarePlanStatus, { color: string; border: string; bg: string }> = {
   'In Progress': { color: '#3B82F6', border: 'rgba(59,130,246,0.4)', bg: 'rgba(59,130,246,0.06)' },
   Planned: { color: '#8A98A3', border: 'rgba(0,100,130,0.2)', bg: 'transparent' },
   Completed: { color: '#22C55E', border: 'rgba(34,197,94,0.4)', bg: 'transparent' },
+  Discontinued: { color: '#8A98A3', border: 'rgba(138,152,163,0.4)', bg: 'rgba(138,152,163,0.1)' },
 };
 
 const TASK_CFG: Record<string, { color: string; border: string; bg: string }> = {
@@ -726,11 +728,7 @@ export function PatientRecordWorkspace({ patientId }: { patientId: string }) {
                           </div>
                           <div className="mt-3 flex flex-col gap-2.5">
                             {record.carePlan.map((c) => {
-                              const cfg = CARE_PLAN_CFG[c.status] as {
-                                color: string;
-                                border: string;
-                                bg: string;
-                              };
+                              const cfg = CARE_PLAN_CFG[c.status];
                               return (
                                 <div key={c.id} className="flex items-center gap-2">
                                   {c.status === 'Completed' ? (

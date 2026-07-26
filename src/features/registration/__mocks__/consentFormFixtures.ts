@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { HOSPITAL_DEPARTMENT_OPTIONS } from '@/constants/departments';
+import type { Gender } from '@/types/patient.types';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -147,7 +148,7 @@ export type ConsentForm = {
   id: string;
   patientName: string;
   mrn: string;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   dateOfBirth: string;
   phone: string;
   email: string;

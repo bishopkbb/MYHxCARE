@@ -13,7 +13,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-import type { Allergy } from '@/types/patient.types';
+import type { Allergy, Gender } from '@/types/patient.types';
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
 
 export type DirectoryPatientStatus = 'Active' | 'Checked-In' | 'Waiting' | 'Inactive' | 'Emergency';
@@ -32,7 +32,7 @@ export type DirectoryPatient = {
   patientId: string;
   studentId: string;
   age: number;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   dateOfBirth: string;
   faculty: string;
   maritalStatus: MaritalStatus;
@@ -144,6 +144,7 @@ export const FACULTY_OPTIONS: SelectOption[] = [
 export const DIRECTORY_GENDER_OPTIONS: SelectOption[] = [
   { value: 'male', label: 'Male' },
   { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
 ];
 
 export const APPOINTMENT_STATUS_OPTIONS: SelectOption[] = [

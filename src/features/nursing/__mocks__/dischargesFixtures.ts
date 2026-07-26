@@ -1,3 +1,5 @@
+import type { Gender } from '@/types/patient.types';
+
 export type DischargeStatus = 'Planned' | 'Discharged' | 'Cancelled';
 export type DischargeType = 'Routine' | 'Transfer' | 'AMA';
 
@@ -39,7 +41,7 @@ export type DischargeRecord = {
   patientName: string;
   mrn: string;
   age: number;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   ward: string;
   bed: string;
   diagnosis: string;

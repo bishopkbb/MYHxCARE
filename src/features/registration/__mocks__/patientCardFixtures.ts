@@ -6,6 +6,8 @@
 
 import { Archive, Clock, CreditCard, FileText, RefreshCw, type LucideIcon } from 'lucide-react';
 
+import type { Gender } from '@/types/patient.types';
+
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
   d.setDate(d.getDate() + dayOffset);
@@ -83,7 +85,7 @@ export type PatientCard = {
   patientName: string;
   mrn: string;
   patientId: string;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   dateOfBirth: string;
   bloodGroup: string;
   cardType: CardType;

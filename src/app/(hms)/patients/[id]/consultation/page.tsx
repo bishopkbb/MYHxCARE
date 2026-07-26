@@ -1216,7 +1216,8 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
             patientName: patient.name,
             mrn: patient.mrn,
             age: parseInt(patient.age, 10) || undefined,
-            gender: patient.gender === 'Female' ? 'Female' : 'Male',
+            gender:
+              patient.gender === 'Female' || patient.gender === 'Other' ? patient.gender : 'Male',
             assignedDoctor: user?.name,
           }}
           onClose={() => setShowRequestAdmission(false)}

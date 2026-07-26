@@ -6,6 +6,7 @@
  */
 
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
+import type { Gender } from '@/types/patient.types';
 
 function todayAt(hour: number, minute: number): string {
   const d = new Date();
@@ -30,7 +31,7 @@ export type CheckInPatient = {
   initials: string;
   status: 'Active' | 'Inactive';
   age: number;
-  gender: string;
+  gender: Gender;
   bloodGroup: string;
   maritalStatus: string;
   nationality: string;

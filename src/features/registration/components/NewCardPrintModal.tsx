@@ -12,10 +12,12 @@ import {
   type CardType,
   type PatientCard,
 } from '@/features/registration/__mocks__/patientCardFixtures';
+import type { Gender } from '@/types/patient.types';
 
 const GENDER_OPTIONS = [
   { value: 'Male', label: 'Male' },
   { value: 'Female', label: 'Female' },
+  { value: 'Other', label: 'Other' },
 ];
 
 function validityDaysFor(cardType: CardType): number {
@@ -64,7 +66,7 @@ export function NewCardPrintModal({
       patientName: patientName.trim(),
       mrn: mrn.trim(),
       patientId: patientId.trim() || `PT-${Date.now().toString().slice(-6)}`,
-      gender: gender as 'Male' | 'Female',
+      gender: gender as Gender,
       dateOfBirth,
       bloodGroup: bloodGroup || 'O+',
       cardType,

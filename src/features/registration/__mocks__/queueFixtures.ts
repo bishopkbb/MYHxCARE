@@ -7,6 +7,7 @@
 
 import { getDoctorByName } from '@/features/shared/__mocks__/doctorDirectory';
 import { TODAY_ON_CALL } from '@/features/workforce/__mocks__/workforceFixtures';
+import type { Gender } from '@/types/patient.types';
 
 export type QueueStatus =
   'New Arrival' | 'Waiting' | 'Calling Next' | 'In Consultation' | 'Emergency' | 'Completed';
@@ -24,7 +25,7 @@ export type QueueEntry = {
   isEmergency: boolean;
   patientName: string;
   mrn: string;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   age: number;
   department: string;
   assignedClinic: string;

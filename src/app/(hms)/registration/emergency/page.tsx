@@ -194,7 +194,7 @@ export default function EmergencyRegistrationPage() {
       setMatchedKnown(MOCK_CHECKIN_PATIENT);
       setPatientName(MOCK_CHECKIN_PATIENT.fullName);
       setAge(String(MOCK_CHECKIN_PATIENT.age));
-      setGender(MOCK_CHECKIN_PATIENT.gender as 'Male' | 'Female');
+      setGender(MOCK_CHECKIN_PATIENT.gender);
       setDob(MOCK_PATIENT_PROFILE.dateOfBirth);
     } else {
       setMatchedKnown(null);
@@ -255,7 +255,7 @@ export default function EmergencyRegistrationPage() {
     addQueueEntry({
       patientName: patientName.trim(),
       mrn: finalMrn,
-      gender: gender === 'Female' ? 'Female' : 'Male',
+      gender: gender === 'Female' || gender === 'Other' ? gender : 'Male',
       age: Number(age) || (matchedKnown ? matchedKnown.age : 0),
       checkinDepartment: 'emergency',
       isEmergency: true,

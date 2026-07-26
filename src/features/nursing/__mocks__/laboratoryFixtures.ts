@@ -13,6 +13,7 @@
 
 import type { ResultFlag } from '@/features/nursing/__mocks__/patientRecordFixtures';
 import type { LabResultRow } from '@/features/laboratory/__mocks__/labResultFixtures';
+import type { Gender } from '@/types/patient.types';
 
 export type LabDepartment =
   'Hematology' | 'Biochemistry' | 'Microbiology' | 'Immunology' | 'Coagulation';
@@ -62,7 +63,7 @@ export type LabTestOrder = {
   patientName: string;
   mrn: string;
   age: number;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   ward?: string;
   bed?: string;
   testName: string;

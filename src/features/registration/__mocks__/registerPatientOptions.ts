@@ -8,6 +8,7 @@ export type SelectOption = { value: string; label: string };
 export const GENDER_OPTIONS: SelectOption[] = [
   { value: 'male', label: 'Male' },
   { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
 ];
 
 export const MARITAL_STATUS_OPTIONS: SelectOption[] = [

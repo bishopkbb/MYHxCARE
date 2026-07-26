@@ -12,6 +12,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { HOSPITAL_DEPARTMENT_OPTIONS } from '@/constants/departments';
+import type { Gender } from '@/types/patient.types';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -210,7 +211,7 @@ export type RegistrationRecord = {
   registrationType: RegistrationType;
   department: string;
   officer: string;
-  gender: 'Male' | 'Female';
+  gender: Gender;
   age: number;
   status: RegistrationStatus;
 };
