@@ -65,13 +65,46 @@ import {
   type LabResultEntry,
   type MedicalDocument,
   type Prescription,
+  type PatientVisit,
   type RecordActivityEntry,
   type RecordAccessEntry,
   type ReferralEntry,
 } from '@/features/medical-records/__mocks__/medicalRecordDetailFixtures';
+import { useEncounters } from '@/features/encounters/store/encounterStore';
+import type { Encounter } from '@/types/visit.types';
 import { computeVisitSummary, VisitHistorySection } from './VisitHistorySection';
 
 const CURATED_PATIENT_ID = 'dp-001';
+
+const VISIT_TYPE_LABEL: Record<Encounter['type'], string> = {
+  OPD: 'Outpatient Consultation',
+  EMERGENCY: 'Emergency Visit',
+  INPATIENT: 'Inpatient',
+};
+
+/** Converts a real, completed `Encounter` (Doctor's Dashboard's canonical
+ * visit record) into this module's own `PatientVisit` display shape — closes
+ * half of SYS-003 (MedicalRecord Model A/B): a completed consultation used to
+ * update only the flat `MedicalRecord` feed, never this chart's own Visit
+ * History tab. Joined by MRN, not patientId — Medical Records resolves
+ * patients through Registration's `DirectoryPatient.id` namespace, a
+ * different identity space from `Encounter.patientId` (Doctor's Dashboard's
+ * own patient ids); MRN is the one field disciplined enough to be shared
+ * across both today (see SYS-001). `credentials` has no `Encounter`
+ * equivalent — left honestly blank rather than fabricated. */
+function encounterToPatientVisit(encounter: Encounter): PatientVisit {
+  return {
+    id: encounter.id,
+    dateTime: encounter.completedAt ?? encounter.checkedInAt ?? encounter.createdAt,
+    department: encounter.departmentName,
+    doctor: encounter.attendingPhysicianName ?? 'Unknown Doctor',
+    credentials: '',
+    visitType: VISIT_TYPE_LABEL[encounter.type],
+    diagnosisSummary: encounter.diagnosis || encounter.chiefComplaint || '—',
+    reason: encounter.chiefComplaint || '—',
+    status: 'Completed',
+  };
+}
 
 /** `ClinicalDocumentEntry` (the richer, formal taxonomy used by the standalone
  * Clinical Documents workspace) is the canonical document shape per
@@ -994,7 +1027,22 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
       ? directoryPatientToProfile(directoryMatch)
       : MOCK_PATIENT_PROFILE;
 
-  const visits = isCuratedOrDemo ? PATIENT_VISITS : generateVisitsForPatient(patient);
+  // Real completed consultations (from Doctor's Dashboard's Complete
+  // Consultation) merged ahead of the fixture/generated list — see
+  // `encounterToPatientVisit()` above for why this joins on `mrn`, not
+  // `patientId`.
+  const allEncounters = useEncounters();
+  const realVisits = useMemo(
+    () =>
+      allEncounters
+        .filter((e) => e.mrn === patient.mrn && e.status === 'COMPLETED')
+        .map(encounterToPatientVisit),
+    [allEncounters, patient.mrn],
+  );
+  const visits = [
+    ...realVisits,
+    ...(isCuratedOrDemo ? PATIENT_VISITS : generateVisitsForPatient(patient)),
+  ];
   const clinicalDocs = isCuratedOrDemo ? null : generateClinicalDocumentsForPatient(patient);
   const documents: MedicalDocument[] = isCuratedOrDemo
     ? MOCK_DOCUMENTS

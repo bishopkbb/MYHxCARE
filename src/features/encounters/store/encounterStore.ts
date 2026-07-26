@@ -77,6 +77,7 @@ export function startEncounter(input: StartEncounterInput): Encounter {
   const encounter: Encounter = {
     id: `enc-${Date.now()}`,
     patientId: input.patientId,
+    mrn: input.mrn,
     patientSummary: {
       fileNumber: '',
       firstName: firstName ?? input.patientName,
@@ -149,6 +150,7 @@ export function completeEncounter(input: CompleteEncounterInput): Encounter {
   if (activeIdx !== -1) {
     encounter = {
       ...encounters[activeIdx]!,
+      mrn: input.mrn,
       patientSummary,
       departmentId: input.departmentId,
       departmentName: input.departmentName,
@@ -156,6 +158,8 @@ export function completeEncounter(input: CompleteEncounterInput): Encounter {
       attendingPhysicianName: input.attendingPhysicianName,
       status: 'COMPLETED',
       ...(input.chiefComplaint ? { chiefComplaint: input.chiefComplaint } : {}),
+      ...(input.diagnosis ? { diagnosis: input.diagnosis } : {}),
+      ...(input.treatmentPlan ? { treatmentPlan: input.treatmentPlan } : {}),
       completedAt: now,
       updatedAt: now,
     };
@@ -164,6 +168,7 @@ export function completeEncounter(input: CompleteEncounterInput): Encounter {
     encounter = {
       id: `enc-${Date.now()}`,
       patientId: input.patientId,
+      mrn: input.mrn,
       patientSummary,
       type: 'OPD',
       status: 'COMPLETED',
@@ -172,6 +177,8 @@ export function completeEncounter(input: CompleteEncounterInput): Encounter {
       attendingPhysicianId: input.attendingPhysicianId,
       attendingPhysicianName: input.attendingPhysicianName,
       ...(input.chiefComplaint ? { chiefComplaint: input.chiefComplaint } : {}),
+      ...(input.diagnosis ? { diagnosis: input.diagnosis } : {}),
+      ...(input.treatmentPlan ? { treatmentPlan: input.treatmentPlan } : {}),
       checkedInAt: now,
       completedAt: now,
       createdAt: now,

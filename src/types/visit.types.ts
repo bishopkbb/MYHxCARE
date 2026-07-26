@@ -119,6 +119,12 @@ export const VISIT_STATUS_DISPLAY: Readonly<Record<VisitStatus, VisitStatusDispl
 export type Encounter = {
   id: string;
   patientId: string;
+  /** Hospital MRN — the de facto shared patient key across modules until
+   * SYS-001's identity unification lands (see
+   * MYHXCARE_SYSTEM_CONSISTENCY_REGISTER.md). This is what lets Medical
+   * Records' chart (a different patient-identity namespace, keyed off
+   * Registration's `DirectoryPatient.id`) find a patient's real encounters. */
+  mrn: string;
   patientSummary: {
     fileNumber: string;
     firstName: string;
@@ -131,6 +137,10 @@ export type Encounter = {
   attendingPhysicianId?: string;
   attendingPhysicianName?: string;
   chiefComplaint?: string;
+  /** Set on completion only — not known while `status` is still
+   * `IN_CONSULTATION`. */
+  diagnosis?: string;
+  treatmentPlan?: string;
   triagePriority?: TriagePriority;
   checkedInAt?: string; // ISO 8601
   completedAt?: string; // ISO 8601
