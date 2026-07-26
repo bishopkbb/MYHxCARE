@@ -20,7 +20,9 @@ import { useEffect, useRef, useState, use } from 'react';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
+import { addPrescription } from '@/features/prescriptions/store/prescriptionStore';
 import {
   ADDITIONAL_OPTION_DEFS,
   DEFAULT_ADDITIONAL_OPTIONS,
@@ -40,9 +42,8 @@ import {
   type PrescriptionVital,
 } from '@/features/prescriptions/__mocks__/prescriptionFixtures';
 import {
-  FALLBACK_PATIENT_DETAIL,
   MOCK_PATIENTS,
-  MOCK_PATIENT_DETAILS,
+  getPatientDetail,
   type PatientDetailMock,
   type VitalKey,
 } from '@/features/patients/__mocks__/patientFixtures';
@@ -148,7 +149,7 @@ function buildDiagnosis(detail: PatientDetailMock): { condition: string; icd10?:
 }
 
 function buildPrescriptionPatient(id: string): PrescriptionPatient {
-  const detail = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
+  const detail = getPatientDetail(id);
   const avatarBg = MOCK_PATIENTS.find((p) => p.id === id)?.avatarBg ?? '#00B4D8';
   const notes =
     MOCK_PATIENTS.find((p) => p.id === id)?.complaint ?? 'No presenting complaint on record.';
@@ -288,8 +289,10 @@ function PrescriptionSkeleton() {
 export default function PatientPrescriptionPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const prescribingDoctorName = user?.name ?? PRESCRIBING_DOCTOR.name;
   const { id } = use(params);
-  const detail = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
+  const detail = getPatientDetail(id);
   const patient = buildPrescriptionPatient(id);
 
   const [pageState, setPageState] = useState<PageState>('loading');
@@ -387,6 +390,10 @@ export default function PatientPrescriptionPage({ params }: { params: Promise<{ 
       toast.error('No medications', 'Add at least one medication before sending.');
       return;
     }
+    // Persists onto the patient's own chart (Current Medications tab) —
+    // actual pharmacy dispensing is still out of scope until a real
+    // Pharmacy module exists, but the prescription itself is now real.
+    addPrescription(id, lines, prescribingDoctorName);
     toast.success('Prescription sent', `Sent to pharmacy for ${patient.name}.`);
     setLines([]);
     setSelectedLineId(null);
@@ -1315,7 +1322,7 @@ export default function PatientPrescriptionPage({ params }: { params: Promise<{ 
                             className="text-base leading-6 font-semibold"
                             style={{ color: '#0D2630' }}
                           >
-                            {PRESCRIBING_DOCTOR.name}
+                            {prescribingDoctorName}
                           </p>
                           <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
                             {PRESCRIBING_DOCTOR.credentials}

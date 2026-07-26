@@ -28,6 +28,10 @@ export type PatientRecord = {
   nextApptTime: string; // HH:MM (24 h)
   status: PatientRecordStatus;
   faculty: string;
+  /** FK into doctorDirectory.ts's DOCTORS — who this patient is assigned to.
+   * "Assigned to Me" filters against this + the logged-in session, not a
+   * hardcoded id allowlist. */
+  assignedDoctorId?: string;
 };
 
 export type PatientStatCard = {
@@ -115,6 +119,7 @@ export const MOCK_PATIENTS: PatientRecord[] = [
     nextApptTime: '10:00',
     status: 'admitted',
     faculty: 'Medicine & Surgery',
+    assignedDoctorId: 'usr_001',
   },
   {
     id: 'p2',
@@ -131,6 +136,7 @@ export const MOCK_PATIENTS: PatientRecord[] = [
     nextApptTime: '09:00',
     status: 'admitted',
     faculty: 'Computer Science',
+    assignedDoctorId: 'usr_001',
   },
   {
     id: 'p3',
@@ -156,6 +162,7 @@ export const MOCK_PATIENTS: PatientRecord[] = [
     nextApptTime: '11:00',
     status: 'active',
     faculty: 'Law',
+    assignedDoctorId: 'usr_001',
   },
   {
     id: 'p4',
@@ -172,6 +179,7 @@ export const MOCK_PATIENTS: PatientRecord[] = [
     nextApptTime: '10:00',
     status: 'follow-up',
     faculty: 'Business Administration',
+    assignedDoctorId: 'usr_001',
   },
   {
     id: 'p5',
@@ -396,6 +404,10 @@ export type PatientDetailMock = {
   consultations: Consultation[];
   medications: Medication[];
   labResults: LabResult[];
+  /** True only for an id that resolves to neither a curated detail record nor a
+   * PatientRecord in MOCK_PATIENTS — screens should render an honest "not
+   * found" state for this, not silently show blank-but-plausible-looking data. */
+  notFound?: boolean;
 };
 
 export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
@@ -972,4 +984,66 @@ export const FALLBACK_PATIENT_DETAIL: PatientDetailMock = {
   consultations: [],
   medications: [],
   labResults: [],
+  notFound: true,
 };
+
+// ── Patient-detail resolution ────────────────────────────────────────────────
+// Only p1-p3 have a hand-curated PatientDetailMock above. Every other id that
+// still belongs to a real MOCK_PATIENTS row (p4-p7) is honestly derived from
+// that row's own real fields (name/MRN/allergies/status) rather than silently
+// showing the blank FALLBACK_PATIENT_DETAIL as if it were a legitimately
+// empty-but-real chart — medical history/vitals/consultations/medications/lab
+// results are left as honest empty arrays, since no per-patient generator
+// exists for them, the same "don't fabricate" rule this app applies
+// everywhere else. Only an id matching neither population resolves to the
+// FALLBACK (marked notFound) — screens should render that as a real error
+// state, not a normal empty chart.
+
+function parseAgeAndGender(meta: string): { age: string; gender: string } {
+  const match = /^(\d+)y\s+(Male|Female)/.exec(meta);
+  if (!match) return { age: '—', gender: '—' };
+  return { age: `${match[1]} years`, gender: match[2]! };
+}
+
+function buildPatientDetailFromRecord(record: PatientRecord): PatientDetailMock {
+  const { age, gender } = parseAgeAndGender(record.meta);
+  return {
+    id: record.id,
+    initials: record.initials,
+    name: record.name,
+    mrn: record.mrn,
+    dob: '—',
+    age,
+    gender,
+    bloodGroup: '—',
+    faculty: record.faculty,
+    level: '—',
+    fileNumber: '—',
+    address: '—',
+    phone: '—',
+    email: '—',
+    queueStatus: record.complaint,
+    allergies: record.allergies,
+    isUrgent: record.status === 'admitted',
+    medicalHistory: {
+      pastDiagnoses: [],
+      familyHistory: [],
+      immunizationHistory: [],
+      surgicalHistory: [],
+      chronicConditions: [],
+      allergiesHistory: [],
+    },
+    vitalSigns: { recordedAt: '', readings: [] },
+    consultations: [],
+    medications: [],
+    labResults: [],
+  };
+}
+
+export function getPatientDetail(id: string): PatientDetailMock {
+  const curated = MOCK_PATIENT_DETAILS[id];
+  if (curated) return curated;
+  const record = MOCK_PATIENTS.find((p) => p.id === id);
+  if (record) return buildPatientDetailFromRecord(record);
+  return FALLBACK_PATIENT_DETAIL;
+}

@@ -47,6 +47,19 @@ export function findQueueRowByPatientId(patientId: string): PatientRow | undefin
   return queueEntries.find((row) => row.patientId === patientId);
 }
 
+/** Called when a doctor clicks "Start Consultation" — advances the matching
+ * queue row to `in-consultation`, so a patient actively being seen no longer
+ * shows as still "Waiting" on the dashboard widget or the full queue list.
+ * A no-op when the patient didn't come through today's OPD queue. */
+export function startEncounterQueueRow(patientId: string): void {
+  const idx = queueEntries.findIndex((row) => row.patientId === patientId);
+  if (idx === -1) return;
+  queueEntries = queueEntries.map((row, i) =>
+    i === idx ? { ...row, status: 'in-consultation', waitDisplay: null } : row,
+  );
+  emit();
+}
+
 /** Called when a doctor completes a consultation — advances the matching
  * queue row to `completed`. A no-op when the patient didn't come through
  * today's OPD queue (e.g. opened directly from the general Patients list),

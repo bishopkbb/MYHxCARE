@@ -12,6 +12,8 @@ import {
   type Priority,
 } from '@/features/laboratory/__mocks__/labOrderFixtures';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
+import { PermissionGate } from '@/components/shared/PermissionGate';
+import { PERMISSIONS } from '@/constants/permissions';
 
 // ── Priority config ───────────────────────────────────────────────────────────
 
@@ -555,24 +557,26 @@ export default function LabOrdersPage() {
                   : `${totalSelected} test${totalSelected !== 1 ? 's' : ''} selected`}
               </p>
 
-              <button
-                type="button"
-                onClick={handleSubmit}
-                className="flex shrink-0 items-center gap-2.5 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                style={{
-                  height: 44,
-                  borderRadius: 12,
-                  padding: '0 24px',
-                  background: '#00B4D8',
-                  fontSize: 14,
-                  lineHeight: '22px',
-                  boxShadow: '0px 4px 20px 0px rgba(0,180,216,0.30)',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                <Send style={{ width: 16, height: 16, flexShrink: 0 }} />
-                Send Request to Laboratory
-              </button>
+              <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="flex shrink-0 items-center gap-2.5 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{
+                    height: 44,
+                    borderRadius: 12,
+                    padding: '0 24px',
+                    background: '#00B4D8',
+                    fontSize: 14,
+                    lineHeight: '22px',
+                    boxShadow: '0px 4px 20px 0px rgba(0,180,216,0.30)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <Send style={{ width: 16, height: 16, flexShrink: 0 }} />
+                  Send Request to Laboratory
+                </button>
+              </PermissionGate>
             </div>
 
             <div className="h-6" />

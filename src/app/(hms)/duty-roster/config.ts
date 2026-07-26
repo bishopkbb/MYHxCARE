@@ -75,6 +75,12 @@ export const STATUS_CFG: Record<ShiftStatus, StatusCfg> = {
     border: 'rgba(107,114,128,0.40)',
     bg: 'transparent',
   },
+  CANCELLED: {
+    label: 'CANCELLED',
+    color: '#EF4444',
+    border: 'rgba(239,68,68,0.40)',
+    bg: 'rgba(239,68,68,0.06)',
+  },
 };
 
 export const SHIFT_TYPE_OPTIONS: { value: ShiftType; label: string }[] = [
@@ -90,6 +96,7 @@ export const STATUS_OPTIONS: { value: ShiftStatus; label: string }[] = [
   { value: 'SCHEDULED', label: 'Scheduled' },
   { value: 'ON_CALL', label: 'On Call' },
   { value: 'COMPLETED', label: 'Completed' },
+  { value: 'CANCELLED', label: 'Cancelled' },
 ];
 
 export const WARD_OPTIONS = [

@@ -26,7 +26,10 @@ import {
   type PatientRow,
   type PatientStatus,
 } from '@/features/encounters/__mocks__/encounterFixtures';
-import { useEncounterQueueEntries } from '@/features/encounters/store/encounterQueueStore';
+import {
+  startEncounterQueueRow,
+  useEncounterQueueEntries,
+} from '@/features/encounters/store/encounterQueueStore';
 import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
@@ -830,9 +833,10 @@ export default function EncountersPage() {
                     <button
                       type="button"
                       disabled={patient.status === 'completed'}
-                      onClick={() =>
-                        router.push(`/patients/${patient.patientId ?? patient.id}/consultation`)
-                      }
+                      onClick={() => {
+                        if (patient.patientId) startEncounterQueueRow(patient.patientId);
+                        router.push(`/patients/${patient.patientId ?? patient.id}/consultation`);
+                      }}
                       className="flex min-h-[44px] flex-1 items-center justify-center rounded-[8px] text-sm font-medium text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
                       style={{
                         background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',
@@ -1117,9 +1121,12 @@ export default function EncountersPage() {
                         <button
                           type="button"
                           disabled={patient.status === 'completed'}
-                          onClick={() =>
-                            router.push(`/patients/${patient.patientId ?? patient.id}/consultation`)
-                          }
+                          onClick={() => {
+                            if (patient.patientId) startEncounterQueueRow(patient.patientId);
+                            router.push(
+                              `/patients/${patient.patientId ?? patient.id}/consultation`,
+                            );
+                          }}
                           className="cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium whitespace-nowrap text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
                           style={{
                             background: patient.status === 'completed' ? '#9CA3AF' : '#00B4D8',

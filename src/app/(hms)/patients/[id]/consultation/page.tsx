@@ -22,11 +22,15 @@ import { use, useMemo, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
+import { PermissionGate } from '@/components/shared/PermissionGate';
+import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { getPatientDetail } from '@/features/patients/__mocks__/patientFixtures';
 import {
-  FALLBACK_PATIENT_DETAIL,
-  MOCK_PATIENT_DETAILS,
-} from '@/features/patients/__mocks__/patientFixtures';
+  clearConsultationDraft,
+  getConsultationDraft,
+  saveConsultationDraft,
+} from '@/features/encounters/store/consultationDraftStore';
 import { completeEncounterQueueRow } from '@/features/encounters/store/encounterQueueStore';
 import { completeEncounter } from '@/features/encounters/store/encounterStore';
 import { addAdmission, useAdmissions } from '@/features/nursing/store/admissionsStore';
@@ -149,12 +153,14 @@ function blurBorder(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>)
 export default function ConsultationPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const patient = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
+  const patient = getPatientDetail(id);
 
   const toast = useToast();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
-  const [form, setForm] = useState<ConsultationForm>(INITIAL_FORM);
+  const [form, setForm] = useState<ConsultationForm>(
+    () => (getConsultationDraft(id) as ConsultationForm | undefined) ?? INITIAL_FORM,
+  );
   const [showRequestAdmission, setShowRequestAdmission] = useState(false);
   const admissionsForWards = useAdmissions();
 
@@ -176,6 +182,11 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
       })),
     [admissionsForWards],
   );
+
+  function handleSaveDraft() {
+    saveConsultationDraft(id, form);
+    toast.success('Draft saved', 'Your progress has been saved.');
+  }
 
   function handleRequestAdmission(input: NewAdmissionInput) {
     addAdmission(input);
@@ -206,6 +217,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
       treatmentPlan: form.treatmentPlan,
     });
     completeEncounterQueueRow(patient.id, new Date().toISOString());
+    clearConsultationDraft(patient.id);
 
     toast.success('Consultation complete', 'The encounter record has been saved.');
     router.back();
@@ -976,73 +988,81 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
 
                   {/* Quick action buttons */}
                   <div className="flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={() => router.push(ROUTES.patientPrescription(id))}
-                      className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
-                      style={{
-                        fontSize: 14,
-                        lineHeight: '22px',
-                        height: 44,
-                        color: '#00B4D8',
-                        border: '1px solid #00B4D8',
-                        background: '#FFFFFF',
-                      }}
-                    >
-                      <Pill style={{ width: 16, height: 16, flexShrink: 0 }} />
-                      Add Prescription
-                    </button>
+                    <PermissionGate permission={PERMISSIONS.PRESCRIPTIONS_WRITE}>
+                      <button
+                        type="button"
+                        onClick={() => router.push(ROUTES.patientPrescription(id))}
+                        className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+                        style={{
+                          fontSize: 14,
+                          lineHeight: '22px',
+                          height: 44,
+                          color: '#00B4D8',
+                          border: '1px solid #00B4D8',
+                          background: '#FFFFFF',
+                        }}
+                      >
+                        <Pill style={{ width: 16, height: 16, flexShrink: 0 }} />
+                        Add Prescription
+                      </button>
+                    </PermissionGate>
 
-                    <button
-                      type="button"
-                      onClick={() => router.push(ROUTES.patientLabOrder(id))}
-                      className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
-                      style={{
-                        fontSize: 14,
-                        lineHeight: '22px',
-                        height: 44,
-                        color: '#00B4D8',
-                        border: '1px solid #00B4D8',
-                        background: '#FFFFFF',
-                      }}
-                    >
-                      <FlaskConical style={{ width: 16, height: 16, flexShrink: 0 }} />
-                      Request Lab Test
-                    </button>
+                    <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+                      <button
+                        type="button"
+                        onClick={() => router.push(ROUTES.patientLabOrder(id))}
+                        className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+                        style={{
+                          fontSize: 14,
+                          lineHeight: '22px',
+                          height: 44,
+                          color: '#00B4D8',
+                          border: '1px solid #00B4D8',
+                          background: '#FFFFFF',
+                        }}
+                      >
+                        <FlaskConical style={{ width: 16, height: 16, flexShrink: 0 }} />
+                        Request Lab Test
+                      </button>
+                    </PermissionGate>
 
-                    <button
-                      type="button"
-                      onClick={() => router.push(ROUTES.patientReferral(id))}
-                      className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
-                      style={{
-                        fontSize: 14,
-                        lineHeight: '22px',
-                        height: 44,
-                        color: '#00B4D8',
-                        border: '1px solid #00B4D8',
-                        background: '#FFFFFF',
-                      }}
-                    >
-                      <Share2 style={{ width: 16, height: 16, flexShrink: 0 }} />
-                      Refer Patient
-                    </button>
+                    <PermissionGate permission={PERMISSIONS.REFERRALS_WRITE}>
+                      <button
+                        type="button"
+                        onClick={() => router.push(ROUTES.patientReferral(id))}
+                        className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+                        style={{
+                          fontSize: 14,
+                          lineHeight: '22px',
+                          height: 44,
+                          color: '#00B4D8',
+                          border: '1px solid #00B4D8',
+                          background: '#FFFFFF',
+                        }}
+                      >
+                        <Share2 style={{ width: 16, height: 16, flexShrink: 0 }} />
+                        Refer Patient
+                      </button>
+                    </PermissionGate>
 
-                    <button
-                      type="button"
-                      onClick={() => setShowRequestAdmission(true)}
-                      className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
-                      style={{
-                        fontSize: 14,
-                        lineHeight: '22px',
-                        height: 44,
-                        color: '#00B4D8',
-                        border: '1px solid #00B4D8',
-                        background: '#FFFFFF',
-                      }}
-                    >
-                      <BedDouble style={{ width: 16, height: 16, flexShrink: 0 }} />
-                      Request Admission
-                    </button>
+                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                      <button
+                        type="button"
+                        onClick={() => setShowRequestAdmission(true)}
+                        className="flex items-center gap-2 rounded-[12px] px-4 font-sans font-semibold transition-colors hover:bg-[rgba(0,180,216,0.06)]"
+                        style={{
+                          fontSize: 14,
+                          lineHeight: '22px',
+                          height: 44,
+                          color: '#00B4D8',
+                          border: '1px solid #00B4D8',
+                          background: '#FFFFFF',
+                        }}
+                      >
+                        <BedDouble style={{ width: 16, height: 16, flexShrink: 0 }} />
+                        Request Admission
+                      </button>
+                    </PermissionGate>
                   </div>
 
                   {/* Follow-up Instructions */}
@@ -1132,49 +1152,55 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                 background: '#FFFFFF',
               }}
             >
-              <button
-                type="button"
-                onClick={() => toast.success('Draft saved', 'Your progress has been saved.')}
-                className="rounded-[12px] px-5 font-sans font-semibold transition-colors duration-150 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                style={{
-                  fontSize: 16,
-                  lineHeight: '24px',
-                  color: '#0D2630',
-                  border: '1px solid #0064821F',
-                  height: 44,
-                }}
-              >
-                Save Draft
-              </button>
+              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                <button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  className="rounded-[12px] px-5 font-sans font-semibold transition-colors duration-150 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{
+                    fontSize: 16,
+                    lineHeight: '24px',
+                    color: '#0D2630',
+                    border: '1px solid #0064821F',
+                    height: 44,
+                  }}
+                >
+                  Save Draft
+                </button>
+              </PermissionGate>
 
-              <button
-                type="button"
-                onClick={() => router.push(ROUTES.patientReferral(id))}
-                className="rounded-[12px] px-5 font-sans font-semibold transition-colors duration-150 hover:bg-amber-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                style={{
-                  fontSize: 16,
-                  lineHeight: '24px',
-                  color: '#D97706',
-                  border: '1px solid #F59E0B',
-                  height: 44,
-                }}
-              >
-                Refer Patient
-              </button>
+              <PermissionGate permission={PERMISSIONS.REFERRALS_WRITE}>
+                <button
+                  type="button"
+                  onClick={() => router.push(ROUTES.patientReferral(id))}
+                  className="rounded-[12px] px-5 font-sans font-semibold transition-colors duration-150 hover:bg-amber-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{
+                    fontSize: 16,
+                    lineHeight: '24px',
+                    color: '#D97706',
+                    border: '1px solid #F59E0B',
+                    height: 44,
+                  }}
+                >
+                  Refer Patient
+                </button>
+              </PermissionGate>
 
-              <button
-                type="button"
-                onClick={handleCompleteConsultation}
-                className="rounded-[12px] px-5 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                style={{
-                  fontSize: 16,
-                  lineHeight: '24px',
-                  background: '#00B4D8',
-                  height: 44,
-                }}
-              >
-                Complete Consultation
-              </button>
+              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                <button
+                  type="button"
+                  onClick={handleCompleteConsultation}
+                  className="rounded-[12px] px-5 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{
+                    fontSize: 16,
+                    lineHeight: '24px',
+                    background: '#00B4D8',
+                    height: 44,
+                  }}
+                >
+                  Complete Consultation
+                </button>
+              </PermissionGate>
             </div>
           </div>
 

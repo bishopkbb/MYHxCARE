@@ -5,10 +5,7 @@ import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
-import {
-  FALLBACK_PATIENT_DETAIL,
-  MOCK_PATIENT_DETAILS,
-} from '@/features/patients/__mocks__/patientFixtures';
+import { getPatientDetail } from '@/features/patients/__mocks__/patientFixtures';
 import {
   FALLBACK_TIMELINE_EVENTS,
   MOCK_TIMELINE_EVENTS,
@@ -73,7 +70,7 @@ function SkeletonRow({ isLast }: { isLast: boolean }) {
 export default function ClinicalTimelinePage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const patient = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
+  const patient = getPatientDetail(id);
   const allEvents = MOCK_TIMELINE_EVENTS[id] ?? FALLBACK_TIMELINE_EVENTS;
 
   const [pageState, setPageState] = useState<PageState>('loading');

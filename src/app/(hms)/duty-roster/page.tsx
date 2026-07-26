@@ -30,7 +30,9 @@ import { ExportMenu } from '@/components/ExportMenu';
 import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
+import { PermissionGate } from '@components/shared/PermissionGate';
 import { StatCardCompact } from '@components/shared/StatCard';
+import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
@@ -319,9 +321,11 @@ export default function DutyRosterPage() {
   }
 
   function handleCancelShift(shift: DoctorShift) {
-    setRoster((prev) => prev.filter((s) => s.id !== shift.id));
+    setRoster((prev) =>
+      prev.map((s) => (s.id === shift.id ? { ...s, status: 'CANCELLED' as const } : s)),
+    );
     setOpenRowMenuId(null);
-    toast.info('Shift cancelled', `${shift.doctorName}'s shift has been removed from the roster.`);
+    toast.info('Shift cancelled', `${shift.doctorName}'s shift has been marked as cancelled.`);
   }
 
   function handleDuplicateShift(shift: DoctorShift) {
@@ -356,15 +360,17 @@ export default function DutyRosterPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => setCreateOpen(true)}
-                className="flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                style={{ background: '#00B4D8', fontSize: 14 }}
-              >
-                <Plus style={{ width: 16, height: 16 }} />
-                Create Shift
-              </button>
+              <PermissionGate permission={PERMISSIONS.DUTY_ROSTER_WRITE}>
+                <button
+                  type="button"
+                  onClick={() => setCreateOpen(true)}
+                  className="flex h-11 items-center gap-2 rounded-[10px] px-4 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                  style={{ background: '#00B4D8', fontSize: 14 }}
+                >
+                  <Plus style={{ width: 16, height: 16 }} />
+                  Create Shift
+                </button>
+              </PermissionGate>
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.dutyRosterCalendar)}
@@ -492,11 +498,13 @@ export default function DutyRosterPage() {
 
           {/* ── Quick actions ───────────────────────────────────────────────── */}
           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-            <QuickAction
-              icon={ClipboardEdit}
-              label="Create Shift"
-              onClick={() => setCreateOpen(true)}
-            />
+            <PermissionGate permission={PERMISSIONS.DUTY_ROSTER_WRITE}>
+              <QuickAction
+                icon={ClipboardEdit}
+                label="Create Shift"
+                onClick={() => setCreateOpen(true)}
+              />
+            </PermissionGate>
             <QuickAction
               icon={Calendar}
               label="Create Weekly Roster"
@@ -696,19 +704,21 @@ export default function DutyRosterPage() {
                             <Eye style={{ width: 14, height: 14 }} />
                             View
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditingShift(shift)}
-                            className="flex flex-1 items-center justify-center gap-1.5 rounded-[8px] py-2 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                            style={{
-                              border: '1px solid #0064821F',
-                              fontSize: 14,
-                              color: '#4A7080',
-                            }}
-                          >
-                            <Pencil style={{ width: 14, height: 14 }} />
-                            Edit
-                          </button>
+                          <PermissionGate permission={PERMISSIONS.DUTY_ROSTER_WRITE}>
+                            <button
+                              type="button"
+                              onClick={() => setEditingShift(shift)}
+                              className="flex flex-1 items-center justify-center gap-1.5 rounded-[8px] py-2 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                              style={{
+                                border: '1px solid #0064821F',
+                                fontSize: 14,
+                                color: '#4A7080',
+                              }}
+                            >
+                              <Pencil style={{ width: 14, height: 14 }} />
+                              Edit
+                            </button>
+                          </PermissionGate>
                         </div>
                       </div>
                     );
@@ -820,55 +830,60 @@ export default function DutyRosterPage() {
                           >
                             <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditingShift(shift)}
-                            aria-label={`Edit ${shift.doctorName}'s shift`}
-                            className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          >
-                            <Pencil style={{ width: 15, height: 15, color: '#4A7080' }} />
-                          </button>
-                          <div
-                            className="relative shrink-0"
-                            ref={(el) => {
-                              rowMenuRefs.current[shift.id] = el;
-                            }}
-                          >
+                          <PermissionGate permission={PERMISSIONS.DUTY_ROSTER_WRITE}>
                             <button
                               type="button"
-                              onClick={() => setOpenRowMenuId(menuOpen ? null : shift.id)}
-                              aria-label="More actions"
+                              onClick={() => setEditingShift(shift)}
+                              aria-label={`Edit ${shift.doctorName}'s shift`}
                               className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                             >
-                              <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
+                              <Pencil style={{ width: 15, height: 15, color: '#4A7080' }} />
                             </button>
-                            {menuOpen && (
-                              <div
-                                className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 min-w-[160px] overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
-                                style={{
-                                  border: '1px solid #0064821F',
-                                  boxShadow: '0 4px 16px rgba(0,0,0,0.09)',
-                                }}
+                            <div
+                              className="relative shrink-0"
+                              ref={(el) => {
+                                rowMenuRefs.current[shift.id] = el;
+                              }}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => setOpenRowMenuId(menuOpen ? null : shift.id)}
+                                aria-label="More actions"
+                                className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                               >
-                                <button
-                                  type="button"
-                                  onClick={() => handleDuplicateShift(shift)}
-                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
+                              </button>
+                              {menuOpen && (
+                                <div
+                                  className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 min-w-[160px] overflow-hidden rounded-[10px] bg-white py-1.5 duration-150"
+                                  style={{
+                                    border: '1px solid #0064821F',
+                                    boxShadow: '0 4px 16px rgba(0,0,0,0.09)',
+                                  }}
                                 >
-                                  Duplicate Shift
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleCancelShift(shift)}
-                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                  style={{ fontSize: 14, color: '#EF4444' }}
-                                >
-                                  Cancel Shift
-                                </button>
-                              </div>
-                            )}
-                          </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDuplicateShift(shift)}
+                                    className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    Duplicate Shift
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCancelShift(shift)}
+                                    disabled={
+                                      shift.status === 'CANCELLED' || shift.status === 'COMPLETED'
+                                    }
+                                    className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+                                    style={{ fontSize: 14, color: '#EF4444' }}
+                                  >
+                                    Cancel Shift
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </PermissionGate>
                         </div>
                       </div>
                     );

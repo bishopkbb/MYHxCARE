@@ -14,6 +14,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/providers/AuthProvider';
 import {
   MOCK_DOCTOR,
   MOCK_ACTIVE_SHIFT,
@@ -607,10 +608,20 @@ function MonthStatCard({ stat }: { stat: MonthStat }) {
 
 export default function MySchedulePage() {
   const toast = useToast();
+  const { user } = useAuth();
 
   const [pageState, setPageState] = useState<PageState>('loading');
   const [confirmedIds, setConfirmedIds] = useState<Set<string>>(new Set());
   const [declinedIds, setDeclinedIds] = useState<Set<string>>(new Set());
+  const [shiftAcknowledged, setShiftAcknowledged] = useState(
+    MOCK_ACTIVE_SHIFT.status === 'acknowledged',
+  );
+  const doctorName = user?.name ?? MOCK_DOCTOR.name;
+
+  function handleAcknowledgeShift() {
+    setShiftAcknowledged(true);
+    toast.success('Shift acknowledged', 'Your active shift has been acknowledged.');
+  }
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -679,7 +690,7 @@ export default function MySchedulePage() {
                   className="font-sans"
                   style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080', marginTop: 2 }}
                 >
-                  {MOCK_DOCTOR.name} · {MOCK_DOCTOR.specialty} · Week of {MOCK_DOCTOR.weekLabel}
+                  {doctorName} · {MOCK_DOCTOR.specialty} · Week of {MOCK_DOCTOR.weekLabel}
                 </p>
               </div>
 
@@ -904,7 +915,7 @@ export default function MySchedulePage() {
 
                     {/* Acknowledged badge + remaining */}
                     <div className="flex shrink-0 flex-row items-center gap-3 sm:flex-col sm:items-end sm:gap-2">
-                      {MOCK_ACTIVE_SHIFT.status === 'acknowledged' ? (
+                      {shiftAcknowledged ? (
                         <div
                           className="flex items-center gap-2 font-sans font-medium"
                           style={{
@@ -924,6 +935,7 @@ export default function MySchedulePage() {
                       ) : (
                         <button
                           type="button"
+                          onClick={handleAcknowledgeShift}
                           className="font-sans font-medium transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                           style={{
                             borderRadius: 20,

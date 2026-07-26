@@ -35,7 +35,10 @@ import {
   getDoctorQueueFrom,
   type PatientRow,
 } from '@/features/encounters/__mocks__/encounterFixtures';
-import { useEncounterQueueEntries } from '@/features/encounters/store/encounterQueueStore';
+import {
+  startEncounterQueueRow,
+  useEncounterQueueEntries,
+} from '@/features/encounters/store/encounterQueueStore';
 import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
 
 function getGreeting(): string {
@@ -879,11 +882,12 @@ export default function DashboardPage() {
                         <div className="hidden shrink-0 pl-1 sm:block">
                           <button
                             type="button"
-                            onClick={() =>
+                            onClick={() => {
+                              if (patient.patientId) startEncounterQueueRow(patient.patientId);
                               router.push(
                                 `/patients/${patient.patientId ?? patient.id}/consultation`,
-                              )
-                            }
+                              );
+                            }}
                             className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors duration-150 hover:bg-[#00B4D8] hover:text-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                             style={{ border: '1px solid #00B4D8' }}
                           >

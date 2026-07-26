@@ -5,7 +5,7 @@
 
 export type ShiftType = 'EMERGENCY' | 'NIGHT' | 'ON_CALL' | 'MORNING' | 'AFTERNOON';
 
-export type ShiftStatus = 'ON_DUTY' | 'SCHEDULED' | 'ON_CALL' | 'COMPLETED';
+export type ShiftStatus = 'ON_DUTY' | 'SCHEDULED' | 'ON_CALL' | 'COMPLETED' | 'CANCELLED';
 
 export type DoctorShift = {
   id: string;

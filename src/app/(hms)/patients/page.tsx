@@ -26,7 +26,9 @@ import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/hooks/useAuth';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
+import { startEncounterQueueRow } from '@/features/encounters/store/encounterQueueStore';
 import {
   MOCK_PATIENTS,
   PATIENT_STAT_CARDS,
@@ -259,6 +261,7 @@ type PageState = 'loading' | 'loaded' | 'error';
 
 export default function PatientsPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const toast = useToast();
   const [search, setSearch] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
@@ -327,8 +330,7 @@ export default function PatientsPage() {
       if (activeFilters.status === 'active' && !isActive) return false;
       if (activeFilters.status === 'inactive' && isActive) return false;
     }
-    if (quickFilters.patientType === 'assigned' && !['p1', 'p2', 'p3', 'p4'].includes(p.id))
-      return false;
+    if (quickFilters.patientType === 'assigned' && p.assignedDoctorId !== user?.id) return false;
     if (quickFilters.status !== 'all' && p.status !== quickFilters.status) return false;
     if (quickFilters.faculty !== 'all' && p.faculty !== quickFilters.faculty) return false;
     return true;
@@ -397,17 +399,34 @@ export default function PatientsPage() {
 
       {/* ── Stat cards ─────────────────────────────────────────────────── */}
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
-        {PATIENT_STAT_CARDS.map((card) => (
-          <StatCard
-            key={card.title}
-            icon={card.icon}
-            label={card.title}
-            value={card.count}
-            info={card.label}
-            accent={card.accent}
-            iconBg={card.iconBg}
-          />
-        ))}
+        {PATIENT_STAT_CARDS.map((card) => {
+          // Compute what's honestly derivable from the real MOCK_PATIENTS
+          // roster instead of showing the fixture's independent hardcoded
+          // literal — "Emergency"/"Active Referrals" have no equivalent real
+          // field on PatientRecord yet, so those two keep the fixture value.
+          let value = card.count;
+          if (card.title === 'Total Patients') value = String(MOCK_PATIENTS.length);
+          else if (card.title === 'Active Patients') {
+            value = String(
+              MOCK_PATIENTS.filter((p) =>
+                ['active', 'admitted', 'follow-up', 'referred'].includes(p.status),
+              ).length,
+            );
+          } else if (card.title === 'Assigned Patients') {
+            value = String(MOCK_PATIENTS.filter((p) => p.assignedDoctorId === user?.id).length);
+          }
+          return (
+            <StatCard
+              key={card.title}
+              icon={card.icon}
+              label={card.title}
+              value={value}
+              info={card.label}
+              accent={card.accent}
+              iconBg={card.iconBg}
+            />
+          );
+        })}
       </div>
 
       {/* ── Search + controls row ──────────────────────────────────────── */}
@@ -834,7 +853,10 @@ export default function PatientsPage() {
                     <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
                       <button
                         type="button"
-                        onClick={() => router.push(`/patients/${patient.id}/consultation`)}
+                        onClick={() => {
+                          startEncounterQueueRow(patient.id);
+                          router.push(`/patients/${patient.id}/consultation`);
+                        }}
                         className="flex-1 rounded-[8px] py-2 text-center text-sm font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         style={{ background: '#00B4D8' }}
                       >
@@ -1100,9 +1122,10 @@ export default function PatientsPage() {
                                     setActionMenuId(null);
                                     if (action.key === 'view')
                                       router.push(`/patients/${patient.id}`);
-                                    else if (action.key === 'consult')
+                                    else if (action.key === 'consult') {
+                                      startEncounterQueueRow(patient.id);
                                       router.push(`/patients/${patient.id}/consultation`);
-                                    else if (action.key === 'note')
+                                    } else if (action.key === 'note')
                                       router.push(ROUTES.clinicalNotes);
                                     else if (action.key === 'lab')
                                       router.push(ROUTES.patientLabOrder(patient.id));

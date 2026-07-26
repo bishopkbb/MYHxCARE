@@ -8,6 +8,7 @@ import { ExportMenu } from '@/components/ExportMenu';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
+import { useAuth } from '@hooks/useAuth';
 import {
   MOCK_CLINICAL_NOTES,
   type ClinicalNote,
@@ -108,6 +109,7 @@ function SkeletonNoteCard() {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ClinicalNotesPage() {
+  const { user } = useAuth();
   const [notes, setNotes] = useState<ClinicalNote[]>(MOCK_CLINICAL_NOTES);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<TabId>('all');
@@ -142,7 +144,37 @@ export default function ClinicalNotesPage() {
   });
 
   function handleAddSubmit(newNote: ClinicalNote) {
-    setNotes((prev) => [newNote, ...prev]);
+    if (amendNote) {
+      const now = new Date();
+      const atStr = `${new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Africa/Lagos',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }).format(now)} · ${new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Africa/Lagos',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }).format(now)}`;
+      setNotes((prev) =>
+        prev.map((n) =>
+          n.id === amendNote.id
+            ? {
+                ...n,
+                amendments: [
+                  ...(n.amendments ?? []),
+                  { at: atStr, by: user?.name ?? n.doctor, reason: newNote.content },
+                ],
+              }
+            : n,
+        ),
+      );
+      setShowAdd(false);
+      setAmendNote(null);
+      return;
+    }
+    setNotes((prev) => [{ ...newNote, doctor: user?.name ?? newNote.doctor }, ...prev]);
     setShowAdd(false);
     setAmendNote(null);
   }

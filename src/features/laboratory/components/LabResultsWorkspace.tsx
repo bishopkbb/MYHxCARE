@@ -20,8 +20,10 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { formatDate, formatTime } from '@/utils/datetime';
+import { getLabOrders } from '@/features/laboratory/store/labOrderStore';
 import {
   MOCK_LAB_RESULTS,
   type LabFlag,
@@ -282,11 +284,13 @@ function ResultCard({
   onViewPatient,
   onMarkReviewed,
   onAddNote,
+  onVerify,
 }: {
   result: LabResult;
   onViewPatient: () => void;
   onMarkReviewed: () => void;
   onAddNote: () => void;
+  onVerify: () => void;
 }) {
   const sc = STATUS_CFG[result.status];
   const isPending = result.status === 'pending';
@@ -377,21 +381,36 @@ function ResultCard({
       </div>
 
       {isPending && (
-        <div
-          className="mx-4 mb-4 flex items-center gap-2 px-3 py-2.5"
-          style={{ borderRadius: 8, background: '#F1F5F9' }}
-        >
-          <Loader2
-            className="animate-spin"
-            style={{ width: 16, height: 16, color: '#94A3B8', flexShrink: 0 }}
-          />
-          <span
-            className="font-sans"
-            style={{ fontSize: 14, lineHeight: '22px', color: '#6B7280' }}
+        <>
+          <div
+            className="mx-4 mt-4 flex items-center gap-2 px-3 py-2.5"
+            style={{ borderRadius: 8, background: '#F1F5F9' }}
           >
-            Awaiting laboratory processing…
-          </span>
-        </div>
+            <Loader2
+              className="animate-spin"
+              style={{ width: 16, height: 16, color: '#94A3B8', flexShrink: 0 }}
+            />
+            <span
+              className="font-sans"
+              style={{ fontSize: 14, lineHeight: '22px', color: '#6B7280' }}
+            >
+              Awaiting laboratory processing…
+            </span>
+          </div>
+          <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+            <div className="flex items-center gap-2.5 px-4 pt-3 pb-4">
+              <button
+                type="button"
+                onClick={onVerify}
+                className={`flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                style={{ fontSize: 14, background: '#00B4D8' }}
+              >
+                <CheckCircle2 style={{ width: 15, height: 15 }} />
+                Verify Result
+              </button>
+            </div>
+          </PermissionGate>
+        </>
       )}
 
       {!isPending && result.rows && result.rows.length > 0 && (
@@ -548,8 +567,12 @@ function ResultCard({
 export function LabResultsWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
   const [pageState, setPageState] = useState<PageState>('loading');
-  const [results, setResults] = useState<LabResult[]>(MOCK_LAB_RESULTS);
+  const [results, setResults] = useState<LabResult[]>(() => [
+    ...getLabOrders(),
+    ...MOCK_LAB_RESULTS,
+  ]);
   const [activeTab, setActiveTab] = useState<TabId>('critical');
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState('');
@@ -624,7 +647,7 @@ export function LabResultsWorkspace() {
           ? {
               ...r,
               doctorReviewedAt: new Date().toISOString(),
-              doctorReviewedBy: 'Dr. Adaeze Okonkwo',
+              doctorReviewedBy: user?.name ?? 'Unknown Doctor',
             }
           : r,
       ),
@@ -635,12 +658,28 @@ export function LabResultsWorkspace() {
     );
   }
 
+  function handleVerifyResult(result: LabResult) {
+    setResults((prev) =>
+      prev.map((r) =>
+        r.id === result.id
+          ? {
+              ...r,
+              status: 'verified',
+              doctorReviewedAt: new Date().toISOString(),
+              doctorReviewedBy: user?.name ?? 'Unknown Doctor',
+            }
+          : r,
+      ),
+    );
+    toast.success('Result verified', `${result.testName} for ${result.patient.name} verified.`);
+  }
+
   function handleSaveNote(text: string) {
     if (!noteTarget) return;
     const newNote = {
       id: `note-${noteTarget.id}-${(noteTarget.notes?.length ?? 0) + 1}`,
       text,
-      author: 'Dr. Adaeze Okonkwo',
+      author: user?.name ?? 'Unknown Doctor',
       createdAt: new Date().toISOString(),
     };
     setResults((prev) =>
@@ -919,6 +958,7 @@ export function LabResultsWorkspace() {
                       onViewPatient={() => handleViewPatient(result)}
                       onMarkReviewed={() => handleMarkReviewed(result)}
                       onAddNote={() => setNoteTarget(result)}
+                      onVerify={() => handleVerifyResult(result)}
                     />
                   ))}
                 </div>

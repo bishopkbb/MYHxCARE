@@ -10,11 +10,8 @@ import {
   type LabCategory,
   type Priority,
 } from '@/features/laboratory/__mocks__/labOrderFixtures';
-import {
-  FALLBACK_PATIENT_DETAIL,
-  MOCK_PATIENTS,
-  MOCK_PATIENT_DETAILS,
-} from '@/features/patients/__mocks__/patientFixtures';
+import { MOCK_PATIENTS, getPatientDetail } from '@/features/patients/__mocks__/patientFixtures';
+import { addLabOrders } from '@/features/laboratory/store/labOrderStore';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -202,7 +199,7 @@ export default function PatientLabOrderPage({ params }: { params: Promise<{ id: 
   const router = useRouter();
   const toast = useToast();
   const { id } = use(params);
-  const patient = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
+  const patient = getPatientDetail(id);
   // MOCK_PATIENTS (list view) carries the avatar color used across list/queue
   // screens — reused here so the same patient shows the same avatar color
   // everywhere rather than defaulting every lab request to one flat brand color.
@@ -239,6 +236,17 @@ export default function PatientLabOrderPage({ params }: { params: Promise<{ id: 
       toast.error('No tests selected', 'Please select at least one test to submit.');
       return;
     }
+    // Persists as real, pending LabResult rows visible on /lab/results —
+    // previously this only ever showed a toast and created nothing anywhere.
+    addLabOrders({
+      ...(patient.id !== 'unknown' ? { patientId: patient.id } : {}),
+      patientName: patient.name,
+      mrn: patient.mrn,
+      initials: patient.initials,
+      avatarBg,
+      testIds: Array.from(selected),
+      priority,
+    });
     toast.success(
       'Request sent',
       `${totalSelected} test${totalSelected !== 1 ? 's' : ''} dispatched to the laboratory at ${PRIORITY_CFG[priority].label} priority for ${patient.name}.`,

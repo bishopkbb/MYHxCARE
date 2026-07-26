@@ -67,16 +67,19 @@ export default function StaffAssignmentPage() {
   const clampedPage = Math.min(page, totalPages);
   const paginated = filtered.slice((clampedPage - 1) * pageSize, clampedPage * pageSize);
 
-  function handleAssignSave(doctor: AssignableDoctor, notes: string) {
+  function handleAssignSave(doctor: AssignableDoctor, notes: string, effectiveDate: string) {
+    const outgoing = doctors.find(
+      (d) => d.id !== doctor.id && d.currentWard === doctor.currentWard,
+    );
     setDoctors((prev) => prev.map((d) => (d.id === doctor.id ? doctor : d)));
     if (notes) {
       setHandoffLog((prev) => [
         {
           id: `ho-${Date.now()}`,
           ward: doctor.currentWard ?? 'Unassigned',
-          outgoingDoctor: '—',
+          outgoingDoctor: outgoing?.name ?? '—',
           incomingDoctor: doctor.name,
-          timestamp: 'Just now',
+          timestamp: effectiveDate,
           notes,
         },
         ...prev,

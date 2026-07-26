@@ -31,10 +31,10 @@ import { AllergyBanner } from '@/components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
-import {
-  FALLBACK_PATIENT_DETAIL,
-  MOCK_PATIENT_DETAILS,
-} from '@/features/patients/__mocks__/patientFixtures';
+import { useEncounters } from '@/features/encounters/store/encounterStore';
+import { getPatientDetail, type Consultation } from '@/features/patients/__mocks__/patientFixtures';
+import { getPrescriptionsForPatient } from '@/features/prescriptions/store/prescriptionStore';
+import { formatHumanDate } from '@/utils/datetime';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -144,7 +144,25 @@ const LAB_STATUS_CONFIG: Record<'critical' | 'verified' | 'pending', LabStatusCf
 export default function PatientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
-  const patient = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
+  const patient = getPatientDetail(id);
+  // Prescriptions sent from this patient's own Consultation/Prescription
+  // screens are stored here rather than discarded — merged in so "Send
+  // Prescription" no longer claims a hand-off that leaves nothing visible.
+  const medications = [...getPrescriptionsForPatient(id), ...patient.medications];
+  // Real completed encounters (from "Complete Consultation") merged ahead of
+  // the fixture list — the encounter entity has no diagnosis/plan fields yet,
+  // so those render as "—" rather than fabricated content.
+  const realConsultations: Consultation[] = useEncounters()
+    .filter((e) => e.patientId === id)
+    .map((e) => ({
+      id: e.id,
+      date: formatHumanDate(e.completedAt ?? e.createdAt),
+      doctor: e.attendingPhysicianName ?? 'Unknown Doctor',
+      diagnosis: '—',
+      complaint: e.chiefComplaint || '—',
+      plan: '—',
+    }));
+  const consultations = [...realConsultations, ...patient.consultations];
   const [activeTab, setActiveTab] = useState('biodata');
 
   // ── Biodata fetch simulation ────────────────────────────────────────────────
@@ -2364,7 +2382,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               {/* ── Loaded ────────────────────────────────────────────────── */}
               {consultationsStatus === 'loaded' && (
                 <div className="flex flex-col gap-4">
-                  {patient.consultations.map((consultation) => (
+                  {consultations.map((consultation) => (
                     <div
                       key={consultation.id}
                       className="rounded-[12px] bg-white p-4"
@@ -2521,7 +2539,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
               {/* ── Loaded ────────────────────────────────────────────────── */}
               {medicationsStatus === 'loaded' && (
                 <div className="flex flex-col gap-3">
-                  {patient.medications.map((med) => {
+                  {medications.map((med) => {
                     const statusStyles: Record<
                       'active' | 'discontinued' | 'completed',
                       { border: string; color: string; label: string }

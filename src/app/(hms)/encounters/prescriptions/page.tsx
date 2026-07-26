@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import {
   ADDITIONAL_OPTION_DEFS,
@@ -215,6 +216,8 @@ function PrescriptionSkeleton() {
 
 export default function PrescriptionsPage() {
   const toast = useToast();
+  const { user } = useAuth();
+  const prescribingDoctorName = user?.name ?? PRESCRIBING_DOCTOR.name;
   const patient = MOCK_PRESCRIPTION_PATIENT;
 
   const [pageState, setPageState] = useState<PageState>('loading');
@@ -1128,7 +1131,7 @@ export default function PrescriptionsPage() {
                             className="text-base leading-6 font-semibold"
                             style={{ color: '#0D2630' }}
                           >
-                            {PRESCRIBING_DOCTOR.name}
+                            {prescribingDoctorName}
                           </p>
                           <p className="text-sm leading-5.5" style={{ color: '#4A7080' }}>
                             {PRESCRIBING_DOCTOR.credentials}

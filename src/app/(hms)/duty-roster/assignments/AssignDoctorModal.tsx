@@ -31,7 +31,7 @@ export function AssignDoctorModal({
 }: {
   doctor: AssignableDoctor;
   onClose: () => void;
-  onSave: (doctor: AssignableDoctor, notes: string) => void;
+  onSave: (doctor: AssignableDoctor, notes: string, effectiveDate: string) => void;
 }) {
   const toast = useToast();
   const [ward, setWard] = useState(doctor.currentWard ?? WARD_OPTIONS[0]!);
@@ -43,7 +43,11 @@ export function AssignDoctorModal({
       toast.error('Required', 'Please select a ward.');
       return;
     }
-    onSave({ ...doctor, currentWard: ward, status: 'ASSIGNED' }, notes.trim());
+    onSave(
+      { ...doctor, currentWard: ward, status: 'ASSIGNED' },
+      notes.trim(),
+      effectiveDate.trim() || 'Today',
+    );
     toast.success('Doctor assigned', `${doctor.name} has been assigned to ${ward}.`);
   }
 

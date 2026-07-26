@@ -21,12 +21,11 @@ import {
   Send,
   type LucideIcon,
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
-import {
-  FALLBACK_PATIENT_DETAIL,
-  MOCK_PATIENTS,
-  MOCK_PATIENT_DETAILS,
-} from '@/features/patients/__mocks__/patientFixtures';
+import { MOCK_PATIENTS, getPatientDetail } from '@/features/patients/__mocks__/patientFixtures';
+import { OUR_DEPARTMENT } from '@/features/registration/__mocks__/referralFixtures';
+import { addReferral } from '@/features/registration/store/referralStore';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -152,8 +151,9 @@ function SkeletonReasonSection() {
 export default function ReferPatientPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
   const { id } = use(params);
-  const patient = MOCK_PATIENT_DETAILS[id] ?? FALLBACK_PATIENT_DETAIL;
+  const patient = getPatientDetail(id);
   // MOCK_PATIENTS (list view) carries the avatar color used across list/queue
   // screens — reused here so the same patient shows the same avatar color
   // everywhere rather than defaulting every referral to one flat brand color.
@@ -192,6 +192,22 @@ export default function ReferPatientPage({ params }: { params: Promise<{ id: str
       return;
     }
     const dept = DEPARTMENTS.find((d) => d.id === selectedDept);
+    // Actually creates the Referral now, in the same shared store Registration's
+    // own workspace and this doctor's own Incoming Referrals tab read/write —
+    // previously this only ever showed a toast and created nothing anywhere.
+    addReferral({
+      id: `REF-2026-NEW-${Date.now().toString().slice(-6)}`,
+      patientName: patient.name,
+      mrn: patient.mrn,
+      direction: 'Outgoing',
+      fromDepartment: OUR_DEPARTMENT,
+      toDepartment: dept?.label ?? 'Unknown Department',
+      referredBy: user?.name ?? 'Unknown Doctor',
+      date: new Date().toISOString(),
+      status: 'Pending',
+      priority: isUrgent ? 'Urgent' : 'Normal',
+      reason: reason.trim(),
+    });
     toast.success(
       'Referral sent',
       `${patient.name} has been referred to ${dept?.label ?? 'the selected department'}.`,
