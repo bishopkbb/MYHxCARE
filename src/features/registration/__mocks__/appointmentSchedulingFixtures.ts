@@ -43,6 +43,26 @@ export type ScheduledAppointment = {
   baseStatus: 'Confirmed' | 'Scheduled' | 'Cancelled';
 };
 
+/** The single source of truth for "what status does this appointment show
+ * right now" — used by both Registration's own calendar and Doctor's
+ * Dashboard's Appointments page, so the two never derive it differently. */
+export function deriveStatus(entry: ScheduledAppointment, now: number): AppointmentStatus {
+  if (entry.baseStatus === 'Cancelled') return 'Cancelled';
+  const start = new Date(entry.dateTime).getTime();
+  const end = start + entry.durationMinutes * 60_000;
+  if (now < start) return entry.baseStatus;
+  if (now < end) return 'In Progress';
+  return 'Completed';
+}
+
+export function isSameCalendarDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
 export const DEPARTMENT_OPTIONS: SelectOption[] = [
   { value: 'General Outpatient Clinic', label: 'General Outpatient Clinic' },
   { value: 'Paediatrics', label: 'Paediatrics' },

@@ -37,13 +37,20 @@ import {
   DURATION_OPTIONS,
   FEE_BY_VISIT_TYPE,
   PATIENT_UPCOMING_APPOINTMENTS,
-  SEED_APPOINTMENTS,
   VISIT_TYPE_OPTIONS,
+  deriveStatus,
+  isSameCalendarDay,
   type AppointmentStatus,
   type ScheduledAppointment,
   type SchedulingDoctor,
   type UpcomingAppointment,
 } from '@/features/registration/__mocks__/appointmentSchedulingFixtures';
+import {
+  bookAppointment as bookAppointmentInStore,
+  cancelAppointment as cancelAppointmentInStore,
+  rescheduleAppointment as rescheduleAppointmentInStore,
+  useScheduledAppointments,
+} from '@/features/registration/store/appointmentStore';
 
 const STATUS_CFG: Record<AppointmentStatus, { color: string; border: string; bg: string }> = {
   Confirmed: { color: '#22C55E', border: 'rgba(34,197,94,0.35)', bg: 'rgba(34,197,94,0.08)' },
@@ -67,23 +74,6 @@ function combineDateTime(dateStr: string, timeStr: string): Date {
   const [y, m, d] = dateStr.split('-').map(Number);
   const [hh, mm] = timeStr.split(':').map(Number);
   return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1, hh ?? 0, mm ?? 0, 0, 0);
-}
-
-function isSameCalendarDay(a: Date, b: Date): boolean {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
-function deriveStatus(entry: ScheduledAppointment, now: number): AppointmentStatus {
-  if (entry.baseStatus === 'Cancelled') return 'Cancelled';
-  const start = new Date(entry.dateTime).getTime();
-  const end = start + entry.durationMinutes * 60_000;
-  if (now < start) return entry.baseStatus;
-  if (now < end) return 'In Progress';
-  return 'Completed';
 }
 
 function slotTimes(): { hour: number; minute: number }[] {
@@ -136,7 +126,7 @@ export default function AppointmentSchedulingPage() {
     return () => clearInterval(t);
   }, []);
 
-  const [appointments, setAppointments] = useState<ScheduledAppointment[]>(SEED_APPOINTMENTS);
+  const appointments = useScheduledAppointments();
   const [patientUpcoming, setPatientUpcoming] = useState<UpcomingAppointment[]>(
     PATIENT_UPCOMING_APPOINTMENTS,
   );
@@ -231,7 +221,7 @@ export default function AppointmentSchedulingPage() {
       durationMinutes: Number(duration),
       baseStatus: 'Scheduled',
     };
-    setAppointments((prev) => [...prev, newEntry]);
+    bookAppointmentInStore(newEntry);
     setPatientUpcoming((prev) => [
       ...prev,
       {
@@ -263,9 +253,7 @@ export default function AppointmentSchedulingPage() {
   function confirmReschedule() {
     if (!selectedAppointment || !rescheduleDate || !rescheduleTime) return;
     const newDateTime = combineDateTime(rescheduleDate, rescheduleTime).toISOString();
-    setAppointments((prev) =>
-      prev.map((a) => (a.id === selectedAppointment.id ? { ...a, dateTime: newDateTime } : a)),
-    );
+    rescheduleAppointmentInStore(selectedAppointment.id, newDateTime);
     toast.success(
       'Appointment rescheduled',
       `${selectedAppointment.patientName} moved to ${formatHumanDate(newDateTime)} at ${formatTime(newDateTime)}.`,
@@ -281,9 +269,7 @@ export default function AppointmentSchedulingPage() {
       );
       return;
     }
-    setAppointments((prev) =>
-      prev.map((a) => (a.id === selectedAppointment.id ? { ...a, baseStatus: 'Cancelled' } : a)),
-    );
+    cancelAppointmentInStore(selectedAppointment.id);
     toast.success(
       'Appointment cancelled',
       `${selectedAppointment.patientName}'s appointment was cancelled.`,

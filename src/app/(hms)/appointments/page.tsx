@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { CalendarDays, AlertCircle, RefreshCw } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { formatTime } from '@/utils/datetime';
+import type { Appointment } from '@/features/appointments/__mocks__/appointmentFixtures';
 import {
-  MOCK_APPOINTMENTS,
-  type Appointment,
+  deriveStatus,
+  isSameCalendarDay,
   type AppointmentStatus,
-} from '@/features/appointments/__mocks__/appointmentFixtures';
+  type ScheduledAppointment,
+} from '@/features/registration/__mocks__/appointmentSchedulingFixtures';
+import { useScheduledAppointments } from '@/features/registration/store/appointmentStore';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -14,33 +19,42 @@ type PageState = 'loading' | 'loaded' | 'error';
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
+// Same 5-value vocabulary and colors as Registration's own calendar
+// (registration/appointments/page.tsx's STATUS_CFG) — one status, one look,
+// app-wide.
 const STATUS_CFG: Record<
   AppointmentStatus,
   { label: string; color: string; bg: string; border: string }
 > = {
-  confirmed: {
+  Confirmed: {
     label: 'Confirmed',
-    color: '#16A34A',
-    bg: 'rgba(22,163,74,0.08)',
-    border: 'rgba(22,163,74,0.28)',
+    color: '#22C55E',
+    bg: 'rgba(34,197,94,0.08)',
+    border: 'rgba(34,197,94,0.35)',
   },
-  urgent: {
-    label: 'Urgent',
-    color: '#EF4444',
-    bg: 'rgba(239,68,68,0.08)',
-    border: 'rgba(239,68,68,0.28)',
+  Scheduled: {
+    label: 'Scheduled',
+    color: '#00B4D8',
+    bg: 'rgba(0,180,216,0.08)',
+    border: 'rgba(0,180,216,0.35)',
   },
-  pending: {
-    label: 'Pending',
-    color: '#D97706',
-    bg: 'rgba(217,119,6,0.08)',
-    border: 'rgba(217,119,6,0.28)',
+  'In Progress': {
+    label: 'In Progress',
+    color: '#F59E0B',
+    bg: 'rgba(245,158,11,0.08)',
+    border: 'rgba(245,158,11,0.35)',
   },
-  cancelled: {
+  Completed: {
+    label: 'Completed',
+    color: '#8B5CF6',
+    bg: 'rgba(139,92,246,0.08)',
+    border: 'rgba(139,92,246,0.35)',
+  },
+  Cancelled: {
     label: 'Cancelled',
-    color: '#6B7280',
-    bg: 'rgba(107,114,128,0.08)',
-    border: 'rgba(107,114,128,0.28)',
+    color: '#8A98A3',
+    bg: 'rgba(138,152,163,0.06)',
+    border: 'rgba(138,152,163,0.35)',
   },
 };
 
@@ -134,20 +148,51 @@ function AppointmentCard({ appt }: { appt: Appointment }) {
   );
 }
 
+// Converts a real, shared ScheduledAppointment (appointmentStore.ts —
+// SYS-012) into this screen's own display shape, deriving the same status
+// Registration's own calendar would show for it.
+function scheduledAppointmentToAppointment(a: ScheduledAppointment, now: number): Appointment {
+  return {
+    id: a.id,
+    time: formatTime(a.dateTime),
+    patientName: a.patientName,
+    type: a.visitType,
+    status: deriveStatus(a, now),
+  };
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function AppointmentsPage() {
   const [pageState, setPageState] = useState<PageState>('loading');
+  const { user } = useAuth();
+  const allAppointments = useScheduledAppointments();
+  // Matches registration/appointments/page.tsx's own pattern — Date.now()
+  // can't be called directly during render (impure), so status/day
+  // derivation reads from state that ticks on an interval instead.
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(t);
+  }, []);
+
   function handleRetry() {
     setPageState('loading');
     setTimeout(() => setPageState('loaded'), 800);
   }
+
+  const todaysAppointments = allAppointments
+    .filter(
+      (a) => a.doctorId === user?.id && isSameCalendarDay(new Date(a.dateTime), new Date(now)),
+    )
+    .sort((a, b) => a.dateTime.localeCompare(b.dateTime))
+    .map((a) => scheduledAppointmentToAppointment(a, now));
 
   const todayLabel = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Africa/Lagos',
@@ -232,7 +277,7 @@ export default function AppointmentsPage() {
 
             {/* Loaded */}
             {pageState === 'loaded' &&
-              (MOCK_APPOINTMENTS.length === 0 ? (
+              (todaysAppointments.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-3 py-20">
                   <div
                     className="flex items-center justify-center rounded-full"
@@ -254,7 +299,7 @@ export default function AppointmentsPage() {
                   </p>
                 </div>
               ) : (
-                MOCK_APPOINTMENTS.map((appt) => <AppointmentCard key={appt.id} appt={appt} />)
+                todaysAppointments.map((appt) => <AppointmentCard key={appt.id} appt={appt} />)
               ))}
           </div>
         </div>
