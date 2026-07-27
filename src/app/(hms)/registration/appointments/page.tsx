@@ -22,6 +22,7 @@ import { PermissionGate } from '@components/shared/PermissionGate';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import {
@@ -119,6 +120,8 @@ function TimeInput({ value, onChange }: { value: string; onChange: (v: string) =
 export default function AppointmentSchedulingPage() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const actorName = user?.name ?? 'Registration Officer';
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -220,6 +223,9 @@ export default function AppointmentSchedulingPage() {
       dateTime,
       durationMinutes: Number(duration),
       baseStatus: 'Scheduled',
+      patientId: selectedPatient.id,
+      bookedBy: actorName,
+      bookedOn: new Date().toISOString(),
     };
     bookAppointmentInStore(newEntry);
     setPatientUpcoming((prev) => [

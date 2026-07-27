@@ -1,25 +1,13 @@
 /**
  * Mock fixtures for the Check-In screen. One searchable sample patient
- * (matching the Patient Profile / Patient Directory persona) with a single
- * scheduled appointment for today.
+ * (matching the Patient Profile / Patient Directory persona) — their
+ * appointment now lives in the shared appointmentStore.ts (SYS-012), not
+ * here.
  * Swap out by pointing hooks to real endpoints in Phase 6.
  */
 
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
 import type { Allergy, Gender } from '@/types/patient.types';
-
-function todayAt(hour: number, minute: number): string {
-  const d = new Date();
-  d.setHours(hour, minute, 0, 0);
-  return d.toISOString();
-}
-
-function daysAgoAt(n: number, hour: number, minute: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  d.setHours(hour, minute, 0, 0);
-  return d.toISOString();
-}
 
 export type CoverageStatus = 'Valid' | 'Expired' | 'Pending';
 
@@ -43,20 +31,6 @@ export type CheckInPatient = {
     coverageStatus: CoverageStatus;
     validTill: string;
   };
-};
-
-export type AppointmentStatus = 'Scheduled' | 'Confirmed' | 'Cancelled';
-
-export type CheckInAppointment = {
-  id: string;
-  patientId: string;
-  dateTime: string;
-  status: AppointmentStatus;
-  department: string;
-  physician: string;
-  purpose: string;
-  bookedBy: string;
-  bookedOn: string;
 };
 
 // The one searchable sample patient — matches the Patient Directory /
@@ -101,18 +75,6 @@ export const CHECKIN_PATIENT_SEARCH_KEYS = [
   '0803 456 7890',
   '08034567890',
 ];
-
-export const MOCK_CHECKIN_APPOINTMENT: CheckInAppointment = {
-  id: 'APT-2026-01458',
-  patientId: 'dp-001',
-  dateTime: todayAt(10, 0),
-  status: 'Scheduled',
-  department: 'General Outpatient Clinic',
-  physician: 'Dr. Jane Ezeonu (GP)',
-  purpose: 'General Consultation',
-  bookedBy: 'Adaobi Nwankwo (Staff)',
-  bookedOn: daysAgoAt(5, 9, 20),
-};
 
 export const VISIT_TYPE_OPTIONS: SelectOption[] = [
   { value: 'outpatient', label: 'Outpatient' },

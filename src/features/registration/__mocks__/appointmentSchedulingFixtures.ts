@@ -41,6 +41,12 @@ export type ScheduledAppointment = {
   dateTime: string; // ISO
   durationMinutes: number;
   baseStatus: 'Confirmed' | 'Scheduled' | 'Cancelled';
+  /** FK into DirectoryPatient.id space — only set for appointments booked
+   * through a real patient search (SYS-012); older seed rows leave it absent
+   * rather than fabricate one. */
+  patientId?: string;
+  bookedBy?: string;
+  bookedOn?: string; // ISO
 };
 
 /** The single source of truth for "what status does this appointment show
@@ -141,6 +147,21 @@ export const SEED_APPOINTMENTS: ScheduledAppointment[] = [
     dateTime: todayAt(14, 0),
     durationMinutes: 30,
     baseStatus: 'Scheduled',
+  },
+  // Migrated from checkInFixtures.ts's MOCK_CHECKIN_APPOINTMENT (SYS-012) —
+  // the Check-In screen's one demo appointment, now real store data instead
+  // of a disconnected static const.
+  {
+    id: 'APT-2026-01458',
+    doctorId: 'doc-jane',
+    patientName: 'Adaeze Chidinma Okonkwo',
+    visitType: 'General Consultation',
+    dateTime: todayAt(10, 0),
+    durationMinutes: 20,
+    baseStatus: 'Scheduled',
+    patientId: 'dp-001',
+    bookedBy: 'Adaobi Nwankwo (Staff)',
+    bookedOn: daysFromNowAt(-5, 9, 20),
   },
 
   // Dr. Michael Obi — Paediatrics

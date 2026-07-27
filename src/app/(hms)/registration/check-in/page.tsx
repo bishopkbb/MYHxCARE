@@ -33,15 +33,20 @@ import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
-import { getDoctorByName } from '@/features/shared/__mocks__/doctorDirectory';
+import { DOCTORS, getDoctorByName } from '@/features/shared/__mocks__/doctorDirectory';
 import { addQueueEntry } from '@/features/registration/store/registrationQueueStore';
+import { useScheduledAppointments } from '@/features/registration/store/appointmentStore';
+import {
+  deriveStatus,
+  type AppointmentStatus,
+  type ScheduledAppointment,
+} from '@/features/registration/__mocks__/appointmentSchedulingFixtures';
 import { formatDateTime, formatHumanDate, formatTime } from '@/utils/datetime';
 import {
   CHECKIN_PATIENT_SEARCH_KEYS,
   CONSULTING_ROOM_OPTIONS,
   DEPARTMENT_OPTIONS,
   ESTIMATED_WAIT_MINUTES,
-  MOCK_CHECKIN_APPOINTMENT,
   MOCK_CHECKIN_PATIENT,
   PHYSICIAN_OPTIONS,
   PURPOSE_OF_VISIT_OPTIONS,
@@ -49,7 +54,6 @@ import {
   TODAYS_QUEUE_COUNT_BEFORE_ASSIGNMENT,
   TOTAL_PATIENTS_IN_QUEUE,
   VISIT_TYPE_OPTIONS,
-  type CheckInAppointment,
   type CheckInPatient,
 } from '@/features/registration/__mocks__/checkInFixtures';
 
@@ -57,6 +61,38 @@ type Mode = 'verify' | 'walkin';
 
 function labelFor(options: { value: string; label: string }[], value: string): string {
   return options.find((o) => o.value === value)?.label ?? value;
+}
+
+type CheckInAppointmentView = {
+  id: string;
+  dateTime: string;
+  status: AppointmentStatus;
+  department: string;
+  physician: string;
+  purpose: string;
+  bookedBy: string;
+  bookedOn: string;
+};
+
+/** Converts a real ScheduledAppointment (the shared appointmentStore.ts
+ * shape) into this screen's own card-display shape — same file-local
+ * converter convention used throughout this session. Replaces the old
+ * standalone MOCK_CHECKIN_APPOINTMENT (SYS-012). */
+function scheduledAppointmentToCheckInView(
+  a: ScheduledAppointment,
+  now: number,
+): CheckInAppointmentView {
+  const doctor = DOCTORS.find((d) => d.id === a.doctorId);
+  return {
+    id: a.id,
+    dateTime: a.dateTime,
+    status: deriveStatus(a, now),
+    department: doctor?.department ?? 'Unknown Department',
+    physician: doctor?.name ?? 'Unknown Physician',
+    purpose: a.visitType,
+    bookedBy: a.bookedBy ?? 'Registration Officer',
+    bookedOn: a.bookedOn ?? a.dateTime,
+  };
 }
 
 function Card({
@@ -169,12 +205,13 @@ export default function CheckInPage() {
   const toast = useToast();
   const { user } = useAuth();
   const actorName = user?.name ?? 'Registration Officer';
+  const scheduledAppointments = useScheduledAppointments();
 
   const [mode, setMode] = useState<Mode>('verify');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchAttempted, setSearchAttempted] = useState(false);
   const [patient, setPatient] = useState<CheckInPatient | null>(null);
-  const [appointment, setAppointment] = useState<CheckInAppointment | null>(null);
+  const [appointment, setAppointment] = useState<CheckInAppointmentView | null>(null);
 
   const [visitDate, setVisitDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [visitDetails, setVisitDetails] = useState(EMPTY_VISIT_DETAILS);
@@ -227,10 +264,10 @@ export default function CheckInPage() {
     setClinicUnit(DEPARTMENT_OPTIONS[0]?.value ?? '');
 
     if (mode === 'verify') {
-      const matched =
-        MOCK_CHECKIN_APPOINTMENT.patientId === MOCK_CHECKIN_PATIENT.id
-          ? MOCK_CHECKIN_APPOINTMENT
-          : null;
+      const real = scheduledAppointments.find(
+        (a) => a.patientId === MOCK_CHECKIN_PATIENT.id && a.baseStatus !== 'Cancelled',
+      );
+      const matched = real ? scheduledAppointmentToCheckInView(real, Date.now()) : null;
       setAppointment(matched);
       if (matched) {
         const departmentValue =
