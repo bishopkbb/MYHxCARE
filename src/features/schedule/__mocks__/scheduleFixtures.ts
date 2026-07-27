@@ -57,7 +57,10 @@ export type MonthStat = {
 };
 
 export const MOCK_DOCTOR = {
-  name: 'Dr. Emeka Obi',
+  // Was 'Dr. Emeka Obi' — collided with the real Pharmacist demo login
+  // persona, 'Mr. Emeka Obi' (usr_003, authFixtures.ts) — a different
+  // person, different role (SYS-005).
+  name: 'Dr. Uzoma Nnaji',
   specialty: 'General Practice',
   weekLabel: 'Jun 30 – Jul 6, 2026',
 };
@@ -207,8 +210,8 @@ export const MOCK_ON_CALL_ROTA: OnCallEntry[] = [
   },
   {
     id: 'oc3',
-    initials: 'EO',
-    name: 'Dr. Emeka Obi',
+    initials: 'UN',
+    name: 'Dr. Uzoma Nnaji',
     subtitleLabel: 'Fri, Jul 4',
     timeRange: '19:00 – 07:00',
     isNow: false,

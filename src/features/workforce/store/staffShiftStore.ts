@@ -1,21 +1,27 @@
 'use client';
 
 /**
- * The canonical StaffShift entity + reactive store — replacing six
+ * The canonical StaffShift entity + reactive store — replacing four
  * independently-declared, independently-seeded shift populations
  * (Registration's `RegistrationShift`, Medical Records' `RecordsShift`,
  * Nurse Station's `NurseShift`, and Doctor's Dashboard/Duty Roster's
- * `DoctorShift`, all structurally near-identical; My Schedule's own
- * lowercase `ShiftType` is unified by consuming this store directly, see
- * `MYHXCARE_SYSTEM_CONSISTENCY_REGISTER.md` SYS-005). Every module's own
+ * `DoctorShift`, all structurally near-identical). Every module's own
  * audit docs referred to reusing a canonical `StaffShift` entity that did
  * not actually exist anywhere in the codebase — this is that entity, finally
  * built.
  *
- * Deliberately NOT unified here: Shift Handover's own `ShiftType` ('Day'|
- * 'Night') — that's a handover *record's* own metadata field, a different
- * concept from a staff roster entry, not another instance of this
- * duplication (see SYS-005's remediation notes for the reasoning).
+ * Deliberately NOT unified here (still open, see
+ * `MYHXCARE_SYSTEM_CONSISTENCY_REGISTER.md` SYS-005): My Schedule's own
+ * lowercase `ShiftType` — both the Doctor (`schedule/__mocks__/
+ * scheduleFixtures.ts`) and Nurse (`nursing/__mocks__/nurseScheduleFixtures.ts`,
+ * an undocumented structural duplicate of the same shape) variants — and
+ * Shift Handover's own `ShiftType` ('Day'|'Night'), a handover *record's*
+ * own metadata field, a different concept from a staff roster entry. None
+ * of these three import or read this store; they remain fully separate
+ * fixtures. Unifying them needs a date dimension this store doesn't have,
+ * staffId-linked seed rows neither roster currently carries, and a decision
+ * on Shift Handover's 12-hour Day/Night vs. this store's 8-hour Morning/
+ * Afternoon/Night granularity — a larger structural pass, not a rename.
  *
  * Each of the four migrated workspaces keeps its own long-standing display
  * shape (`RegistrationShift`/`RecordsShift`/`NurseShift`/`DoctorShift`) as a
