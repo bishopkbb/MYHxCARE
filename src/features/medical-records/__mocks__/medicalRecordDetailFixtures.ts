@@ -502,7 +502,7 @@ export type ReferralEntry = {
   toProvider: string;
   reason: string;
   dateReferred: string; // ISO
-  status: 'Pending' | 'Accepted' | 'Completed';
+  status: 'Pending' | 'Accepted' | 'Completed' | 'Cancelled';
 };
 
 export const MOCK_REFERRALS: ReferralEntry[] = [

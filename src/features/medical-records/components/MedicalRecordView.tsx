@@ -42,6 +42,8 @@ import {
   type PatientProfile,
 } from '@/features/registration/__mocks__/patientProfileFixtures';
 import { useDirectoryPatients } from '@/features/registration/store/patientDirectoryStore';
+import type { Referral } from '@/features/registration/__mocks__/referralFixtures';
+import { useReferrals } from '@/features/registration/store/referralStore';
 import {
   getPatientDetail,
   resolvePatientIdByMrn,
@@ -521,7 +523,24 @@ const REFERRAL_STATUS_COLOR: Record<string, string> = {
   Pending: '#F59E0B',
   Accepted: '#00B4D8',
   Completed: '#22C55E',
+  Cancelled: '#8A98A3',
 };
+
+/** Converts a real, shared Referral (referralStore.ts — already correctly
+ * cross-module for Registration/Doctor's Dashboard, SYS-006) into this tab's
+ * own long-standing ReferralEntry display shape. */
+function referralToReferralEntry(r: Referral): ReferralEntry {
+  return {
+    id: r.id,
+    toDepartment: r.toDepartment,
+    // No named-provider field exists on the real entity — reuse the
+    // department rather than fabricate a person's name.
+    toProvider: r.toDepartment,
+    reason: r.reason,
+    dateReferred: r.date,
+    status: r.status,
+  };
+}
 
 function ReferralsSection({ referrals }: { referrals: ReferralEntry[] }) {
   return (
@@ -1120,7 +1139,15 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
     ...(isCuratedOrDemo ? MOCK_PRESCRIPTIONS : []),
   ];
   const immunizations = isCuratedOrDemo ? MOCK_IMMUNIZATIONS : [];
-  const referrals = isCuratedOrDemo ? MOCK_REFERRALS : [];
+  // Real, live referrals (referralStore.ts — SYS-006), merged ahead of the
+  // fixture/empty list. Referral already carries a real mrn field, so this
+  // is a direct flat-array filter, same as labResults/visits above.
+  const allReferrals = useReferrals();
+  const realReferrals = allReferrals.filter((r) => r.mrn === patient.mrn);
+  const referrals: ReferralEntry[] = [
+    ...realReferrals.map(referralToReferralEntry),
+    ...(isCuratedOrDemo ? MOCK_REFERRALS : []),
+  ];
   const insuranceClaims = isCuratedOrDemo ? MOCK_INSURANCE_CLAIMS : [];
   const recordActivity = isCuratedOrDemo ? RECORD_ACTIVITY : generateActivityFromVisits(visits);
   const recordAccess = isCuratedOrDemo ? RECORD_ACCESS : [];
