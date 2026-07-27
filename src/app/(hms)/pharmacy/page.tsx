@@ -282,7 +282,7 @@ export default function PharmacyDashboardPage() {
         </div>
 
         {/* Stat cards */}
-        <div className="mt-4 grid grid-cols-2 gap-3.5 sm:grid-cols-3 xl:grid-cols-6 xl:gap-4">
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {pageState === 'loading' ? (
             Array.from({ length: 6 }).map((_, i) => <SkeletonStatCard key={i} />)
           ) : (
