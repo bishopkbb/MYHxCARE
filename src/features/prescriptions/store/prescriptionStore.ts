@@ -13,16 +13,32 @@
  * Pharmacy module exists (`/pharmacy` is a bare stub) — this store only
  * closes the "did the prescription itself get created" half of the claim.
  *
- * Plain map, not a reactive store — every consumer reads it once per mount/
- * patient-change, the same reasoning as nursingAssessmentStore.ts. Swap out
- * by pointing hooks to a real prescriptions endpoint in Phase 6.
+ * Real, shared, reactive state (`useSyncExternalStore`, same pattern as
+ * `labResultStore.ts`) — not a plain map, so a screen mounted independently
+ * of the one that sent a prescription (Pharmacy's future dispensing queue)
+ * can see it update live instead of only on its own next mount. See
+ * MYHXCARE_SYSTEM_CONSISTENCY_REGISTER.md SYS-014. Swap out by pointing
+ * hooks to a real prescriptions endpoint in Phase 6.
  */
+
+import { useSyncExternalStore } from 'react';
 
 import type { Medication } from '@/features/patients/__mocks__/patientFixtures';
 import type { PrescriptionLine } from '@/features/prescriptions/__mocks__/prescriptionFixtures';
 
 const prescriptionsByPatient = new Map<string, Medication[]>();
 let seq = 0;
+const listeners = new Set<() => void>();
+const EMPTY: Medication[] = [];
+
+function emit() {
+  for (const listener of listeners) listener();
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
 
 export function addPrescription(
   patientId: string,
@@ -44,8 +60,21 @@ export function addPrescription(
   });
   const existing = prescriptionsByPatient.get(patientId) ?? [];
   prescriptionsByPatient.set(patientId, [...newMeds, ...existing]);
+  emit();
 }
 
 export function getPrescriptionsForPatient(patientId: string): Medication[] {
-  return prescriptionsByPatient.get(patientId) ?? [];
+  return prescriptionsByPatient.get(patientId) ?? EMPTY;
+}
+
+/** Reactive hook — re-renders the caller whenever a prescription is sent for
+ * the given patient, from any screen. Not consumed yet (Pharmacy doesn't
+ * exist), added ahead of its first real consumer the same way
+ * `labResultStore.ts`'s `useLabResults()` was. */
+export function usePrescriptionsForPatient(patientId: string): Medication[] {
+  return useSyncExternalStore(
+    subscribe,
+    () => getPrescriptionsForPatient(patientId),
+    () => getPrescriptionsForPatient(patientId),
+  );
 }
