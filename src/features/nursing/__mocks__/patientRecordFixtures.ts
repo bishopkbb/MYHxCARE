@@ -7,6 +7,10 @@ import type { Allergy } from '@/types/patient.types';
 import { type NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
 import { getEffectiveRoster } from '@/features/nursing/store/nursingWorkflowStore';
 import type { CarePlanStatus } from '@/features/nursing/__mocks__/carePlansFixtures';
+import {
+  getPatientDetail,
+  resolvePatientIdByMrn,
+} from '@/features/patients/__mocks__/patientFixtures';
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
@@ -780,6 +784,15 @@ const CURATED_DETAIL: Record<string, Omit<PatientRecordDetail, 'patient'>> = {
 
 function fallbackDetail(patient: NursePatient): Omit<PatientRecordDetail, 'patient'> {
   const dobYear = new Date().getFullYear() - patient.age;
+  // NursePatient itself has no allergies field — this used to always show
+  // "No known allergies" for every generated roster patient, silently
+  // asserting confirmed safety for data that was simply never checked
+  // (SYS-001). Now cross-checks the same real populations the doctor's
+  // chart and patient directory already draw from, joined by mrn.
+  const crossPopulationId = resolvePatientIdByMrn(patient.mrn);
+  const realAllergies: Allergy[] = crossPopulationId
+    ? getPatientDetail(crossPopulationId).allergies
+    : [];
   return {
     dob: `${dobYear}-06-15`,
     phone: '0800 000 0000',
@@ -791,7 +804,7 @@ function fallbackDetail(patient: NursePatient): Omit<PatientRecordDetail, 'patie
     religion: 'Not specified',
     admissionDate: atOffset(-1, 9, 0),
     lengthOfStayDays: 1,
-    allergies: [],
+    allergies: realAllergies,
     codeStatus: 'Full Code',
     secondaryDiagnosis: 'None',
     diagnosisTag: 'General Outpatient Clinic',
@@ -805,7 +818,10 @@ function fallbackDetail(patient: NursePatient): Omit<PatientRecordDetail, 'patie
       painScore: 2,
       recordedAt: patient.vitals.recordedAt,
     },
-    alerts: [...baseAlerts(patient.nextMedication, patient.nextMedicationTime), noAllergyAlert()],
+    alerts: [
+      ...baseAlerts(patient.nextMedication, patient.nextMedicationTime),
+      ...(realAllergies.length > 0 ? realAllergies.map(allergyAlert) : [noAllergyAlert()]),
+    ],
     carePlan: [
       { id: 'cp-1', label: 'Symptom Management', status: 'In Progress' },
       { id: 'cp-2', label: 'Discharge Planning', status: 'Planned' },

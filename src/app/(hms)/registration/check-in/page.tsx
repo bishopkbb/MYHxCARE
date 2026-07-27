@@ -22,6 +22,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
+import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormField } from '@components/shared/FormField';
 import { FormSelect } from '@components/shared/FormSelect';
@@ -598,399 +599,407 @@ export default function CheckInPage() {
 
           {/* ── Main content ─────────────────────────────────────────────── */}
           {patient && (
-            <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
-              {/* ── Left column ───────────────────────────────────────────── */}
-              <div className="flex flex-col gap-4">
-                <Card icon={UserIcon} title="Patient Information">
-                  <div className="flex items-start gap-3">
-                    <UserAvatar initials={patient.initials} size={64} textSize={22} />
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p
-                          className="font-display font-semibold"
-                          style={{ fontSize: 16, color: '#0D2630' }}
-                        >
-                          {patient.fullName}
+            <>
+              <div className="mt-5">
+                <AllergyBanner allergies={patient.allergies} />
+              </div>
+              <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
+                {/* ── Left column ───────────────────────────────────────────── */}
+                <div className="flex flex-col gap-4">
+                  <Card icon={UserIcon} title="Patient Information">
+                    <div className="flex items-start gap-3">
+                      <UserAvatar initials={patient.initials} size={64} textSize={22} />
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p
+                            className="font-display font-semibold"
+                            style={{ fontSize: 16, color: '#0D2630' }}
+                          >
+                            {patient.fullName}
+                          </p>
+                          <span
+                            className="rounded-full px-2 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              color: '#22C55E',
+                              border: '1px solid rgba(34,197,94,0.4)',
+                            }}
+                          >
+                            {patient.status}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 14 }}>
+                          <span style={{ color: '#00B4D8' }}>{patient.mrn}</span>
+                          <span style={{ color: '#8A98A3' }}>
+                            {' '}
+                            · Patient ID: {patient.patientId}
+                          </span>
                         </p>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                          <BannerStat icon={Calendar} value={`${patient.age} Yrs`} />
+                          <BannerStat icon={UserIcon} value={patient.gender} />
+                          <BannerStat icon={Droplet} value={patient.bloodGroup} />
+                          <BannerStat icon={Heart} value={patient.maritalStatus} />
+                          <BannerStat icon={Globe2} value={patient.nationality} />
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card icon={ClipboardCheck} title="Visit Details">
+                    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                      <FormField label="Visit Type" htmlFor="visitType" required>
+                        <FormSelect
+                          id="visitType"
+                          value={visitDetails.visitType}
+                          onChange={(v) => setVisitDetails((p) => ({ ...p, visitType: v }))}
+                          options={VISIT_TYPE_OPTIONS}
+                          placeholder="Select visit type"
+                        />
+                      </FormField>
+                      <FormField label="Visit Date" htmlFor="visitDate" required>
+                        <FormDateInput
+                          id="visitDate"
+                          value={visitDate}
+                          onChange={(e) => setVisitDate(e.target.value)}
+                        />
+                      </FormField>
+                      <FormField label="Department" htmlFor="department" required>
+                        <FormSelect
+                          id="department"
+                          value={visitDetails.department}
+                          onChange={(v) => {
+                            setVisitDetails((p) => ({ ...p, department: v }));
+                            setClinicUnit(v);
+                          }}
+                          options={DEPARTMENT_OPTIONS}
+                          placeholder="Select department"
+                        />
+                      </FormField>
+                      <FormField label="Purpose of Visit" htmlFor="purposeOfVisit" required>
+                        <FormSelect
+                          id="purposeOfVisit"
+                          value={visitDetails.purposeOfVisit}
+                          onChange={(v) => setVisitDetails((p) => ({ ...p, purposeOfVisit: v }))}
+                          options={PURPOSE_OF_VISIT_OPTIONS}
+                          placeholder="Select purpose"
+                        />
+                      </FormField>
+                      <FormField label="Attending Physician" htmlFor="physician">
+                        <FormSelect
+                          id="physician"
+                          value={visitDetails.physician}
+                          onChange={(v) => setVisitDetails((p) => ({ ...p, physician: v }))}
+                          options={PHYSICIAN_OPTIONS}
+                          placeholder="Select physician"
+                        />
+                      </FormField>
+                      {mode === 'verify' && appointment && (
+                        <FormField label="Appointment Time" htmlFor="appointmentTime">
+                          <input
+                            id="appointmentTime"
+                            disabled
+                            readOnly
+                            value={formatTime(appointment.dateTime)}
+                            className="h-11 w-full rounded-[10px] bg-[#F5FBFD] px-3.5 font-sans"
+                            style={{
+                              fontSize: 14,
+                              border: '1px solid rgba(0,100,130,0.18)',
+                              color: '#8A98A3',
+                            }}
+                          />
+                        </FormField>
+                      )}
+                      <div className="sm:col-span-2">
+                        <FormField label="Notes (Optional)" htmlFor="notes">
+                          <FormTextarea
+                            id="notes"
+                            rows={2}
+                            placeholder="Enter any notes..."
+                            value={visitDetails.notes}
+                            onChange={(e) =>
+                              setVisitDetails((p) => ({ ...p, notes: e.target.value }))
+                            }
+                          />
+                        </FormField>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card icon={Shield} title="Insurance Information">
+                    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                      <Field label="Insurance Provider" value={patient.insurance.provider} />
+                      <Field label="Policy Number" value={patient.insurance.policyNumber} />
+                      <div>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>Coverage Status</p>
                         <span
-                          className="rounded-full px-2 py-0.5 font-sans font-medium"
+                          className="mt-0.5 inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                          style={{
+                            fontSize: 14,
+                            color:
+                              patient.insurance.coverageStatus === 'Valid' ? '#22C55E' : '#EF4444',
+                            border: `1px solid ${patient.insurance.coverageStatus === 'Valid' ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`,
+                          }}
+                        >
+                          {patient.insurance.coverageStatus}
+                        </span>
+                      </div>
+                      <Field
+                        label="Valid Till"
+                        value={formatHumanDate(patient.insurance.validTill)}
+                      />
+                    </div>
+                  </Card>
+                </div>
+
+                {/* ── Middle column ─────────────────────────────────────────── */}
+                <div className="flex flex-col gap-4">
+                  {mode === 'verify' && (
+                    <Card
+                      icon={Info}
+                      title="Appointment Verification"
+                      headerAction={
+                        <span
+                          className="rounded-full px-2.5 py-0.5 font-sans font-medium"
+                          style={{
+                            fontSize: 14,
+                            color: appointment ? '#22C55E' : '#EF4444',
+                            border: `1px solid ${appointment ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`,
+                          }}
+                        >
+                          {appointment ? 'Appointment Found' : 'Not Found'}
+                        </span>
+                      }
+                    >
+                      {appointment ? (
+                        <>
+                          <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                            <Field label="Appointment ID" value={appointment.id} />
+                            <Field
+                              label="Appointment Date"
+                              value={formatHumanDate(appointment.dateTime)}
+                            />
+                            <Field
+                              label="Appointment Time"
+                              value={formatTime(appointment.dateTime)}
+                            />
+                            <div>
+                              <p style={{ fontSize: 14, color: '#8A98A3' }}>Status</p>
+                              <span
+                                className="mt-0.5 inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                                style={{
+                                  fontSize: 14,
+                                  color: '#00B4D8',
+                                  border: '1px solid rgba(0,180,216,0.4)',
+                                }}
+                              >
+                                {appointment.status}
+                              </span>
+                            </div>
+                            <Field label="Booked By" value={appointment.bookedBy} />
+                            <Field label="Booked On" value={formatDateTime(appointment.bookedOn)} />
+                          </div>
+                          <div
+                            className="mt-3.5 flex items-start gap-2.5 rounded-[10px] p-3"
+                            style={{
+                              background: 'rgba(34,197,94,0.06)',
+                              border: '1px solid rgba(34,197,94,0.25)',
+                            }}
+                          >
+                            <CheckCircle2
+                              style={{ width: 16, height: 16, color: '#22C55E' }}
+                              className="mt-0.5 shrink-0"
+                            />
+                            <div>
+                              <p
+                                className="font-sans font-medium"
+                                style={{ fontSize: 14, color: '#166534' }}
+                              >
+                                Appointment is valid
+                              </p>
+                              <p style={{ fontSize: 14, color: '#166534' }}>
+                                Patient is scheduled for an appointment with {appointment.physician}{' '}
+                                in {appointment.department}.
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div
+                          className="flex items-start gap-2.5 rounded-[10px] p-3"
+                          style={{
+                            background: 'rgba(239,68,68,0.06)',
+                            border: '1px solid rgba(239,68,68,0.25)',
+                          }}
+                        >
+                          <AlertCircle
+                            style={{ width: 16, height: 16, color: '#EF4444' }}
+                            className="mt-0.5 shrink-0"
+                          />
+                          <div>
+                            <p
+                              className="font-sans font-medium"
+                              style={{ fontSize: 14, color: '#7F1D1D' }}
+                            >
+                              No appointment found for today
+                            </p>
+                            <p style={{ fontSize: 14, color: '#7F1D1D' }}>
+                              Switch to Walk-in Registration to check this patient in without a
+                              scheduled appointment.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </Card>
+                  )}
+
+                  <Card icon={ClipboardCheck} title="Check-In Summary">
+                    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                      <Field
+                        label="Check-In Date & Time"
+                        value={
+                          checkInDateTime
+                            ? formatDateTime(checkInDateTime)
+                            : formatDateTime(new Date())
+                        }
+                      />
+                      <Field label="Checked In By" value="Adaobi Nwankwo" />
+                      <div>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>Check-In Type</p>
+                        <span
+                          className="mt-0.5 inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                          style={{
+                            fontSize: 14,
+                            color: '#00B4D8',
+                            border: '1px solid rgba(0,180,216,0.4)',
+                          }}
+                        >
+                          {mode === 'verify' && appointment ? 'Appointment' : 'Walk-in'}
+                        </span>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>Payment Status</p>
+                        <span
+                          className="mt-0.5 inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
                           style={{
                             fontSize: 14,
                             color: '#22C55E',
                             border: '1px solid rgba(34,197,94,0.4)',
                           }}
                         >
-                          {patient.status}
+                          Covered ({patient.insurance.provider})
                         </span>
                       </div>
-                      <p style={{ fontSize: 14 }}>
-                        <span style={{ color: '#00B4D8' }}>{patient.mrn}</span>
-                        <span style={{ color: '#8A98A3' }}> · Patient ID: {patient.patientId}</span>
-                      </p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <BannerStat icon={Calendar} value={`${patient.age} Yrs`} />
-                        <BannerStat icon={UserIcon} value={patient.gender} />
-                        <BannerStat icon={Droplet} value={patient.bloodGroup} />
-                        <BannerStat icon={Heart} value={patient.maritalStatus} />
-                        <BannerStat icon={Globe2} value={patient.nationality} />
-                      </div>
                     </div>
-                  </div>
-                </Card>
-
-                <Card icon={ClipboardCheck} title="Visit Details">
-                  <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-                    <FormField label="Visit Type" htmlFor="visitType" required>
-                      <FormSelect
-                        id="visitType"
-                        value={visitDetails.visitType}
-                        onChange={(v) => setVisitDetails((p) => ({ ...p, visitType: v }))}
-                        options={VISIT_TYPE_OPTIONS}
-                        placeholder="Select visit type"
-                      />
-                    </FormField>
-                    <FormField label="Visit Date" htmlFor="visitDate" required>
-                      <FormDateInput
-                        id="visitDate"
-                        value={visitDate}
-                        onChange={(e) => setVisitDate(e.target.value)}
-                      />
-                    </FormField>
-                    <FormField label="Department" htmlFor="department" required>
-                      <FormSelect
-                        id="department"
-                        value={visitDetails.department}
-                        onChange={(v) => {
-                          setVisitDetails((p) => ({ ...p, department: v }));
-                          setClinicUnit(v);
-                        }}
-                        options={DEPARTMENT_OPTIONS}
-                        placeholder="Select department"
-                      />
-                    </FormField>
-                    <FormField label="Purpose of Visit" htmlFor="purposeOfVisit" required>
-                      <FormSelect
-                        id="purposeOfVisit"
-                        value={visitDetails.purposeOfVisit}
-                        onChange={(v) => setVisitDetails((p) => ({ ...p, purposeOfVisit: v }))}
-                        options={PURPOSE_OF_VISIT_OPTIONS}
-                        placeholder="Select purpose"
-                      />
-                    </FormField>
-                    <FormField label="Attending Physician" htmlFor="physician">
-                      <FormSelect
-                        id="physician"
-                        value={visitDetails.physician}
-                        onChange={(v) => setVisitDetails((p) => ({ ...p, physician: v }))}
-                        options={PHYSICIAN_OPTIONS}
-                        placeholder="Select physician"
-                      />
-                    </FormField>
-                    {mode === 'verify' && appointment && (
-                      <FormField label="Appointment Time" htmlFor="appointmentTime">
-                        <input
-                          id="appointmentTime"
-                          disabled
-                          readOnly
-                          value={formatTime(appointment.dateTime)}
-                          className="h-11 w-full rounded-[10px] bg-[#F5FBFD] px-3.5 font-sans"
-                          style={{
-                            fontSize: 14,
-                            border: '1px solid rgba(0,100,130,0.18)',
-                            color: '#8A98A3',
-                          }}
-                        />
-                      </FormField>
-                    )}
-                    <div className="sm:col-span-2">
-                      <FormField label="Notes (Optional)" htmlFor="notes">
-                        <FormTextarea
-                          id="notes"
-                          rows={2}
-                          placeholder="Enter any notes..."
-                          value={visitDetails.notes}
-                          onChange={(e) =>
-                            setVisitDetails((p) => ({ ...p, notes: e.target.value }))
-                          }
-                        />
-                      </FormField>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card icon={Shield} title="Insurance Information">
-                  <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-                    <Field label="Insurance Provider" value={patient.insurance.provider} />
-                    <Field label="Policy Number" value={patient.insurance.policyNumber} />
-                    <div>
-                      <p style={{ fontSize: 14, color: '#8A98A3' }}>Coverage Status</p>
-                      <span
-                        className="mt-0.5 inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                        style={{
-                          fontSize: 14,
-                          color:
-                            patient.insurance.coverageStatus === 'Valid' ? '#22C55E' : '#EF4444',
-                          border: `1px solid ${patient.insurance.coverageStatus === 'Valid' ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`,
-                        }}
-                      >
-                        {patient.insurance.coverageStatus}
-                      </span>
-                    </div>
-                    <Field
-                      label="Valid Till"
-                      value={formatHumanDate(patient.insurance.validTill)}
-                    />
-                  </div>
-                </Card>
-              </div>
-
-              {/* ── Middle column ─────────────────────────────────────────── */}
-              <div className="flex flex-col gap-4">
-                {mode === 'verify' && (
-                  <Card
-                    icon={Info}
-                    title="Appointment Verification"
-                    headerAction={
-                      <span
-                        className="rounded-full px-2.5 py-0.5 font-sans font-medium"
-                        style={{
-                          fontSize: 14,
-                          color: appointment ? '#22C55E' : '#EF4444',
-                          border: `1px solid ${appointment ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`,
-                        }}
-                      >
-                        {appointment ? 'Appointment Found' : 'Not Found'}
-                      </span>
-                    }
-                  >
-                    {appointment ? (
-                      <>
-                        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-                          <Field label="Appointment ID" value={appointment.id} />
-                          <Field
-                            label="Appointment Date"
-                            value={formatHumanDate(appointment.dateTime)}
-                          />
-                          <Field
-                            label="Appointment Time"
-                            value={formatTime(appointment.dateTime)}
-                          />
-                          <div>
-                            <p style={{ fontSize: 14, color: '#8A98A3' }}>Status</p>
-                            <span
-                              className="mt-0.5 inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                color: '#00B4D8',
-                                border: '1px solid rgba(0,180,216,0.4)',
-                              }}
-                            >
-                              {appointment.status}
-                            </span>
-                          </div>
-                          <Field label="Booked By" value={appointment.bookedBy} />
-                          <Field label="Booked On" value={formatDateTime(appointment.bookedOn)} />
-                        </div>
-                        <div
-                          className="mt-3.5 flex items-start gap-2.5 rounded-[10px] p-3"
-                          style={{
-                            background: 'rgba(34,197,94,0.06)',
-                            border: '1px solid rgba(34,197,94,0.25)',
-                          }}
-                        >
-                          <CheckCircle2
-                            style={{ width: 16, height: 16, color: '#22C55E' }}
-                            className="mt-0.5 shrink-0"
-                          />
-                          <div>
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 14, color: '#166534' }}
-                            >
-                              Appointment is valid
-                            </p>
-                            <p style={{ fontSize: 14, color: '#166534' }}>
-                              Patient is scheduled for an appointment with {appointment.physician}{' '}
-                              in {appointment.department}.
-                            </p>
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <div
-                        className="flex items-start gap-2.5 rounded-[10px] p-3"
-                        style={{
-                          background: 'rgba(239,68,68,0.06)',
-                          border: '1px solid rgba(239,68,68,0.25)',
-                        }}
-                      >
-                        <AlertCircle
-                          style={{ width: 16, height: 16, color: '#EF4444' }}
-                          className="mt-0.5 shrink-0"
-                        />
-                        <div>
-                          <p
-                            className="font-sans font-medium"
-                            style={{ fontSize: 14, color: '#7F1D1D' }}
-                          >
-                            No appointment found for today
-                          </p>
-                          <p style={{ fontSize: 14, color: '#7F1D1D' }}>
-                            Switch to Walk-in Registration to check this patient in without a
-                            scheduled appointment.
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </Card>
-                )}
+                </div>
 
-                <Card icon={ClipboardCheck} title="Check-In Summary">
-                  <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-                    <Field
-                      label="Check-In Date & Time"
-                      value={
-                        checkInDateTime
-                          ? formatDateTime(checkInDateTime)
-                          : formatDateTime(new Date())
-                      }
-                    />
-                    <Field label="Checked In By" value="Adaobi Nwankwo" />
-                    <div>
-                      <p style={{ fontSize: 14, color: '#8A98A3' }}>Check-In Type</p>
-                      <span
-                        className="mt-0.5 inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                        style={{
-                          fontSize: 14,
-                          color: '#00B4D8',
-                          border: '1px solid rgba(0,180,216,0.4)',
-                        }}
-                      >
-                        {mode === 'verify' && appointment ? 'Appointment' : 'Walk-in'}
-                      </span>
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 14, color: '#8A98A3' }}>Payment Status</p>
-                      <span
-                        className="mt-0.5 inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                        style={{
-                          fontSize: 14,
-                          color: '#22C55E',
-                          border: '1px solid rgba(34,197,94,0.4)',
-                        }}
-                      >
-                        Covered ({patient.insurance.provider})
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-
-              {/* ── Right column ──────────────────────────────────────────── */}
-              <div className="flex flex-col gap-4">
-                <Card icon={Users} title="Queue Assignment">
-                  <div
-                    className="flex flex-col items-center rounded-[10px] py-5"
-                    style={{ background: '#F5FBFD' }}
-                  >
-                    <p style={{ fontSize: 14, color: '#8A98A3' }}>Current Queue Number</p>
-                    <p
-                      className="font-display font-bold"
-                      style={{ fontSize: 40, color: '#00B4D8' }}
+                {/* ── Right column ──────────────────────────────────────────── */}
+                <div className="flex flex-col gap-4">
+                  <Card icon={Users} title="Queue Assignment">
+                    <div
+                      className="flex flex-col items-center rounded-[10px] py-5"
+                      style={{ background: '#F5FBFD' }}
                     >
-                      {queueNumber !== null ? String(queueNumber).padStart(3, '0') : '—'}
+                      <p style={{ fontSize: 14, color: '#8A98A3' }}>Current Queue Number</p>
+                      <p
+                        className="font-display font-bold"
+                        style={{ fontSize: 40, color: '#00B4D8' }}
+                      >
+                        {queueNumber !== null ? String(queueNumber).padStart(3, '0') : '—'}
+                      </p>
+                    </div>
+                    <div className="mt-3.5 grid grid-cols-3 gap-2 text-center">
+                      <Field label="Prefix" value={QUEUE_PREFIX} />
+                      <Field label="Today's Count" value={String(todaysCount)} />
+                      <Field label="Est. Wait Time" value={`~ ${ESTIMATED_WAIT_MINUTES} mins`} />
+                    </div>
+                    <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
+                      <button
+                        type="button"
+                        onClick={handleAssignQueue}
+                        disabled={queueNumber !== null || !visitDetailsValid}
+                        className="mt-3.5 flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                        style={{ fontSize: 14, background: '#00B4D8' }}
+                      >
+                        <Users style={{ width: 15, height: 15 }} />
+                        {queueNumber !== null ? 'Queue Number Assigned' : 'Assign Queue Number'}
+                      </button>
+                    </PermissionGate>
+                  </Card>
+
+                  <Card icon={MapPin} title="Route to Clinic">
+                    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                      <FormField label="Clinic/Unit" htmlFor="clinicUnit" required>
+                        <FormSelect
+                          id="clinicUnit"
+                          value={clinicUnit}
+                          onChange={setClinicUnit}
+                          options={DEPARTMENT_OPTIONS}
+                          placeholder="Select clinic"
+                        />
+                      </FormField>
+                      <FormField label="Consulting Room" htmlFor="consultingRoom">
+                        <FormSelect
+                          id="consultingRoom"
+                          value={consultingRoom}
+                          onChange={setConsultingRoom}
+                          options={CONSULTING_ROOM_OPTIONS}
+                          placeholder="Select room"
+                        />
+                      </FormField>
+                    </div>
+                    <div className="mt-3.5 grid grid-cols-2 gap-3.5">
+                      <Field
+                        label="Total Patients in Queue"
+                        value={String(TOTAL_PATIENTS_IN_QUEUE)}
+                      />
+                      <Field
+                        label="Next Available Doctor"
+                        value={
+                          visitDetails.physician
+                            ? labelFor(PHYSICIAN_OPTIONS, visitDetails.physician)
+                            : '—'
+                        }
+                      />
+                    </div>
+                  </Card>
+
+                  <Card icon={Bell} title="Notify Department">
+                    <p style={{ fontSize: 14, color: '#4A7080' }}>
+                      Send check-in notification to the selected department
                     </p>
-                  </div>
-                  <div className="mt-3.5 grid grid-cols-3 gap-2 text-center">
-                    <Field label="Prefix" value={QUEUE_PREFIX} />
-                    <Field label="Today's Count" value={String(todaysCount)} />
-                    <Field label="Est. Wait Time" value={`~ ${ESTIMATED_WAIT_MINUTES} mins`} />
-                  </div>
-                  <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
-                    <button
-                      type="button"
-                      onClick={handleAssignQueue}
-                      disabled={queueNumber !== null || !visitDetailsValid}
-                      className="mt-3.5 flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-                      style={{ fontSize: 14, background: '#00B4D8' }}
+                    <label
+                      className="mt-3 flex cursor-pointer items-center gap-2 font-sans"
+                      style={{ fontSize: 14, color: '#0D2630' }}
                     >
-                      <Users style={{ width: 15, height: 15 }} />
-                      {queueNumber !== null ? 'Queue Number Assigned' : 'Assign Queue Number'}
-                    </button>
-                  </PermissionGate>
-                </Card>
-
-                <Card icon={MapPin} title="Route to Clinic">
-                  <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-                    <FormField label="Clinic/Unit" htmlFor="clinicUnit" required>
-                      <FormSelect
-                        id="clinicUnit"
-                        value={clinicUnit}
-                        onChange={setClinicUnit}
-                        options={DEPARTMENT_OPTIONS}
-                        placeholder="Select clinic"
+                      <input
+                        type="checkbox"
+                        checked={notifyChecked}
+                        onChange={(e) => setNotifyChecked(e.target.checked)}
+                        style={{ accentColor: '#00B4D8' }}
+                        className="size-4 cursor-pointer rounded"
                       />
-                    </FormField>
-                    <FormField label="Consulting Room" htmlFor="consultingRoom">
-                      <FormSelect
-                        id="consultingRoom"
-                        value={consultingRoom}
-                        onChange={setConsultingRoom}
-                        options={CONSULTING_ROOM_OPTIONS}
-                        placeholder="Select room"
-                      />
-                    </FormField>
-                  </div>
-                  <div className="mt-3.5 grid grid-cols-2 gap-3.5">
-                    <Field
-                      label="Total Patients in Queue"
-                      value={String(TOTAL_PATIENTS_IN_QUEUE)}
-                    />
-                    <Field
-                      label="Next Available Doctor"
-                      value={
-                        visitDetails.physician
-                          ? labelFor(PHYSICIAN_OPTIONS, visitDetails.physician)
-                          : '—'
-                      }
-                    />
-                  </div>
-                </Card>
-
-                <Card icon={Bell} title="Notify Department">
-                  <p style={{ fontSize: 14, color: '#4A7080' }}>
-                    Send check-in notification to the selected department
-                  </p>
-                  <label
-                    className="mt-3 flex cursor-pointer items-center gap-2 font-sans"
-                    style={{ fontSize: 14, color: '#0D2630' }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={notifyChecked}
-                      onChange={(e) => setNotifyChecked(e.target.checked)}
-                      style={{ accentColor: '#00B4D8' }}
-                      className="size-4 cursor-pointer rounded"
-                    />
-                    {clinicUnit
-                      ? labelFor(DEPARTMENT_OPTIONS, clinicUnit)
-                      : 'No department selected'}
-                  </label>
-                  <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
-                    <button
-                      type="button"
-                      onClick={handleNotifyDepartment}
-                      disabled={notified}
-                      className="mt-3.5 flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-                      style={{ fontSize: 14, background: '#00B4D8' }}
-                    >
-                      <Bell style={{ width: 15, height: 15 }} />
-                      {notified ? 'Department Notified' : 'Notify Department'}
-                    </button>
-                  </PermissionGate>
-                </Card>
+                      {clinicUnit
+                        ? labelFor(DEPARTMENT_OPTIONS, clinicUnit)
+                        : 'No department selected'}
+                    </label>
+                    <PermissionGate permission={PERMISSIONS.PATIENTS_WRITE}>
+                      <button
+                        type="button"
+                        onClick={handleNotifyDepartment}
+                        disabled={notified}
+                        className="mt-3.5 flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                        style={{ fontSize: 14, background: '#00B4D8' }}
+                      >
+                        <Bell style={{ width: 15, height: 15 }} />
+                        {notified ? 'Department Notified' : 'Notify Department'}
+                      </button>
+                    </PermissionGate>
+                  </Card>
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           {/* ── Progress stepper ─────────────────────────────────────────── */}

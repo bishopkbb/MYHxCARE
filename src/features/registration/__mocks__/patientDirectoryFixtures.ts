@@ -332,6 +332,13 @@ export const DIRECTORY_PATIENTS: DirectoryPatient[] = NAMES.map(([first, last], 
   const age = 18 + (i % 40);
   const gender: 'Male' | 'Female' = i % 2 === 0 ? 'Female' : 'Male';
   const dobYear = 2026 - age;
+  // dp-001 is the one curated demo persona (matches MOCK_PATIENT_PROFILE and
+  // MOCK_CHECKIN_PATIENT, which both already hand-declare mrn MRN-2026-00451
+  // — the formulaic mrn/patientId below would otherwise disagree with them,
+  // breaking resolvePatientIdByMrn() for the one persona everything else
+  // assumes is joinable; see SYS-001 register entry). Real allergy data
+  // replaces the otherwise-universal empty array, same reasoning.
+  const isCuratedDemoPatient = i === 0;
   return {
     id: `dp-${String(i + 1).padStart(3, '0')}`,
     initials: getInitialsFor(first, last),
@@ -339,8 +346,8 @@ export const DIRECTORY_PATIENTS: DirectoryPatient[] = NAMES.map(([first, last], 
     name: `${first} ${last}`,
     phone: `080${3 + (i % 6)} ${String(100 + i * 7).padStart(3, '0')} ${String(1000 + i * 13).padStart(4, '0')}`,
     email: `${first.toLowerCase()}.${last.toLowerCase()}@email.com`,
-    mrn: `MRN-2026-${String(500 - i).padStart(5, '0')}`,
-    patientId: `PT-${String(500 - i).padStart(6, '0')}`,
+    mrn: isCuratedDemoPatient ? 'MRN-2026-00451' : `MRN-2026-${String(500 - i).padStart(5, '0')}`,
+    patientId: isCuratedDemoPatient ? 'PT-000451' : `PT-${String(500 - i).padStart(6, '0')}`,
     studentId: `2024${String(1000 + i * 17).padStart(5, '0')}`,
     age,
     gender,
@@ -355,6 +362,17 @@ export const DIRECTORY_PATIENTS: DirectoryPatient[] = NAMES.map(([first, last], 
     bloodGroup: BLOOD_GROUPS[i % BLOOD_GROUPS.length] as string,
     address: `No. ${12 + i} Nnamdi Azikiwe Street, Awka, Anambra State.`,
     dateRegistered: `2026-${String(1 + (i % 7)).padStart(2, '0')}-${String(3 + (i % 25)).padStart(2, '0')}`,
-    allergies: [],
+    allergies: isCuratedDemoPatient
+      ? [
+          {
+            id: 'alg-dp-001',
+            substance: 'Penicillin',
+            reaction: 'Rash and swelling',
+            severity: 'MODERATE',
+            recordedAt: '2026-01-10T09:00:00.000Z',
+            recordedBy: 'Nurse Chidinma Eze',
+          },
+        ]
+      : [],
   };
 });

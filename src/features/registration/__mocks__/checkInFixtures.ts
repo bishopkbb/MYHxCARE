@@ -6,7 +6,7 @@
  */
 
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
-import type { Gender } from '@/types/patient.types';
+import type { Allergy, Gender } from '@/types/patient.types';
 
 function todayAt(hour: number, minute: number): string {
   const d = new Date();
@@ -36,6 +36,7 @@ export type CheckInPatient = {
   maritalStatus: string;
   nationality: string;
   phone: string;
+  allergies: Allergy[];
   insurance: {
     provider: string;
     policyNumber: string;
@@ -73,6 +74,16 @@ export const MOCK_CHECKIN_PATIENT: CheckInPatient = {
   maritalStatus: 'Single',
   nationality: 'Nigerian',
   phone: '0803 456 7890',
+  allergies: [
+    {
+      id: 'alg-dp-001',
+      substance: 'Penicillin',
+      reaction: 'Rash and swelling',
+      severity: 'MODERATE',
+      recordedAt: '2026-01-10T09:00:00.000Z',
+      recordedBy: 'Nurse Chidinma Eze',
+    },
+  ],
   insurance: {
     provider: 'NHIS',
     policyNumber: 'NHIS-2026-0056789',
