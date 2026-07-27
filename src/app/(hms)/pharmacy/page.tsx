@@ -398,7 +398,7 @@ export default function PharmacyDashboardPage() {
           </div>
         </div>
 
-        {/* Prescription Queue | Ready Pickup Queue | Notifications */}
+        {/* Prescription Queue | Ready Pickup Queue */}
         <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
           <div>
             <Panel
@@ -503,50 +503,9 @@ export default function PharmacyDashboardPage() {
               </div>
             </Panel>
           </div>
-
-          <div className="xl:col-span-2">
-            <Panel title="Notifications &amp; Announcements" viewAllHref={ROUTES.notifications}>
-              <div className="mt-3 flex flex-col gap-3">
-                {pageState === 'loading' ? (
-                  Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
-                ) : feed.length === 0 ? (
-                  <EmptyRow label="No notifications right now." />
-                ) : (
-                  feed.map((n) => {
-                    const cfg = NOTIFICATION_ICON_CFG[n.type] ?? NOTIFICATION_ICON_CFG['system']!;
-                    const Icon = cfg.icon;
-                    return (
-                      <div key={n.id} className="flex items-start gap-2.5">
-                        <div
-                          className="flex size-8 shrink-0 items-center justify-center rounded-full"
-                          style={{ background: cfg.bg }}
-                        >
-                          <Icon style={{ width: 15, height: 15, color: cfg.color }} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p
-                            className="font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {n.title}
-                          </p>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {n.body}
-                          </p>
-                          <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                            {toRelativeTime(n.timestamp)}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </Panel>
-          </div>
         </div>
 
-        {/* Low Stock | Expiring Batches | Pending Transfers */}
+        {/* Low Stock | Expiring Batches | Pending Transfers | Safety Alerts */}
         <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
           <Panel title="Low Stock Medicines" viewAllHref={ROUTES.pharmacyLowStockAlerts}>
             <div
@@ -678,29 +637,6 @@ export default function PharmacyDashboardPage() {
               Go to Transfers →
             </Link>
           </Panel>
-        </div>
-
-        {/* Inventory Snapshot | Safety Alerts */}
-        <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
-          <div
-            className="rounded-[12px] p-4 sm:p-5"
-            style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
-          >
-            <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-              Inventory Snapshot
-            </h2>
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <StatMini label="Total Medicines" value={String(snapshot.totalMedicines)} />
-              <StatMini
-                label="Total Stock Value"
-                value={`₦${snapshot.totalStockValue.toLocaleString('en-GB')}`}
-              />
-              <StatMini label="Available Stock" value={String(snapshot.availableStock)} />
-              <StatMini label="Low Stock Items" value={String(snapshot.lowStockItems)} />
-              <StatMini label="Expiring Soon" value={String(snapshot.expiringSoon)} />
-              <StatMini label="Out of Stock" value={String(snapshot.outOfStock)} />
-            </div>
-          </div>
 
           <div
             className="rounded-[12px] p-4 sm:p-5"
@@ -739,6 +675,68 @@ export default function PharmacyDashboardPage() {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Inventory Snapshot | Notifications & Announcements */}
+        <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div
+            className="rounded-[12px] p-4 sm:p-5"
+            style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+          >
+            <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+              Inventory Snapshot
+            </h2>
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <StatMini label="Total Medicines" value={String(snapshot.totalMedicines)} />
+              <StatMini
+                label="Total Stock Value"
+                value={`₦${snapshot.totalStockValue.toLocaleString('en-GB')}`}
+              />
+              <StatMini label="Available Stock" value={String(snapshot.availableStock)} />
+              <StatMini label="Low Stock Items" value={String(snapshot.lowStockItems)} />
+              <StatMini label="Expiring Soon" value={String(snapshot.expiringSoon)} />
+              <StatMini label="Out of Stock" value={String(snapshot.outOfStock)} />
+            </div>
+          </div>
+
+          <Panel title="Notifications &amp; Announcements" viewAllHref={ROUTES.notifications}>
+            <div className="mt-3 flex flex-col gap-3">
+              {pageState === 'loading' ? (
+                Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
+              ) : feed.length === 0 ? (
+                <EmptyRow label="No notifications right now." />
+              ) : (
+                feed.map((n) => {
+                  const cfg = NOTIFICATION_ICON_CFG[n.type] ?? NOTIFICATION_ICON_CFG['system']!;
+                  const Icon = cfg.icon;
+                  return (
+                    <div key={n.id} className="flex items-start gap-2.5">
+                      <div
+                        className="flex size-8 shrink-0 items-center justify-center rounded-full"
+                        style={{ background: cfg.bg }}
+                      >
+                        <Icon style={{ width: 15, height: 15, color: cfg.color }} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {n.title}
+                        </p>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {n.body}
+                        </p>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                          {toRelativeTime(n.timestamp)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </Panel>
         </div>
 
         {/* Recent Dispensing Activity */}
