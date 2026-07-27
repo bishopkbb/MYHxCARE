@@ -33,7 +33,7 @@ export const MOCK_CLINICAL_NOTES: ClinicalNote[] = [
   {
     id: 'cn-001',
     type: 'soap',
-    patientName: 'Adaeze Okonkwo',
+    patientName: 'Nkechi Obiora',
     mrn: 'MRN-2024-00451',
     date: 'Jun 30, 2026',
     time: '09:45 AM',

@@ -94,9 +94,9 @@ export const PATIENT_STAT_CARDS: PatientStatCard[] = [
 export const MOCK_PATIENTS: PatientRecord[] = [
   {
     id: 'p1',
-    initials: 'AO',
+    initials: 'NO',
     avatarBg: '#EF4444',
-    name: 'Adaeze Okonkwo',
+    name: 'Nkechi Obiora',
     mrn: 'MRN-2024-00451',
     meta: '21y Female · Medicine & Surgery',
     complaint: 'Persistent headache and fever for 3 days',
@@ -418,8 +418,8 @@ export type PatientDetailMock = {
 export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
   p1: {
     id: 'p1',
-    initials: 'AO',
-    name: 'Adaeze Okonkwo',
+    initials: 'NO',
+    name: 'Nkechi Obiora',
     mrn: 'MRN-2024-00451',
     dob: '2003-05-12',
     age: '21 years',

@@ -60,7 +60,7 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
     id: 'ntf-1',
     type: 'alert',
     title: 'Critical Lab Result',
-    body: 'FBC for Adaeze Okonkwo requires immediate attention. WBC: 18.4 — CRITICAL HIGH.',
+    body: 'FBC for Nkechi Obiora requires immediate attention. WBC: 18.4 — CRITICAL HIGH.',
     timestamp: minutesAgo(10),
     read: false,
     target: { kind: 'patient', patientId: 'p1' },

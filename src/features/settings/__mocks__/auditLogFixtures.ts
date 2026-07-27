@@ -45,21 +45,21 @@ export const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     timestamp: '2026-06-30T10:05:00+01:00',
     category: 'lab',
     action: 'Critical lab result acknowledged',
-    detail: 'Adaeze Okonkwo — FBC, WBC 18.4 CRITICAL HIGH.',
+    detail: 'Nkechi Obiora — FBC, WBC 18.4 CRITICAL HIGH.',
   },
   {
     id: 'al-3',
     timestamp: '2026-06-30T09:30:00+01:00',
     category: 'lab',
     action: 'Laboratory request sent — STAT',
-    detail: 'Adaeze Okonkwo — Full Blood Count.',
+    detail: 'Nkechi Obiora — Full Blood Count.',
   },
   {
     id: 'al-4',
     timestamp: '2026-06-30T09:15:00+01:00',
     category: 'consultation',
     action: 'Consultation started',
-    detail: 'Adaeze Okonkwo — persistent headache and fever, 3 days.',
+    detail: 'Nkechi Obiora — persistent headache and fever, 3 days.',
   },
   {
     id: 'al-5',
@@ -108,7 +108,7 @@ export const MOCK_AUDIT_LOG: AuditLogEntry[] = [
     timestamp: '2026-06-15T10:00:00+01:00',
     category: 'consultation',
     action: 'Consultation completed',
-    detail: 'Adaeze Okonkwo — upper respiratory tract infection, Paracetamol 1000mg TDS.',
+    detail: 'Nkechi Obiora — upper respiratory tract infection, Paracetamol 1000mg TDS.',
   },
   {
     id: 'al-12',

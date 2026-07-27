@@ -97,9 +97,9 @@ export type LabPatient = {
 };
 
 export const MOCK_LAB_PATIENT: LabPatient = {
-  initials: 'AO',
+  initials: 'NO',
   avatarBg: '#EF4444',
-  name: 'Adaeze Okonkwo',
+  name: 'Nkechi Obiora',
   mrn: 'MRN-2024-00451',
   age: '21y',
   gender: 'Female',

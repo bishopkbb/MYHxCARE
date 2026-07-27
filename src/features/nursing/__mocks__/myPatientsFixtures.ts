@@ -150,7 +150,10 @@ const CURATED_PATIENTS: NursePatient[] = [
     patientName: 'Grace Adebayo',
     initials: 'GA',
     avatarBg: '#00B4D8',
-    mrn: 'MRN-2026-00421',
+    // Was 'MRN-2026-00421' — collided with patientDirectoryFixtures.ts's dp-080
+    // (its `500 - i` generator covers the whole 00251-00500 band). Moved into
+    // the empty 00501-00673 gap (SYS-001).
+    mrn: 'MRN-2026-00521',
     age: 29,
     gender: 'Female',
     ward: 'Female Ward',
@@ -319,7 +322,11 @@ const GENERATED_PATIENTS: NursePatient[] = Array.from({ length: 10 }, (_, idx) =
     patientName: `${firstName} ${lastName}`,
     initials: `${firstName[0]}${lastName[0]}`,
     avatarBg: GEN_AVATAR_BG[idx % GEN_AVATAR_BG.length] as string,
-    mrn: `MRN-${2023 + (idx % 4)}-${String(200 + idx * 9).padStart(5, '0')}`,
+    // Base 550 (range 550-631) is a deliberately empty band — patientDirectoryFixtures.ts's
+    // generator covers 00251-00500, and admissions/bed/lab fixtures cluster around 00674+
+    // (SYS-001: a previous base of 200 landed idx=7's 2026 output at 00263, colliding with
+    // dp-238).
+    mrn: `MRN-${2023 + (idx % 4)}-${String(550 + idx * 9).padStart(5, '0')}`,
     age: 18 + ((idx * 7) % 60),
     gender,
     ward: GEN_WARDS[idx % GEN_WARDS.length] as string,

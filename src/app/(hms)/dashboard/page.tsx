@@ -267,7 +267,7 @@ const MOCK_ALERTS: Alert[] = [
     iconBg: 'rgba(239,68,68,0.1)',
     iconColor: '#EF4444',
     title: 'Critical Lab Result',
-    body: 'FBC for Adaeze Okonkwo requires immediate attention. WBC: 18.4 — CRITICAL HIGH.',
+    body: 'FBC for Nkechi Obiora requires immediate attention. WBC: 18.4 — CRITICAL HIGH.',
     time: '10 min ago',
     unread: true,
   },
@@ -322,7 +322,7 @@ const MOCK_ACTIVITIES: RecentActivity[] = [
   {
     id: 'ra3',
     header: 'Critical lab result received',
-    patient: 'Adaeze Okonkwo — FBC',
+    patient: 'Nkechi Obiora — FBC',
     time: '10:05 AM',
     dotColor: '#EF4444',
   },

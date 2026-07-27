@@ -44,9 +44,9 @@ const MOCK_QUEUE_ENTRIES: PatientRow[] = [
   {
     id: 'q1',
     patientId: 'p1',
-    initials: 'AO',
+    initials: 'NO',
     avatarBg: '#F59E0B',
-    name: 'Adaeze Okonkwo',
+    name: 'Nkechi Obiora',
     mrn: 'MRN-2024-00451',
     meta: '21y Female · Medicine & Surgery',
     complaint: 'Persistent headache and fever for 3 days',
