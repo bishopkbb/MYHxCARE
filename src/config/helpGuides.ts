@@ -1029,6 +1029,34 @@ const REGISTRATION_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const PHARMACY_DASHBOARD_GUIDE: HelpGuide = {
+  id: 'pharmacy-dashboard',
+  title: 'Pharmacy Dashboard',
+  intro: 'Your prescription dispensing, inventory, and safety overview for the pharmacy.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Pending Prescriptions and Ready for Pickup are live counts from the dispensing queue. Prescriptions Dispensed Today, Low Stock Medicines, Expiring Batches, and Transfers Pending Approval summarize the rest of the day at a glance.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: 'Verify Prescription and Dispense Medication open the same verify-and-dispense flow, starting from the pending queue or a direct search. Search Medication looks up stock and batch details. Receive Stock, Stock Adjustment, and Transfer Stock jump to the relevant inventory screens.',
+    },
+    {
+      heading: 'Prescription Queue and Ready Pickup Queue',
+      body: "The Prescription Queue lists prescriptions awaiting verification — select one to review the patient's allergy profile before dispensing. Once dispensed, a prescription moves to the Ready Pickup Queue until marked collected.",
+    },
+    {
+      heading: 'Inventory and safety panels',
+      body: 'Low Stock Medicines, the Expiring Batch List, and Pending Stock Transfers highlight items needing attention. Inventory Snapshot summarizes total stock; Safety Alerts flags drug interactions, allergy conflicts, and other dispensing risks caught this session.',
+    },
+    {
+      heading: 'Notifications and Recent Activity',
+      body: 'Notifications & Announcements merges hospital-wide announcements with pharmacy-specific alerts. Recent Dispensing Activity is a live log of every prescription verified and dispensed this session.',
+    },
+  ],
+};
+
 const NURSE_DASHBOARD_GUIDE: HelpGuide = {
   id: 'nurse-dashboard',
   title: 'Nurse Dashboard',
@@ -2011,6 +2039,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy')) return PHARMACY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;
   if (pathname.startsWith('/duty-roster/templates')) return SHIFT_TEMPLATES_GUIDE;

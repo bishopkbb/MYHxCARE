@@ -1,0 +1,626 @@
+/**
+ * Mock fixtures for the Pharmacy Dashboard — prescription dispensing queue,
+ * drug inventory, batch/expiry tracking, and stock transfers. Prescription
+ * queue entries link to real, resolvable patients (`getPatientDetail()`) and
+ * real doctors (`DOCTORS`) rather than inventing disconnected personas — the
+ * same lesson this session's own name-collision fixes (SYS-001/005/007)
+ * established. Swap out by pointing hooks to real endpoints in Phase 6.
+ */
+
+import { DOCTORS } from '@/features/shared/__mocks__/doctorDirectory';
+
+// ── Prescription queue ───────────────────────────────────────────────────────
+
+export type PharmacyQueueStage = 'Pending Verification' | 'Ready for Pickup' | 'Collected';
+export type PharmacyPriority = 'High' | 'Medium' | 'Low';
+
+export type PharmacyQueueEntry = {
+  rxNo: string;
+  /** Resolvable via getPatientDetail() from patientFixtures.ts — never a
+   * disconnected free-text name. */
+  patientId: string;
+  medicationName: string;
+  dose: string;
+  frequency: string;
+  doctorName: string;
+  priority: PharmacyPriority;
+  hasAllergyAlert: boolean;
+  receivedAt: string; // ISO
+  stage: PharmacyQueueStage;
+  dispensedAt?: string; // ISO
+  collectedAt?: string; // ISO
+};
+
+function atOffset(hoursAgo: number): string {
+  const d = new Date();
+  d.setHours(d.getHours() - hoursAgo, d.getMinutes(), 0, 0);
+  return d.toISOString();
+}
+
+function todayAt(hour: number, minute: number): string {
+  const d = new Date();
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+}
+
+const RX_MEDICATIONS: { name: string; dose: string; frequency: string }[] = [
+  { name: 'Paracetamol', dose: '1000mg', frequency: 'TDS' },
+  { name: 'Amoxicillin', dose: '500mg', frequency: 'TDS' },
+  { name: 'Metformin', dose: '500mg', frequency: 'BD' },
+  { name: 'Atorvastatin', dose: '20mg', frequency: 'OD' },
+  { name: 'Salbutamol Inhaler', dose: '100mcg', frequency: 'PRN' },
+  { name: 'Losartan', dose: '50mg', frequency: 'OD' },
+  { name: 'Omeprazole', dose: '20mg', frequency: 'OD' },
+  { name: 'Ciprofloxacin', dose: '500mg', frequency: 'BD' },
+  { name: 'Ibuprofen', dose: '400mg', frequency: 'TDS' },
+  { name: 'Amlodipine', dose: '5mg', frequency: 'OD' },
+];
+
+const PRIORITIES: PharmacyPriority[] = ['High', 'Medium', 'Low', 'Low', 'Medium'];
+
+let rxSeq = 0;
+function nextRxNo(): string {
+  rxSeq += 1;
+  return `RX-${new Date().toISOString().slice(0, 10).replace(/-/g, '').slice(2)}-${String(rxSeq).padStart(3, '0')}`;
+}
+
+function buildQueueEntry(
+  patientId: string,
+  hoursAgo: number,
+  stage: PharmacyQueueStage,
+  overrides: Partial<PharmacyQueueEntry> = {},
+): PharmacyQueueEntry {
+  const med = RX_MEDICATIONS[rxSeq % RX_MEDICATIONS.length]!;
+  const doctor = DOCTORS[rxSeq % DOCTORS.length]!;
+  const entry: PharmacyQueueEntry = {
+    rxNo: nextRxNo(),
+    patientId,
+    medicationName: med.name,
+    dose: med.dose,
+    frequency: med.frequency,
+    doctorName: doctor.name,
+    priority: PRIORITIES[rxSeq % PRIORITIES.length]!,
+    hasAllergyAlert: rxSeq % 7 === 0,
+    receivedAt: atOffset(hoursAgo),
+    stage,
+    ...overrides,
+  };
+  return entry;
+}
+
+// 5 curated rows, linked to real, already-established patients elsewhere in
+// the app (Registration directory / nursing roster) — same "flagship
+// resolvable persona" convention used throughout this session.
+const CURATED_PENDING: PharmacyQueueEntry[] = [
+  buildQueueEntry('dp-001', 5.25, 'Pending Verification', {
+    priority: 'High',
+    hasAllergyAlert: true,
+  }),
+  buildQueueEntry('np-002', 4.5, 'Pending Verification', {
+    priority: 'Medium',
+    hasAllergyAlert: true,
+  }),
+  buildQueueEntry('dp-002', 5.75, 'Pending Verification', { priority: 'Medium' }),
+  buildQueueEntry('dp-004', 6.05, 'Pending Verification', { priority: 'Low' }),
+  buildQueueEntry('dp-006', 6.35, 'Pending Verification', { priority: 'High' }),
+];
+
+const GENERATED_PENDING: PharmacyQueueEntry[] = Array.from({ length: 27 }, (_, i) =>
+  buildQueueEntry(
+    `dp-${String((i % 60) + 7).padStart(3, '0')}`,
+    1 + (i % 8),
+    'Pending Verification',
+  ),
+);
+
+const GENERATED_READY_FOR_PICKUP: PharmacyQueueEntry[] = Array.from({ length: 21 }, (_, i) => {
+  const entry = buildQueueEntry(
+    `dp-${String((i % 60) + 70).padStart(3, '0')}`,
+    2 + (i % 6),
+    'Ready for Pickup',
+  );
+  entry.dispensedAt = todayAt(8 + (i % 9), (i * 7) % 60);
+  return entry;
+});
+
+const GENERATED_COLLECTED: PharmacyQueueEntry[] = Array.from({ length: 127 }, (_, i) => {
+  const entry = buildQueueEntry(
+    `dp-${String((i % 60) + 135).padStart(3, '0')}`,
+    3 + (i % 10),
+    'Collected',
+  );
+  entry.dispensedAt = todayAt(7 + (i % 10), (i * 11) % 60);
+  entry.collectedAt = todayAt(8 + (i % 10), (i * 13) % 60);
+  return entry;
+});
+
+/** Seed queue — 32 Pending Verification, 21 Ready for Pickup, 127 already
+ * Collected today (21 + 127 = 148 dispensed today). `pharmacyDispensingStore.ts`
+ * owns the live, mutable copy of this seed. */
+export const PHARMACY_QUEUE_SEED: PharmacyQueueEntry[] = [
+  ...CURATED_PENDING,
+  ...GENERATED_PENDING,
+  ...GENERATED_READY_FOR_PICKUP,
+  ...GENERATED_COLLECTED,
+];
+
+// ── Recent dispensing activity ───────────────────────────────────────────────
+
+export type DispensingActivityEntry = {
+  id: string;
+  medicationName: string;
+  patientId: string;
+  rxNo: string;
+  dispensedAt: string; // ISO
+};
+
+export const DISPENSING_ACTIVITY_SEED: DispensingActivityEntry[] = [
+  {
+    id: 'da-1',
+    medicationName: 'Amoxicillin 500mg',
+    patientId: 'dp-001',
+    rxNo: 'RX-250629-1458',
+    dispensedAt: todayAt(10, 25),
+  },
+  {
+    id: 'da-2',
+    medicationName: 'Metformin 500mg',
+    patientId: 'np-002',
+    rxNo: 'RX-250629-1457',
+    dispensedAt: todayAt(10, 18),
+  },
+  {
+    id: 'da-3',
+    medicationName: 'Atorvastatin 20mg',
+    patientId: 'dp-002',
+    rxNo: 'RX-250629-1456',
+    dispensedAt: todayAt(10, 12),
+  },
+  {
+    id: 'da-4',
+    medicationName: 'Salbutamol Inhaler',
+    patientId: 'dp-004',
+    rxNo: 'RX-250629-1455',
+    dispensedAt: todayAt(10, 5),
+  },
+  {
+    id: 'da-5',
+    medicationName: 'Losartan 50mg',
+    patientId: 'dp-006',
+    rxNo: 'RX-250629-1454',
+    dispensedAt: todayAt(9, 58),
+  },
+];
+
+// ── Drug inventory ────────────────────────────────────────────────────────────
+
+export type DrugBatch = {
+  batchNo: string;
+  expiryDate: string; // ISO date, YYYY-MM-DD
+};
+
+export type DrugInventoryItem = {
+  id: string;
+  name: string;
+  category: string;
+  unit: string;
+  currentStock: number;
+  reorderLevel: number;
+  batches: DrugBatch[];
+};
+
+function daysFromNow(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+export const DRUG_INVENTORY: DrugInventoryItem[] = [
+  {
+    id: 'di-1',
+    name: 'Paracetamol 500mg',
+    category: 'Analgesic',
+    unit: 'Tablet',
+    currentStock: 18,
+    reorderLevel: 100,
+    batches: [{ batchNo: 'PAR-2505', expiryDate: daysFromNow(12) }],
+  },
+  {
+    id: 'di-2',
+    name: 'Amoxicillin 500mg',
+    category: 'Antibiotic',
+    unit: 'Capsule',
+    currentStock: 22,
+    reorderLevel: 80,
+    batches: [{ batchNo: 'AMX-2504', expiryDate: daysFromNow(16) }],
+  },
+  {
+    id: 'di-3',
+    name: 'Metformin 500mg',
+    category: 'Antidiabetic',
+    unit: 'Tablet',
+    currentStock: 15,
+    reorderLevel: 60,
+    batches: [{ batchNo: 'MET-2503', expiryDate: daysFromNow(24) }],
+  },
+  {
+    id: 'di-4',
+    name: 'Salbutamol Inhaler',
+    category: 'Bronchodilator',
+    unit: 'Inhaler',
+    currentStock: 10,
+    reorderLevel: 40,
+    batches: [{ batchNo: 'SAL-2502', expiryDate: daysFromNow(45) }],
+  },
+  {
+    id: 'di-5',
+    name: 'Atorvastatin 20mg',
+    category: 'Statin',
+    unit: 'Tablet',
+    currentStock: 12,
+    reorderLevel: 50,
+    batches: [{ batchNo: 'ATO-2501', expiryDate: daysFromNow(60) }],
+  },
+  {
+    id: 'di-6',
+    name: 'Ciprofloxacin 500mg',
+    category: 'Antibiotic',
+    unit: 'Tablet',
+    currentStock: 19,
+    reorderLevel: 70,
+    batches: [{ batchNo: 'CIP-2506', expiryDate: daysFromNow(21) }],
+  },
+  {
+    id: 'di-7',
+    name: 'Metronidazole 400mg',
+    category: 'Antibiotic',
+    unit: 'Tablet',
+    currentStock: 25,
+    reorderLevel: 65,
+    batches: [{ batchNo: 'MTZ-2507', expiryDate: daysFromNow(24) }],
+  },
+  {
+    id: 'di-8',
+    name: 'Diclofenac 50mg',
+    category: 'NSAID',
+    unit: 'Tablet',
+    currentStock: 14,
+    reorderLevel: 55,
+    batches: [{ batchNo: 'DIC-2502', expiryDate: daysFromNow(28) }],
+  },
+  {
+    id: 'di-9',
+    name: 'Losartan 50mg',
+    category: 'Antihypertensive',
+    unit: 'Tablet',
+    currentStock: 16,
+    reorderLevel: 60,
+    batches: [{ batchNo: 'LOS-2508', expiryDate: daysFromNow(19) }],
+  },
+  {
+    id: 'di-10',
+    name: 'Amlodipine 5mg',
+    category: 'Antihypertensive',
+    unit: 'Tablet',
+    currentStock: 20,
+    reorderLevel: 60,
+    batches: [{ batchNo: 'AML-2509', expiryDate: daysFromNow(27) }],
+  },
+  {
+    id: 'di-11',
+    name: 'Omeprazole 20mg',
+    category: 'PPI',
+    unit: 'Capsule',
+    currentStock: 13,
+    reorderLevel: 50,
+    batches: [{ batchNo: 'OME-2510', expiryDate: daysFromNow(70) }],
+  },
+  {
+    id: 'di-12',
+    name: 'Ibuprofen 400mg',
+    category: 'NSAID',
+    unit: 'Tablet',
+    currentStock: 17,
+    reorderLevel: 90,
+    batches: [{ batchNo: 'IBU-2511', expiryDate: daysFromNow(90) }],
+  },
+  {
+    id: 'di-13',
+    name: 'Chlorphenamine 4mg',
+    category: 'Antihistamine',
+    unit: 'Tablet',
+    currentStock: 9,
+    reorderLevel: 40,
+    batches: [{ batchNo: 'CHL-2512', expiryDate: daysFromNow(120) }],
+  },
+  {
+    id: 'di-14',
+    name: 'Hydrochlorothiazide 25mg',
+    category: 'Diuretic',
+    unit: 'Tablet',
+    currentStock: 11,
+    reorderLevel: 45,
+    batches: [{ batchNo: 'HCT-2513', expiryDate: daysFromNow(150) }],
+  },
+  // Healthy stock — not low, not expiring soon.
+  {
+    id: 'di-15',
+    name: 'Vitamin C 500mg',
+    category: 'Supplement',
+    unit: 'Tablet',
+    currentStock: 420,
+    reorderLevel: 100,
+    batches: [{ batchNo: 'VTC-2514', expiryDate: daysFromNow(240) }],
+  },
+  {
+    id: 'di-16',
+    name: 'Ferrous Sulfate 200mg',
+    category: 'Supplement',
+    unit: 'Tablet',
+    currentStock: 310,
+    reorderLevel: 80,
+    batches: [{ batchNo: 'FES-2515', expiryDate: daysFromNow(200) }],
+  },
+  {
+    id: 'di-17',
+    name: 'Folic Acid 5mg',
+    category: 'Supplement',
+    unit: 'Tablet',
+    currentStock: 280,
+    reorderLevel: 70,
+    batches: [{ batchNo: 'FOL-2516', expiryDate: daysFromNow(300) }],
+  },
+  {
+    id: 'di-18',
+    name: 'Cetirizine 10mg',
+    category: 'Antihistamine',
+    unit: 'Tablet',
+    currentStock: 190,
+    reorderLevel: 60,
+    batches: [{ batchNo: 'CET-2517', expiryDate: daysFromNow(180) }],
+  },
+  {
+    id: 'di-19',
+    name: 'Ondansetron 4mg',
+    category: 'Antiemetic',
+    unit: 'Tablet',
+    currentStock: 150,
+    reorderLevel: 50,
+    batches: [{ batchNo: 'OND-2518', expiryDate: daysFromNow(160) }],
+  },
+  {
+    id: 'di-20',
+    name: 'Ceftriaxone 1g',
+    category: 'Antibiotic',
+    unit: 'Vial',
+    currentStock: 95,
+    reorderLevel: 40,
+    batches: [{ batchNo: 'CFT-2519', expiryDate: daysFromNow(100) }],
+  },
+  {
+    id: 'di-21',
+    name: 'Normal Saline 0.9%',
+    category: 'IV Fluid',
+    unit: 'Bag',
+    currentStock: 260,
+    reorderLevel: 80,
+    batches: [{ batchNo: 'NAC-2520', expiryDate: daysFromNow(365) }],
+  },
+  {
+    id: 'di-22',
+    name: 'Insulin Glargine',
+    category: 'Antidiabetic',
+    unit: 'Pen',
+    currentStock: 70,
+    reorderLevel: 30,
+    batches: [{ batchNo: 'INS-2521', expiryDate: daysFromNow(110) }],
+  },
+  {
+    id: 'di-23',
+    name: 'Dexamethasone 4mg',
+    category: 'Corticosteroid',
+    unit: 'Ampoule',
+    currentStock: 130,
+    reorderLevel: 45,
+    batches: [{ batchNo: 'DEX-2522', expiryDate: daysFromNow(140) }],
+  },
+  {
+    id: 'di-24',
+    name: 'Artemether/Lumefantrine',
+    category: 'Antimalarial',
+    unit: 'Tablet',
+    currentStock: 210,
+    reorderLevel: 70,
+    batches: [{ batchNo: 'ART-2523', expiryDate: daysFromNow(220) }],
+  },
+];
+
+export function getLowStockItems(): DrugInventoryItem[] {
+  return DRUG_INVENTORY.filter((d) => d.currentStock <= d.reorderLevel);
+}
+
+export function getExpiringBatches(
+  withinDays: number,
+): Array<{ item: DrugInventoryItem; batch: DrugBatch; daysLeft: number }> {
+  const now = Date.now();
+  const rows: Array<{ item: DrugInventoryItem; batch: DrugBatch; daysLeft: number }> = [];
+  for (const item of DRUG_INVENTORY) {
+    for (const batch of item.batches) {
+      const daysLeft = Math.round((new Date(batch.expiryDate).getTime() - now) / 86_400_000);
+      if (daysLeft >= 0 && daysLeft <= withinDays) rows.push({ item, batch, daysLeft });
+    }
+  }
+  return rows.sort((a, b) => a.daysLeft - b.daysLeft);
+}
+
+export function getInventorySnapshot() {
+  const totalMedicines = DRUG_INVENTORY.length;
+  const availableStock = DRUG_INVENTORY.reduce((sum, d) => sum + d.currentStock, 0);
+  const lowStockItems = getLowStockItems().length;
+  const expiringSoon = getExpiringBatches(30).length;
+  const outOfStock = DRUG_INVENTORY.filter((d) => d.currentStock === 0).length;
+  // Representative unit price band per category — a real system prices this
+  // per batch; this mock derives a plausible aggregate for the snapshot tile.
+  const totalStockValue = DRUG_INVENTORY.reduce((sum, d) => sum + d.currentStock * 850, 0);
+  return {
+    totalMedicines,
+    totalStockValue,
+    availableStock,
+    lowStockItems,
+    expiringSoon,
+    outOfStock,
+  };
+}
+
+// ── Stock transfers ───────────────────────────────────────────────────────────
+
+export type StockTransferStatus = 'Pending' | 'Approved' | 'Completed';
+
+export type StockTransfer = {
+  id: string;
+  from: string;
+  to: string;
+  itemCount: number;
+  status: StockTransferStatus;
+  requestedAt: string; // ISO
+};
+
+export const STOCK_TRANSFERS: StockTransfer[] = [
+  {
+    id: 'st-1',
+    from: 'Main Store',
+    to: 'Pharmacy',
+    itemCount: 8,
+    status: 'Pending',
+    requestedAt: atOffset(2),
+  },
+  {
+    id: 'st-2',
+    from: 'Pharmacy',
+    to: 'Lab',
+    itemCount: 5,
+    status: 'Pending',
+    requestedAt: atOffset(3),
+  },
+  {
+    id: 'st-3',
+    from: 'Main Store',
+    to: 'Emergency',
+    itemCount: 4,
+    status: 'Pending',
+    requestedAt: atOffset(4),
+  },
+  {
+    id: 'st-4',
+    from: 'Main Store',
+    to: 'Ward 2',
+    itemCount: 6,
+    status: 'Pending',
+    requestedAt: atOffset(5),
+  },
+  {
+    id: 'st-5',
+    from: 'Main Store',
+    to: 'Ward 3',
+    itemCount: 3,
+    status: 'Pending',
+    requestedAt: atOffset(6),
+  },
+  {
+    id: 'st-6',
+    from: 'Pharmacy',
+    to: 'ICU',
+    itemCount: 7,
+    status: 'Pending',
+    requestedAt: atOffset(7),
+  },
+  {
+    id: 'st-7',
+    from: 'Main Store',
+    to: 'Maternity Ward',
+    itemCount: 5,
+    status: 'Pending',
+    requestedAt: atOffset(8),
+  },
+  {
+    id: 'st-8',
+    from: 'Main Store',
+    to: 'Pharmacy',
+    itemCount: 10,
+    status: 'Approved',
+    requestedAt: atOffset(20),
+  },
+  {
+    id: 'st-9',
+    from: 'Pharmacy',
+    to: 'Ward 1',
+    itemCount: 6,
+    status: 'Completed',
+    requestedAt: atOffset(30),
+  },
+];
+
+export function getPendingTransferCount(): number {
+  return STOCK_TRANSFERS.filter((t) => t.status === 'Pending').length;
+}
+
+// ── Safety alerts ─────────────────────────────────────────────────────────────
+
+export const SAFETY_ALERT_COUNTS = {
+  drugInteractions: 3,
+  allergyConflicts: 2,
+  duplicateTherapy: 1,
+  highRiskMedications: 2,
+  expiredAttempts: 1,
+};
+
+// ── Pharmacy-specific notifications (merged with real announcements on the
+// dashboard) ──────────────────────────────────────────────────────────────────
+
+export type PharmacyNotificationType = 'prescription' | 'stock' | 'batch' | 'transfer' | 'system';
+
+export type PharmacyNotification = {
+  id: string;
+  type: PharmacyNotificationType;
+  title: string;
+  body: string;
+  timestamp: string; // ISO
+};
+
+export const PHARMACY_NOTIFICATIONS: PharmacyNotification[] = [
+  {
+    id: 'pn-1',
+    type: 'prescription',
+    title: 'New prescription received',
+    body: 'RX-250630-006 from Dr. Jane Ezeonu (GP)',
+    timestamp: atOffset(0.03),
+  },
+  {
+    id: 'pn-2',
+    type: 'stock',
+    title: 'Stock for Paracetamol 500mg is low',
+    body: 'Current stock: 18 units',
+    timestamp: atOffset(0.17),
+  },
+  {
+    id: 'pn-3',
+    type: 'batch',
+    title: 'Batch PAR-2505 expiring in 12 days',
+    body: 'Paracetamol 500mg',
+    timestamp: atOffset(0.42),
+  },
+  {
+    id: 'pn-4',
+    type: 'transfer',
+    title: 'Stock transfer request pending',
+    body: 'From Main Store to Pharmacy',
+    timestamp: atOffset(0.58),
+  },
+  {
+    id: 'pn-5',
+    type: 'system',
+    title: 'System Maintenance Notice',
+    body: 'On the 5th, 12:00 AM – 2:00 AM',
+    timestamp: atOffset(1),
+  },
+];

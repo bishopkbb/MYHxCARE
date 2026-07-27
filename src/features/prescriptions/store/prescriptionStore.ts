@@ -40,6 +40,11 @@ function subscribe(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
+/** Exported so a different domain's store can bridge to this one's writes —
+ * e.g. Pharmacy's dispensing queue watching for prescriptions doctors send,
+ * without this store needing to know Pharmacy exists. */
+export { subscribe };
+
 export function addPrescription(
   patientId: string,
   lines: PrescriptionLine[],
@@ -65,6 +70,17 @@ export function addPrescription(
 
 export function getPrescriptionsForPatient(patientId: string): Medication[] {
   return prescriptionsByPatient.get(patientId) ?? EMPTY;
+}
+
+/** All prescriptions across all patients, flattened — for a consumer (like
+ * Pharmacy's dispensing queue) that needs to enumerate every prescription
+ * sent, not just one patient's. */
+export function getAllPrescriptionEntries(): Array<{ patientId: string; medication: Medication }> {
+  const entries: Array<{ patientId: string; medication: Medication }> = [];
+  for (const [patientId, meds] of prescriptionsByPatient) {
+    for (const medication of meds) entries.push({ patientId, medication });
+  }
+  return entries;
 }
 
 /** Reactive hook — re-renders the caller whenever a prescription is sent for

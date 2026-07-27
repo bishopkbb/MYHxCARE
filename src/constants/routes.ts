@@ -40,9 +40,43 @@ export const ROUTES = {
   encounterOrders: (id: string) => `/encounters/${id}/orders`,
 
   // Pharmacy sub-routes
+  // Prescription Management
+  pharmacyPrescriptionQueue: '/pharmacy/prescriptions/queue',
+  pharmacyPrescriptionDetails: '/pharmacy/prescriptions/details',
+  pharmacyActivePrescriptions: '/pharmacy/prescriptions/active',
   pharmacyDispense: '/pharmacy/dispense',
+  pharmacyPickupQueue: '/pharmacy/pickup-queue',
+  pharmacyDispensingHistory: '/pharmacy/dispensing-history',
+  pharmacyRefillRequests: '/pharmacy/refill-requests',
+  pharmacyControlledDrugs: '/pharmacy/controlled-drugs',
+  // Inventory Management
   pharmacyInventory: '/pharmacy/inventory',
+  pharmacyStockReceiving: '/pharmacy/stock-receiving',
   pharmacyTransfers: '/pharmacy/transfers',
+  pharmacyStockAdjustments: '/pharmacy/stock-adjustments',
+  pharmacyBatchManagement: '/pharmacy/batch-management',
+  pharmacyExpiry: '/pharmacy/expiry',
+  pharmacyLowStockAlerts: '/pharmacy/low-stock-alerts',
+  pharmacyProcurementRequests: '/pharmacy/procurement-requests',
+  pharmacySuppliers: '/pharmacy/suppliers',
+  // Clinical Pharmacy
+  pharmacyAdr: '/pharmacy/adr',
+  // Operations
+  pharmacyAuditTrail: '/pharmacy/audit-trail',
+  pharmacyLabelPrinting: '/pharmacy/label-printing',
+  pharmacyMedicationReturns: '/pharmacy/medication-returns',
+  pharmacyQueueMonitor: '/pharmacy/queue-monitor',
+  // Schedule & Workforce
+  pharmacyWorkforce: '/pharmacy/workforce',
+  pharmacyMySchedule: '/pharmacy/my-schedule',
+  pharmacyShiftHandover: '/pharmacy/shift-handover',
+  // Reports
+  pharmacyReportsPrescriptions: '/pharmacy/reports/prescriptions',
+  pharmacyReportsDispensing: '/pharmacy/reports/dispensing',
+  pharmacyReportsInventory: '/pharmacy/reports/inventory',
+  pharmacyReportsStockMovement: '/pharmacy/reports/stock-movement',
+  pharmacyReportsExpiry: '/pharmacy/reports/expiry',
+  pharmacyReportsProcurement: '/pharmacy/reports/procurement',
 
   // Lab sub-routes
   labOrders: '/lab/orders',
