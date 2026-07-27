@@ -282,7 +282,7 @@ export default function PharmacyDashboardPage() {
         </div>
 
         {/* Stat cards */}
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid grid-cols-2 gap-3.5 sm:grid-cols-3 xl:grid-cols-6 xl:gap-4">
           {pageState === 'loading' ? (
             Array.from({ length: 6 }).map((_, i) => <SkeletonStatCard key={i} />)
           ) : (
@@ -399,8 +399,8 @@ export default function PharmacyDashboardPage() {
         </div>
 
         {/* Prescription Queue | Ready Pickup Queue | Notifications */}
-        <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-12">
-          <div className="xl:col-span-5">
+        <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
+          <div>
             <Panel
               title="Prescription Queue (Awaiting Verification)"
               viewAllHref={ROUTES.pharmacyPrescriptionQueue}
@@ -457,7 +457,7 @@ export default function PharmacyDashboardPage() {
             </Panel>
           </div>
 
-          <div className="xl:col-span-4">
+          <div>
             <Panel title="Ready Pickup Queue" viewAllHref={ROUTES.pharmacyPickupQueue}>
               <div
                 className="mt-3 flex flex-col divide-y"
@@ -504,7 +504,7 @@ export default function PharmacyDashboardPage() {
             </Panel>
           </div>
 
-          <div className="xl:col-span-3">
+          <div className="xl:col-span-2">
             <Panel title="Notifications &amp; Announcements" viewAllHref={ROUTES.notifications}>
               <div className="mt-3 flex flex-col gap-3">
                 {pageState === 'loading' ? (
@@ -547,7 +547,7 @@ export default function PharmacyDashboardPage() {
         </div>
 
         {/* Low Stock | Expiring Batches | Pending Transfers */}
-        <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
           <Panel title="Low Stock Medicines" viewAllHref={ROUTES.pharmacyLowStockAlerts}>
             <div
               className="mt-3 flex flex-col divide-y"
