@@ -100,7 +100,7 @@ const FALLBACK_IDENTITY: Record<
   'ward-management': {
     name: 'Mrs. Amaka Nwosu',
     role: 'Ward Manager',
-    department: 'Female Surgical Ward',
+    department: 'Female Medical Ward',
     email: 'amaka.nwosu@unizikmedical.edu.ng',
   },
   pharmacy: {

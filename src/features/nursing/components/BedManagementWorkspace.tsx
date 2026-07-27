@@ -118,7 +118,10 @@ function resolveWardBeds(layout: WardLayout, roster: NursePatient[]): ResolvedBe
       if (patient) {
         return {
           id: patient.id,
-          bedCode: slot.bedCode,
+          // A roster-occupied bed shows the patient's own real bed identity
+          // (matches every other nursing screen that reads NursePatient.bed),
+          // not the layout's arbitrary positional slot.bedCode (SYS-007).
+          bedCode: patient.bed,
           room: slot.room,
           status: 'Occupied',
           patientName: patient.patientName,
@@ -622,7 +625,9 @@ export function BedManagementWorkspace() {
     return local.map((bed, i) => {
       const slot = selectedWard.beds[i];
       if (slot?.rosterSlot && bed.status === 'Occupied' && isPatientDischarged(bed.id)) {
-        return { id: bed.id, bedCode: bed.bedCode, room: bed.room, status: 'Available' as const };
+        // Revert to the ward layout's own physical bed code once vacated —
+        // the discharged patient's "Bed N" identity no longer applies here.
+        return { id: bed.id, bedCode: slot.bedCode, room: bed.room, status: 'Available' as const };
       }
       // Admissions' "Assign Bed" step allocates into a real bed here — a
       // static-Available slot with a live allocation renders Occupied without

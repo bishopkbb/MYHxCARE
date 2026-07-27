@@ -167,7 +167,7 @@ export const MOCK_USERS: User[] = [
     email: 'amaka.nwosu@unizikmedical.edu.ng',
     role: 'Ward Manager',
     workspaceRole: 'WARD_MANAGER',
-    department: 'Female Surgical Ward',
+    department: 'Female Medical Ward',
     departmentId: 'dept_ward_surgical_female',
     permissions: [
       'patients:read',
