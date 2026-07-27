@@ -323,10 +323,20 @@ export function SimpleTableCard({
   );
 }
 
-const RX_STATUS_COLOR: Record<string, string> = {
+const RX_STATUS_COLOR: Record<Prescription['status'], string> = {
   Active: '#00B4D8',
   Completed: '#22C55E',
   Discontinued: '#8A98A3',
+  Cancelled: '#8A98A3',
+};
+
+// Exhaustive so a future Medication status fails to compile here instead of
+// silently falling through to the wrong Prescription status (G-MR-13).
+const MEDICATION_TO_RX_STATUS: Record<Medication['status'], Prescription['status']> = {
+  active: 'Active',
+  completed: 'Completed',
+  discontinued: 'Discontinued',
+  cancelled: 'Cancelled',
 };
 
 /** Converts a real, live Medication (prescriptionStore.ts's canonical shape —
@@ -341,8 +351,7 @@ function medicationToPrescription(m: Medication): Prescription {
     route: m.route,
     prescribedBy: m.prescribedBy,
     datePrescribed: m.startedDate,
-    status:
-      m.status === 'active' ? 'Active' : m.status === 'completed' ? 'Completed' : 'Discontinued',
+    status: MEDICATION_TO_RX_STATUS[m.status],
   };
 }
 

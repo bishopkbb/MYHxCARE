@@ -2569,12 +2569,13 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                 <div className="flex flex-col gap-3">
                   {medications.map((med) => {
                     const statusStyles: Record<
-                      'active' | 'discontinued' | 'completed',
+                      'active' | 'discontinued' | 'completed' | 'cancelled',
                       { border: string; color: string; label: string }
                     > = {
                       active: { border: '#22C55E', color: '#22C55E', label: 'Active' },
                       discontinued: { border: '#EF4444', color: '#EF4444', label: 'Discontinued' },
                       completed: { border: '#4A7080', color: '#4A7080', label: 'Completed' },
+                      cancelled: { border: '#8A98A3', color: '#8A98A3', label: 'Cancelled' },
                     };
                     const badge = statusStyles[med.status];
                     return (

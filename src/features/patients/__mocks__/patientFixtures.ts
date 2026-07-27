@@ -351,7 +351,7 @@ export type Consultation = {
   plan: string;
 };
 
-export type MedicationStatus = 'active' | 'discontinued' | 'completed';
+export type MedicationStatus = 'active' | 'discontinued' | 'completed' | 'cancelled';
 
 export type Medication = {
   id: string;
