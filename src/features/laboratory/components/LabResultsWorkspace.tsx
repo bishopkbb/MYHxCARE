@@ -455,7 +455,7 @@ function ResultCard({
               Awaiting laboratory processing…
             </span>
           </div>
-          <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+          <PermissionGate permission={PERMISSIONS.LAB_RESULTS_WRITE}>
             <div className="flex items-center gap-2.5 px-4 pt-3 pb-4">
               <button
                 type="button"
@@ -580,7 +580,7 @@ function ResultCard({
             className="flex flex-wrap items-center gap-2.5 px-4 py-3"
             style={{ borderTop: '1px solid rgba(0,100,130,0.08)' }}
           >
-            <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+            <PermissionGate permission={PERMISSIONS.LAB_RESULTS_WRITE}>
               {needsReview ? (
                 <button
                   type="button"
@@ -602,7 +602,7 @@ function ResultCard({
                 </span>
               )}
             </PermissionGate>
-            <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+            <PermissionGate permission={PERMISSIONS.LAB_RESULTS_WRITE}>
               <button
                 type="button"
                 onClick={onAddNote}

@@ -196,7 +196,7 @@ const DOCTOR_ACTIONS: {
     key: 'note',
     label: 'Add Clinical Note',
     icon: FileText,
-    permission: PERMISSIONS.ENCOUNTERS_WRITE,
+    permission: PERMISSIONS.CLINICAL_NOTES_WRITE,
   },
   {
     key: 'lab',

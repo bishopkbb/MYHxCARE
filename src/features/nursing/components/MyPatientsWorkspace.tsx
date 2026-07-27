@@ -710,7 +710,7 @@ export function MyPatientsWorkspace() {
                                     <Eye style={{ width: 14, height: 14 }} />
                                     View Record
                                   </button>
-                                  <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                                  <PermissionGate permission={PERMISSIONS.VITALS_WRITE}>
                                     <button
                                       type="button"
                                       onClick={() => handleRecordObservation(p)}
@@ -900,7 +900,7 @@ export function MyPatientsWorkspace() {
                                   >
                                     <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
                                   </button>
-                                  <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                                  <PermissionGate permission={PERMISSIONS.VITALS_WRITE}>
                                     <button
                                       type="button"
                                       onClick={() => handleRecordObservation(p)}

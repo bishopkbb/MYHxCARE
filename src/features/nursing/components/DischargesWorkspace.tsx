@@ -478,7 +478,7 @@ export function DischargesWorkspace() {
                 <RefreshCw style={{ width: 16, height: 16 }} />
                 Refresh
               </button>
-              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+              <PermissionGate permission={PERMISSIONS.DISCHARGES_WRITE}>
                 <button
                   type="button"
                   onClick={() => setShowPlanDischarge(true)}
@@ -949,7 +949,7 @@ export function DischargesWorkspace() {
                                 className={`sticky right-0 flex w-24 shrink-0 items-center justify-end py-3 pr-3 ${isMenuOpen ? 'z-30' : 'z-10'}`}
                                 style={{ background: '#FFFFFF' }}
                               >
-                                <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                                <PermissionGate permission={PERMISSIONS.DISCHARGES_WRITE}>
                                   <RowMenu
                                     record={d}
                                     open={isMenuOpen}
@@ -1205,7 +1205,7 @@ export function DischargesWorkspace() {
                       Quick Actions
                     </h2>
                     <div className="mt-3 flex flex-col gap-2">
-                      <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                      <PermissionGate permission={PERMISSIONS.DISCHARGES_WRITE}>
                         <button
                           type="button"
                           onClick={() => setShowPlanDischarge(true)}

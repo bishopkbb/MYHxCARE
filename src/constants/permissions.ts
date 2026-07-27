@@ -3,7 +3,21 @@ export const PERMISSIONS = {
   PATIENTS_WRITE: 'patients:write',
 
   ENCOUNTERS_READ: 'encounters:read',
+  // ENCOUNTERS_WRITE gates only real encounter-lifecycle actions (consultation
+  // completion, "Start Consultation"). The other clinical write actions that
+  // used to share this one flag (SYS-008) now have their own permission below.
   ENCOUNTERS_WRITE: 'encounters:write',
+
+  CLINICAL_NOTES_WRITE: 'clinical_notes:write',
+  NURSING_ASSESSMENT_WRITE: 'nursing_assessment:write',
+  LAB_RESULTS_WRITE: 'lab_results:write',
+  VITALS_WRITE: 'vitals:write',
+  MEDICATION_ADMIN_WRITE: 'medication_admin:write',
+  ADMISSIONS_WRITE: 'admissions:write',
+  DISCHARGES_WRITE: 'discharges:write',
+  CARE_PLANS_WRITE: 'care_plans:write',
+  SHIFT_HANDOVER_WRITE: 'shift_handover:write',
+  ANNOUNCEMENTS_WRITE: 'announcements:write',
 
   PRESCRIPTIONS_WRITE: 'prescriptions:write',
 

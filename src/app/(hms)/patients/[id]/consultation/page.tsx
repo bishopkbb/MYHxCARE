@@ -1045,7 +1045,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                       </button>
                     </PermissionGate>
 
-                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                    <PermissionGate permission={PERMISSIONS.ADMISSIONS_WRITE}>
                       <button
                         type="button"
                         onClick={() => setShowRequestAdmission(true)}

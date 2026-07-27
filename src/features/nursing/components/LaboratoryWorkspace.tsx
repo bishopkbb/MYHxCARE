@@ -964,7 +964,7 @@ export function LaboratoryWorkspace() {
                                 className={`sticky right-0 flex w-20 shrink-0 items-center justify-end py-3 pr-3 ${isMenuOpen ? 'z-30' : 'z-10'}`}
                                 style={{ background: '#FFFFFF' }}
                               >
-                                <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                                <PermissionGate permission={PERMISSIONS.LAB_RESULTS_WRITE}>
                                   <RowMenu
                                     order={o}
                                     open={isMenuOpen}

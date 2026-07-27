@@ -800,7 +800,7 @@ function PatientMARPanel({
                           style={{ background: isSelected ? '#E6F8FD' : '#FFFFFF' }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                          <PermissionGate permission={PERMISSIONS.MEDICATION_ADMIN_WRITE}>
                             {order.status === 'Completed' ? (
                               <button
                                 type="button"
@@ -949,7 +949,7 @@ function PatientMARPanel({
                 >
                   Administration Actions
                 </h2>
-                <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                <PermissionGate permission={PERMISSIONS.MEDICATION_ADMIN_WRITE}>
                   <div className="mt-3 flex flex-col gap-2">
                     <button
                       type="button"

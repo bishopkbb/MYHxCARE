@@ -448,7 +448,7 @@ function EmptyObservationsState({ onRecord }: { onRecord: () => void }) {
           tracking trends.
         </p>
       </div>
-      <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+      <PermissionGate permission={PERMISSIONS.VITALS_WRITE}>
         <button
           type="button"
           onClick={onRecord}
@@ -813,7 +813,7 @@ function PatientObservationPanel({
                 <ArrowLeft style={{ width: 16, height: 16, color: '#4A7080' }} />
                 Back to Patient Record
               </button>
-              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+              <PermissionGate permission={PERMISSIONS.VITALS_WRITE}>
                 <button
                   type="button"
                   onClick={() => setRecordModalOpen(true)}
@@ -1501,7 +1501,7 @@ function PatientObservationPanel({
                     Quick Actions
                   </h2>
                   <div className="mt-3 flex flex-col gap-2">
-                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                    <PermissionGate permission={PERMISSIONS.VITALS_WRITE}>
                       <button
                         type="button"
                         onClick={() => setRecordModalOpen(true)}
@@ -1519,7 +1519,7 @@ function PatientObservationPanel({
                         <span style={{ color: '#8A98A3' }}>›</span>
                       </button>
                     </PermissionGate>
-                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                    <PermissionGate permission={PERMISSIONS.VITALS_WRITE}>
                       <button
                         type="button"
                         onClick={() => setFluidModalOpen(true)}
@@ -1537,7 +1537,7 @@ function PatientObservationPanel({
                         <span style={{ color: '#8A98A3' }}>›</span>
                       </button>
                     </PermissionGate>
-                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                    <PermissionGate permission={PERMISSIONS.VITALS_WRITE}>
                       <button
                         type="button"
                         onClick={handleCalculateEws}

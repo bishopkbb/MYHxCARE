@@ -208,7 +208,7 @@ function EmptyVitalsState({ onRecordVitals }: { onRecordVitals: () => void }) {
           start tracking trends.
         </p>
       </div>
-      <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+      <PermissionGate permission={PERMISSIONS.VITALS_WRITE}>
         <button
           type="button"
           onClick={onRecordVitals}
@@ -456,7 +456,7 @@ function PatientVitalsPanel({
                 <ArrowLeft style={{ width: 16, height: 16, color: '#4A7080' }} />
                 Back to Patient Record
               </button>
-              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+              <PermissionGate permission={PERMISSIONS.VITALS_WRITE}>
                 <button
                   type="button"
                   onClick={() => setRecordModalOpen(true)}
@@ -1048,7 +1048,7 @@ function PatientVitalsPanel({
                       Actions
                     </h2>
                     <div className="mt-3 grid grid-cols-2 gap-2.5">
-                      <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                      <PermissionGate permission={PERMISSIONS.VITALS_WRITE}>
                         <button
                           type="button"
                           onClick={() => setRecordModalOpen(true)}

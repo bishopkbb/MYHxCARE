@@ -664,7 +664,7 @@ export function PatientQueueWorkspace() {
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {isPreAdmission ? (
-                                  <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                                  <PermissionGate permission={PERMISSIONS.ADMISSIONS_WRITE}>
                                     <button
                                       type="button"
                                       onClick={() => openReassign(task)}
@@ -708,7 +708,7 @@ export function PatientQueueWorkspace() {
                                     >
                                       <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
                                     </button>
-                                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                                    <PermissionGate permission={PERMISSIONS.ADMISSIONS_WRITE}>
                                       <button
                                         type="button"
                                         onClick={() => handleEdit(task)}
@@ -938,7 +938,7 @@ export function PatientQueueWorkspace() {
                         </div>
                       </div>
                     ) : (
-                      <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                      <PermissionGate permission={PERMISSIONS.ADMISSIONS_WRITE}>
                         <div className="flex flex-col gap-2 p-4 pt-0 sm:p-5 sm:pt-0">
                           {selected.preAdmissionEntryId ? (
                             <>

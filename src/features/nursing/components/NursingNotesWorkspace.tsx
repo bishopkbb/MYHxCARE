@@ -466,7 +466,7 @@ function PatientNursingNotesPanel({
               >
                 Back to Patient Record
               </button>
-              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+              <PermissionGate permission={PERMISSIONS.CLINICAL_NOTES_WRITE}>
                 <button
                   type="button"
                   onClick={() => setShowTemplatesModal(true)}
@@ -876,7 +876,7 @@ function PatientNursingNotesPanel({
                           className={`sticky right-0 flex w-16 shrink-0 items-center justify-end py-3 pr-3 ${isMenuOpen ? 'z-30' : 'z-10'}`}
                           style={{ background: '#FFFFFF' }}
                         >
-                          <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                          <PermissionGate permission={PERMISSIONS.CLINICAL_NOTES_WRITE}>
                             <RowMenu
                               open={isMenuOpen}
                               onToggle={() => setOpenMenuId(isMenuOpen ? null : note.id)}
@@ -970,7 +970,7 @@ function PatientNursingNotesPanel({
             {/* ── Sidebar ─────────────────────────────────────────────────── */}
             <div className="flex w-full shrink-0 flex-col gap-4 xl:w-[320px]">
               <PermissionGate
-                permission={PERMISSIONS.ENCOUNTERS_WRITE}
+                permission={PERMISSIONS.CLINICAL_NOTES_WRITE}
                 fallback={
                   <div
                     className="rounded-[12px] p-4 sm:p-5"
@@ -1135,7 +1135,7 @@ function PatientNursingNotesPanel({
                     );
                   })}
                 </div>
-                <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                <PermissionGate permission={PERMISSIONS.CLINICAL_NOTES_WRITE}>
                   <button
                     type="button"
                     onClick={() => setShowTemplatesModal(true)}

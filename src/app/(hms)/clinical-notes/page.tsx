@@ -202,7 +202,7 @@ export default function ClinicalNotesPage() {
             </p>
           </div>
 
-          <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+          <PermissionGate permission={PERMISSIONS.CLINICAL_NOTES_WRITE}>
             <button
               type="button"
               onClick={() => setShowAdd(true)}

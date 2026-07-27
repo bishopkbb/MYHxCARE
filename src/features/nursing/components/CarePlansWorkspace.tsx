@@ -491,7 +491,7 @@ function PatientCarePlansPanel({
               >
                 Back to Patient Record
               </button>
-              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+              <PermissionGate permission={PERMISSIONS.CARE_PLANS_WRITE}>
                 <button
                   type="button"
                   onClick={openCreate}
@@ -907,7 +907,7 @@ function PatientCarePlansPanel({
                                 >
                                   View Plan
                                 </button>
-                                <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                                <PermissionGate permission={PERMISSIONS.CARE_PLANS_WRITE}>
                                   <RowMenu
                                     status={plan.status}
                                     open={isMenuOpen}
@@ -1268,7 +1268,7 @@ function PatientCarePlansPanel({
                               );
                             })}
                           </div>
-                          <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                          <PermissionGate permission={PERMISSIONS.CARE_PLANS_WRITE}>
                             <div className="mt-3 flex items-center gap-2">
                               <input
                                 type="text"
@@ -1298,7 +1298,7 @@ function PatientCarePlansPanel({
 
                       {detailSection === 'progress' && (
                         <div className="mt-4">
-                          <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                          <PermissionGate permission={PERMISSIONS.CARE_PLANS_WRITE}>
                             <div className="flex items-start gap-2">
                               <textarea
                                 value={newProgressNote}
@@ -1375,7 +1375,7 @@ function PatientCarePlansPanel({
                               </p>
                             </div>
                             {!evalDraft && (
-                              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                              <PermissionGate permission={PERMISSIONS.CARE_PLANS_WRITE}>
                                 <button
                                   type="button"
                                   onClick={startEvalEdit}
@@ -1657,7 +1657,7 @@ function PatientCarePlansPanel({
                     );
                   })}
                 </div>
-                <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                <PermissionGate permission={PERMISSIONS.CARE_PLANS_WRITE}>
                   <button
                     type="button"
                     onClick={() => setShowTemplatesModal(true)}

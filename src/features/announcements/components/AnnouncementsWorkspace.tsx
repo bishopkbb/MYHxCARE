@@ -164,7 +164,7 @@ export function AnnouncementsWorkspace() {
                 Stay informed with important updates and information.
               </p>
             </div>
-            <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+            <PermissionGate permission={PERMISSIONS.ANNOUNCEMENTS_WRITE}>
               <button
                 type="button"
                 onClick={() => setNewModalOpen(true)}
@@ -654,7 +654,7 @@ export function AnnouncementsWorkspace() {
                         </span>
                       )}
                     </div>
-                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                    <PermissionGate permission={PERMISSIONS.ANNOUNCEMENTS_WRITE}>
                       <button
                         ref={moreButtonRef}
                         type="button"

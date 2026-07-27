@@ -1015,7 +1015,7 @@ export function ShiftHandoverWorkspace() {
                   </>
                 ) : (
                   <>
-                    <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+                    <PermissionGate permission={PERMISSIONS.SHIFT_HANDOVER_WRITE}>
                       <button
                         type="button"
                         onClick={() => setSignModalOpen(true)}
@@ -1045,7 +1045,7 @@ export function ShiftHandoverWorkspace() {
             className="mt-4 flex flex-col gap-3 rounded-[12px] p-4 sm:flex-row sm:items-center sm:justify-between"
             style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
           >
-            <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+            <PermissionGate permission={PERMISSIONS.SHIFT_HANDOVER_WRITE}>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -1079,7 +1079,7 @@ export function ShiftHandoverWorkspace() {
                   Please ensure all information is accurate before completing handover.
                 </p>
               )}
-              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+              <PermissionGate permission={PERMISSIONS.SHIFT_HANDOVER_WRITE}>
                 <button
                   type="button"
                   onClick={handleCompleteHandover}

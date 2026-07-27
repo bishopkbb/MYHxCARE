@@ -441,7 +441,7 @@ function PatientAssessmentPanel({
               >
                 Back to Patient Record
               </button>
-              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+              <PermissionGate permission={PERMISSIONS.NURSING_ASSESSMENT_WRITE}>
                 <button
                   type="button"
                   onClick={handleSaveDraft}
@@ -1072,7 +1072,7 @@ function PatientAssessmentPanel({
               <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
                 Actions
               </h2>
-              <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
+              <PermissionGate permission={PERMISSIONS.NURSING_ASSESSMENT_WRITE}>
                 <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
                   <button
                     type="button"
