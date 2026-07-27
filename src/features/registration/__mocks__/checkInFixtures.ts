@@ -104,14 +104,6 @@ export const PURPOSE_OF_VISIT_OPTIONS: SelectOption[] = [
   { value: 'specialist-referral', label: 'Specialist Referral' },
 ];
 
-export const PHYSICIAN_OPTIONS: SelectOption[] = [
-  { value: 'dr-jane-ezeonu', label: 'Dr. Jane Ezeonu (GP)' },
-  { value: 'dr-michael-obi', label: 'Dr. Michael Obi (Surgeon)' },
-  { value: 'dr-ngozi-okafor', label: 'Dr. Ngozi Okafor (Peds)' },
-  { value: 'dr-ada-chukwu', label: 'Dr. Ada Chukwu (GP)' },
-  { value: 'dr-chinedu-a', label: 'Dr. Chinedu A. (Cardio)' },
-];
-
 export const CONSULTING_ROOM_OPTIONS: SelectOption[] = [
   { value: 'room-1', label: 'Room 1' },
   { value: 'room-2', label: 'Room 2' },

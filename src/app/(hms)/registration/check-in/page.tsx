@@ -33,7 +33,7 @@ import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
-import { DOCTORS, getDoctorByName } from '@/features/shared/__mocks__/doctorDirectory';
+import { DOCTORS } from '@/features/shared/__mocks__/doctorDirectory';
 import { addQueueEntry } from '@/features/registration/store/registrationQueueStore';
 import { useScheduledAppointments } from '@/features/registration/store/appointmentStore';
 import {
@@ -41,6 +41,7 @@ import {
   type AppointmentStatus,
   type ScheduledAppointment,
 } from '@/features/registration/__mocks__/appointmentSchedulingFixtures';
+import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
 import { formatDateTime, formatHumanDate, formatTime } from '@/utils/datetime';
 import {
   CHECKIN_PATIENT_SEARCH_KEYS,
@@ -48,7 +49,6 @@ import {
   DEPARTMENT_OPTIONS,
   ESTIMATED_WAIT_MINUTES,
   MOCK_CHECKIN_PATIENT,
-  PHYSICIAN_OPTIONS,
   PURPOSE_OF_VISIT_OPTIONS,
   QUEUE_PREFIX,
   TODAYS_QUEUE_COUNT_BEFORE_ASSIGNMENT,
@@ -58,6 +58,14 @@ import {
 } from '@/features/registration/__mocks__/checkInFixtures';
 
 type Mode = 'verify' | 'walkin';
+
+// Built from the shared canonical roster (DOCTORS) instead of an
+// independently-authored list — closes the physician/department vocabulary
+// mismatch found while fixing SYS-012.
+const PHYSICIAN_SELECT_OPTIONS: SelectOption[] = DOCTORS.map((d) => ({
+  value: d.id,
+  label: d.name,
+}));
 
 function labelFor(options: { value: string; label: string }[], value: string): string {
   return options.find((o) => o.value === value)?.label ?? value;
@@ -272,8 +280,7 @@ export default function CheckInPage() {
       if (matched) {
         const departmentValue =
           DEPARTMENT_OPTIONS.find((o) => o.label === matched.department)?.value ?? '';
-        const physicianValue =
-          PHYSICIAN_OPTIONS.find((o) => o.label === matched.physician)?.value ?? '';
+        const physicianValue = DOCTORS.find((d) => d.name === matched.physician)?.id ?? '';
         const purposeValue =
           PURPOSE_OF_VISIT_OPTIONS.find((o) => o.label === matched.purpose)?.value ?? '';
         setVisitDetails({
@@ -332,8 +339,8 @@ export default function CheckInPage() {
       return;
     }
 
-    const physicianLabel = visitDetails.physician
-      ? labelFor(PHYSICIAN_OPTIONS, visitDetails.physician)
+    const selectedDoctor = visitDetails.physician
+      ? DOCTORS.find((d) => d.id === visitDetails.physician)
       : undefined;
 
     // This is what actually moves the patient from Registration onto the
@@ -348,8 +355,8 @@ export default function CheckInPage() {
       checkinDepartment: visitDetails.department,
       isEmergency: visitDetails.visitType === 'emergency',
       isNewPatient: mode === 'walkin' && !appointment,
-      physician: physicianLabel
-        ? { label: physicianLabel, doctorId: getDoctorByName(physicianLabel)?.id }
+      physician: selectedDoctor
+        ? { label: selectedDoctor.name, doctorId: selectedDoctor.id }
         : undefined,
       consultingRoomLabel: consultingRoom
         ? labelFor(CONSULTING_ROOM_OPTIONS, consultingRoom)
@@ -727,7 +734,7 @@ export default function CheckInPage() {
                           id="physician"
                           value={visitDetails.physician}
                           onChange={(v) => setVisitDetails((p) => ({ ...p, physician: v }))}
-                          options={PHYSICIAN_OPTIONS}
+                          options={PHYSICIAN_SELECT_OPTIONS}
                           placeholder="Select physician"
                         />
                       </FormField>
@@ -995,7 +1002,7 @@ export default function CheckInPage() {
                         label="Next Available Doctor"
                         value={
                           visitDetails.physician
-                            ? labelFor(PHYSICIAN_OPTIONS, visitDetails.physician)
+                            ? (DOCTORS.find((d) => d.id === visitDetails.physician)?.name ?? '—')
                             : '—'
                         }
                       />
