@@ -29,9 +29,9 @@ export const OUTGOING_NURSE: HandoverNurse = {
 };
 
 export const INCOMING_NURSE: HandoverNurse = {
-  name: 'Nurse Aisha Ibrahim',
-  staffId: 'NUR-0317',
-  email: 'aisha.i@myhxcare.ng',
+  name: 'Nurse Ijeoma K.',
+  staffId: 'NUR-0289',
+  email: 'ijeoma.k@myhxcare.ng',
   phone: '+234 805 987 6543',
   avatarBg: '#8B5CF6',
 };
@@ -359,7 +359,7 @@ export const HANDOVER_HISTORY: HandoverHistoryEntry[] = [
     id: 'h1',
     shiftDateLabel: 'Sun, Jun 29, 2026',
     shiftType: 'Night',
-    outgoingNurse: 'Nurse Aisha Ibrahim',
+    outgoingNurse: 'Nurse Ijeoma K.',
     incomingNurse: 'Nurse Grace E.',
     ward: 'Female Medical Ward',
     completedAtLabel: 'Jun 30, 2026 07:02 AM',
@@ -369,7 +369,7 @@ export const HANDOVER_HISTORY: HandoverHistoryEntry[] = [
     shiftDateLabel: 'Sun, Jun 29, 2026',
     shiftType: 'Day',
     outgoingNurse: 'Nurse Grace E.',
-    incomingNurse: 'Nurse Aisha Ibrahim',
+    incomingNurse: 'Nurse Ijeoma K.',
     ward: 'Female Medical Ward',
     completedAtLabel: 'Jun 29, 2026 06:35 PM',
   },
@@ -377,7 +377,7 @@ export const HANDOVER_HISTORY: HandoverHistoryEntry[] = [
     id: 'h3',
     shiftDateLabel: 'Sat, Jun 28, 2026',
     shiftType: 'Night',
-    outgoingNurse: 'Nurse Aisha Ibrahim',
+    outgoingNurse: 'Nurse Ijeoma K.',
     incomingNurse: 'Nurse Grace E.',
     ward: 'Female Medical Ward',
     completedAtLabel: 'Jun 29, 2026 07:08 AM',
@@ -387,7 +387,7 @@ export const HANDOVER_HISTORY: HandoverHistoryEntry[] = [
     shiftDateLabel: 'Sat, Jun 28, 2026',
     shiftType: 'Day',
     outgoingNurse: 'Nurse Grace E.',
-    incomingNurse: 'Nurse Aisha Ibrahim',
+    incomingNurse: 'Nurse Ijeoma K.',
     ward: 'Female Medical Ward',
     completedAtLabel: 'Jun 28, 2026 06:31 PM',
   },
