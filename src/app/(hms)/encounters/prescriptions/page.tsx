@@ -20,6 +20,9 @@ import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
+import { getPatientDetail } from '@/features/patients/__mocks__/patientFixtures';
+import { getDirectoryPatientsSnapshot } from '@/features/registration/store/patientDirectoryStore';
+import { addPrescription as addPrescriptionInStore } from '@/features/prescriptions/store/prescriptionStore';
 import {
   ADDITIONAL_OPTION_DEFS,
   DEFAULT_ADDITIONAL_OPTIONS,
@@ -27,12 +30,12 @@ import {
   DOSAGE_UNITS,
   DURATION_UNITS,
   FREQUENCY_OPTIONS,
-  MOCK_PRESCRIPTION_PATIENT,
   PRESCRIBING_DOCTOR,
   ROUTE_OPTIONS,
   createDefaultPrescriptionLines,
   createLineFromDrug,
   frequencyLabel,
+  patientDetailToPrescriptionPatient,
   type AdditionalOptionsState,
   type PrescriptionLine,
 } from '@/features/prescriptions/__mocks__/prescriptionFixtures';
@@ -218,19 +221,28 @@ export default function PrescriptionsPage() {
   const toast = useToast();
   const { user } = useAuth();
   const prescribingDoctorName = user?.name ?? PRESCRIBING_DOCTOR.name;
-  const patient = MOCK_PRESCRIPTION_PATIENT;
+
+  // Defaults to the same p1 persona this screen always showed — but now a
+  // real, searchable patient id instead of a disconnected hardcoded object
+  // (MOCK_PRESCRIPTION_PATIENT was itself an independent duplicate of p1;
+  // see SYS-011 register entry).
+  const [patientId, setPatientId] = useState('p1');
+  const patient = patientDetailToPrescriptionPatient(getPatientDetail(patientId));
 
   const [pageState, setPageState] = useState<PageState>('loading');
   const [lines, setLines] = useState<PrescriptionLine[]>(() => createDefaultPrescriptionLines());
   const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [patientSearch, setPatientSearch] = useState('');
+  const [patientMenuOpen, setPatientMenuOpen] = useState(false);
   const [additionalOptions, setAdditionalOptions] = useState<AdditionalOptionsState>(
     DEFAULT_ADDITIONAL_OPTIONS,
   );
   const [pharmacyNote, setPharmacyNote] = useState('');
 
   const addMenuRef = useRef<HTMLDivElement>(null);
+  const patientMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -247,6 +259,35 @@ export default function PrescriptionsPage() {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [addMenuOpen]);
+
+  useEffect(() => {
+    if (!patientMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (patientMenuRef.current && !patientMenuRef.current.contains(e.target as Node)) {
+        setPatientMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [patientMenuOpen]);
+
+  const patientResults = patientSearch.trim()
+    ? getDirectoryPatientsSnapshot()
+        .filter(
+          (p) =>
+            p.name.toLowerCase().includes(patientSearch.trim().toLowerCase()) ||
+            p.mrn.toLowerCase().includes(patientSearch.trim().toLowerCase()),
+        )
+        .slice(0, 8)
+    : [];
+
+  function selectPatient(id: string) {
+    setPatientId(id);
+    setPatientSearch('');
+    setPatientMenuOpen(false);
+    setLines([]);
+    setSelectedLineId(null);
+  }
 
   function handleRetry() {
     setPageState('loading');
@@ -315,6 +356,7 @@ export default function PrescriptionsPage() {
       toast.error('No medications', 'Add at least one medication before sending.');
       return;
     }
+    addPrescriptionInStore(patientId, lines, prescribingDoctorName);
     toast.success('Prescription sent', `Sent to pharmacy for ${patient.name}.`);
     setLines([]);
     setSelectedLineId(null);
@@ -415,6 +457,68 @@ export default function PrescriptionsPage() {
                     </div>
                   </div>
                 )}
+
+                {/* ── Search Patient ───────────────────────────────────────── */}
+                <div className="mt-4" ref={patientMenuRef}>
+                  <p className="text-base leading-6 font-semibold" style={{ color: '#0D2630' }}>
+                    Patient
+                  </p>
+                  <div className="relative mt-2">
+                    <Search
+                      className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2"
+                      style={{ width: 16, height: 16, color: '#8A98A3' }}
+                    />
+                    <input
+                      type="text"
+                      value={patientSearch}
+                      onChange={(e) => {
+                        setPatientSearch(e.target.value);
+                        setPatientMenuOpen(true);
+                      }}
+                      onFocus={(e) => {
+                        setPatientMenuOpen(true);
+                        focusBorder(e);
+                      }}
+                      onBlur={blurBorder}
+                      placeholder={`Search a different patient by name or MRN… (currently: ${patient.name})`}
+                      className={`w-full pr-4 pl-10 transition-[border-color] duration-150 outline-none ${FOCUS_RING}`}
+                      style={FIELD_BASE}
+                    />
+                    {patientMenuOpen && patientResults.length > 0 && (
+                      <div
+                        className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 left-0 z-30 mt-1.5 max-h-72 overflow-y-auto scroll-smooth rounded-[12px] bg-white py-1.5 duration-150"
+                        style={{
+                          border: '1px solid rgba(0,100,130,0.15)',
+                          boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
+                        }}
+                      >
+                        {patientResults.map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => selectPatient(p.id)}
+                            className={`flex w-full items-center justify-between px-4 py-2.5 text-left transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                          >
+                            <span>
+                              <span
+                                className="block text-sm leading-5.5 font-medium"
+                                style={{ color: '#0D2630' }}
+                              >
+                                {p.name}
+                              </span>
+                              <span
+                                className="block text-sm leading-5"
+                                style={{ color: '#8A98A3' }}
+                              >
+                                {p.mrn}
+                              </span>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {/* ── Two-column layout ─────────────────────────────────────── */}
                 <div className="mt-6 flex flex-col gap-6 xl:flex-row xl:items-start">

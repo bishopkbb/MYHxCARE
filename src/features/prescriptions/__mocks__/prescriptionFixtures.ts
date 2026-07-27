@@ -5,6 +5,7 @@
  */
 
 import type { Allergy } from '@/types/patient.types';
+import type { PatientDetailMock } from '@/features/patients/__mocks__/patientFixtures';
 
 // ── Patient in context ───────────────────────────────────────────────────────
 
@@ -38,59 +39,52 @@ export type PrescriptionPatient = {
   allergies: Allergy[];
 };
 
-export const MOCK_PRESCRIPTION_PATIENT: PrescriptionPatient = {
-  initials: 'AO',
-  avatarBg: '#00B4D8',
-  name: 'Adaeze Okonkwo',
-  mrn: 'MRN-2024-00451',
-  age: '21y',
-  gender: 'Female',
-  bloodGroup: 'O+',
-  vitals: [
-    { label: 'BP', value: '132/86 mmHg', abnormal: false },
-    { label: 'Pulse', value: '98 bpm', abnormal: false },
-    { label: 'Temp', value: '38.7°C', abnormal: true },
-    { label: 'SpO2', value: '97%', abnormal: false },
-    { label: 'RR', value: '22/min', abnormal: true },
-  ],
-  activeMedications: [
-    {
-      id: 'am1',
-      name: 'Paracetamol',
-      dose: '1000mg',
-      frequencyShort: 'TDS',
-      frequencyLabel: 'Three times a day (TDS)',
-    },
-    {
-      id: 'am2',
-      name: 'Amoxicillin',
-      dose: '500mg',
-      form: 'Capsule',
-      frequencyShort: 'BD',
-      frequencyLabel: 'Twice a day (BD)',
-    },
-  ],
-  diagnosis: { condition: 'Migraine (Tension Type)', icd10: 'G44.209' },
-  notes: 'Persistent headache and fever for 3 days',
-  allergies: [
-    {
-      id: 'al-p1-1',
-      substance: 'Penicillin',
-      reaction: 'Skin rash, itching',
-      severity: 'SEVERE',
-      recordedAt: '2025-11-20T00:00:00Z',
-      recordedBy: 'Dr. A. Nwosu',
-    },
-    {
-      id: 'al-p1-2',
-      substance: 'Sulfonamides',
-      reaction: 'Nausea, Vomiting',
-      severity: 'MODERATE',
-      recordedAt: '2025-11-20T00:00:00Z',
-      recordedBy: 'Dr. A. Nwosu',
-    },
-  ],
+const VITAL_KEY_LABEL: Record<string, string> = {
+  'blood-pressure': 'BP',
+  'pulse-rate': 'Pulse',
+  temperature: 'Temp',
+  spo2: 'SpO2',
+  'resp-rate': 'RR',
 };
+
+/** Converts a real patient (getPatientDetail()'s canonical shape) into this
+ * screen's own PrescriptionPatient display shape — same file-local-converter
+ * convention used throughout this session (SYS-004/005/006/007/011).
+ * Replaces the standalone MOCK_PRESCRIPTION_PATIENT, which was itself an
+ * independently-curated duplicate of PatientRecord p1 (same mrn, same name,
+ * identical activeMedications) rather than a genuinely separate demo patient. */
+export function patientDetailToPrescriptionPatient(detail: PatientDetailMock): PrescriptionPatient {
+  return {
+    initials: detail.initials,
+    // PatientDetailMock has no avatarBg — same known, documented gap already
+    // flagged for the referral/lab-order/prescription pages (SYS-011 register entry).
+    avatarBg: '#00B4D8',
+    name: detail.name,
+    mrn: detail.mrn,
+    age: detail.age,
+    gender: detail.gender,
+    bloodGroup: detail.bloodGroup,
+    vitals: detail.vitalSigns.readings.map((r) => ({
+      label: VITAL_KEY_LABEL[r.key] ?? r.key,
+      value: r.value,
+      abnormal: r.status === 'abnormal',
+    })),
+    activeMedications: detail.medications
+      .filter((m) => m.status === 'active')
+      .map((m) => ({
+        id: m.id,
+        name: m.name,
+        dose: m.dose,
+        frequencyShort: m.frequency,
+        frequencyLabel: frequencyLabel(m.frequency),
+      })),
+    diagnosis: {
+      condition: detail.consultations[0]?.diagnosis || 'No diagnosis on record',
+    },
+    notes: detail.queueStatus,
+    allergies: detail.allergies,
+  };
+}
 
 export const PRESCRIBING_DOCTOR = { name: 'Dr. Jane Ezeonu', credentials: 'MBBS, FMCP' };
 
