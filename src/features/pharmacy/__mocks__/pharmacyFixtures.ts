@@ -45,6 +45,10 @@ export type PharmacyQueueEntry = {
   form: string;
   route: string;
   duration: string;
+  /** Numeric course length backing `duration`'s human-readable label — what
+   * the Active Prescriptions screen computes an honest End Date/days-left
+   * from, rather than parsing the display string. */
+  courseDays: number;
   quantity: number;
   instructions: string;
   prescriberNote: string;
@@ -65,6 +69,13 @@ function atOffset(hoursAgo: number): string {
 
 function todayAt(hour: number, minute: number): string {
   const d = new Date();
+  d.setHours(hour, minute, 0, 0);
+  return d.toISOString();
+}
+
+function pastDateAt(daysAgo: number, hour: number, minute: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
   d.setHours(hour, minute, 0, 0);
   return d.toISOString();
 }
@@ -204,6 +215,7 @@ export function deriveMedicationFields(name: string): {
   form: string;
   route: string;
   duration: string;
+  courseDays: number;
   quantity: number;
   instructions: string;
   prescriberNote: string;
@@ -215,6 +227,7 @@ export function deriveMedicationFields(name: string): {
     form: info.form,
     route: info.route,
     duration,
+    courseDays: info.courseDays,
     quantity,
     instructions: info.instructions,
     prescriberNote: info.prescriberNote,
@@ -374,14 +387,20 @@ const GENERATED_COLLECTED: PharmacyQueueEntry[] = Array.from({ length: 127 }, (_
     3 + (i % 10),
     'Collected',
   );
-  entry.dispensedAt = todayAt(7 + (i % 10), (i * 11) % 60);
-  entry.collectedAt = todayAt(8 + (i % 10), (i * 13) % 60);
+  // The first 50 were dispensed earlier today (recent activity); the rest
+  // spread across the past 1-45 days so course end dates vary — giving
+  // Active Prescriptions a real mix of Active/Ending Soon/Overdue instead of
+  // every course starting "today".
+  const daysAgo = i < 50 ? 0 : ((i - 50) % 45) + 1;
+  entry.dispensedAt = pastDateAt(daysAgo, 7 + (i % 10), (i * 11) % 60);
+  entry.collectedAt = pastDateAt(daysAgo, 8 + (i % 10), (i * 13) % 60);
   return entry;
 });
 
 /** Seed queue — 32 Pending Verification, 8 In Progress, 21 Ready for Dispense,
  * 21 Ready for Pickup, 3 Cancelled (85 active in the pipeline), plus 127
- * already Collected today (21 + 127 = 148 dispensed today).
+ * already Collected (spread across today and the past 45 days, so dispensing
+ * courses land at every stage — see GENERATED_COLLECTED).
  * `pharmacyDispensingStore.ts` owns the live, mutable copy of this seed. */
 export const PHARMACY_QUEUE_SEED: PharmacyQueueEntry[] = [
   ...CURATED_PENDING,

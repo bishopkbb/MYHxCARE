@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Active Prescriptions' };
+import { ActivePrescriptionsWorkspace } from '@/features/pharmacy/components/ActivePrescriptionsWorkspace';
 
 export default function ActivePrescriptionsPage() {
-  return (
-    <ComingSoon
-      title="Active Prescriptions"
-      description="A hospital-wide view of every currently active prescription is on the way."
-    />
-  );
+  return <ActivePrescriptionsWorkspace />;
 }

@@ -100,6 +100,14 @@ export function useCancelledQueue(): PharmacyQueueEntry[] {
   return all.filter((e) => e.stage === 'Cancelled');
 }
 
+/** Dispensed prescriptions the patient is currently on — Ready for Pickup
+ * (dispensed, not yet collected) or already Collected — for the Active
+ * Prescriptions screen. */
+export function useActivePrescriptions(): PharmacyQueueEntry[] {
+  const all = useAllQueueEntries();
+  return all.filter((e) => e.stage === 'Ready for Pickup' || e.stage === 'Collected');
+}
+
 /** Live-updating single entry, for the Prescription Details screen — re-runs
  * whenever the shared queue emits, so a change made on the Queue screen (or
  * the live prescriptionStore bridge) is reflected here without a reload. */

@@ -1057,6 +1057,30 @@ const PRESCRIPTION_DETAILS_GUIDE: HelpGuide = {
   ],
 };
 
+const ACTIVE_PRESCRIPTIONS_GUIDE: HelpGuide = {
+  id: 'active-prescriptions',
+  title: 'Active Prescriptions',
+  intro: 'A hospital-wide view of every dispensed prescription patients are currently on.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Active Prescriptions and Patients on Medications summarize the full list. Ending Soon, Requires Review, and Overdue / Missed are clickable — each filters the table to that status.',
+    },
+    {
+      heading: 'Filters, sort, and export',
+      body: 'Search by patient, Rx number, or medication, or filter by status, department, prescriber, and (under More Filters) medication. Sort by date prescribed, end date, or patient name. Export downloads the current filtered list as CSV.',
+    },
+    {
+      heading: 'Status',
+      body: 'Active means the course still has time left. Ending Soon is within 3 days of the end date. Requires Review flags a real allergy or drug-interaction concern. Overdue / Missed means the course window has passed without a follow-up.',
+    },
+    {
+      heading: 'Patient Summary',
+      body: "Selecting a row updates the sidebar with that patient's allergies, chronic conditions, current medications, and relevant alerts and reminders — the same docked-panel pattern used elsewhere in the app.",
+    },
+  ],
+};
+
 const PRESCRIPTION_QUEUE_GUIDE: HelpGuide = {
   id: 'prescription-queue',
   title: 'Prescription Queue',
@@ -2096,6 +2120,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/prescriptions/active')) return ACTIVE_PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/pharmacy/prescriptions/details')) return PRESCRIPTION_DETAILS_GUIDE;
   if (pathname.startsWith('/pharmacy/prescriptions/queue')) return PRESCRIPTION_QUEUE_GUIDE;
   if (pathname.startsWith('/pharmacy')) return PHARMACY_DASHBOARD_GUIDE;
