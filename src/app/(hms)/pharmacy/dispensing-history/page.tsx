@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Dispensing History' };
+import { DispensingHistoryWorkspace } from '@/features/pharmacy/components/DispensingHistoryWorkspace';
 
 export default function DispensingHistoryPage() {
-  return (
-    <ComingSoon
-      title="Dispensing History"
-      description="A searchable, exportable history of every dispensed medication is on the way."
-    />
-  );
+  return <DispensingHistoryWorkspace />;
 }

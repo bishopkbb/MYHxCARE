@@ -1057,6 +1057,30 @@ const PRESCRIPTION_DETAILS_GUIDE: HelpGuide = {
   ],
 };
 
+const DISPENSING_HISTORY_GUIDE: HelpGuide = {
+  id: 'dispensing-history',
+  title: 'Dispensing History',
+  intro: 'A searchable, exportable record of every dispensed medication and transaction.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Dispensed, This Week, This Month, and Unique Patients summarize the full history. Dispensed Today, This Week, and This Month are clickable — each filters the table to that date range.',
+    },
+    {
+      heading: 'Filters and export',
+      body: 'Search by patient, Rx number, or medication, or filter by date range, status, department, and (under More Filters) prescriber. Export downloads the current filtered list as CSV; Print prints the page.',
+    },
+    {
+      heading: 'Status',
+      body: 'Completed is a normal dispense. Partial, Returned, and Cancelled cover the exceptions — a partial fill, a medication returned to stock, or a dispense that was cancelled after the fact.',
+    },
+    {
+      heading: 'Dispensing Overview and Top Medications',
+      body: 'The donut chart breaks down every record by status. Top Medications Dispensed ranks the most frequently dispensed medications across the full history.',
+    },
+  ],
+};
+
 const MEDICATION_PICKUP_QUEUE_GUIDE: HelpGuide = {
   id: 'medication-pickup-queue',
   title: 'Medication Pickup Queue',
@@ -2177,6 +2201,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/dispensing-history')) return DISPENSING_HISTORY_GUIDE;
   if (pathname.startsWith('/pharmacy/pickup-queue')) return MEDICATION_PICKUP_QUEUE_GUIDE;
   if (pathname.startsWith('/pharmacy/dispense')) return DISPENSE_MEDICATION_GUIDE;
   if (pathname.startsWith('/pharmacy/prescriptions/active')) return ACTIVE_PRESCRIPTIONS_GUIDE;

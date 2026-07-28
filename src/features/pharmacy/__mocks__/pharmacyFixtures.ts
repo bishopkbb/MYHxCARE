@@ -464,7 +464,16 @@ export const PICKUP_TYPE_OPTIONS: SelectOption[] = [
   { value: 'Family Pickup', label: 'Family Pickup' },
 ];
 
-// ── Recent dispensing activity ───────────────────────────────────────────────
+export const DISPENSING_STATUS_OPTIONS: SelectOption[] = [
+  { value: 'Completed', label: 'Completed' },
+  { value: 'Partial', label: 'Partial' },
+  { value: 'Returned', label: 'Returned' },
+  { value: 'Cancelled', label: 'Cancelled' },
+];
+
+// ── Recent dispensing activity / dispensing history ─────────────────────────
+
+export type DispensingStatus = 'Completed' | 'Partial' | 'Returned' | 'Cancelled';
 
 export type DispensingActivityEntry = {
   id: string;
@@ -472,15 +481,30 @@ export type DispensingActivityEntry = {
   patientId: string;
   rxNo: string;
   dispensedAt: string; // ISO
+  /** Dose/qty/unit/prescriber/department — populated so the Dispensing
+   * History screen can show a full transaction record, not just a name and a
+   * timestamp. */
+  dose: string;
+  qty: number;
+  unit: string;
+  doctorName: string;
+  department: string;
+  status: DispensingStatus;
 };
 
-export const DISPENSING_ACTIVITY_SEED: DispensingActivityEntry[] = [
+const CURATED_DISPENSING_ACTIVITY: DispensingActivityEntry[] = [
   {
     id: 'da-1',
     medicationName: 'Amoxicillin 500mg',
     patientId: 'dp-001',
     rxNo: 'RX-250629-1458',
     dispensedAt: todayAt(10, 25),
+    dose: '500mg',
+    qty: 15,
+    unit: 'Capsule',
+    doctorName: DOCTORS[0]!.name,
+    department: DOCTORS[0]!.department,
+    status: 'Completed',
   },
   {
     id: 'da-2',
@@ -488,6 +512,12 @@ export const DISPENSING_ACTIVITY_SEED: DispensingActivityEntry[] = [
     patientId: 'np-002',
     rxNo: 'RX-250629-1457',
     dispensedAt: todayAt(10, 18),
+    dose: '500mg',
+    qty: 60,
+    unit: 'Tablet',
+    doctorName: DOCTORS[1]!.name,
+    department: DOCTORS[1]!.department,
+    status: 'Completed',
   },
   {
     id: 'da-3',
@@ -495,6 +525,12 @@ export const DISPENSING_ACTIVITY_SEED: DispensingActivityEntry[] = [
     patientId: 'dp-002',
     rxNo: 'RX-250629-1456',
     dispensedAt: todayAt(10, 12),
+    dose: '20mg',
+    qty: 30,
+    unit: 'Tablet',
+    doctorName: DOCTORS[2]!.name,
+    department: DOCTORS[2]!.department,
+    status: 'Completed',
   },
   {
     id: 'da-4',
@@ -502,6 +538,12 @@ export const DISPENSING_ACTIVITY_SEED: DispensingActivityEntry[] = [
     patientId: 'dp-004',
     rxNo: 'RX-250629-1455',
     dispensedAt: todayAt(10, 5),
+    dose: '100mcg',
+    qty: 1,
+    unit: 'Inhaler',
+    doctorName: DOCTORS[3]!.name,
+    department: DOCTORS[3]!.department,
+    status: 'Completed',
   },
   {
     id: 'da-5',
@@ -509,7 +551,67 @@ export const DISPENSING_ACTIVITY_SEED: DispensingActivityEntry[] = [
     patientId: 'dp-006',
     rxNo: 'RX-250629-1454',
     dispensedAt: todayAt(9, 58),
+    dose: '50mg',
+    qty: 30,
+    unit: 'Tablet',
+    doctorName: DOCTORS[4]!.name,
+    department: DOCTORS[4]!.department,
+    status: 'Completed',
   },
+];
+
+const HISTORY_MEDICATIONS: { name: string; dose: string; unit: string }[] = [
+  { name: 'Amoxicillin 500mg', dose: '500mg', unit: 'Capsule' },
+  { name: 'Metformin 500mg', dose: '500mg', unit: 'Tablet' },
+  { name: 'Atorvastatin 20mg', dose: '20mg', unit: 'Tablet' },
+  { name: 'Salbutamol Inhaler', dose: '100mcg', unit: 'Inhaler' },
+  { name: 'Losartan 50mg', dose: '50mg', unit: 'Tablet' },
+  { name: 'Omeprazole 20mg', dose: '20mg', unit: 'Capsule' },
+  { name: 'Ciprofloxacin 500mg', dose: '500mg', unit: 'Tablet' },
+  { name: 'Ibuprofen 400mg', dose: '400mg', unit: 'Tablet' },
+  { name: 'Amlodipine 5mg', dose: '5mg', unit: 'Tablet' },
+  { name: 'Paracetamol 1000mg', dose: '1000mg', unit: 'Tablet' },
+];
+
+// ~90 days of past transaction history, feeding the Dispensing History
+// screen's stats/table/Top Medications ranking — all real, derived counts,
+// not hardcoded totals.
+const GENERATED_DISPENSING_HISTORY: DispensingActivityEntry[] = Array.from(
+  { length: 180 },
+  (_, i) => {
+    const med = HISTORY_MEDICATIONS[i % HISTORY_MEDICATIONS.length]!;
+    const doctor = DOCTORS[i % DOCTORS.length]!;
+    const daysAgo = i % 90;
+    const status: DispensingStatus =
+      i % 33 === 0
+        ? 'Cancelled'
+        : i % 25 === 0
+          ? 'Returned'
+          : i % 12 === 0
+            ? 'Partial'
+            : 'Completed';
+    return {
+      id: `dah-${i}`,
+      medicationName: med.name,
+      patientId: `dp-${String((i % 150) + 1).padStart(3, '0')}`,
+      rxNo: `RX-${String(250620 + (89 - daysAgo)).padStart(6, '0')}-${String(2000 + i)}`,
+      dispensedAt: pastDateAt(daysAgo, 8 + (i % 9), (i * 7) % 60),
+      dose: med.dose,
+      qty: [15, 30, 45, 60][i % 4]!,
+      unit: med.unit,
+      doctorName: doctor.name,
+      department: doctor.department,
+      status,
+    };
+  },
+);
+
+/** Every dispensing transaction on record — curated recent entries plus 180
+ * days of generated history. The store's live `verifyAndDispense()` prepends
+ * new real entries to this same list. */
+export const DISPENSING_ACTIVITY_SEED: DispensingActivityEntry[] = [
+  ...CURATED_DISPENSING_ACTIVITY,
+  ...GENERATED_DISPENSING_HISTORY,
 ];
 
 // ── Drug inventory ────────────────────────────────────────────────────────────

@@ -160,6 +160,12 @@ export function verifyAndDispense(rxNo: string, dispensedBy: string): void {
       patientId: entry.patientId,
       rxNo: entry.rxNo,
       dispensedAt: now,
+      dose: entry.dose,
+      qty: entry.quantity,
+      unit: entry.form,
+      doctorName: entry.doctorName,
+      department: entry.department,
+      status: 'Completed',
     },
     ...activityLog,
   ];
