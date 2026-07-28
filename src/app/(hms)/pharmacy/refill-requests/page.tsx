@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Medication Refill Requests' };
+import { MedicationRefillRequestsWorkspace } from '@/features/pharmacy/components/MedicationRefillRequestsWorkspace';
 
 export default function MedicationRefillRequestsPage() {
-  return (
-    <ComingSoon
-      title="Medication Refill Requests"
-      description="Patient-initiated refill requests, approval workflow, and status tracking are on the way."
-    />
-  );
+  return <MedicationRefillRequestsWorkspace />;
 }

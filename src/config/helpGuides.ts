@@ -1057,6 +1057,30 @@ const PRESCRIPTION_DETAILS_GUIDE: HelpGuide = {
   ],
 };
 
+const MEDICATION_REFILL_REQUESTS_GUIDE: HelpGuide = {
+  id: 'medication-refill-requests',
+  title: 'Medication Refill Requests',
+  intro: 'Review and manage patient-initiated requests to refill an existing prescription.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Requests, Pending Review, Approved, Dispensed, and Denied summarize the queue. Click a card to filter the table to that status.',
+    },
+    {
+      heading: 'Approving a request',
+      body: "Approve Request creates a real, dispensable prescription in the Prescription Queue — it isn't just a label change. Once that prescription is actually dispensed, this request automatically updates to Dispensed.",
+    },
+    {
+      heading: 'Denying a request',
+      body: 'Deny Request marks the request as not approved. Both actions are only available while a request is still Pending Review.',
+    },
+    {
+      heading: 'Refill Request Overview and Request Sources',
+      body: 'The donut chart breaks down every request by status. Request Sources shows where requests came from — the Patient Portal, the mobile app, a doctor, or a walk-in/phone request.',
+    },
+  ],
+};
+
 const DISPENSING_HISTORY_GUIDE: HelpGuide = {
   id: 'dispensing-history',
   title: 'Dispensing History',
@@ -2201,6 +2225,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/refill-requests')) return MEDICATION_REFILL_REQUESTS_GUIDE;
   if (pathname.startsWith('/pharmacy/dispensing-history')) return DISPENSING_HISTORY_GUIDE;
   if (pathname.startsWith('/pharmacy/pickup-queue')) return MEDICATION_PICKUP_QUEUE_GUIDE;
   if (pathname.startsWith('/pharmacy/dispense')) return DISPENSE_MEDICATION_GUIDE;

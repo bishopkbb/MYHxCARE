@@ -1080,3 +1080,100 @@ export function getStockForMedication(medicationName: string): DrugInventoryItem
     null
   );
 }
+
+// ── Medication Refill Requests ───────────────────────────────────────────────
+
+export type RefillRequestStatus = 'Pending Review' | 'Approved' | 'Dispensed' | 'Denied';
+export type RefillRequestSource = 'Patient Portal' | 'Mobile App' | 'Doctor' | 'Walk-in' | 'Phone';
+
+export type RefillRequest = {
+  id: string; // REF-2026-0056
+  patientId: string;
+  medicationName: string;
+  dose: string;
+  qty: number;
+  form: string;
+  department: string;
+  lastFilledDate: string; // ISO date
+  requestedAt: string; // ISO
+  status: RefillRequestStatus;
+  source: RefillRequestSource;
+  requestedByDoctorName?: string; // only when source === 'Doctor'
+  reviewedAt?: string; // ISO
+  reviewNote?: string;
+  /** Set once approved — the real PharmacyQueueEntry.rxNo this request became,
+   * so it can be tracked through to actually being dispensed rather than the
+   * refill request staying "Approved" forever with nothing behind it. */
+  linkedRxNo?: string;
+};
+
+export const REFILL_STATUS_OPTIONS: SelectOption[] = [
+  { value: 'Pending Review', label: 'Pending Review' },
+  { value: 'Approved', label: 'Approved' },
+  { value: 'Dispensed', label: 'Dispensed' },
+  { value: 'Denied', label: 'Denied' },
+];
+
+const REFILL_SOURCES: RefillRequestSource[] = [
+  'Patient Portal',
+  'Patient Portal',
+  'Mobile App',
+  'Mobile App',
+  'Doctor',
+  'Walk-in',
+  'Phone',
+];
+
+function refillId(n: number): string {
+  return `REF-${new Date().getFullYear()}-${String(n).padStart(4, '0')}`;
+}
+
+const REFILL_MEDICATIONS: { name: string; dose: string; form: string; qty: number }[] = [
+  { name: 'Amlodipine 5mg', dose: '5mg', form: 'Tablet', qty: 30 },
+  { name: 'Metformin 500mg', dose: '500mg', form: 'Tablet', qty: 60 },
+  { name: 'Atorvastatin 20mg', dose: '20mg', form: 'Tablet', qty: 30 },
+  { name: 'Salbutamol Inhaler', dose: '100mcg', form: 'Inhaler', qty: 1 },
+  { name: 'Losartan 50mg', dose: '50mg', form: 'Tablet', qty: 30 },
+  { name: 'Omeprazole 20mg', dose: '20mg', form: 'Capsule', qty: 30 },
+  { name: 'Cetirizine 10mg', dose: '10mg', form: 'Tablet', qty: 30 },
+  { name: 'Amoxicillin 500mg', dose: '500mg', form: 'Capsule', qty: 21 },
+];
+
+/** 56 refill requests spread over the past ~10 days, in a realistic mix of
+ * statuses and request sources. `refillRequestStore.ts` owns the live,
+ * mutable copy. */
+export const REFILL_REQUESTS_SEED: RefillRequest[] = Array.from({ length: 56 }, (_, i) => {
+  const med = REFILL_MEDICATIONS[i % REFILL_MEDICATIONS.length]!;
+  const doctor = DOCTORS[i % DOCTORS.length]!;
+  const source = REFILL_SOURCES[i % REFILL_SOURCES.length]!;
+  const daysAgo = i % 10;
+  const requestedAt = pastDateAt(daysAgo, 8 + (i % 10), (i * 9) % 60);
+  const lastFilledDate = pastDateAt(daysAgo + 28 + (i % 14), 10, 0).slice(0, 10);
+  // Roughly: ~32% Pending Review, ~46% Approved, ~15% Dispensed (already
+  // fulfilled), ~7% Denied — close to a real pharmacy's refill mix.
+  const status: RefillRequestStatus =
+    i % 14 === 0
+      ? 'Denied'
+      : i % 7 === 0
+        ? 'Dispensed'
+        : i % 2 === 0
+          ? 'Approved'
+          : 'Pending Review';
+  return {
+    id: refillId(56 - i),
+    patientId: `dp-${String((i % 150) + 1).padStart(3, '0')}`,
+    medicationName: med.name,
+    dose: med.dose,
+    qty: med.qty,
+    form: med.form,
+    department: doctor.department,
+    lastFilledDate,
+    requestedAt,
+    status,
+    source,
+    ...(source === 'Doctor' ? { requestedByDoctorName: doctor.name } : {}),
+    ...(status !== 'Pending Review'
+      ? { reviewedAt: pastDateAt(Math.max(0, daysAgo - 1), 9, 0) }
+      : {}),
+  };
+});

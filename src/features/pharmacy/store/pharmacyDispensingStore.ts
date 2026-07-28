@@ -41,7 +41,9 @@ function emit() {
   for (const listener of listeners) listener();
 }
 
-function subscribe(listener: () => void): () => void {
+/** Exported so other pharmacy stores (e.g. refillRequestStore.ts) can react
+ * to a queue change without re-deriving their own copy of this state. */
+export function subscribe(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
@@ -141,6 +143,22 @@ function activityGetServerSnapshot(): DispensingActivityEntry[] {
 
 export function useRecentDispensingActivity(): DispensingActivityEntry[] {
   return useSyncExternalStore(subscribe, activityGetSnapshot, activityGetServerSnapshot);
+}
+
+/** Injects a fully-built queue entry — e.g. a refill request the pharmacist
+ * approved becoming a real, dispensable prescription in this same queue,
+ * rather than a dead-end "approved" label with nothing behind it. */
+export function addManualQueueEntry(entry: PharmacyQueueEntry): void {
+  queue = [entry, ...queue];
+  emit();
+}
+
+/** True once an entry with this Rx No. has reached Ready for Pickup or
+ * Collected — used by refillRequestStore.ts to know when an approved refill
+ * it created has actually been dispensed. */
+export function isQueueEntryDispensed(rxNo: string): boolean {
+  const entry = queue.find((e) => e.rxNo === rxNo);
+  return Boolean(entry && (entry.stage === 'Ready for Pickup' || entry.stage === 'Collected'));
 }
 
 /** Pharmacist verifies and dispenses a pending prescription — moves it to
