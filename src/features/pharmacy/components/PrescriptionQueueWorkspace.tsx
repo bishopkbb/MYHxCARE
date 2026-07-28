@@ -1209,6 +1209,15 @@ function QueueDonutChart({
     { cumulative: 0, segments: [] },
   );
 
+  // Draws the arcs in from empty on first mount, then transitions smoothly
+  // whenever the underlying counts change (e.g. a status filter narrows the
+  // queue) rather than snapping straight to the new shape.
+  const [animateIn, setAnimateIn] = useState(false);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setAnimateIn(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   return (
     <div
       className="relative flex shrink-0 items-center justify-center"
@@ -1231,13 +1240,16 @@ function QueueDonutChart({
               stroke={seg.color}
               strokeWidth={strokeWidth}
               strokeLinecap="butt"
-              strokeDasharray={`${seg.length} ${circumference}`}
+              strokeDasharray={`${animateIn ? seg.length : 0} ${circumference}`}
               strokeDashoffset={seg.offset}
+              style={{
+                transition: 'stroke-dasharray 700ms ease-out, stroke-dashoffset 700ms ease-out',
+              }}
             />
           ))}
         </g>
       </svg>
-      <div className="absolute flex flex-col items-center">
+      <div className="animate-in fade-in-0 zoom-in-95 absolute flex flex-col items-center duration-500">
         <span className="font-display font-bold" style={{ fontSize: 20, color: '#0D2630' }}>
           {total}
         </span>
