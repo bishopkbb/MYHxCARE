@@ -16,6 +16,7 @@
 import { useSyncExternalStore } from 'react';
 
 import { getPatientDetail } from '@/features/patients/__mocks__/patientFixtures';
+import { getDoctorByName } from '@/features/shared/__mocks__/doctorDirectory';
 import {
   getAllPrescriptionEntries,
   subscribe as subscribeToPrescriptions,
@@ -83,6 +84,21 @@ export function useReadyForPickupQueue(): PharmacyQueueEntry[] {
   return all.filter((e) => e.stage === 'Ready for Pickup');
 }
 
+export function useInProgressQueue(): PharmacyQueueEntry[] {
+  const all = useAllQueueEntries();
+  return all.filter((e) => e.stage === 'In Progress');
+}
+
+export function useReadyForDispenseQueue(): PharmacyQueueEntry[] {
+  const all = useAllQueueEntries();
+  return all.filter((e) => e.stage === 'Ready for Dispense');
+}
+
+export function useCancelledQueue(): PharmacyQueueEntry[] {
+  const all = useAllQueueEntries();
+  return all.filter((e) => e.stage === 'Cancelled');
+}
+
 export function useDispensedTodayCount(): number {
   const all = useAllQueueEntries();
   return all.filter((e) => isToday(e.dispensedAt)).length;
@@ -133,6 +149,17 @@ export function markCollected(rxNo: string): void {
   emit();
 }
 
+/** Cancels a prescription still earlier in the pipeline — by the prescriber,
+ * the patient, or a pharmacist safety hold. Not available once a prescription
+ * has already reached the patient (Ready for Pickup/Collected). */
+export function cancelPrescription(rxNo: string): void {
+  const idx = queue.findIndex((e) => e.rxNo === rxNo);
+  if (idx === -1) return;
+  const now = new Date().toISOString();
+  queue = queue.map((e, i) => (i === idx ? { ...e, stage: 'Cancelled', cancelledAt: now } : e));
+  emit();
+}
+
 function ingestNewPrescriptions() {
   const before = queue.length;
   const newRows: PharmacyQueueEntry[] = [];
@@ -146,6 +173,7 @@ function ingestNewPrescriptions() {
       dose: medication.dose,
       frequency: medication.frequency,
       doctorName: medication.prescribedBy,
+      department: getDoctorByName(medication.prescribedBy)?.department ?? 'General Medicine',
       priority: 'Medium',
       hasAllergyAlert: getPatientDetail(patientId).allergies.length > 0,
       receivedAt: new Date().toISOString(),

@@ -1029,6 +1029,35 @@ const REGISTRATION_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const PRESCRIPTION_QUEUE_GUIDE: HelpGuide = {
+  id: 'prescription-queue',
+  title: 'Prescription Queue',
+  intro:
+    'Review and verify new prescriptions — check patient details, allergies, interactions, and stock availability before dispensing.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Pending Verification, In Progress, Ready for Dispense, Ready for Pickup, and Cancelled track every prescription currently in the pipeline. Click a card to filter the table to that status.',
+    },
+    {
+      heading: 'Filters and search',
+      body: 'Search by patient, Rx number, or medication, or filter by status, priority, prescriber, or department. More Filters adds an allergy-alerts-only toggle. Clear Filters resets everything.',
+    },
+    {
+      heading: 'The queue table',
+      body: 'Select rows with the checkboxes to cancel several prescriptions at once. The eye icon or "View Details" opens the full prescription record, including the allergy banner. The row menu also offers Verify & Dispense for pending prescriptions.',
+    },
+    {
+      heading: 'Queue Overview and alerts',
+      body: 'The donut chart in the sidebar breaks down the queue by status. High Priority, Allergy Alerts, and Stock Alerts summarize prescriptions needing attention, each with a link that filters or navigates straight to it.',
+    },
+    {
+      heading: 'Queue Settings and Refresh',
+      body: 'Queue Settings controls the default page size, whether cancelled prescriptions stay visible, and whether allergy-alert rows are highlighted. Refresh Queue reloads the latest data.',
+    },
+  ],
+};
+
 const PHARMACY_DASHBOARD_GUIDE: HelpGuide = {
   id: 'pharmacy-dashboard',
   title: 'Pharmacy Dashboard',
@@ -2039,6 +2068,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/prescriptions/queue')) return PRESCRIPTION_QUEUE_GUIDE;
   if (pathname.startsWith('/pharmacy')) return PHARMACY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/duty-roster/roster')) return DUTY_ROSTER_CALENDAR_GUIDE;

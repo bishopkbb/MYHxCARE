@@ -8,10 +8,17 @@
  */
 
 import { DOCTORS } from '@/features/shared/__mocks__/doctorDirectory';
+import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
 
 // ── Prescription queue ───────────────────────────────────────────────────────
 
-export type PharmacyQueueStage = 'Pending Verification' | 'Ready for Pickup' | 'Collected';
+export type PharmacyQueueStage =
+  | 'Pending Verification'
+  | 'In Progress'
+  | 'Ready for Dispense'
+  | 'Ready for Pickup'
+  | 'Collected'
+  | 'Cancelled';
 export type PharmacyPriority = 'High' | 'Medium' | 'Low';
 
 export type PharmacyQueueEntry = {
@@ -23,12 +30,15 @@ export type PharmacyQueueEntry = {
   dose: string;
   frequency: string;
   doctorName: string;
+  /** The prescriber's own department, from the shared DOCTORS roster. */
+  department: string;
   priority: PharmacyPriority;
   hasAllergyAlert: boolean;
   receivedAt: string; // ISO
   stage: PharmacyQueueStage;
   dispensedAt?: string; // ISO
   collectedAt?: string; // ISO
+  cancelledAt?: string; // ISO
 };
 
 function atOffset(hoursAgo: number): string {
@@ -79,6 +89,7 @@ function buildQueueEntry(
     dose: med.dose,
     frequency: med.frequency,
     doctorName: doctor.name,
+    department: doctor.department,
     priority: PRIORITIES[rxSeq % PRIORITIES.length]!,
     hasAllergyAlert: rxSeq % 7 === 0,
     receivedAt: atOffset(hoursAgo),
@@ -123,6 +134,33 @@ const GENERATED_READY_FOR_PICKUP: PharmacyQueueEntry[] = Array.from({ length: 21
   return entry;
 });
 
+// A pharmacist has opened these and started verification but not finished —
+// mid-pipeline, ahead of the Pending Verification queue.
+const GENERATED_IN_PROGRESS: PharmacyQueueEntry[] = Array.from({ length: 8 }, (_, i) =>
+  buildQueueEntry(`dp-${String((i % 60) + 100).padStart(3, '0')}`, 0.5 + i * 0.3, 'In Progress'),
+);
+
+// Verified and cleared — waiting on the pharmacist to physically dispense
+// (the step before a prescription becomes Ready for Pickup).
+const GENERATED_READY_FOR_DISPENSE: PharmacyQueueEntry[] = Array.from({ length: 21 }, (_, i) =>
+  buildQueueEntry(
+    `dp-${String((i % 60) + 110).padStart(3, '0')}`,
+    0.2 + (i % 6) * 0.4,
+    'Ready for Dispense',
+  ),
+);
+
+// Cancelled today — by the prescriber, the patient, or a pharmacist safety hold.
+const GENERATED_CANCELLED: PharmacyQueueEntry[] = Array.from({ length: 3 }, (_, i) => {
+  const entry = buildQueueEntry(
+    `dp-${String((i % 60) + 120).padStart(3, '0')}`,
+    3 + i,
+    'Cancelled',
+  );
+  entry.cancelledAt = todayAt(9 + i, (i * 17) % 60);
+  return entry;
+});
+
 const GENERATED_COLLECTED: PharmacyQueueEntry[] = Array.from({ length: 127 }, (_, i) => {
   const entry = buildQueueEntry(
     `dp-${String((i % 60) + 135).padStart(3, '0')}`,
@@ -134,15 +172,44 @@ const GENERATED_COLLECTED: PharmacyQueueEntry[] = Array.from({ length: 127 }, (_
   return entry;
 });
 
-/** Seed queue — 32 Pending Verification, 21 Ready for Pickup, 127 already
- * Collected today (21 + 127 = 148 dispensed today). `pharmacyDispensingStore.ts`
- * owns the live, mutable copy of this seed. */
+/** Seed queue — 32 Pending Verification, 8 In Progress, 21 Ready for Dispense,
+ * 21 Ready for Pickup, 3 Cancelled (85 active in the pipeline), plus 127
+ * already Collected today (21 + 127 = 148 dispensed today).
+ * `pharmacyDispensingStore.ts` owns the live, mutable copy of this seed. */
 export const PHARMACY_QUEUE_SEED: PharmacyQueueEntry[] = [
   ...CURATED_PENDING,
   ...GENERATED_PENDING,
+  ...GENERATED_IN_PROGRESS,
+  ...GENERATED_READY_FOR_DISPENSE,
   ...GENERATED_READY_FOR_PICKUP,
+  ...GENERATED_CANCELLED,
   ...GENERATED_COLLECTED,
 ];
+
+// ── Prescription Queue screen — filter options ──────────────────────────────
+
+export const QUEUE_STATUS_OPTIONS: SelectOption[] = [
+  { value: 'Pending Verification', label: 'Pending Verification' },
+  { value: 'In Progress', label: 'In Progress' },
+  { value: 'Ready for Dispense', label: 'Ready for Dispense' },
+  { value: 'Ready for Pickup', label: 'Ready for Pickup' },
+  { value: 'Cancelled', label: 'Cancelled' },
+];
+
+export const QUEUE_PRIORITY_OPTIONS: SelectOption[] = [
+  { value: 'High', label: 'High' },
+  { value: 'Medium', label: 'Medium' },
+  { value: 'Low', label: 'Low' },
+];
+
+export const QUEUE_PRESCRIBER_OPTIONS: SelectOption[] = DOCTORS.map((d) => ({
+  value: d.name,
+  label: d.name,
+}));
+
+export const QUEUE_DEPARTMENT_OPTIONS: SelectOption[] = Array.from(
+  new Set(DOCTORS.map((d) => d.department)),
+).map((dept) => ({ value: dept, label: dept }));
 
 // ── Recent dispensing activity ───────────────────────────────────────────────
 
@@ -437,6 +504,13 @@ export const DRUG_INVENTORY: DrugInventoryItem[] = [
 
 export function getLowStockItems(): DrugInventoryItem[] {
   return DRUG_INVENTORY.filter((d) => d.currentStock <= d.reorderLevel);
+}
+
+/** A tighter floor than "below reorder level" — the subset already so low
+ * they risk running out before the next delivery, used to flag prescriptions
+ * for a stock alert rather than the broader (and much larger) low-stock list. */
+export function getCriticallyLowStockItems(): DrugInventoryItem[] {
+  return DRUG_INVENTORY.filter((d) => d.currentStock <= 15);
 }
 
 export function getExpiringBatches(

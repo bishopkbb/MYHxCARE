@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Prescription Queue' };
+import { PrescriptionQueueWorkspace } from '@/features/pharmacy/components/PrescriptionQueueWorkspace';
 
 export default function PrescriptionQueuePage() {
-  return (
-    <ComingSoon
-      title="Prescription Queue"
-      description="The full, filterable list of prescriptions awaiting pharmacist verification is on the way."
-    />
-  );
+  return <PrescriptionQueueWorkspace />;
 }
