@@ -539,11 +539,6 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
             icon: ClipboardList,
             badge: 32,
           },
-          {
-            label: 'Prescription Details',
-            href: '/pharmacy/prescriptions/details',
-            icon: FileText,
-          },
           { label: 'Active Prescriptions', href: '/pharmacy/prescriptions/active', icon: Pill },
           { label: 'Dispense Medication', href: '/pharmacy/dispense', icon: ClipboardCheck },
           {
