@@ -614,7 +614,7 @@ export function DispenseMedicationWorkspace() {
                   Prescription Items (1)
                 </h2>
                 <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 950 }}>
+                  <div style={{ minWidth: 970 }}>
                     <div
                       className="flex rounded-t-[8px]"
                       style={{
@@ -633,7 +633,7 @@ export function DispenseMedicationWorkspace() {
                           Medication
                         </span>
                       </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2">
+                      <div className="w-36 shrink-0 py-2.5 pr-2">
                         <span
                           className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -641,7 +641,7 @@ export function DispenseMedicationWorkspace() {
                           Strength/Form
                         </span>
                       </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <div className="w-40 shrink-0 py-2.5 pr-2">
                         <span
                           className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -698,12 +698,12 @@ export function DispenseMedicationWorkspace() {
                         </p>
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>{entry.instructions}</p>
                       </div>
-                      <div className="w-32 shrink-0 py-3 pr-2">
+                      <div className="w-36 shrink-0 py-3 pr-2">
                         <p style={{ fontSize: 14, color: '#4A7080' }}>
                           {entry.dose} {entry.form}
                         </p>
                       </div>
-                      <div className="w-36 shrink-0 py-3 pr-2">
+                      <div className="w-40 shrink-0 py-3 pr-2">
                         <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.frequency}</p>
                       </div>
                       <div className="w-24 shrink-0 py-3 pr-2">
@@ -975,7 +975,7 @@ export function DispenseMedicationWorkspace() {
                 className="rounded-[12px] p-4 sm:p-5"
                 style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
               >
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <h2
                     className="font-display font-semibold"
                     style={{ fontSize: 16, color: '#0D2630' }}
@@ -983,7 +983,7 @@ export function DispenseMedicationWorkspace() {
                     Prescription Summary
                   </h2>
                   <span
-                    className="rounded-full px-2.5 py-0.5 font-sans font-medium"
+                    className="shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
                     style={{
                       fontSize: 14,
                       color: '#7C3AED',
