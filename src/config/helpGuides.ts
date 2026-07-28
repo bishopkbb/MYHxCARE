@@ -1057,6 +1057,34 @@ const PRESCRIPTION_DETAILS_GUIDE: HelpGuide = {
   ],
 };
 
+const MEDICATION_PICKUP_QUEUE_GUIDE: HelpGuide = {
+  id: 'medication-pickup-queue',
+  title: 'Medication Pickup Queue',
+  intro: 'Manage and prepare medications that are ready for patient pickup.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Ready for Pickup, Due for Pickup Today, Overdue, Collected Today, and Will Call / On Hold summarize the queue. Click a card to filter the table to that status.',
+    },
+    {
+      heading: 'Status',
+      body: 'Ready means still within the pickup window. Overdue means it has been ready more than 4 hours. On Hold means a pharmacist paused the release — both are independent of how much time has passed.',
+    },
+    {
+      heading: 'Pickup Type and Notes',
+      body: 'Self Pickup, Will Call, and Family Pickup track how the patient collects their medication. Notes shows dosing instructions, or a hold/will-call reason when that applies.',
+    },
+    {
+      heading: 'Actions',
+      body: 'The printer icon prints a pickup label. The row menu opens full details, marks an item collected, or holds/resumes it — the same hold used on the Prescription Details and Dispense Medication screens.',
+    },
+    {
+      heading: 'Pickup Queue Overview and Next Pickup',
+      body: 'The donut chart breaks down Ready/Overdue/On Hold. Next Pickup surfaces the most urgent items — overdue pickups and Will Call/On Hold items — each linking straight to the filtered table.',
+    },
+  ],
+};
+
 const DISPENSE_MEDICATION_GUIDE: HelpGuide = {
   id: 'dispense-medication',
   title: 'Dispense Medication',
@@ -2149,6 +2177,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/pickup-queue')) return MEDICATION_PICKUP_QUEUE_GUIDE;
   if (pathname.startsWith('/pharmacy/dispense')) return DISPENSE_MEDICATION_GUIDE;
   if (pathname.startsWith('/pharmacy/prescriptions/active')) return ACTIVE_PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/pharmacy/prescriptions/details')) return PRESCRIPTION_DETAILS_GUIDE;

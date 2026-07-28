@@ -24,6 +24,7 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import { AnimatedDonutChart } from '@components/shared/AnimatedDonutChart';
 import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -1022,7 +1023,11 @@ export function PrescriptionQueueWorkspace() {
                 Queue Overview
               </h2>
               <div className="mt-3 flex items-center gap-5">
-                <QueueDonutChart breakdown={donutBreakdown} total={totalActive} />
+                <AnimatedDonutChart
+                  breakdown={donutBreakdown}
+                  total={totalActive}
+                  ariaLabel="Prescription queue overview donut chart"
+                />
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                   {donutBreakdown.map((d) => (
                     <div key={d.label} className="flex items-center justify-between gap-2">
@@ -1180,81 +1185,5 @@ export function PrescriptionQueueWorkspace() {
         />
       )}
     </main>
-  );
-}
-
-function QueueDonutChart({
-  breakdown,
-  total,
-}: {
-  breakdown: { label: string; value: number; color: string }[];
-  total: number;
-}) {
-  const safeTotal = total || 1;
-  const radius = 54;
-  const strokeWidth = 20;
-  const circumference = 2 * Math.PI * radius;
-  const gapPx = 3;
-
-  type Seg = (typeof breakdown)[number] & { length: number; offset: number };
-  const { segments } = breakdown.reduce<{ cumulative: number; segments: Seg[] }>(
-    (acc, d) => {
-      const rawLength = (d.value / safeTotal) * circumference;
-      const offset = -(acc.cumulative / safeTotal) * circumference;
-      return {
-        cumulative: acc.cumulative + d.value,
-        segments: [...acc.segments, { ...d, length: Math.max(0, rawLength - gapPx), offset }],
-      };
-    },
-    { cumulative: 0, segments: [] },
-  );
-
-  // Draws the arcs in from empty on first mount, then transitions smoothly
-  // whenever the underlying counts change (e.g. a status filter narrows the
-  // queue) rather than snapping straight to the new shape.
-  const [animateIn, setAnimateIn] = useState(false);
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setAnimateIn(true));
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  return (
-    <div
-      className="relative flex shrink-0 items-center justify-center"
-      style={{ width: 120, height: 120 }}
-    >
-      <svg
-        viewBox="0 0 128 128"
-        style={{ width: 120, height: 120 }}
-        role="img"
-        aria-label="Prescription queue overview donut chart"
-      >
-        <g transform="rotate(-90 64 64)">
-          {segments.map((seg) => (
-            <circle
-              key={seg.label}
-              cx={64}
-              cy={64}
-              r={radius}
-              fill="none"
-              stroke={seg.color}
-              strokeWidth={strokeWidth}
-              strokeLinecap="butt"
-              strokeDasharray={`${animateIn ? seg.length : 0} ${circumference}`}
-              strokeDashoffset={seg.offset}
-              style={{
-                transition: 'stroke-dasharray 700ms ease-out, stroke-dashoffset 700ms ease-out',
-              }}
-            />
-          ))}
-        </g>
-      </svg>
-      <div className="animate-in fade-in-0 zoom-in-95 absolute flex flex-col items-center duration-500">
-        <span className="font-display font-bold" style={{ fontSize: 20, color: '#0D2630' }}>
-          {total}
-        </span>
-        <span style={{ fontSize: 14, color: '#8A98A3' }}>Total</span>
-      </div>
-    </div>
   );
 }

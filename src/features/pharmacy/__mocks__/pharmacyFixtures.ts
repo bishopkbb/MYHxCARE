@@ -20,6 +20,7 @@ export type PharmacyQueueStage =
   | 'Collected'
   | 'Cancelled';
 export type PharmacyPriority = 'High' | 'Medium' | 'Low';
+export type PickupType = 'Self Pickup' | 'Will Call' | 'Family Pickup';
 
 export type PharmacyQueueEntry = {
   rxNo: string;
@@ -59,6 +60,10 @@ export type PharmacyQueueEntry = {
   /** A temporary safety hold, independent of `stage` — a held prescription
    * stays wherever it is in the pipeline but is flagged for attention. */
   isOnHold?: boolean;
+  /** How the patient collects a dispensed prescription — meaningful once a
+   * prescription reaches Ready for Pickup, used by the Medication Pickup
+   * Queue screen. */
+  pickupType: PickupType;
 };
 
 function atOffset(hoursAgo: number): string {
@@ -94,6 +99,17 @@ const RX_MEDICATIONS: { name: string; dose: string; frequency: string }[] = [
 ];
 
 const PRIORITIES: PharmacyPriority[] = ['High', 'Medium', 'Low', 'Low', 'Medium'];
+
+// ~71% Self Pickup, ~14% Will Call, ~14% Family Pickup.
+const PICKUP_TYPES: PickupType[] = [
+  'Self Pickup',
+  'Self Pickup',
+  'Self Pickup',
+  'Self Pickup',
+  'Self Pickup',
+  'Will Call',
+  'Family Pickup',
+];
 
 /** Dosage form, route, standard course length, and prescriber guidance per
  * medication — derived once at construction into each queue entry, and
@@ -302,6 +318,7 @@ function buildQueueEntry(
     doctorName: doctor.name,
     department: doctor.department,
     priority: PRIORITIES[rxSeq % PRIORITIES.length]!,
+    pickupType: PICKUP_TYPES[rxSeq % PICKUP_TYPES.length]!,
     hasAllergyAlert: rxSeq % 7 === 0,
     receivedAt: atOffset(hoursAgo),
     stage,
@@ -351,6 +368,10 @@ const GENERATED_READY_FOR_PICKUP: PharmacyQueueEntry[] = Array.from({ length: 21
     'Ready for Pickup',
   );
   entry.dispensedAt = todayAt(8 + (i % 9), (i * 7) % 60);
+  // A couple already flagged on hold — e.g. the pharmacist paused release
+  // pending a safety follow-up — for the Pickup Queue's "Will Call / On Hold"
+  // bucket to have real, non-zero content.
+  if (i === 2 || i === 9) entry.isOnHold = true;
   return entry;
 });
 
@@ -436,6 +457,12 @@ export const QUEUE_PRESCRIBER_OPTIONS: SelectOption[] = DOCTORS.map((d) => ({
 export const QUEUE_DEPARTMENT_OPTIONS: SelectOption[] = Array.from(
   new Set(DOCTORS.map((d) => d.department)),
 ).map((dept) => ({ value: dept, label: dept }));
+
+export const PICKUP_TYPE_OPTIONS: SelectOption[] = [
+  { value: 'Self Pickup', label: 'Self Pickup' },
+  { value: 'Will Call', label: 'Will Call' },
+  { value: 'Family Pickup', label: 'Family Pickup' },
+];
 
 // ── Recent dispensing activity ───────────────────────────────────────────────
 

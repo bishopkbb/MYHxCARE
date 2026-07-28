@@ -221,6 +221,7 @@ function ingestNewPrescriptions() {
       doctorName: medication.prescribedBy,
       department: getDoctorByName(medication.prescribedBy)?.department ?? 'General Medicine',
       priority: 'Medium',
+      pickupType: 'Self Pickup',
       hasAllergyAlert: getPatientDetail(patientId).allergies.length > 0,
       receivedAt: new Date().toISOString(),
       stage: 'Pending Verification',

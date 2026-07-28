@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Medication Pickup Queue' };
+import { MedicationPickupQueueWorkspace } from '@/features/pharmacy/components/MedicationPickupQueueWorkspace';
 
 export default function MedicationPickupQueuePage() {
-  return (
-    <ComingSoon
-      title="Medication Pickup Queue"
-      description="The full, filterable list of dispensed medications awaiting patient collection is on the way."
-    />
-  );
+  return <MedicationPickupQueueWorkspace />;
 }
