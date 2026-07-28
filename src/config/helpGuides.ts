@@ -1057,6 +1057,35 @@ const PRESCRIPTION_DETAILS_GUIDE: HelpGuide = {
   ],
 };
 
+const DISPENSE_MEDICATION_GUIDE: HelpGuide = {
+  id: 'dispense-medication',
+  title: 'Dispense Medication',
+  intro:
+    'A guided, checklist-gated wizard for verifying and dispensing a single pending prescription.',
+  sections: [
+    {
+      heading: 'Steps',
+      body: 'Verify Prescription, Select Items, Dispense & Label, and Complete track your progress. Confirm & Continue advances to the next step once its requirements are met.',
+    },
+    {
+      heading: 'Clinical Alerts and Safety Checklist',
+      body: 'A real allergy or drug-interaction alert appears when it applies. The Safety Checklist in the sidebar must be fully checked — including a real stock-sufficiency check — before you can continue past Verify Prescription.',
+    },
+    {
+      heading: 'Stock & Batch Selection',
+      body: 'Choose the batch, confirm the expiry date, and set the quantity to dispense. Add to Dispense List once the batch and quantity are confirmed — this is required before moving to Dispense & Label.',
+    },
+    {
+      heading: 'Notes, counselling, and attachments',
+      body: 'Dispense Notes and Counselling Provided are optional documentation. Upload File attaches a real local file (PDF, JPG, or PNG, max 5MB) to this dispense.',
+    },
+    {
+      heading: 'Actions',
+      body: 'Hold Prescription pauses it without changing its stage. Reject Prescription cancels it. Completing all three steps calls the same dispensing action used by the Prescription Queue and Details screens, so the change is live everywhere.',
+    },
+  ],
+};
+
 const ACTIVE_PRESCRIPTIONS_GUIDE: HelpGuide = {
   id: 'active-prescriptions',
   title: 'Active Prescriptions',
@@ -2120,6 +2149,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/dispense')) return DISPENSE_MEDICATION_GUIDE;
   if (pathname.startsWith('/pharmacy/prescriptions/active')) return ACTIVE_PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/pharmacy/prescriptions/details')) return PRESCRIPTION_DETAILS_GUIDE;
   if (pathname.startsWith('/pharmacy/prescriptions/queue')) return PRESCRIPTION_QUEUE_GUIDE;

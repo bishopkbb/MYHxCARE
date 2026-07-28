@@ -51,14 +51,7 @@ import {
   usePendingVerificationQueue,
   useReadyForPickupQueue,
   useRecentDispensingActivity,
-  verifyAndDispense,
 } from '@/features/pharmacy/store/pharmacyDispensingStore';
-
-const VerifyDispenseModal = dynamic(
-  () =>
-    import('@/features/pharmacy/components/VerifyDispenseModal').then((m) => m.VerifyDispenseModal),
-  { ssr: false, loading: () => <ModalLoadingFallback /> },
-);
 
 const SearchMedicationModal = dynamic(
   () =>
@@ -69,7 +62,7 @@ const SearchMedicationModal = dynamic(
 );
 
 type PageState = 'loading' | 'loaded' | 'error';
-type ModalState = { type: 'verify'; rxNo?: string } | { type: 'search' } | null;
+type ModalState = { type: 'search' } | null;
 
 function getWATGreeting(): string {
   const hour = Number(
@@ -219,11 +212,6 @@ export default function PharmacyDashboardPage() {
   const pendingTransferCount = getPendingTransferCount();
   const snapshot = getInventorySnapshot();
 
-  function handleDispense(rxNo: string) {
-    verifyAndDispense(rxNo, actorName);
-    toast.success('Prescription dispensed', `${rxNo} moved to Ready for Pickup.`);
-  }
-
   function handleCollect(entry: PharmacyQueueEntry) {
     markCollected(entry.rxNo);
     toast.success('Marked collected', `${entry.rxNo} has been collected.`);
@@ -294,7 +282,7 @@ export default function PharmacyDashboardPage() {
                 info="Awaiting verification"
                 accent="#00B4D8"
                 iconBg="rgba(0,180,216,0.1)"
-                onClick={() => setModal({ type: 'verify' })}
+                onClick={() => router.push(ROUTES.pharmacyDispense)}
               />
               <StatCard
                 icon={CheckCircle2}
@@ -355,7 +343,7 @@ export default function PharmacyDashboardPage() {
                 label="Verify Prescription"
                 iconBg="rgba(0,180,216,0.1)"
                 iconColor="#00B4D8"
-                onClick={() => setModal({ type: 'verify' })}
+                onClick={() => router.push(ROUTES.pharmacyDispense)}
               />
             </PermissionGate>
             <PermissionGate permission={PERMISSIONS.PHARMACY_DISPENSE}>
@@ -364,7 +352,7 @@ export default function PharmacyDashboardPage() {
                 label="Dispense Medication"
                 iconBg="rgba(22,163,74,0.1)"
                 iconColor="#16A34A"
-                onClick={() => setModal({ type: 'verify' })}
+                onClick={() => router.push(ROUTES.pharmacyDispense)}
               />
             </PermissionGate>
             <QuickActionTile
@@ -443,7 +431,7 @@ export default function PharmacyDashboardPage() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => setModal({ type: 'verify', rxNo: entry.rxNo })}
+                          onClick={() => router.push(`${ROUTES.pharmacyDispense}?rx=${entry.rxNo}`)}
                           aria-label={`Review ${patient.name}'s prescription`}
                           className="flex size-11 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                         >
@@ -789,14 +777,6 @@ export default function PharmacyDashboardPage() {
         </div>
       </div>
 
-      {modal?.type === 'verify' && (
-        <VerifyDispenseModal
-          pendingQueue={pendingQueue}
-          {...(modal.rxNo ? { initialRxNo: modal.rxNo } : {})}
-          onClose={() => setModal(null)}
-          onDispense={handleDispense}
-        />
-      )}
       {modal?.type === 'search' && <SearchMedicationModal onClose={() => setModal(null)} />}
     </main>
   );
