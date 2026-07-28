@@ -46,10 +46,6 @@ import {
 } from '@/features/pharmacy/store/pharmacyDispensingStore';
 import type { QueueSettings } from './QueueSettingsModal';
 
-const PrescriptionDetailModal = dynamic(
-  () => import('./PrescriptionDetailModal').then((m) => m.PrescriptionDetailModal),
-  { ssr: false, loading: () => <ModalLoadingFallback /> },
-);
 const QueueSettingsModal = dynamic(
   () => import('./QueueSettingsModal').then((m) => m.QueueSettingsModal),
   { ssr: false, loading: () => <ModalLoadingFallback /> },
@@ -212,7 +208,6 @@ export function PrescriptionQueueWorkspace() {
   const [settings, setSettings] = useState<QueueSettings>(DEFAULT_SETTINGS);
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_SETTINGS.defaultRowsPerPage);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [detailRxNo, setDetailRxNo] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const tableRef = useRef<HTMLDivElement>(null);
@@ -397,7 +392,9 @@ export function PrescriptionQueueWorkspace() {
     setSelected(new Set());
   }
 
-  const detailEntry = detailRxNo ? (allEntries.find((e) => e.rxNo === detailRxNo) ?? null) : null;
+  function viewDetails(rxNo: string) {
+    router.push(`${ROUTES.pharmacyPrescriptionDetails}?rx=${rxNo}`);
+  }
 
   if (pageState === 'error') {
     return (
@@ -979,7 +976,7 @@ export function PrescriptionQueueWorkspace() {
                             <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
                               <button
                                 type="button"
-                                onClick={() => setDetailRxNo(entry.rxNo)}
+                                onClick={() => viewDetails(entry.rxNo)}
                                 aria-label={`View ${entry.rxNo}`}
                                 className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
                               >
@@ -987,7 +984,7 @@ export function PrescriptionQueueWorkspace() {
                               </button>
                               <RowMenu
                                 entry={entry}
-                                onView={() => setDetailRxNo(entry.rxNo)}
+                                onView={() => viewDetails(entry.rxNo)}
                                 onVerify={() => handleVerifyAndDispense(entry.rxNo)}
                                 onCancel={() => handleCancel(entry.rxNo)}
                               />
@@ -1171,14 +1168,6 @@ export function PrescriptionQueueWorkspace() {
         <div className="h-4" />
       </div>
 
-      {detailEntry && (
-        <PrescriptionDetailModal
-          entry={detailEntry}
-          onClose={() => setDetailRxNo(null)}
-          onVerifyAndDispense={handleVerifyAndDispense}
-          onCancel={handleCancel}
-        />
-      )}
       {settingsOpen && (
         <QueueSettingsModal
           settings={settings}

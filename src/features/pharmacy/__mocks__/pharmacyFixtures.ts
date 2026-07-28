@@ -39,6 +39,22 @@ export type PharmacyQueueEntry = {
   dispensedAt?: string; // ISO
   collectedAt?: string; // ISO
   cancelledAt?: string; // ISO
+  /** Derived once at construction from MEDICATION_INFO, keyed by medicationName
+   * — dosage form, route, course length, computed quantity, and standard
+   * instructions/prescriber note, for the Prescription Details screen. */
+  form: string;
+  route: string;
+  duration: string;
+  quantity: number;
+  instructions: string;
+  prescriberNote: string;
+  /** Set by a pharmacist on the Prescription Details screen — real, shared
+   * state, not page-local. */
+  pharmacistNote?: string;
+  noteUpdatedAt?: string; // ISO
+  /** A temporary safety hold, independent of `stage` — a held prescription
+   * stays wherever it is in the pipeline but is flagged for attention. */
+  isOnHold?: boolean;
 };
 
 function atOffset(hoursAgo: number): string {
@@ -68,6 +84,184 @@ const RX_MEDICATIONS: { name: string; dose: string; frequency: string }[] = [
 
 const PRIORITIES: PharmacyPriority[] = ['High', 'Medium', 'Low', 'Low', 'Medium'];
 
+/** Dosage form, route, standard course length, and prescriber guidance per
+ * medication — derived once at construction into each queue entry, and
+ * reused by the Prescription Details screen for Quantity/Duration/Route and
+ * the Clinical Alerts "Notes from Prescriber" panel. Course length and doses
+ * per day are what an honest "Total Quantity" is computed from, not a
+ * hardcoded number. */
+const MEDICATION_INFO: Record<
+  string,
+  {
+    form: string;
+    route: string;
+    dosesPerDay: number | null; // null = PRN (as-needed), quantity is a unit count
+    courseDays: number;
+    instructions: string;
+    prescriberNote: string;
+  }
+> = {
+  Paracetamol: {
+    form: 'Tablet',
+    route: 'Oral',
+    dosesPerDay: 3,
+    courseDays: 5,
+    instructions: 'Take with food',
+    prescriberNote: 'Monitor for fever response.',
+  },
+  Amoxicillin: {
+    form: 'Capsule',
+    route: 'Oral',
+    dosesPerDay: 3,
+    courseDays: 5,
+    instructions: 'Take with food',
+    prescriberNote: 'Complete full course even if symptoms improve.',
+  },
+  Metformin: {
+    form: 'Tablet',
+    route: 'Oral',
+    dosesPerDay: 2,
+    courseDays: 30,
+    instructions: 'Take after meals',
+    prescriberNote: 'Monitor blood glucose regularly.',
+  },
+  Atorvastatin: {
+    form: 'Tablet',
+    route: 'Oral',
+    dosesPerDay: 1,
+    courseDays: 30,
+    instructions: 'Take at bedtime',
+    prescriberNote: 'Monitor for muscle pain.',
+  },
+  'Salbutamol Inhaler': {
+    form: 'Inhaler',
+    route: 'Inhalation',
+    dosesPerDay: null,
+    courseDays: 30,
+    instructions: 'Use as needed for breathlessness',
+    prescriberNote: 'Review inhaler technique at next visit.',
+  },
+  Losartan: {
+    form: 'Tablet',
+    route: 'Oral',
+    dosesPerDay: 1,
+    courseDays: 30,
+    instructions: 'Take in the morning',
+    prescriberNote: 'Monitor blood pressure.',
+  },
+  Omeprazole: {
+    form: 'Capsule',
+    route: 'Oral',
+    dosesPerDay: 1,
+    courseDays: 14,
+    instructions: 'Take before breakfast',
+    prescriberNote: 'Reassess if symptoms persist beyond 2 weeks.',
+  },
+  Ciprofloxacin: {
+    form: 'Tablet',
+    route: 'Oral',
+    dosesPerDay: 2,
+    courseDays: 7,
+    instructions: 'Take with plenty of water',
+    prescriberNote: 'Avoid dairy products within 2 hours of dosing.',
+  },
+  Ibuprofen: {
+    form: 'Tablet',
+    route: 'Oral',
+    dosesPerDay: 3,
+    courseDays: 5,
+    instructions: 'Take with food',
+    prescriberNote: 'Avoid if history of peptic ulcer.',
+  },
+  Amlodipine: {
+    form: 'Tablet',
+    route: 'Oral',
+    dosesPerDay: 1,
+    courseDays: 30,
+    instructions: 'Take at the same time daily',
+    prescriberNote: 'Monitor for ankle swelling.',
+  },
+};
+
+const GENERIC_MEDICATION_INFO = {
+  form: 'Tablet',
+  route: 'Oral',
+  dosesPerDay: 2,
+  courseDays: 5,
+  instructions: 'Take as directed',
+  prescriberNote: '',
+};
+
+function getMedicationInfo(name: string) {
+  return MEDICATION_INFO[name] ?? GENERIC_MEDICATION_INFO;
+}
+
+/** The one place quantity/duration are computed from a medication's form and
+ * course length — reused by the seed builder and the live prescriptionStore
+ * bridge, so a doctor-sent prescription gets the same honest derivation as a
+ * seeded one, never a hardcoded placeholder. */
+export function deriveMedicationFields(name: string): {
+  form: string;
+  route: string;
+  duration: string;
+  quantity: number;
+  instructions: string;
+  prescriberNote: string;
+} {
+  const info = getMedicationInfo(name);
+  const quantity = info.dosesPerDay === null ? 1 : info.dosesPerDay * info.courseDays;
+  const duration = info.dosesPerDay === null ? 'As needed' : `${info.courseDays} Days`;
+  return {
+    form: info.form,
+    route: info.route,
+    duration,
+    quantity,
+    instructions: info.instructions,
+    prescriberNote: info.prescriberNote,
+  };
+}
+
+/** Real, clinically-recognized interacting pairs — a small curated knowledge
+ * base, not a claim of full drug-interaction coverage. Checked both
+ * directions against a patient's active medications. */
+const DRUG_INTERACTIONS: { a: string; b: string; description: string }[] = [
+  {
+    a: 'Losartan',
+    b: 'Ibuprofen',
+    description:
+      'NSAIDs like Ibuprofen may reduce the antihypertensive effect of Losartan and increase the risk of kidney impairment.',
+  },
+  {
+    a: 'Atorvastatin',
+    b: 'Ciprofloxacin',
+    description:
+      'Ciprofloxacin may raise Atorvastatin levels, increasing the risk of muscle toxicity (myopathy).',
+  },
+  {
+    a: 'Amlodipine',
+    b: 'Ciprofloxacin',
+    description:
+      'Rarely, concurrent use may increase the risk of low blood pressure — monitor after the first dose.',
+  },
+];
+
+/** Checks the medication being dispensed against a patient's own active
+ * medication list — real, patient-specific, not a static per-drug flag. */
+export function getInteractionWarning(
+  medicationName: string,
+  activeMedicationNames: string[],
+): string | null {
+  const active = activeMedicationNames.map((n) => n.toLowerCase());
+  for (const pair of DRUG_INTERACTIONS) {
+    const [a, b] = [pair.a.toLowerCase(), pair.b.toLowerCase()];
+    const matchesA = medicationName.toLowerCase().startsWith(a);
+    const matchesB = medicationName.toLowerCase().startsWith(b);
+    if (matchesA && active.some((m) => m.startsWith(b))) return pair.description;
+    if (matchesB && active.some((m) => m.startsWith(a))) return pair.description;
+  }
+  return null;
+}
+
 let rxSeq = 0;
 function nextRxNo(): string {
   rxSeq += 1;
@@ -82,18 +276,23 @@ function buildQueueEntry(
 ): PharmacyQueueEntry {
   const med = RX_MEDICATIONS[rxSeq % RX_MEDICATIONS.length]!;
   const doctor = DOCTORS[rxSeq % DOCTORS.length]!;
+  const name = overrides.medicationName ?? med.name;
+  const dose = overrides.dose ?? med.dose;
+  const frequency = overrides.frequency ?? med.frequency;
+  const derived = deriveMedicationFields(name);
   const entry: PharmacyQueueEntry = {
     rxNo: nextRxNo(),
     patientId,
-    medicationName: med.name,
-    dose: med.dose,
-    frequency: med.frequency,
+    medicationName: name,
+    dose,
+    frequency,
     doctorName: doctor.name,
     department: doctor.department,
     priority: PRIORITIES[rxSeq % PRIORITIES.length]!,
     hasAllergyAlert: rxSeq % 7 === 0,
     receivedAt: atOffset(hoursAgo),
     stage,
+    ...derived,
     ...overrides,
   };
   return entry;
@@ -111,7 +310,15 @@ const CURATED_PENDING: PharmacyQueueEntry[] = [
     priority: 'Medium',
     hasAllergyAlert: true,
   }),
-  buildQueueEntry('dp-002', 5.75, 'Pending Verification', { priority: 'Medium' }),
+  // p1 (Nkechi Obiora) already takes Ibuprofen — a real, checkable
+  // interaction with the Losartan being prescribed here, and a populated
+  // medication/consultation history for the Prescription Details showcase.
+  buildQueueEntry('p1', 5.75, 'Pending Verification', {
+    priority: 'Medium',
+    medicationName: 'Losartan',
+    dose: '50mg',
+    frequency: 'OD',
+  }),
   buildQueueEntry('dp-004', 6.05, 'Pending Verification', { priority: 'Low' }),
   buildQueueEntry('dp-006', 6.35, 'Pending Verification', { priority: 'High' }),
 ];
@@ -698,3 +905,30 @@ export const PHARMACY_NOTIFICATIONS: PharmacyNotification[] = [
     timestamp: atOffset(1),
   },
 ];
+
+// ── Prescription Details screen ─────────────────────────────────────────────
+
+export type PrescriptionAttachment = {
+  id: string;
+  filename: string;
+  sizeLabel: string;
+  uploadedAt: string; // ISO
+};
+
+/** Same illustrative attachment set on every prescription — there's no real
+ * upload flow behind prescriptions yet, so these stand in for whatever a
+ * consultation actually attached. Their download button generates a real
+ * placeholder file rather than doing nothing (checklist rule 10). */
+export const PRESCRIPTION_ATTACHMENTS_SEED: PrescriptionAttachment[] = [
+  { id: 'att-1', filename: 'Lab Result - CBC.pdf', sizeLabel: '128 KB', uploadedAt: atOffset(2) },
+  { id: 'att-2', filename: 'ECG Report.pdf', sizeLabel: '256 KB', uploadedAt: atOffset(2) },
+];
+
+/** Available stock for a prescribed medication, matched by name against the
+ * inventory — used by the Prescription Details "Stock Availability" table. */
+export function getStockForMedication(medicationName: string): DrugInventoryItem | null {
+  return (
+    DRUG_INVENTORY.find((d) => d.name.toLowerCase().startsWith(medicationName.toLowerCase())) ??
+    null
+  );
+}

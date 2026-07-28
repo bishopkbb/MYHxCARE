@@ -22,6 +22,7 @@ import {
   subscribe as subscribeToPrescriptions,
 } from '@/features/prescriptions/store/prescriptionStore';
 import {
+  deriveMedicationFields,
   DISPENSING_ACTIVITY_SEED,
   PHARMACY_QUEUE_SEED,
   type DispensingActivityEntry,
@@ -99,6 +100,24 @@ export function useCancelledQueue(): PharmacyQueueEntry[] {
   return all.filter((e) => e.stage === 'Cancelled');
 }
 
+/** Live-updating single entry, for the Prescription Details screen — re-runs
+ * whenever the shared queue emits, so a change made on the Queue screen (or
+ * the live prescriptionStore bridge) is reflected here without a reload. */
+export function useQueueEntry(rxNo: string | null): PharmacyQueueEntry | null {
+  const all = useAllQueueEntries();
+  if (!rxNo) return null;
+  return all.find((e) => e.rxNo === rxNo) ?? null;
+}
+
+/** Most recent dispensing activity for a patient, across the whole log —
+ * powers the Prescription Details "Patient Summary" Last Dispensed field. */
+export function getLastDispensedForPatient(patientId: string): DispensingActivityEntry | null {
+  const entries = activityLog
+    .filter((a) => a.patientId === patientId)
+    .sort((a, b) => new Date(b.dispensedAt).getTime() - new Date(a.dispensedAt).getTime());
+  return entries[0] ?? null;
+}
+
 export function useDispensedTodayCount(): number {
   const all = useAllQueueEntries();
   return all.filter((e) => isToday(e.dispensedAt)).length;
@@ -160,6 +179,25 @@ export function cancelPrescription(rxNo: string): void {
   emit();
 }
 
+/** Toggles a temporary safety hold — independent of `stage`, so a held
+ * prescription stays exactly where it is in the pipeline but is flagged. */
+export function toggleHold(rxNo: string): void {
+  const idx = queue.findIndex((e) => e.rxNo === rxNo);
+  if (idx === -1) return;
+  queue = queue.map((e, i) => (i === idx ? { ...e, isOnHold: !e.isOnHold } : e));
+  emit();
+}
+
+/** A pharmacist's note on a specific Rx — real, shared state (checklist §16),
+ * not local component state that vanishes on navigation. */
+export function setPharmacistNote(rxNo: string, note: string): void {
+  const idx = queue.findIndex((e) => e.rxNo === rxNo);
+  if (idx === -1) return;
+  const now = new Date().toISOString();
+  queue = queue.map((e, i) => (i === idx ? { ...e, pharmacistNote: note, noteUpdatedAt: now } : e));
+  emit();
+}
+
 function ingestNewPrescriptions() {
   const before = queue.length;
   const newRows: PharmacyQueueEntry[] = [];
@@ -178,6 +216,7 @@ function ingestNewPrescriptions() {
       hasAllergyAlert: getPatientDetail(patientId).allergies.length > 0,
       receivedAt: new Date().toISOString(),
       stage: 'Pending Verification',
+      ...deriveMedicationFields(medication.name),
     });
   }
   if (newRows.length > 0) {

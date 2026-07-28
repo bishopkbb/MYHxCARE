@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Prescription Details' };
+import PrescriptionDetailsWorkspace from '@/features/pharmacy/components/PrescriptionDetailsWorkspace';
 
 export default function PrescriptionDetailsPage() {
-  return (
-    <ComingSoon
-      title="Prescription Details"
-      description="A full single-prescription view — line items, interaction checks, and dispensing history — is on the way."
-    />
-  );
+  return <PrescriptionDetailsWorkspace />;
 }

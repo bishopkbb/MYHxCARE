@@ -1029,6 +1029,34 @@ const REGISTRATION_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const PRESCRIPTION_DETAILS_GUIDE: HelpGuide = {
+  id: 'prescription-details',
+  title: 'Prescription Details',
+  intro: 'The full record for one prescription — patient, medication, alerts, and actions.',
+  sections: [
+    {
+      heading: 'Patient Information and Clinical Alerts',
+      body: "Patient Information shows who the prescription is for. Clinical Alerts surfaces an allergy match, a real drug interaction against the patient's active medications, and any prescriber notes — only when they apply.",
+    },
+    {
+      heading: 'Prescription Status',
+      body: 'A step tracker for where this prescription is in the pipeline. While it awaits verification, a live countdown shows time remaining against its priority-based SLA; once dispensed, collected, or cancelled, that space shows the timestamp instead.',
+    },
+    {
+      heading: 'Prescription Items and Stock Availability',
+      body: 'The medication, strength, dose, duration, and quantity, with a matching Stock Availability check against current inventory.',
+    },
+    {
+      heading: 'Notes and Attachments',
+      body: 'Add or edit a pharmacist note directly on this prescription — it saves immediately and shows up in the Audit Trail. Attachments lists supporting documents with a real download.',
+    },
+    {
+      heading: 'Before Verification Checklist and Actions',
+      body: 'Before a pending prescription can be verified, confirm each item in the checklist. Actions adapts to the current stage: Verify/Dispense, Mark Collected, Hold/Resume, or Reject — only the ones that make sense from where the prescription is now.',
+    },
+  ],
+};
+
 const PRESCRIPTION_QUEUE_GUIDE: HelpGuide = {
   id: 'prescription-queue',
   title: 'Prescription Queue',
@@ -2068,6 +2096,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/prescriptions/details')) return PRESCRIPTION_DETAILS_GUIDE;
   if (pathname.startsWith('/pharmacy/prescriptions/queue')) return PRESCRIPTION_QUEUE_GUIDE;
   if (pathname.startsWith('/pharmacy')) return PHARMACY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/my-schedule')) return MY_SCHEDULE_GUIDE;
