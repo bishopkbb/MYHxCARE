@@ -603,7 +603,7 @@ export function DrugInventoryWorkspace() {
                           Stock Qty
                         </span>
                       </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2 pl-3">
+                      <div className="w-40 shrink-0 py-2.5 pr-2 pl-6">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
