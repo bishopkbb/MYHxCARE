@@ -230,6 +230,20 @@ export function setPharmacistNote(rxNo: string, note: string): void {
   emit();
 }
 
+/** Countersigns a controlled-substance dispensing record still sitting at
+ * Pending Approval — the second-pharmacist sign-off real controlled drugs
+ * require, flipping it to Completed instead of leaving it stuck forever. */
+export function approveControlledDispenseRecord(activityId: string, approvedBy: string): void {
+  const idx = activityLog.findIndex((a) => a.id === activityId);
+  if (idx === -1) return;
+  const entry = activityLog[idx]!;
+  if (entry.status !== 'Pending Approval') return;
+  activityLog = activityLog.map((a, i) =>
+    i === idx ? { ...a, status: 'Completed', approvedBy } : a,
+  );
+  emit();
+}
+
 function ingestNewPrescriptions() {
   const before = queue.length;
   const newRows: PharmacyQueueEntry[] = [];

@@ -1081,6 +1081,35 @@ const MEDICATION_REFILL_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const CONTROLLED_DRUGS_GUIDE: HelpGuide = {
+  id: 'controlled-drugs',
+  title: 'Controlled Drugs',
+  intro:
+    'Monitor and audit every controlled-substance (Schedule II-IV) dispense, stock level, and expiry.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Controlled Dispenses, Dispensed Today, Low Stock Alerts, Pending Approvals, and Expiring Soon summarize the controlled-drug log. Click a card to filter the table.',
+    },
+    {
+      heading: 'Pending Approval',
+      body: 'A controlled-substance dispense requires a second pharmacist’s sign-off before it counts as Completed. Approve Record countersigns it — this uses the same PHARMACY_DISPENSE permission as any other dispense.',
+    },
+    {
+      heading: 'Schedule',
+      body: 'C-II through C-V mirror real-world controlled-substance scheduling (opioids and benzodiazepines shown here fall in II-IV) — higher schedules carry tighter dispensing controls.',
+    },
+    {
+      heading: 'Controlled Drugs Overview and Low Stock Alerts',
+      body: 'The donut chart breaks every record down by schedule. Low Stock Alerts and Expiring Soon list the controlled inventory items nearest to needing reorder or replacement.',
+    },
+    {
+      heading: 'Audit Trail and Export',
+      body: 'Audit Trail opens the full activity log for compliance review. Export Report downloads the current filtered list as CSV.',
+    },
+  ],
+};
+
 const DISPENSING_HISTORY_GUIDE: HelpGuide = {
   id: 'dispensing-history',
   title: 'Dispensing History',
@@ -2225,6 +2254,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/controlled-drugs')) return CONTROLLED_DRUGS_GUIDE;
   if (pathname.startsWith('/pharmacy/refill-requests')) return MEDICATION_REFILL_REQUESTS_GUIDE;
   if (pathname.startsWith('/pharmacy/dispensing-history')) return DISPENSING_HISTORY_GUIDE;
   if (pathname.startsWith('/pharmacy/pickup-queue')) return MEDICATION_PICKUP_QUEUE_GUIDE;

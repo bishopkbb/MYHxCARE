@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Controlled Drugs' };
+import { ControlledDrugsWorkspace } from '@/features/pharmacy/components/ControlledDrugsWorkspace';
 
 export default function ControlledDrugsPage() {
-  return (
-    <ComingSoon
-      title="Controlled Drugs"
-      description="A dedicated register for controlled-substance stock, dispensing, and regulatory logging is on the way."
-    />
-  );
+  return <ControlledDrugsWorkspace />;
 }

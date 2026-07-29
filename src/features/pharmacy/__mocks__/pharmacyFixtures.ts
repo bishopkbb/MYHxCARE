@@ -22,6 +22,18 @@ export type PharmacyQueueStage =
 export type PharmacyPriority = 'High' | 'Medium' | 'Low';
 export type PickupType = 'Self Pickup' | 'Will Call' | 'Family Pickup';
 
+/** DEA/NDLEA-style controlled substance schedule — set on the small subset of
+ * inventory items and dispensing records that are actually controlled drugs;
+ * everything else leaves this field unset. */
+export type ControlledSchedule = 'C-II' | 'C-III' | 'C-IV' | 'C-V';
+
+export const CONTROLLED_SCHEDULE_OPTIONS: SelectOption[] = [
+  { value: 'C-II', label: 'Schedule II' },
+  { value: 'C-III', label: 'Schedule III' },
+  { value: 'C-IV', label: 'Schedule IV' },
+  { value: 'C-V', label: 'Schedule V' },
+];
+
 export type PharmacyQueueEntry = {
   rxNo: string;
   /** Resolvable via getPatientDetail() from patientFixtures.ts — never a
@@ -469,11 +481,16 @@ export const DISPENSING_STATUS_OPTIONS: SelectOption[] = [
   { value: 'Partial', label: 'Partial' },
   { value: 'Returned', label: 'Returned' },
   { value: 'Cancelled', label: 'Cancelled' },
+  { value: 'Pending Approval', label: 'Pending Approval' },
 ];
 
 // ── Recent dispensing activity / dispensing history ─────────────────────────
 
-export type DispensingStatus = 'Completed' | 'Partial' | 'Returned' | 'Cancelled';
+/** "Pending Approval" only ever appears on controlled-substance records —
+ * NDLEA-class dispenses that require a second pharmacist's sign-off before
+ * they count as Completed. */
+export type DispensingStatus =
+  'Completed' | 'Partial' | 'Returned' | 'Cancelled' | 'Pending Approval';
 
 export type DispensingActivityEntry = {
   id: string;
@@ -490,6 +507,13 @@ export type DispensingActivityEntry = {
   doctorName: string;
   department: string;
   status: DispensingStatus;
+  /** Set only on controlled-substance dispenses — powers the Controlled
+   * Drugs screen's table/stats/schedule breakdown without a separate log. */
+  controlledSchedule?: ControlledSchedule;
+  /** The pharmacist who countersigned a Pending Approval record — set once
+   * approved, mirroring the second-signature requirement for controlled
+   * substances. */
+  approvedBy?: string;
 };
 
 const CURATED_DISPENSING_ACTIVITY: DispensingActivityEntry[] = [
@@ -606,12 +630,125 @@ const GENERATED_DISPENSING_HISTORY: DispensingActivityEntry[] = Array.from(
   },
 );
 
+// ── Controlled drugs ──────────────────────────────────────────────────────────
+
+const CONTROLLED_MEDICATIONS: {
+  name: string;
+  dose: string;
+  unit: string;
+  schedule: ControlledSchedule;
+}[] = [
+  { name: 'Morphine Sulfate 10mg', dose: '10mg', unit: 'Ampoule', schedule: 'C-II' },
+  { name: 'Fentanyl 25mcg/hr', dose: '25mcg/hr', unit: 'Patch', schedule: 'C-II' },
+  { name: 'Oxycodone 5mg', dose: '5mg', unit: 'Tablet', schedule: 'C-II' },
+  { name: 'Codeine Phosphate 30mg', dose: '30mg', unit: 'Tablet', schedule: 'C-III' },
+  { name: 'Tramadol 50mg', dose: '50mg', unit: 'Capsule', schedule: 'C-IV' },
+  { name: 'Alprazolam 0.5mg', dose: '0.5mg', unit: 'Tablet', schedule: 'C-IV' },
+  { name: 'Diazepam 5mg', dose: '5mg', unit: 'Tablet', schedule: 'C-IV' },
+  { name: 'Lorazepam 1mg', dose: '1mg', unit: 'Tablet', schedule: 'C-IV' },
+];
+
+// A handful dispensed today (curated, matching the CURATED_DISPENSING_ACTIVITY
+// convention above) so "Dispensed Today" is never a suspicious zero.
+const CURATED_CONTROLLED_ACTIVITY: DispensingActivityEntry[] = [
+  {
+    id: 'cda-1',
+    medicationName: 'Morphine Sulfate 10mg',
+    patientId: 'dp-003',
+    rxNo: 'RX-CD-250629-9001',
+    dispensedAt: todayAt(9, 40),
+    dose: '10mg',
+    qty: 10,
+    unit: 'Ampoule',
+    doctorName: DOCTORS[0]!.name,
+    department: DOCTORS[0]!.department,
+    status: 'Completed',
+    controlledSchedule: 'C-II',
+    approvedBy: 'Mr. Emeka Obi',
+  },
+  {
+    id: 'cda-2',
+    medicationName: 'Tramadol 50mg',
+    patientId: 'dp-005',
+    rxNo: 'RX-CD-250629-9002',
+    dispensedAt: todayAt(9, 15),
+    dose: '50mg',
+    qty: 20,
+    unit: 'Capsule',
+    doctorName: DOCTORS[2]!.name,
+    department: DOCTORS[2]!.department,
+    status: 'Completed',
+    controlledSchedule: 'C-IV',
+    approvedBy: 'Mr. Emeka Obi',
+  },
+  {
+    id: 'cda-3',
+    medicationName: 'Oxycodone 5mg',
+    patientId: 'dp-007',
+    rxNo: 'RX-CD-250629-9003',
+    dispensedAt: todayAt(8, 50),
+    dose: '5mg',
+    qty: 14,
+    unit: 'Tablet',
+    doctorName: DOCTORS[1]!.name,
+    department: DOCTORS[1]!.department,
+    status: 'Pending Approval',
+    controlledSchedule: 'C-II',
+  },
+  {
+    id: 'cda-4',
+    medicationName: 'Diazepam 5mg',
+    patientId: 'dp-009',
+    rxNo: 'RX-CD-250629-9004',
+    dispensedAt: todayAt(8, 20),
+    dose: '5mg',
+    qty: 10,
+    unit: 'Tablet',
+    doctorName: DOCTORS[3]!.name,
+    department: DOCTORS[3]!.department,
+    status: 'Pending Approval',
+    controlledSchedule: 'C-IV',
+  },
+];
+
+// ~90 days of controlled-substance dispensing records — same generator
+// convention as GENERATED_DISPENSING_HISTORY, merged into the one
+// dispensing log so a controlled dispense also counts toward the overall
+// Dispensing History totals (it genuinely is one).
+const GENERATED_CONTROLLED_ACTIVITY: DispensingActivityEntry[] = Array.from(
+  { length: 120 },
+  (_, i) => {
+    const med = CONTROLLED_MEDICATIONS[i % CONTROLLED_MEDICATIONS.length]!;
+    const doctor = DOCTORS[(i + 2) % DOCTORS.length]!;
+    const daysAgo = 1 + (i % 89);
+    const status: DispensingStatus =
+      i % 24 === 0 ? 'Pending Approval' : i % 40 === 0 ? 'Cancelled' : 'Completed';
+    return {
+      id: `cdah-${i}`,
+      medicationName: med.name,
+      patientId: `dp-${String((i % 150) + 1).padStart(3, '0')}`,
+      rxNo: `RX-CD-${String(250620 + (89 - daysAgo)).padStart(6, '0')}-${String(3000 + i)}`,
+      dispensedAt: pastDateAt(daysAgo, 8 + (i % 9), (i * 11) % 60),
+      dose: med.dose,
+      qty: [10, 14, 20, 30][i % 4]!,
+      unit: med.unit,
+      doctorName: doctor.name,
+      department: doctor.department,
+      status,
+      controlledSchedule: med.schedule,
+      ...(status === 'Completed' ? { approvedBy: 'Mr. Emeka Obi' } : {}),
+    };
+  },
+);
+
 /** Every dispensing transaction on record — curated recent entries plus 180
- * days of generated history. The store's live `verifyAndDispense()` prepends
- * new real entries to this same list. */
+ * days of generated history (including controlled substances). The store's
+ * live `verifyAndDispense()` prepends new real entries to this same list. */
 export const DISPENSING_ACTIVITY_SEED: DispensingActivityEntry[] = [
   ...CURATED_DISPENSING_ACTIVITY,
+  ...CURATED_CONTROLLED_ACTIVITY,
   ...GENERATED_DISPENSING_HISTORY,
+  ...GENERATED_CONTROLLED_ACTIVITY,
 ];
 
 // ── Drug inventory ────────────────────────────────────────────────────────────
@@ -629,6 +766,8 @@ export type DrugInventoryItem = {
   currentStock: number;
   reorderLevel: number;
   batches: DrugBatch[];
+  /** Set only for controlled substances — everything else leaves it unset. */
+  controlledSchedule?: ControlledSchedule;
 };
 
 function daysFromNow(n: number): string {
@@ -854,6 +993,88 @@ export const DRUG_INVENTORY: DrugInventoryItem[] = [
     currentStock: 210,
     reorderLevel: 70,
     batches: [{ batchNo: 'ART-2523', expiryDate: daysFromNow(220) }],
+  },
+  // Controlled substances — Schedule II-IV, held to tighter stock/expiry
+  // scrutiny by the Controlled Drugs screen.
+  {
+    id: 'di-25',
+    name: 'Morphine Sulfate 10mg',
+    category: 'Opioid Analgesic',
+    unit: 'Ampoule',
+    currentStock: 18,
+    reorderLevel: 25,
+    batches: [{ batchNo: 'MOR-2601', expiryDate: daysFromNow(20) }],
+    controlledSchedule: 'C-II',
+  },
+  {
+    id: 'di-26',
+    name: 'Fentanyl 25mcg/hr',
+    category: 'Opioid Analgesic',
+    unit: 'Patch',
+    currentStock: 40,
+    reorderLevel: 20,
+    batches: [{ batchNo: 'FEN-2602', expiryDate: daysFromNow(200) }],
+    controlledSchedule: 'C-II',
+  },
+  {
+    id: 'di-27',
+    name: 'Oxycodone 5mg',
+    category: 'Opioid Analgesic',
+    unit: 'Tablet',
+    currentStock: 12,
+    reorderLevel: 30,
+    batches: [{ batchNo: 'OXY-2603', expiryDate: daysFromNow(25) }],
+    controlledSchedule: 'C-II',
+  },
+  {
+    id: 'di-28',
+    name: 'Codeine Phosphate 30mg',
+    category: 'Opioid Analgesic',
+    unit: 'Tablet',
+    currentStock: 90,
+    reorderLevel: 40,
+    batches: [{ batchNo: 'COD-2604', expiryDate: daysFromNow(150) }],
+    controlledSchedule: 'C-III',
+  },
+  {
+    id: 'di-29',
+    name: 'Tramadol 50mg',
+    category: 'Opioid Analgesic',
+    unit: 'Capsule',
+    currentStock: 60,
+    reorderLevel: 50,
+    batches: [{ batchNo: 'TRA-2605', expiryDate: daysFromNow(180) }],
+    controlledSchedule: 'C-IV',
+  },
+  {
+    id: 'di-30',
+    name: 'Alprazolam 0.5mg',
+    category: 'Benzodiazepine',
+    unit: 'Tablet',
+    currentStock: 15,
+    reorderLevel: 35,
+    batches: [{ batchNo: 'ALP-2606', expiryDate: daysFromNow(300) }],
+    controlledSchedule: 'C-IV',
+  },
+  {
+    id: 'di-31',
+    name: 'Diazepam 5mg',
+    category: 'Benzodiazepine',
+    unit: 'Tablet',
+    currentStock: 55,
+    reorderLevel: 40,
+    batches: [{ batchNo: 'DIA-2607', expiryDate: daysFromNow(240) }],
+    controlledSchedule: 'C-IV',
+  },
+  {
+    id: 'di-32',
+    name: 'Lorazepam 1mg',
+    category: 'Benzodiazepine',
+    unit: 'Tablet',
+    currentStock: 48,
+    reorderLevel: 30,
+    batches: [{ batchNo: 'LOR-2608', expiryDate: daysFromNow(210) }],
+    controlledSchedule: 'C-IV',
   },
 ];
 

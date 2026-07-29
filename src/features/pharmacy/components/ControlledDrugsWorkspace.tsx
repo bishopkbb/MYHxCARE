@@ -1,15 +1,16 @@
 'use client';
 
 import {
-  Calendar,
+  AlertTriangle,
   CalendarClock,
-  CalendarDays,
+  CheckCircle2,
+  Clock,
   Download,
   Eye,
   MoreVertical,
-  Printer,
+  Package,
   Search,
-  Users,
+  ShieldAlert,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useRef, useState } from 'react';
@@ -17,25 +18,41 @@ import { useMemo, useRef, useState } from 'react';
 import { AnimatedDonutChart } from '@components/shared/AnimatedDonutChart';
 import { FormSelect } from '@components/shared/FormSelect';
 import { Pagination } from '@components/shared/Pagination';
+import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { StatCard } from '@components/shared/StatCard';
+import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import { formatDateTime } from '@/utils/datetime';
 import { getPatientDetail } from '@/features/patients/__mocks__/patientFixtures';
 import { REGISTRATION_DATE_OPTIONS } from '@/features/registration/__mocks__/patientDirectoryFixtures';
 import {
+  CONTROLLED_SCHEDULE_OPTIONS,
   DISPENSING_STATUS_OPTIONS,
+  DRUG_INVENTORY,
+  getExpiringBatches,
   QUEUE_DEPARTMENT_OPTIONS,
-  QUEUE_PRESCRIBER_OPTIONS,
+  type ControlledSchedule,
   type DispensingActivityEntry,
   type DispensingStatus,
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
-import { useRecentDispensingActivity } from '@/features/pharmacy/store/pharmacyDispensingStore';
+import {
+  approveControlledDispenseRecord,
+  useRecentDispensingActivity,
+} from '@/features/pharmacy/store/pharmacyDispensingStore';
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
+
+const SCHEDULE_CFG: Record<ControlledSchedule, { color: string; border: string; bg: string }> = {
+  'C-II': { color: '#DC2626', border: 'rgba(220,38,38,0.35)', bg: 'rgba(220,38,38,0.08)' },
+  'C-III': { color: '#D97706', border: 'rgba(217,119,6,0.35)', bg: 'rgba(217,119,6,0.08)' },
+  'C-IV': { color: '#7C3AED', border: 'rgba(124,58,237,0.35)', bg: 'rgba(124,58,237,0.08)' },
+  'C-V': { color: '#2563EB', border: 'rgba(37,99,235,0.35)', bg: 'rgba(37,99,235,0.08)' },
+};
 
 const STATUS_CFG: Record<DispensingStatus, { color: string; border: string; bg: string }> = {
   Completed: { color: '#16A34A', border: 'rgba(22,163,74,0.35)', bg: 'rgba(22,163,74,0.08)' },
@@ -70,10 +87,12 @@ function RowMenu({
   entry,
   onView,
   onPrint,
+  onApprove,
 }: {
   entry: DispensingActivityEntry;
   onView: () => void;
   onPrint: () => void;
+  onApprove: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -112,92 +131,114 @@ function RowMenu({
         >
           Print Receipt
         </button>
+        {entry.status === 'Pending Approval' && (
+          <PermissionGate permission={PERMISSIONS.PHARMACY_DISPENSE}>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onApprove();
+              }}
+              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(22,163,74,0.06)]"
+              style={{ fontSize: 14, color: '#16A34A' }}
+            >
+              Approve Record
+            </button>
+          </PermissionGate>
+        )}
       </RowMenuPortal>
     </div>
   );
 }
 
-export function DispensingHistoryWorkspace() {
+export function ControlledDrugsWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  const actorName = user?.name ?? 'Pharmacist';
 
   const [search, setSearch] = useState('');
-  const [dateRange, setDateRange] = useState('');
+  const [scheduleFilter, setScheduleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
-  const [prescriberFilter, setPrescriberFilter] = useState('');
+  const [dateRange, setDateRange] = useState('');
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const allActivity = useRecentDispensingActivity();
+  const controlledActivity = useMemo(
+    () =>
+      allActivity.filter(
+        (a): a is DispensingActivityEntry & { controlledSchedule: ControlledSchedule } =>
+          Boolean(a.controlledSchedule),
+      ),
+    [allActivity],
+  );
 
-  const totalDispensed = allActivity.length;
-  const dispensedToday = allActivity.filter((a) => isToday(a.dispensedAt)).length;
-  const thisWeek = allActivity.filter((a) => isWithinRange(a.dispensedAt, 'this-week')).length;
-  const thisMonth = allActivity.filter((a) => isWithinRange(a.dispensedAt, 'this-month')).length;
-  const uniquePatients = new Set(allActivity.map((a) => a.patientId)).size;
+  const controlledInventory = useMemo(() => DRUG_INVENTORY.filter((d) => d.controlledSchedule), []);
+  const lowStockItems = useMemo(
+    () => controlledInventory.filter((d) => d.currentStock <= d.reorderLevel),
+    [controlledInventory],
+  );
+  const expiringBatches = useMemo(
+    () => getExpiringBatches(30).filter((row) => row.item.controlledSchedule),
+    [],
+  );
 
-  const statusCounts = useMemo(() => {
-    const counts: Record<DispensingStatus, number> = {
-      Completed: 0,
-      Partial: 0,
-      Returned: 0,
-      Cancelled: 0,
-      'Pending Approval': 0,
+  const totalControlled = controlledActivity.length;
+  const dispensedToday = controlledActivity.filter((a) => isToday(a.dispensedAt)).length;
+  const pendingApprovals = controlledActivity.filter((a) => a.status === 'Pending Approval').length;
+
+  const scheduleCounts = useMemo(() => {
+    const counts: Record<ControlledSchedule, number> = {
+      'C-II': 0,
+      'C-III': 0,
+      'C-IV': 0,
+      'C-V': 0,
     };
-    for (const a of allActivity) counts[a.status] += 1;
+    for (const a of controlledActivity) counts[a.controlledSchedule] += 1;
     return counts;
-  }, [allActivity]);
+  }, [controlledActivity]);
 
-  const donutBreakdown = (Object.keys(STATUS_CFG) as DispensingStatus[]).map((status) => ({
-    label: status,
-    value: statusCounts[status],
-    color: STATUS_CFG[status].color,
+  const donutBreakdown = (Object.keys(SCHEDULE_CFG) as ControlledSchedule[]).map((schedule) => ({
+    label: schedule,
+    value: scheduleCounts[schedule],
+    color: SCHEDULE_CFG[schedule].color,
   }));
 
-  const topMedications = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const a of allActivity)
-      counts.set(a.medicationName, (counts.get(a.medicationName) ?? 0) + 1);
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-  }, [allActivity]);
-
   const withPatient = useMemo(
-    () => allActivity.map((a) => ({ activity: a, patient: getPatientDetail(a.patientId) })),
-    [allActivity],
+    () => controlledActivity.map((a) => ({ activity: a, patient: getPatientDetail(a.patientId) })),
+    [controlledActivity],
   );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return withPatient.filter(({ activity, patient }) => {
+      if (scheduleFilter && activity.controlledSchedule !== scheduleFilter) return false;
       if (statusFilter && activity.status !== statusFilter) return false;
       if (departmentFilter && activity.department !== departmentFilter) return false;
-      if (prescriberFilter && activity.doctorName !== prescriberFilter) return false;
       if (dateRange && !isWithinRange(activity.dispensedAt, dateRange)) return false;
       if (
         q &&
         !patient.name.toLowerCase().includes(q) &&
-        !patient.mrn.toLowerCase().includes(q) &&
         !activity.rxNo.toLowerCase().includes(q) &&
         !activity.medicationName.toLowerCase().includes(q)
       )
         return false;
       return true;
     });
-  }, [withPatient, search, statusFilter, departmentFilter, prescriberFilter, dateRange]);
+  }, [withPatient, search, scheduleFilter, statusFilter, departmentFilter, dateRange]);
 
   const pageStart = (currentPage - 1) * rowsPerPage;
   const pageRows = filtered.slice(pageStart, pageStart + rowsPerPage);
 
   function handleClearFilters() {
     setSearch('');
-    setDateRange('');
+    setScheduleFilter('');
     setStatusFilter('');
     setDepartmentFilter('');
-    setPrescriberFilter('');
+    setDateRange('');
     setCurrentPage(1);
   }
 
@@ -215,8 +256,9 @@ export function DispensingHistoryWorkspace() {
         'Patient',
         'MRN',
         'Medication',
+        'Schedule',
         'Qty Dispensed',
-        'Dispense Date & Time',
+        'Dispensed On',
         'Prescriber',
         'Department',
         'Status',
@@ -226,6 +268,7 @@ export function DispensingHistoryWorkspace() {
         patient.name,
         patient.mrn,
         activity.medicationName,
+        activity.controlledSchedule,
         `${activity.qty} ${activity.unit}${activity.qty === 1 ? '' : 's'}`,
         formatDateTime(activity.dispensedAt),
         activity.doctorName,
@@ -233,7 +276,7 @@ export function DispensingHistoryWorkspace() {
         activity.status,
       ]),
     ];
-    downloadCSV('dispensing-history', rows);
+    downloadCSV('controlled-drugs-report', rows);
     toast.success('Export ready', `${filtered.length} records downloaded as CSV.`);
   }
 
@@ -243,16 +286,22 @@ export function DispensingHistoryWorkspace() {
 
   function printReceipt(activity: DispensingActivityEntry, patientName: string) {
     downloadPDF(
-      `dispensing-receipt-${activity.rxNo}`,
-      `<h1>Dispensing Receipt</h1>` +
-        `<p class="meta">Rx ${escapeHtml(activity.rxNo)}</p><hr />` +
+      `controlled-drug-receipt-${activity.rxNo}`,
+      `<h1>Controlled Drug Dispensing Receipt</h1>` +
+        `<p class="meta">Rx ${escapeHtml(activity.rxNo)} — Schedule ${escapeHtml(activity.controlledSchedule ?? '')}</p><hr />` +
         `<p><strong>Patient:</strong> ${escapeHtml(patientName)}</p>` +
         `<p><strong>Medication:</strong> ${escapeHtml(activity.medicationName)}</p>` +
         `<p><strong>Quantity:</strong> ${activity.qty} ${escapeHtml(activity.unit)}${activity.qty === 1 ? '' : 's'}</p>` +
         `<p><strong>Dispensed:</strong> ${escapeHtml(formatDateTime(activity.dispensedAt))}</p>` +
         `<p><strong>Prescriber:</strong> ${escapeHtml(activity.doctorName)} (${escapeHtml(activity.department)})</p>` +
-        `<p><strong>Status:</strong> ${escapeHtml(activity.status)}</p>`,
+        `<p><strong>Status:</strong> ${escapeHtml(activity.status)}</p>` +
+        `<p><strong>Countersigned by:</strong> ${escapeHtml(activity.approvedBy ?? 'Pending')}</p>`,
     );
+  }
+
+  function handleApprove(activity: DispensingActivityEntry) {
+    approveControlledDispenseRecord(activity.id, actorName);
+    toast.success('Record approved', `${activity.rxNo} countersigned and marked Completed.`);
   }
 
   return (
@@ -269,10 +318,10 @@ export function DispensingHistoryWorkspace() {
             Home
           </button>
           <span style={{ fontSize: 14, color: '#8A98A3' }}>/</span>
-          <span style={{ fontSize: 14, color: '#8A98A3' }}>Prescription Management</span>
+          <span style={{ fontSize: 14, color: '#8A98A3' }}>Clinical Pharmacy</span>
           <span style={{ fontSize: 14, color: '#8A98A3' }}>/</span>
           <span className="font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
-            Dispensing History
+            Controlled Drugs
           </span>
         </nav>
 
@@ -283,30 +332,30 @@ export function DispensingHistoryWorkspace() {
               className="font-display font-semibold"
               style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
             >
-              Dispensing History
+              Controlled Drugs
             </h1>
             <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-              View and search all dispensed medications and transaction history.
+              Monitor and audit controlled-substance dispensing, stock, and expiry.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2.5">
             <button
               type="button"
-              onClick={handleExport}
+              onClick={() => router.push(ROUTES.pharmacyAuditTrail)}
               className={`flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
               style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.2)' }}
             >
-              <Download style={{ width: 15, height: 15 }} />
-              Export
+              <ShieldAlert style={{ width: 15, height: 15 }} />
+              Audit Trail
             </button>
             <button
               type="button"
-              onClick={() => window.print()}
-              className={`flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-              style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.2)' }}
+              onClick={handleExport}
+              className={`flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+              style={{ fontSize: 14, background: '#00B4D8' }}
             >
-              <Printer style={{ width: 15, height: 15 }} />
-              Print
+              <Download style={{ width: 15, height: 15 }} />
+              Export Report
             </button>
           </div>
         </div>
@@ -314,56 +363,52 @@ export function DispensingHistoryWorkspace() {
         {/* Stat cards */}
         <div className="mt-5 grid grid-cols-2 gap-3.5 sm:grid-cols-3 xl:grid-cols-5 xl:gap-4">
           <StatCard
-            icon={CalendarClock}
-            label="Total Dispensed"
-            value={totalDispensed}
-            info="All time"
-            accent="#16A34A"
-            iconBg="rgba(22,163,74,0.1)"
+            icon={Package}
+            label="Total Controlled Dispenses"
+            value={totalControlled}
+            info="Full log"
+            accent="#0D2630"
+            iconBg="rgba(13,38,48,0.08)"
           />
           <StatCard
-            icon={Calendar}
+            icon={CheckCircle2}
             label="Dispensed Today"
             value={dispensedToday}
-            info={formatDateTime(new Date().toISOString()).split(' ')[0] ?? 'Today'}
-            accent="#2563EB"
-            iconBg="rgba(37,99,235,0.1)"
+            info="Since midnight WAT"
+            accent="#16A34A"
+            iconBg="rgba(22,163,74,0.1)"
             onClick={() => {
               setDateRange('today');
               setCurrentPage(1);
             }}
           />
           <StatCard
-            icon={CalendarDays}
-            label="This Week"
-            value={thisWeek}
-            info="Last 7 days"
+            icon={AlertTriangle}
+            label="Low Stock Alerts"
+            value={lowStockItems.length}
+            info="At or below reorder level"
+            accent="#D97706"
+            iconBg="rgba(217,119,6,0.1)"
+          />
+          <StatCard
+            icon={Clock}
+            label="Pending Approvals"
+            value={pendingApprovals}
+            info="Needs countersignature"
             accent="#7C3AED"
             iconBg="rgba(124,58,237,0.1)"
             onClick={() => {
-              setDateRange('this-week');
+              setStatusFilter('Pending Approval');
               setCurrentPage(1);
             }}
           />
           <StatCard
-            icon={Calendar}
-            label="This Month"
-            value={thisMonth}
-            info="Current month"
-            accent="#D97706"
-            iconBg="rgba(217,119,6,0.1)"
-            onClick={() => {
-              setDateRange('this-month');
-              setCurrentPage(1);
-            }}
-          />
-          <StatCard
-            icon={Users}
-            label="Unique Patients"
-            value={uniquePatients}
-            info="All time"
-            accent="#00B4D8"
-            iconBg="rgba(0,180,216,0.1)"
+            icon={CalendarClock}
+            label="Expiring Soon"
+            value={expiringBatches.length}
+            info="Within 30 days"
+            accent="#DC2626"
+            iconBg="rgba(220,38,38,0.1)"
           />
         </div>
 
@@ -388,7 +433,7 @@ export function DispensingHistoryWorkspace() {
                       setSearch(e.target.value);
                       setCurrentPage(1);
                     }}
-                    placeholder="Search by patient, Rx No., or medication..."
+                    placeholder="Search by patient name, Rx No., or medication..."
                     className={`h-11 w-full rounded-[10px] pr-4 pl-9 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
                     style={{
                       fontSize: 14,
@@ -409,17 +454,17 @@ export function DispensingHistoryWorkspace() {
 
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <FormSelect
-                  id="history-date-range"
-                  value={dateRange}
+                  id="controlled-schedule-filter"
+                  value={scheduleFilter}
                   onChange={(v) => {
-                    setDateRange(v);
+                    setScheduleFilter(v);
                     setCurrentPage(1);
                   }}
-                  options={REGISTRATION_DATE_OPTIONS}
-                  placeholder="All Dates"
+                  options={CONTROLLED_SCHEDULE_OPTIONS}
+                  placeholder="All Schedules"
                 />
                 <FormSelect
-                  id="history-status-filter"
+                  id="controlled-status-filter"
                   value={statusFilter}
                   onChange={(v) => {
                     setStatusFilter(v);
@@ -429,7 +474,7 @@ export function DispensingHistoryWorkspace() {
                   placeholder="All Statuses"
                 />
                 <FormSelect
-                  id="history-department-filter"
+                  id="controlled-department-filter"
                   value={departmentFilter}
                   onChange={(v) => {
                     setDepartmentFilter(v);
@@ -440,14 +485,14 @@ export function DispensingHistoryWorkspace() {
                 />
                 {moreFiltersOpen && (
                   <FormSelect
-                    id="history-prescriber-filter"
-                    value={prescriberFilter}
+                    id="controlled-date-filter"
+                    value={dateRange}
                     onChange={(v) => {
-                      setPrescriberFilter(v);
+                      setDateRange(v);
                       setCurrentPage(1);
                     }}
-                    options={QUEUE_PRESCRIBER_OPTIONS}
-                    placeholder="All Prescribers"
+                    options={REGISTRATION_DATE_OPTIONS}
+                    placeholder="All Dates"
                   />
                 )}
               </div>
@@ -481,10 +526,10 @@ export function DispensingHistoryWorkspace() {
                   className="font-display font-semibold"
                   style={{ fontSize: 16, color: '#0D2630' }}
                 >
-                  Dispensing Records ({filtered.length})
+                  Controlled Drugs List ({filtered.length})
                 </h2>
                 <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 1260 }}>
+                  <div style={{ minWidth: 1320 }}>
                     <div
                       className="flex rounded-t-[8px]"
                       style={{
@@ -492,7 +537,7 @@ export function DispensingHistoryWorkspace() {
                         borderBottom: '1px solid #E6F8FD',
                       }}
                     >
-                      <div className="w-28 shrink-0 py-2.5 pr-2 pl-3">
+                      <div className="w-36 shrink-0 py-2.5 pr-2 pl-3">
                         <span
                           className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -508,7 +553,7 @@ export function DispensingHistoryWorkspace() {
                           Patient
                         </span>
                       </div>
-                      <div className="min-w-[160px] flex-1 py-2.5 pr-2">
+                      <div className="min-w-[170px] flex-1 py-2.5 pr-2">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -516,12 +561,20 @@ export function DispensingHistoryWorkspace() {
                           Medication
                         </span>
                       </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2">
+                      <div className="w-28 shrink-0 py-2.5 pr-2">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Schedule
+                        </span>
+                      </div>
+                      <div className="w-28 shrink-0 py-2.5 pr-2">
                         <span
                           className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
-                          Qty Dispensed
+                          Qty
                         </span>
                       </div>
                       <div className="w-36 shrink-0 py-2.5 pr-2">
@@ -529,26 +582,18 @@ export function DispensingHistoryWorkspace() {
                           className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
-                          Dispense Date
+                          Dispensed On
                         </span>
                       </div>
                       <div className="w-40 shrink-0 py-2.5 pr-2">
                         <span
-                          className="font-sans font-bold tracking-wider uppercase"
+                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
                           Prescriber
                         </span>
                       </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Department
-                        </span>
-                      </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2">
+                      <div className="w-40 shrink-0 py-2.5 pr-2">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -572,13 +617,13 @@ export function DispensingHistoryWorkspace() {
                           className="flex size-14 items-center justify-center rounded-full"
                           style={{ background: 'rgba(226,237,241,0.6)' }}
                         >
-                          <CalendarClock style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                          <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
                         </div>
                         <p
                           className="font-sans font-medium"
                           style={{ fontSize: 16, color: '#4A7080' }}
                         >
-                          No dispensing records match your filters
+                          No controlled-drug records match your filters
                         </p>
                         <button
                           type="button"
@@ -593,13 +638,14 @@ export function DispensingHistoryWorkspace() {
 
                     {pageRows.map(({ activity, patient }) => {
                       const statusCfg = STATUS_CFG[activity.status];
+                      const scheduleCfg = SCHEDULE_CFG[activity.controlledSchedule];
                       return (
                         <div
                           key={activity.id}
                           className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
-                          <div className="w-28 shrink-0 py-3 pr-2 pl-3">
+                          <div className="w-36 shrink-0 py-3 pr-2 pl-3">
                             <p
                               className="truncate font-sans font-medium"
                               style={{ fontSize: 14, color: '#0D2630' }}
@@ -618,22 +664,37 @@ export function DispensingHistoryWorkspace() {
                               {patient.mrn}
                             </p>
                           </div>
-                          <div className="min-w-[160px] flex-1 py-3 pr-2">
+                          <div className="min-w-[170px] flex-1 py-3 pr-2">
                             <p
                               className="truncate font-sans font-medium"
                               style={{ fontSize: 14, color: '#0D2630' }}
                             >
                               {activity.medicationName}
                             </p>
+                            <p style={{ fontSize: 14, color: '#8A98A3' }}>{activity.dose}</p>
                           </div>
-                          <div className="w-32 shrink-0 py-3 pr-2">
-                            <p style={{ fontSize: 14, color: '#4A7080' }}>
+                          <div className="w-28 shrink-0 py-3 pr-2">
+                            <span
+                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                              style={{
+                                fontSize: 14,
+                                whiteSpace: 'nowrap',
+                                color: scheduleCfg.color,
+                                border: `1px solid ${scheduleCfg.border}`,
+                                background: scheduleCfg.bg,
+                              }}
+                            >
+                              {activity.controlledSchedule}
+                            </span>
+                          </div>
+                          <div className="w-28 shrink-0 py-3 pr-2">
+                            <p style={{ fontSize: 14, color: '#0D2630' }}>
                               {activity.qty} {activity.unit}
                               {activity.qty === 1 ? '' : 's'}
                             </p>
                           </div>
                           <div className="w-36 shrink-0 py-3 pr-2">
-                            <p style={{ fontSize: 14, color: '#4A7080' }}>
+                            <p style={{ fontSize: 14, color: '#0D2630' }}>
                               {formatDateTime(activity.dispensedAt)}
                             </p>
                           </div>
@@ -641,13 +702,11 @@ export function DispensingHistoryWorkspace() {
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {activity.doctorName}
                             </p>
-                          </div>
-                          <div className="w-36 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
                               {activity.department}
                             </p>
                           </div>
-                          <div className="w-32 shrink-0 py-3 pr-2">
+                          <div className="w-40 shrink-0 py-3 pr-2">
                             <span
                               className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
                               style={{
@@ -674,6 +733,7 @@ export function DispensingHistoryWorkspace() {
                               entry={activity}
                               onView={() => viewDetails(activity.rxNo)}
                               onPrint={() => printReceipt(activity, patient.name)}
+                              onApprove={() => handleApprove(activity)}
                             />
                           </div>
                         </div>
@@ -704,13 +764,13 @@ export function DispensingHistoryWorkspace() {
               style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
             >
               <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-                Dispensing Overview
+                Controlled Drugs Overview
               </h2>
               <div className="mt-3 flex items-center gap-5">
                 <AnimatedDonutChart
                   breakdown={donutBreakdown}
-                  total={totalDispensed}
-                  ariaLabel="Dispensing overview donut chart"
+                  total={totalControlled}
+                  ariaLabel="Controlled drugs overview donut chart, by schedule"
                 />
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                   {donutBreakdown.map((d) => (
@@ -721,7 +781,7 @@ export function DispensingHistoryWorkspace() {
                           style={{ background: d.color }}
                         />
                         <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {d.label}
+                          Schedule {d.label.replace('C-', '')}
                         </span>
                       </div>
                       <span
@@ -729,7 +789,8 @@ export function DispensingHistoryWorkspace() {
                         style={{ fontSize: 14, color: '#0D2630' }}
                       >
                         {d.value} (
-                        {totalDispensed > 0 ? Math.round((d.value / totalDispensed) * 100) : 0}%)
+                        {totalControlled > 0 ? Math.round((d.value / totalControlled) * 100) : 0}
+                        %)
                       </span>
                     </div>
                   ))}
@@ -742,63 +803,109 @@ export function DispensingHistoryWorkspace() {
               style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
             >
               <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-                Top Medications Dispensed
+                Low Stock Alerts
               </h2>
-              <div className="mt-3 flex flex-col gap-2.5">
-                {topMedications.map(([name, count], i) => (
-                  <div key={name} className="flex items-center gap-2.5">
-                    <div
-                      className="flex size-6 shrink-0 items-center justify-center rounded-full font-sans font-semibold"
-                      style={{ fontSize: 14, background: 'rgba(0,180,216,0.1)', color: '#00B4D8' }}
-                    >
-                      {i + 1}
+              {lowStockItems.length === 0 ? (
+                <p className="mt-3" style={{ fontSize: 14, color: '#8A98A3' }}>
+                  No controlled items below reorder level.
+                </p>
+              ) : (
+                <div className="mt-3 flex flex-col gap-3">
+                  {lowStockItems.map((item) => (
+                    <div key={item.id} className="flex items-start gap-2.5">
+                      <AlertTriangle
+                        className="mt-0.5 shrink-0"
+                        style={{ width: 16, height: 16, color: '#D97706' }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {item.name}
+                        </p>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                          {item.currentStock} {item.unit}
+                          {item.currentStock === 1 ? '' : 's'} left · reorder at {item.reorderLevel}
+                        </p>
+                      </div>
                     </div>
-                    <p
-                      className="min-w-0 flex-1 truncate"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
-                      {name}
-                    </p>
-                    <span
-                      className="shrink-0 font-sans font-medium"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      {count}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => router.push(ROUTES.pharmacyInventory)}
-                className={`mt-3.5 flex items-center gap-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#00B4D8' }}
-              >
-                View All Medications →
-              </button>
+                  ))}
+                </div>
+              )}
             </div>
+
+            {expiringBatches.length > 0 && (
+              <div
+                className="rounded-[12px] p-4"
+                style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+              >
+                <h2
+                  className="font-display font-semibold"
+                  style={{ fontSize: 16, color: '#0D2630' }}
+                >
+                  Expiring Soon
+                </h2>
+                <div className="mt-3 flex flex-col gap-3">
+                  {expiringBatches.map((row) => (
+                    <div key={row.batch.batchNo} className="flex items-start gap-2.5">
+                      <CalendarClock
+                        className="mt-0.5 shrink-0"
+                        style={{ width: 16, height: 16, color: '#DC2626' }}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {row.item.name}
+                        </p>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                          Batch {row.batch.batchNo} — {row.daysLeft} day
+                          {row.daysLeft === 1 ? '' : 's'} left
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div
               className="rounded-[12px] p-4"
               style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
             >
               <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-                Quick Links
+                Quick Actions
               </h2>
               <div className="mt-3 flex flex-col gap-1">
                 {[
-                  { label: 'Prescription Queue', href: ROUTES.pharmacyPrescriptionQueue },
-                  { label: 'Active Prescriptions', href: ROUTES.pharmacyActivePrescriptions },
-                  { label: 'Medication Returns', href: ROUTES.pharmacyMedicationReturns },
-                  { label: 'Dispensing Audit Trail', href: ROUTES.pharmacyAuditTrail },
-                ].map((link) => (
+                  {
+                    icon: Package,
+                    label: 'Add Stock Entry',
+                    href: ROUTES.pharmacyStockReceiving,
+                  },
+                  {
+                    icon: Clock,
+                    label: 'Stock Adjustment',
+                    href: ROUTES.pharmacyStockAdjustments,
+                  },
+                  {
+                    icon: ShieldAlert,
+                    label: 'Manage Drug Schedules',
+                    href: ROUTES.pharmacyBatchManagement,
+                  },
+                ].map((action) => (
                   <button
-                    key={link.href}
+                    key={action.label}
                     type="button"
-                    onClick={() => router.push(link.href)}
+                    onClick={() => router.push(action.href)}
                     className={`flex items-center justify-between gap-2 rounded-[8px] px-2.5 py-2.5 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
                   >
-                    <span style={{ fontSize: 14, color: '#0D2630' }}>{link.label}</span>
+                    <span className="flex items-center gap-2.5">
+                      <action.icon style={{ width: 16, height: 16, color: '#00B4D8' }} />
+                      <span style={{ fontSize: 14, color: '#0D2630' }}>{action.label}</span>
+                    </span>
                     <span style={{ fontSize: 14, color: '#00B4D8' }}>→</span>
                   </button>
                 ))}
@@ -810,11 +917,15 @@ export function DispensingHistoryWorkspace() {
         {/* Footer safety banner */}
         <div
           className="mt-5 flex items-start gap-2.5 rounded-[12px] p-4"
-          style={{ background: 'rgba(0,180,216,0.06)', border: '1px solid rgba(0,180,216,0.25)' }}
+          style={{ background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.25)' }}
         >
+          <ShieldAlert
+            style={{ width: 18, height: 18, color: '#DC2626' }}
+            className="mt-0.5 shrink-0"
+          />
           <p style={{ fontSize: 14, color: '#0D2630' }}>
-            All times shown are in West Africa Time (WAT). Ensure records are accurate and follow
-            regulatory guidelines.
+            Controlled substances require a two-pharmacist countersignature and full batch
+            traceability. Report any discrepancy immediately through the Audit Trail.
           </p>
         </div>
 
