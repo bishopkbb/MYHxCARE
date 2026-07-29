@@ -4,6 +4,7 @@ import { Check, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import type { Conversation } from '@/features/messages/__mocks__/messageFixtures';
+import { Tooltip } from '@components/shared/Tooltip';
 import { MOCK_PATIENTS, type PatientRecord } from '@/features/patients/__mocks__/patientFixtures';
 
 const FOCUS_RING =
@@ -58,12 +59,14 @@ export function PatientContextModal({
                 ? 'Change Patient Context'
                 : 'Link Patient Context'}
             </h2>
-            <p
-              className="mt-0.5 truncate font-sans"
-              style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-            >
-              For your conversation with {activeConversation.staffName}
-            </p>
+            <Tooltip content={`For your conversation with ${activeConversation.staffName}`}>
+              <p
+                className="mt-0.5 truncate font-sans"
+                style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+              >
+                For your conversation with {activeConversation.staffName}
+              </p>
+            </Tooltip>
           </div>
           <button
             type="button"
@@ -132,15 +135,19 @@ export function PatientContextModal({
                     {patient.initials}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p
-                      className="truncate font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
-                      {patient.name}
-                    </p>
-                    <p className="truncate font-sans" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {patient.mrn} · {patient.meta}
-                    </p>
+                    <Tooltip content={patient.name}>
+                      <p
+                        className="truncate font-sans font-medium"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        {patient.name}
+                      </p>
+                    </Tooltip>
+                    <Tooltip content={`${patient.mrn} · ${patient.meta}`}>
+                      <p className="truncate font-sans" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {patient.mrn} · {patient.meta}
+                      </p>
+                    </Tooltip>
                   </div>
                   {isCurrent && (
                     <Check style={{ width: 16, height: 16, color: '#00B4D8', flexShrink: 0 }} />

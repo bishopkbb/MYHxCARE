@@ -20,6 +20,7 @@ import { useMemo, useRef, useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
@@ -284,9 +285,11 @@ export function StaffInboxWorkspace() {
                   >
                     <s.icon style={{ width: 16, height: 16, color: s.color }} />
                   </div>
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {s.label}
-                  </p>
+                  <Tooltip content={s.label}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {s.label}
+                    </p>
+                  </Tooltip>
                 </div>
                 <p
                   className="font-display mt-2 font-semibold"
@@ -365,9 +368,11 @@ export function StaffInboxWorkspace() {
                           >
                             {d.subject}
                           </p>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {d.preview}
-                          </p>
+                          <Tooltip content={d.preview}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {d.preview}
+                            </p>
+                          </Tooltip>
                         </div>
                       ))}
                     </div>
@@ -478,12 +483,14 @@ export function StaffInboxWorkspace() {
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-2">
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {m.senderName}
-                                </p>
+                                <Tooltip content={m.senderName}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {m.senderName}
+                                  </p>
+                                </Tooltip>
                                 <p
                                   className="shrink-0 whitespace-nowrap"
                                   style={{ fontSize: 14, color: '#8A98A3' }}
@@ -491,19 +498,23 @@ export function StaffInboxWorkspace() {
                                   {relativeTime(m.sentAt)}
                                 </p>
                               </div>
-                              <p
-                                className="truncate"
-                                style={{
-                                  fontSize: 14,
-                                  color: '#0D2630',
-                                  fontWeight: isUnread ? 600 : 400,
-                                }}
-                              >
-                                {m.subject}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {m.preview}
-                              </p>
+                              <Tooltip content={m.subject}>
+                                <p
+                                  className="truncate"
+                                  style={{
+                                    fontSize: 14,
+                                    color: '#0D2630',
+                                    fontWeight: isUnread ? 600 : 400,
+                                  }}
+                                >
+                                  {m.subject}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={m.preview}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {m.preview}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="hidden shrink-0 sm:block">
                               <DeptBadge department={m.department} />
@@ -624,12 +635,14 @@ export function StaffInboxWorkspace() {
                     </div>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <p
-                          className="truncate font-sans font-semibold"
-                          style={{ fontSize: 16, color: '#0D2630' }}
-                        >
-                          {selected.senderName}
-                        </p>
+                        <Tooltip content={selected.senderName}>
+                          <p
+                            className="truncate font-sans font-semibold"
+                            style={{ fontSize: 16, color: '#0D2630' }}
+                          >
+                            {selected.senderName}
+                          </p>
+                        </Tooltip>
                         <DeptBadge department={selected.department} />
                       </div>
                       {selected.online && (
@@ -782,12 +795,14 @@ export function StaffInboxWorkspace() {
                             }}
                           >
                             <div className="min-w-0 flex-1">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {a.name}
-                              </p>
+                              <Tooltip content={a.name}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {a.name}
+                                </p>
+                              </Tooltip>
                               <p style={{ fontSize: 14, color: '#8A98A3' }}>{a.sizeKB} KB</p>
                             </div>
                             <button
@@ -844,12 +859,14 @@ export function StaffInboxWorkspace() {
                         <Paperclip
                           style={{ width: 14, height: 14, color: '#00B4D8', flexShrink: 0 }}
                         />
-                        <span
-                          className="min-w-0 flex-1 truncate"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {attachedFileName}
-                        </span>
+                        <Tooltip content={attachedFileName}>
+                          <span
+                            className="min-w-0 flex-1 truncate"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {attachedFileName}
+                          </span>
+                        </Tooltip>
                         <button
                           type="button"
                           onClick={() => setAttachedFileName(null)}

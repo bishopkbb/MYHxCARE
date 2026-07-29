@@ -19,6 +19,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { useAuth } from '@hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
@@ -553,12 +554,14 @@ export function StaffChatWorkspace() {
                       <Avatar initials={c.initials} bg={c.avatarBg} online={c.online} />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <span
-                            className="truncate font-sans font-semibold"
-                            style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                          >
-                            {c.staffName}
-                          </span>
+                          <Tooltip content={c.staffName}>
+                            <span
+                              className="truncate font-sans font-semibold"
+                              style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                            >
+                              {c.staffName}
+                            </span>
+                          </Tooltip>
                           <span
                             className="shrink-0 font-sans"
                             style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
@@ -566,24 +569,28 @@ export function StaffChatWorkspace() {
                             {formatTime(c.lastMessageAt)}
                           </span>
                         </div>
-                        <p
-                          className="truncate font-sans"
-                          style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
-                        >
-                          {c.department}
-                        </p>
-                        <div className="mt-0.5 flex items-center justify-between gap-2">
+                        <Tooltip content={c.department}>
                           <p
                             className="truncate font-sans"
-                            style={{
-                              fontSize: 14,
-                              lineHeight: '22px',
-                              color: isUnread ? '#25464D' : '#4A7080',
-                              fontWeight: isUnread ? 500 : 400,
-                            }}
+                            style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
                           >
-                            {c.lastMessagePreview}
+                            {c.department}
                           </p>
+                        </Tooltip>
+                        <div className="mt-0.5 flex items-center justify-between gap-2">
+                          <Tooltip content={c.lastMessagePreview}>
+                            <p
+                              className="truncate font-sans"
+                              style={{
+                                fontSize: 14,
+                                lineHeight: '22px',
+                                color: isUnread ? '#25464D' : '#4A7080',
+                                fontWeight: isUnread ? 500 : 400,
+                              }}
+                            >
+                              {c.lastMessagePreview}
+                            </p>
+                          </Tooltip>
                           {isUnread && (
                             <span
                               className="flex shrink-0 items-center justify-center rounded-full font-sans font-semibold text-white"
@@ -650,19 +657,23 @@ export function StaffChatWorkspace() {
                     online={activeConversation.online}
                   />
                   <div className="min-w-0 flex-1">
-                    <p
-                      className="truncate font-sans font-semibold"
-                      style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                    >
-                      {activeConversation.staffName}
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className="truncate font-sans"
-                        style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                    <Tooltip content={activeConversation.staffName}>
+                      <p
+                        className="truncate font-sans font-semibold"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
                       >
-                        {activeConversation.department}
-                      </span>
+                        {activeConversation.staffName}
+                      </p>
+                    </Tooltip>
+                    <div className="flex items-center gap-1.5">
+                      <Tooltip content={activeConversation.department}>
+                        <span
+                          className="truncate font-sans"
+                          style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                        >
+                          {activeConversation.department}
+                        </span>
+                      </Tooltip>
                       {activeConversation.online && (
                         <>
                           <span
@@ -758,13 +769,17 @@ export function StaffChatWorkspace() {
                     <Stethoscope
                       style={{ width: 15, height: 15, color: '#00B4D8', flexShrink: 0 }}
                     />
-                    <p
-                      className="min-w-0 flex-1 truncate font-sans"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+                    <Tooltip
+                      content={`Patient context: ${activeConversation.patientContext.name} · ${' '} ${activeConversation.patientContext.mrn}`}
                     >
-                      Patient context: {activeConversation.patientContext.name} ·{' '}
-                      {activeConversation.patientContext.mrn}
-                    </p>
+                      <p
+                        className="min-w-0 flex-1 truncate font-sans"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+                      >
+                        Patient context: {activeConversation.patientContext.name} ·{' '}
+                        {activeConversation.patientContext.mrn}
+                      </p>
+                    </Tooltip>
                     <ChevronDown
                       className="shrink-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
                       style={{ width: 14, height: 14, color: '#00B4D8' }}
@@ -932,12 +947,14 @@ export function StaffChatWorkspace() {
                     style={{ background: '#E6F8FD', border: '1px solid rgba(0,180,216,0.3)' }}
                   >
                     <Paperclip style={{ width: 14, height: 14, color: '#00B4D8', flexShrink: 0 }} />
-                    <span
-                      className="min-w-0 flex-1 truncate font-sans"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
-                      {attachedFileName}
-                    </span>
+                    <Tooltip content={attachedFileName}>
+                      <span
+                        className="min-w-0 flex-1 truncate font-sans"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        {attachedFileName}
+                      </span>
+                    </Tooltip>
                     <button
                       type="button"
                       onClick={() => setAttachedFileName(null)}

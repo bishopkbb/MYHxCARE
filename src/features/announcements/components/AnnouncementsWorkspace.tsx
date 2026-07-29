@@ -20,6 +20,7 @@ import dynamic from 'next/dynamic';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { useToast } from '@/hooks/useToast';
@@ -473,12 +474,14 @@ export function AnnouncementsWorkspace() {
                             {a.pinned && (
                               <Pin style={{ width: 13, height: 13, color: '#F59E0B' }} />
                             )}
-                            <p
-                              className="truncate font-sans font-semibold"
-                              style={{ fontSize: 15, color: '#0D2630' }}
-                            >
-                              {a.title}
-                            </p>
+                            <Tooltip content={a.title}>
+                              <p
+                                className="truncate font-sans font-semibold"
+                                style={{ fontSize: 15, color: '#0D2630' }}
+                              >
+                                {a.title}
+                              </p>
+                            </Tooltip>
                             {a.priority === 'High Priority' && (
                               <span
                                 className="shrink-0 rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
@@ -493,13 +496,25 @@ export function AnnouncementsWorkspace() {
                               </span>
                             )}
                           </div>
-                          <p className="mt-0.5 truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {a.scope === 'System Wide' ? 'System Wide' : a.department} · By{' '}
-                            {a.author}
-                          </p>
-                          <p className="mt-0.5 truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                            {a.preview}
-                          </p>
+                          <Tooltip
+                            content={`${a.scope === 'System Wide' ? 'System Wide' : a.department} · By ${' '} ${a.author}`}
+                          >
+                            <p
+                              className="mt-0.5 truncate"
+                              style={{ fontSize: 14, color: '#4A7080' }}
+                            >
+                              {a.scope === 'System Wide' ? 'System Wide' : a.department} · By{' '}
+                              {a.author}
+                            </p>
+                          </Tooltip>
+                          <Tooltip content={a.preview}>
+                            <p
+                              className="mt-0.5 truncate"
+                              style={{ fontSize: 14, color: '#8A98A3' }}
+                            >
+                              {a.preview}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="flex shrink-0 flex-col items-end gap-1.5">
                           <span
@@ -766,12 +781,14 @@ export function AnnouncementsWorkspace() {
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {selected.attachment.name}
-                        </p>
+                        <Tooltip content={selected.attachment.name}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {selected.attachment.name}
+                          </p>
+                        </Tooltip>
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>
                           {selected.attachment.fileType} · {selected.attachment.sizeLabel}
                         </p>
