@@ -35,14 +35,16 @@ import { useToast } from '@/hooks/useToast';
 import { formatDate, formatTime, toRelativeTime } from '@/utils/datetime';
 import { getPatientDetail } from '@/features/patients/__mocks__/patientFixtures';
 import { useAnnouncements } from '@/features/announcements/store/announcementsStore';
+import { getPharmacyLocation } from '@/constants/pharmacyLocations';
 import {
   getExpiringBatches,
   getInventorySnapshot,
   getLowStockItems,
   getPendingTransferCount,
+  getTransferItemCount,
   SAFETY_ALERT_COUNTS,
   PHARMACY_NOTIFICATIONS,
-  STOCK_TRANSFERS,
+  STOCK_TRANSFERS_SEED,
   type PharmacyQueueEntry,
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
 import {
@@ -586,10 +588,11 @@ export default function PharmacyDashboardPage() {
             >
               {pageState === 'loading' ? (
                 Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
-              ) : STOCK_TRANSFERS.filter((t) => t.status === 'Pending').length === 0 ? (
+              ) : STOCK_TRANSFERS_SEED.filter((t) => t.status === 'Pending Approval').length ===
+                0 ? (
                 <EmptyRow label="No stock transfers pending." />
               ) : (
-                STOCK_TRANSFERS.filter((t) => t.status === 'Pending')
+                STOCK_TRANSFERS_SEED.filter((t) => t.status === 'Pending Approval')
                   .slice(0, 5)
                   .map((t) => (
                     <div key={t.id} className="flex items-center gap-3 py-2.5">
@@ -598,9 +601,12 @@ export default function PharmacyDashboardPage() {
                           className="truncate font-sans font-medium"
                           style={{ fontSize: 14, color: '#0D2630' }}
                         >
-                          {t.from} → {t.to}
+                          {getPharmacyLocation(t.fromLocationId).shortName} →{' '}
+                          {getPharmacyLocation(t.toLocationId).shortName}
                         </p>
-                        <p style={{ fontSize: 14, color: '#4A7080' }}>{t.itemCount} items</p>
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>
+                          {getTransferItemCount(t)} items
+                        </p>
                       </div>
                       <span
                         className="shrink-0 rounded-full px-2.5 py-0.5 whitespace-nowrap"

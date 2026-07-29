@@ -1081,6 +1081,30 @@ const MEDICATION_REFILL_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const STOCK_TRANSFERS_GUIDE: HelpGuide = {
+  id: 'stock-transfers',
+  title: 'Stock Transfers',
+  intro: 'Transfer stock between pharmacy locations and track each transfer through to completion.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Pending Transfers and In Transit are clickable — each filters the table to that status. Completed and Cancelled/Rejected summarize this month’s activity.',
+    },
+    {
+      heading: 'Requesting a transfer',
+      body: 'New Transfer picks items from the source location’s actual current stock, so you can never request more than is really on hand there.',
+    },
+    {
+      heading: 'Approving and completing',
+      body: 'Approve & Dispatch moves a request to In Transit. Mark Completed is the real stock movement — it deducts the quantity from the source location and adds it to the destination in Drug Inventory.',
+    },
+    {
+      heading: 'Transfer Overview and Top Transfer Destinations',
+      body: 'The donut chart breaks this month’s transfers down by status. Top Transfer Destinations ranks locations by how many transfers were sent there.',
+    },
+  ],
+};
+
 const STOCK_RECEIVING_GUIDE: HelpGuide = {
   id: 'stock-receiving',
   title: 'Stock Receiving',
@@ -2307,6 +2331,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/transfers')) return STOCK_TRANSFERS_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-receiving')) return STOCK_RECEIVING_GUIDE;
   if (pathname.startsWith('/pharmacy/inventory')) return DRUG_INVENTORY_GUIDE;
   if (pathname.startsWith('/pharmacy/controlled-drugs')) return CONTROLLED_DRUGS_GUIDE;

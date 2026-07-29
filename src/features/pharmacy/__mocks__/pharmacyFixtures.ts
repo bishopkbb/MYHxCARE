@@ -1984,95 +1984,171 @@ export function getPendingPurchaseOrders(): PurchaseOrder[] {
 }
 
 // ── Stock transfers ───────────────────────────────────────────────────────────
+// Real inter-location movements between the 6 UNIZIK/NAUTH pharmacy outlets
+// (pharmacyLocations.ts). Completing a transfer (stockTransferStore.ts) is a
+// genuine stock movement — it calls inventoryStore.ts's
+// transferStockBetweenLocations(), decrementing the source batch and
+// crediting the destination, not just flipping a status label.
 
-export type StockTransferStatus = 'Pending' | 'Approved' | 'Completed';
+export type StockTransferStatus =
+  'Draft' | 'Pending Approval' | 'In Transit' | 'Completed' | 'Cancelled' | 'Rejected';
 
-export type StockTransfer = {
-  id: string;
-  from: string;
-  to: string;
-  itemCount: number;
-  status: StockTransferStatus;
-  requestedAt: string; // ISO
+export type StockTransferItem = {
+  medicationName: string;
+  strength: string;
+  form: string;
+  unit: string;
+  batchNo: string;
+  qty: number;
 };
 
-export const STOCK_TRANSFERS: StockTransfer[] = [
-  {
-    id: 'st-1',
-    from: 'Main Store',
-    to: 'Pharmacy',
-    itemCount: 8,
-    status: 'Pending',
-    requestedAt: atOffset(2),
-  },
-  {
-    id: 'st-2',
-    from: 'Pharmacy',
-    to: 'Lab',
-    itemCount: 5,
-    status: 'Pending',
-    requestedAt: atOffset(3),
-  },
-  {
-    id: 'st-3',
-    from: 'Main Store',
-    to: 'Emergency',
-    itemCount: 4,
-    status: 'Pending',
-    requestedAt: atOffset(4),
-  },
-  {
-    id: 'st-4',
-    from: 'Main Store',
-    to: 'Ward 2',
-    itemCount: 6,
-    status: 'Pending',
-    requestedAt: atOffset(5),
-  },
-  {
-    id: 'st-5',
-    from: 'Main Store',
-    to: 'Ward 3',
-    itemCount: 3,
-    status: 'Pending',
-    requestedAt: atOffset(6),
-  },
-  {
-    id: 'st-6',
-    from: 'Pharmacy',
-    to: 'ICU',
-    itemCount: 7,
-    status: 'Pending',
-    requestedAt: atOffset(7),
-  },
-  {
-    id: 'st-7',
-    from: 'Main Store',
-    to: 'Maternity Ward',
-    itemCount: 5,
-    status: 'Pending',
-    requestedAt: atOffset(8),
-  },
-  {
-    id: 'st-8',
-    from: 'Main Store',
-    to: 'Pharmacy',
-    itemCount: 10,
-    status: 'Approved',
-    requestedAt: atOffset(20),
-  },
-  {
-    id: 'st-9',
-    from: 'Pharmacy',
-    to: 'Ward 1',
-    itemCount: 6,
-    status: 'Completed',
-    requestedAt: atOffset(30),
-  },
+export type StockTransfer = {
+  id: string; // TRF-2026-00034
+  fromLocationId: PharmacyLocationId;
+  toLocationId: PharmacyLocationId;
+  status: StockTransferStatus;
+  requestedAt: string; // ISO
+  requestedBy: string;
+  items: StockTransferItem[];
+  dispatchedAt?: string;
+  completedAt?: string;
+  cancelledAt?: string;
+  notes?: string;
+};
+
+function transferId(n: number): string {
+  return `TRF-${new Date().getFullYear()}-${String(n).padStart(5, '0')}`;
+}
+
+const TRANSFER_REQUESTERS = [
+  'Mr. Emeka Obi',
+  'Pharmacist Adaeze',
+  'John Okafor',
+  'Maryam Usman',
+  'Dr. Emeka Nwosu',
+  'Dr. Victoria O.',
 ];
 
+const TRANSFER_ITEM_POOL: { name: string; batchPrefix: string }[] = [
+  { name: 'Amoxicillin', batchPrefix: 'AMX' },
+  { name: 'Paracetamol', batchPrefix: 'PAR' },
+  { name: 'Ciprofloxacin', batchPrefix: 'CIP' },
+  { name: 'Losartan', batchPrefix: 'LOS' },
+  { name: 'Salbutamol', batchPrefix: 'SAL' },
+  { name: 'Omeprazole', batchPrefix: 'OME' },
+  { name: 'Metformin', batchPrefix: 'MET' },
+  { name: 'Atorvastatin', batchPrefix: 'ATO' },
+  { name: 'Ibuprofen', batchPrefix: 'IBU' },
+  { name: 'Diclofenac', batchPrefix: 'DIC' },
+];
+
+function buildTransferItems(startIdx: number, count: number): StockTransferItem[] {
+  return Array.from({ length: count }, (_, i) => {
+    const pick = TRANSFER_ITEM_POOL[(startIdx + i) % TRANSFER_ITEM_POOL.length]!;
+    const entry = getCatalogEntry(pick.name)!;
+    return {
+      medicationName: entry.name,
+      strength: entry.strength,
+      form: entry.form,
+      unit: entry.unit,
+      batchNo: `${pick.batchPrefix}${2500 + ((startIdx + i * 3) % 30)}`,
+      qty: [10, 20, 30, 40, 50, 60][(startIdx + i) % 6]!,
+    };
+  });
+}
+
+/** 34 transfers across this month, deliberately mirroring a real distribution
+ * (18 Completed, 3 In Transit, 5 Pending Approval, 2 Cancelled/Rejected,
+ * 6 Draft) so the sidebar donut sums to the same total as the table. */
+export const STOCK_TRANSFERS_SEED: StockTransfer[] = (() => {
+  const rows: StockTransfer[] = [];
+  let seq = 34;
+
+  function push(
+    status: StockTransferStatus,
+    fromLocationId: PharmacyLocationId,
+    toLocationId: PharmacyLocationId,
+    daysAgo: number,
+    itemCount: number,
+  ) {
+    const requestedBy = TRANSFER_REQUESTERS[seq % TRANSFER_REQUESTERS.length]!;
+    const requestedAt = pastDateAt(daysAgo, 8 + (seq % 10), (seq * 7) % 60);
+    const items = buildTransferItems(seq, itemCount);
+    const base: StockTransfer = {
+      id: transferId(seq),
+      fromLocationId,
+      toLocationId,
+      status,
+      requestedAt,
+      requestedBy,
+      items,
+    };
+    if (status === 'In Transit' || status === 'Completed') {
+      base.dispatchedAt = pastDateAt(Math.max(0, daysAgo - 1), 9, 0);
+    }
+    if (status === 'Completed') {
+      base.completedAt = pastDateAt(Math.max(0, daysAgo - 2), 15, 0);
+    }
+    if (status === 'Cancelled' || status === 'Rejected') {
+      base.cancelledAt = pastDateAt(Math.max(0, daysAgo - 1), 12, 0);
+    }
+    rows.push(base);
+    seq -= 1;
+  }
+
+  // 18 Completed
+  for (let i = 0; i < 18; i++) {
+    push(
+      'Completed',
+      PHARMACY_LOCATIONS[i % PHARMACY_LOCATIONS.length]!.id,
+      PHARMACY_LOCATIONS[(i + 1 + (i % 4)) % PHARMACY_LOCATIONS.length]!.id,
+      3 + i,
+      2 + (i % 4),
+    );
+  }
+  // 3 In Transit
+  for (let i = 0; i < 3; i++) {
+    push(
+      'In Transit',
+      PHARMACY_LOCATIONS[(i + 2) % PHARMACY_LOCATIONS.length]!.id,
+      PHARMACY_LOCATIONS[(i + 4) % PHARMACY_LOCATIONS.length]!.id,
+      1,
+      3 + i,
+    );
+  }
+  // 5 Pending Approval
+  for (let i = 0; i < 5; i++) {
+    push(
+      'Pending Approval',
+      PHARMACY_LOCATIONS[(i + 1) % PHARMACY_LOCATIONS.length]!.id,
+      PHARMACY_LOCATIONS[(i + 3) % PHARMACY_LOCATIONS.length]!.id,
+      0,
+      2 + (i % 3),
+    );
+  }
+  // 1 Cancelled + 1 Rejected
+  push('Cancelled', 'loc_central', 'loc_opd', 6, 4);
+  push('Rejected', 'loc_ward', 'loc_central', 7, 3);
+  // 6 Draft
+  for (let i = 0; i < 6; i++) {
+    push(
+      'Draft',
+      PHARMACY_LOCATIONS[i % PHARMACY_LOCATIONS.length]!.id,
+      PHARMACY_LOCATIONS[(i + 2) % PHARMACY_LOCATIONS.length]!.id,
+      0,
+      2,
+    );
+  }
+
+  return rows.sort((a, b) => new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime());
+})();
+
 export function getPendingTransferCount(): number {
-  return STOCK_TRANSFERS.filter((t) => t.status === 'Pending').length;
+  return STOCK_TRANSFERS_SEED.filter((t) => t.status === 'Pending Approval').length;
+}
+
+export function getTransferItemCount(t: StockTransfer): number {
+  return t.items.reduce((sum, i) => sum + i.qty, 0);
 }
 
 // ── Safety alerts ─────────────────────────────────────────────────────────────

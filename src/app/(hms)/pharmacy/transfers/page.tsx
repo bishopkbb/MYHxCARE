@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Stock Transfers' };
+import { StockTransfersWorkspace } from '@/features/pharmacy/components/StockTransfersWorkspace';
 
 export default function StockTransfersPage() {
-  return (
-    <ComingSoon
-      title="Stock Transfers"
-      description="Requesting, approving, and tracking stock transfers between stores and wards is on the way."
-    />
-  );
+  return <StockTransfersWorkspace />;
 }
