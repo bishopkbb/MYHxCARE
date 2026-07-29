@@ -26,7 +26,7 @@ import { StatCard } from '@components/shared/StatCard';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
-import { formatCurrency } from '@/utils/currency';
+import { formatCurrency, formatCurrencyCompact } from '@/utils/currency';
 import { formatDate } from '@/utils/datetime';
 import { downloadCSV } from '@/utils/export';
 import {
@@ -388,8 +388,8 @@ export function DrugInventoryWorkspace() {
           <StatCard
             icon={Banknote}
             label="Total Stock Value"
-            value={formatCurrency(totalStockValue)}
-            info="Total inventory value"
+            value={formatCurrencyCompact(totalStockValue)}
+            info={formatCurrency(totalStockValue)}
             accent="#16A34A"
             iconBg="rgba(22,163,74,0.1)"
           />
@@ -539,7 +539,7 @@ export function DrugInventoryWorkspace() {
                   Inventory List ({filtered.length})
                 </h2>
                 <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 1360 }}>
+                  <div style={{ minWidth: 1400 }}>
                     <div
                       className="flex rounded-t-[8px]"
                       style={{
@@ -595,7 +595,7 @@ export function DrugInventoryWorkspace() {
                           Expiry Date
                         </span>
                       </div>
-                      <div className="w-28 shrink-0 py-2.5 pr-2 text-right">
+                      <div className="w-32 shrink-0 py-2.5 pr-4 text-right">
                         <span
                           className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -603,7 +603,7 @@ export function DrugInventoryWorkspace() {
                           Stock Qty
                         </span>
                       </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2">
+                      <div className="w-40 shrink-0 py-2.5 pr-2 pl-3">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -690,7 +690,7 @@ export function DrugInventoryWorkspace() {
                               {formatDate(row.expiryDate)}
                             </p>
                           </div>
-                          <div className="w-28 shrink-0 py-3 pr-2 text-right">
+                          <div className="w-32 shrink-0 py-3 pr-4 text-right">
                             <p
                               className="font-sans font-medium"
                               style={{ fontSize: 14, color: '#0D2630' }}
@@ -699,7 +699,7 @@ export function DrugInventoryWorkspace() {
                             </p>
                             <p style={{ fontSize: 14, color: '#8A98A3' }}>{row.unit}s</p>
                           </div>
-                          <div className="w-40 shrink-0 py-3 pr-2">
+                          <div className="w-40 shrink-0 py-3 pr-2 pl-3">
                             <span
                               className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
                               style={{

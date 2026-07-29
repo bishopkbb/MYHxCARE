@@ -5,12 +5,28 @@ const numberFmt = new Intl.NumberFormat('en', {
   maximumFractionDigits: 2,
 });
 
+const compactNumberFmt = new Intl.NumberFormat('en', {
+  notation: 'compact',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+
 /**
  * Formats a naira amount for display, e.g. 1234.5 → "₦1,234.50".
  * Amounts are always naira — never kobo.
  */
 export function formatCurrency(amount: number): string {
   return `${CURRENCY_SYMBOL}${numberFmt.format(amount)}`;
+}
+
+/**
+ * Formats a naira amount compactly for tight spaces like stat cards,
+ * e.g. 46970475 → "₦46.97M". Falls back to the full amount below 100,000,
+ * where compact notation wouldn't actually save space.
+ */
+export function formatCurrencyCompact(amount: number): string {
+  if (Math.abs(amount) < 100_000) return formatCurrency(amount);
+  return `${CURRENCY_SYMBOL}${compactNumberFmt.format(amount)}`;
 }
 
 /**
