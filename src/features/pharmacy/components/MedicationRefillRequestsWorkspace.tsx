@@ -36,6 +36,8 @@ import {
 import {
   approveRefillRequest,
   denyRefillRequest,
+  reconsiderRefillRequest,
+  revokeRefillApproval,
   useRefillRequests,
 } from '@/features/pharmacy/store/refillRequestStore';
 
@@ -79,11 +81,17 @@ function RowMenu({
   onView,
   onApprove,
   onDeny,
+  onRevoke,
+  onReconsider,
+  onViewLinkedRx,
 }: {
   req: RefillRequest;
   onView: () => void;
   onApprove: () => void;
   onDeny: () => void;
+  onRevoke: () => void;
+  onReconsider: () => void;
+  onViewLinkedRx: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -99,7 +107,7 @@ function RowMenu({
       >
         <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
       </button>
-      <RowMenuPortal open={open} anchorRef={buttonRef} onClose={() => setOpen(false)} width={200}>
+      <RowMenuPortal open={open} anchorRef={buttonRef} onClose={() => setOpen(false)} width={220}>
         <button
           type="button"
           onClick={() => {
@@ -111,6 +119,19 @@ function RowMenu({
         >
           View Patient Profile
         </button>
+        {req.linkedRxNo && (
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              onViewLinkedRx();
+            }}
+            className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+            style={{ fontSize: 14, color: '#2F3A40' }}
+          >
+            View Linked Prescription
+          </button>
+        )}
         {req.status === 'Pending Review' && (
           <PermissionGate permission={PERMISSIONS.PHARMACY_DISPENSE}>
             <button
@@ -134,6 +155,36 @@ function RowMenu({
               style={{ fontSize: 14, color: '#DC2626' }}
             >
               Deny Request
+            </button>
+          </PermissionGate>
+        )}
+        {req.status === 'Approved' && (
+          <PermissionGate permission={PERMISSIONS.PHARMACY_DISPENSE}>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onRevoke();
+              }}
+              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(220,38,38,0.06)]"
+              style={{ fontSize: 14, color: '#DC2626' }}
+            >
+              Revoke Approval
+            </button>
+          </PermissionGate>
+        )}
+        {req.status === 'Denied' && (
+          <PermissionGate permission={PERMISSIONS.PHARMACY_DISPENSE}>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onReconsider();
+              }}
+              className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)]"
+              style={{ fontSize: 14, color: '#00B4D8' }}
+            >
+              Reconsider Request
             </button>
           </PermissionGate>
         )}
@@ -233,8 +284,22 @@ export function MedicationRefillRequestsWorkspace() {
     toast.info('Refill denied', `${req.id} has been denied.`);
   }
 
+  function handleRevoke(req: RefillRequest) {
+    revokeRefillApproval(req.id);
+    toast.info('Approval revoked', `${req.id} is back to Pending Review.`);
+  }
+
+  function handleReconsider(req: RefillRequest) {
+    reconsiderRefillRequest(req.id);
+    toast.info('Request reopened', `${req.id} is back to Pending Review.`);
+  }
+
   function viewPatient(patientId: string) {
     router.push(`/patients/${patientId}`);
+  }
+
+  function viewLinkedRx(rxNo: string) {
+    router.push(`${ROUTES.pharmacyPrescriptionDetails}?rx=${rxNo}`);
   }
 
   return (
@@ -621,6 +686,11 @@ export function MedicationRefillRequestsWorkspace() {
                               onView={() => viewPatient(request.patientId)}
                               onApprove={() => handleApprove(request)}
                               onDeny={() => handleDeny(request)}
+                              onRevoke={() => handleRevoke(request)}
+                              onReconsider={() => handleReconsider(request)}
+                              onViewLinkedRx={() =>
+                                request.linkedRxNo && viewLinkedRx(request.linkedRxNo)
+                              }
                             />
                           </div>
                         </div>

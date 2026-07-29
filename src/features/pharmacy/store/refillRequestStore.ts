@@ -23,6 +23,7 @@ import {
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
 import {
   addManualQueueEntry,
+  cancelPrescription,
   isQueueEntryDispensed,
   subscribe as subscribeToQueue,
 } from '@/features/pharmacy/store/pharmacyDispensingStore';
@@ -105,6 +106,37 @@ export function denyRefillRequest(id: string, reason?: string): void {
       ? { ...r, status: 'Denied', reviewedAt: now, ...(reason ? { reviewNote: reason } : {}) }
       : r,
   );
+  emit();
+}
+
+/** Undoes an approval — cancels the real prescription it created (so it
+ * doesn't sit orphaned in the queue) and returns the request to Pending
+ * Review. Only valid while still Approved (not once actually dispensed). */
+export function revokeRefillApproval(id: string): void {
+  const idx = requests.findIndex((r) => r.id === id);
+  if (idx === -1) return;
+  const req = requests[idx]!;
+  if (req.status !== 'Approved') return;
+  if (req.linkedRxNo) cancelPrescription(req.linkedRxNo);
+  const { linkedRxNo, reviewedAt, reviewNote, ...rest } = req;
+  void linkedRxNo;
+  void reviewedAt;
+  void reviewNote;
+  requests = requests.map((r, i) => (i === idx ? { ...rest, status: 'Pending Review' } : r));
+  emit();
+}
+
+/** Reopens a denied request for another look — a pharmacist correcting a
+ * mistaken denial, without having to recreate the request from scratch. */
+export function reconsiderRefillRequest(id: string): void {
+  const idx = requests.findIndex((r) => r.id === id);
+  if (idx === -1) return;
+  const req = requests[idx]!;
+  if (req.status !== 'Denied') return;
+  const { reviewedAt, reviewNote, ...rest } = req;
+  void reviewedAt;
+  void reviewNote;
+  requests = requests.map((r, i) => (i === idx ? { ...rest, status: 'Pending Review' } : r));
   emit();
 }
 
