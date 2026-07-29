@@ -2151,6 +2151,159 @@ export function getTransferItemCount(t: StockTransfer): number {
   return t.items.reduce((sum, i) => sum + i.qty, 0);
 }
 
+// ── Stock Adjustments ─────────────────────────────────────────────────────────
+// Corrections to on-hand quantity for reasons other than a receipt or
+// transfer — a physical count, an expiry write-off, damage, a patient
+// return, or fixing a data-entry mistake. Confirming an adjustment
+// (stockAdjustmentStore.ts) calls inventoryStore.ts's adjustStockQty() on the
+// real batch — the number here becomes the number Drug Inventory shows, not
+// a parallel ledger.
+
+export type AdjustmentType = 'Increase' | 'Decrease';
+
+export type AdjustmentReason =
+  | 'Expired Items'
+  | 'Stock Count Adjustment'
+  | 'Damaged Items'
+  | 'Received (Unrecorded)'
+  | 'Patient Return'
+  | 'Correction of Entry Error'
+  | 'Spillage'
+  | 'Others';
+
+export const ADJUSTMENT_REASON_OPTIONS: SelectOption[] = [
+  { value: 'Expired Items', label: 'Expired Items' },
+  { value: 'Stock Count Adjustment', label: 'Stock Count Adjustment' },
+  { value: 'Damaged Items', label: 'Damaged Items' },
+  { value: 'Received (Unrecorded)', label: 'Received (Unrecorded)' },
+  { value: 'Patient Return', label: 'Patient Return' },
+  { value: 'Correction of Entry Error', label: 'Correction of Entry Error' },
+  { value: 'Spillage', label: 'Spillage' },
+  { value: 'Others', label: 'Others' },
+];
+
+export const ADJUSTMENT_TYPE_OPTIONS: SelectOption[] = [
+  { value: 'Increase', label: 'Increase' },
+  { value: 'Decrease', label: 'Decrease' },
+];
+
+export type StockAdjustmentItem = {
+  medicationName: string;
+  strength: string;
+  form: string;
+  unit: string;
+  batchNo: string;
+  /** Always positive — direction comes from the adjustment's own type. */
+  qty: number;
+  unitPrice: number;
+};
+
+export type StockAdjustment = {
+  id: string; // ADJ-2026-00042
+  locationId: PharmacyLocationId;
+  adjustmentType: AdjustmentType;
+  reason: AdjustmentReason;
+  items: StockAdjustmentItem[];
+  adjustedBy: string;
+  adjustedAt: string; // ISO
+  referenceNo?: string;
+  notes?: string;
+};
+
+function adjustmentId(n: number): string {
+  return `ADJ-${new Date().getFullYear()}-${String(n).padStart(5, '0')}`;
+}
+
+const REASON_PREFIX: Record<AdjustmentReason, string> = {
+  'Expired Items': 'EXP',
+  'Stock Count Adjustment': 'SCA',
+  'Damaged Items': 'DAM',
+  'Received (Unrecorded)': 'RCV',
+  'Patient Return': 'RET',
+  'Correction of Entry Error': 'COR',
+  Spillage: 'SPG',
+  Others: 'OTH',
+};
+
+function buildAdjustmentItems(
+  startIdx: number,
+  count: number,
+  maxQty: number,
+): StockAdjustmentItem[] {
+  return Array.from({ length: count }, (_, i) => {
+    const pick = TRANSFER_ITEM_POOL[(startIdx + i) % TRANSFER_ITEM_POOL.length]!;
+    const entry = getCatalogEntry(pick.name)!;
+    return {
+      medicationName: entry.name,
+      strength: entry.strength,
+      form: entry.form,
+      unit: entry.unit,
+      batchNo: `${pick.batchPrefix}${2500 + ((startIdx + i * 3) % 30)}`,
+      qty: 1 + ((startIdx + i * 7) % maxQty),
+      unitPrice: entry.unitPrice,
+    };
+  });
+}
+
+/** 42 adjustments — 12 Expired, 10 Stock Count, 6 Damaged, 4 Patient Return,
+ * 3 Spillage, and 7 more (Received Unrecorded/Correction/Others) that the
+ * Adjustment Reasons donut folds into "Others". */
+export const STOCK_ADJUSTMENTS_SEED: StockAdjustment[] = (() => {
+  const rows: StockAdjustment[] = [];
+  let seq = 42;
+
+  function push(
+    reason: AdjustmentReason,
+    adjustmentType: AdjustmentType,
+    daysAgo: number,
+    itemCount: number,
+  ) {
+    const locationId = PHARMACY_LOCATIONS[seq % PHARMACY_LOCATIONS.length]!.id;
+    const adjustedBy = TRANSFER_REQUESTERS[seq % TRANSFER_REQUESTERS.length]!;
+    const adjustedAt = pastDateAt(daysAgo, 8 + (seq % 10), (seq * 11) % 60);
+    const items = buildAdjustmentItems(seq, itemCount, 40);
+    const prefix = REASON_PREFIX[reason];
+    rows.push({
+      id: adjustmentId(seq),
+      locationId,
+      adjustmentType,
+      reason,
+      items,
+      adjustedBy,
+      adjustedAt,
+      referenceNo: `${prefix}-${String(6 + (seq % 24)).padStart(2, '0')}${String(1 + (seq % 28)).padStart(2, '0')}-${String(seq).padStart(3, '0')}`,
+    });
+    seq -= 1;
+  }
+
+  for (let i = 0; i < 12; i++) push('Expired Items', 'Decrease', i % 60, 2 + (i % 6));
+  for (let i = 0; i < 10; i++) {
+    push('Stock Count Adjustment', i % 2 === 0 ? 'Increase' : 'Decrease', i % 45, 3 + (i % 8));
+  }
+  for (let i = 0; i < 6; i++) push('Damaged Items', 'Decrease', i % 50, 2 + (i % 5));
+  for (let i = 0; i < 4; i++) push('Patient Return', 'Increase', i % 40, 1 + (i % 4));
+  for (let i = 0; i < 3; i++) push('Spillage', 'Decrease', i % 35, 1 + (i % 3));
+  for (let i = 0; i < 3; i++) push('Received (Unrecorded)', 'Increase', i % 30, 2 + (i % 6));
+  for (let i = 0; i < 2; i++) {
+    push('Correction of Entry Error', i % 2 === 0 ? 'Increase' : 'Decrease', i % 20, 1 + (i % 3));
+  }
+  for (let i = 0; i < 2; i++)
+    push('Others', i % 2 === 0 ? 'Increase' : 'Decrease', i % 15, 1 + (i % 3));
+
+  return rows.sort((a, b) => new Date(b.adjustedAt).getTime() - new Date(a.adjustedAt).getTime());
+})();
+
+export function getAdjustmentQty(a: StockAdjustment): number {
+  return a.items.reduce((sum, i) => sum + i.qty, 0);
+}
+
+/** Positive for an Increase, negative for a Decrease — so summing this
+ * across a set of adjustments gives an honest net value impact. */
+export function getAdjustmentValueImpact(a: StockAdjustment): number {
+  const raw = a.items.reduce((sum, i) => sum + i.qty * i.unitPrice, 0);
+  return a.adjustmentType === 'Increase' ? raw : -raw;
+}
+
 // ── Safety alerts ─────────────────────────────────────────────────────────────
 
 export const SAFETY_ALERT_COUNTS = {

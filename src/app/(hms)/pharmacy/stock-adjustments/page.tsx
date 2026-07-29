@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Stock Adjustments' };
+import { StockAdjustmentsWorkspace } from '@/features/pharmacy/components/StockAdjustmentsWorkspace';
 
 export default function StockAdjustmentsPage() {
-  return (
-    <ComingSoon
-      title="Stock Adjustments"
-      description="Recording stock corrections — damage, loss, count discrepancies — with a full audit trail is on the way."
-    />
-  );
+  return <StockAdjustmentsWorkspace />;
 }

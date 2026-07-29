@@ -1081,6 +1081,31 @@ const MEDICATION_REFILL_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const STOCK_ADJUSTMENTS_GUIDE: HelpGuide = {
+  id: 'stock-adjustments',
+  title: 'Stock Adjustments',
+  intro:
+    'Correct stock quantities due to a physical count, damage, expiry, or another documented reason.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Increase and Decrease are clickable — each filters the table to that adjustment type. The rest summarize this month’s activity.',
+    },
+    {
+      heading: 'Recording an adjustment',
+      body: 'New Adjustment picks items from the chosen location’s actual tracked stock. A Decrease can never exceed what’s really on hand there. Confirming applies the change straight to Drug Inventory.',
+    },
+    {
+      heading: 'Reasons',
+      body: 'Expired Items, Damaged Items, and Spillage are always write-offs. Stock Count Adjustment, Received (Unrecorded), Patient Return, and Correction of Entry Error can go either direction.',
+    },
+    {
+      heading: 'Adjustment Reasons and Value Impact',
+      body: 'The donut chart breaks every adjustment down by reason. Value Impact shows this month’s total increase, decrease, and net effect on inventory value.',
+    },
+  ],
+};
+
 const STOCK_TRANSFERS_GUIDE: HelpGuide = {
   id: 'stock-transfers',
   title: 'Stock Transfers',
@@ -2331,6 +2356,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;
   if (pathname.startsWith('/pharmacy/transfers')) return STOCK_TRANSFERS_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-receiving')) return STOCK_RECEIVING_GUIDE;
   if (pathname.startsWith('/pharmacy/inventory')) return DRUG_INVENTORY_GUIDE;

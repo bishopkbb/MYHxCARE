@@ -20,12 +20,12 @@ export function formatCurrency(amount: number): string {
 }
 
 /**
- * Formats a naira amount compactly for tight spaces like stat cards,
- * e.g. 46970475 → "₦46.97M". Falls back to the full amount below 100,000,
- * where compact notation wouldn't actually save space.
+ * Formats a naira amount compactly for tight spaces like stat cards, e.g.
+ * 46970475 → "₦46.97M", 66654 → "₦66.65K". Falls back to the full amount
+ * only below 1,000, where compact notation wouldn't actually save space.
  */
 export function formatCurrencyCompact(amount: number): string {
-  if (Math.abs(amount) < 100_000) return formatCurrency(amount);
+  if (Math.abs(amount) < 1_000) return formatCurrency(amount);
   return `${CURRENCY_SYMBOL}${compactNumberFmt.format(amount)}`;
 }
 

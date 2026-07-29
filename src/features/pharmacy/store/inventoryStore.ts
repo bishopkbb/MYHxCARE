@@ -74,6 +74,13 @@ export function getBatchesAtLocation(locationId: PharmacyLocationId): InventoryB
   return batches.filter((b) => b.locationId === locationId && b.stockQty > 0);
 }
 
+/** Every batch tracked at one location, including ones already at zero —
+ * stockAdjustmentStore.ts's New Adjustment picker needs zero-stock batches
+ * too (e.g. correcting an under-recorded receipt back up from 0). */
+export function getAllBatchesAtLocation(locationId: PharmacyLocationId): InventoryBatchRow[] {
+  return batches.filter((b) => b.locationId === locationId);
+}
+
 /** Moves real stock between two locations — decrements the matching batch at
  * the source (never below what's actually on hand) and credits the same
  * batch at the destination, creating it there if this is the first time that
