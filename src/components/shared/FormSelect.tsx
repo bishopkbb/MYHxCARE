@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { cn } from '@lib/utils';
+import { Tooltip } from '@components/shared/Tooltip';
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
 
 /**
@@ -74,7 +75,9 @@ export function FormSelect({
           color: selected ? '#0D2630' : '#8A98A3',
         }}
       >
-        <span className="truncate">{selected?.label ?? placeholder}</span>
+        <Tooltip content={selected?.label ?? placeholder}>
+          <span className="truncate">{selected?.label ?? placeholder}</span>
+        </Tooltip>
         <ChevronDown
           className="shrink-0"
           style={{

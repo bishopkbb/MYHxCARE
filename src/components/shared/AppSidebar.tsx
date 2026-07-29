@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import { resolveWorkspace } from '@/types/auth.types';
 import { WORKSPACE_NAV } from '@/config/workspaces';
 import type { NavItem } from '@/config/workspaces';
+import { Tooltip } from '@components/shared/Tooltip';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { useAuth } from '@hooks/useAuth';
 import { usePermissions } from '@hooks/usePermissions';
@@ -249,15 +250,19 @@ export function AppSidebar({
 
             {/* Brand text — always visible on mobile; hidden on desktop when collapsed */}
             <div className={cn('min-w-0 flex-1', collapsed && 'lg:hidden')}>
-              <p className="font-display truncate text-[17px] leading-6 font-semibold text-white lg:text-[20px] lg:leading-7">
-                MyHxCare HMS
-              </p>
-              <p
-                className="text-sm leading-5 lg:truncate lg:leading-5.5"
-                style={{ color: '#0098CC' }}
-              >
-                UNIZIK Medical Centre
-              </p>
+              <Tooltip content={`MyHxCare HMS`}>
+                <p className="font-display truncate text-[17px] leading-6 font-semibold text-white lg:text-[20px] lg:leading-7">
+                  MyHxCare HMS
+                </p>
+              </Tooltip>
+              <Tooltip content={`UNIZIK Medical Centre`}>
+                <p
+                  className="text-sm leading-5 lg:truncate lg:leading-5.5"
+                  style={{ color: '#0098CC' }}
+                >
+                  UNIZIK Medical Centre
+                </p>
+              </Tooltip>
             </div>
 
             {/* Mobile: X close button — hidden on desktop */}
@@ -283,10 +288,14 @@ export function AppSidebar({
             >
               <UserAvatar initials={getInitials(user?.name ?? '')} size={50} />
               <div className="min-w-0">
-                <p className="truncate text-base leading-6 text-white">{user?.name ?? '—'}</p>
-                <p className="truncate text-sm leading-5" style={{ color: '#0098CC' }}>
-                  {user?.role ?? ''}
-                </p>
+                <Tooltip content={user?.name ?? '—'}>
+                  <p className="truncate text-base leading-6 text-white">{user?.name ?? '—'}</p>
+                </Tooltip>
+                <Tooltip content={user?.role ?? ''}>
+                  <p className="truncate text-sm leading-5" style={{ color: '#0098CC' }}>
+                    {user?.role ?? ''}
+                  </p>
+                </Tooltip>
               </div>
             </div>
           </div>
@@ -409,9 +418,11 @@ function SidebarNavItem({ item, active, collapsed }: SidebarNavItemProps) {
         )}
 
         {/* Label — always visible on mobile; hidden on desktop when collapsed */}
-        <span className={cn('flex-1 truncate text-base leading-6', collapsed && 'lg:hidden')}>
-          {item.label}
-        </span>
+        <Tooltip content={item.label}>
+          <span className={cn('flex-1 truncate text-base leading-6', collapsed && 'lg:hidden')}>
+            {item.label}
+          </span>
+        </Tooltip>
 
         {/* Badge — always visible on mobile; hidden on desktop when collapsed */}
         {item.badge !== undefined && (
