@@ -25,6 +25,7 @@ import { useEffect, useState } from 'react';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -260,17 +261,18 @@ function ObservationTrendChart({
         </svg>
         <div className="absolute inset-x-0 bottom-0 flex" style={{ height: 20 }}>
           {xLabelIdx.map((i, idx) => (
-            <span
-              key={i}
-              className="min-w-0 flex-1 truncate font-sans"
-              style={{
-                fontSize: 14,
-                color: '#8A98A3',
-                textAlign: idx === 0 ? 'left' : idx === xLabelIdx.length - 1 ? 'right' : 'center',
-              }}
-            >
-              {primary?.data[i]?.label}
-            </span>
+            <Tooltip key={i} content={primary?.data[i]?.label}>
+              <span
+                className="min-w-0 flex-1 truncate font-sans"
+                style={{
+                  fontSize: 14,
+                  color: '#8A98A3',
+                  textAlign: idx === 0 ? 'left' : idx === xLabelIdx.length - 1 ? 'right' : 'center',
+                }}
+              >
+                {primary?.data[i]?.label}
+              </span>
+            </Tooltip>
           ))}
         </div>
       </div>
@@ -342,17 +344,19 @@ function ObservationBarChart({ data, color }: { data: ChartPoint[]; color: strin
         </div>
         <div className="absolute inset-x-0 bottom-0 flex" style={{ height: 20 }}>
           {barLabelIdx.map((i, idx) => (
-            <span
-              key={i}
-              className="min-w-0 flex-1 truncate font-sans"
-              style={{
-                fontSize: 14,
-                color: '#8A98A3',
-                textAlign: idx === 0 ? 'left' : idx === barLabelIdx.length - 1 ? 'right' : 'center',
-              }}
-            >
-              {data[i]?.label}
-            </span>
+            <Tooltip key={i} content={data[i]?.label}>
+              <span
+                className="min-w-0 flex-1 truncate font-sans"
+                style={{
+                  fontSize: 14,
+                  color: '#8A98A3',
+                  textAlign:
+                    idx === 0 ? 'left' : idx === barLabelIdx.length - 1 ? 'right' : 'center',
+                }}
+              >
+                {data[i]?.label}
+              </span>
+            </Tooltip>
           ))}
         </div>
       </div>
@@ -1380,9 +1384,11 @@ function PatientObservationPanel({
                       <div key={label} className="flex items-center justify-between gap-2">
                         <div className="flex min-w-0 items-center gap-2">
                           <Icon style={{ width: 15, height: 15, color, flexShrink: 0 }} />
-                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {label}
-                          </span>
+                          <Tooltip content={label}>
+                            <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {label}
+                            </span>
+                          </Tooltip>
                         </div>
                         <div className="shrink-0 text-right">
                           <p

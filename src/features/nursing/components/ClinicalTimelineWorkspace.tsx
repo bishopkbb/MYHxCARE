@@ -28,6 +28,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { ROUTES } from '@/constants/routes';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
@@ -667,12 +668,14 @@ function PatientClinicalTimelinePanel({
                               </span>
                             </div>
                             <div className="min-w-0 flex-1 py-3 pr-2">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {event.title}
-                              </p>
+                              <Tooltip content={event.title}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {event.title}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-40 shrink-0 py-3 pr-2">
                               <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -683,9 +686,11 @@ function PatientClinicalTimelinePanel({
                               </p>
                             </div>
                             <div className="w-40 shrink-0 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {event.actor}
-                              </p>
+                              <Tooltip content={event.actor}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {event.actor}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="flex w-28 shrink-0 justify-end py-3 pr-4">
                               <button
@@ -771,12 +776,14 @@ function PatientClinicalTimelinePanel({
                             <div className="flex min-w-0 items-center gap-1.5">
                               <UserRound style={{ width: 14, height: 14, color: '#8A98A3' }} />
                               <div className="min-w-0">
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {event.actor}
-                                </p>
+                                <Tooltip content={event.actor}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {event.actor}
+                                  </p>
+                                </Tooltip>
                                 <p style={{ fontSize: 14, color: '#8A98A3' }}>{event.actorRole}</p>
                               </div>
                             </div>
@@ -964,7 +971,9 @@ function PatientClinicalTimelinePanel({
                       style={{ fontSize: 14, color: '#0D2630' }}
                     >
                       <action.icon style={{ width: 16, height: 16, color: '#00B4D8' }} />
-                      <span className="min-w-0 flex-1 truncate">{action.label}</span>
+                      <Tooltip content={action.label}>
+                        <span className="min-w-0 flex-1 truncate">{action.label}</span>
+                      </Tooltip>
                       <ChevronRight style={{ width: 14, height: 14, color: '#8A98A3' }} />
                     </button>
                   ))}

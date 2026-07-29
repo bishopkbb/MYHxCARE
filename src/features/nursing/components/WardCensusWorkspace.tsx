@@ -22,6 +22,7 @@ import {
   useClaimedPatients,
 } from '@/features/nursing/store/nursingWorkflowStore';
 import type { NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
+import { Tooltip } from '@components/shared/Tooltip';
 import {
   ACUITY_CFG,
   BED_STATUS_CFG,
@@ -376,9 +377,11 @@ export function WardCensusWorkspace() {
                           >
                             <s.icon style={{ width: 18, height: 18, color: s.color }} />
                           </div>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {s.label}
-                          </p>
+                          <Tooltip content={s.label}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {s.label}
+                            </p>
+                          </Tooltip>
                         </div>
                         <p
                           className="font-display mt-2 font-semibold"
@@ -596,18 +599,17 @@ export function WardCensusWorkspace() {
                                   </span>
                                 </div>
                                 <div className="min-w-[200px] flex-1 py-3 pr-1.5">
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {bed.patientName ?? '—'}
-                                  </p>
-                                  {(bed.mrn ?? bed.admittedAt) && (
+                                  <Tooltip content={bed.patientName ?? '—'}>
                                     <p
                                       className="truncate"
-                                      style={{ fontSize: 14, color: '#8A98A3' }}
+                                      style={{ fontSize: 14, color: '#0D2630' }}
                                     >
-                                      {[
+                                      {bed.patientName ?? '—'}
+                                    </p>
+                                  </Tooltip>
+                                  {(bed.mrn ?? bed.admittedAt) && (
+                                    <Tooltip
+                                      content={[
                                         bed.mrn,
                                         bed.admittedAt
                                           ? `Admitted ${formatDate(bed.admittedAt)}`
@@ -615,16 +617,32 @@ export function WardCensusWorkspace() {
                                       ]
                                         .filter(Boolean)
                                         .join(' · ')}
-                                    </p>
+                                    >
+                                      <p
+                                        className="truncate"
+                                        style={{ fontSize: 14, color: '#8A98A3' }}
+                                      >
+                                        {[
+                                          bed.mrn,
+                                          bed.admittedAt
+                                            ? `Admitted ${formatDate(bed.admittedAt)}`
+                                            : null,
+                                        ]
+                                          .filter(Boolean)
+                                          .join(' · ')}
+                                      </p>
+                                    </Tooltip>
                                   )}
                                 </div>
                                 <div className="w-36 shrink-0 py-3 pr-1.5">
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {bed.doctorName ?? '—'}
-                                  </p>
+                                  <Tooltip content={bed.doctorName ?? '—'}>
+                                    <p
+                                      className="truncate"
+                                      style={{ fontSize: 14, color: '#4A7080' }}
+                                    >
+                                      {bed.doctorName ?? '—'}
+                                    </p>
+                                  </Tooltip>
                                 </div>
                                 <div className="w-24 shrink-0 py-3 pr-1.5">
                                   {bed.acuity ? (
@@ -956,9 +974,11 @@ function FacilityOccupancyDonut({
           <div key={d.label} className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="size-2.5 shrink-0 rounded-full" style={{ background: d.color }} />
-              <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                {d.label}
-              </span>
+              <Tooltip content={d.label}>
+                <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  {d.label}
+                </span>
+              </Tooltip>
             </div>
             <span
               className="shrink-0 font-sans font-medium"

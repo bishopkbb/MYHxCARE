@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { FilterDropdown } from '@components/shared/FilterDropdown';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -391,9 +392,11 @@ export function MyPatientsWorkspace() {
                           >
                             <s.icon style={{ width: 17, height: 17, color: s.color }} />
                           </div>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {s.label}
-                          </p>
+                          <Tooltip content={s.label}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {s.label}
+                            </p>
+                          </Tooltip>
                         </div>
                         <p
                           className="font-display mt-2 font-semibold"
@@ -577,12 +580,14 @@ export function MyPatientsWorkspace() {
                                     {p.initials}
                                   </div>
                                   <div className="min-w-0">
-                                    <p
-                                      className="font-display truncate font-semibold"
-                                      style={{ fontSize: 16, color: '#0D2630' }}
-                                    >
-                                      {p.patientName}
-                                    </p>
+                                    <Tooltip content={p.patientName}>
+                                      <p
+                                        className="font-display truncate font-semibold"
+                                        style={{ fontSize: 16, color: '#0D2630' }}
+                                      >
+                                        {p.patientName}
+                                      </p>
+                                    </Tooltip>
                                     <p style={{ fontSize: 14, color: '#8A98A3' }}>
                                       <span style={{ color: '#00B4D8' }}>{p.mrn}</span> · {p.age} Y
                                       / {p.gender[0]}
@@ -649,12 +654,14 @@ export function MyPatientsWorkspace() {
                                           Latest Vitals
                                         </span>
                                       </div>
-                                      <p
-                                        className="truncate font-sans font-medium"
-                                        style={{ fontSize: 14, color: '#0D2630' }}
-                                      >
-                                        BP {p.vitals.bp}
-                                      </p>
+                                      <Tooltip content={`BP ${p.vitals.bp}`}>
+                                        <p
+                                          className="truncate font-sans font-medium"
+                                          style={{ fontSize: 14, color: '#0D2630' }}
+                                        >
+                                          BP {p.vitals.bp}
+                                        </p>
+                                      </Tooltip>
                                       <p style={{ fontSize: 14, color: '#4A7080' }}>
                                         HR {p.vitals.hr} · {p.vitals.temp}°C
                                       </p>
@@ -666,12 +673,14 @@ export function MyPatientsWorkspace() {
                                           Next Medication
                                         </span>
                                       </div>
-                                      <p
-                                        className="truncate font-sans font-medium"
-                                        style={{ fontSize: 14, color: '#0D2630' }}
-                                      >
-                                        {p.nextMedication}
-                                      </p>
+                                      <Tooltip content={p.nextMedication}>
+                                        <p
+                                          className="truncate font-sans font-medium"
+                                          style={{ fontSize: 14, color: '#0D2630' }}
+                                        >
+                                          {p.nextMedication}
+                                        </p>
+                                      </Tooltip>
                                       <p style={{ fontSize: 14, color: '#4A7080' }}>
                                         {formatTime(p.nextMedicationTime)}
                                       </p>
@@ -806,46 +815,56 @@ export function MyPatientsWorkspace() {
                                     {p.initials}
                                   </div>
                                   <div className="min-w-0">
-                                    <p
-                                      className="truncate font-sans font-medium"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {p.patientName}
-                                    </p>
-                                    <p
-                                      className="truncate"
-                                      style={{ fontSize: 14, color: '#00B4D8' }}
-                                    >
-                                      {p.mrn}
-                                    </p>
+                                    <Tooltip content={p.patientName}>
+                                      <p
+                                        className="truncate font-sans font-medium"
+                                        style={{ fontSize: 14, color: '#0D2630' }}
+                                      >
+                                        {p.patientName}
+                                      </p>
+                                    </Tooltip>
+                                    <Tooltip content={p.mrn}>
+                                      <p
+                                        className="truncate"
+                                        style={{ fontSize: 14, color: '#00B4D8' }}
+                                      >
+                                        {p.mrn}
+                                      </p>
+                                    </Tooltip>
                                   </div>
                                 </div>
                                 <div className="w-28 shrink-0 py-3 pr-2">
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {p.ward}
-                                  </p>
+                                  <Tooltip content={p.ward}>
+                                    <p
+                                      className="truncate"
+                                      style={{ fontSize: 14, color: '#4A7080' }}
+                                    >
+                                      {p.ward}
+                                    </p>
+                                  </Tooltip>
                                 </div>
                                 <div className="w-20 shrink-0 py-3 pr-2">
                                   <p style={{ fontSize: 14, color: '#4A7080' }}>{p.bed}</p>
                                 </div>
                                 <div className="w-40 shrink-0 py-3 pr-2">
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {p.diagnosis}
-                                  </p>
+                                  <Tooltip content={p.diagnosis}>
+                                    <p
+                                      className="truncate"
+                                      style={{ fontSize: 14, color: '#4A7080' }}
+                                    >
+                                      {p.diagnosis}
+                                    </p>
+                                  </Tooltip>
                                 </div>
                                 <div className="w-36 shrink-0 py-3 pr-2">
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {p.doctorName}
-                                  </p>
+                                  <Tooltip content={p.doctorName}>
+                                    <p
+                                      className="truncate"
+                                      style={{ fontSize: 14, color: '#4A7080' }}
+                                    >
+                                      {p.doctorName}
+                                    </p>
+                                  </Tooltip>
                                 </div>
                                 <div className="w-36 shrink-0 py-3 pr-2">
                                   {p.isPreAdmission ? (
@@ -862,12 +881,20 @@ export function MyPatientsWorkspace() {
                                   )}
                                 </div>
                                 <div className="w-44 shrink-0 py-3 pr-2">
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  <Tooltip
+                                    content={
+                                      p.isPreAdmission ? 'Pending doctor review' : p.nextMedication
+                                    }
                                   >
-                                    {p.isPreAdmission ? 'Pending doctor review' : p.nextMedication}
-                                  </p>
+                                    <p
+                                      className="truncate font-sans font-medium"
+                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                    >
+                                      {p.isPreAdmission
+                                        ? 'Pending doctor review'
+                                        : p.nextMedication}
+                                    </p>
+                                  </Tooltip>
                                   {!p.isPreAdmission && (
                                     <p style={{ fontSize: 14, color: '#8A98A3' }}>
                                       {formatTime(p.nextMedicationTime)}

@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { QuickActionTile } from '@components/shared/QuickActionTile';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -164,9 +165,11 @@ function WardCensusDonut({ animate }: { animate: boolean }) {
           <div key={d.label} className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="size-2.5 shrink-0 rounded-full" style={{ background: d.color }} />
-              <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                {d.label}
-              </span>
+              <Tooltip content={d.label}>
+                <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  {d.label}
+                </span>
+              </Tooltip>
             </div>
             <span
               className="shrink-0 font-sans font-medium"
@@ -323,9 +326,11 @@ export function NurseDashboardWorkspace() {
                             >
                               <s.icon style={{ width: 17, height: 17, color: s.color }} />
                             </div>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {s.label}
-                            </p>
+                            <Tooltip content={s.label}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {s.label}
+                              </p>
+                            </Tooltip>
                           </div>
                           <p
                             className="font-display mt-2 font-semibold"
@@ -451,15 +456,19 @@ export function NurseDashboardWorkspace() {
                               {p.initials}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {p.patientName}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {p.ward} · {p.bed}
-                              </p>
+                              <Tooltip content={p.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {p.patientName}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={`${p.ward} · ${p.bed}`}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {p.ward} · {p.bed}
+                                </p>
+                              </Tooltip>
                             </div>
                             <span
                               className="shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium"
@@ -534,15 +543,19 @@ export function NurseDashboardWorkspace() {
                             {formatTime(m.time)}
                           </p>
                           <div className="min-w-0 flex-1">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {m.patientName}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {m.medication}
-                            </p>
+                            <Tooltip content={m.patientName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {m.patientName}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={m.medication}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {m.medication}
+                              </p>
+                            </Tooltip>
                           </div>
                           <span
                             className="shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium"
@@ -630,9 +643,11 @@ export function NurseDashboardWorkspace() {
                               >
                                 {a.title}
                               </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {a.description}
-                              </p>
+                              <Tooltip content={a.description}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {a.description}
+                                </p>
+                              </Tooltip>
                             </div>
                             <p
                               className="shrink-0 whitespace-nowrap"
@@ -685,15 +700,19 @@ export function NurseDashboardWorkspace() {
                             {formatTime(a.time)}
                           </p>
                           <div className="min-w-0 flex-1">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {a.patientName}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {a.ward} · {a.bed}
-                            </p>
+                            <Tooltip content={a.patientName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {a.patientName}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={`${a.ward} · ${a.bed}`}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {a.ward} · {a.bed}
+                              </p>
+                            </Tooltip>
                           </div>
                           <span
                             className="shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium"
@@ -798,16 +817,18 @@ export function NurseDashboardWorkspace() {
                             >
                               {t.time}
                             </span>
-                            <span
-                              className="min-w-0 flex-1 truncate font-sans"
-                              style={{
-                                fontSize: 14,
-                                color: done ? '#8A98A3' : '#0D2630',
-                                textDecoration: done ? 'line-through' : undefined,
-                              }}
-                            >
-                              {t.label}
-                            </span>
+                            <Tooltip content={t.label}>
+                              <span
+                                className="min-w-0 flex-1 truncate font-sans"
+                                style={{
+                                  fontSize: 14,
+                                  color: done ? '#8A98A3' : '#0D2630',
+                                  textDecoration: done ? 'line-through' : undefined,
+                                }}
+                              >
+                                {t.label}
+                              </span>
+                            </Tooltip>
                           </label>
                         );
                       })}

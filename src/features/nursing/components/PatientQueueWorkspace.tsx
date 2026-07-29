@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { FormSelect } from '@components/shared/FormSelect';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -386,9 +387,11 @@ export function PatientQueueWorkspace() {
                             >
                               <s.icon style={{ width: 17, height: 17, color: s.color }} />
                             </div>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {s.label}
-                            </p>
+                            <Tooltip content={s.label}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {s.label}
+                              </p>
+                            </Tooltip>
                           </div>
                           <p
                             className="font-display mt-2 font-semibold"
@@ -555,40 +558,61 @@ export function PatientQueueWorkspace() {
                                   {task.initials}
                                 </div>
                                 <div className="min-w-0">
+                                  <Tooltip content={task.patientName}>
+                                    <p
+                                      className="truncate font-sans font-medium"
+                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                    >
+                                      {task.patientName}
+                                    </p>
+                                  </Tooltip>
+                                  <Tooltip content={task.mrn}>
+                                    <p
+                                      className="truncate"
+                                      style={{ fontSize: 14, color: '#00B4D8' }}
+                                    >
+                                      {task.mrn}
+                                    </p>
+                                  </Tooltip>
+                                </div>
+                              </div>
+                              <div className="w-36 shrink-0 py-3 pr-2">
+                                <Tooltip content={task.ward ?? task.department ?? '—'}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {task.ward ?? task.department ?? '—'}
+                                  </p>
+                                </Tooltip>
+                              </div>
+                              <div className="w-28 shrink-0 py-3 pr-2">
+                                <Tooltip content={task.bed ?? task.assignedClinic ?? '—'}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {task.bed ?? task.assignedClinic ?? '—'}
+                                  </p>
+                                </Tooltip>
+                              </div>
+                              <div className="w-44 shrink-0 py-3 pr-2">
+                                <Tooltip content={task.doctorName}>
                                   <p
                                     className="truncate font-sans font-medium"
                                     style={{ fontSize: 14, color: '#0D2630' }}
                                   >
-                                    {task.patientName}
+                                    {task.doctorName}
                                   </p>
+                                </Tooltip>
+                                <Tooltip content={task.doctorRole}>
                                   <p
                                     className="truncate"
-                                    style={{ fontSize: 14, color: '#00B4D8' }}
+                                    style={{ fontSize: 14, color: '#8A98A3' }}
                                   >
-                                    {task.mrn}
+                                    {task.doctorRole}
                                   </p>
-                                </div>
-                              </div>
-                              <div className="w-36 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {task.ward ?? task.department ?? '—'}
-                                </p>
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {task.bed ?? task.assignedClinic ?? '—'}
-                                </p>
-                              </div>
-                              <div className="w-44 shrink-0 py-3 pr-2">
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {task.doctorName}
-                                </p>
-                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                  {task.doctorRole}
-                                </p>
+                                </Tooltip>
                               </div>
                               <div className="flex w-52 shrink-0 items-center gap-2 py-3 pr-2">
                                 <div
@@ -600,18 +624,22 @@ export function PatientQueueWorkspace() {
                                   />
                                 </div>
                                 <div className="min-w-0">
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {task.taskType}
-                                  </p>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#8A98A3' }}
-                                  >
-                                    {task.taskDetail}
-                                  </p>
+                                  <Tooltip content={task.taskType}>
+                                    <p
+                                      className="truncate font-sans font-medium"
+                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                    >
+                                      {task.taskType}
+                                    </p>
+                                  </Tooltip>
+                                  <Tooltip content={task.taskDetail}>
+                                    <p
+                                      className="truncate"
+                                      style={{ fontSize: 14, color: '#8A98A3' }}
+                                    >
+                                      {task.taskDetail}
+                                    </p>
+                                  </Tooltip>
                                 </div>
                               </div>
                               <div className="w-28 shrink-0 py-3 pr-2">
@@ -621,15 +649,19 @@ export function PatientQueueWorkspace() {
                                 >
                                   {formatTime(task.dueTime)}
                                 </p>
-                                <p
-                                  className="truncate"
-                                  style={{
-                                    fontSize: 14,
-                                    color: task.overdue ? '#EF4444' : '#8A98A3',
-                                  }}
+                                <Tooltip
+                                  content={task.status === 'Completed' ? 'Done' : task.dueLabel}
                                 >
-                                  {task.status === 'Completed' ? 'Done' : task.dueLabel}
-                                </p>
+                                  <p
+                                    className="truncate"
+                                    style={{
+                                      fontSize: 14,
+                                      color: task.overdue ? '#EF4444' : '#8A98A3',
+                                    }}
+                                  >
+                                    {task.status === 'Completed' ? 'Done' : task.dueLabel}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-24 shrink-0 py-3 pr-2">
                                 <span
@@ -869,12 +901,14 @@ export function PatientQueueWorkspace() {
                         ].map(([label, value]) => (
                           <div key={label} className="flex items-center justify-between gap-2">
                             <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
-                            <span
-                              className="max-w-[200px] truncate text-right font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {value}
-                            </span>
+                            <Tooltip content={value}>
+                              <span
+                                className="max-w-[200px] truncate text-right font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {value}
+                              </span>
+                            </Tooltip>
                           </div>
                         ))}
                       </div>

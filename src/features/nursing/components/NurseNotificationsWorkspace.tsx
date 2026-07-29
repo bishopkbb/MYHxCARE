@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { FormDateInput } from '@components/shared/FormDateInput';
+import { Tooltip } from '@components/shared/Tooltip';
 import { FormSelect } from '@components/shared/FormSelect';
 import { useToast } from '@/hooks/useToast';
 import { formatTime } from '@/utils/datetime';
@@ -231,9 +232,11 @@ export function NurseNotificationsWorkspace() {
                     >
                       {s.value}
                     </p>
-                    <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                      {s.sub}
-                    </p>
+                    <Tooltip content={s.sub}>
+                      <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                        {s.sub}
+                      </p>
+                    </Tooltip>
                   </div>
                 </div>
                 <div style={{ height: 3, background: s.color, opacity: 0.85 }} />
@@ -368,12 +371,14 @@ export function NurseNotificationsWorkspace() {
                         >
                           <cfg.icon style={{ width: 14, height: 14, color: cfg.color }} />
                         </div>
-                        <span
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: active ? '#00B4D8' : '#0D2630' }}
-                        >
-                          {c}
-                        </span>
+                        <Tooltip content={c}>
+                          <span
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: active ? '#00B4D8' : '#0D2630' }}
+                          >
+                            {c}
+                          </span>
+                        </Tooltip>
                       </div>
                       <span
                         className="shrink-0 rounded-full px-2 py-0.5 font-sans font-semibold"
@@ -500,15 +505,19 @@ export function NurseNotificationsWorkspace() {
                               <cfg.icon style={{ width: 16, height: 16, color: cfg.color }} />
                             </div>
                             <div className="min-w-0">
-                              <p
-                                className="truncate font-sans font-semibold"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {n.title}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {n.body}
-                              </p>
+                              <Tooltip content={n.title}>
+                                <p
+                                  className="truncate font-sans font-semibold"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {n.title}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={n.body}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {n.body}
+                                </p>
+                              </Tooltip>
                             </div>
                           </div>
                           <div className="w-24 shrink-0 py-3 pr-2">
@@ -522,15 +531,22 @@ export function NurseNotificationsWorkspace() {
                           <div className="w-40 shrink-0 py-3 pr-2">
                             {n.patientName ? (
                               <>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {n.patientName}
-                                </p>
-                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                  {n.mrn}
-                                </p>
+                                <Tooltip content={n.patientName}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {n.patientName}
+                                  </p>
+                                </Tooltip>
+                                <Tooltip content={n.mrn}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#8A98A3' }}
+                                  >
+                                    {n.mrn}
+                                  </p>
+                                </Tooltip>
                               </>
                             ) : (
                               <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>

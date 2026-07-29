@@ -23,6 +23,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { VitalTrendChart, type VitalChartPoint } from '@components/shared/VitalTrendChart';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -139,9 +140,14 @@ function VitalStatTile({
         >
           <Icon style={{ width: 16, height: 16, color: iconColor }} />
         </div>
-        <span className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#4A7080' }}>
-          {label}
-        </span>
+        <Tooltip content={label}>
+          <span
+            className="truncate font-sans font-medium"
+            style={{ fontSize: 14, color: '#4A7080' }}
+          >
+            {label}
+          </span>
+        </Tooltip>
       </div>
       <div className="mt-2.5 flex flex-wrap items-baseline gap-2">
         <span
@@ -982,9 +988,13 @@ function PatientVitalsPanel({
                             style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
                           >
                             <div className="min-w-0 flex-1 py-2.5 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {formatHumanDate(r.recordedAt)}, {formatTime(r.recordedAt)}
-                              </p>
+                              <Tooltip
+                                content={`${formatHumanDate(r.recordedAt)} , ${formatTime(r.recordedAt)}`}
+                              >
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {formatHumanDate(r.recordedAt)}, {formatTime(r.recordedAt)}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="min-w-0 flex-1 py-2.5 pr-2">
                               <p
@@ -1122,12 +1132,14 @@ function PatientVitalsPanel({
                     </div>
                     <div className="min-w-0">
                       <p style={{ fontSize: 14, color: '#8A98A3' }}>Last Recorded By</p>
-                      <p
-                        className="truncate font-sans font-semibold"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        {record.nursingNotes[0]?.author ?? 'Unknown'}
-                      </p>
+                      <Tooltip content={record.nursingNotes[0]?.author ?? 'Unknown'}>
+                        <p
+                          className="truncate font-sans font-semibold"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {record.nursingNotes[0]?.author ?? 'Unknown'}
+                        </p>
+                      </Tooltip>
                       <p style={{ fontSize: 14, color: '#8A98A3' }}>
                         {timingLabel(latest.recordedAt)}
                       </p>

@@ -23,6 +23,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -852,12 +853,14 @@ export function AdmissionsWorkspace() {
                                     {initialsOf(a.patientName)}
                                   </div>
                                   <div className="min-w-0">
-                                    <p
-                                      className="truncate font-sans font-medium"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {a.patientName}
-                                    </p>
+                                    <Tooltip content={a.patientName}>
+                                      <p
+                                        className="truncate font-sans font-medium"
+                                        style={{ fontSize: 14, color: '#0D2630' }}
+                                      >
+                                        {a.patientName}
+                                      </p>
+                                    </Tooltip>
                                     <p style={{ fontSize: 14, color: '#8A98A3' }}>
                                       {a.age} Y / {a.gender[0]}
                                     </p>
@@ -865,9 +868,14 @@ export function AdmissionsWorkspace() {
                                 </div>
                               </div>
                               <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                                  {a.mrn}
-                                </p>
+                                <Tooltip content={a.mrn}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#00B4D8' }}
+                                  >
+                                    {a.mrn}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-28 shrink-0 py-3 pr-1.5">
                                 <p
@@ -884,14 +892,24 @@ export function AdmissionsWorkspace() {
                                 </p>
                               </div>
                               <div className="w-36 shrink-0 py-3 pr-1.5">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {a.ward}
-                                </p>
+                                <Tooltip content={a.ward}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {a.ward}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-20 shrink-0 py-3 pr-1.5">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {a.admissionType}
-                                </p>
+                                <Tooltip content={a.admissionType}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {a.admissionType}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-36 shrink-0 py-3 pr-1.5">
                                 {step && StepIcon ? (
@@ -908,12 +926,14 @@ export function AdmissionsWorkspace() {
                                         }}
                                       />
                                     </div>
-                                    <p
-                                      className="truncate"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {step.shortLabel}
-                                    </p>
+                                    <Tooltip content={step.shortLabel}>
+                                      <p
+                                        className="truncate"
+                                        style={{ fontSize: 14, color: '#0D2630' }}
+                                      >
+                                        {step.shortLabel}
+                                      </p>
+                                    </Tooltip>
                                   </div>
                                 ) : (
                                   <p style={{ fontSize: 14, color: '#8A98A3' }}>Not started</p>
@@ -1162,15 +1182,19 @@ export function AdmissionsWorkspace() {
                               {initialsOf(a.patientName)}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {a.patientName}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {a.mrn}
-                              </p>
+                              <Tooltip content={a.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {a.patientName}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={a.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {a.mrn}
+                                </p>
+                              </Tooltip>
                             </div>
                             <p style={{ fontSize: 14, color: '#8A98A3' }}>
                               {formatTime(a.completedAt!)}
@@ -1365,9 +1389,11 @@ function WorkflowProgressDonut({
                 className="size-2.5 shrink-0 rounded-full"
                 style={{ background: STEP_COLOR[s.step] }}
               />
-              <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                Step {s.step}: {s.label}
-              </span>
+              <Tooltip content={`Step ${s.step} : ${s.label}`}>
+                <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  Step {s.step}: {s.label}
+                </span>
+              </Tooltip>
             </div>
             <span
               className="shrink-0 font-sans font-medium"

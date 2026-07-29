@@ -22,6 +22,7 @@ import { FormField } from '@components/shared/FormField';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -805,9 +806,11 @@ function PatientNursingNotesPanel({
                               className="size-2 shrink-0 rounded-full"
                               style={{ background: cfg.color }}
                             />
-                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                              {noteDayLabel(note.time)}
-                            </p>
+                            <Tooltip content={noteDayLabel(note.time)}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                                {noteDayLabel(note.time)}
+                              </p>
+                            </Tooltip>
                           </div>
                           <p className="pl-3.5" style={{ fontSize: 14, color: '#8A98A3' }}>
                             {formatTime(note.time)}
@@ -822,16 +825,23 @@ function PatientNursingNotesPanel({
                               {initialsOf(note.authorName)}
                             </div>
                             <div className="min-w-0">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {note.authorName}
-                              </p>
-                              {note.authorId && (
-                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                  {note.authorId}
+                              <Tooltip content={note.authorName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {note.authorName}
                                 </p>
+                              </Tooltip>
+                              {note.authorId && (
+                                <Tooltip content={note.authorId}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#8A98A3' }}
+                                  >
+                                    {note.authorId}
+                                  </p>
+                                </Tooltip>
                               )}
                             </div>
                           </div>
@@ -1130,7 +1140,9 @@ function PatientNursingNotesPanel({
                         }}
                       >
                         <Icon style={{ width: 15, height: 15, flexShrink: 0 }} />
-                        <span className="truncate">{tpl.label}</span>
+                        <Tooltip content={tpl.label}>
+                          <span className="truncate">{tpl.label}</span>
+                        </Tooltip>
                       </button>
                     );
                   })}
@@ -1186,15 +1198,19 @@ function PatientNursingNotesPanel({
                         <Paperclip style={{ width: 15, height: 15, color: '#00B4D8' }} />
                       </div>
                       <div className="min-w-0">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {att.name}
-                        </p>
-                        <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                          {noteTimeLabel(att.time)} · {att.size}
-                        </p>
+                        <Tooltip content={att.name}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {att.name}
+                          </p>
+                        </Tooltip>
+                        <Tooltip content={`${noteTimeLabel(att.time)} · ${att.size}`}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                            {noteTimeLabel(att.time)} · {att.size}
+                          </p>
+                        </Tooltip>
                       </div>
                     </button>
                   ))}

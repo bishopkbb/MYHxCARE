@@ -3,6 +3,7 @@
 import { FileText, Image as ImageIcon, X } from 'lucide-react';
 
 import { formatDateTime } from '@/utils/datetime';
+import { Tooltip } from '@components/shared/Tooltip';
 import type { NoteAttachment } from '@/features/nursing/__mocks__/nursingNotesFixtures';
 
 const FOCUS_RING =
@@ -69,12 +70,14 @@ export function NoteAttachmentsModal({
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p
-                      className="truncate font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
-                      {att.name}
-                    </p>
+                    <Tooltip content={att.name}>
+                      <p
+                        className="truncate font-sans font-medium"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        {att.name}
+                      </p>
+                    </Tooltip>
                     <p style={{ fontSize: 14, color: '#8A98A3' }}>
                       {formatDateTime(att.time)} · {att.size}
                     </p>

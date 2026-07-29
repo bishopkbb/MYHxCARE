@@ -25,6 +25,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -329,12 +330,14 @@ export function ShiftHandoverWorkspace() {
                     .slice(0, 2)}
                 </div>
                 <div className="min-w-0">
-                  <p
-                    className="truncate font-sans font-semibold"
-                    style={{ fontSize: 15, color: '#0D2630' }}
-                  >
-                    {OUTGOING_NURSE.name}
-                  </p>
+                  <Tooltip content={OUTGOING_NURSE.name}>
+                    <p
+                      className="truncate font-sans font-semibold"
+                      style={{ fontSize: 15, color: '#0D2630' }}
+                    >
+                      {OUTGOING_NURSE.name}
+                    </p>
+                  </Tooltip>
                   <p style={{ fontSize: 14, color: '#8A98A3' }}>{OUTGOING_NURSE.staffId}</p>
                 </div>
               </div>
@@ -369,12 +372,14 @@ export function ShiftHandoverWorkspace() {
                     .slice(0, 2)}
                 </div>
                 <div className="min-w-0">
-                  <p
-                    className="truncate font-sans font-semibold"
-                    style={{ fontSize: 15, color: '#0D2630' }}
-                  >
-                    {INCOMING_NURSE.name}
-                  </p>
+                  <Tooltip content={INCOMING_NURSE.name}>
+                    <p
+                      className="truncate font-sans font-semibold"
+                      style={{ fontSize: 15, color: '#0D2630' }}
+                    >
+                      {INCOMING_NURSE.name}
+                    </p>
+                  </Tooltip>
                   <p style={{ fontSize: 14, color: '#8A98A3' }}>{INCOMING_NURSE.staffId}</p>
                 </div>
               </div>
@@ -405,12 +410,14 @@ export function ShiftHandoverWorkspace() {
                   <Bed style={{ width: 18, height: 18, color: '#00B4D8' }} />
                 </div>
                 <div className="min-w-0">
-                  <p
-                    className="truncate font-sans font-semibold"
-                    style={{ fontSize: 15, color: '#0D2630' }}
-                  >
-                    {WARD_INFO.name}
-                  </p>
+                  <Tooltip content={WARD_INFO.name}>
+                    <p
+                      className="truncate font-sans font-semibold"
+                      style={{ fontSize: 15, color: '#0D2630' }}
+                    >
+                      {WARD_INFO.name}
+                    </p>
+                  </Tooltip>
                   <p style={{ fontSize: 14, color: '#8A98A3' }}>{WARD_INFO.wardCode}</p>
                 </div>
               </div>
@@ -543,17 +550,21 @@ export function ShiftHandoverWorkspace() {
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{p.bed}</p>
                         </div>
                         <div className="w-36 shrink-0 py-3 pr-2">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {p.patientName}
-                          </p>
+                          <Tooltip content={p.patientName}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {p.patientName}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="min-w-0 flex-1 py-3 pr-2">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {p.diagnosis}
-                          </p>
+                          <Tooltip content={p.diagnosis}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {p.diagnosis}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-28 shrink-0 py-3 pr-2">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -574,9 +585,11 @@ export function ShiftHandoverWorkspace() {
                           </span>
                         </div>
                         <div className="w-40 shrink-0 py-3 pr-3">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {p.notes}
-                          </p>
+                          <Tooltip content={p.notes}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {p.notes}
+                            </p>
+                          </Tooltip>
                         </div>
                       </div>
                     );
@@ -608,9 +621,11 @@ export function ShiftHandoverWorkspace() {
                   >
                     <div className="flex min-w-0 items-center gap-2">
                       <ClipboardList style={{ width: 15, height: 15, color: '#8A98A3' }} />
-                      <span className="truncate" style={{ fontSize: 14, color: '#2F3A40' }}>
-                        {category}
-                      </span>
+                      <Tooltip content={category}>
+                        <span className="truncate" style={{ fontSize: 14, color: '#2F3A40' }}>
+                          {category}
+                        </span>
+                      </Tooltip>
                     </div>
                     <span
                       className="shrink-0 rounded-full px-2 py-0.5 font-sans font-semibold"
@@ -683,12 +698,14 @@ export function ShiftHandoverWorkspace() {
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{p.bed}</p>
                         </div>
                         <div className="w-32 shrink-0 py-3 pr-2">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {p.patientName}
-                          </p>
+                          <Tooltip content={p.patientName}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {p.patientName}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-28 shrink-0 py-3 pr-2">
                           <span
@@ -704,9 +721,11 @@ export function ShiftHandoverWorkspace() {
                           </span>
                         </div>
                         <div className="min-w-0 flex-1 py-3 pr-3">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {p.reason}
-                          </p>
+                          <Tooltip content={p.reason}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {p.reason}
+                            </p>
+                          </Tooltip>
                         </div>
                       </div>
                     );
@@ -787,17 +806,21 @@ export function ShiftHandoverWorkspace() {
                         </p>
                       </div>
                       <div className="w-32 shrink-0 py-3 pr-2">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {m.patientName}
-                        </p>
+                        <Tooltip content={m.patientName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {m.patientName}
+                          </p>
+                        </Tooltip>
                       </div>
                       <div className="min-w-0 flex-1 py-3 pr-2">
-                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {m.medication}
-                        </p>
+                        <Tooltip content={m.medication}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {m.medication}
+                          </p>
+                        </Tooltip>
                       </div>
                       <div className="w-20 shrink-0 py-3 pr-2">
                         <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
@@ -872,22 +895,28 @@ export function ShiftHandoverWorkspace() {
                         }}
                       >
                         <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {inv.patientName}
-                          </p>
+                          <Tooltip content={inv.patientName}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {inv.patientName}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="min-w-0 flex-1 py-3 pr-2">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {inv.investigation}
-                          </p>
+                          <Tooltip content={inv.investigation}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {inv.investigation}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-36 shrink-0 py-3 pr-2">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {inv.orderedBy}
-                          </p>
+                          <Tooltip content={inv.orderedBy}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {inv.orderedBy}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-28 shrink-0 py-3 pr-3">
                           <span

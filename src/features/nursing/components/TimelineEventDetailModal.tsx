@@ -3,6 +3,7 @@
 import { Lock, X } from 'lucide-react';
 
 import { formatHumanDate, formatTime } from '@/utils/datetime';
+import { Tooltip } from '@components/shared/Tooltip';
 import {
   TIMELINE_CATEGORY_CFG,
   type ClinicalTimelineEvent,
@@ -69,9 +70,11 @@ export function TimelineEventDetailModal({
             >
               {event.title}
             </h2>
-            <p className="mt-0.5 truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-              {patientName} · MRN: {mrn}
-            </p>
+            <Tooltip content={`${patientName} · MRN: ${mrn}`}>
+              <p className="mt-0.5 truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                {patientName} · MRN: {mrn}
+              </p>
+            </Tooltip>
           </div>
           <button
             type="button"

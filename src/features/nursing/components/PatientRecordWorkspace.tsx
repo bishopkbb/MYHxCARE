@@ -33,6 +33,7 @@ import { ROUTES } from '@/constants/routes';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import { downloadPDF, escapeHtml } from '@/utils/export';
 import { getPatientRecord } from '@/features/nursing/__mocks__/patientRecordFixtures';
+import { Tooltip } from '@components/shared/Tooltip';
 import type { CarePlanStatus } from '@/features/nursing/__mocks__/carePlansFixtures';
 
 type PageState = 'loading' | 'loaded' | 'error';
@@ -750,12 +751,14 @@ export function PatientRecordWorkspace({ patientId }: { patientId: string }) {
                                       }}
                                     />
                                   )}
-                                  <span
-                                    className="min-w-0 flex-1 truncate"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {c.label}
-                                  </span>
+                                  <Tooltip content={c.label}>
+                                    <span
+                                      className="min-w-0 flex-1 truncate"
+                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                    >
+                                      {c.label}
+                                    </span>
+                                  </Tooltip>
                                   <span
                                     className="shrink-0 rounded-full px-2 py-0.5 font-sans font-medium"
                                     style={{
@@ -1075,12 +1078,14 @@ export function PatientRecordWorkspace({ patientId }: { patientId: string }) {
                             <Pill style={{ width: 16, height: 16, color: '#8B5CF6' }} />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {patient.nextMedication}
-                            </p>
+                            <Tooltip content={patient.nextMedication}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {patient.nextMedication}
+                              </p>
+                            </Tooltip>
                             <p style={{ fontSize: 14, color: '#8A98A3' }}>
                               {formatTime(patient.nextMedicationTime)}
                             </p>
@@ -1142,12 +1147,14 @@ export function PatientRecordWorkspace({ patientId }: { patientId: string }) {
                                   />
                                 )}
                                 <div className="min-w-0 flex-1">
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {t.label}
-                                  </p>
+                                  <Tooltip content={t.label}>
+                                    <p
+                                      className="truncate font-sans font-medium"
+                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                    >
+                                      {t.label}
+                                    </p>
+                                  </Tooltip>
                                   <p style={{ fontSize: 14, color: '#8A98A3' }}>
                                     Due: {formatTime(t.dueTime)}
                                   </p>

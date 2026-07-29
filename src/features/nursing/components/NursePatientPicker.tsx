@@ -2,7 +2,7 @@
 
 import { Eye, Search, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
-
+import { Tooltip } from '@components/shared/Tooltip';
 import { Pagination } from '@components/shared/Pagination';
 import {
   MY_PATIENTS_ROSTER,
@@ -156,26 +156,34 @@ export function NursePatientPicker({
                     {p.initials}
                   </div>
                   <div className="min-w-0">
-                    <p
-                      className="truncate font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
-                      {p.patientName}
-                    </p>
-                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {p.age} Y / {p.gender}
-                    </p>
+                    <Tooltip content={p.patientName}>
+                      <p
+                        className="truncate font-sans font-medium"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        {p.patientName}
+                      </p>
+                    </Tooltip>
+                    <Tooltip content={`${p.age} Y / ${p.gender}`}>
+                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {p.age} Y / {p.gender}
+                      </p>
+                    </Tooltip>
                   </div>
                 </div>
                 <div className="w-32 shrink-0 py-3 pr-2">
-                  <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                    {p.mrn}
-                  </p>
+                  <Tooltip content={p.mrn}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                      {p.mrn}
+                    </p>
+                  </Tooltip>
                 </div>
                 <div className="w-32 shrink-0 py-3 pr-2">
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {p.ward} · {p.bed}
-                  </p>
+                  <Tooltip content={`${p.ward} · ${p.bed}`}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {p.ward} · {p.bed}
+                    </p>
+                  </Tooltip>
                 </div>
                 <div className="w-24 shrink-0 py-3 pr-2">
                   <span

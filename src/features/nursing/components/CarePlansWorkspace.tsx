@@ -28,6 +28,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -825,15 +826,22 @@ function PatientCarePlansPanel({
                                 </div>
                               </div>
                               <div className="w-36 shrink-0 py-3 pr-1.5">
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {plan.problem}
-                                </p>
-                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                  {plan.problemDetail}
-                                </p>
+                                <Tooltip content={plan.problem}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {plan.problem}
+                                  </p>
+                                </Tooltip>
+                                <Tooltip content={plan.problemDetail}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#8A98A3' }}
+                                  >
+                                    {plan.problemDetail}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="min-w-[180px] flex-1 py-3 pr-1.5">
                                 <p style={{ fontSize: 14, color: '#0D2630' }}>{plan.goal}</p>
@@ -876,18 +884,22 @@ function PatientCarePlansPanel({
                                     {initialsOf(plan.assignedNurseName)}
                                   </div>
                                   <div className="min-w-0">
-                                    <p
-                                      className="truncate font-sans font-medium"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {plan.assignedNurseName}
-                                    </p>
-                                    <p
-                                      className="truncate"
-                                      style={{ fontSize: 14, color: '#8A98A3' }}
-                                    >
-                                      {plan.assignedNurseId}
-                                    </p>
+                                    <Tooltip content={plan.assignedNurseName}>
+                                      <p
+                                        className="truncate font-sans font-medium"
+                                        style={{ fontSize: 14, color: '#0D2630' }}
+                                      >
+                                        {plan.assignedNurseName}
+                                      </p>
+                                    </Tooltip>
+                                    <Tooltip content={plan.assignedNurseId}>
+                                      <p
+                                        className="truncate"
+                                        style={{ fontSize: 14, color: '#8A98A3' }}
+                                      >
+                                        {plan.assignedNurseId}
+                                      </p>
+                                    </Tooltip>
                                   </div>
                                 </div>
                               </div>
@@ -1529,12 +1541,14 @@ function PatientCarePlansPanel({
                                       />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                      <p
-                                        className="truncate font-sans font-medium"
-                                        style={{ fontSize: 14, color: '#0D2630' }}
-                                      >
-                                        {doc.name}
-                                      </p>
+                                      <Tooltip content={doc.name}>
+                                        <p
+                                          className="truncate font-sans font-medium"
+                                          style={{ fontSize: 14, color: '#0D2630' }}
+                                        >
+                                          {doc.name}
+                                        </p>
+                                      </Tooltip>
                                       <p style={{ fontSize: 14, color: '#8A98A3' }}>
                                         {formatDateTime(doc.time)} · {doc.size}
                                       </p>
@@ -1597,12 +1611,14 @@ function PatientCarePlansPanel({
                     const review = reviewCountdownLabel(plan.nextReviewDate, nowMs);
                     return (
                       <div key={plan.id} className="flex items-center justify-between gap-2">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {plan.problem}
-                        </p>
+                        <Tooltip content={plan.problem}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {plan.problem}
+                          </p>
+                        </Tooltip>
                         <div className="flex shrink-0 items-center gap-1.5">
                           <span style={{ fontSize: 14, color: '#0D2630' }}>
                             {formatHumanDate(plan.nextReviewDate)}
@@ -1652,7 +1668,9 @@ function PatientCarePlansPanel({
                         }}
                       >
                         <Icon style={{ width: 15, height: 15, flexShrink: 0 }} />
-                        <span className="truncate">{tpl.label}</span>
+                        <Tooltip content={tpl.label}>
+                          <span className="truncate">{tpl.label}</span>
+                        </Tooltip>
                       </button>
                     );
                   })}
@@ -1866,9 +1884,11 @@ function CarePlanSummaryDonut({ plans }: { plans: CarePlan[] }) {
           <div key={d.label} className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="size-2.5 shrink-0 rounded-full" style={{ background: d.color }} />
-              <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                {d.label}
-              </span>
+              <Tooltip content={d.label}>
+                <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  {d.label}
+                </span>
+              </Tooltip>
             </div>
             <span
               className="shrink-0 font-sans font-medium"

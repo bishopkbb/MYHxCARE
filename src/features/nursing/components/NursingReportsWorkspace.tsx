@@ -24,6 +24,7 @@ import { useRouter } from 'next/navigation';
 
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
@@ -102,9 +103,11 @@ function TwoColTable({ columns, rows }: { columns: [string, string]; rows: TwoCo
           className="flex items-center justify-between py-2"
           style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
         >
-          <span className="truncate" style={{ fontSize: 14, color: '#2F3A40' }}>
-            {r.label}
-          </span>
+          <Tooltip content={r.label}>
+            <span className="truncate" style={{ fontSize: 14, color: '#2F3A40' }}>
+              {r.label}
+            </span>
+          </Tooltip>
           <span className="font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
             {r.value}
           </span>
@@ -176,9 +179,11 @@ function DonutChart({
           <div key={s.label} className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="size-2.5 shrink-0 rounded-full" style={{ background: s.color }} />
-              <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                {s.label}
-              </span>
+              <Tooltip content={s.label}>
+                <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  {s.label}
+                </span>
+              </Tooltip>
             </div>
             <span
               className="shrink-0 font-sans font-medium"
@@ -311,15 +316,19 @@ function ReportCard({
       <div className="mt-4 grid grid-cols-3 gap-2">
         {report.stats.map((s) => (
           <div key={s.label} className="min-w-0">
-            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-              {s.label}
-            </p>
-            <p
-              className="font-display truncate font-bold"
-              style={{ fontSize: 18, color: '#0D2630' }}
-            >
-              {s.value}
-            </p>
+            <Tooltip content={s.label}>
+              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                {s.label}
+              </p>
+            </Tooltip>
+            <Tooltip content={s.value}>
+              <p
+                className="font-display truncate font-bold"
+                style={{ fontSize: 18, color: '#0D2630' }}
+              >
+                {s.value}
+              </p>
+            </Tooltip>
           </div>
         ))}
       </div>
@@ -349,12 +358,14 @@ function ReportCard({
                     style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span
-                        className="truncate font-sans font-medium"
-                        style={{ fontSize: 14, color: '#2F3A40' }}
-                      >
-                        {s.shift}
-                      </span>
+                      <Tooltip content={s.shift}>
+                        <span
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#2F3A40' }}
+                        >
+                          {s.shift}
+                        </span>
+                      </Tooltip>
                       <span
                         className="shrink-0 rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
                         style={{
@@ -367,12 +378,16 @@ function ReportCard({
                         {s.status}
                       </span>
                     </div>
-                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {s.time}
-                    </p>
-                    <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                      {s.staffInCharge}
-                    </p>
+                    <Tooltip content={s.time}>
+                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {s.time}
+                      </p>
+                    </Tooltip>
+                    <Tooltip content={s.staffInCharge}>
+                      <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                        {s.staffInCharge}
+                      </p>
+                    </Tooltip>
                   </div>
                 );
               })}
@@ -438,12 +453,14 @@ function ReportCard({
                   style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
                 >
                   <div className="min-w-0">
-                    <p
-                      className="truncate font-sans font-medium"
-                      style={{ fontSize: 14, color: '#2F3A40' }}
-                    >
-                      {r.medication}
-                    </p>
+                    <Tooltip content={r.medication}>
+                      <p
+                        className="truncate font-sans font-medium"
+                        style={{ fontSize: 14, color: '#2F3A40' }}
+                      >
+                        {r.medication}
+                      </p>
+                    </Tooltip>
                     <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.time}</p>
                   </div>
                   <span

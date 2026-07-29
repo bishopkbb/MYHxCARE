@@ -20,6 +20,7 @@ import { useRef, useState } from 'react';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -527,9 +528,11 @@ function PatientMARPanel({
                   <p className="font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
                     Correct Patient
                   </p>
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {patient.patientName}
-                  </p>
+                  <Tooltip content={patient.patientName}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {patient.patientName}
+                    </p>
+                  </Tooltip>
                 </div>
               </div>
               {FIVE_RIGHTS.map((r) => (
@@ -541,9 +544,11 @@ function PatientMARPanel({
                     <p className="font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
                       {r.label}
                     </p>
-                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {r.detail}
-                    </p>
+                    <Tooltip content={r.detail}>
+                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {r.detail}
+                      </p>
+                    </Tooltip>
                   </div>
                 </div>
               ))}
@@ -722,15 +727,17 @@ function PatientMARPanel({
                       >
                         <div className="min-w-[110px] flex-1 py-3 pr-1.5 pl-3">
                           <div className="flex items-center gap-1.5">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                color: order.status === 'Overdue' ? '#EF4444' : '#0D2630',
-                              }}
-                            >
-                              {order.medication}
-                            </p>
+                            <Tooltip content={order.medication}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{
+                                  fontSize: 14,
+                                  color: order.status === 'Overdue' ? '#EF4444' : '#0D2630',
+                                }}
+                              >
+                                {order.medication}
+                              </p>
+                            </Tooltip>
                             {order.isHighAlert && (
                               <ShieldAlert
                                 aria-label="High alert medication"
@@ -740,30 +747,38 @@ function PatientMARPanel({
                           </div>
                         </div>
                         <div className="w-[60px] shrink-0 py-3 pr-1.5">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {order.dose}
-                          </p>
+                          <Tooltip content={order.dose}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {order.dose}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-16 shrink-0 py-3 pr-1.5">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {order.route}
-                          </p>
+                          <Tooltip content={order.route}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {order.route}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-24 shrink-0 py-3 pr-1.5">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {order.frequency}
-                          </p>
+                          <Tooltip content={order.frequency}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {order.frequency}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-24 shrink-0 py-3 pr-1.5">
-                          <p
-                            className="truncate"
-                            style={{
-                              fontSize: 14,
-                              color: order.status === 'Overdue' ? '#EF4444' : '#0D2630',
-                            }}
-                          >
-                            {order.timeDueLabel ?? formatTime(order.timeDue)}
-                          </p>
+                          <Tooltip content={order.timeDueLabel ?? formatTime(order.timeDue)}>
+                            <p
+                              className="truncate"
+                              style={{
+                                fontSize: 14,
+                                color: order.status === 'Overdue' ? '#EF4444' : '#0D2630',
+                              }}
+                            >
+                              {order.timeDueLabel ?? formatTime(order.timeDue)}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-24 shrink-0 py-3 pr-1.5">
                           <span
@@ -781,15 +796,19 @@ function PatientMARPanel({
                         <div className="w-28 shrink-0 py-3 pr-1.5">
                           {order.administeredBy ? (
                             <>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {order.administeredBy}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {order.remarks}
-                              </p>
+                              <Tooltip content={order.administeredBy}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {order.administeredBy}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={order.remarks}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {order.remarks}
+                                </p>
+                              </Tooltip>
                             </>
                           ) : (
                             <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>

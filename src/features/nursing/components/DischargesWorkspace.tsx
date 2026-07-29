@@ -27,6 +27,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -864,12 +865,14 @@ export function DischargesWorkspace() {
                                     {initialsOf(d.patientName)}
                                   </div>
                                   <div className="min-w-0">
-                                    <p
-                                      className="truncate font-sans font-medium"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {d.patientName}
-                                    </p>
+                                    <Tooltip content={d.patientName}>
+                                      <p
+                                        className="truncate font-sans font-medium"
+                                        style={{ fontSize: 14, color: '#0D2630' }}
+                                      >
+                                        {d.patientName}
+                                      </p>
+                                    </Tooltip>
                                     <p style={{ fontSize: 14, color: '#8A98A3' }}>
                                       {d.age} Y / {d.gender[0]}
                                     </p>
@@ -877,17 +880,32 @@ export function DischargesWorkspace() {
                                 </div>
                               </div>
                               <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                                  {d.mrn}
-                                </p>
+                                <Tooltip content={d.mrn}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#00B4D8' }}
+                                  >
+                                    {d.mrn}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-32 shrink-0 py-3 pr-1.5">
-                                <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                                  {d.ward}
-                                </p>
-                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                  {d.bed}
-                                </p>
+                                <Tooltip content={d.ward}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {d.ward}
+                                  </p>
+                                </Tooltip>
+                                <Tooltip content={d.bed}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#8A98A3' }}
+                                  >
+                                    {d.bed}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-28 shrink-0 py-3 pr-1.5">
                                 <p
@@ -904,9 +922,14 @@ export function DischargesWorkspace() {
                                 </p>
                               </div>
                               <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {d.dischargeType}
-                                </p>
+                                <Tooltip content={d.dischargeType}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {d.dischargeType}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-36 shrink-0 py-3 pr-1.5">
                                 {StepIcon && (
@@ -923,12 +946,14 @@ export function DischargesWorkspace() {
                                         }}
                                       />
                                     </div>
-                                    <p
-                                      className="truncate"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {step?.shortLabel}
-                                    </p>
+                                    <Tooltip content={step?.shortLabel}>
+                                      <p
+                                        className="truncate"
+                                        style={{ fontSize: 14, color: '#0D2630' }}
+                                      >
+                                        {step?.shortLabel}
+                                      </p>
+                                    </Tooltip>
                                   </div>
                                 )}
                               </div>
@@ -1175,15 +1200,19 @@ export function DischargesWorkspace() {
                               {initialsOf(d.patientName)}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {d.patientName}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {d.mrn}
-                              </p>
+                              <Tooltip content={d.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {d.patientName}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={d.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {d.mrn}
+                                </p>
+                              </Tooltip>
                             </div>
                             <p style={{ fontSize: 14, color: '#8A98A3' }}>
                               {formatTime(d.dischargedAt!)}
@@ -1378,9 +1407,11 @@ function WorkflowProgressDonut({
                 className="size-2.5 shrink-0 rounded-full"
                 style={{ background: STEP_COLOR[s.step] }}
               />
-              <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                Step {s.step}: {s.label}
-              </span>
+              <Tooltip content={`Step ${s.step} : ${s.label}`}>
+                <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  Step {s.step}: {s.label}
+                </span>
+              </Tooltip>
             </div>
             <span
               className="shrink-0 font-sans font-medium"

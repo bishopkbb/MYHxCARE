@@ -25,6 +25,7 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -856,12 +857,14 @@ export function LaboratoryWorkspace() {
                                     {initialsOf(o.patientName)}
                                   </div>
                                   <div className="min-w-0">
-                                    <p
-                                      className="truncate font-sans font-medium"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {o.patientName}
-                                    </p>
+                                    <Tooltip content={o.patientName}>
+                                      <p
+                                        className="truncate font-sans font-medium"
+                                        style={{ fontSize: 14, color: '#0D2630' }}
+                                      >
+                                        {o.patientName}
+                                      </p>
+                                    </Tooltip>
                                     <p style={{ fontSize: 14, color: '#8A98A3' }}>
                                       {o.age !== undefined && o.gender
                                         ? `${o.age} Y / ${o.gender[0]}`
@@ -871,22 +874,37 @@ export function LaboratoryWorkspace() {
                                 </div>
                               </div>
                               <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                                  {o.mrn}
-                                </p>
+                                <Tooltip content={o.mrn}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#00B4D8' }}
+                                  >
+                                    {o.mrn}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-40 shrink-0 py-3 pr-1.5">
-                                <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                                  {o.testName}
-                                </p>
+                                <Tooltip content={o.testName}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {o.testName}
+                                  </p>
+                                </Tooltip>
                                 {FASTING_REQUIRED_TESTS.has(o.testName) && (
                                   <p style={{ fontSize: 14, color: '#F59E0B' }}>Fasting required</p>
                                 )}
                               </div>
                               <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {o.department}
-                                </p>
+                                <Tooltip content={o.department}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {o.department}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-24 shrink-0 py-3 pr-1.5">
                                 <span
@@ -902,9 +920,14 @@ export function LaboratoryWorkspace() {
                                 </span>
                               </div>
                               <div className="w-32 shrink-0 py-3 pr-1.5">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {o.orderedBy}
-                                </p>
+                                <Tooltip content={o.orderedBy}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {o.orderedBy}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-28 shrink-0 py-3 pr-1.5">
                                 <p
@@ -1057,15 +1080,19 @@ export function LaboratoryWorkspace() {
                       {recentlyCompleted.slice(0, 3).map((o) => (
                         <div key={o.id} className="flex items-center justify-between gap-2">
                           <div className="min-w-0">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {o.patientName}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {o.testName}
-                            </p>
+                            <Tooltip content={o.patientName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {o.patientName}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={o.testName}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {o.testName}
+                              </p>
+                            </Tooltip>
                           </div>
                           <span
                             className="shrink-0 rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
@@ -1098,12 +1125,14 @@ export function LaboratoryWorkspace() {
                         .slice(0, 5)
                         .map(([test, hours]) => (
                           <div key={test} className="flex items-center justify-between gap-2">
-                            <span
-                              className="min-w-0 truncate"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {test}
-                            </span>
+                            <Tooltip content={test}>
+                              <span
+                                className="min-w-0 truncate"
+                                style={{ fontSize: 14, color: '#4A7080' }}
+                              >
+                                {test}
+                              </span>
+                            </Tooltip>
                             <span
                               className="shrink-0 font-sans font-medium"
                               style={{ fontSize: 14, color: '#0D2630' }}
@@ -1194,15 +1223,19 @@ export function LaboratoryWorkspace() {
                             }}
                           />
                           <div className="min-w-0 flex-1">
-                            <p
-                              className="truncate font-sans font-semibold"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {o.patientName}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {o.mrn}
-                            </p>
+                            <Tooltip content={o.patientName}>
+                              <p
+                                className="truncate font-sans font-semibold"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {o.patientName}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={o.mrn}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {o.mrn}
+                              </p>
+                            </Tooltip>
                             <p
                               className="font-sans font-semibold"
                               style={{ fontSize: 14, color: '#EF4444' }}

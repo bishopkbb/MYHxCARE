@@ -29,6 +29,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -262,12 +263,16 @@ function BedCard({
         <div className="mt-1.5 flex items-center gap-1.5">
           <BedDouble style={{ width: 14, height: 14, color: cfg.color, flexShrink: 0 }} />
           <div className="min-w-0">
-            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-              {bed.patientName}
-            </p>
-            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-              {bed.mrn}
-            </p>
+            <Tooltip content={bed.patientName}>
+              <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                {bed.patientName}
+              </p>
+            </Tooltip>
+            <Tooltip content={bed.mrn}>
+              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                {bed.mrn}
+              </p>
+            </Tooltip>
           </div>
         </div>
       ) : (
@@ -1086,9 +1091,11 @@ export function BedManagementWorkspace() {
                   >
                     <s.icon style={{ width: 16, height: 16, color: s.color }} />
                   </div>
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {s.label}
-                  </p>
+                  <Tooltip content={s.label}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {s.label}
+                    </p>
+                  </Tooltip>
                 </div>
                 <p
                   className="font-display mt-2 font-semibold"
@@ -1336,9 +1343,11 @@ export function BedManagementWorkspace() {
                           </div>
                         </div>
                         <div className="w-24 shrink-0 py-3 pr-1.5">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {bed.room}
-                          </p>
+                          <Tooltip content={bed.room}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {bed.room}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-40 shrink-0 py-3 pr-1.5">
                           <span
@@ -1354,19 +1363,25 @@ export function BedManagementWorkspace() {
                           </span>
                         </div>
                         <div className="min-w-[160px] flex-1 py-3 pr-1.5">
-                          <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                            {bed.patientName ?? '—'}
-                          </p>
-                          {bed.mrn && (
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {bed.mrn}
+                          <Tooltip content={bed.patientName ?? '—'}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                              {bed.patientName ?? '—'}
                             </p>
+                          </Tooltip>
+                          {bed.mrn && (
+                            <Tooltip content={bed.mrn}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {bed.mrn}
+                              </p>
+                            </Tooltip>
                           )}
                         </div>
                         <div className="w-36 shrink-0 py-3 pr-1.5">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {bed.doctorName ?? '—'}
-                          </p>
+                          <Tooltip content={bed.doctorName ?? '—'}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {bed.doctorName ?? '—'}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div
                           className={`sticky right-0 flex w-40 shrink-0 items-center justify-end py-3 pr-3 ${openListMenuId === bed.id ? 'z-30' : 'z-10'}`}
@@ -1784,9 +1799,11 @@ export function BedManagementWorkspace() {
                       className="size-2.5 shrink-0 rounded-full"
                       style={{ background: BED_STATUS_CFG[status].color }}
                     />
-                    <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {status}
-                    </span>
+                    <Tooltip content={status}>
+                      <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {status}
+                      </span>
+                    </Tooltip>
                   </div>
                 ))}
                 <div className="flex items-center gap-2">
