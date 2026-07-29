@@ -1081,6 +1081,30 @@ const MEDICATION_REFILL_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const STOCK_RECEIVING_GUIDE: HelpGuide = {
+  id: 'stock-receiving',
+  title: 'Stock Receiving',
+  intro: 'Receive stock from suppliers against a purchase order and update inventory levels.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Pending Receipts counts purchase orders still awaiting delivery. Items Receiving Today and Total Items/Value Received summarize this month’s actual receipts.',
+    },
+    {
+      heading: 'Selecting a purchase order',
+      body: 'Choosing a Purchase Order loads its supplier and line items automatically. View Purchase Orders lists every order, open or already received, and lets you pick one to receive.',
+    },
+    {
+      heading: 'Items to Receive',
+      body: 'Adjust the batch number, expiry date, and Received Qty for each line as you check the physical delivery. Add Item records something the supplier included that wasn’t on the original order.',
+    },
+    {
+      heading: 'Confirming a receipt',
+      body: 'Confirm & Save Receipt marks the purchase order Received (or Partial if any line was short), and adds every received item straight into Drug Inventory as new stock — a real event, not just a form.',
+    },
+  ],
+};
+
 const DRUG_INVENTORY_GUIDE: HelpGuide = {
   id: 'drug-inventory',
   title: 'Drug Inventory',
@@ -2283,6 +2307,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/stock-receiving')) return STOCK_RECEIVING_GUIDE;
   if (pathname.startsWith('/pharmacy/inventory')) return DRUG_INVENTORY_GUIDE;
   if (pathname.startsWith('/pharmacy/controlled-drugs')) return CONTROLLED_DRUGS_GUIDE;
   if (pathname.startsWith('/pharmacy/refill-requests')) return MEDICATION_REFILL_REQUESTS_GUIDE;

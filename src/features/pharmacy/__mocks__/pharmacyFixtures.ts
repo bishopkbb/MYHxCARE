@@ -1132,16 +1132,69 @@ export function getInventorySnapshot() {
 
 export type InventoryStatus = 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Expiring Soon';
 
-export const SUPPLIERS: string[] = [
-  'MedPlus Distributors',
-  'PharmaCare Nigeria Ltd',
-  'Fidson Healthcare',
-  'Emzor Pharmaceuticals',
-  'May & Baker Nigeria',
-  'Juhel Nigeria Ltd',
+export type SupplierInfo = {
+  name: string;
+  code: string;
+  address: string;
+  phone: string;
+  email: string;
+};
+
+export const SUPPLIER_DIRECTORY: SupplierInfo[] = [
+  {
+    name: 'MedPlus Distributors',
+    code: 'SUP-00045',
+    address: '23 Ire Akari Street, Surulere, Lagos, Nigeria',
+    phone: '+234 803 123 4567',
+    email: 'info@medplusdistributors.com',
+  },
+  {
+    name: 'PharmaCare Nigeria Ltd',
+    code: 'SUP-00046',
+    address: '14 Awolowo Road, Ikoyi, Lagos, Nigeria',
+    phone: '+234 802 234 5678',
+    email: 'sales@pharmacarenigeria.com',
+  },
+  {
+    name: 'Fidson Healthcare',
+    code: 'SUP-00047',
+    address: 'Km 16, Ikorodu Road, Lagos, Nigeria',
+    phone: '+234 801 345 6789',
+    email: 'orders@fidson.com',
+  },
+  {
+    name: 'Emzor Pharmaceuticals',
+    code: 'SUP-00048',
+    address: '3 Adeniyi Jones Avenue, Ikeja, Lagos, Nigeria',
+    phone: '+234 809 456 7890',
+    email: 'supply@emzorpharma.com',
+  },
+  {
+    name: 'May & Baker Nigeria',
+    code: 'SUP-00049',
+    address: '3/5 Sapara Street, Industrial Estate, Lagos, Nigeria',
+    phone: '+234 807 567 8901',
+    email: 'procurement@may-baker.com',
+  },
+  {
+    name: 'Juhel Nigeria Ltd',
+    code: 'SUP-00050',
+    address: '15 Enugu-Onitsha Expressway, Enugu, Nigeria',
+    phone: '+234 806 678 9012',
+    email: 'orders@juhelpharma.com',
+  },
 ];
 
-export const SUPPLIER_OPTIONS: SelectOption[] = SUPPLIERS.map((s) => ({ value: s, label: s }));
+export const SUPPLIERS: string[] = SUPPLIER_DIRECTORY.map((s) => s.name);
+
+export const SUPPLIER_OPTIONS: SelectOption[] = SUPPLIER_DIRECTORY.map((s) => ({
+  value: s.name,
+  label: s.name,
+}));
+
+export function getSupplierInfo(name: string): SupplierInfo | null {
+  return SUPPLIER_DIRECTORY.find((s) => s.name === name) ?? null;
+}
 
 export const INVENTORY_LOCATION_OPTIONS: SelectOption[] = PHARMACY_LOCATIONS.map((l) => ({
   value: l.id,
@@ -1173,7 +1226,7 @@ export type InventoryBatchRow = {
   controlledSchedule?: ControlledSchedule;
 };
 
-const INVENTORY_CATALOG: {
+export type InventoryCatalogEntry = {
   name: string;
   strength: string;
   form: string;
@@ -1182,7 +1235,9 @@ const INVENTORY_CATALOG: {
   reorderLevel: number;
   unitPrice: number;
   controlledSchedule?: ControlledSchedule;
-}[] = [
+};
+
+export const INVENTORY_CATALOG: InventoryCatalogEntry[] = [
   {
     name: 'Amoxicillin',
     strength: '500mg',
@@ -1603,6 +1658,10 @@ export const INVENTORY_CATEGORY_OPTIONS: SelectOption[] = Array.from(
   new Set(INVENTORY_CATALOG.map((m) => m.category)),
 ).map((c) => ({ value: c, label: c }));
 
+export function getCatalogEntry(name: string): InventoryCatalogEntry | null {
+  return INVENTORY_CATALOG.find((m) => m.name === name) ?? null;
+}
+
 /** Out of Stock takes precedence over Expiring Soon over Low Stock, so every
  * row lands in exactly one bucket — the Inventory Overview donut always sums
  * to the total row count. */
@@ -1612,6 +1671,316 @@ export function getInventoryRowStatus(row: InventoryBatchRow): InventoryStatus {
   if (daysLeft <= 60) return 'Expiring Soon';
   if (row.stockQty <= row.reorderLevel) return 'Low Stock';
   return 'In Stock';
+}
+
+// ── Stock Receiving ───────────────────────────────────────────────────────────
+// Purchase orders a supplier is still to deliver against, and the receipts a
+// pharmacist has already confirmed. Confirming a receipt (stockReceivingStore.ts)
+// does two real things: marks the PO Received/Partial, and calls
+// inventoryStore.ts's addStockBatch() for every line — a goods-received event
+// genuinely becomes new Drug Inventory stock, not a form that vanishes on submit.
+
+export type PurchaseOrderStatus = 'Pending' | 'Partial' | 'Received';
+
+export type PurchaseOrderItem = {
+  /** Resolvable via getCatalogEntry() for strength/form/unit/category/price. */
+  medicationName: string;
+  /** The supplier's own batch reference, prefilled into the receiving form —
+   * the pharmacist can correct it if the physical batch label differs. */
+  batchNo: string;
+  expiryDate: string; // ISO date
+  orderedQty: number;
+};
+
+export type PurchaseOrder = {
+  poNumber: string;
+  supplier: string; // resolvable via getSupplierInfo()
+  createdAt: string; // ISO
+  status: PurchaseOrderStatus;
+  items: PurchaseOrderItem[];
+};
+
+function poNumber(monthsAgo: number, seq: number): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() - monthsAgo);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  return `PO-${yyyy}-${mm}-${String(700 + seq).padStart(4, '0')}`;
+}
+
+const PO_ITEM_POOL: { name: string; batchPrefix: string }[] = [
+  { name: 'Amoxicillin', batchPrefix: 'AMX' },
+  { name: 'Paracetamol', batchPrefix: 'PAR' },
+  { name: 'Ciprofloxacin', batchPrefix: 'CIP' },
+  { name: 'Losartan', batchPrefix: 'LOS' },
+  { name: 'Salbutamol', batchPrefix: 'SAL' },
+  { name: 'Omeprazole', batchPrefix: 'OME' },
+  { name: 'Metformin', batchPrefix: 'MET' },
+  { name: 'Atorvastatin', batchPrefix: 'ATO' },
+  { name: 'Amlodipine', batchPrefix: 'AML' },
+  { name: 'Ibuprofen', batchPrefix: 'IBU' },
+  { name: 'Diclofenac', batchPrefix: 'DIC' },
+  { name: 'Metronidazole', batchPrefix: 'MTZ' },
+  { name: 'Ceftriaxone', batchPrefix: 'CFT' },
+  { name: 'Normal Saline', batchPrefix: 'NAC' },
+];
+
+function buildPoItems(startIdx: number, count: number, monthsAgo: number): PurchaseOrderItem[] {
+  return Array.from({ length: count }, (_, i) => {
+    const pick = PO_ITEM_POOL[(startIdx + i) % PO_ITEM_POOL.length]!;
+    const orderedQty = [50, 300, 400, 500, 800, 1000][(startIdx + i) % 6]!;
+    return {
+      medicationName: pick.name,
+      batchNo: `${pick.batchPrefix}${2500 + ((startIdx + i * 3) % 30)}`,
+      expiryDate: daysFromNow(180 - monthsAgo * 30 + ((startIdx + i) % 200)),
+      orderedQty,
+    };
+  });
+}
+
+/** 10 purchase orders — 8 still Pending (matching a real "awaiting receipt"
+ * queue), 2 already Received (their linked receipts are in
+ * STOCK_RECEIPTS_SEED below, so Recent Receipts is a genuine derived view). */
+export const PURCHASE_ORDERS_SEED: PurchaseOrder[] = [
+  {
+    poNumber: poNumber(0, 24),
+    supplier: 'MedPlus Distributors',
+    createdAt: pastDateAt(2, 9, 0),
+    status: 'Pending',
+    items: buildPoItems(0, 12, 0),
+  },
+  {
+    poNumber: poNumber(0, 23),
+    supplier: 'PharmaCare Nigeria Ltd',
+    createdAt: pastDateAt(3, 10, 30),
+    status: 'Pending',
+    items: buildPoItems(3, 6, 0),
+  },
+  {
+    poNumber: poNumber(0, 22),
+    supplier: 'Fidson Healthcare',
+    createdAt: pastDateAt(4, 11, 15),
+    status: 'Pending',
+    items: buildPoItems(6, 5, 0),
+  },
+  {
+    poNumber: poNumber(0, 21),
+    supplier: 'Emzor Pharmaceuticals',
+    createdAt: pastDateAt(5, 8, 45),
+    status: 'Pending',
+    items: buildPoItems(9, 4, 0),
+  },
+  {
+    poNumber: poNumber(0, 20),
+    supplier: 'May & Baker Nigeria',
+    createdAt: pastDateAt(6, 9, 20),
+    status: 'Pending',
+    items: buildPoItems(1, 7, 0),
+  },
+  {
+    poNumber: poNumber(0, 19),
+    supplier: 'Juhel Nigeria Ltd',
+    createdAt: pastDateAt(7, 10, 0),
+    status: 'Pending',
+    items: buildPoItems(4, 5, 0),
+  },
+  {
+    poNumber: poNumber(0, 18),
+    supplier: 'MedPlus Distributors',
+    createdAt: pastDateAt(8, 9, 40),
+    status: 'Pending',
+    items: buildPoItems(7, 6, 0),
+  },
+  {
+    poNumber: poNumber(0, 17),
+    supplier: 'Fidson Healthcare',
+    createdAt: pastDateAt(9, 11, 0),
+    status: 'Pending',
+    items: buildPoItems(2, 8, 0),
+  },
+  {
+    poNumber: poNumber(0, 16),
+    supplier: 'MedPlus Distributors',
+    createdAt: pastDateAt(1, 9, 0),
+    status: 'Received',
+    items: buildPoItems(0, 6, 0),
+  },
+  {
+    poNumber: poNumber(0, 15),
+    supplier: 'PharmaCare Nigeria Ltd',
+    createdAt: pastDateAt(2, 14, 0),
+    status: 'Received',
+    items: buildPoItems(3, 3, 0),
+  },
+];
+
+export const PO_OPTIONS: SelectOption[] = PURCHASE_ORDERS_SEED.filter(
+  (po) => po.status === 'Pending',
+).map((po) => ({ value: po.poNumber, label: po.poNumber }));
+
+export type StockReceiptItem = {
+  medicationName: string;
+  strength: string;
+  form: string;
+  unit: string;
+  category: string;
+  batchNo: string;
+  expiryDate: string; // ISO date
+  orderedQty: number;
+  receivedQty: number;
+  unitPrice: number;
+  reorderLevel: number;
+  controlledSchedule?: ControlledSchedule;
+};
+
+export type StockReceipt = {
+  id: string;
+  poNumber: string;
+  supplier: string;
+  warehouseLocationId: PharmacyLocationId;
+  deliveryNote: string;
+  referenceNo: string;
+  receivedBy: string;
+  receivedAt: string; // ISO
+  notes: string;
+  items: StockReceiptItem[];
+  totalValueExclTax: number;
+  tax: number;
+  totalValueInclTax: number;
+  status: 'Completed' | 'Partial';
+};
+
+const RECEIPT_VAT_RATE = 0.075; // Nigeria's standard VAT rate
+
+function buildReceiptItems(
+  picks: { name: string; batchNo: string; expiryDate: string; qty: number }[],
+): StockReceiptItem[] {
+  return picks.map((p) => {
+    const entry = getCatalogEntry(p.name)!;
+    return {
+      medicationName: entry.name,
+      strength: entry.strength,
+      form: entry.form,
+      unit: entry.unit,
+      category: entry.category,
+      batchNo: p.batchNo,
+      expiryDate: p.expiryDate,
+      orderedQty: p.qty,
+      receivedQty: p.qty,
+      unitPrice: entry.unitPrice,
+      reorderLevel: entry.reorderLevel,
+      ...(entry.controlledSchedule ? { controlledSchedule: entry.controlledSchedule } : {}),
+    };
+  });
+}
+
+function receiptTotals(items: StockReceiptItem[]): {
+  totalValueExclTax: number;
+  tax: number;
+  totalValueInclTax: number;
+} {
+  const totalValueExclTax = items.reduce((sum, i) => sum + i.receivedQty * i.unitPrice, 0);
+  const tax = Math.round(totalValueExclTax * RECEIPT_VAT_RATE);
+  return { totalValueExclTax, tax, totalValueInclTax: totalValueExclTax + tax };
+}
+
+const CURATED_RECEIPT_DEFS: {
+  id: string;
+  poNumber: string;
+  supplier: string;
+  warehouseLocationId: PharmacyLocationId;
+  receivedAt: string;
+  picks: { name: string; batchNo: string; expiryDate: string; qty: number }[];
+}[] = [
+  {
+    id: 'RCV-2026-0630-002',
+    poNumber: poNumber(0, 16),
+    supplier: 'MedPlus Distributors',
+    warehouseLocationId: 'loc_central',
+    receivedAt: pastDateAt(0, 10, 15),
+    picks: [
+      { name: 'Amoxicillin', batchNo: 'AMX2506', expiryDate: daysFromNow(400), qty: 1000 },
+      { name: 'Paracetamol', batchNo: 'PAR2505', expiryDate: daysFromNow(350), qty: 800 },
+      { name: 'Ciprofloxacin', batchNo: 'CIP2502', expiryDate: daysFromNow(300), qty: 500 },
+    ],
+  },
+  {
+    id: 'RCV-2026-0629-001',
+    poNumber: poNumber(0, 15),
+    supplier: 'PharmaCare Nigeria Ltd',
+    warehouseLocationId: 'loc_opd',
+    receivedAt: pastDateAt(1, 9, 30),
+    picks: [
+      { name: 'Losartan', batchNo: 'LOS2501', expiryDate: daysFromNow(560), qty: 300 },
+      { name: 'Salbutamol', batchNo: 'SAL2505', expiryDate: daysFromNow(280), qty: 50 },
+    ],
+  },
+  {
+    id: 'RCV-2026-0628-003',
+    poNumber: poNumber(0, 18),
+    supplier: 'Fidson Healthcare',
+    warehouseLocationId: 'loc_ward',
+    receivedAt: pastDateAt(2, 8, 50),
+    picks: [
+      { name: 'Omeprazole', batchNo: 'OME2503', expiryDate: daysFromNow(600), qty: 400 },
+      { name: 'Metformin', batchNo: 'MET2502', expiryDate: daysFromNow(320), qty: 600 },
+      { name: 'Atorvastatin', batchNo: 'ATO2504', expiryDate: daysFromNow(310), qty: 250 },
+    ],
+  },
+];
+
+const GENERATED_RECEIPT_DEFS = Array.from({ length: 14 }, (_, i) => {
+  const daysAgo = i < 4 ? 0 : i % 27; // several land "today" too, rest spread across ~this month
+  const supplier = SUPPLIER_DIRECTORY[i % SUPPLIER_DIRECTORY.length]!.name;
+  const location = PHARMACY_LOCATIONS[i % PHARMACY_LOCATIONS.length]!.id;
+  const itemCount = 2 + (i % 3);
+  const picks = Array.from({ length: itemCount }, (_, j) => {
+    const pool = PO_ITEM_POOL[(i + j) % PO_ITEM_POOL.length]!;
+    return {
+      name: pool.name,
+      batchNo: `${pool.batchPrefix}${2600 + ((i + j) % 40)}`,
+      expiryDate: daysFromNow(200 + ((i + j) % 300)),
+      qty: [50, 150, 300, 500, 700][(i + j) % 5]!,
+    };
+  });
+  return {
+    id: `RCV-${new Date().getFullYear()}-GEN-${String(i + 1).padStart(3, '0')}`,
+    poNumber: poNumber(0, 24 - (i % 9)),
+    supplier,
+    warehouseLocationId: location,
+    receivedAt: pastDateAt(daysAgo, 8 + (i % 9), (i * 13) % 60),
+    picks,
+  };
+});
+
+/** Curated recent receipts (for the Recent Receipts panel) plus generated
+ * history spread across this month (feeding the "Items Received"/"Value
+ * Received This Month" stats with real, derived totals). The store's live
+ * submitReceipt() prepends new real receipts to this same list. */
+export const STOCK_RECEIPTS_SEED: StockReceipt[] = [
+  ...CURATED_RECEIPT_DEFS,
+  ...GENERATED_RECEIPT_DEFS,
+].map((def) => {
+  const items = buildReceiptItems(def.picks);
+  const totals = receiptTotals(items);
+  return {
+    id: def.id,
+    poNumber: def.poNumber,
+    supplier: def.supplier,
+    warehouseLocationId: def.warehouseLocationId,
+    deliveryNote: `INV-${def.supplier.slice(0, 3).toUpperCase()}-${def.id.slice(-8)}`,
+    referenceNo: `REF-${def.id.slice(4)}`,
+    receivedBy: 'Mr. Emeka Obi',
+    receivedAt: def.receivedAt,
+    notes: 'Delivery made in good condition.',
+    items,
+    ...totals,
+    status: 'Completed' as const,
+  };
+});
+
+export function getPendingPurchaseOrders(): PurchaseOrder[] {
+  return PURCHASE_ORDERS_SEED.filter((po) => po.status === 'Pending');
 }
 
 // ── Stock transfers ───────────────────────────────────────────────────────────

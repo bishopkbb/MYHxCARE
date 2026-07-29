@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Stock Receiving' };
+import { StockReceivingWorkspace } from '@/features/pharmacy/components/StockReceivingWorkspace';
 
 export default function StockReceivingPage() {
-  return (
-    <ComingSoon
-      title="Stock Receiving"
-      description="Recording incoming stock deliveries against purchase orders and suppliers is on the way."
-    />
-  );
+  return <StockReceivingWorkspace />;
 }
