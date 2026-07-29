@@ -21,6 +21,7 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -654,22 +655,28 @@ export function StockTransfersWorkspace() {
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
                           <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {t.id}
-                            </p>
+                            <Tooltip content={t.id}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {t.id}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-48 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                              {getPharmacyLocation(t.fromLocationId).name}
-                            </p>
+                            <Tooltip content={getPharmacyLocation(t.fromLocationId).name}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                                {getPharmacyLocation(t.fromLocationId).name}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-48 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                              {getPharmacyLocation(t.toLocationId).name}
-                            </p>
+                            <Tooltip content={getPharmacyLocation(t.toLocationId).name}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                                {getPharmacyLocation(t.toLocationId).name}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-32 shrink-0 py-3 pr-2">
                             <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -699,9 +706,11 @@ export function StockTransfersWorkspace() {
                             </p>
                           </div>
                           <div className="w-40 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {t.requestedBy}
-                            </p>
+                            <Tooltip content={t.requestedBy}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {t.requestedBy}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
                             <button
@@ -765,9 +774,11 @@ export function StockTransfersWorkspace() {
                           className="size-2.5 shrink-0 rounded-full"
                           style={{ background: d.color }}
                         />
-                        <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {d.label}
-                        </span>
+                        <Tooltip content={d.label}>
+                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {d.label}
+                          </span>
+                        </Tooltip>
                       </div>
                       <span
                         className="shrink-0 font-sans font-medium"
@@ -802,9 +813,11 @@ export function StockTransfersWorkspace() {
                       >
                         {i + 1}
                       </span>
-                      <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                        {name}
-                      </span>
+                      <Tooltip content={name}>
+                        <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {name}
+                        </span>
+                      </Tooltip>
                     </div>
                     <span
                       className="shrink-0 font-sans font-medium"

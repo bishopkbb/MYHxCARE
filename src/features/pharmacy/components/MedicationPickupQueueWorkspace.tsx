@@ -21,6 +21,7 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -602,31 +603,39 @@ export function MedicationPickupQueueWorkspace() {
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
                           <div className="w-28 shrink-0 py-3 pr-2 pl-3">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {entry.rxNo}
-                            </p>
+                            <Tooltip content={entry.rxNo}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {entry.rxNo}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-44 shrink-0 py-3 pr-2">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {patient.name}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {patient.mrn}
-                            </p>
+                            <Tooltip content={patient.name}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {patient.name}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={patient.mrn}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {patient.mrn}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="min-w-[160px] flex-1 py-3 pr-2">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {entry.medicationName} {entry.dose}
-                            </p>
+                            <Tooltip content={`${entry.medicationName} ${entry.dose}`}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {entry.medicationName} {entry.dose}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-24 shrink-0 py-3 pr-2">
                             <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -648,14 +657,18 @@ export function MedicationPickupQueueWorkspace() {
                             </span>
                           </div>
                           <div className="w-32 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {entry.pickupType}
-                            </p>
+                            <Tooltip content={entry.pickupType}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {entry.pickupType}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-44 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {note}
-                            </p>
+                            <Tooltip content={note}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {note}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
                             <button
@@ -717,9 +730,11 @@ export function MedicationPickupQueueWorkspace() {
                           className="size-2.5 shrink-0 rounded-full"
                           style={{ background: d.color }}
                         />
-                        <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {d.label}
-                        </span>
+                        <Tooltip content={d.label}>
+                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {d.label}
+                          </span>
+                        </Tooltip>
                       </div>
                       <span
                         className="shrink-0 font-sans font-medium"
@@ -762,15 +777,21 @@ export function MedicationPickupQueueWorkspace() {
                       {firstOverdue.patient.initials}
                     </div>
                     <div className="min-w-0">
-                      <p
-                        className="truncate font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
+                      <Tooltip
+                        content={`${overdueCount} prescription ${overdueCount !== 1 ? 's' : ''} overdue`}
                       >
-                        {overdueCount} prescription{overdueCount !== 1 ? 's' : ''} overdue
-                      </p>
-                      <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                        Follow up with patients.
-                      </p>
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {overdueCount} prescription{overdueCount !== 1 ? 's' : ''} overdue
+                        </p>
+                      </Tooltip>
+                      <Tooltip content={`Follow up with patients.`}>
+                        <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                          Follow up with patients.
+                        </p>
+                      </Tooltip>
                     </div>
                   </button>
                 ) : (
@@ -798,15 +819,19 @@ export function MedicationPickupQueueWorkspace() {
                     <Info style={{ width: 16, height: 16, color: '#D97706' }} />
                   </div>
                   <div className="min-w-0">
-                    <p
-                      className="truncate font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
-                      Will Call / On Hold: {willCallOrHoldCount}
-                    </p>
-                    <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                      Items on hold for patient.
-                    </p>
+                    <Tooltip content={`Will Call / On Hold: ${willCallOrHoldCount}`}>
+                      <p
+                        className="truncate font-sans font-medium"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        Will Call / On Hold: {willCallOrHoldCount}
+                      </p>
+                    </Tooltip>
+                    <Tooltip content={`Items on hold for patient.`}>
+                      <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                        Items on hold for patient.
+                      </p>
+                    </Tooltip>
                   </div>
                 </button>
                 <div className="flex items-start gap-2.5 rounded-[10px] p-2.5">
@@ -817,15 +842,19 @@ export function MedicationPickupQueueWorkspace() {
                     <Clock style={{ width: 16, height: 16, color: '#00B4D8' }} />
                   </div>
                   <div className="min-w-0">
-                    <p
-                      className="truncate font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
-                      Pharmacy closes at 6:00 PM
-                    </p>
-                    <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                      Plan pickups accordingly.
-                    </p>
+                    <Tooltip content={`Pharmacy closes at 6:00 PM`}>
+                      <p
+                        className="truncate font-sans font-medium"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        Pharmacy closes at 6:00 PM
+                      </p>
+                    </Tooltip>
+                    <Tooltip content={`Plan pickups accordingly.`}>
+                      <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                        Plan pickups accordingly.
+                      </p>
+                    </Tooltip>
                   </div>
                 </div>
               </div>

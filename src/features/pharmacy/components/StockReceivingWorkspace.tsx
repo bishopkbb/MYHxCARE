@@ -19,6 +19,7 @@ import { useMemo, useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/useAuth';
@@ -631,15 +632,19 @@ export function StockReceivingWorkspace() {
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{index + 1}</p>
                         </div>
                         <div className="min-w-[160px] flex-1 py-3 pr-2">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {item.medicationName} {item.strength}
-                          </p>
-                          <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                            {item.form}
-                          </p>
+                          <Tooltip content={`${item.medicationName} ${item.strength}`}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {item.medicationName} {item.strength}
+                            </p>
+                          </Tooltip>
+                          <Tooltip content={item.form}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                              {item.form}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-32 shrink-0 py-2 pr-2">
                           <input
@@ -852,9 +857,11 @@ export function StockReceivingWorkspace() {
                       className="shrink-0"
                       style={{ width: 14, height: 14, color: '#8A98A3' }}
                     />
-                    <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {supplierInfo.email}
-                    </span>
+                    <Tooltip content={supplierInfo.email}>
+                      <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {supplierInfo.email}
+                      </span>
+                    </Tooltip>
                   </div>
                   <span
                     className="mt-1 inline-block w-fit rounded-full px-2.5 py-0.5 font-sans"
@@ -894,12 +901,14 @@ export function StockReceivingWorkspace() {
                 {recentReceipts.map((r) => (
                   <div key={r.id} className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <p
-                        className="truncate font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        {r.id}
-                      </p>
+                      <Tooltip content={r.id}>
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {r.id}
+                        </p>
+                      </Tooltip>
                       <p style={{ fontSize: 14, color: '#8A98A3' }}>{formatDate(r.receivedAt)}</p>
                       <p style={{ fontSize: 14, color: '#0D2630' }}>
                         {formatCurrency(r.totalValueInclTax)}

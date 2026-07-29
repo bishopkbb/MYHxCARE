@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -192,15 +193,19 @@ export function DispenseMedicationWorkspace() {
                     style={{ border: '1px solid rgba(0,100,130,0.12)', background: '#FFFFFF' }}
                   >
                     <div className="min-w-0">
-                      <p
-                        className="truncate font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        {p.name}
-                      </p>
-                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                        {e.medicationName} {e.dose} · {e.rxNo}
-                      </p>
+                      <Tooltip content={p.name}>
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {p.name}
+                        </p>
+                      </Tooltip>
+                      <Tooltip content={`${e.medicationName} ${e.dose} · ${e.rxNo}`}>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {e.medicationName} {e.dose} · {e.rxNo}
+                        </p>
+                      </Tooltip>
                     </div>
                   </button>
                 );
@@ -690,12 +695,14 @@ export function DispenseMedicationWorkspace() {
                         <span style={{ fontSize: 14, color: '#4A7080' }}>1</span>
                       </div>
                       <div className="min-w-[160px] flex-1 py-3 pr-2">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {entry.medicationName}
-                        </p>
+                        <Tooltip content={entry.medicationName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {entry.medicationName}
+                          </p>
+                        </Tooltip>
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>{entry.instructions}</p>
                       </div>
                       <div className="w-36 shrink-0 py-3 pr-2">
@@ -955,9 +962,11 @@ export function DispenseMedicationWorkspace() {
                             style={{ width: 15, height: 15, color: '#4A7080' }}
                             className="shrink-0"
                           />
-                          <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                            {a.name}
-                          </p>
+                          <Tooltip content={a.name}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                              {a.name}
+                            </p>
+                          </Tooltip>
                           <span className="shrink-0" style={{ fontSize: 14, color: '#8A98A3' }}>
                             {a.sizeLabel}
                           </span>

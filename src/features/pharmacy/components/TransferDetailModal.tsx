@@ -5,6 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
 import { formatDateTime } from '@/utils/datetime';
+import { Tooltip } from '@components/shared/Tooltip';
 import type { StockTransfer } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
 
 const FOCUS_RING =
@@ -102,12 +103,14 @@ export function TransferDetailModal({
                 style={{ background: '#F5FBFD' }}
               >
                 <div className="min-w-0">
-                  <p
-                    className="truncate font-sans font-medium"
-                    style={{ fontSize: 14, color: '#0D2630' }}
-                  >
-                    {item.medicationName} {item.strength}
-                  </p>
+                  <Tooltip content={`${item.medicationName} ${item.strength}`}>
+                    <p
+                      className="truncate font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      {item.medicationName} {item.strength}
+                    </p>
+                  </Tooltip>
                   <p style={{ fontSize: 14, color: '#8A98A3' }}>Batch {item.batchNo}</p>
                 </div>
                 <p

@@ -20,6 +20,7 @@ import { AnimatedDonutChart } from '@components/shared/AnimatedDonutChart';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
 import { ROUTES } from '@/constants/routes';
@@ -668,12 +669,14 @@ export function StockAdjustmentsWorkspace() {
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
                           <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {a.id}
-                            </p>
+                            <Tooltip content={a.id}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {a.id}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-32 shrink-0 py-3 pr-2">
                             <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -681,9 +684,11 @@ export function StockAdjustmentsWorkspace() {
                             </p>
                           </div>
                           <div className="w-44 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                              {getPharmacyLocation(a.locationId).name}
-                            </p>
+                            <Tooltip content={getPharmacyLocation(a.locationId).name}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                                {getPharmacyLocation(a.locationId).name}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-32 shrink-0 py-3 pr-2 pl-3">
                             <span
@@ -700,9 +705,11 @@ export function StockAdjustmentsWorkspace() {
                             </span>
                           </div>
                           <div className="w-44 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {a.reason}
-                            </p>
+                            <Tooltip content={a.reason}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {a.reason}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-28 shrink-0 py-3 pr-2 text-right">
                             <p style={{ fontSize: 14, color: '#0D2630' }}>
@@ -719,14 +726,18 @@ export function StockAdjustmentsWorkspace() {
                             </p>
                           </div>
                           <div className="w-36 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {a.adjustedBy}
-                            </p>
+                            <Tooltip content={a.adjustedBy}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {a.adjustedBy}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="min-w-[90px] flex-1 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {a.referenceNo ?? '—'}
-                            </p>
+                            <Tooltip content={a.referenceNo ?? '—'}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {a.referenceNo ?? '—'}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="flex w-16 shrink-0 items-center justify-end py-3 pr-3">
                             <button
@@ -782,9 +793,11 @@ export function StockAdjustmentsWorkspace() {
                           className="size-2.5 shrink-0 rounded-full"
                           style={{ background: d.color }}
                         />
-                        <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {d.label}
-                        </span>
+                        <Tooltip content={d.label}>
+                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {d.label}
+                          </span>
+                        </Tooltip>
                       </div>
                       <span
                         className="shrink-0 font-sans font-medium"

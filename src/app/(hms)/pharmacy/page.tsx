@@ -27,6 +27,7 @@ import { useEffect, useState } from 'react';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { QuickActionTile } from '@components/shared/QuickActionTile';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard, StatMini } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -410,15 +411,21 @@ export default function PharmacyDashboardPage() {
                     return (
                       <div key={entry.rxNo} className="flex items-center gap-3 py-2.5">
                         <div className="min-w-0 flex-1">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
+                          <Tooltip content={patient.name}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {patient.name}
+                            </p>
+                          </Tooltip>
+                          <Tooltip
+                            content={`${entry.medicationName} ${entry.dose} · ${entry.doctorName}`}
                           >
-                            {patient.name}
-                          </p>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {entry.medicationName} {entry.dose} · {entry.doctorName}
-                          </p>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {entry.medicationName} {entry.dose} · {entry.doctorName}
+                            </p>
+                          </Tooltip>
                         </div>
                         <span
                           className="shrink-0 rounded-full px-2.5 py-0.5 whitespace-nowrap"
@@ -463,16 +470,22 @@ export default function PharmacyDashboardPage() {
                     return (
                       <div key={entry.rxNo} className="flex items-center gap-3 py-2.5">
                         <div className="min-w-0 flex-1">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
+                          <Tooltip content={patient.name}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {patient.name}
+                            </p>
+                          </Tooltip>
+                          <Tooltip
+                            content={`${entry.medicationName} · ${' '} ${entry.dispensedAt ? formatTime(entry.dispensedAt) : '—'}`}
                           >
-                            {patient.name}
-                          </p>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {entry.medicationName} ·{' '}
-                            {entry.dispensedAt ? formatTime(entry.dispensedAt) : '—'}
-                          </p>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {entry.medicationName} ·{' '}
+                              {entry.dispensedAt ? formatTime(entry.dispensedAt) : '—'}
+                            </p>
+                          </Tooltip>
                         </div>
                         <button
                           type="button"
@@ -510,12 +523,14 @@ export default function PharmacyDashboardPage() {
                 lowStock.slice(0, 5).map((item) => (
                   <div key={item.id} className="flex items-center gap-3 py-2.5">
                     <div className="min-w-0 flex-1">
-                      <p
-                        className="truncate font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        {item.name}
-                      </p>
+                      <Tooltip content={item.name}>
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {item.name}
+                        </p>
+                      </Tooltip>
                     </div>
                     <span className="shrink-0" style={{ fontSize: 14, color: '#DC2626' }}>
                       {item.currentStock} left
@@ -546,15 +561,19 @@ export default function PharmacyDashboardPage() {
                 expiringBatches.slice(0, 5).map(({ item, batch, daysLeft }) => (
                   <div key={batch.batchNo} className="flex items-center gap-3 py-2.5">
                     <div className="min-w-0 flex-1">
-                      <p
-                        className="truncate font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        {item.name}
-                      </p>
-                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                        Batch {batch.batchNo} · {formatDate(batch.expiryDate)}
-                      </p>
+                      <Tooltip content={item.name}>
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {item.name}
+                        </p>
+                      </Tooltip>
+                      <Tooltip content={`Batch ${batch.batchNo} · ${formatDate(batch.expiryDate)}`}>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          Batch {batch.batchNo} · {formatDate(batch.expiryDate)}
+                        </p>
+                      </Tooltip>
                     </div>
                     <span
                       className="shrink-0 rounded-full px-2.5 py-0.5 whitespace-nowrap"
@@ -597,13 +616,17 @@ export default function PharmacyDashboardPage() {
                   .map((t) => (
                     <div key={t.id} className="flex items-center gap-3 py-2.5">
                       <div className="min-w-0 flex-1">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
+                        <Tooltip
+                          content={`${getPharmacyLocation(t.fromLocationId).shortName} → ${' '} ${getPharmacyLocation(t.toLocationId).shortName}`}
                         >
-                          {getPharmacyLocation(t.fromLocationId).shortName} →{' '}
-                          {getPharmacyLocation(t.toLocationId).shortName}
-                        </p>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {getPharmacyLocation(t.fromLocationId).shortName} →{' '}
+                            {getPharmacyLocation(t.toLocationId).shortName}
+                          </p>
+                        </Tooltip>
                         <p style={{ fontSize: 14, color: '#4A7080' }}>
                           {getTransferItemCount(t)} items
                         </p>
@@ -718,9 +741,11 @@ export default function PharmacyDashboardPage() {
                         >
                           {n.title}
                         </p>
-                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {n.body}
-                        </p>
+                        <Tooltip content={n.body}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {n.body}
+                          </p>
+                        </Tooltip>
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>
                           {toRelativeTime(n.timestamp)}
                         </p>

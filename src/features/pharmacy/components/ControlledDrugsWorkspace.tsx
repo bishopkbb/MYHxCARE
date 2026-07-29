@@ -20,6 +20,7 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -646,31 +647,39 @@ export function ControlledDrugsWorkspace() {
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
                           <div className="w-36 shrink-0 py-3 pr-2 pl-3">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {activity.rxNo}
-                            </p>
+                            <Tooltip content={activity.rxNo}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {activity.rxNo}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-44 shrink-0 py-3 pr-2">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {patient.name}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {patient.mrn}
-                            </p>
+                            <Tooltip content={patient.name}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {patient.name}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={patient.mrn}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {patient.mrn}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="min-w-[170px] flex-1 py-3 pr-2">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {activity.medicationName}
-                            </p>
+                            <Tooltip content={activity.medicationName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {activity.medicationName}
+                              </p>
+                            </Tooltip>
                             <p style={{ fontSize: 14, color: '#8A98A3' }}>{activity.dose}</p>
                           </div>
                           <div className="w-28 shrink-0 py-3 pr-2">
@@ -699,12 +708,16 @@ export function ControlledDrugsWorkspace() {
                             </p>
                           </div>
                           <div className="w-40 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {activity.doctorName}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {activity.department}
-                            </p>
+                            <Tooltip content={activity.doctorName}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {activity.doctorName}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={activity.department}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {activity.department}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-40 shrink-0 py-3 pr-2">
                             <span
@@ -780,9 +793,11 @@ export function ControlledDrugsWorkspace() {
                           className="size-2.5 shrink-0 rounded-full"
                           style={{ background: d.color }}
                         />
-                        <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          Schedule {d.label.replace('C-', '')}
-                        </span>
+                        <Tooltip content={`Schedule ${d.label.replace('C-', '')}`}>
+                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            Schedule {d.label.replace('C-', '')}
+                          </span>
+                        </Tooltip>
                       </div>
                       <span
                         className="shrink-0 font-sans font-medium"
@@ -818,12 +833,14 @@ export function ControlledDrugsWorkspace() {
                         style={{ width: 16, height: 16, color: '#D97706' }}
                       />
                       <div className="min-w-0 flex-1">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {item.name}
-                        </p>
+                        <Tooltip content={item.name}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {item.name}
+                          </p>
+                        </Tooltip>
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>
                           {item.currentStock} {item.unit}
                           {item.currentStock === 1 ? '' : 's'} left · reorder at {item.reorderLevel}
@@ -854,12 +871,14 @@ export function ControlledDrugsWorkspace() {
                         style={{ width: 16, height: 16, color: '#DC2626' }}
                       />
                       <div className="min-w-0 flex-1">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {row.item.name}
-                        </p>
+                        <Tooltip content={row.item.name}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {row.item.name}
+                          </p>
+                        </Tooltip>
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>
                           Batch {row.batch.batchNo} — {row.daysLeft} day
                           {row.daysLeft === 1 ? '' : 's'} left

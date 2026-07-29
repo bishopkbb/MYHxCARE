@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -624,12 +625,14 @@ export default function PrescriptionDetailsWorkspace() {
                       <span style={{ fontSize: 14, color: '#4A7080' }}>1</span>
                     </div>
                     <div className="min-w-[160px] flex-1 py-3 pr-2">
-                      <p
-                        className="truncate font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        {entry.medicationName}
-                      </p>
+                      <Tooltip content={entry.medicationName}>
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {entry.medicationName}
+                        </p>
+                      </Tooltip>
                     </div>
                     <div className="w-32 shrink-0 py-3 pr-2">
                       <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -652,9 +655,11 @@ export default function PrescriptionDetailsWorkspace() {
                       <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.route}</p>
                     </div>
                     <div className="w-40 shrink-0 py-3 pr-3">
-                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                        {entry.instructions}
-                      </p>
+                      <Tooltip content={entry.instructions}>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {entry.instructions}
+                        </p>
+                      </Tooltip>
                     </div>
                   </div>
                 </div>
@@ -815,12 +820,14 @@ export default function PrescriptionDetailsWorkspace() {
                   {PRESCRIPTION_ATTACHMENTS_SEED.map((att) => (
                     <div key={att.id} className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {att.filename}
-                        </p>
+                        <Tooltip content={att.filename}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {att.filename}
+                          </p>
+                        </Tooltip>
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>
                           {att.sizeLabel} · {formatHumanDate(att.uploadedAt)}
                         </p>

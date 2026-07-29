@@ -2,7 +2,7 @@
 
 import { ArrowDown, ArrowUp, Package, Plus, Search, Trash2, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-
+import { Tooltip } from '@components/shared/Tooltip';
 import { FormSelect } from '@components/shared/FormSelect';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
 import { formatCurrency } from '@/utils/currency';
@@ -342,16 +342,22 @@ export function NewAdjustmentModal({
                             style={{ background: '#F5FBFD' }}
                           >
                             <div className="min-w-0 flex-1">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
+                              <Tooltip content={`${b.medicationName} ${b.strength}`}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {b.medicationName} {b.strength}
+                                </p>
+                              </Tooltip>
+                              <Tooltip
+                                content={`Batch ${b.batchNo} · ${b.stockQty} ${b.unit} ${b.stockQty === 1 ? '' : 's'} on hand`}
                               >
-                                {b.medicationName} {b.strength}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                Batch {b.batchNo} · {b.stockQty} {b.unit}
-                                {b.stockQty === 1 ? '' : 's'} on hand
-                              </p>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  Batch {b.batchNo} · {b.stockQty} {b.unit}
+                                  {b.stockQty === 1 ? '' : 's'} on hand
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="flex shrink-0 items-center gap-1.5">
                               <input
@@ -431,15 +437,19 @@ export function NewAdjustmentModal({
                           style={{ background: '#F5FBFD' }}
                         >
                           <div className="min-w-0 flex-1">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {item.medicationName} {item.strength}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              Batch {item.batchNo}
-                            </p>
+                            <Tooltip content={`${item.medicationName} ${item.strength}`}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {item.medicationName} {item.strength}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={`Batch ${item.batchNo}`}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                Batch {item.batchNo}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="flex shrink-0 items-center gap-1.5">
                             <input

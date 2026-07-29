@@ -25,6 +25,7 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
 import { ROUTES } from '@/constants/routes';
@@ -700,28 +701,36 @@ export function BatchManagementWorkspace() {
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
                           <div className="w-28 shrink-0 py-3 pr-2 pl-3">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {row.batchNo}
-                            </p>
+                            <Tooltip content={row.batchNo}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {row.batchNo}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="min-w-[160px] flex-1 py-3 pr-2">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {row.medicationName}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {row.strength} {row.form}
-                            </p>
+                            <Tooltip content={row.medicationName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {row.medicationName}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={`${row.strength} ${row.form}`}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {row.strength} {row.form}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-40 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {row.manufacturer ?? '—'}
-                            </p>
+                            <Tooltip content={row.manufacturer ?? '—'}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {row.manufacturer ?? '—'}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-32 shrink-0 py-3 pr-2">
                             <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -745,9 +754,11 @@ export function BatchManagementWorkspace() {
                             </p>
                           </div>
                           <div className="w-44 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {getPharmacyLocation(row.locationId).name}
-                            </p>
+                            <Tooltip content={getPharmacyLocation(row.locationId).name}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {getPharmacyLocation(row.locationId).name}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-24 shrink-0 py-3 pr-2 text-right">
                             <p style={{ fontSize: 14, color: '#0D2630' }}>
@@ -834,9 +845,11 @@ export function BatchManagementWorkspace() {
                           className="size-2.5 shrink-0 rounded-full"
                           style={{ background: d.color }}
                         />
-                        <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {d.label}
-                        </span>
+                        <Tooltip content={d.label}>
+                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {d.label}
+                          </span>
+                        </Tooltip>
                       </div>
                       <span
                         className="shrink-0 font-sans font-medium"

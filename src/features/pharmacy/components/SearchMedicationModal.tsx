@@ -4,6 +4,7 @@ import { Package, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { formatDate } from '@/utils/datetime';
+import { Tooltip } from '@components/shared/Tooltip';
 import { DRUG_INVENTORY } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
 
 const FOCUS_RING =
@@ -99,16 +100,22 @@ export function SearchMedicationModal({ onClose }: { onClose: () => void }) {
                     style={{ border: '1px solid rgba(0,100,130,0.12)' }}
                   >
                     <div className="min-w-0 flex-1">
-                      <p
-                        className="truncate font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
+                      <Tooltip content={drug.name}>
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {drug.name}
+                        </p>
+                      </Tooltip>
+                      <Tooltip
+                        content={`${drug.category} · Batch ${drug.batches[0]?.batchNo} · Exp ${' '} ${drug.batches[0] ? formatDate(drug.batches[0].expiryDate) : '—'}`}
                       >
-                        {drug.name}
-                      </p>
-                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                        {drug.category} · Batch {drug.batches[0]?.batchNo} · Exp{' '}
-                        {drug.batches[0] ? formatDate(drug.batches[0].expiryDate) : '—'}
-                      </p>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {drug.category} · Batch {drug.batches[0]?.batchNo} · Exp{' '}
+                          {drug.batches[0] ? formatDate(drug.batches[0].expiryDate) : '—'}
+                        </p>
+                      </Tooltip>
                     </div>
                     <div className="shrink-0 text-right">
                       <p

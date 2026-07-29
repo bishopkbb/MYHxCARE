@@ -19,6 +19,7 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -610,31 +611,39 @@ export function MedicationRefillRequestsWorkspace() {
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
                           <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {request.id}
-                            </p>
+                            <Tooltip content={request.id}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {request.id}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-44 shrink-0 py-3 pr-2">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {patient.name}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {patient.mrn}
-                            </p>
+                            <Tooltip content={patient.name}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {patient.name}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={patient.mrn}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {patient.mrn}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="min-w-[160px] flex-1 py-3 pr-2">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {request.medicationName}
-                            </p>
+                            <Tooltip content={request.medicationName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {request.medicationName}
+                              </p>
+                            </Tooltip>
                             <p style={{ fontSize: 14, color: '#8A98A3' }}>
                               Qty {request.qty} {request.form}
                               {request.qty === 1 ? '' : 's'}
@@ -668,9 +677,11 @@ export function MedicationRefillRequestsWorkspace() {
                             </span>
                           </div>
                           <div className="w-40 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {requestedByLabel(request)}
-                            </p>
+                            <Tooltip content={requestedByLabel(request)}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {requestedByLabel(request)}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
                             <button
@@ -737,9 +748,11 @@ export function MedicationRefillRequestsWorkspace() {
                           className="size-2.5 shrink-0 rounded-full"
                           style={{ background: d.color }}
                         />
-                        <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {d.label}
-                        </span>
+                        <Tooltip content={d.label}>
+                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {d.label}
+                          </span>
+                        </Tooltip>
                       </div>
                       <span
                         className="shrink-0 font-sans font-medium"

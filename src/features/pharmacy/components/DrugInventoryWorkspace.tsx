@@ -22,6 +22,7 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
 import { ROUTES } from '@/constants/routes';
@@ -657,35 +658,47 @@ export function DrugInventoryWorkspace() {
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
                           <div className="min-w-[170px] flex-1 py-3 pr-2 pl-3">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {row.medicationName}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {row.form}
-                            </p>
+                            <Tooltip content={row.medicationName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {row.medicationName}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={row.form}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {row.form}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-40 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {row.strength} {row.form}
-                            </p>
+                            <Tooltip content={`${row.strength} ${row.form}`}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {row.strength} {row.form}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-36 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {row.category}
-                            </p>
+                            <Tooltip content={row.category}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {row.category}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-40 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {getPharmacyLocation(row.locationId).name}
-                            </p>
+                            <Tooltip content={getPharmacyLocation(row.locationId).name}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {getPharmacyLocation(row.locationId).name}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-28 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                              {row.batchNo}
-                            </p>
+                            <Tooltip content={row.batchNo}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                                {row.batchNo}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-32 shrink-0 py-3 pr-2">
                             <p style={{ fontSize: 14, color: '#0D2630' }}>
@@ -783,12 +796,14 @@ export function DrugInventoryWorkspace() {
                       return (
                         <div key={row.id} className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {row.medicationName} {row.strength}
-                            </p>
+                            <Tooltip content={`${row.medicationName} ${row.strength}`}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {row.medicationName} {row.strength}
+                              </p>
+                            </Tooltip>
                             <p style={{ fontSize: 14, color: '#8A98A3' }}>
                               {formatDate(row.expiryDate)}
                             </p>
@@ -838,12 +853,14 @@ export function DrugInventoryWorkspace() {
                     {lowStockRows.map(({ row }) => (
                       <div key={row.id} className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {row.medicationName} {row.strength}
-                          </p>
+                          <Tooltip content={`${row.medicationName} ${row.strength}`}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {row.medicationName} {row.strength}
+                            </p>
+                          </Tooltip>
                           <p style={{ fontSize: 14, color: '#8A98A3' }}>Qty {row.stockQty}</p>
                         </div>
                         <span className="shrink-0" style={{ fontSize: 14, color: '#8A98A3' }}>
@@ -887,12 +904,14 @@ export function DrugInventoryWorkspace() {
                     {outOfStockRows.map(({ row }) => (
                       <div key={row.id} className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {row.medicationName} {row.strength}
-                          </p>
+                          <Tooltip content={`${row.medicationName} ${row.strength}`}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {row.medicationName} {row.strength}
+                            </p>
+                          </Tooltip>
                           <p style={{ fontSize: 14, color: '#8A98A3' }}>
                             {getPharmacyLocation(row.locationId).name}
                           </p>
@@ -931,9 +950,11 @@ export function DrugInventoryWorkspace() {
                           className="size-2.5 shrink-0 rounded-full"
                           style={{ background: d.color }}
                         />
-                        <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {d.label}
-                        </span>
+                        <Tooltip content={d.label}>
+                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {d.label}
+                          </span>
+                        </Tooltip>
                       </div>
                       <span
                         className="shrink-0 font-sans font-medium"
@@ -960,9 +981,11 @@ export function DrugInventoryWorkspace() {
               <div className="mt-3 flex flex-col gap-2.5">
                 {topCategoriesByValue.map(([category, value]) => (
                   <div key={category} className="flex items-center justify-between gap-2">
-                    <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {category}
-                    </span>
+                    <Tooltip content={category}>
+                      <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {category}
+                      </span>
+                    </Tooltip>
                     <span
                       className="shrink-0 font-sans font-medium"
                       style={{ fontSize: 14, color: '#0D2630' }}
