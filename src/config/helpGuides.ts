@@ -1081,6 +1081,31 @@ const MEDICATION_REFILL_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'expiry-management',
+  title: 'Expiry Management',
+  intro:
+    'Monitor medication expiry dates and take action to minimize waste and ensure patient safety.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Expired Items, Expiring Within 30 Days, and the 31–60/61–90 day buckets are clickable — each filters the table to that window.',
+    },
+    {
+      heading: 'The Expiry Items list',
+      body: 'This table only shows items that are expired or within 90 days of expiry — healthy stock beyond that lives in Drug Inventory.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'Mark as Returned removes an expired batch from available stock. Adjust Stock corrects its quantity. Transfer Batch opens Stock Transfers.',
+    },
+    {
+      heading: 'Expiry Overview and Top Items Expiring Soon',
+      body: 'The donut chart breaks all stock down by expiry window. Top Items Expiring Soon ranks the most urgent batches first.',
+    },
+  ],
+};
+
 const BATCH_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'batch-management',
   title: 'Batch Management',
@@ -2381,6 +2406,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;
   if (pathname.startsWith('/pharmacy/transfers')) return STOCK_TRANSFERS_GUIDE;

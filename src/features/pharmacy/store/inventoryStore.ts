@@ -83,6 +83,16 @@ export function toggleBatchHold(id: string): void {
   emit();
 }
 
+/** Zeroes out a batch that's being sent back to the supplier/manufacturer —
+ * Expiry Management's "Mark as Returned" action. A real stock movement, not
+ * just a status label: the units genuinely leave available stock. */
+export function markBatchReturned(id: string): void {
+  const idx = batches.findIndex((b) => b.id === id);
+  if (idx === -1) return;
+  batches = batches.map((b, i) => (i === idx ? { ...b, stockQty: 0 } : b));
+  emit();
+}
+
 /** Every batch tracked at one location, including ones already at zero —
  * stockAdjustmentStore.ts's New Adjustment picker needs zero-stock batches
  * too (e.g. correcting an under-recorded receipt back up from 0). */

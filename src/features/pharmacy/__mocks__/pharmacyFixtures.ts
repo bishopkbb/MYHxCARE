@@ -1735,6 +1735,29 @@ export function getBatchStatus(row: InventoryBatchRow): BatchStatus {
   return 'Active';
 }
 
+// ── Expiry Management ────────────────────────────────────────────────────────
+// A pure date-lens over the same live inventoryStore.ts batches — unlike
+// getBatchStatus() (which also cares about hold/out-of-stock), this only
+// buckets by how much shelf life is left.
+
+export type ExpiryBucket = 'Expired' | '≤ 30 Days' | '31 – 60 Days' | '61 – 90 Days' | '> 90 Days';
+
+export const EXPIRY_STATUS_OPTIONS: SelectOption[] = [
+  { value: 'Expired', label: 'Expired' },
+  { value: '≤ 30 Days', label: 'Expiring within 30 Days' },
+  { value: '31 – 60 Days', label: 'Expiring in 31–60 Days' },
+  { value: '61 – 90 Days', label: 'Expiring in 61–90 Days' },
+];
+
+export function getExpiryBucket(row: InventoryBatchRow): ExpiryBucket {
+  const daysLeft = getBatchDaysLeft(row);
+  if (daysLeft < 0) return 'Expired';
+  if (daysLeft <= 30) return '≤ 30 Days';
+  if (daysLeft <= 60) return '31 – 60 Days';
+  if (daysLeft <= 90) return '61 – 90 Days';
+  return '> 90 Days';
+}
+
 // ── Stock Receiving ───────────────────────────────────────────────────────────
 // Purchase orders a supplier is still to deliver against, and the receipts a
 // pharmacist has already confirmed. Confirming a receipt (stockReceivingStore.ts)

@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Expiry Management' };
+import { ExpiryManagementWorkspace } from '@/features/pharmacy/components/ExpiryManagementWorkspace';
 
 export default function ExpiryManagementPage() {
-  return (
-    <ComingSoon
-      title="Expiry Management"
-      description="A full expiry calendar with automated FEFO alerts across every batch is on the way."
-    />
-  );
+  return <ExpiryManagementWorkspace />;
 }
