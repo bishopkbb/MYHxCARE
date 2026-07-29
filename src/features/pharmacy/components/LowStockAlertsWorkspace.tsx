@@ -24,6 +24,7 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { StatCard } from '@components/shared/StatCard';
+import { Tooltip } from '@components/shared/Tooltip';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
@@ -600,20 +601,26 @@ export function LowStockAlertsWorkspace() {
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
                           <div className="min-w-[160px] flex-1 py-3 pr-2 pl-3">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {row.medicationName}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {row.strength} {row.form}
-                            </p>
+                            <Tooltip content={row.medicationName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {row.medicationName}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={`${row.strength} ${row.form}`}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {row.strength} {row.form}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-44 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {getPharmacyLocation(row.locationId).name}
-                            </p>
+                            <Tooltip content={getPharmacyLocation(row.locationId).name}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {getPharmacyLocation(row.locationId).name}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-36 shrink-0 py-3 pr-3 text-right">
                             <p style={{ fontSize: 14, color: '#0D2630' }}>
@@ -713,9 +720,11 @@ export function LowStockAlertsWorkspace() {
                           className="size-2.5 shrink-0 rounded-full"
                           style={{ background: d.color }}
                         />
-                        <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {d.label}
-                        </span>
+                        <Tooltip content={d.label}>
+                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {d.label}
+                          </span>
+                        </Tooltip>
                       </div>
                       <span
                         className="shrink-0 font-sans font-medium"
@@ -764,12 +773,14 @@ export function LowStockAlertsWorkspace() {
                     >
                       {i + 1}
                     </span>
-                    <p
-                      className="min-w-0 flex-1 truncate font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
-                      {row.medicationName} {row.strength}
-                    </p>
+                    <Tooltip content={`${row.medicationName} ${row.strength}`}>
+                      <p
+                        className="min-w-0 flex-1 truncate font-sans font-medium"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        {row.medicationName} {row.strength}
+                      </p>
+                    </Tooltip>
                     <span
                       className="shrink-0"
                       style={{ fontSize: 14, color: daysOfStock <= 3 ? '#DC2626' : '#D97706' }}
