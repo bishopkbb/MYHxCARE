@@ -22,20 +22,29 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 /** Views a batch's full detail and, for pharmacists, corrects its on-hand
- * quantity — lazy-loaded (checklist §14). A real write against
- * inventoryStore.ts, reflected immediately in the table/stats/donut. */
+ * quantity and reorder level — lazy-loaded (checklist §14). A real write
+ * against inventoryStore.ts, reflected immediately in the table/stats/donut
+ * of every screen that shares it. */
 export function AdjustStockModal({
   row,
   onAdjust,
   onClose,
 }: {
   row: InventoryBatchRow;
-  onAdjust: (id: string, newQty: number) => void;
+  onAdjust: (id: string, newQty: number, newReorderLevel: number) => void;
   onClose: () => void;
 }) {
   const [newQty, setNewQty] = useState(String(row.stockQty));
+  const [newReorderLevel, setNewReorderLevel] = useState(String(row.reorderLevel));
   const parsedQty = Number(newQty);
-  const canSubmit = newQty !== '' && Number.isFinite(parsedQty) && parsedQty >= 0;
+  const parsedReorderLevel = Number(newReorderLevel);
+  const canSubmit =
+    newQty !== '' &&
+    Number.isFinite(parsedQty) &&
+    parsedQty >= 0 &&
+    newReorderLevel !== '' &&
+    Number.isFinite(parsedReorderLevel) &&
+    parsedReorderLevel >= 0;
 
   return (
     <div
@@ -80,7 +89,6 @@ export function AdjustStockModal({
             <DetailRow label="Location" value={getPharmacyLocation(row.locationId).name} />
             <DetailRow label="Supplier" value={row.supplier} />
             <DetailRow label="Expiry Date" value={formatDate(row.expiryDate)} />
-            <DetailRow label="Reorder Level" value={`${row.reorderLevel} ${row.unit}s`} />
           </div>
 
           <div className="mt-4">
@@ -105,6 +113,28 @@ export function AdjustStockModal({
               {row.stockQty === 1 ? '' : 's'} on hand.
             </p>
           </div>
+
+          <div className="mt-4">
+            <label
+              htmlFor="adjust-reorder"
+              className="mb-1.5 block font-sans font-medium"
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              Reorder Level ({row.unit}s)
+            </label>
+            <input
+              id="adjust-reorder"
+              type="number"
+              min={0}
+              value={newReorderLevel}
+              onChange={(e) => setNewReorderLevel(e.target.value)}
+              className={`h-11 w-full rounded-[10px] px-3.5 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
+              style={{ fontSize: 14, border: '1px solid rgba(0,100,130,0.18)', color: '#0D2630' }}
+            />
+            <p className="mt-1.5" style={{ fontSize: 14, color: '#8A98A3' }}>
+              Stock at or below this threshold triggers a reorder alert.
+            </p>
+          </div>
         </div>
 
         <div
@@ -121,12 +151,12 @@ export function AdjustStockModal({
           </button>
           <button
             type="button"
-            onClick={() => canSubmit && onAdjust(row.id, parsedQty)}
+            onClick={() => canSubmit && onAdjust(row.id, parsedQty, parsedReorderLevel)}
             disabled={!canSubmit}
             className={`flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
             style={{ fontSize: 14, background: '#00B4D8' }}
           >
-            Save Quantity
+            Save Changes
           </button>
         </div>
       </div>

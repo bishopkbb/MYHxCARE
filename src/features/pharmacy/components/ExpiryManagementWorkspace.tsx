@@ -43,6 +43,7 @@ import {
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
 import {
   adjustStockQty,
+  updateReorderLevel,
   markBatchReturned,
   useInventoryBatches,
 } from '@/features/pharmacy/store/inventoryStore';
@@ -342,8 +343,9 @@ export function ExpiryManagementWorkspace() {
     );
   }
 
-  function handleAdjustStock(id: string, newQty: number) {
+  function handleAdjustStock(id: string, newQty: number, newReorderLevel: number) {
     adjustStockQty(id, newQty);
+    updateReorderLevel(id, newReorderLevel);
     setModal(null);
     toast.success('Quantity updated', 'Batch stock quantity has been adjusted.');
   }

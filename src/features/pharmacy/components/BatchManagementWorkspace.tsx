@@ -44,6 +44,7 @@ import {
 import {
   addStockBatch,
   adjustStockQty,
+  updateReorderLevel,
   toggleBatchHold,
   useInventoryBatches,
 } from '@/features/pharmacy/store/inventoryStore';
@@ -331,8 +332,9 @@ export function BatchManagementWorkspace() {
     toast.success('Batch added', `${entry.medicationName} batch ${entry.batchNo} added.`);
   }
 
-  function handleAdjustStock(id: string, newQty: number) {
+  function handleAdjustStock(id: string, newQty: number, newReorderLevel: number) {
     adjustStockQty(id, newQty);
+    updateReorderLevel(id, newReorderLevel);
     setModal(null);
     toast.success('Quantity updated', 'Batch stock quantity has been adjusted.');
   }

@@ -1758,6 +1758,42 @@ export function getExpiryBucket(row: InventoryBatchRow): ExpiryBucket {
   return '> 90 Days';
 }
 
+// ── Low Stock Alerts ─────────────────────────────────────────────────────────
+// A stock-runway lens over the same live inventoryStore.ts batches.
+
+export type StockAlertLevel = 'Critical' | 'Low Stock' | 'Reorder Recommended' | 'All Good';
+
+export const ALERT_LEVEL_OPTIONS: SelectOption[] = [
+  { value: 'Critical', label: 'Critical (Out Soon)' },
+  { value: 'Low Stock', label: 'Low Stock' },
+  { value: 'Reorder Recommended', label: 'Reorder Recommended' },
+];
+
+/** A reorder level is conventionally sized to cover ~30 days of typical
+ * usage — back-deriving a daily usage rate from it (rather than inventing a
+ * separate, disconnected field) keeps "days of stock" honest and consistent
+ * with the reorder level actually configured for this batch. */
+export function getBatchDaysOfStock(row: InventoryBatchRow): number {
+  const avgDailyUsage = Math.max(1, Math.round(row.reorderLevel / 30));
+  return Math.floor(row.stockQty / avgDailyUsage);
+}
+
+/** Critical takes precedence over Low Stock over Reorder Recommended, so
+ * every batch lands in exactly one alert level — the Alerts by Level donut
+ * always sums to the total batch count. Thresholds are configurable via
+ * Alert Settings, defaulting to 3/7 days. */
+export function getStockAlertLevel(
+  row: InventoryBatchRow,
+  criticalDays = 3,
+  lowStockDays = 7,
+): StockAlertLevel {
+  const daysOfStock = getBatchDaysOfStock(row);
+  if (daysOfStock <= criticalDays) return 'Critical';
+  if (daysOfStock <= lowStockDays) return 'Low Stock';
+  if (row.stockQty <= row.reorderLevel) return 'Reorder Recommended';
+  return 'All Good';
+}
+
 // ── Stock Receiving ───────────────────────────────────────────────────────────
 // Purchase orders a supplier is still to deliver against, and the receipts a
 // pharmacist has already confirmed. Confirming a receipt (stockReceivingStore.ts)

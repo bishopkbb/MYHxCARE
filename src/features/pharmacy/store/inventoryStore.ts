@@ -68,6 +68,16 @@ export function adjustStockQty(id: string, newQty: number): void {
   emit();
 }
 
+/** Corrects the reorder threshold a batch is measured against — Low Stock
+ * Alerts' "Adjust Reorder Levels" action. */
+export function updateReorderLevel(id: string, newReorderLevel: number): void {
+  const idx = batches.findIndex((b) => b.id === id);
+  if (idx === -1) return;
+  const safeLevel = Math.max(0, Math.round(newReorderLevel));
+  batches = batches.map((b, i) => (i === idx ? { ...b, reorderLevel: safeLevel } : b));
+  emit();
+}
+
 /** Batches currently on hand at one location with stock to give — the source
  * list stockTransferStore.ts's New Transfer picker offers a pharmacist. */
 export function getBatchesAtLocation(locationId: PharmacyLocationId): InventoryBatchRow[] {

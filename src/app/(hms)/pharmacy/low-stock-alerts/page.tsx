@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Low Stock Alerts' };
+import { LowStockAlertsWorkspace } from '@/features/pharmacy/components/LowStockAlertsWorkspace';
 
 export default function LowStockAlertsPage() {
-  return (
-    <ComingSoon
-      title="Low Stock Alerts"
-      description="The full, filterable list of medications at or below reorder level is on the way."
-    />
-  );
+  return <LowStockAlertsWorkspace />;
 }

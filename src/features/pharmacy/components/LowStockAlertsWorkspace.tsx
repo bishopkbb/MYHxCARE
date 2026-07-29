@@ -2,16 +2,17 @@
 
 import {
   AlertTriangle,
-  Banknote,
-  CalendarClock,
+  Box,
+  CheckCircle2,
   Download,
-  Eye,
+  Info,
   MoreVertical,
   Package,
-  Repeat,
-  Search,
-  Upload,
-  XCircle,
+  Settings,
+  ShoppingCart,
+  Sliders,
+  Truck,
+  Users,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
@@ -26,64 +27,67 @@ import { StatCard } from '@components/shared/StatCard';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
-import { formatCurrency, formatCurrencyCompact } from '@/utils/currency';
-import { formatDate } from '@/utils/datetime';
 import { downloadCSV } from '@/utils/export';
 import {
-  getInventoryRowStatus,
+  ALERT_LEVEL_OPTIONS,
+  getBatchDaysOfStock,
+  getStockAlertLevel,
   INVENTORY_CATEGORY_OPTIONS,
   INVENTORY_LOCATION_OPTIONS,
-  INVENTORY_STATUS_OPTIONS,
-  SUPPLIER_OPTIONS,
   type InventoryBatchRow,
-  type InventoryStatus,
+  type StockAlertLevel,
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
 import {
-  addStockBatch,
   adjustStockQty,
   updateReorderLevel,
   useInventoryBatches,
 } from '@/features/pharmacy/store/inventoryStore';
+import type { AlertSettings } from '@/features/pharmacy/components/AlertSettingsModal';
 
-const AddStockModal = dynamic(
-  () => import('@/features/pharmacy/components/AddStockModal').then((m) => m.AddStockModal),
-  { ssr: false, loading: () => <ModalLoadingFallback /> },
-);
 const AdjustStockModal = dynamic(
   () => import('@/features/pharmacy/components/AdjustStockModal').then((m) => m.AdjustStockModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+const BatchDetailModal = dynamic(
+  () => import('@/features/pharmacy/components/BatchDetailModal').then((m) => m.BatchDetailModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+const AlertSettingsModal = dynamic(
+  () =>
+    import('@/features/pharmacy/components/AlertSettingsModal').then((m) => m.AlertSettingsModal),
   { ssr: false, loading: () => <ModalLoadingFallback /> },
 );
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
 
-const STATUS_CFG: Record<InventoryStatus, { color: string; border: string; bg: string }> = {
-  'In Stock': { color: '#16A34A', border: 'rgba(22,163,74,0.35)', bg: 'rgba(22,163,74,0.08)' },
+const LEVEL_CFG: Record<StockAlertLevel, { color: string; border: string; bg: string }> = {
+  Critical: { color: '#DC2626', border: 'rgba(220,38,38,0.35)', bg: 'rgba(220,38,38,0.08)' },
   'Low Stock': { color: '#D97706', border: 'rgba(217,119,6,0.35)', bg: 'rgba(217,119,6,0.08)' },
-  'Out of Stock': { color: '#DC2626', border: 'rgba(220,38,38,0.35)', bg: 'rgba(220,38,38,0.08)' },
-  'Expiring Soon': {
-    color: '#7C3AED',
-    border: 'rgba(124,58,237,0.35)',
-    bg: 'rgba(124,58,237,0.08)',
+  'Reorder Recommended': {
+    color: '#2563EB',
+    border: 'rgba(37,99,235,0.35)',
+    bg: 'rgba(37,99,235,0.08)',
   },
+  'All Good': { color: '#16A34A', border: 'rgba(22,163,74,0.35)', bg: 'rgba(22,163,74,0.08)' },
 };
 
-type ModalState = { type: 'add' } | { type: 'adjust'; row: InventoryBatchRow } | null;
-
-function daysUntil(dateIso: string): number {
-  return Math.round((new Date(dateIso).getTime() - Date.now()) / 86_400_000);
-}
+type ModalState =
+  | { type: 'adjust'; row: InventoryBatchRow }
+  | { type: 'detail'; row: InventoryBatchRow }
+  | { type: 'settings' }
+  | null;
 
 function RowMenu({
   row,
+  onView,
   onAdjust,
-  onTransfer,
-  onBatchHistory,
+  onPurchaseOrder,
 }: {
   row: InventoryBatchRow;
+  onView: () => void;
   onAdjust: () => void;
-  onTransfer: () => void;
-  onBatchHistory: () => void;
+  onPurchaseOrder: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -94,12 +98,23 @@ function RowMenu({
         ref={buttonRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label={`More actions for ${row.medicationName} batch ${row.batchNo}`}
+        aria-label={`More actions for batch ${row.batchNo}`}
         className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
       >
         <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
       </button>
       <RowMenuPortal open={open} anchorRef={buttonRef} onClose={() => setOpen(false)} width={200}>
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false);
+            onView();
+          }}
+          className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+          style={{ fontSize: 14, color: '#2F3A40' }}
+        >
+          View Details
+        </button>
         <button
           type="button"
           onClick={() => {
@@ -115,39 +130,31 @@ function RowMenu({
           type="button"
           onClick={() => {
             setOpen(false);
-            onTransfer();
+            onPurchaseOrder();
           }}
           className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
           style={{ fontSize: 14, color: '#2F3A40' }}
         >
-          Transfer Stock
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setOpen(false);
-            onBatchHistory();
-          }}
-          className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-          style={{ fontSize: 14, color: '#2F3A40' }}
-        >
-          View Batch History
+          Create Purchase Order
         </button>
       </RowMenuPortal>
     </div>
   );
 }
 
-export function DrugInventoryWorkspace() {
+export function LowStockAlertsWorkspace() {
   const router = useRouter();
   const toast = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [alertSettings, setAlertSettings] = useState<AlertSettings>({
+    criticalDays: 3,
+    lowStockDays: 7,
+  });
 
   const [search, setSearch] = useState('');
+  const [levelFilter, setLevelFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [supplierFilter, setSupplierFilter] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(8);
@@ -155,66 +162,46 @@ export function DrugInventoryWorkspace() {
 
   const allBatches = useInventoryBatches();
 
-  const withStatus = useMemo(
-    () => allBatches.map((row) => ({ row, status: getInventoryRowStatus(row) })),
-    [allBatches],
+  const withLevel = useMemo(
+    () =>
+      allBatches.map((row) => ({
+        row,
+        level: getStockAlertLevel(row, alertSettings.criticalDays, alertSettings.lowStockDays),
+        daysOfStock: getBatchDaysOfStock(row),
+      })),
+    [allBatches, alertSettings],
   );
 
   const totalItems = allBatches.length;
-  const totalStockValue = useMemo(
-    () => allBatches.reduce((sum, r) => sum + r.stockQty * r.unitPrice, 0),
-    [allBatches],
-  );
-  const lowStockCount = withStatus.filter((r) => r.status === 'Low Stock').length;
-  const expiringSoonCount = withStatus.filter((r) => r.status === 'Expiring Soon').length;
-  const outOfStockCount = withStatus.filter((r) => r.status === 'Out of Stock').length;
-  const inStockCount = withStatus.filter((r) => r.status === 'In Stock').length;
+  const critical = withLevel.filter((r) => r.level === 'Critical');
+  const lowStock = withLevel.filter((r) => r.level === 'Low Stock');
+  const reorderRecommended = withLevel.filter((r) => r.level === 'Reorder Recommended');
+  const allGood = withLevel.filter((r) => r.level === 'All Good');
 
   const donutBreakdown = [
-    { label: 'In Stock', value: inStockCount, color: STATUS_CFG['In Stock'].color },
-    { label: 'Low Stock', value: lowStockCount, color: STATUS_CFG['Low Stock'].color },
-    { label: 'Out of Stock', value: outOfStockCount, color: STATUS_CFG['Out of Stock'].color },
-    { label: 'Expiring Soon', value: expiringSoonCount, color: STATUS_CFG['Expiring Soon'].color },
+    { label: 'Critical (Out Soon)', value: critical.length, color: LEVEL_CFG.Critical.color },
+    { label: 'Low Stock', value: lowStock.length, color: LEVEL_CFG['Low Stock'].color },
+    {
+      label: 'Reorder Recommended',
+      value: reorderRecommended.length,
+      color: LEVEL_CFG['Reorder Recommended'].color,
+    },
+    { label: 'All Good', value: allGood.length, color: LEVEL_CFG['All Good'].color },
   ];
 
-  const topCategoriesByValue = useMemo(() => {
-    const totals = new Map<string, number>();
-    for (const r of allBatches)
-      totals.set(r.category, (totals.get(r.category) ?? 0) + r.stockQty * r.unitPrice);
-    return Array.from(totals.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-  }, [allBatches]);
+  const alerted = useMemo(() => withLevel.filter((r) => r.level !== 'All Good'), [withLevel]);
 
-  const expiringRows = useMemo(
-    () =>
-      withStatus
-        .filter((r) => r.status === 'Expiring Soon')
-        .sort((a, b) => new Date(a.row.expiryDate).getTime() - new Date(b.row.expiryDate).getTime())
-        .slice(0, 3)
-        .map((r) => ({ ...r, daysLeft: daysUntil(r.row.expiryDate) })),
-    [withStatus],
-  );
-  const lowStockRows = useMemo(
-    () =>
-      withStatus
-        .filter((r) => r.status === 'Low Stock')
-        .sort((a, b) => a.row.stockQty - b.row.stockQty)
-        .slice(0, 3),
-    [withStatus],
-  );
-  const outOfStockRows = useMemo(
-    () => withStatus.filter((r) => r.status === 'Out of Stock').slice(0, 3),
-    [withStatus],
+  const topLowStock = useMemo(
+    () => [...alerted].sort((a, b) => a.daysOfStock - b.daysOfStock).slice(0, 5),
+    [alerted],
   );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return withStatus.filter(({ row, status }) => {
+    return alerted.filter(({ row, level }) => {
+      if (levelFilter && level !== levelFilter) return false;
       if (categoryFilter && row.category !== categoryFilter) return false;
-      if (supplierFilter && row.supplier !== supplierFilter) return false;
       if (locationFilter && row.locationId !== locationFilter) return false;
-      if (statusFilter && status !== statusFilter) return false;
       if (
         q &&
         !row.medicationName.toLowerCase().includes(q) &&
@@ -223,17 +210,21 @@ export function DrugInventoryWorkspace() {
         return false;
       return true;
     });
-  }, [withStatus, search, categoryFilter, supplierFilter, locationFilter, statusFilter]);
+  }, [alerted, search, levelFilter, categoryFilter, locationFilter]);
+
+  const sorted = useMemo(
+    () => [...filtered].sort((a, b) => a.daysOfStock - b.daysOfStock),
+    [filtered],
+  );
 
   const pageStart = (currentPage - 1) * rowsPerPage;
-  const pageRows = filtered.slice(pageStart, pageStart + rowsPerPage);
+  const pageRows = sorted.slice(pageStart, pageStart + rowsPerPage);
 
   function handleClearFilters() {
     setSearch('');
+    setLevelFilter('');
     setCategoryFilter('');
-    setSupplierFilter('');
     setLocationFilter('');
-    setStatusFilter('');
     setCurrentPage(1);
   }
 
@@ -244,8 +235,8 @@ export function DrugInventoryWorkspace() {
     );
   }
 
-  function filterByStatus(status: InventoryStatus) {
-    setStatusFilter(status);
+  function filterByLevel(level: StockAlertLevel) {
+    setLevelFilter(level);
     setCurrentPage(1);
   }
 
@@ -254,47 +245,40 @@ export function DrugInventoryWorkspace() {
       [
         'Medication',
         'Strength/Form',
-        'Category',
         'Location',
-        'Batch No.',
-        'Expiry Date',
-        'Stock Qty',
-        'Unit',
-        'Status',
+        'Current Stock',
+        'Reorder Level',
+        'Days of Stock',
+        'Alert Level',
       ],
-      ...filtered.map(({ row, status }) => [
+      ...filtered.map(({ row, level, daysOfStock }) => [
         row.medicationName,
         `${row.strength} ${row.form}`,
-        row.category,
         getPharmacyLocation(row.locationId).name,
-        row.batchNo,
-        formatDate(row.expiryDate),
         String(row.stockQty),
-        row.unit,
-        status,
+        String(row.reorderLevel),
+        `${daysOfStock} days`,
+        level,
       ]),
     ];
-    downloadCSV('drug-inventory', rows);
+    downloadCSV('low-stock-alerts', rows);
     toast.success('Export ready', `${filtered.length} items downloaded as CSV.`);
   }
 
-  function handleImportClick() {
-    fileInputRef.current?.click();
+  function handleCreatePurchaseOrder(row: InventoryBatchRow) {
+    router.push(ROUTES.pharmacyProcurementRequests);
+    toast.info(
+      'Opening Procurement Requests',
+      `Start a request for ${row.medicationName} from there.`,
+    );
   }
 
-  function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    toast.success('Import received', `${file.name} queued — our team will process this shortly.`);
-  }
-
-  function handleAddStock(entry: Omit<InventoryBatchRow, 'id'>) {
-    addStockBatch(entry);
-    setModal(null);
-    toast.success(
-      'Stock added',
-      `${entry.medicationName} batch ${entry.batchNo} added to inventory.`,
+  function handleAdjustReorderLevelsQuickAction() {
+    setLevelFilter('Reorder Recommended');
+    setCurrentPage(1);
+    toast.info(
+      'Filtered to Reorder Recommended',
+      'Use each row’s Adjust Stock action to update its reorder level.',
     );
   }
 
@@ -302,7 +286,7 @@ export function DrugInventoryWorkspace() {
     adjustStockQty(id, newQty);
     updateReorderLevel(id, newReorderLevel);
     setModal(null);
-    toast.success('Quantity updated', 'Stock quantity has been adjusted.');
+    toast.success('Quantity updated', 'Stock quantity and reorder level have been adjusted.');
   }
 
   return (
@@ -322,7 +306,7 @@ export function DrugInventoryWorkspace() {
           <span style={{ fontSize: 14, color: '#8A98A3' }}>Inventory Management</span>
           <span style={{ fontSize: 14, color: '#8A98A3' }}>/</span>
           <span className="font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
-            Drug Inventory
+            Low Stock Alerts
           </span>
         </nav>
 
@@ -333,38 +317,22 @@ export function DrugInventoryWorkspace() {
               className="font-display font-semibold"
               style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
             >
-              Drug Inventory
+              Low Stock Alerts
             </h1>
             <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-              Monitor stock levels, track expiry dates, and manage inventory across all locations.
+              Monitor medications running low and reorder on time to avoid stockouts.
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setModal({ type: 'add' })}
+              onClick={() => setModal({ type: 'settings' })}
               className={`flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
               style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.2)' }}
             >
-              <Package style={{ width: 15, height: 15 }} />
-              Add Stock
+              <Settings style={{ width: 15, height: 15 }} />
+              Alert Settings
             </button>
-            <button
-              type="button"
-              onClick={handleImportClick}
-              className={`flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-              style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.2)' }}
-            >
-              <Upload style={{ width: 15, height: 15 }} />
-              Import Stock
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv"
-              className="hidden"
-              onChange={handleImportFile}
-            />
             <button
               type="button"
               onClick={handleExport}
@@ -380,47 +348,48 @@ export function DrugInventoryWorkspace() {
         {/* Stat cards */}
         <div className="mt-5 grid grid-cols-2 gap-3.5 sm:grid-cols-3 xl:grid-cols-5 xl:gap-4">
           <StatCard
-            icon={Package}
-            label="Total Items"
-            value={totalItems}
-            info="All medications"
-            accent="#0D2630"
-            iconBg="rgba(13,38,48,0.08)"
-          />
-          <StatCard
-            icon={Banknote}
-            label="Total Stock Value"
-            value={formatCurrencyCompact(totalStockValue)}
-            info={formatCurrency(totalStockValue)}
-            accent="#16A34A"
-            iconBg="rgba(22,163,74,0.1)"
-          />
-          <StatCard
             icon={AlertTriangle}
-            label="Low Stock Items"
-            value={lowStockCount}
-            info="Require attention"
-            accent="#D97706"
-            iconBg="rgba(217,119,6,0.1)"
-            onClick={() => filterByStatus('Low Stock')}
-          />
-          <StatCard
-            icon={CalendarClock}
-            label="Expiring Soon"
-            value={expiringSoonCount}
-            info="Within 60 days"
-            accent="#7C3AED"
-            iconBg="rgba(124,58,237,0.1)"
-            onClick={() => filterByStatus('Expiring Soon')}
-          />
-          <StatCard
-            icon={XCircle}
-            label="Out of Stock"
-            value={outOfStockCount}
-            info="Unavailable items"
+            label="Critical (Out Soon)"
+            value={critical.length}
+            info={`Stock will last ≤ ${alertSettings.criticalDays} days`}
             accent="#DC2626"
             iconBg="rgba(220,38,38,0.1)"
-            onClick={() => filterByStatus('Out of Stock')}
+            onClick={() => filterByLevel('Critical')}
+          />
+          <StatCard
+            icon={Info}
+            label="Low Stock"
+            value={lowStock.length}
+            info={`Stock will last ≤ ${alertSettings.lowStockDays} days`}
+            accent="#D97706"
+            iconBg="rgba(217,119,6,0.1)"
+            onClick={() => filterByLevel('Low Stock')}
+          />
+          <StatCard
+            icon={Truck}
+            label="Reorder Recommended"
+            value={reorderRecommended.length}
+            info="Below reorder level"
+            accent="#2563EB"
+            iconBg="rgba(37,99,235,0.1)"
+            onClick={() => filterByLevel('Reorder Recommended')}
+          />
+          <StatCard
+            icon={CheckCircle2}
+            label="All Good"
+            value={allGood.length}
+            info="Sufficient stock"
+            accent="#16A34A"
+            iconBg="rgba(22,163,74,0.1)"
+            onClick={() => filterByLevel('All Good')}
+          />
+          <StatCard
+            icon={Box}
+            label="Total Items"
+            value={totalItems}
+            info="In inventory"
+            accent="#7C3AED"
+            iconBg="rgba(124,58,237,0.1)"
           />
         </div>
 
@@ -434,7 +403,7 @@ export function DrugInventoryWorkspace() {
               {/* Filters */}
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="relative min-w-0 flex-1">
-                  <Search
+                  <Package
                     className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
                     style={{ width: 16, height: 16, color: '#8A98A3' }}
                   />
@@ -445,7 +414,7 @@ export function DrugInventoryWorkspace() {
                       setSearch(e.target.value);
                       setCurrentPage(1);
                     }}
-                    placeholder="Search by medication, generic name, or batch..."
+                    placeholder="Search by medication or batch no..."
                     className={`h-11 w-full rounded-[10px] pr-4 pl-9 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
                     style={{
                       fontSize: 14,
@@ -464,9 +433,19 @@ export function DrugInventoryWorkspace() {
                 </button>
               </div>
 
-              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <FormSelect
-                  id="inventory-category-filter"
+                  id="alert-level-filter"
+                  value={levelFilter}
+                  onChange={(v) => {
+                    setLevelFilter(v);
+                    setCurrentPage(1);
+                  }}
+                  options={ALERT_LEVEL_OPTIONS}
+                  placeholder="All Levels"
+                />
+                <FormSelect
+                  id="alert-category-filter"
                   value={categoryFilter}
                   onChange={(v) => {
                     setCategoryFilter(v);
@@ -475,36 +454,16 @@ export function DrugInventoryWorkspace() {
                   options={INVENTORY_CATEGORY_OPTIONS}
                   placeholder="All Categories"
                 />
-                <FormSelect
-                  id="inventory-supplier-filter"
-                  value={supplierFilter}
-                  onChange={(v) => {
-                    setSupplierFilter(v);
-                    setCurrentPage(1);
-                  }}
-                  options={SUPPLIER_OPTIONS}
-                  placeholder="All Suppliers"
-                />
-                <FormSelect
-                  id="inventory-location-filter"
-                  value={locationFilter}
-                  onChange={(v) => {
-                    setLocationFilter(v);
-                    setCurrentPage(1);
-                  }}
-                  options={INVENTORY_LOCATION_OPTIONS}
-                  placeholder="All Locations"
-                />
                 {moreFiltersOpen && (
                   <FormSelect
-                    id="inventory-status-filter"
-                    value={statusFilter}
+                    id="alert-location-filter"
+                    value={locationFilter}
                     onChange={(v) => {
-                      setStatusFilter(v);
+                      setLocationFilter(v);
                       setCurrentPage(1);
                     }}
-                    options={INVENTORY_STATUS_OPTIONS}
-                    placeholder="All Statuses"
+                    options={INVENTORY_LOCATION_OPTIONS}
+                    placeholder="All Locations"
                   />
                 )}
               </div>
@@ -538,10 +497,10 @@ export function DrugInventoryWorkspace() {
                   className="font-display font-semibold"
                   style={{ fontSize: 16, color: '#0D2630' }}
                 >
-                  Inventory List ({filtered.length})
+                  Low Stock Items ({filtered.length})
                 </h2>
                 <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 1400 }}>
+                  <div style={{ minWidth: 1340 }}>
                     <div
                       className="flex rounded-t-[8px]"
                       style={{
@@ -549,7 +508,7 @@ export function DrugInventoryWorkspace() {
                         borderBottom: '1px solid #E6F8FD',
                       }}
                     >
-                      <div className="min-w-[170px] flex-1 py-2.5 pr-2 pl-3">
+                      <div className="min-w-[160px] flex-1 py-2.5 pr-2 pl-3">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -557,23 +516,7 @@ export function DrugInventoryWorkspace() {
                           Medication
                         </span>
                       </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Strength / Form
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Category
-                        </span>
-                      </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2">
+                      <div className="w-44 shrink-0 py-2.5 pr-2">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -581,36 +524,36 @@ export function DrugInventoryWorkspace() {
                           Location
                         </span>
                       </div>
-                      <div className="w-28 shrink-0 py-2.5 pr-2">
+                      <div className="w-36 shrink-0 py-2.5 pr-3 text-right">
                         <span
                           className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
-                          Batch No.
+                          Current Stock
                         </span>
                       </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2">
+                      <div className="w-36 shrink-0 py-2.5 pr-3 text-right">
                         <span
                           className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
-                          Expiry Date
+                          Reorder Level
                         </span>
                       </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-4 text-right">
+                      <div className="w-36 shrink-0 py-2.5 pr-2 pl-3">
                         <span
                           className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
-                          Stock Qty
+                          Days of Stock
                         </span>
                       </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2 pl-6">
+                      <div className="w-48 shrink-0 py-2.5 pr-2 pl-3">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
-                          Status
+                          Alert Level
                         </span>
                       </div>
                       <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
@@ -629,13 +572,13 @@ export function DrugInventoryWorkspace() {
                           className="flex size-14 items-center justify-center rounded-full"
                           style={{ background: 'rgba(226,237,241,0.6)' }}
                         >
-                          <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                          <Package style={{ width: 24, height: 24, color: '#8A98A3' }} />
                         </div>
                         <p
                           className="font-sans font-medium"
                           style={{ fontSize: 16, color: '#4A7080' }}
                         >
-                          No inventory items match your filters
+                          No items match your filters
                         </p>
                         <button
                           type="button"
@@ -648,15 +591,15 @@ export function DrugInventoryWorkspace() {
                       </div>
                     )}
 
-                    {pageRows.map(({ row, status }) => {
-                      const statusCfg = STATUS_CFG[status];
+                    {pageRows.map(({ row, level, daysOfStock }) => {
+                      const cfg = LEVEL_CFG[level];
                       return (
                         <div
                           key={row.id}
                           className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
-                          <div className="min-w-[170px] flex-1 py-3 pr-2 pl-3">
+                          <div className="min-w-[160px] flex-1 py-3 pr-2 pl-3">
                             <p
                               className="truncate font-sans font-medium"
                               style={{ fontSize: 14, color: '#0D2630' }}
@@ -664,71 +607,66 @@ export function DrugInventoryWorkspace() {
                               {row.medicationName}
                             </p>
                             <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {row.form}
-                            </p>
-                          </div>
-                          <div className="w-40 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {row.strength} {row.form}
                             </p>
                           </div>
-                          <div className="w-36 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {row.category}
-                            </p>
-                          </div>
-                          <div className="w-40 shrink-0 py-3 pr-2">
+                          <div className="w-44 shrink-0 py-3 pr-2">
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {getPharmacyLocation(row.locationId).name}
                             </p>
                           </div>
-                          <div className="w-28 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                              {row.batchNo}
-                            </p>
-                          </div>
-                          <div className="w-32 shrink-0 py-3 pr-2">
+                          <div className="w-36 shrink-0 py-3 pr-3 text-right">
                             <p style={{ fontSize: 14, color: '#0D2630' }}>
-                              {formatDate(row.expiryDate)}
-                            </p>
-                          </div>
-                          <div className="w-32 shrink-0 py-3 pr-4 text-right">
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
                               {row.stockQty.toLocaleString('en-GB')}
                             </p>
-                            <p style={{ fontSize: 14, color: '#8A98A3' }}>{row.unit}s</p>
                           </div>
-                          <div className="w-40 shrink-0 py-3 pr-2 pl-3">
+                          <div className="w-36 shrink-0 py-3 pr-3 text-right">
+                            <p style={{ fontSize: 14, color: '#4A7080' }}>
+                              {row.reorderLevel.toLocaleString('en-GB')}
+                            </p>
+                          </div>
+                          <div className="w-36 shrink-0 py-3 pr-2 pl-3">
                             <span
                               className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
                               style={{
                                 fontSize: 14,
                                 whiteSpace: 'nowrap',
-                                color: statusCfg.color,
-                                border: `1px solid ${statusCfg.border}`,
-                                background: statusCfg.bg,
+                                color: cfg.color,
+                                border: `1px solid ${cfg.border}`,
+                                background: cfg.bg,
                               }}
                             >
-                              {status}
+                              {daysOfStock} days
+                            </span>
+                          </div>
+                          <div className="w-48 shrink-0 py-3 pr-2 pl-3">
+                            <span
+                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                              style={{
+                                fontSize: 14,
+                                whiteSpace: 'nowrap',
+                                color: cfg.color,
+                                border: `1px solid ${cfg.border}`,
+                                background: cfg.bg,
+                              }}
+                            >
+                              {level}
                             </span>
                           </div>
                           <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
                             <button
                               type="button"
-                              onClick={() => setModal({ type: 'adjust', row })}
-                              aria-label={`View ${row.medicationName} batch ${row.batchNo}`}
+                              onClick={() => setModal({ type: 'detail', row })}
+                              aria-label={`View batch ${row.batchNo}`}
                               className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
                             >
-                              <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                              <Package style={{ width: 15, height: 15, color: '#4A7080' }} />
                             </button>
                             <RowMenu
                               row={row}
+                              onView={() => setModal({ type: 'detail', row })}
                               onAdjust={() => setModal({ type: 'adjust', row })}
-                              onTransfer={() => router.push(ROUTES.pharmacyTransfers)}
-                              onBatchHistory={() => router.push(ROUTES.pharmacyBatchManagement)}
+                              onPurchaseOrder={() => handleCreatePurchaseOrder(row)}
                             />
                           </div>
                         </div>
@@ -750,162 +688,6 @@ export function DrugInventoryWorkspace() {
                 />
               </div>
             </div>
-
-            {/* Bottom panels */}
-            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-              <div
-                className="rounded-[12px] p-4"
-                style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3
-                    className="font-display font-semibold"
-                    style={{ fontSize: 16, color: '#0D2630' }}
-                  >
-                    Expiring Soon
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => filterByStatus('Expiring Soon')}
-                    className={`font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                    style={{ fontSize: 14, color: '#00B4D8' }}
-                  >
-                    View All
-                  </button>
-                </div>
-                {expiringRows.length === 0 ? (
-                  <p className="mt-3" style={{ fontSize: 14, color: '#8A98A3' }}>
-                    Nothing expiring within 60 days.
-                  </p>
-                ) : (
-                  <div className="mt-3 flex flex-col gap-3">
-                    {expiringRows.map(({ row, daysLeft }) => {
-                      return (
-                        <div key={row.id} className="flex items-start justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {row.medicationName} {row.strength}
-                            </p>
-                            <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {formatDate(row.expiryDate)}
-                            </p>
-                          </div>
-                          <span
-                            className="shrink-0 font-sans font-medium"
-                            style={{ fontSize: 14, color: daysLeft < 0 ? '#DC2626' : '#7C3AED' }}
-                          >
-                            {daysLeft} days
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                <p className="mt-3" style={{ fontSize: 14, color: '#8A98A3' }}>
-                  Total {expiringSoonCount} items
-                </p>
-              </div>
-
-              <div
-                className="rounded-[12px] p-4"
-                style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3
-                    className="font-display font-semibold"
-                    style={{ fontSize: 16, color: '#0D2630' }}
-                  >
-                    Low Stock Alerts
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => filterByStatus('Low Stock')}
-                    className={`font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                    style={{ fontSize: 14, color: '#00B4D8' }}
-                  >
-                    View All
-                  </button>
-                </div>
-                {lowStockRows.length === 0 ? (
-                  <p className="mt-3" style={{ fontSize: 14, color: '#8A98A3' }}>
-                    No items below reorder level.
-                  </p>
-                ) : (
-                  <div className="mt-3 flex flex-col gap-3">
-                    {lowStockRows.map(({ row }) => (
-                      <div key={row.id} className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {row.medicationName} {row.strength}
-                          </p>
-                          <p style={{ fontSize: 14, color: '#8A98A3' }}>Qty {row.stockQty}</p>
-                        </div>
-                        <span className="shrink-0" style={{ fontSize: 14, color: '#8A98A3' }}>
-                          Min: {row.reorderLevel}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <p className="mt-3" style={{ fontSize: 14, color: '#8A98A3' }}>
-                  Total {lowStockCount} items
-                </p>
-              </div>
-
-              <div
-                className="rounded-[12px] p-4"
-                style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3
-                    className="font-display font-semibold"
-                    style={{ fontSize: 16, color: '#0D2630' }}
-                  >
-                    Out of Stock Items
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => filterByStatus('Out of Stock')}
-                    className={`font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                    style={{ fontSize: 14, color: '#00B4D8' }}
-                  >
-                    View All
-                  </button>
-                </div>
-                {outOfStockRows.length === 0 ? (
-                  <p className="mt-3" style={{ fontSize: 14, color: '#8A98A3' }}>
-                    Nothing out of stock.
-                  </p>
-                ) : (
-                  <div className="mt-3 flex flex-col gap-3">
-                    {outOfStockRows.map(({ row }) => (
-                      <div key={row.id} className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {row.medicationName} {row.strength}
-                          </p>
-                          <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                            {getPharmacyLocation(row.locationId).name}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <p className="mt-3" style={{ fontSize: 14, color: '#8A98A3' }}>
-                  Total {outOfStockCount} items
-                </p>
-              </div>
-            </div>
           </div>
 
           {/* Sidebar */}
@@ -915,13 +697,13 @@ export function DrugInventoryWorkspace() {
               style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
             >
               <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-                Inventory Overview
+                Alerts by Level
               </h2>
               <div className="mt-3 flex items-center gap-5">
                 <AnimatedDonutChart
                   breakdown={donutBreakdown}
                   total={totalItems}
-                  ariaLabel="Inventory overview donut chart"
+                  ariaLabel="Alerts by level donut chart"
                 />
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                   {donutBreakdown.map((d) => (
@@ -954,32 +736,49 @@ export function DrugInventoryWorkspace() {
               className="rounded-[12px] p-4"
               style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
             >
-              <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-                Top Categories by Value
-              </h2>
-              <div className="mt-3 flex flex-col gap-2.5">
-                {topCategoriesByValue.map(([category, value]) => (
-                  <div key={category} className="flex items-center justify-between gap-2">
-                    <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {category}
-                    </span>
+              <div className="flex items-center justify-between gap-2">
+                <h2
+                  className="font-display font-semibold"
+                  style={{ fontSize: 16, color: '#0D2630' }}
+                >
+                  Top Low Stock Items
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLevelFilter('');
+                    setCurrentPage(1);
+                  }}
+                  className={`font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                  style={{ fontSize: 14, color: '#00B4D8' }}
+                >
+                  View All
+                </button>
+              </div>
+              <div className="mt-3 flex flex-col gap-3">
+                {topLowStock.map(({ row, daysOfStock }, i) => (
+                  <div key={row.id} className="flex items-center gap-2.5">
                     <span
-                      className="shrink-0 font-sans font-medium"
+                      className="flex size-5 shrink-0 items-center justify-center rounded-full font-sans font-medium"
+                      style={{ fontSize: 14, background: 'rgba(0,180,216,0.1)', color: '#00B4D8' }}
+                    >
+                      {i + 1}
+                    </span>
+                    <p
+                      className="min-w-0 flex-1 truncate font-sans font-medium"
                       style={{ fontSize: 14, color: '#0D2630' }}
                     >
-                      {formatCurrency(value)}
+                      {row.medicationName} {row.strength}
+                    </p>
+                    <span
+                      className="shrink-0"
+                      style={{ fontSize: 14, color: daysOfStock <= 3 ? '#DC2626' : '#D97706' }}
+                    >
+                      {daysOfStock} days
                     </span>
                   </div>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={() => setMoreFiltersOpen(true)}
-                className={`mt-3 flex items-center gap-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#00B4D8' }}
-              >
-                View All Categories →
-              </button>
             </div>
 
             <div
@@ -991,23 +790,27 @@ export function DrugInventoryWorkspace() {
               </h2>
               <div className="mt-3 flex flex-col gap-1">
                 {[
-                  { icon: Package, label: 'Stock Receiving', href: ROUTES.pharmacyStockReceiving },
-                  { icon: Repeat, label: 'Stock Transfers', href: ROUTES.pharmacyTransfers },
+                  { icon: Download, label: 'Generate Low Stock Report', onClick: handleExport },
                   {
-                    icon: AlertTriangle,
-                    label: 'Stock Adjustments',
-                    href: ROUTES.pharmacyStockAdjustments,
+                    icon: ShoppingCart,
+                    label: 'Create Purchase Order',
+                    onClick: () => router.push(ROUTES.pharmacyProcurementRequests),
                   },
                   {
-                    icon: CalendarClock,
-                    label: 'Low Stock Alerts',
-                    href: ROUTES.pharmacyLowStockAlerts,
+                    icon: Sliders,
+                    label: 'Adjust Reorder Levels',
+                    onClick: handleAdjustReorderLevelsQuickAction,
+                  },
+                  {
+                    icon: Users,
+                    label: 'Manage Suppliers',
+                    onClick: () => router.push(ROUTES.pharmacySuppliers),
                   },
                 ].map((action) => (
                   <button
                     key={action.label}
                     type="button"
-                    onClick={() => router.push(action.href)}
+                    onClick={action.onClick}
                     className={`flex items-center justify-between gap-2 rounded-[8px] px-2.5 py-2.5 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
                   >
                     <span className="flex items-center gap-2.5">
@@ -1024,25 +827,31 @@ export function DrugInventoryWorkspace() {
 
         {/* Footer info banner */}
         <div
-          className="mt-5 flex items-start justify-between gap-3 rounded-[12px] p-4"
+          className="mt-5 flex items-start gap-2.5 rounded-[12px] p-4"
           style={{ background: 'rgba(0,180,216,0.06)', border: '1px solid rgba(0,180,216,0.25)' }}
         >
           <p style={{ fontSize: 14, color: '#0D2630' }}>
-            Inventory data is updated in real time. Ensure regular stock checks and accurate
-            entries.
+            Low stock alerts are based on your average daily usage and current stock levels.
           </p>
         </div>
 
         <div className="h-4" />
       </div>
 
-      {modal?.type === 'add' && (
-        <AddStockModal onSubmit={handleAddStock} onClose={() => setModal(null)} />
-      )}
       {modal?.type === 'adjust' && (
         <AdjustStockModal
           row={modal.row}
           onAdjust={handleAdjustStock}
+          onClose={() => setModal(null)}
+        />
+      )}
+      {modal?.type === 'detail' && (
+        <BatchDetailModal row={modal.row} onClose={() => setModal(null)} />
+      )}
+      {modal?.type === 'settings' && (
+        <AlertSettingsModal
+          settings={alertSettings}
+          onChange={setAlertSettings}
           onClose={() => setModal(null)}
         />
       )}

@@ -1081,6 +1081,30 @@ const MEDICATION_REFILL_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const LOW_STOCK_ALERTS_GUIDE: HelpGuide = {
+  id: 'low-stock-alerts',
+  title: 'Low Stock Alerts',
+  intro: 'Monitor medications running low and reorder on time to avoid stockouts.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Critical, Low Stock, Reorder Recommended, and All Good are clickable — each filters the table to that alert level.',
+    },
+    {
+      heading: 'Days of Stock',
+      body: 'Estimated from each batch’s reorder level (a real threshold already sized for about 30 days of typical usage), not a separate guess.',
+    },
+    {
+      heading: 'Alert Settings',
+      body: 'Adjusts the day thresholds Critical and Low Stock are computed from — changes apply immediately across the table, stat cards, and donut.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'Adjust Stock corrects both quantity and reorder level. Create Purchase Order opens Procurement Requests to start a request for that medication.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2406,6 +2430,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/low-stock-alerts')) return LOW_STOCK_ALERTS_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;
