@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Batch Management' };
+import { BatchManagementWorkspace } from '@/features/pharmacy/components/BatchManagementWorkspace';
 
 export default function BatchManagementPage() {
-  return (
-    <ComingSoon
-      title="Batch Management"
-      description="Full batch/lot tracking with FEFO (First Expire, First Out) enforcement is on the way."
-    />
-  );
+  return <BatchManagementWorkspace />;
 }

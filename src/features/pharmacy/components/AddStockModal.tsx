@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { FormSelect } from '@components/shared/FormSelect';
 import {
   INVENTORY_LOCATION_OPTIONS,
+  MANUFACTURER_OPTIONS,
   SUPPLIER_OPTIONS,
   type InventoryBatchRow,
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
@@ -44,6 +45,8 @@ export function AddStockModal({
   const [stockQty, setStockQty] = useState('');
   const [reorderLevel, setReorderLevel] = useState('');
   const [unitPrice, setUnitPrice] = useState('');
+  const [manufacturer, setManufacturer] = useState('');
+  const [mfgDate, setMfgDate] = useState('');
 
   const canSubmit =
     medicationName.trim() &&
@@ -74,6 +77,8 @@ export function AddStockModal({
       stockQty: Number(stockQty),
       reorderLevel: Number(reorderLevel),
       unitPrice: Number(unitPrice),
+      ...(manufacturer ? { manufacturer } : {}),
+      ...(mfgDate ? { mfgDate } : {}),
     });
   }
 
@@ -326,6 +331,39 @@ export function AddStockModal({
                 value={unitPrice}
                 onChange={(e) => setUnitPrice(e.target.value)}
                 placeholder="e.g. 45"
+                className={FIELD_INPUT_CLASS}
+                style={FIELD_INPUT_STYLE}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="as-manufacturer"
+                className="mb-1.5 block font-sans font-medium"
+                style={FIELD_LABEL}
+              >
+                Manufacturer (Optional)
+              </label>
+              <FormSelect
+                id="as-manufacturer"
+                value={manufacturer}
+                onChange={setManufacturer}
+                options={MANUFACTURER_OPTIONS}
+                placeholder="Select manufacturer"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="as-mfgdate"
+                className="mb-1.5 block font-sans font-medium"
+                style={FIELD_LABEL}
+              >
+                Mfg. Date (Optional)
+              </label>
+              <input
+                id="as-mfgdate"
+                type="date"
+                value={mfgDate}
+                onChange={(e) => setMfgDate(e.target.value)}
                 className={FIELD_INPUT_CLASS}
                 style={FIELD_INPUT_STYLE}
               />

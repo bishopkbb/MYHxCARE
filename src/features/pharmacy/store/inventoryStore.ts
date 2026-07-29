@@ -74,6 +74,15 @@ export function getBatchesAtLocation(locationId: PharmacyLocationId): InventoryB
   return batches.filter((b) => b.locationId === locationId && b.stockQty > 0);
 }
 
+/** Toggles a batch's quarantine hold — independent of stock level or expiry,
+ * for Batch Management's "Put On Hold" / "Release Hold" action. */
+export function toggleBatchHold(id: string): void {
+  const idx = batches.findIndex((b) => b.id === id);
+  if (idx === -1) return;
+  batches = batches.map((b, i) => (i === idx ? { ...b, isOnHold: !b.isOnHold } : b));
+  emit();
+}
+
 /** Every batch tracked at one location, including ones already at zero —
  * stockAdjustmentStore.ts's New Adjustment picker needs zero-stock batches
  * too (e.g. correcting an under-recorded receipt back up from 0). */

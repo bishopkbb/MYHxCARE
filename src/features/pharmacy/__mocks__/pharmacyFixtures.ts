@@ -1224,6 +1224,13 @@ export type InventoryBatchRow = {
   /** ₦ per unit — backs Total Stock Value and Top Categories by Value. */
   unitPrice: number;
   controlledSchedule?: ControlledSchedule;
+  /** The pharmaceutical manufacturer — distinct from `supplier` (who
+   * delivered it). Not every intake flow captures it, so it's optional. */
+  manufacturer?: string;
+  mfgDate?: string; // ISO date
+  /** A temporary quarantine hold — independent of stock level, flagged by
+   * Batch Management pending a QA/safety check. */
+  isOnHold?: boolean;
 };
 
 export type InventoryCatalogEntry = {
@@ -1615,6 +1622,23 @@ export const INVENTORY_CATALOG: InventoryCatalogEntry[] = [
   },
 ];
 
+/** The pharmaceutical manufacturer — distinct from SUPPLIER_DIRECTORY (which
+ * is who delivered the batch to us). Real Nigerian/multinational
+ * manufacturers, cycled deterministically per generated batch. */
+const MANUFACTURER_POOL = [
+  'Fidson Healthcare',
+  'Emzor Pharmaceuticals',
+  'May & Baker Nigeria',
+  'Juhel Nigeria Ltd',
+  'GlaxoSmithKline Nigeria',
+  'Swiss Pharma Nigeria',
+];
+
+export const MANUFACTURER_OPTIONS: SelectOption[] = MANUFACTURER_POOL.map((m) => ({
+  value: m,
+  label: m,
+}));
+
 /** 280 batch/location rows generated deterministically across the catalog and
  * every real pharmacy campus location (`PHARMACY_LOCATIONS`) — enough to be a
  * plausible teaching-hospital formulary without literally inventing 1,500+
@@ -1651,6 +1675,10 @@ export const INVENTORY_BATCHES_SEED: InventoryBatchRow[] = Array.from({ length: 
     reorderLevel: med.reorderLevel,
     unitPrice: med.unitPrice,
     ...(med.controlledSchedule ? { controlledSchedule: med.controlledSchedule } : {}),
+    manufacturer: MANUFACTURER_POOL[i % MANUFACTURER_POOL.length]!,
+    // A typical 18-24 month shelf life, counted back from this batch's expiry.
+    mfgDate: daysFromNow(expiryDays - (540 + (i % 180))),
+    ...(i % 46 === 3 ? { isOnHold: true } : {}),
   };
 });
 
@@ -1671,6 +1699,40 @@ export function getInventoryRowStatus(row: InventoryBatchRow): InventoryStatus {
   if (daysLeft <= 60) return 'Expiring Soon';
   if (row.stockQty <= row.reorderLevel) return 'Low Stock';
   return 'In Stock';
+}
+
+// ── Batch Management ─────────────────────────────────────────────────────────
+// A batch-lifecycle view of the same live inventoryStore.ts batches Drug
+// Inventory shows — same data, different lens (manufacturing/expiry
+// tracking and quarantine holds, rather than stock-level alerts).
+
+export type BatchStatus =
+  'Active' | 'Expiring Soon' | 'Expired' | 'On Hold / Quarantine' | 'Out of Stock';
+
+export const BATCH_STATUS_OPTIONS: SelectOption[] = [
+  { value: 'Active', label: 'Active' },
+  { value: 'Expiring Soon', label: 'Expiring Soon' },
+  { value: 'Expired', label: 'Expired' },
+  { value: 'On Hold / Quarantine', label: 'On Hold / Quarantine' },
+  { value: 'Out of Stock', label: 'Out of Stock' },
+];
+
+export function getBatchDaysLeft(row: InventoryBatchRow): number {
+  return Math.round((new Date(row.expiryDate).getTime() - Date.now()) / 86_400_000);
+}
+
+/** On Hold takes precedence (a pharmacist's explicit safety flag), then
+ * Expired, then Out of Stock, then Expiring Soon — every batch lands in
+ * exactly one bucket, so the Batch Status Overview donut always sums to the
+ * total batch count. Items are marked Expired automatically once the date
+ * passes — there's no separate manual "mark expired" action. */
+export function getBatchStatus(row: InventoryBatchRow): BatchStatus {
+  if (row.isOnHold) return 'On Hold / Quarantine';
+  const daysLeft = getBatchDaysLeft(row);
+  if (daysLeft < 0) return 'Expired';
+  if (row.stockQty === 0) return 'Out of Stock';
+  if (daysLeft <= 60) return 'Expiring Soon';
+  return 'Active';
 }
 
 // ── Stock Receiving ───────────────────────────────────────────────────────────

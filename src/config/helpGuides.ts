@@ -1081,6 +1081,31 @@ const MEDICATION_REFILL_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BATCH_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'batch-management',
+  title: 'Batch Management',
+  intro:
+    'A batch-lifecycle view of Drug Inventory — manufacturing, expiry, and quarantine tracking.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Active Batches, Expiring Soon, Expired Batches, and On Hold / Quarantine are clickable — each filters the table to that status.',
+    },
+    {
+      heading: 'Status',
+      body: 'On Hold takes priority over every other status. Items are marked Expired automatically once the expiry date passes — there’s no manual "mark expired" action.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'Adjust Stock corrects a batch’s quantity. Put On Hold / Release Hold quarantines a batch independent of its stock level. Transfer Batch opens Stock Transfers.',
+    },
+    {
+      heading: 'Batch Status Overview and Expiry Calendar',
+      body: 'The donut chart breaks every batch down by status. The Expiry Calendar buckets batches expiring in the next 90 days.',
+    },
+  ],
+};
+
 const STOCK_ADJUSTMENTS_GUIDE: HelpGuide = {
   id: 'stock-adjustments',
   title: 'Stock Adjustments',
@@ -2356,6 +2381,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;
   if (pathname.startsWith('/pharmacy/transfers')) return STOCK_TRANSFERS_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-receiving')) return STOCK_RECEIVING_GUIDE;
