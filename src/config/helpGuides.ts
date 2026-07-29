@@ -1081,6 +1081,35 @@ const MEDICATION_REFILL_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const DRUG_INVENTORY_GUIDE: HelpGuide = {
+  id: 'drug-inventory',
+  title: 'Drug Inventory',
+  intro:
+    'Monitor stock levels, track expiry dates, and manage inventory across all pharmacy locations.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Items and Total Stock Value summarize the full inventory. Low Stock Items, Expiring Soon, and Out of Stock are clickable — each filters the table to that status.',
+    },
+    {
+      heading: 'Status',
+      body: 'Out of Stock takes priority, then Expiring Soon (within 60 days), then Low Stock (at or below reorder level) — every batch lands in exactly one status.',
+    },
+    {
+      heading: 'Add Stock and Import Stock',
+      body: 'Add Stock records a new batch received into inventory — it appears in the table and stat cards immediately. Import Stock accepts a CSV file for bulk intake.',
+    },
+    {
+      heading: 'Adjusting a batch',
+      body: 'The eye icon or Adjust Stock opens a batch’s full detail and lets you correct its on-hand quantity — a real, shared update, not a local edit.',
+    },
+    {
+      heading: 'Inventory Overview and Top Categories by Value',
+      body: 'The donut chart breaks every batch down by status. Top Categories by Value ranks medication categories by their total stock value.',
+    },
+  ],
+};
+
 const CONTROLLED_DRUGS_GUIDE: HelpGuide = {
   id: 'controlled-drugs',
   title: 'Controlled Drugs',
@@ -2254,6 +2283,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/discharges')) return DISCHARGES_GUIDE;
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/inventory')) return DRUG_INVENTORY_GUIDE;
   if (pathname.startsWith('/pharmacy/controlled-drugs')) return CONTROLLED_DRUGS_GUIDE;
   if (pathname.startsWith('/pharmacy/refill-requests')) return MEDICATION_REFILL_REQUESTS_GUIDE;
   if (pathname.startsWith('/pharmacy/dispensing-history')) return DISPENSING_HISTORY_GUIDE;

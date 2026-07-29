@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Drug Inventory' };
+import { DrugInventoryWorkspace } from '@/features/pharmacy/components/DrugInventoryWorkspace';
 
 export default function DrugInventoryPage() {
-  return (
-    <ComingSoon
-      title="Drug Inventory"
-      description="Stock levels, expiry tracking, reorder alerts, supplier management, and formulary controls are on the way."
-    />
-  );
+  return <DrugInventoryWorkspace />;
 }

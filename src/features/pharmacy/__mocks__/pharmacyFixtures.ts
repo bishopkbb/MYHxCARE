@@ -8,6 +8,7 @@
  */
 
 import { DOCTORS } from '@/features/shared/__mocks__/doctorDirectory';
+import { PHARMACY_LOCATIONS, type PharmacyLocationId } from '@/constants/pharmacyLocations';
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
 
 // ── Prescription queue ───────────────────────────────────────────────────────
@@ -1120,6 +1121,497 @@ export function getInventorySnapshot() {
     expiringSoon,
     outOfStock,
   };
+}
+
+// ── Drug Inventory (batch/location level) ───────────────────────────────────
+// A richer, per-batch-per-location view than DRUG_INVENTORY above (which
+// stays as the coarse item-level stock the dispensing wizard/search modal
+// check against). This is its own live store (inventoryStore.ts) — Add
+// Stock/Adjust Stock are real, reactive mutations that this screen's own
+// stats and table reflect immediately, not page-local state.
+
+export type InventoryStatus = 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Expiring Soon';
+
+export const SUPPLIERS: string[] = [
+  'MedPlus Distributors',
+  'PharmaCare Nigeria Ltd',
+  'Fidson Healthcare',
+  'Emzor Pharmaceuticals',
+  'May & Baker Nigeria',
+  'Juhel Nigeria Ltd',
+];
+
+export const SUPPLIER_OPTIONS: SelectOption[] = SUPPLIERS.map((s) => ({ value: s, label: s }));
+
+export const INVENTORY_LOCATION_OPTIONS: SelectOption[] = PHARMACY_LOCATIONS.map((l) => ({
+  value: l.id,
+  label: l.name,
+}));
+
+export const INVENTORY_STATUS_OPTIONS: SelectOption[] = [
+  { value: 'In Stock', label: 'In Stock' },
+  { value: 'Low Stock', label: 'Low Stock' },
+  { value: 'Out of Stock', label: 'Out of Stock' },
+  { value: 'Expiring Soon', label: 'Expiring Soon' },
+];
+
+export type InventoryBatchRow = {
+  id: string;
+  medicationName: string;
+  strength: string;
+  form: string;
+  unit: string;
+  category: string;
+  locationId: PharmacyLocationId;
+  supplier: string;
+  batchNo: string;
+  expiryDate: string; // ISO date
+  stockQty: number;
+  reorderLevel: number;
+  /** ₦ per unit — backs Total Stock Value and Top Categories by Value. */
+  unitPrice: number;
+  controlledSchedule?: ControlledSchedule;
+};
+
+const INVENTORY_CATALOG: {
+  name: string;
+  strength: string;
+  form: string;
+  unit: string;
+  category: string;
+  reorderLevel: number;
+  unitPrice: number;
+  controlledSchedule?: ControlledSchedule;
+}[] = [
+  {
+    name: 'Amoxicillin',
+    strength: '500mg',
+    form: 'Capsule',
+    unit: 'Capsule',
+    category: 'Antibiotics',
+    reorderLevel: 200,
+    unitPrice: 45,
+  },
+  {
+    name: 'Paracetamol',
+    strength: '500mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Analgesics',
+    reorderLevel: 300,
+    unitPrice: 12,
+  },
+  {
+    name: 'Azithromycin',
+    strength: '250mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Antibiotics',
+    reorderLevel: 100,
+    unitPrice: 180,
+  },
+  {
+    name: 'Salbutamol',
+    strength: '100mcg/dose',
+    form: 'Inhaler',
+    unit: 'Inhaler',
+    category: 'Respiratory',
+    reorderLevel: 40,
+    unitPrice: 2400,
+  },
+  {
+    name: 'Omeprazole',
+    strength: '20mg',
+    form: 'Capsule',
+    unit: 'Capsule',
+    category: 'Gastrointestinal',
+    reorderLevel: 150,
+    unitPrice: 60,
+  },
+  {
+    name: 'Metformin',
+    strength: '500mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Antidiabetic',
+    reorderLevel: 250,
+    unitPrice: 25,
+  },
+  {
+    name: 'Ciprofloxacin',
+    strength: '500mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Antibiotics',
+    reorderLevel: 150,
+    unitPrice: 90,
+  },
+  {
+    name: 'Losartan',
+    strength: '50mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Cardiovascular',
+    reorderLevel: 150,
+    unitPrice: 55,
+  },
+  {
+    name: 'Atorvastatin',
+    strength: '20mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Cardiovascular',
+    reorderLevel: 120,
+    unitPrice: 130,
+  },
+  {
+    name: 'Amlodipine',
+    strength: '5mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Cardiovascular',
+    reorderLevel: 150,
+    unitPrice: 40,
+  },
+  {
+    name: 'Ibuprofen',
+    strength: '400mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Analgesics',
+    reorderLevel: 250,
+    unitPrice: 18,
+  },
+  {
+    name: 'Diclofenac',
+    strength: '50mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Analgesics',
+    reorderLevel: 150,
+    unitPrice: 22,
+  },
+  {
+    name: 'Metronidazole',
+    strength: '400mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Antibiotics',
+    reorderLevel: 150,
+    unitPrice: 30,
+  },
+  {
+    name: 'Chlorphenamine',
+    strength: '4mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Antihistamine',
+    reorderLevel: 100,
+    unitPrice: 15,
+  },
+  {
+    name: 'Hydrochlorothiazide',
+    strength: '25mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Cardiovascular',
+    reorderLevel: 100,
+    unitPrice: 28,
+  },
+  {
+    name: 'Cetirizine',
+    strength: '10mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Antihistamine',
+    reorderLevel: 150,
+    unitPrice: 20,
+  },
+  {
+    name: 'Ondansetron',
+    strength: '4mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Antiemetic',
+    reorderLevel: 100,
+    unitPrice: 75,
+  },
+  {
+    name: 'Ceftriaxone',
+    strength: '1g',
+    form: 'Vial',
+    unit: 'Vial',
+    category: 'Antibiotics',
+    reorderLevel: 80,
+    unitPrice: 850,
+  },
+  {
+    name: 'Normal Saline',
+    strength: '0.9%',
+    form: 'Bag',
+    unit: 'Bag',
+    category: 'IV Fluids',
+    reorderLevel: 150,
+    unitPrice: 320,
+  },
+  {
+    name: 'Insulin Glargine',
+    strength: '100IU/mL',
+    form: 'Pen',
+    unit: 'Pen',
+    category: 'Antidiabetic',
+    reorderLevel: 40,
+    unitPrice: 4200,
+  },
+  {
+    name: 'Dexamethasone',
+    strength: '4mg',
+    form: 'Ampoule',
+    unit: 'Ampoule',
+    category: 'Corticosteroid',
+    reorderLevel: 60,
+    unitPrice: 110,
+  },
+  {
+    name: 'Artemether/Lumefantrine',
+    strength: '20/120mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Antimalarial',
+    reorderLevel: 120,
+    unitPrice: 650,
+  },
+  {
+    name: 'Vitamin C',
+    strength: '500mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Supplement',
+    reorderLevel: 150,
+    unitPrice: 10,
+  },
+  {
+    name: 'Ferrous Sulfate',
+    strength: '200mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Supplement',
+    reorderLevel: 120,
+    unitPrice: 14,
+  },
+  {
+    name: 'Folic Acid',
+    strength: '5mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Supplement',
+    reorderLevel: 100,
+    unitPrice: 8,
+  },
+  {
+    name: 'Ranitidine',
+    strength: '150mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Gastrointestinal',
+    reorderLevel: 100,
+    unitPrice: 32,
+  },
+  {
+    name: 'Furosemide',
+    strength: '40mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Cardiovascular',
+    reorderLevel: 100,
+    unitPrice: 26,
+  },
+  {
+    name: 'Doxycycline',
+    strength: '100mg',
+    form: 'Capsule',
+    unit: 'Capsule',
+    category: 'Antibiotics',
+    reorderLevel: 100,
+    unitPrice: 55,
+  },
+  {
+    name: 'Prednisolone',
+    strength: '5mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Corticosteroid',
+    reorderLevel: 80,
+    unitPrice: 38,
+  },
+  {
+    name: 'Loperamide',
+    strength: '2mg',
+    form: 'Capsule',
+    unit: 'Capsule',
+    category: 'Gastrointestinal',
+    reorderLevel: 80,
+    unitPrice: 16,
+  },
+  {
+    name: 'Amoxicillin/Clavulanate',
+    strength: '625mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Antibiotics',
+    reorderLevel: 100,
+    unitPrice: 320,
+  },
+  {
+    name: 'Salbutamol Nebules',
+    strength: '2.5mg/2.5mL',
+    form: 'Nebule',
+    unit: 'Nebule',
+    category: 'Respiratory',
+    reorderLevel: 60,
+    unitPrice: 95,
+  },
+  {
+    name: 'Aspirin',
+    strength: '75mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Cardiovascular',
+    reorderLevel: 200,
+    unitPrice: 9,
+  },
+  {
+    name: 'Clopidogrel',
+    strength: '75mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Cardiovascular',
+    reorderLevel: 100,
+    unitPrice: 140,
+  },
+  {
+    name: 'Multivitamin',
+    strength: 'Standard',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Supplement',
+    reorderLevel: 150,
+    unitPrice: 12,
+  },
+  {
+    name: 'Morphine Sulfate',
+    strength: '10mg',
+    form: 'Ampoule',
+    unit: 'Ampoule',
+    category: 'Opioid Analgesic',
+    reorderLevel: 25,
+    unitPrice: 480,
+    controlledSchedule: 'C-II',
+  },
+  {
+    name: 'Fentanyl',
+    strength: '25mcg/hr',
+    form: 'Patch',
+    unit: 'Patch',
+    category: 'Opioid Analgesic',
+    reorderLevel: 20,
+    unitPrice: 3800,
+    controlledSchedule: 'C-II',
+  },
+  {
+    name: 'Oxycodone',
+    strength: '5mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Opioid Analgesic',
+    reorderLevel: 30,
+    unitPrice: 260,
+    controlledSchedule: 'C-II',
+  },
+  {
+    name: 'Codeine Phosphate',
+    strength: '30mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Opioid Analgesic',
+    reorderLevel: 40,
+    unitPrice: 95,
+    controlledSchedule: 'C-III',
+  },
+  {
+    name: 'Tramadol',
+    strength: '50mg',
+    form: 'Capsule',
+    unit: 'Capsule',
+    category: 'Opioid Analgesic',
+    reorderLevel: 50,
+    unitPrice: 60,
+    controlledSchedule: 'C-IV',
+  },
+  {
+    name: 'Diazepam',
+    strength: '5mg',
+    form: 'Tablet',
+    unit: 'Tablet',
+    category: 'Benzodiazepine',
+    reorderLevel: 40,
+    unitPrice: 22,
+    controlledSchedule: 'C-IV',
+  },
+];
+
+/** 280 batch/location rows generated deterministically across the catalog and
+ * every real pharmacy campus location (`PHARMACY_LOCATIONS`) — enough to be a
+ * plausible teaching-hospital formulary without literally inventing 1,500+
+ * distinct drug names. Roughly 1 in 19 rows is Out of Stock and 1 in 7 is
+ * pushed below reorder level, so the stat cards below are always non-zero. */
+export const INVENTORY_BATCHES_SEED: InventoryBatchRow[] = Array.from({ length: 280 }, (_, i) => {
+  const med = INVENTORY_CATALOG[i % INVENTORY_CATALOG.length]!;
+  const location = PHARMACY_LOCATIONS[i % PHARMACY_LOCATIONS.length]!;
+  const supplier = SUPPLIERS[i % SUPPLIERS.length]!;
+  const expiryDays = ((i * 53) % 460) - 20;
+  const isOutOfStock = i % 19 === 0;
+  const isLow = !isOutOfStock && i % 7 === 0;
+  const healthyQty = 40 + ((i * 31) % 1200);
+  const stockQty = isOutOfStock
+    ? 0
+    : isLow
+      ? Math.max(1, Math.round(med.reorderLevel * 0.4))
+      : healthyQty;
+  return {
+    id: `inv-${i}`,
+    medicationName: med.name,
+    strength: med.strength,
+    form: med.form,
+    unit: med.unit,
+    category: med.category,
+    locationId: location.id,
+    supplier,
+    batchNo: `${med.name
+      .replace(/[^A-Za-z]/g, '')
+      .slice(0, 3)
+      .toUpperCase()}${2500 + (i % 90)}`,
+    expiryDate: daysFromNow(expiryDays),
+    stockQty,
+    reorderLevel: med.reorderLevel,
+    unitPrice: med.unitPrice,
+    ...(med.controlledSchedule ? { controlledSchedule: med.controlledSchedule } : {}),
+  };
+});
+
+export const INVENTORY_CATEGORY_OPTIONS: SelectOption[] = Array.from(
+  new Set(INVENTORY_CATALOG.map((m) => m.category)),
+).map((c) => ({ value: c, label: c }));
+
+/** Out of Stock takes precedence over Expiring Soon over Low Stock, so every
+ * row lands in exactly one bucket — the Inventory Overview donut always sums
+ * to the total row count. */
+export function getInventoryRowStatus(row: InventoryBatchRow): InventoryStatus {
+  if (row.stockQty === 0) return 'Out of Stock';
+  const daysLeft = Math.round((new Date(row.expiryDate).getTime() - Date.now()) / 86_400_000);
+  if (daysLeft <= 60) return 'Expiring Soon';
+  if (row.stockQty <= row.reorderLevel) return 'Low Stock';
+  return 'In Stock';
 }
 
 // ── Stock transfers ───────────────────────────────────────────────────────────
