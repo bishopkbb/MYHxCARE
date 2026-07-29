@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 
 import { ExportMenu } from '@/components/ExportMenu';
 import { FormDateInput } from '@components/shared/FormDateInput';
+import { Tooltip } from '@components/shared/Tooltip';
 import { FormSelect } from '@components/shared/FormSelect';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
@@ -239,26 +240,36 @@ export function VisitHistorySection({
           <p key="date" style={{ fontSize: 14, color: '#0D2630' }}>
             {formatHumanDate(v.dateTime)} {formatTime(v.dateTime)}
           </p>,
-          <p key="dept" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-            {v.department}
-          </p>,
+          <Tooltip key="dept" content={v.department}>
+            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+              {v.department}
+            </p>
+          </Tooltip>,
           <div key="doc" className="min-w-0">
-            <p
-              className="truncate font-sans font-medium"
-              style={{ fontSize: 14, color: '#0D2630' }}
-            >
-              {v.doctor}
-            </p>
-            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-              {v.credentials}
-            </p>
+            <Tooltip content={v.doctor}>
+              <p
+                className="truncate font-sans font-medium"
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                {v.doctor}
+              </p>
+            </Tooltip>
+            <Tooltip content={v.credentials}>
+              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                {v.credentials}
+              </p>
+            </Tooltip>
           </div>,
-          <p key="type" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-            {v.visitType}
-          </p>,
-          <p key="diagnosis" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-            {v.diagnosisSummary}
-          </p>,
+          <Tooltip key="type" content={v.visitType}>
+            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+              {v.visitType}
+            </p>
+          </Tooltip>,
+          <Tooltip key="diagnosis" content={v.diagnosisSummary}>
+            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+              {v.diagnosisSummary}
+            </p>
+          </Tooltip>,
           <Pill key="status" label={v.status} color={VISIT_STATUS_COLOR[v.status] ?? '#8A98A3'} />,
           <div key="actions" className="flex items-center gap-1">
             <button

@@ -17,6 +17,7 @@ import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -596,18 +597,22 @@ export function ClinicalDocumentsWorkspace() {
                                   <Icon style={{ width: 16, height: 16, color: cfg.iconColor }} />
                                 </div>
                                 <div className="min-w-0">
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {doc.name}
-                                  </p>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {doc.subtitle}
-                                  </p>
+                                  <Tooltip content={doc.name}>
+                                    <p
+                                      className="truncate font-sans font-medium"
+                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                    >
+                                      {doc.name}
+                                    </p>
+                                  </Tooltip>
+                                  <Tooltip content={doc.subtitle}>
+                                    <p
+                                      className="truncate"
+                                      style={{ fontSize: 14, color: '#4A7080' }}
+                                    >
+                                      {doc.subtitle}
+                                    </p>
+                                  </Tooltip>
                                 </div>
                               </div>
                               <div className="w-48 shrink-0 py-3 pr-2">
@@ -625,19 +630,34 @@ export function ClinicalDocumentsWorkspace() {
                                 </span>
                               </div>
                               <div className="w-44 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {doc.department}
-                                </p>
+                                <Tooltip content={doc.department}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {doc.department}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-32 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {formatHumanDate(doc.dateCreated)}
-                                </p>
+                                <Tooltip content={formatHumanDate(doc.dateCreated)}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {formatHumanDate(doc.dateCreated)}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-40 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {doc.createdBy}
-                                </p>
+                                <Tooltip content={doc.createdBy}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {doc.createdBy}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div
                                 className="flex w-28 shrink-0 items-center justify-end gap-1 py-3 pr-3"
@@ -836,12 +856,14 @@ export function ClinicalDocumentsWorkspace() {
                             className="flex items-center justify-between gap-2 rounded-[8px] px-2.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                             style={{ background: active ? '#E6F8FD' : 'transparent' }}
                           >
-                            <span
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: active ? '#00B4D8' : '#0D2630' }}
-                            >
-                              {tab.label}
-                            </span>
+                            <Tooltip content={tab.label}>
+                              <span
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: active ? '#00B4D8' : '#0D2630' }}
+                              >
+                                {tab.label}
+                              </span>
+                            </Tooltip>
                             <span
                               className="shrink-0 rounded-full px-2 py-0.5 font-sans font-semibold"
                               style={{
@@ -971,9 +993,11 @@ export function ClinicalDocumentsWorkspace() {
                               >
                                 {act.label}
                               </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {act.detail}
-                              </p>
+                              <Tooltip content={act.detail}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {act.detail}
+                                </p>
+                              </Tooltip>
                             </div>
                           </div>
                         );

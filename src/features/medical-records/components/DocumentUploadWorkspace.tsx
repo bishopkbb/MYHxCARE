@@ -24,6 +24,7 @@ import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormField } from '@components/shared/FormField';
 import { FormSelect } from '@components/shared/FormSelect';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -443,12 +444,14 @@ export function DocumentUploadWorkspace() {
                                 style={{ width: 16, height: 16, color: '#4A7080', flexShrink: 0 }}
                               />
                               <div className="min-w-0 flex-1">
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {f.name}
-                                </p>
+                                <Tooltip content={f.name}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {f.name}
+                                  </p>
+                                </Tooltip>
                                 <p style={{ fontSize: 14, color: '#8A98A3' }}>
                                   {formatBytes(f.size)}
                                 </p>
@@ -642,12 +645,14 @@ export function DocumentUploadWorkspace() {
                                 >
                                   <Icon style={{ width: 16, height: 16, color: cfg.iconColor }} />
                                 </div>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {doc.name}
-                                </p>
+                                <Tooltip content={doc.name}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {doc.name}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-48 shrink-0 py-3 pr-2">
                                 <span
@@ -664,24 +669,44 @@ export function DocumentUploadWorkspace() {
                                 </span>
                               </div>
                               <div className="w-40 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {doc.department}
-                                </p>
+                                <Tooltip content={doc.department}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {doc.department}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-40 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {doc.createdBy}
-                                </p>
+                                <Tooltip content={doc.createdBy}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {doc.createdBy}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-32 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {formatHumanDate(doc.dateCreated)}
-                                </p>
+                                <Tooltip content={formatHumanDate(doc.dateCreated)}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {formatHumanDate(doc.dateCreated)}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div className="w-32 shrink-0 py-3 pr-2">
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {formatHumanDate(doc.visitDate)}
-                                </p>
+                                <Tooltip content={formatHumanDate(doc.visitDate)}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {formatHumanDate(doc.visitDate)}
+                                  </p>
+                                </Tooltip>
                               </div>
                               <div
                                 className="flex w-32 shrink-0 items-center justify-end gap-1 py-3 pr-3"
@@ -873,12 +898,14 @@ export function DocumentUploadWorkspace() {
                             <t.icon style={{ width: 16, height: 16, color: t.color }} />
                           </div>
                           <div className="min-w-0">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {t.label}
-                            </p>
+                            <Tooltip content={t.label}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {t.label}
+                              </p>
+                            </Tooltip>
                             <p style={{ fontSize: 14, color: '#8A98A3' }}>{t.ext}</p>
                           </div>
                         </div>
@@ -946,9 +973,13 @@ export function DocumentUploadWorkspace() {
                             <FileText
                               style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0 }}
                             />
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {previewDoc.name} - {formatHumanDate(previewDoc.dateCreated)}
-                            </p>
+                            <Tooltip
+                              content={`${previewDoc.name} - ${formatHumanDate(previewDoc.dateCreated)}`}
+                            >
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {previewDoc.name} - {formatHumanDate(previewDoc.dateCreated)}
+                              </p>
+                            </Tooltip>
                           </div>
                           <span className="shrink-0" style={{ fontSize: 14, color: '#8A98A3' }}>
                             1 / 2

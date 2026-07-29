@@ -19,6 +19,7 @@ import { useMemo, useState } from 'react';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { useAuth } from '@/providers/AuthProvider';
@@ -500,17 +501,21 @@ export function ArchivedRecordsWorkspace() {
                               >
                                 {rec.initials}
                               </div>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {rec.patientName}
-                              </p>
+                              <Tooltip content={rec.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {rec.patientName}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-32 shrink-0 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                                {rec.mrn}
-                              </p>
+                              <Tooltip content={rec.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                  {rec.mrn}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-36 shrink-0 py-3 pr-2">
                               <span
@@ -527,9 +532,11 @@ export function ArchivedRecordsWorkspace() {
                               </span>
                             </div>
                             <div className="w-44 shrink-0 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {rec.department}
-                              </p>
+                              <Tooltip content={rec.department}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {rec.department}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-36 shrink-0 py-3 pr-2">
                               <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -540,9 +547,11 @@ export function ArchivedRecordsWorkspace() {
                               </p>
                             </div>
                             <div className="w-44 shrink-0 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {rec.reason}
-                              </p>
+                              <Tooltip content={rec.reason}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {rec.reason}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-32 shrink-0 py-3 pr-2">
                               <span

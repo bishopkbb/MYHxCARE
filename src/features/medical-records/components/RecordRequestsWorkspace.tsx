@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { useToast } from '@/hooks/useToast';
@@ -316,25 +317,31 @@ export function RecordRequestsWorkspace() {
                             }}
                           >
                             <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {req.requestNumber}
-                              </p>
+                              <Tooltip content={req.requestNumber}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {req.requestNumber}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-36 shrink-0 py-3 pr-2">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {req.patientName}
-                              </p>
+                              <Tooltip content={req.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {req.patientName}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-28 shrink-0 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                                {req.mrn}
-                              </p>
+                              <Tooltip content={req.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                  {req.mrn}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-36 shrink-0 py-3 pr-2">
                               <span
@@ -351,9 +358,11 @@ export function RecordRequestsWorkspace() {
                               </span>
                             </div>
                             <div className="w-40 shrink-0 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {req.requestedBy}
-                              </p>
+                              <Tooltip content={req.requestedBy}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {req.requestedBy}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-32 shrink-0 py-3 pr-2">
                               <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -364,9 +373,11 @@ export function RecordRequestsWorkspace() {
                               </p>
                             </div>
                             <div className="min-w-[160px] flex-1 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {req.purpose}
-                              </p>
+                              <Tooltip content={req.purpose}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {req.purpose}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-28 shrink-0 py-3 pr-2">
                               <span
@@ -538,12 +549,14 @@ export function RecordRequestsWorkspace() {
                       ].map(([label, value]) => (
                         <div key={label} className="flex items-center justify-between gap-2">
                           <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
-                          <span
-                            className="max-w-[200px] truncate text-right font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {value}
-                          </span>
+                          <Tooltip content={value}>
+                            <span
+                              className="max-w-[200px] truncate text-right font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {value}
+                            </span>
+                          </Tooltip>
                         </div>
                       ))}
                     </div>

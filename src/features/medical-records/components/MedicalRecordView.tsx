@@ -30,6 +30,7 @@ import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { QuickActionTile } from '@components/shared/QuickActionTile';
+import { Tooltip } from '@components/shared/Tooltip';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -369,25 +370,27 @@ function PrescriptionsSection({ prescriptions }: { prescriptions: Prescription[]
         { label: 'Status', width: 'w-28' },
       ]}
       rows={prescriptions.map((rx) => [
-        <p
-          key="drug"
-          className="truncate font-sans font-medium"
-          style={{ fontSize: 14, color: '#0D2630' }}
-        >
-          {rx.drugName}
-        </p>,
+        <Tooltip key="drug" content={rx.drugName}>
+          <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
+            {rx.drugName}
+          </p>
+        </Tooltip>,
         <p key="dose" style={{ fontSize: 14, color: '#4A7080' }}>
           {rx.dosage}
         </p>,
-        <p key="freq" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {rx.frequency}
-        </p>,
+        <Tooltip key="freq" content={rx.frequency}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {rx.frequency}
+          </p>
+        </Tooltip>,
         <p key="route" style={{ fontSize: 14, color: '#4A7080' }}>
           {rx.route}
         </p>,
-        <p key="by" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {rx.prescribedBy}
-        </p>,
+        <Tooltip key="by" content={rx.prescribedBy}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {rx.prescribedBy}
+          </p>
+        </Tooltip>,
         <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
           {formatHumanDate(rx.datePrescribed)}
         </p>,
@@ -418,29 +421,31 @@ function LabResultsSection({ labResults }: { labResults: LabResultEntry[] }) {
         { label: 'Ordered By', width: 'w-40' },
       ]}
       rows={labResults.map((lab) => [
-        <p
-          key="test"
-          className="truncate font-sans font-medium"
-          style={{ fontSize: 14, color: '#0D2630' }}
-        >
-          {lab.testName}
-        </p>,
+        <Tooltip key="test" content={lab.testName}>
+          <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
+            {lab.testName}
+          </p>
+        </Tooltip>,
         <p key="result" style={{ fontSize: 14, color: '#0D2630' }}>
           {lab.result}
         </p>,
         <p key="unit" style={{ fontSize: 14, color: '#4A7080' }}>
           {lab.unit}
         </p>,
-        <p key="range" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {lab.referenceRange}
-        </p>,
+        <Tooltip key="range" content={lab.referenceRange}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {lab.referenceRange}
+          </p>
+        </Tooltip>,
         <Pill key="flag" label={lab.flag} color={LAB_FLAG_COLOR[lab.flag] ?? '#8A98A3'} />,
         <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
           {formatHumanDate(lab.dateCollected)}
         </p>,
-        <p key="by" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {lab.orderedBy}
-        </p>,
+        <Tooltip key="by" content={lab.orderedBy}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {lab.orderedBy}
+          </p>
+        </Tooltip>,
       ])}
     />
   );
@@ -458,22 +463,24 @@ function ImmunizationsSection({ immunizations }: { immunizations: ImmunizationEn
         { label: 'Next Due', width: 'w-32' },
       ]}
       rows={immunizations.map((imm) => [
-        <p
-          key="vaccine"
-          className="truncate font-sans font-medium"
-          style={{ fontSize: 14, color: '#0D2630' }}
-        >
-          {imm.vaccine}
-        </p>,
-        <p key="dose" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {imm.doseLabel}
-        </p>,
+        <Tooltip key="vaccine" content={imm.vaccine}>
+          <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
+            {imm.vaccine}
+          </p>
+        </Tooltip>,
+        <Tooltip key="dose" content={imm.doseLabel}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {imm.doseLabel}
+          </p>
+        </Tooltip>,
         <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
           {formatHumanDate(imm.dateGiven)}
         </p>,
-        <p key="by" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {imm.givenBy}
-        </p>,
+        <Tooltip key="by" content={imm.givenBy}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {imm.givenBy}
+          </p>
+        </Tooltip>,
         <p key="next" style={{ fontSize: 14, color: '#4A7080' }}>
           {imm.nextDueDate ? formatHumanDate(imm.nextDueDate) : '—'}
         </p>,
@@ -502,16 +509,16 @@ function AllergiesSection({ allergies }: { allergies: Allergy[] }) {
         { label: 'Recorded By', width: 'w-44' },
       ]}
       rows={allergies.map((a) => [
-        <p
-          key="substance"
-          className="truncate font-sans font-medium"
-          style={{ fontSize: 14, color: '#0D2630' }}
-        >
-          {a.substance}
-        </p>,
-        <p key="reaction" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {a.reaction}
-        </p>,
+        <Tooltip key="substance" content={a.substance}>
+          <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
+            {a.substance}
+          </p>
+        </Tooltip>,
+        <Tooltip key="reaction" content={a.reaction}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {a.reaction}
+          </p>
+        </Tooltip>,
         <Pill
           key="severity"
           label={a.severity.replace('_', ' ')}
@@ -520,9 +527,11 @@ function AllergiesSection({ allergies }: { allergies: Allergy[] }) {
         <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
           {formatHumanDate(a.recordedAt)}
         </p>,
-        <p key="by" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {a.recordedBy}
-        </p>,
+        <Tooltip key="by" content={a.recordedBy}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {a.recordedBy}
+          </p>
+        </Tooltip>,
       ])}
     />
   );
@@ -563,19 +572,21 @@ function ReferralsSection({ referrals }: { referrals: ReferralEntry[] }) {
         { label: 'Status', width: 'w-28' },
       ]}
       rows={referrals.map((ref) => [
-        <p
-          key="dept"
-          className="truncate font-sans font-medium"
-          style={{ fontSize: 14, color: '#0D2630' }}
-        >
-          {ref.toDepartment}
-        </p>,
-        <p key="provider" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {ref.toProvider}
-        </p>,
-        <p key="reason" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {ref.reason}
-        </p>,
+        <Tooltip key="dept" content={ref.toDepartment}>
+          <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
+            {ref.toDepartment}
+          </p>
+        </Tooltip>,
+        <Tooltip key="provider" content={ref.toProvider}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {ref.toProvider}
+          </p>
+        </Tooltip>,
+        <Tooltip key="reason" content={ref.reason}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {ref.reason}
+          </p>
+        </Tooltip>,
         <p key="date" style={{ fontSize: 14, color: '#4A7080' }}>
           {formatHumanDate(ref.dateReferred)}
         </p>,
@@ -608,16 +619,16 @@ function InsuranceClaimsSection({ insuranceClaims }: { insuranceClaims: Insuranc
         { label: 'Status', width: 'w-28' },
       ]}
       rows={insuranceClaims.map((claim) => [
-        <p
-          key="id"
-          className="truncate font-sans font-medium"
-          style={{ fontSize: 14, color: '#0D2630' }}
-        >
-          {claim.claimId}
-        </p>,
-        <p key="service" className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {claim.service}
-        </p>,
+        <Tooltip key="id" content={claim.claimId}>
+          <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
+            {claim.claimId}
+          </p>
+        </Tooltip>,
+        <Tooltip key="service" content={claim.service}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {claim.service}
+          </p>
+        </Tooltip>,
         <p key="amount" style={{ fontSize: 14, color: '#0D2630' }}>
           &#8358;{claim.amount.toLocaleString('en-NG')}
         </p>,
@@ -669,9 +680,11 @@ function AuditLogSection({
           {formatHumanDate(r.dateTime)} {formatTime(r.dateTime)}
         </p>,
         <Pill key="type" label={r.type} color={r.type === 'Activity' ? '#00B4D8' : '#8B5CF6'} />,
-        <p key={`desc-${i}`} className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-          {r.description}
-        </p>,
+        <Tooltip key={`desc-${i}`} content={r.description}>
+          <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+            {r.description}
+          </p>
+        </Tooltip>,
       ])}
     />
   );
@@ -847,16 +860,20 @@ function DocumentsAndFilesCard({ initialDocuments }: { initialDocuments: Medical
                     <Icon style={{ width: 16, height: 16, color: cfg.iconColor }} />
                   </div>
                   <div className="min-w-0">
-                    <p
-                      className="truncate font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
-                      {doc.name}
-                    </p>
-                    {doc.subtitle && (
-                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                        {doc.subtitle}
+                    <Tooltip content={doc.name}>
+                      <p
+                        className="truncate font-sans font-medium"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        {doc.name}
                       </p>
+                    </Tooltip>
+                    {doc.subtitle && (
+                      <Tooltip content={doc.subtitle}>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {doc.subtitle}
+                        </p>
+                      </Tooltip>
                     )}
                   </div>
                 </div>
@@ -875,19 +892,27 @@ function DocumentsAndFilesCard({ initialDocuments }: { initialDocuments: Medical
                   </span>
                 </div>
                 <div className="w-36 shrink-0 py-3 pr-2">
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {doc.uploadedBy}
-                  </p>
+                  <Tooltip content={doc.uploadedBy}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {doc.uploadedBy}
+                    </p>
+                  </Tooltip>
                 </div>
                 <div className="w-32 shrink-0 py-3 pr-2">
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {formatHumanDate(doc.dateUploaded)} {formatTime(doc.dateUploaded)}
-                  </p>
+                  <Tooltip
+                    content={`${formatHumanDate(doc.dateUploaded)} ${formatTime(doc.dateUploaded)}`}
+                  >
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {formatHumanDate(doc.dateUploaded)} {formatTime(doc.dateUploaded)}
+                    </p>
+                  </Tooltip>
                 </div>
                 <div className="w-28 shrink-0 py-3 pr-2">
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {formatHumanDate(doc.visitDate)}
-                  </p>
+                  <Tooltip content={formatHumanDate(doc.visitDate)}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {formatHumanDate(doc.visitDate)}
+                    </p>
+                  </Tooltip>
                 </div>
                 <div className="flex w-28 shrink-0 items-center justify-end gap-1 py-3 pr-3">
                   <button
@@ -1756,12 +1781,14 @@ export function MedicalRecordView({ initialTab = 'Overview' }: { initialTab?: Ta
                 <div className="mt-3 flex flex-col gap-2.5">
                   {recordAccess.map((acc) => (
                     <div key={acc.id} className="flex items-center justify-between gap-2">
-                      <p
-                        className="truncate font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        {acc.name}
-                      </p>
+                      <Tooltip content={acc.name}>
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {acc.name}
+                        </p>
+                      </Tooltip>
                       <p className="shrink-0 text-right" style={{ fontSize: 14, color: '#8A98A3' }}>
                         {formatHumanDate(acc.dateTime)} {formatTime(acc.dateTime)}
                       </p>

@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from 'react';
 
 import { FormDateInput } from '@components/shared/FormDateInput';
+import { Tooltip } from '@components/shared/Tooltip';
 import { FormSelect } from '@components/shared/FormSelect';
 import { useToast } from '@/hooks/useToast';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
@@ -229,9 +230,11 @@ function RequestsDonutChart({ animate }: { animate: boolean }) {
           <div key={d.label} className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="size-2.5 shrink-0 rounded-full" style={{ background: d.color }} />
-              <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                {d.label}
-              </span>
+              <Tooltip content={d.label}>
+                <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  {d.label}
+                </span>
+              </Tooltip>
             </div>
             <span
               className="shrink-0 font-sans font-medium"
@@ -258,12 +261,14 @@ function DepartmentUsageBars({ animate }: { animate: boolean }) {
     <div className="mt-2 flex flex-col gap-3">
       {DEPARTMENT_USAGE.map((d, i) => (
         <div key={d.department} className="flex items-center gap-3">
-          <span
-            className="w-32 shrink-0 truncate text-right font-sans"
-            style={{ fontSize: 14, color: '#4A7080' }}
-          >
-            {d.department}
-          </span>
+          <Tooltip content={d.department}>
+            <span
+              className="w-32 shrink-0 truncate text-right font-sans"
+              style={{ fontSize: 14, color: '#4A7080' }}
+            >
+              {d.department}
+            </span>
+          </Tooltip>
           <div
             className="relative h-5 min-w-0 flex-1 rounded-[4px]"
             style={{ background: 'rgba(139,92,246,0.08)' }}
@@ -506,9 +511,11 @@ export function MedicalRecordsReportsWorkspace() {
                           >
                             <stat.icon style={{ width: 16, height: 16, color: stat.color }} />
                           </div>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {stat.label}
-                          </p>
+                          <Tooltip content={stat.label}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {stat.label}
+                            </p>
+                          </Tooltip>
                         </div>
                         <p
                           className="font-display mt-2 font-semibold"
@@ -883,9 +890,11 @@ export function MedicalRecordsReportsWorkspace() {
                             style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                           >
                             <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                              <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                                {r.mrn}
-                              </p>
+                              <Tooltip content={r.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                  {r.mrn}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="flex min-w-[160px] flex-1 items-center gap-2.5 py-3 pr-2">
                               <div
@@ -894,27 +903,35 @@ export function MedicalRecordsReportsWorkspace() {
                               >
                                 {r.initials}
                               </div>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {r.patientName}
-                              </p>
+                              <Tooltip content={r.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {r.patientName}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-44 shrink-0 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {r.recordType}
-                              </p>
+                              <Tooltip content={r.recordType}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {r.recordType}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-36 shrink-0 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {r.retrievedBy}
-                              </p>
+                              <Tooltip content={r.retrievedBy}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {r.retrievedBy}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-40 shrink-0 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {r.department}
-                              </p>
+                              <Tooltip content={r.department}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {r.department}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-32 shrink-0 py-3 pr-2">
                               <p style={{ fontSize: 14, color: '#4A7080' }}>

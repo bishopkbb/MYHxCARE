@@ -8,6 +8,7 @@ import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
+import { Tooltip } from '@components/shared/Tooltip';
 import {
   AGE_DISTRIBUTION,
   EMERGENCY_REGISTRATION_BY_CATEGORY,
@@ -153,9 +154,11 @@ function DonutChart({
           <div key={d.label} className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="size-2.5 shrink-0 rounded-full" style={{ background: d.color }} />
-              <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                {d.label}
-              </span>
+              <Tooltip content={d.label}>
+                <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  {d.label}
+                </span>
+              </Tooltip>
             </div>
             <span
               className="shrink-0 font-sans font-medium"
@@ -181,12 +184,14 @@ function HorizontalBarChart({ data, animate }: { data: LabeledBar[]; animate: bo
     <div className="mt-2 flex flex-col gap-3">
       {data.map((d, i) => (
         <div key={d.label} className="flex items-center gap-3">
-          <span
-            className="w-56 shrink-0 truncate text-right font-sans"
-            style={{ fontSize: 14, color: '#4A7080' }}
-          >
-            {d.label}
-          </span>
+          <Tooltip content={d.label}>
+            <span
+              className="w-56 shrink-0 truncate text-right font-sans"
+              style={{ fontSize: 14, color: '#4A7080' }}
+            >
+              {d.label}
+            </span>
+          </Tooltip>
           <div
             className="relative h-5 min-w-0 flex-1 rounded-[4px]"
             style={{ background: 'rgba(139,92,246,0.08)' }}
@@ -480,9 +485,11 @@ export function PatientStatisticsWorkspace() {
                   >
                     <s.icon style={{ width: 17, height: 17, color: s.color }} />
                   </div>
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {s.label}
-                  </p>
+                  <Tooltip content={s.label}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {s.label}
+                    </p>
+                  </Tooltip>
                 </div>
                 <p
                   className="font-display mt-2 font-semibold"
@@ -630,9 +637,11 @@ export function PatientStatisticsWorkspace() {
                     >
                       <k.icon style={{ width: 17, height: 17, color: k.color }} />
                     </div>
-                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {k.label}
-                    </p>
+                    <Tooltip content={k.label}>
+                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {k.label}
+                      </p>
+                    </Tooltip>
                   </div>
                   <p
                     className="font-display mt-2 font-semibold"

@@ -2,7 +2,7 @@
 
 import { Eye, Search, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
-
+import { Tooltip } from '@components/shared/Tooltip';
 import {
   DIRECTORY_PATIENTS,
   type DirectoryPatient,
@@ -131,26 +131,34 @@ export function PatientPicker({ onSelect }: { onSelect: (patient: DirectoryPatie
                   {p.initials}
                 </div>
                 <div className="min-w-0">
-                  <p
-                    className="truncate font-sans font-medium"
-                    style={{ fontSize: 14, color: '#0D2630' }}
-                  >
-                    {p.name}
-                  </p>
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {p.phone}
-                  </p>
+                  <Tooltip content={p.name}>
+                    <p
+                      className="truncate font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      {p.name}
+                    </p>
+                  </Tooltip>
+                  <Tooltip content={p.phone}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {p.phone}
+                    </p>
+                  </Tooltip>
                 </div>
               </div>
               <div className="w-32 shrink-0 py-3 pr-2">
-                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                  {p.mrn}
-                </p>
+                <Tooltip content={p.mrn}>
+                  <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                    {p.mrn}
+                  </p>
+                </Tooltip>
               </div>
               <div className="w-40 shrink-0 py-3 pr-2">
-                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                  {p.faculty}
-                </p>
+                <Tooltip content={p.faculty}>
+                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                    {p.faculty}
+                  </p>
+                </Tooltip>
               </div>
               <div className="w-24 shrink-0 py-3 pr-2">
                 <span
