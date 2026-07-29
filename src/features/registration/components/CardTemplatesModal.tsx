@@ -1,7 +1,7 @@
 'use client';
 
 import { CreditCard, X } from 'lucide-react';
-
+import { Tooltip } from '@components/shared/Tooltip';
 import {
   CARD_TEMPLATES,
   type CardType,
@@ -66,12 +66,14 @@ export function CardTemplatesModal({
                   <CreditCard style={{ width: 16, height: 16, color: t.accent }} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p
-                    className="truncate font-sans font-medium"
-                    style={{ fontSize: 14, color: '#0D2630' }}
-                  >
-                    {t.name}
-                  </p>
+                  <Tooltip content={t.name}>
+                    <p
+                      className="truncate font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      {t.name}
+                    </p>
+                  </Tooltip>
                   <p style={{ fontSize: 14, color: '#4A7080' }}>{t.description}</p>
                 </div>
                 <button

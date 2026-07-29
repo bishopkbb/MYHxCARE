@@ -22,6 +22,7 @@ import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { getInitials } from '@lib/utils';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -427,9 +428,11 @@ export function PatientCardPrintingWorkspace() {
                   >
                     <s.icon style={{ width: 17, height: 17, color: s.color }} />
                   </div>
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {s.label}
-                  </p>
+                  <Tooltip content={s.label}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {s.label}
+                    </p>
+                  </Tooltip>
                 </div>
                 <p
                   className="font-display mt-2 font-semibold"
@@ -761,12 +764,14 @@ export function PatientCardPrintingWorkspace() {
                             />
                           </div>
                           <div className="w-36 shrink-0 py-3 pr-2">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {c.id}
-                            </p>
+                            <Tooltip content={c.id}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {c.id}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="flex w-44 shrink-0 items-center gap-2.5 py-3 pr-2">
                             <div
@@ -776,15 +781,19 @@ export function PatientCardPrintingWorkspace() {
                               {getInitials(c.patientName)}
                             </div>
                             <div className="min-w-0">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {c.patientName}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {c.mrn}
-                              </p>
+                              <Tooltip content={c.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {c.patientName}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={c.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {c.mrn}
+                                </p>
+                              </Tooltip>
                             </div>
                           </div>
                           <div className="w-32 shrink-0 py-3 pr-2">
@@ -968,12 +977,14 @@ export function PatientCardPrintingWorkspace() {
                     ].map(([label, value]) => (
                       <div key={label} className="flex items-center justify-between gap-2">
                         <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
-                        <span
-                          className="max-w-[220px] truncate text-right font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {value}
-                        </span>
+                        <Tooltip content={value}>
+                          <span
+                            className="max-w-[220px] truncate text-right font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {value}
+                          </span>
+                        </Tooltip>
                       </div>
                     ))}
                   </div>

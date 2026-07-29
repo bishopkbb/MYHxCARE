@@ -3,6 +3,7 @@
 import { getInitials } from '@lib/utils';
 import { computeAge } from '@/features/registration/schemas/registerPatientSchema';
 import { formatHumanDate } from '@/utils/datetime';
+import { Tooltip } from '@components/shared/Tooltip';
 import type { PatientCard } from '@/features/registration/__mocks__/patientCardFixtures';
 
 const ACCENT_BY_TYPE: Record<string, string> = {
@@ -54,9 +55,11 @@ export function PatientIdCard({ card }: { card: PatientCard }) {
               U
             </span>
           </div>
-          <span className="truncate font-sans font-semibold text-white" style={{ fontSize: 14 }}>
-            UNIZIK Medical Centre
-          </span>
+          <Tooltip content={`UNIZIK Medical Centre`}>
+            <span className="truncate font-sans font-semibold text-white" style={{ fontSize: 14 }}>
+              UNIZIK Medical Centre
+            </span>
+          </Tooltip>
         </div>
         <span
           className="shrink-0 rounded-full px-2 py-0.5 font-sans font-medium text-white"
@@ -74,12 +77,14 @@ export function PatientIdCard({ card }: { card: PatientCard }) {
           {getInitials(card.patientName)}
         </div>
         <div className="min-w-0 flex-1">
-          <p
-            className="font-display truncate font-semibold"
-            style={{ fontSize: 16, color: '#0D2630' }}
-          >
-            {card.patientName}
-          </p>
+          <Tooltip content={card.patientName}>
+            <p
+              className="font-display truncate font-semibold"
+              style={{ fontSize: 16, color: '#0D2630' }}
+            >
+              {card.patientName}
+            </p>
+          </Tooltip>
           <p style={{ fontSize: 14, color: '#00B4D8' }}>{card.mrn}</p>
           <div className="mt-1.5 grid grid-cols-2 gap-x-2 gap-y-0.5">
             <span style={{ fontSize: 14, color: '#8A98A3' }}>ID: {card.patientId}</span>

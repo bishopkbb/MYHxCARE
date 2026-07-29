@@ -4,6 +4,7 @@ import { Download, Printer, X } from 'lucide-react';
 
 import { downloadPDF, escapeHtml } from '@/utils/export';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
+import { Tooltip } from '@components/shared/Tooltip';
 import type { ConsentForm } from '@/features/registration/__mocks__/consentFormFixtures';
 
 function buildConsentHtml(consent: ConsentForm): string {
@@ -93,12 +94,14 @@ export function ConsentPreviewModal({
               ].map(([label, value]) => (
                 <div key={label} className="flex items-center justify-between gap-2">
                   <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
-                  <span
-                    className="max-w-[300px] truncate text-right font-sans font-medium"
-                    style={{ fontSize: 14, color: '#0D2630' }}
-                  >
-                    {value}
-                  </span>
+                  <Tooltip content={value}>
+                    <span
+                      className="max-w-[300px] truncate text-right font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      {value}
+                    </span>
+                  </Tooltip>
                 </div>
               ))}
             </div>

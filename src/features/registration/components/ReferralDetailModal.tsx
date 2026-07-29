@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowRight, Check, Printer, X } from 'lucide-react';
-
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { downloadPDF, escapeHtml } from '@/utils/export';
@@ -134,12 +134,14 @@ export function ReferralDetailModal({
             ].map(([label, value]) => (
               <div key={label} className="flex items-center justify-between gap-2">
                 <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
-                <span
-                  className="max-w-[280px] truncate text-right font-sans font-medium"
-                  style={{ fontSize: 14, color: '#0D2630' }}
-                >
-                  {value}
-                </span>
+                <Tooltip content={value}>
+                  <span
+                    className="max-w-[280px] truncate text-right font-sans font-medium"
+                    style={{ fontSize: 14, color: '#0D2630' }}
+                  >
+                    {value}
+                  </span>
+                </Tooltip>
               </div>
             ))}
           </div>

@@ -17,6 +17,7 @@ import {
   PREFERRED_LANGUAGE_OPTIONS,
   REFERRAL_SOURCE_OPTIONS,
 } from '@/features/registration/schemas/additionalDetailsSchema';
+import { Tooltip } from '@components/shared/Tooltip';
 import {
   GENDER_OPTIONS,
   INSURANCE_PROVIDER_OPTIONS,
@@ -77,9 +78,11 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="min-w-0">
       <p style={{ fontSize: 14, color: '#8A98A3' }}>{label}</p>
-      <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
-        {value || '—'}
-      </p>
+      <Tooltip content={value || '—'}>
+        <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
+          {value || '—'}
+        </p>
+      </Tooltip>
     </div>
   );
 }

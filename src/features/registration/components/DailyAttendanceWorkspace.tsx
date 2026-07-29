@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { FormDateInput } from '@components/shared/FormDateInput';
+import { Tooltip } from '@components/shared/Tooltip';
 import { FormSelect } from '@components/shared/FormSelect';
 import { getInitials } from '@lib/utils';
 import { ROUTES } from '@/constants/routes';
@@ -322,9 +323,11 @@ function DonutChart({
           <div key={d.label} className="flex items-center justify-between gap-2">
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="size-2.5 shrink-0 rounded-full" style={{ background: d.color }} />
-              <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                {d.label}
-              </span>
+              <Tooltip content={d.label}>
+                <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  {d.label}
+                </span>
+              </Tooltip>
             </div>
             <span
               className="shrink-0 font-sans font-medium"
@@ -512,9 +515,11 @@ export function DailyAttendanceWorkspace() {
                     >
                       <s.icon style={{ width: 17, height: 17, color: s.color }} />
                     </div>
-                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {s.label}
-                    </p>
+                    <Tooltip content={s.label}>
+                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {s.label}
+                      </p>
+                    </Tooltip>
                   </div>
                   <p
                     className="font-display mt-2 font-semibold"
@@ -818,12 +823,14 @@ export function DailyAttendanceWorkspace() {
                         }}
                       >
                         <div className="w-24 shrink-0 py-3 pr-2 pl-3">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#00B4D8' }}
-                          >
-                            {r.id}
-                          </p>
+                          <Tooltip content={r.id}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#00B4D8' }}
+                            >
+                              {r.id}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="flex w-44 shrink-0 items-center gap-2.5 py-3 pr-2">
                           <div
@@ -833,31 +840,41 @@ export function DailyAttendanceWorkspace() {
                             {getInitials(r.patientName)}
                           </div>
                           <div className="min-w-0">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {r.patientName}
-                            </p>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {r.gender}, {r.age} Yrs
-                            </p>
+                            <Tooltip content={r.patientName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {r.patientName}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={`${r.gender} , ${r.age} Yrs`}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {r.gender}, {r.age} Yrs
+                              </p>
+                            </Tooltip>
                           </div>
                         </div>
                         <div className="w-32 shrink-0 py-3 pr-2">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {r.mrn}
-                          </p>
+                          <Tooltip content={r.mrn}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {r.mrn}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="min-w-[140px] flex-1 py-3 pr-2">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {r.department}
-                          </p>
+                          <Tooltip content={r.department}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {r.department}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-40 shrink-0 py-3 pr-2">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {r.doctor}
-                          </p>
+                          <Tooltip content={r.doctor}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {r.doctor}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-28 shrink-0 py-3 pr-2">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Phone, X } from 'lucide-react';
-
+import { Tooltip } from '@components/shared/Tooltip';
 import { DEPARTMENT_DIRECTORY } from '@/features/registration/__mocks__/referralFixtures';
 
 export function ReferralDirectoryModal({ onClose }: { onClose: () => void }) {
@@ -51,15 +51,19 @@ export function ReferralDirectoryModal({ onClose }: { onClose: () => void }) {
                 style={{ border: '1px solid rgba(0,100,130,0.12)' }}
               >
                 <div className="min-w-0">
-                  <p
-                    className="truncate font-sans font-medium"
-                    style={{ fontSize: 14, color: '#0D2630' }}
-                  >
-                    {d.department}
-                  </p>
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {d.contact}
-                  </p>
+                  <Tooltip content={d.department}>
+                    <p
+                      className="truncate font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      {d.department}
+                    </p>
+                  </Tooltip>
+                  <Tooltip content={d.contact}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {d.contact}
+                    </p>
+                  </Tooltip>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <Phone style={{ width: 14, height: 14, color: '#8A98A3' }} />

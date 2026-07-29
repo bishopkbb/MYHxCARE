@@ -1,7 +1,7 @@
 'use client';
 
 import { FileText, X } from 'lucide-react';
-
+import { Tooltip } from '@components/shared/Tooltip';
 import { REFERRAL_TEMPLATES } from '@/features/registration/__mocks__/referralFixtures';
 
 export function ReferralTemplatesModal({
@@ -63,12 +63,14 @@ export function ReferralTemplatesModal({
                   <FileText style={{ width: 16, height: 16, color: '#00B4D8' }} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p
-                    className="truncate font-sans font-medium"
-                    style={{ fontSize: 14, color: '#0D2630' }}
-                  >
-                    {t.name}
-                  </p>
+                  <Tooltip content={t.name}>
+                    <p
+                      className="truncate font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      {t.name}
+                    </p>
+                  </Tooltip>
                   <p style={{ fontSize: 14, color: '#4A7080' }}>{t.description}</p>
                 </div>
                 <button

@@ -9,6 +9,7 @@ import { FormField } from '@components/shared/FormField';
 import { FormInput } from '@components/shared/FormInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -711,12 +712,14 @@ export function InsuranceVerificationWorkspace() {
                             style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                           >
                             <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {row.category}
-                              </p>
+                              <Tooltip content={row.category}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {row.category}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-24 shrink-0 py-3 pr-2">
                               <span
@@ -739,9 +742,11 @@ export function InsuranceVerificationWorkspace() {
                               </p>
                             </div>
                             <div className="w-40 shrink-0 py-3 pr-2">
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {row.limit}
-                              </p>
+                              <Tooltip content={row.limit}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {row.limit}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-28 shrink-0 py-3 pr-3">
                               <span
@@ -920,12 +925,14 @@ export function InsuranceVerificationWorkspace() {
                       ].map(([label, value]) => (
                         <div key={label} className="flex items-center justify-between gap-2">
                           <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
-                          <span
-                            className="max-w-[170px] truncate text-right font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {value}
-                          </span>
+                          <Tooltip content={value}>
+                            <span
+                              className="max-w-[170px] truncate text-right font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {value}
+                            </span>
+                          </Tooltip>
                         </div>
                       ))}
                     </div>
@@ -1011,12 +1018,14 @@ export function InsuranceVerificationWorkspace() {
                         ].map(([label, value, color]) => (
                           <div key={label} className="flex items-center justify-between gap-2">
                             <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
-                            <span
-                              className="max-w-[170px] truncate text-right font-sans font-medium"
-                              style={{ fontSize: 14, color: (color as string) ?? '#0D2630' }}
-                            >
-                              {value}
-                            </span>
+                            <Tooltip content={value}>
+                              <span
+                                className="max-w-[170px] truncate text-right font-sans font-medium"
+                                style={{ fontSize: 14, color: (color as string) ?? '#0D2630' }}
+                              >
+                                {value}
+                              </span>
+                            </Tooltip>
                           </div>
                         ))}
                       </div>

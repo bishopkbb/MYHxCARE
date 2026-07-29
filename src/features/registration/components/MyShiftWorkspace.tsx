@@ -21,6 +21,7 @@ import {
   type RegistrationShift,
   type ShiftStatus,
 } from '@/features/registration/__mocks__/registrationWorkforceFixtures';
+import { Tooltip } from '@components/shared/Tooltip';
 import {
   acknowledgeShift,
   useStaffShifts,
@@ -299,15 +300,19 @@ export function MyShiftWorkspace() {
                           {s.initials}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {s.staffName}
-                          </p>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {s.role} · {s.ward}
-                          </p>
+                          <Tooltip content={s.staffName}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {s.staffName}
+                            </p>
+                          </Tooltip>
+                          <Tooltip content={`${s.role} · ${s.ward}`}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {s.role} · {s.ward}
+                            </p>
+                          </Tooltip>
                         </div>
                         <span
                           className="flex shrink-0 items-center gap-1"

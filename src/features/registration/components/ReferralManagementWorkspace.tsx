@@ -18,6 +18,7 @@ import { useMemo, useRef, useState } from 'react';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { getInitials } from '@lib/utils';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -631,12 +632,14 @@ export function ReferralManagementWorkspace() {
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
                           <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {r.id}
-                            </p>
+                            <Tooltip content={r.id}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {r.id}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="flex w-40 shrink-0 items-center gap-2.5 py-3 pr-2">
                             <div
@@ -646,15 +649,19 @@ export function ReferralManagementWorkspace() {
                               {getInitials(r.patientName)}
                             </div>
                             <div className="min-w-0">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {r.patientName}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {r.mrn}
-                              </p>
+                              <Tooltip content={r.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {r.patientName}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={r.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {r.mrn}
+                                </p>
+                              </Tooltip>
                             </div>
                           </div>
                           <div className="w-32 shrink-0 py-3 pr-2">
@@ -672,16 +679,26 @@ export function ReferralManagementWorkspace() {
                             </span>
                           </div>
                           <div className="min-w-[220px] flex-1 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.direction === 'Outgoing'
-                                ? `${r.fromDepartment} → ${r.toDepartment}`
-                                : `${r.fromDepartment} ← ${r.toDepartment}`}
-                            </p>
+                            <Tooltip
+                              content={
+                                r.direction === 'Outgoing'
+                                  ? `${r.fromDepartment} → ${r.toDepartment}`
+                                  : `${r.fromDepartment} ← ${r.toDepartment}`
+                              }
+                            >
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {r.direction === 'Outgoing'
+                                  ? `${r.fromDepartment} → ${r.toDepartment}`
+                                  : `${r.fromDepartment} ← ${r.toDepartment}`}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-40 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.referredBy}
-                            </p>
+                            <Tooltip content={r.referredBy}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {r.referredBy}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-28 shrink-0 py-3 pr-2">
                             <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -843,9 +860,11 @@ export function ReferralManagementWorkspace() {
                             className="size-2.5 shrink-0 rounded-full"
                             style={{ background: d.color }}
                           />
-                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {d.label}
-                          </span>
+                          <Tooltip content={d.label}>
+                            <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {d.label}
+                            </span>
+                          </Tooltip>
                         </div>
                         <span
                           className="shrink-0 font-sans font-medium"
@@ -909,15 +928,19 @@ export function ReferralManagementWorkspace() {
                         <a.icon style={{ width: 16, height: 16, color: '#00B4D8' }} />
                       </div>
                       <div className="min-w-0">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {a.label}
-                        </p>
-                        <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                          {a.desc}
-                        </p>
+                        <Tooltip content={a.label}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {a.label}
+                          </p>
+                        </Tooltip>
+                        <Tooltip content={a.desc}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                            {a.desc}
+                          </p>
+                        </Tooltip>
                       </div>
                     </button>
                   ))}
@@ -965,9 +988,11 @@ export function ReferralManagementWorkspace() {
                         >
                           Referral {act.referralId}
                         </p>
-                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {act.label}
-                        </p>
+                        <Tooltip content={act.label}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {act.label}
+                          </p>
+                        </Tooltip>
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>
                           {formatHumanDate(act.dateTime)} {formatTime(act.dateTime)}
                         </p>

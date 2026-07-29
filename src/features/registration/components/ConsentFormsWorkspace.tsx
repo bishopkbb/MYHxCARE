@@ -23,6 +23,7 @@ import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { getInitials } from '@lib/utils';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -485,9 +486,11 @@ export function ConsentFormsWorkspace() {
                     <s.icon style={{ width: 16, height: 16, color: s.color }} />
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                      {s.label}
-                    </p>
+                    <Tooltip content={s.label}>
+                      <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {s.label}
+                      </p>
+                    </Tooltip>
                     <p
                       className="font-display font-semibold"
                       style={{ fontSize: 22, color: '#0D2630' }}
@@ -836,12 +839,14 @@ export function ConsentFormsWorkspace() {
                           }}
                         >
                           <div className="w-36 shrink-0 py-3 pr-2 pl-3">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {c.id}
-                            </p>
+                            <Tooltip content={c.id}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {c.id}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="flex w-40 shrink-0 items-center gap-2.5 py-3 pr-2">
                             <div
@@ -851,15 +856,19 @@ export function ConsentFormsWorkspace() {
                               {getInitials(c.patientName)}
                             </div>
                             <div className="min-w-0">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {c.patientName}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {c.mrn}
-                              </p>
+                              <Tooltip content={c.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {c.patientName}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={c.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {c.mrn}
+                                </p>
+                              </Tooltip>
                             </div>
                           </div>
                           <div className="w-52 shrink-0 py-3 pr-2">
@@ -877,14 +886,18 @@ export function ConsentFormsWorkspace() {
                             </span>
                           </div>
                           <div className="min-w-[140px] flex-1 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {c.department}
-                            </p>
+                            <Tooltip content={c.department}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {c.department}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-40 shrink-0 py-3 pr-2">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {c.doctor}
-                            </p>
+                            <Tooltip content={c.doctor}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {c.doctor}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-28 shrink-0 py-3 pr-2">
                             <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -1099,12 +1112,14 @@ export function ConsentFormsWorkspace() {
                           {getInitials(selected.patientName)}
                         </div>
                         <div className="min-w-0">
-                          <p
-                            className="truncate font-sans font-semibold"
-                            style={{ fontSize: 16, color: '#0D2630' }}
-                          >
-                            {selected.patientName}
-                          </p>
+                          <Tooltip content={selected.patientName}>
+                            <p
+                              className="truncate font-sans font-semibold"
+                              style={{ fontSize: 16, color: '#0D2630' }}
+                            >
+                              {selected.patientName}
+                            </p>
+                          </Tooltip>
                           <p style={{ fontSize: 14, color: '#8A98A3' }}>{selected.mrn}</p>
                         </div>
                       </div>
@@ -1130,9 +1145,11 @@ export function ConsentFormsWorkspace() {
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Mail style={{ width: 14, height: 14, color: '#8A98A3' }} />
-                          <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {selected.email || '—'}
-                          </span>
+                          <Tooltip content={selected.email || '—'}>
+                            <span className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {selected.email || '—'}
+                            </span>
+                          </Tooltip>
                         </div>
                         <div className="col-span-2 flex items-start gap-1.5">
                           <MapPin
@@ -1176,12 +1193,14 @@ export function ConsentFormsWorkspace() {
                           ].map(([label, value]) => (
                             <div key={label} className="flex items-center justify-between gap-2">
                               <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
-                              <span
-                                className="max-w-[220px] truncate text-right font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {value}
-                              </span>
+                              <Tooltip content={value}>
+                                <span
+                                  className="max-w-[220px] truncate text-right font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {value}
+                                </span>
+                              </Tooltip>
                             </div>
                           ))}
                         </div>
@@ -1225,12 +1244,14 @@ export function ConsentFormsWorkspace() {
                                 <UserIcon
                                   style={{ width: 15, height: 15, color: '#8A98A3', flexShrink: 0 }}
                                 />
-                                <span
-                                  className="truncate"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {s.role}
-                                </span>
+                                <Tooltip content={s.role}>
+                                  <span
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {s.role}
+                                  </span>
+                                </Tooltip>
                               </div>
                               <div className="flex shrink-0 flex-col items-end gap-0.5">
                                 {s.status === 'Signed' ? (
@@ -1304,12 +1325,14 @@ export function ConsentFormsWorkspace() {
                                   style={{ width: 15, height: 15, color: '#8A98A3', flexShrink: 0 }}
                                 />
                                 <div className="min-w-0 flex-1">
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {a.fileName}
-                                  </p>
+                                  <Tooltip content={a.fileName}>
+                                    <p
+                                      className="truncate font-sans font-medium"
+                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                    >
+                                      {a.fileName}
+                                    </p>
+                                  </Tooltip>
                                   <p style={{ fontSize: 14, color: '#8A98A3' }}>
                                     {(a.fileSize / 1024).toFixed(0)} KB · uploaded by {a.uploadedBy}{' '}
                                     · {formatDateTimeHuman(a.uploadedAt)}
@@ -1430,12 +1453,14 @@ export function ConsentFormsWorkspace() {
                         </p>
                         <div className="mt-3 flex items-center gap-3">
                           <div className="min-w-0 flex-1">
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {selected.id}
-                            </p>
+                            <Tooltip content={selected.id}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {selected.id}
+                              </p>
+                            </Tooltip>
                             <button
                               type="button"
                               onClick={() => {
@@ -1500,12 +1525,14 @@ export function ConsentFormsWorkspace() {
                               style={{ border: '1px solid rgba(0,100,130,0.10)' }}
                             >
                               <div className="min-w-0">
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {a.action}
-                                </p>
+                                <Tooltip content={a.action}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {a.action}
+                                  </p>
+                                </Tooltip>
                                 <p style={{ fontSize: 14, color: '#8A98A3' }}>by {a.actor}</p>
                               </div>
                               <span className="shrink-0" style={{ fontSize: 14, color: '#8A98A3' }}>
