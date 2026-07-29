@@ -1896,7 +1896,7 @@ const CURATED_RECEIPT_DEFS: {
     id: 'RCV-2026-0630-002',
     poNumber: poNumber(0, 16),
     supplier: 'MedPlus Distributors',
-    warehouseLocationId: 'loc_central',
+    warehouseLocationId: 'loc_awka',
     receivedAt: pastDateAt(0, 10, 15),
     picks: [
       { name: 'Amoxicillin', batchNo: 'AMX2506', expiryDate: daysFromNow(400), qty: 1000 },
@@ -1908,7 +1908,7 @@ const CURATED_RECEIPT_DEFS: {
     id: 'RCV-2026-0629-001',
     poNumber: poNumber(0, 15),
     supplier: 'PharmaCare Nigeria Ltd',
-    warehouseLocationId: 'loc_opd',
+    warehouseLocationId: 'loc_nnewi',
     receivedAt: pastDateAt(1, 9, 30),
     picks: [
       { name: 'Losartan', batchNo: 'LOS2501', expiryDate: daysFromNow(560), qty: 300 },
@@ -1919,7 +1919,7 @@ const CURATED_RECEIPT_DEFS: {
     id: 'RCV-2026-0628-003',
     poNumber: poNumber(0, 18),
     supplier: 'Fidson Healthcare',
-    warehouseLocationId: 'loc_ward',
+    warehouseLocationId: 'loc_mbaukwu',
     receivedAt: pastDateAt(2, 8, 50),
     picks: [
       { name: 'Omeprazole', batchNo: 'OME2503', expiryDate: daysFromNow(600), qty: 400 },
@@ -2127,8 +2127,8 @@ export const STOCK_TRANSFERS_SEED: StockTransfer[] = (() => {
     );
   }
   // 1 Cancelled + 1 Rejected
-  push('Cancelled', 'loc_central', 'loc_opd', 6, 4);
-  push('Rejected', 'loc_ward', 'loc_central', 7, 3);
+  push('Cancelled', 'loc_awka', 'loc_nnewi', 6, 4);
+  push('Rejected', 'loc_mbaukwu', 'loc_awka', 7, 3);
   // 6 Draft
   for (let i = 0; i < 6; i++) {
     push(

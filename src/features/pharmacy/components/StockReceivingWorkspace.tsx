@@ -168,7 +168,7 @@ export function StockReceivingWorkspace() {
     if (!po) return;
     setSelectedPoNumber(poNumber);
     setSupplier(po.supplier);
-    setWarehouseLocationId('loc_central');
+    setWarehouseLocationId('loc_awka');
     setItems(
       po.items.map((line) => {
         const entry = getCatalogEntry(line.medicationName)!;
