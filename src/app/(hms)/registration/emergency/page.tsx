@@ -20,6 +20,7 @@ import { useState } from 'react';
 
 import { FormPhoneInput } from '@components/shared/FormPhoneInput';
 import { FormSelect } from '@components/shared/FormSelect';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -787,12 +788,14 @@ export default function EmergencyRegistrationPage() {
                     ].map(([label, value]) => (
                       <div key={label} className="flex items-center justify-between gap-2">
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>{label}</p>
-                        <p
-                          className="truncate text-right font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {value}
-                        </p>
+                        <Tooltip content={value}>
+                          <p
+                            className="truncate text-right font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {value}
+                          </p>
+                        </Tooltip>
                       </div>
                     ))}
                     <div className="flex items-center justify-between gap-2">

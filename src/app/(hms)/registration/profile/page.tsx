@@ -28,6 +28,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -170,16 +171,20 @@ function VisitSummaryMini({
       </div>
       <div className="min-w-0">
         <p style={{ fontSize: 14, color: '#8A98A3' }}>{label}</p>
-        <p
-          className="font-display truncate font-semibold"
-          style={{ fontSize: 16, color: '#0D2630' }}
-        >
-          {value}
-        </p>
-        {sub && (
-          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-            {sub}
+        <Tooltip content={value}>
+          <p
+            className="font-display truncate font-semibold"
+            style={{ fontSize: 16, color: '#0D2630' }}
+          >
+            {value}
           </p>
+        </Tooltip>
+        {sub && (
+          <Tooltip content={sub}>
+            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+              {sub}
+            </p>
+          </Tooltip>
         )}
       </div>
     </div>

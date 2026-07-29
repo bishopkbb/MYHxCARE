@@ -22,6 +22,7 @@ import {
 import { formatDate } from '@/utils/datetime';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PreferenceToggle } from '@components/shared/PreferenceToggle';
+import { Tooltip } from '@components/shared/Tooltip';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { useAuth } from '@hooks/useAuth';
 import { useContactDetails } from '@hooks/useContactDetails';
@@ -188,12 +189,14 @@ function AccountFieldRow({
         <p className="font-sans" style={{ fontSize: 14, lineHeight: '20px', color: '#8A98A3' }}>
           {label}
         </p>
-        <p
-          className="mt-0.5 truncate font-sans font-medium"
-          style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-        >
-          {value}
-        </p>
+        <Tooltip content={value}>
+          <p
+            className="mt-0.5 truncate font-sans font-medium"
+            style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+          >
+            {value}
+          </p>
+        </Tooltip>
       </div>
       {onEdit && (
         <button

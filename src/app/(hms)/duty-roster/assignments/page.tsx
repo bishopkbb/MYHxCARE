@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatMini } from '@components/shared/StatCard';
 import { ROUTES } from '@/constants/routes';
 import {
@@ -333,33 +334,41 @@ export default function StaffAssignmentPage() {
                           >
                             {doctor.initials}
                           </div>
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {doctor.name}
-                          </p>
+                          <Tooltip content={doctor.name}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {doctor.name}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-[14%] px-4 py-3">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {doctor.role}
-                          </p>
+                          <Tooltip content={doctor.role}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {doctor.role}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-[20%] px-4 py-3">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {doctor.department}
-                          </p>
+                          <Tooltip content={doctor.department}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {doctor.department}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="min-w-0 flex-1 px-4 py-3">
-                          <p
-                            className="truncate"
-                            style={{
-                              fontSize: 14,
-                              color: doctor.currentWard ? '#4A7080' : '#8A98A3',
-                            }}
-                          >
-                            {doctor.currentWard ?? 'Not assigned'}
-                          </p>
+                          <Tooltip content={doctor.currentWard ?? 'Not assigned'}>
+                            <p
+                              className="truncate"
+                              style={{
+                                fontSize: 14,
+                                color: doctor.currentWard ? '#4A7080' : '#8A98A3',
+                              }}
+                            >
+                              {doctor.currentWard ?? 'Not assigned'}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-30 shrink-0 px-4 py-3">
                           <span
@@ -414,12 +423,14 @@ export default function StaffAssignmentPage() {
                               {doctor.initials}
                             </div>
                             <div className="min-w-0">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {doctor.name}
-                              </p>
+                              <Tooltip content={doctor.name}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {doctor.name}
+                                </p>
+                              </Tooltip>
                               <p style={{ fontSize: 14, color: '#4A7080' }}>
                                 {doctor.role} · {doctor.department}
                               </p>

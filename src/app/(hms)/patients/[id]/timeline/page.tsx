@@ -13,6 +13,7 @@ import {
   TIMELINE_FILTERS,
   type TimelineFilterKey,
 } from '@/features/clinical-timeline/__mocks__/clinicalTimelineFixtures';
+import { Tooltip } from '@components/shared/Tooltip';
 import { downloadPDF, escapeHtml } from '@/utils/export';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -148,12 +149,14 @@ export default function ClinicalTimelinePage({ params }: { params: Promise<{ id:
             {patient.initials}
           </div>
 
-          <span
-            className="min-w-0 flex-1 truncate font-normal text-white sm:hidden"
-            style={{ fontSize: 16, lineHeight: '24px' }}
-          >
-            {patient.name}
-          </span>
+          <Tooltip content={patient.name}>
+            <span
+              className="min-w-0 flex-1 truncate font-normal text-white sm:hidden"
+              style={{ fontSize: 16, lineHeight: '24px' }}
+            >
+              {patient.name}
+            </span>
+          </Tooltip>
 
           {patient.isUrgent && (
             <span

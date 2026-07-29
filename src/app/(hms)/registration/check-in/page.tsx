@@ -28,6 +28,7 @@ import { FormField } from '@components/shared/FormField';
 import { FormSelect } from '@components/shared/FormSelect';
 import { FormTextarea } from '@components/shared/FormTextarea';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -137,9 +138,11 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="min-w-0">
       <p style={{ fontSize: 14, color: '#8A98A3' }}>{label}</p>
-      <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
-        {value || '—'}
-      </p>
+      <Tooltip content={value || '—'}>
+        <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
+          {value || '—'}
+        </p>
+      </Tooltip>
     </div>
   );
 }
@@ -183,12 +186,19 @@ function StepPill({
           {state === 'done' ? <Check style={{ width: 16, height: 16 }} /> : index}
         </div>
         <div className="min-w-0">
-          <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
-            {label}
-          </p>
-          <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-            {detail}
-          </p>
+          <Tooltip content={label}>
+            <p
+              className="truncate font-sans font-medium"
+              style={{ fontSize: 14, color: '#0D2630' }}
+            >
+              {label}
+            </p>
+          </Tooltip>
+          <Tooltip content={detail}>
+            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+              {detail}
+            </p>
+          </Tooltip>
         </div>
       </div>
       {!isLast && (

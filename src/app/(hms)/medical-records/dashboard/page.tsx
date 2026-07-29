@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { QuickActionTile } from '@components/shared/QuickActionTile';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCardTrend } from '@components/shared/StatCard';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@hooks/useAuth';
@@ -281,20 +282,24 @@ export default function MedicalRecordsDashboardPage() {
                               </p>
                             </div>
                             <div className="w-30 shrink-0 py-3 pr-2">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {req.patient}
-                              </p>
+                              <Tooltip content={req.patient}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {req.patient}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="min-w-0 flex-1 py-3 pr-2">
-                              <p
-                                className="truncate whitespace-nowrap"
-                                style={{ fontSize: 14, color: '#4A7080' }}
-                              >
-                                {req.requestedBy}
-                              </p>
+                              <Tooltip content={req.requestedBy}>
+                                <p
+                                  className="truncate whitespace-nowrap"
+                                  style={{ fontSize: 14, color: '#4A7080' }}
+                                >
+                                  {req.requestedBy}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-24 shrink-0 py-3 pr-3 text-right">
                               <span
@@ -378,15 +383,19 @@ export default function MedicalRecordsDashboardPage() {
                           {rec.initials}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {rec.patient}
-                          </p>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {rec.mrn}
-                          </p>
+                          <Tooltip content={rec.patient}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {rec.patient}
+                            </p>
+                          </Tooltip>
+                          <Tooltip content={rec.mrn}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {rec.mrn}
+                            </p>
+                          </Tooltip>
                         </div>
                         <p
                           className="shrink-0 text-right"

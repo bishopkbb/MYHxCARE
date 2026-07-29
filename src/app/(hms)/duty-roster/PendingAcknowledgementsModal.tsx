@@ -1,5 +1,6 @@
 'use client';
 
+import { Tooltip } from '@components/shared/Tooltip';
 import { X } from 'lucide-react';
 
 const FOCUS_RING =
@@ -79,15 +80,19 @@ export function PendingAcknowledgementsModal({
                   {ack.initials}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p
-                    className="truncate font-sans font-medium"
-                    style={{ fontSize: 14, color: '#0D2630' }}
-                  >
-                    {ack.doctorName}
-                  </p>
-                  <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                    {ack.shiftLabel} • {ack.day}
-                  </p>
+                  <Tooltip content={ack.doctorName}>
+                    <p
+                      className="truncate font-sans font-medium"
+                      style={{ fontSize: 14, color: '#0D2630' }}
+                    >
+                      {ack.doctorName}
+                    </p>
+                  </Tooltip>
+                  <Tooltip content={`${ack.shiftLabel} • ${ack.day}`}>
+                    <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                      {ack.shiftLabel} • {ack.day}
+                    </p>
+                  </Tooltip>
                 </div>
                 <span
                   className="hidden shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium sm:inline"

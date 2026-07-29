@@ -19,6 +19,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -417,12 +418,14 @@ export default function AppointmentSchedulingPage() {
                 <div className="mt-2 flex items-center gap-3">
                   <UserAvatar initials={selectedPatient.initials} size={48} bg="#00B4D8" />
                   <div className="min-w-0">
-                    <p
-                      className="font-display truncate font-semibold"
-                      style={{ fontSize: 16, color: '#0D2630' }}
-                    >
-                      {selectedPatient.fullName}
-                    </p>
+                    <Tooltip content={selectedPatient.fullName}>
+                      <p
+                        className="font-display truncate font-semibold"
+                        style={{ fontSize: 16, color: '#0D2630' }}
+                      >
+                        {selectedPatient.fullName}
+                      </p>
+                    </Tooltip>
                     <p style={{ fontSize: 14, color: '#00B4D8' }}>{selectedPatient.mrn}</p>
                     <p style={{ fontSize: 14, color: '#4A7080' }}>
                       {selectedPatient.age} Yrs &middot; {selectedPatient.gender}
@@ -796,12 +799,14 @@ export default function AppointmentSchedulingPage() {
                   ].map(([label, value]) => (
                     <div key={label} className="flex items-center justify-between gap-2">
                       <p style={{ fontSize: 14, color: '#8A98A3' }}>{label}</p>
-                      <p
-                        className="truncate text-right font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        {value}
-                      </p>
+                      <Tooltip content={value}>
+                        <p
+                          className="truncate text-right font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {value}
+                        </p>
+                      </Tooltip>
                     </div>
                   ))}
                   <div
@@ -992,15 +997,19 @@ function DoctorCard({
     >
       <UserAvatar initials={doctor.initials} size={36} bg={active ? '#00B4D8' : '#4A7080'} />
       <div className="min-w-0">
-        <p
-          className="truncate font-sans font-medium"
-          style={{ fontSize: 14, color: active ? '#00B4D8' : '#0D2630' }}
-        >
-          {doctor.name}
-        </p>
-        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-          {doctor.department}
-        </p>
+        <Tooltip content={doctor.name}>
+          <p
+            className="truncate font-sans font-medium"
+            style={{ fontSize: 14, color: active ? '#00B4D8' : '#0D2630' }}
+          >
+            {doctor.name}
+          </p>
+        </Tooltip>
+        <Tooltip content={doctor.department}>
+          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+            {doctor.department}
+          </p>
+        </Tooltip>
       </div>
     </button>
   );
@@ -1101,15 +1110,19 @@ function DayView({
             style={{ borderLeft: '1px solid rgba(0,100,130,0.08)' }}
           >
             <div className="flex h-11 flex-col items-center justify-center px-2 text-center">
-              <p
-                className="truncate font-sans font-semibold"
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                {doc.name}
-              </p>
-              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                {doc.department}
-              </p>
+              <Tooltip content={doc.name}>
+                <p
+                  className="truncate font-sans font-semibold"
+                  style={{ fontSize: 14, color: '#0D2630' }}
+                >
+                  {doc.name}
+                </p>
+              </Tooltip>
+              <Tooltip content={doc.department}>
+                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  {doc.department}
+                </p>
+              </Tooltip>
             </div>
             {slots.map((s) => {
               const slotKey = `${s.hour}:${s.minute}`;
@@ -1188,12 +1201,16 @@ function AppointmentBlock({
         background: selected ? '#E6F8FD' : cfg.bg,
       }}
     >
-      <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
-        {appt.patientName}
-      </p>
-      <p className="truncate" style={{ fontSize: 14, color: cfg.color }}>
-        {appt.visitType}
-      </p>
+      <Tooltip content={appt.patientName}>
+        <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
+          {appt.patientName}
+        </p>
+      </Tooltip>
+      <Tooltip content={appt.visitType}>
+        <p className="truncate" style={{ fontSize: 14, color: cfg.color }}>
+          {appt.visitType}
+        </p>
+      </Tooltip>
     </button>
   );
 }
@@ -1243,9 +1260,11 @@ function WeekView({
               {day.getDate()}
             </p>
             {dayAppointments.slice(0, 3).map((a) => (
-              <p key={a.id} className="w-full truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                {formatTime(a.dateTime)} &middot; {a.patientName}
-              </p>
+              <Tooltip key={a.id} content={`${formatTime(a.dateTime)} &middot; ${a.patientName}`}>
+                <p className="w-full truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                  {formatTime(a.dateTime)} &middot; {a.patientName}
+                </p>
+              </Tooltip>
             ))}
             {dayAppointments.length === 0 && (
               <p style={{ fontSize: 14, color: '#8A98A3' }}>No appointments</p>

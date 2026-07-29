@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, use } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { useAuth } from '@/hooks/useAuth';
@@ -448,12 +449,14 @@ export default function PatientPrescriptionPage({ params }: { params: Promise<{ 
             {patient.initials}
           </div>
 
-          <span
-            className="min-w-0 flex-1 truncate font-sans text-white sm:hidden"
-            style={{ fontSize: 15, lineHeight: '22px' }}
-          >
-            {patient.name}
-          </span>
+          <Tooltip content={patient.name}>
+            <span
+              className="min-w-0 flex-1 truncate font-sans text-white sm:hidden"
+              style={{ fontSize: 15, lineHeight: '22px' }}
+            >
+              {patient.name}
+            </span>
+          </Tooltip>
 
           {detail.isUrgent && (
             <span

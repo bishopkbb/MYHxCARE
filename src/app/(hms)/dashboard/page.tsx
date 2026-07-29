@@ -29,6 +29,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@hooks/useAuth';
 import { ROUTES } from '@/constants/routes';
 import { PermissionGate } from '@/components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
 import {
@@ -859,9 +860,11 @@ export default function DashboardPage() {
                         <p className="text-base leading-6" style={{ color: '#00B4D8' }}>
                           {patient.name}
                         </p>
-                        <p className="truncate text-sm leading-5.5" style={{ color: '#25464D' }}>
-                          {patient.symptoms}
-                        </p>
+                        <Tooltip content={patient.symptoms}>
+                          <p className="truncate text-sm leading-5.5" style={{ color: '#25464D' }}>
+                            {patient.symptoms}
+                          </p>
+                        </Tooltip>
                       </div>
 
                       {/* Status badge + wait time */}

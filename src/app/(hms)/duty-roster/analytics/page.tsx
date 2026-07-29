@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import { ExportMenu } from '@/components/ExportMenu';
 import { ROUTES } from '@/constants/routes';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
+import { Tooltip } from '@components/shared/Tooltip';
 import {
   ANALYTICS_PERIODS,
   DEPARTMENT_COVERAGE,
@@ -558,17 +559,21 @@ export default function WorkforceAnalyticsPage() {
                             >
                               {o.initials}
                             </div>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {o.doctorName}
-                            </p>
+                            <Tooltip content={o.doctorName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {o.doctorName}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="min-w-0 flex-1 px-4 py-3">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {o.department}
-                            </p>
+                            <Tooltip content={o.department}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {o.department}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-32 shrink-0 px-4 py-3">
                             <span
@@ -610,12 +615,14 @@ export default function WorkforceAnalyticsPage() {
                                 {o.initials}
                               </div>
                               <div className="min-w-0">
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {o.doctorName}
-                                </p>
+                                <Tooltip content={o.doctorName}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {o.doctorName}
+                                  </p>
+                                </Tooltip>
                                 <p style={{ fontSize: 14, color: '#4A7080' }}>{o.department}</p>
                               </div>
                             </div>

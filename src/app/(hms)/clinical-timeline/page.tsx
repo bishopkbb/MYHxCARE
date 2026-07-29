@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { ROUTES } from '@/constants/routes';
+import { Tooltip } from '@components/shared/Tooltip';
 import {
   MOCK_PATIENTS,
   type PatientRecord,
@@ -307,12 +308,14 @@ export default function ClinicalTimelineIndexPage() {
                         {patient.initials}
                       </div>
                       <div className="min-w-0">
-                        <p
-                          className="truncate text-base leading-6 font-semibold"
-                          style={{ color: '#2F3A40' }}
-                        >
-                          {patient.name}
-                        </p>
+                        <Tooltip content={patient.name}>
+                          <p
+                            className="truncate text-base leading-6 font-semibold"
+                            style={{ color: '#2F3A40' }}
+                          >
+                            {patient.name}
+                          </p>
+                        </Tooltip>
                         <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
                           {patient.mrn}
                         </p>
@@ -447,12 +450,14 @@ export default function ClinicalTimelineIndexPage() {
                       {patient.initials}
                     </div>
                     <div className="min-w-0">
-                      <p
-                        className="truncate text-base leading-6 font-semibold"
-                        style={{ color: '#2F3A40' }}
-                      >
-                        {patient.name}
-                      </p>
+                      <Tooltip content={patient.name}>
+                        <p
+                          className="truncate text-base leading-6 font-semibold"
+                          style={{ color: '#2F3A40' }}
+                        >
+                          {patient.name}
+                        </p>
+                      </Tooltip>
                       <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
                         {patient.mrn}
                       </p>

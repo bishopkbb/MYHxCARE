@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
 import { formatDate } from '@/utils/datetime';
+import { Tooltip } from '@components/shared/Tooltip';
 import {
   CONSULTATION_CHART_TITLE,
   DAILY_CONSULTATIONS,
@@ -417,12 +418,14 @@ export default function ReportsPage() {
                           background: '#FFFFFF',
                         }}
                       >
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
-                        >
-                          {stat.label}
-                        </p>
+                        <Tooltip content={stat.label}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
+                          >
+                            {stat.label}
+                          </p>
+                        </Tooltip>
                         <p
                           className="font-display mt-1.5 font-semibold"
                           style={{ fontSize: 28, lineHeight: '36px', color: '#0D2630' }}
@@ -612,28 +615,34 @@ export default function ReportsPage() {
                             }}
                           >
                             <div className="min-w-0 flex-1 py-4 pr-3 pl-5">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                              >
-                                {row.patient}
-                              </p>
+                              <Tooltip content={row.patient}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                                >
+                                  {row.patient}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-44 shrink-0 py-4 pr-4">
-                              <p
-                                className="truncate font-sans"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
-                              >
-                                {row.department}
-                              </p>
+                              <Tooltip content={row.department}>
+                                <p
+                                  className="truncate font-sans"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                >
+                                  {row.department}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-48 shrink-0 py-4 pr-4">
-                              <p
-                                className="truncate font-sans"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
-                              >
-                                {row.referredTo}
-                              </p>
+                              <Tooltip content={row.referredTo}>
+                                <p
+                                  className="truncate font-sans"
+                                  style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                >
+                                  {row.referredTo}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-32 shrink-0 py-4 pr-4">
                               <p
@@ -693,12 +702,14 @@ export default function ReportsPage() {
                             style={{ borderRadius: 10, border: '1px solid rgba(0,100,130,0.10)' }}
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                              >
-                                {row.patient}
-                              </p>
+                              <Tooltip content={row.patient}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                                >
+                                  {row.patient}
+                                </p>
+                              </Tooltip>
                               <span
                                 className="shrink-0 rounded-full border px-2.5 py-0.5 text-sm font-medium whitespace-nowrap"
                                 style={{

@@ -31,6 +31,7 @@ import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCardCompact } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -684,12 +685,14 @@ export default function DutyRosterPage() {
                               {shift.initials}
                             </div>
                             <div className="min-w-0">
-                              <p
-                                className="truncate font-sans font-semibold"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {shift.doctorName}
-                              </p>
+                              <Tooltip content={shift.doctorName}>
+                                <p
+                                  className="truncate font-sans font-semibold"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {shift.doctorName}
+                                </p>
+                              </Tooltip>
                               <p style={{ fontSize: 14, color: '#4A7080' }}>{shift.role}</p>
                             </div>
                           </div>
@@ -780,12 +783,14 @@ export default function DutyRosterPage() {
                   >
                     {COLS.map((col) => (
                       <div key={col.key} className={`${col.width} min-w-0 px-3 py-3 ${col.align}`}>
-                        <span
-                          className="block truncate font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          {col.label}
-                        </span>
+                        <Tooltip content={col.label}>
+                          <span
+                            className="block truncate font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            {col.label}
+                          </span>
+                        </Tooltip>
                       </div>
                     ))}
                   </div>
@@ -807,17 +812,21 @@ export default function DutyRosterPage() {
                           >
                             {shift.initials}
                           </div>
-                          <p
-                            className="min-w-0 truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {shift.doctorName}
-                          </p>
+                          <Tooltip content={shift.doctorName}>
+                            <p
+                              className="min-w-0 truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {shift.doctorName}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-[10%] min-w-0 px-3 py-3">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {shift.role}
-                          </p>
+                          <Tooltip content={shift.role}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {shift.role}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-28 shrink-0 px-3 py-3">
                           <span
@@ -834,14 +843,18 @@ export default function DutyRosterPage() {
                           </span>
                         </div>
                         <div className="w-[14%] min-w-0 px-3 py-3">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {shift.timeRange}
-                          </p>
+                          <Tooltip content={shift.timeRange}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {shift.timeRange}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="min-w-0 flex-1 px-3 py-3">
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {shift.ward}
-                          </p>
+                          <Tooltip content={shift.ward}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {shift.ward}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-28 shrink-0 px-3 py-3">
                           <span
@@ -974,12 +987,14 @@ export default function DutyRosterPage() {
               <div className="mt-4 flex flex-col gap-3.5">
                 {COVERAGE_OVERVIEW.map((metric) => (
                   <div key={metric.label} className="flex items-center gap-3">
-                    <p
-                      className="w-[42%] shrink-0 truncate"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      {metric.label}
-                    </p>
+                    <Tooltip content={metric.label}>
+                      <p
+                        className="w-[42%] shrink-0 truncate"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        {metric.label}
+                      </p>
+                    </Tooltip>
                     <div
                       className="h-2 min-w-0 flex-1 overflow-hidden rounded-full"
                       style={{ background: '#E2EDF1' }}
@@ -1035,15 +1050,19 @@ export default function DutyRosterPage() {
                         {ack.initials}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {ack.doctorName}
-                        </p>
-                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {ack.shiftLabel} • {ack.day}
-                        </p>
+                        <Tooltip content={ack.doctorName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {ack.doctorName}
+                          </p>
+                        </Tooltip>
+                        <Tooltip content={`${ack.shiftLabel} • ${ack.day}`}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {ack.shiftLabel} • {ack.day}
+                          </p>
+                        </Tooltip>
                       </div>
                       <span
                         className="hidden shrink-0 rounded-full px-2.5 py-0.5 font-sans font-medium sm:inline"

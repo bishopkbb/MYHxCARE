@@ -3,7 +3,7 @@
 import { AlertCircle, CheckCircle2, Inbox, RefreshCw, Search, Share2, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -389,12 +389,14 @@ export default function ReferralsIndexPage() {
                             {patient.initials}
                           </div>
                           <div className="min-w-0">
-                            <p
-                              className="truncate text-base leading-6 font-semibold"
-                              style={{ color: '#2F3A40' }}
-                            >
-                              {patient.name}
-                            </p>
+                            <Tooltip content={patient.name}>
+                              <p
+                                className="truncate text-base leading-6 font-semibold"
+                                style={{ color: '#2F3A40' }}
+                              >
+                                {patient.name}
+                              </p>
+                            </Tooltip>
                             <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
                               {patient.mrn}
                             </p>
@@ -530,12 +532,14 @@ export default function ReferralsIndexPage() {
                           {patient.initials}
                         </div>
                         <div className="min-w-0">
-                          <p
-                            className="truncate text-base leading-6 font-semibold"
-                            style={{ color: '#2F3A40' }}
-                          >
-                            {patient.name}
-                          </p>
+                          <Tooltip content={patient.name}>
+                            <p
+                              className="truncate text-base leading-6 font-semibold"
+                              style={{ color: '#2F3A40' }}
+                            >
+                              {patient.name}
+                            </p>
+                          </Tooltip>
                           <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
                             {patient.mrn}
                           </p>
@@ -635,25 +639,31 @@ export default function ReferralsIndexPage() {
                     style={{ borderBottom: isLast ? undefined : '1px solid rgba(0,100,130,0.08)' }}
                   >
                     <div className="min-w-0 flex-1 py-4 pr-3 pl-5">
-                      <p
-                        className="truncate text-base leading-6 font-semibold"
-                        style={{ color: '#2F3A40' }}
-                      >
-                        {referral.patientName}
-                      </p>
+                      <Tooltip content={referral.patientName}>
+                        <p
+                          className="truncate text-base leading-6 font-semibold"
+                          style={{ color: '#2F3A40' }}
+                        >
+                          {referral.patientName}
+                        </p>
+                      </Tooltip>
                       <p className="text-sm leading-5.5" style={{ color: '#00B4D8' }}>
                         {referral.mrn}
                       </p>
                     </div>
                     <div className="w-44 shrink-0 py-4 pr-3">
-                      <p className="truncate text-sm leading-5.5" style={{ color: '#25464D' }}>
-                        {referral.fromDepartment}
-                      </p>
+                      <Tooltip content={referral.fromDepartment}>
+                        <p className="truncate text-sm leading-5.5" style={{ color: '#25464D' }}>
+                          {referral.fromDepartment}
+                        </p>
+                      </Tooltip>
                     </div>
                     <div className="w-40 shrink-0 py-4 pr-3">
-                      <p className="truncate text-sm leading-5.5" style={{ color: '#25464D' }}>
-                        {referral.referredBy}
-                      </p>
+                      <Tooltip content={referral.referredBy}>
+                        <p className="truncate text-sm leading-5.5" style={{ color: '#25464D' }}>
+                          {referral.referredBy}
+                        </p>
+                      </Tooltip>
                     </div>
                     <div className="w-24 shrink-0 py-4 pr-3">
                       <span

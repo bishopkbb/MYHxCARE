@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import { Tooltip } from '@components/shared/Tooltip';
 import { Pagination } from '@components/shared/Pagination';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
@@ -186,12 +187,14 @@ export default function OnCallSchedulePage() {
                                 {a.initials}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {a.doctorName}
-                                </p>
+                                <Tooltip content={a.doctorName}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {a.doctorName}
+                                  </p>
+                                </Tooltip>
                                 <p style={{ fontSize: 14, color: levelMeta.color }}>
                                   {levelMeta.label}
                                 </p>
@@ -388,9 +391,11 @@ export default function OnCallSchedulePage() {
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.date}</p>
                         </div>
                         <div className="w-[28%] px-4 py-3">
-                          <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                            {entry.department}
-                          </p>
+                          <Tooltip content={entry.department}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                              {entry.department}
+                            </p>
+                          </Tooltip>
                         </div>
                         <div className="w-[20%] px-4 py-3">
                           <span
@@ -413,12 +418,14 @@ export default function OnCallSchedulePage() {
                           >
                             {entry.initials}
                           </div>
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {entry.doctorName}
-                          </p>
+                          <Tooltip content={entry.doctorName}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {entry.doctorName}
+                            </p>
+                          </Tooltip>
                         </div>
                       </div>
                     );

@@ -11,6 +11,7 @@ import {
   type AppointmentStatus,
   type ScheduledAppointment,
 } from '@/features/registration/__mocks__/appointmentSchedulingFixtures';
+import { Tooltip } from '@components/shared/Tooltip';
 import { useScheduledAppointments } from '@/features/registration/store/appointmentStore';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -129,18 +130,22 @@ function AppointmentCard({ appt }: { appt: Appointment }) {
       </span>
 
       <div className="min-w-0 flex-1">
-        <p
-          className="truncate font-sans font-semibold"
-          style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-        >
-          {appt.patientName}
-        </p>
-        <p
-          className="truncate font-sans"
-          style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-        >
-          {appt.type}
-        </p>
+        <Tooltip content={appt.patientName}>
+          <p
+            className="truncate font-sans font-semibold"
+            style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+          >
+            {appt.patientName}
+          </p>
+        </Tooltip>
+        <Tooltip content={appt.type}>
+          <p
+            className="truncate font-sans"
+            style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+          >
+            {appt.type}
+          </p>
+        </Tooltip>
       </div>
 
       <StatusBadge status={appt.status} />

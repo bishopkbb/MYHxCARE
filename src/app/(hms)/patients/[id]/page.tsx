@@ -28,6 +28,7 @@ import { useRouter } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 
 import { AllergyBanner } from '@/components/clinical/AllergyBanner';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -422,12 +423,14 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Name — only visible on mobile (sm+ shows it in the info strip below) */}
-          <span
-            className="min-w-0 flex-1 truncate font-normal text-white sm:hidden"
-            style={{ fontSize: 16, lineHeight: '24px' }}
-          >
-            {patient.name}
-          </span>
+          <Tooltip content={patient.name}>
+            <span
+              className="min-w-0 flex-1 truncate font-normal text-white sm:hidden"
+              style={{ fontSize: 16, lineHeight: '24px' }}
+            >
+              {patient.name}
+            </span>
+          </Tooltip>
 
           {/* URGENT — mobile slot, sits inline with the name */}
           {patient.isUrgent && (

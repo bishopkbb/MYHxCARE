@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { QuickActionTile } from '@components/shared/QuickActionTile';
+import { Tooltip } from '@components/shared/Tooltip';
 import { StatCardTrend } from '@components/shared/StatCard';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@hooks/useAuth';
@@ -283,20 +284,24 @@ export default function RegistrationDashboardPage() {
                               </p>
                             </div>
                             <div className="w-30 shrink-0 py-3 pr-2">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {appt.patient}
-                              </p>
+                              <Tooltip content={appt.patient}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {appt.patient}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="min-w-0 flex-1 py-3 pr-2">
-                              <p
-                                className="truncate whitespace-nowrap"
-                                style={{ fontSize: 14, color: '#4A7080' }}
-                              >
-                                {appt.appointmentWith}
-                              </p>
+                              <Tooltip content={appt.appointmentWith}>
+                                <p
+                                  className="truncate whitespace-nowrap"
+                                  style={{ fontSize: 14, color: '#4A7080' }}
+                                >
+                                  {appt.appointmentWith}
+                                </p>
+                              </Tooltip>
                             </div>
                             <div className="w-24 shrink-0 py-3 pr-3 text-right">
                               <span
@@ -380,15 +385,19 @@ export default function RegistrationDashboardPage() {
                           {reg.initials}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {reg.name}
-                          </p>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {reg.mrn}
-                          </p>
+                          <Tooltip content={reg.name}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {reg.name}
+                            </p>
+                          </Tooltip>
+                          <Tooltip content={reg.mrn}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {reg.mrn}
+                            </p>
+                          </Tooltip>
                         </div>
                         <p
                           className="shrink-0 text-right"

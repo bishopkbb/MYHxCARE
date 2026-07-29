@@ -36,6 +36,7 @@ import { completeEncounter } from '@/features/encounters/store/encounterStore';
 import { addAdmission, useAdmissions } from '@/features/nursing/store/admissionsStore';
 import type { NewAdmissionInput } from '@/features/nursing/components/NewAdmissionModal';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
+import { Tooltip } from '@components/shared/Tooltip';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 
 const NewAdmissionModal = dynamic(
@@ -254,12 +255,14 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
             {patient.initials}
           </div>
 
-          <span
-            className="min-w-0 flex-1 truncate font-normal text-white sm:hidden"
-            style={{ fontSize: 16, lineHeight: '24px' }}
-          >
-            {patient.name}
-          </span>
+          <Tooltip content={patient.name}>
+            <span
+              className="min-w-0 flex-1 truncate font-normal text-white sm:hidden"
+              style={{ fontSize: 16, lineHeight: '24px' }}
+            >
+              {patient.name}
+            </span>
+          </Tooltip>
 
           {patient.isUrgent && (
             <span

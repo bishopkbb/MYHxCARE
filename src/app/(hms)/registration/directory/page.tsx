@@ -24,6 +24,7 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { StatCardTrend } from '@components/shared/StatCard';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { ExportMenu } from '@/components/ExportMenu';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -622,28 +623,34 @@ export default function PatientDirectoryPage() {
                       </span>
                     </div>
                     <div className="w-28 shrink-0 py-3 pr-3">
-                      <span
-                        className="truncate font-sans font-bold tracking-wide uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Age/Gender
-                      </span>
+                      <Tooltip content={`Age/Gender`}>
+                        <span
+                          className="truncate font-sans font-bold tracking-wide uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Age/Gender
+                        </span>
+                      </Tooltip>
                     </div>
                     <div className="w-40 shrink-0 py-3 pr-3">
-                      <span
-                        className="truncate font-sans font-bold tracking-wide uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Faculty/Dept
-                      </span>
+                      <Tooltip content={`Faculty/Dept`}>
+                        <span
+                          className="truncate font-sans font-bold tracking-wide uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Faculty/Dept
+                        </span>
+                      </Tooltip>
                     </div>
                     <div className="w-28 shrink-0 py-3 pr-3">
-                      <span
-                        className="truncate font-sans font-bold tracking-wide uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Last Visit
-                      </span>
+                      <Tooltip content={`Last Visit`}>
+                        <span
+                          className="truncate font-sans font-bold tracking-wide uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Last Visit
+                        </span>
+                      </Tooltip>
                     </div>
                     <div className="w-24 shrink-0 py-3 pr-3">
                       <span
@@ -759,26 +766,34 @@ export default function PatientDirectoryPage() {
                               {patient.initials}
                             </div>
                             <div className="min-w-0">
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {patient.name}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {patient.phone}
-                              </p>
+                              <Tooltip content={patient.name}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {patient.name}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={patient.phone}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {patient.phone}
+                                </p>
+                              </Tooltip>
                             </div>
                           </div>
                           <div className="w-32 shrink-0 py-3 pr-3">
-                            <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                              {patient.mrn}
-                            </p>
+                            <Tooltip content={patient.mrn}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                {patient.mrn}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-28 shrink-0 py-3 pr-3">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {patient.studentId}
-                            </p>
+                            <Tooltip content={patient.studentId}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {patient.studentId}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-28 shrink-0 py-3 pr-3">
                             <p style={{ fontSize: 14, color: '#4A7080' }}>
@@ -786,14 +801,18 @@ export default function PatientDirectoryPage() {
                             </p>
                           </div>
                           <div className="w-40 shrink-0 py-3 pr-3">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {patient.faculty}
-                            </p>
+                            <Tooltip content={patient.faculty}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {patient.faculty}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-28 shrink-0 py-3 pr-3">
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {patient.lastVisit}
-                            </p>
+                            <Tooltip content={patient.lastVisit}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {patient.lastVisit}
+                              </p>
+                            </Tooltip>
                           </div>
                           <div className="w-24 shrink-0 py-3 pr-3">
                             <span
@@ -1100,23 +1119,27 @@ export default function PatientDirectoryPage() {
                       />
                       <div className="min-w-0">
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>{row.label}</p>
-                        <p
-                          className="truncate font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {row.value}
-                        </p>
+                        <Tooltip content={row.value}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {row.value}
+                          </p>
+                        </Tooltip>
                       </div>
                     </div>
                   ))}
                   <div>
                     <p style={{ fontSize: 14, color: '#8A98A3' }}>Email</p>
-                    <p
-                      className="truncate font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
-                      {selectedPatient.email}
-                    </p>
+                    <Tooltip content={selectedPatient.email}>
+                      <p
+                        className="truncate font-sans font-medium"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        {selectedPatient.email}
+                      </p>
+                    </Tooltip>
                   </div>
                   <div>
                     <p style={{ fontSize: 14, color: '#8A98A3' }}>Address</p>

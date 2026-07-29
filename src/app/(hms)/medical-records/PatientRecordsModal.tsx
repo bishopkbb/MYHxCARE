@@ -10,6 +10,7 @@ import type { MedicalRecord } from '@/features/medical-records/__mocks__/medical
 import { resolvePatientIdByMrn } from '@/features/patients/__mocks__/patientFixtures';
 import { MOCK_PATIENT_PROFILE } from '@/features/registration/__mocks__/patientProfileFixtures';
 import { useDirectoryPatients } from '@/features/registration/store/patientDirectoryStore';
+import { Tooltip } from '@components/shared/Tooltip';
 import { RECORD_TYPE_CFG, STATUS_CFG } from './config';
 
 // ── Patient Records Modal ─────────────────────────────────────────────────────
@@ -214,12 +215,14 @@ function RecordListView({
             {/* Title + meta */}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <p
-                  className="truncate font-sans font-semibold"
-                  style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                >
-                  {record.title}
-                </p>
+                <Tooltip content={record.title}>
+                  <p
+                    className="truncate font-sans font-semibold"
+                    style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                  >
+                    {record.title}
+                  </p>
+                </Tooltip>
                 {record.isCritical && (
                   <AlertTriangle
                     aria-hidden
@@ -227,13 +230,15 @@ function RecordListView({
                   />
                 )}
               </div>
-              <p
-                className="truncate"
-                style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-              >
-                {record.date}
-                <span className="hidden sm:inline"> · {record.provider}</span>
-              </p>
+              <Tooltip content={`${record.date} · ${record.provider}`}>
+                <p
+                  className="truncate"
+                  style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                >
+                  {record.date}
+                  <span className="hidden sm:inline"> · {record.provider}</span>
+                </p>
+              </Tooltip>
             </div>
 
             {/* Type badge — desktop only */}

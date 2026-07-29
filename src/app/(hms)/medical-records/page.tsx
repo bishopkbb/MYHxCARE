@@ -19,6 +19,7 @@ import {
 } from '@/features/medical-records/__mocks__/medicalRecordFixtures';
 import { useMedicalRecords } from '@/features/medical-records/store/medicalRecordsStore';
 import { ExportMenu } from '@/components/ExportMenu';
+import { Tooltip } from '@components/shared/Tooltip';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import { RECORD_TYPE_CFG, STATUS_CFG } from './config';
@@ -537,12 +538,14 @@ export default function MedicalRecordsPage() {
                       {/* Title + meta */}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <p
-                            className="truncate font-sans font-semibold"
-                            style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
-                          >
-                            {record.title}
-                          </p>
+                          <Tooltip content={record.title}>
+                            <p
+                              className="truncate font-sans font-semibold"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#0D2630' }}
+                            >
+                              {record.title}
+                            </p>
+                          </Tooltip>
                           {record.isCritical && (
                             <AlertTriangle
                               aria-hidden
@@ -550,14 +553,19 @@ export default function MedicalRecordsPage() {
                             />
                           )}
                         </div>
-                        <p
-                          className="truncate"
-                          style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                        <Tooltip
+                          content={`${record.patientName} · ${record.mrn} · ${record.date} · ${record.provider}`}
                         >
-                          {record.patientName}
-                          <span className="hidden sm:inline"> · {record.mrn}</span> · {record.date}
-                          <span className="hidden sm:inline"> · {record.provider}</span>
-                        </p>
+                          <p
+                            className="truncate"
+                            style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
+                          >
+                            {record.patientName}
+                            <span className="hidden sm:inline"> · {record.mrn}</span> ·{' '}
+                            {record.date}
+                            <span className="hidden sm:inline"> · {record.provider}</span>
+                          </p>
+                        </Tooltip>
                       </div>
 
                       {/* Type badge — desktop only */}

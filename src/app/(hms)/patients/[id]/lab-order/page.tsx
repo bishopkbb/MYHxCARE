@@ -14,6 +14,7 @@ import {
 import { MOCK_PATIENTS, getPatientDetail } from '@/features/patients/__mocks__/patientFixtures';
 import { addLabOrder } from '@/features/laboratory/store/labResultStore';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
+import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
 
@@ -311,12 +312,14 @@ export default function PatientLabOrderPage({ params }: { params: Promise<{ id: 
           </div>
 
           {/* Name — mobile only */}
-          <span
-            className="min-w-0 flex-1 truncate font-sans text-white sm:hidden"
-            style={{ fontSize: 15, lineHeight: '22px' }}
-          >
-            {patient.name}
-          </span>
+          <Tooltip content={patient.name}>
+            <span
+              className="min-w-0 flex-1 truncate font-sans text-white sm:hidden"
+              style={{ fontSize: 15, lineHeight: '22px' }}
+            >
+              {patient.name}
+            </span>
+          </Tooltip>
 
           {/* URGENT — mobile inline */}
           {patient.isUrgent && (
