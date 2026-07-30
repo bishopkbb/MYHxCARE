@@ -1132,21 +1132,53 @@ export function getInventorySnapshot() {
 
 export type InventoryStatus = 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Expiring Soon';
 
+export type SupplierCategory =
+  'Pharmaceuticals' | 'Medical Supplies' | 'Medical Equipment' | 'Laboratory Supplies' | 'Others';
+
+export type SupplierStatus = 'Active' | 'Pending Approval' | 'Inactive';
+
 export type SupplierInfo = {
   name: string;
   code: string;
   address: string;
   phone: string;
   email: string;
+  category: SupplierCategory;
+  contactPerson: string;
+  location: string;
+  status: SupplierStatus;
+  /** Only meaningful when status === 'Active' — a preferred supplier is
+   * still active, just displayed/tagged as a higher-priority partner. */
+  isPreferred: boolean;
+  performanceRating: number; // 0–5 in 0.5 increments; 0 = not yet rated
+  lastOrderDate: string; // ISO date, '' if never ordered
+  totalSpendYTD: number; // ₦, 0 for Pending Approval / never-ordered suppliers
 };
 
-export const SUPPLIER_DIRECTORY: SupplierInfo[] = [
+/** The label the Suppliers table/status filter actually shows — "Preferred"
+ * takes over the "Active" label for display, since it's a rendering choice,
+ * not a separate exclusive state (§ isPreferred docs above). */
+export function getSupplierDisplayStatus(
+  s: Pick<SupplierInfo, 'status' | 'isPreferred'>,
+): 'Active' | 'Preferred' | 'Pending Approval' | 'Inactive' {
+  return s.status === 'Active' && s.isPreferred ? 'Preferred' : s.status;
+}
+
+const REAL_SUPPLIERS: SupplierInfo[] = [
   {
     name: 'MedPlus Distributors',
     code: 'SUP-00045',
     address: '23 Ire Akari Street, Surulere, Lagos, Nigeria',
     phone: '+234 803 123 4567',
     email: 'info@medplusdistributors.com',
+    category: 'Pharmaceuticals',
+    contactPerson: 'Mr. Chinedu Okafor',
+    location: 'Lagos, Nigeria',
+    status: 'Active',
+    isPreferred: true,
+    performanceRating: 5,
+    lastOrderDate: pastDateAt(5, 9, 15).slice(0, 10),
+    totalSpendYTD: 45230000,
   },
   {
     name: 'PharmaCare Nigeria Ltd',
@@ -1154,6 +1186,14 @@ export const SUPPLIER_DIRECTORY: SupplierInfo[] = [
     address: '14 Awolowo Road, Ikoyi, Lagos, Nigeria',
     phone: '+234 802 234 5678',
     email: 'sales@pharmacarenigeria.com',
+    category: 'Pharmaceuticals',
+    contactPerson: 'Mrs. Folake Adeyemi',
+    location: 'Lagos, Nigeria',
+    status: 'Active',
+    isPreferred: false,
+    performanceRating: 4,
+    lastOrderDate: pastDateAt(2, 8, 45).slice(0, 10),
+    totalSpendYTD: 32450000,
   },
   {
     name: 'Fidson Healthcare',
@@ -1161,6 +1201,14 @@ export const SUPPLIER_DIRECTORY: SupplierInfo[] = [
     address: 'Km 16, Ikorodu Road, Lagos, Nigeria',
     phone: '+234 801 345 6789',
     email: 'orders@fidson.com',
+    category: 'Pharmaceuticals',
+    contactPerson: 'Mr. Steve Eze',
+    location: 'Port Harcourt, Nigeria',
+    status: 'Active',
+    isPreferred: true,
+    performanceRating: 5,
+    lastOrderDate: pastDateAt(6, 10, 20).slice(0, 10),
+    totalSpendYTD: 28760000,
   },
   {
     name: 'Emzor Pharmaceuticals',
@@ -1168,6 +1216,14 @@ export const SUPPLIER_DIRECTORY: SupplierInfo[] = [
     address: '3 Adeniyi Jones Avenue, Ikeja, Lagos, Nigeria',
     phone: '+234 809 456 7890',
     email: 'supply@emzorpharma.com',
+    category: 'Pharmaceuticals',
+    contactPerson: 'Mr. Samuel Isaac',
+    location: 'Ibadan, Nigeria',
+    status: 'Active',
+    isPreferred: false,
+    performanceRating: 4,
+    lastOrderDate: pastDateAt(10, 9, 0).slice(0, 10),
+    totalSpendYTD: 21300000,
   },
   {
     name: 'May & Baker Nigeria',
@@ -1175,6 +1231,14 @@ export const SUPPLIER_DIRECTORY: SupplierInfo[] = [
     address: '3/5 Sapara Street, Industrial Estate, Lagos, Nigeria',
     phone: '+234 807 567 8901',
     email: 'procurement@may-baker.com',
+    category: 'Pharmaceuticals',
+    contactPerson: 'Mrs. Aisha Bello',
+    location: 'Kano, Nigeria',
+    status: 'Active',
+    isPreferred: false,
+    performanceRating: 3.5,
+    lastOrderDate: pastDateAt(12, 11, 30).slice(0, 10),
+    totalSpendYTD: 18980000,
   },
   {
     name: 'Juhel Nigeria Ltd',
@@ -1182,8 +1246,309 @@ export const SUPPLIER_DIRECTORY: SupplierInfo[] = [
     address: '15 Enugu-Onitsha Expressway, Enugu, Nigeria',
     phone: '+234 806 678 9012',
     email: 'orders@juhelpharma.com',
+    category: 'Pharmaceuticals',
+    contactPerson: 'Mr. Kola Johnson',
+    location: 'Enugu, Nigeria',
+    status: 'Active',
+    isPreferred: true,
+    performanceRating: 4.5,
+    lastOrderDate: pastDateAt(1, 9, 20).slice(0, 10),
+    totalSpendYTD: 15670000,
   },
 ];
+
+const PREFIX_POOL = [
+  'Apex',
+  'Delta',
+  'Zenith',
+  'Crown',
+  'Unity',
+  'Trust',
+  'Metro',
+  'National',
+  'Continental',
+  'Golden',
+  'Heritage',
+  'Summit',
+  'Horizon',
+  'Falcon',
+  'Pinnacle',
+  'Cardinal',
+  'Sterling',
+  'Vantage',
+  'Meridian',
+  'Bright',
+  'Grand',
+  'Royal',
+  'Premier',
+  'Elite',
+  'Capital',
+  'Regal',
+  'Superior',
+  'Union',
+  'Standard',
+  'First',
+  'Central',
+  'Coastal',
+  'Northern',
+  'Eastern',
+  'Atlantic',
+  'Westgate',
+];
+
+const SUFFIX_BY_CATEGORY: Record<SupplierCategory, string[]> = {
+  Pharmaceuticals: [
+    'Pharmaceuticals',
+    'Pharma Nigeria',
+    'Drug Company',
+    'Pharmaceuticals Ltd',
+    'Pharma Distributors',
+  ],
+  'Medical Supplies': [
+    'Medical Supplies',
+    'Healthcare Supplies',
+    'Medicals Ltd',
+    'Health Supplies Ltd',
+    'Medical Trading',
+  ],
+  'Medical Equipment': [
+    'Medical Equipment',
+    'Biomedical Systems',
+    'Medical Devices Ltd',
+    'Equipment Nigeria',
+  ],
+  'Laboratory Supplies': ['Lab Supplies', 'Diagnostics Ltd', 'Laboratory Systems'],
+  Others: ['Logistics Ltd', 'General Supplies', 'Trading Company'],
+};
+
+const NIGERIAN_CITIES = [
+  'Lagos',
+  'Abuja',
+  'Port Harcourt',
+  'Ibadan',
+  'Kano',
+  'Enugu',
+  'Kaduna',
+  'Benin City',
+  'Onitsha',
+  'Aba',
+  'Jos',
+  'Owerri',
+  'Uyo',
+  'Calabar',
+  'Warri',
+];
+
+const STREET_POOL = [
+  'Adeola Odeku',
+  'Marina Road',
+  'Aba Road',
+  'Ring Road',
+  'Ahmadu Bello Way',
+  'Zik Avenue',
+];
+
+const CONTACT_FIRST_NAMES = [
+  'Chidi',
+  'Ngozi',
+  'Tunde',
+  'Amaka',
+  'Bola',
+  'Emeka',
+  'Yemi',
+  'Chioma',
+  'Ifeanyi',
+  'Kemi',
+  'Uche',
+  'Funke',
+  'Segun',
+  'Adaeze',
+  'Musa',
+  'Blessing',
+];
+const CONTACT_LAST_NAMES = [
+  'Okoro',
+  'Adebayo',
+  'Nwachukwu',
+  'Balogun',
+  'Eze',
+  'Ogunleye',
+  'Chukwu',
+  'Ibrahim',
+  'Okonkwo',
+  'Bello',
+  'Ude',
+  'Afolabi',
+  'Nnamdi',
+  'Yusuf',
+];
+const HONORIFICS = ['Mr.', 'Mrs.', 'Dr.', 'Engr.', 'Alhaji', 'Chief'];
+const PHONE_PREFIXES = [
+  '803',
+  '806',
+  '807',
+  '808',
+  '809',
+  '810',
+  '811',
+  '812',
+  '813',
+  '814',
+  '815',
+  '816',
+  '817',
+  '818',
+  '909',
+  '901',
+  '902',
+];
+
+/** Deterministic mixing hash (not a simple linear step) — picking pool
+ * indices via `(i * k) % n` for small k/n repeatedly produced correlated
+ * collisions (e.g. every supplier whose generated prefix happened to repeat
+ * on a ~12-item cycle also landed on the exact same contact-person name,
+ * because the linear steps shared common factors). Hashing each field with
+ * its own salt before reducing mod pool-length breaks that correlation. */
+function mixHash(n: number): number {
+  let h = (n ^ 0x9e3779b9) >>> 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0;
+  return (h ^ (h >>> 16)) >>> 0;
+}
+
+function pickByHash<T>(pool: T[], seed: number, salt: number): T {
+  return pool[mixHash(seed + salt) % pool.length]!;
+}
+
+function generateSupplierName(category: SupplierCategory, i: number): string {
+  const prefix = pickByHash(PREFIX_POOL, i, 1_000);
+  const suffixes = SUFFIX_BY_CATEGORY[category];
+  const suffix = pickByHash(suffixes, i, 2_000);
+  return `${prefix} ${suffix}`;
+}
+
+function generateContactPerson(i: number): string {
+  const honorific = pickByHash(HONORIFICS, i, 3_000);
+  const first = pickByHash(CONTACT_FIRST_NAMES, i, 4_000);
+  const last = pickByHash(CONTACT_LAST_NAMES, i, 5_000);
+  return `${honorific} ${first} ${last}`;
+}
+
+function generatePhone(i: number): string {
+  const prefix = PHONE_PREFIXES[i % PHONE_PREFIXES.length]!;
+  const mid = String(100 + ((i * 13) % 900));
+  const last = String(1000 + ((i * 37) % 9000));
+  return `+234 ${prefix} ${mid} ${last}`;
+}
+
+function slugifyForEmail(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+function generateEmail(name: string, i: number): string {
+  const domain = ['com', 'com.ng', 'ng'][i % 3];
+  return `info@${slugifyForEmail(name)}.${domain}`;
+}
+
+function statusForGeneratedIndex(i: number): { status: SupplierStatus; isPreferred: boolean } {
+  if (i < 35) return { status: 'Active', isPreferred: false };
+  if (i < 35 + 31) return { status: 'Active', isPreferred: true };
+  if (i < 35 + 31 + 6) return { status: 'Pending Approval', isPreferred: false };
+  return { status: 'Inactive', isPreferred: false };
+}
+
+/** 80 generated suppliers on top of the 6 real ones — 42 Pharmaceuticals,
+ * 25 Medical Supplies, 10 Medical Equipment, 6 Laboratory Supplies, 3
+ * Others (86 total), and 72 Active-or-Preferred / 6 Pending Approval / 8
+ * Inactive (86 total) — both breakdowns sum exactly, so the category donut
+ * and the stat cards never disagree with the real row count. */
+const GENERATED_SUPPLIERS: SupplierInfo[] = (() => {
+  const categoryCounts: { category: SupplierCategory; count: number }[] = [
+    { category: 'Pharmaceuticals', count: 36 },
+    { category: 'Medical Supplies', count: 25 },
+    { category: 'Medical Equipment', count: 10 },
+    { category: 'Laboratory Supplies', count: 6 },
+    { category: 'Others', count: 3 },
+  ];
+  const rows: SupplierInfo[] = [];
+  let i = 0;
+  for (const spec of categoryCounts) {
+    for (let k = 0; k < spec.count; k++) {
+      const name = generateSupplierName(spec.category, i);
+      const city = NIGERIAN_CITIES[i % NIGERIAN_CITIES.length]!;
+      const street = STREET_POOL[i % STREET_POOL.length]!;
+      const { status, isPreferred } = statusForGeneratedIndex(i);
+      const rating =
+        status === 'Inactive'
+          ? [1.5, 2, 2.5, 3][i % 4]!
+          : status === 'Pending Approval'
+            ? 0
+            : isPreferred
+              ? [4.5, 5][i % 2]!
+              : [3, 3.5, 4][i % 3]!;
+      rows.push({
+        name,
+        code: `SUP-${String(51 + i).padStart(5, '0')}`,
+        address: `${10 + (i % 80)} ${street} Street, ${city}, Nigeria`,
+        phone: generatePhone(i),
+        email: generateEmail(name, i),
+        category: spec.category,
+        contactPerson: generateContactPerson(i),
+        location: `${city}, Nigeria`,
+        status,
+        isPreferred,
+        performanceRating: rating,
+        lastOrderDate:
+          status === 'Pending Approval'
+            ? ''
+            : pastDateAt(i % 45, 8 + (i % 9), (i * 11) % 60).slice(0, 10),
+        totalSpendYTD:
+          status === 'Active'
+            ? [500000, 1200000, 2400000, 3800000, 5600000, 8200000, 11500000][i % 7]!
+            : 0,
+      });
+      i++;
+    }
+  }
+  return rows;
+})();
+
+export const SUPPLIER_DIRECTORY: SupplierInfo[] = [...REAL_SUPPLIERS, ...GENERATED_SUPPLIERS];
+
+export const SUPPLIER_CATEGORY_OPTIONS: SelectOption[] = [
+  'Pharmaceuticals',
+  'Medical Supplies',
+  'Medical Equipment',
+  'Laboratory Supplies',
+  'Others',
+].map((c) => ({ value: c, label: c }));
+
+export const SUPPLIER_STATUS_FILTER_OPTIONS: SelectOption[] = [
+  { value: 'Active', label: 'Active' },
+  { value: 'Preferred', label: 'Preferred' },
+  { value: 'Pending Approval', label: 'Pending Approval' },
+  { value: 'Inactive', label: 'Inactive' },
+];
+
+export const SUPPLIER_RATING_OPTIONS: SelectOption[] = [
+  { value: '4', label: '4+ Stars' },
+  { value: '3', label: '3+ Stars' },
+  { value: '2', label: '2+ Stars' },
+];
+
+export const SUPPLIER_LOCATION_OPTIONS: SelectOption[] = Array.from(
+  new Set(SUPPLIER_DIRECTORY.map((s) => s.location)),
+)
+  .sort()
+  .map((loc) => ({ value: loc, label: loc }));
+
+/** The canonical city list — used by Add Supplier so a new supplier's
+ * location always matches the same set the filter dropdown draws from,
+ * rather than free text drifting out of sync with it. */
+export const SUPPLIER_CITY_OPTIONS: SelectOption[] = NIGERIAN_CITIES.map((city) => ({
+  value: `${city}, Nigeria`,
+  label: `${city}, Nigeria`,
+}));
 
 export const SUPPLIERS: string[] = SUPPLIER_DIRECTORY.map((s) => s.name);
 

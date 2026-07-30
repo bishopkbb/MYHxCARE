@@ -5,7 +5,6 @@ import { useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
 import { Tooltip } from '@components/shared/Tooltip';
-import { SUPPLIER_OPTIONS } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
 import { formatCurrency } from '@/utils/currency';
 import { formatDateTime } from '@/utils/datetime';
 import {
@@ -13,6 +12,7 @@ import {
   type ProcurementPriority,
   type ProcurementRequest,
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
+import { useSupplierOptions } from '@/features/pharmacy/store/supplierStore';
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
@@ -56,6 +56,8 @@ export function ProcurementRequestDetailModal({
   onViewPurchaseOrder: () => void;
   onClose: () => void;
 }) {
+  const supplierOptions = useSupplierOptions();
+
   const [rejecting, setRejecting] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [supplier, setSupplier] = useState('');
@@ -200,7 +202,7 @@ export function ProcurementRequestDetailModal({
                 id="mark-ordered-supplier"
                 value={supplier}
                 onChange={setSupplier}
-                options={SUPPLIER_OPTIONS}
+                options={supplierOptions}
                 placeholder="Select supplier"
               />
             </div>

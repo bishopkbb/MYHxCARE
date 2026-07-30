@@ -35,7 +35,6 @@ import {
   INVENTORY_CATEGORY_OPTIONS,
   INVENTORY_LOCATION_OPTIONS,
   INVENTORY_STATUS_OPTIONS,
-  SUPPLIER_OPTIONS,
   type InventoryBatchRow,
   type InventoryStatus,
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
@@ -45,6 +44,7 @@ import {
   updateReorderLevel,
   useInventoryBatches,
 } from '@/features/pharmacy/store/inventoryStore';
+import { useSupplierOptions } from '@/features/pharmacy/store/supplierStore';
 
 const AddStockModal = dynamic(
   () => import('@/features/pharmacy/components/AddStockModal').then((m) => m.AddStockModal),
@@ -143,6 +143,7 @@ export function DrugInventoryWorkspace() {
   const router = useRouter();
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const supplierOptions = useSupplierOptions();
 
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -483,7 +484,7 @@ export function DrugInventoryWorkspace() {
                     setSupplierFilter(v);
                     setCurrentPage(1);
                   }}
-                  options={SUPPLIER_OPTIONS}
+                  options={supplierOptions}
                   placeholder="All Suppliers"
                 />
                 <FormSelect

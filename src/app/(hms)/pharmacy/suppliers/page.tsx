@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Suppliers' };
+import { SuppliersWorkspace } from '@/features/pharmacy/components/SuppliersWorkspace';
 
 export default function SuppliersPage() {
-  return (
-    <ComingSoon
-      title="Suppliers"
-      description="A directory of approved drug suppliers, contracts, and performance history is on the way."
-    />
-  );
+  return <SuppliersWorkspace />;
 }

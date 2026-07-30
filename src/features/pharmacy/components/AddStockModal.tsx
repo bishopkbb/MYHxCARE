@@ -7,9 +7,9 @@ import { FormSelect } from '@components/shared/FormSelect';
 import {
   INVENTORY_LOCATION_OPTIONS,
   MANUFACTURER_OPTIONS,
-  SUPPLIER_OPTIONS,
   type InventoryBatchRow,
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
+import { useSupplierOptions } from '@/features/pharmacy/store/supplierStore';
 import type { PharmacyLocationId } from '@/constants/pharmacyLocations';
 
 const FOCUS_RING =
@@ -33,6 +33,8 @@ export function AddStockModal({
   onSubmit: (entry: Omit<InventoryBatchRow, 'id'>) => void;
   onClose: () => void;
 }) {
+  const supplierOptions = useSupplierOptions();
+
   const [medicationName, setMedicationName] = useState('');
   const [strength, setStrength] = useState('');
   const [form, setForm] = useState('');
@@ -239,7 +241,7 @@ export function AddStockModal({
                 id="as-supplier"
                 value={supplier}
                 onChange={setSupplier}
-                options={SUPPLIER_OPTIONS}
+                options={supplierOptions}
                 placeholder="Select supplier"
               />
             </div>

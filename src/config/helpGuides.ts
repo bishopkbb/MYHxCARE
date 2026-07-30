@@ -1129,6 +1129,30 @@ const PROCUREMENT_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const SUPPLIERS_GUIDE: HelpGuide = {
+  id: 'suppliers',
+  title: 'Suppliers',
+  intro: 'Manage and maintain supplier information and performance.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Active, Preferred, Pending Approval, and Inactive are clickable — each filters the table to that status. Preferred is a tag on an Active supplier, not a separate exclusive state.',
+    },
+    {
+      heading: 'Approving a new supplier',
+      body: 'Add Supplier registers a Pending Approval entry. It only becomes selectable on other stock-movement screens (Add Stock, Drug Inventory, Procurement Requests) once approved from its row menu here.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'Approve/Reject while Pending Approval. Mark as Preferred/Deactivate while Active. Reactivate while Inactive.',
+    },
+    {
+      heading: 'Suppliers by Category and Top Suppliers by Spend',
+      body: 'The donut chart breaks every supplier down by category. Top Suppliers by Spend ranks active suppliers by year-to-date spend — select one to open its full detail.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2456,6 +2480,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/low-stock-alerts')) return LOW_STOCK_ALERTS_GUIDE;
   if (pathname.startsWith('/pharmacy/procurement-requests')) return PROCUREMENT_REQUESTS_GUIDE;
+  if (pathname.startsWith('/pharmacy/suppliers')) return SUPPLIERS_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;
