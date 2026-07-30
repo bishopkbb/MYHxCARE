@@ -2609,3 +2609,256 @@ export const REFILL_REQUESTS_SEED: RefillRequest[] = Array.from({ length: 56 }, 
       : {}),
   };
 });
+
+// ── Procurement requests ─────────────────────────────────────────────────────
+// The internal request stage that comes *before* a real purchase order: a
+// department asks for medication/supplies/equipment, a pharmacist approves
+// or rejects it, and — the one genuine cross-store write on this screen —
+// marking an Approved request "Ordered" calls stockReceivingStore.ts's
+// addPurchaseOrder(), which creates a real PurchaseOrder that immediately
+// shows up in Stock Receiving's own Pending list. Historical seed rows carry
+// a plausible poNumber/supplier for display but aren't cross-linked to a
+// specific seeded PurchaseOrder — only the live write path is.
+
+export type ProcurementRequestType = 'Medication' | 'Medical Supplies' | 'Equipment';
+export type ProcurementPriority = 'High' | 'Medium' | 'Low';
+export type ProcurementRequestStatus =
+  'Pending Approval' | 'Approved' | 'Rejected' | 'Ordered' | 'Partially Received' | 'Completed';
+
+export type ProcurementRequestItem = {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+export type ProcurementRequest = {
+  id: string;
+  requestType: ProcurementRequestType;
+  department: string;
+  requestedBy: string;
+  priority: ProcurementPriority;
+  createdAt: string; // ISO
+  items: ProcurementRequestItem[];
+  status: ProcurementRequestStatus;
+  notes?: string;
+  approvedBy?: string;
+  rejectedReason?: string;
+  supplier?: string;
+  poNumber?: string;
+};
+
+export const REQUEST_TYPE_OPTIONS: SelectOption[] = [
+  { value: 'Medication', label: 'Medication' },
+  { value: 'Medical Supplies', label: 'Medical Supplies' },
+  { value: 'Equipment', label: 'Equipment' },
+];
+
+export const PROCUREMENT_PRIORITY_OPTIONS: SelectOption[] = [
+  { value: 'High', label: 'High' },
+  { value: 'Medium', label: 'Medium' },
+  { value: 'Low', label: 'Low' },
+];
+
+export const PROCUREMENT_STATUS_OPTIONS: SelectOption[] = [
+  { value: 'Pending Approval', label: 'Pending Approval' },
+  { value: 'Approved', label: 'Approved' },
+  { value: 'Rejected', label: 'Rejected' },
+  { value: 'Ordered', label: 'Ordered' },
+  { value: 'Partially Received', label: 'Partially Received' },
+  { value: 'Completed', label: 'Completed' },
+];
+
+const PROCUREMENT_DEPARTMENTS = ['Pharmacy', 'Nursing', 'Laboratory', 'Emergency'] as const;
+
+export const PROCUREMENT_DEPARTMENT_OPTIONS: SelectOption[] = PROCUREMENT_DEPARTMENTS.map((d) => ({
+  value: d,
+  label: d,
+}));
+
+const REQUESTERS_BY_DEPARTMENT: Record<(typeof PROCUREMENT_DEPARTMENTS)[number], string[]> = {
+  Pharmacy: ['Pharmacist Adaeze', 'Pharmacist John', 'Mr. Emeka Obi'],
+  Nursing: ['Nurse Victoria', 'Nurse Chidinma Eze'],
+  Laboratory: ['Lab Scientist Mary', 'Lab Scientist Adaora'],
+  Emergency: ['Dr. Emeka Nwosu', 'Dr. Chukwuemeka Nwosu'],
+};
+
+const SUPPLY_ITEM_POOL: { name: string; unitPrice: number }[] = [
+  { name: 'Disposable Syringes (5ml)', unitPrice: 25 },
+  { name: 'Surgical Gloves (Box of 100)', unitPrice: 3500 },
+  { name: 'IV Cannulas (18G)', unitPrice: 120 },
+  { name: 'Gauze Rolls', unitPrice: 350 },
+  { name: 'Alcohol Swabs (Box)', unitPrice: 800 },
+  { name: 'Face Masks (Box of 50)', unitPrice: 2500 },
+  { name: 'Blood Collection Tubes', unitPrice: 45 },
+  { name: 'Wound Dressing Kits', unitPrice: 1200 },
+];
+
+const EQUIPMENT_ITEM_POOL: { name: string; unitPrice: number }[] = [
+  { name: 'Digital Blood Pressure Monitor', unitPrice: 45000 },
+  { name: 'Infusion Pump', unitPrice: 385000 },
+  { name: 'Pulse Oximeter', unitPrice: 28000 },
+  { name: 'Nebulizer Machine', unitPrice: 65000 },
+  { name: 'Vaccine Storage Refrigerator', unitPrice: 420000 },
+];
+
+function buildRequestItems(
+  requestType: ProcurementRequestType,
+  startIdx: number,
+  count: number,
+): ProcurementRequestItem[] {
+  if (requestType === 'Medication') {
+    return Array.from({ length: count }, (_, i) => {
+      const entry = INVENTORY_CATALOG[(startIdx + i) % INVENTORY_CATALOG.length]!;
+      return {
+        name: `${entry.name} ${entry.strength}`,
+        quantity: [50, 100, 150, 200, 300, 500][(startIdx + i) % 6]!,
+        unitPrice: entry.unitPrice,
+      };
+    });
+  }
+  const pool = requestType === 'Equipment' ? EQUIPMENT_ITEM_POOL : SUPPLY_ITEM_POOL;
+  return Array.from({ length: count }, (_, i) => {
+    const pick = pool[(startIdx + i) % pool.length]!;
+    return {
+      name: pick.name,
+      quantity:
+        requestType === 'Equipment'
+          ? [1, 2, 3][(startIdx + i) % 3]!
+          : [50, 100, 200, 300][(startIdx + i) % 4]!,
+      unitPrice: pick.unitPrice,
+    };
+  });
+}
+
+/** Catalog a New Procurement Request's item picker searches, keyed by the
+ * chosen request type — medications draw from the real Drug Inventory
+ * catalog (name + strength combined), supplies/equipment from their own
+ * pools. Never a location's *current* stock — a request is for something to
+ * be procured, not something already tracked. */
+export function getProcurementCatalog(
+  requestType: ProcurementRequestType,
+): { name: string; unitPrice: number }[] {
+  if (requestType === 'Medication') {
+    return INVENTORY_CATALOG.map((entry) => ({
+      name: `${entry.name} ${entry.strength}`,
+      unitPrice: entry.unitPrice,
+    }));
+  }
+  return requestType === 'Equipment' ? EQUIPMENT_ITEM_POOL : SUPPLY_ITEM_POOL;
+}
+
+export function getRequestItemCount(request: ProcurementRequest): number {
+  return request.items.length;
+}
+
+export function getRequestEstAmount(request: ProcurementRequest): number {
+  return request.items.reduce((sum, i) => sum + i.quantity * i.unitPrice, 0);
+}
+
+function requestId(n: number): string {
+  return `PR-${new Date().getFullYear()}-${String(n).padStart(4, '0')}`;
+}
+
+/** 56 requests: 18 Pending Approval, 12 Approved, 10 Ordered, 4 Partially
+ * Received, 12 Completed (0 Rejected — a real status, just not seeded, so
+ * the donut and stat cards sum exactly to 56 without an invented bucket).
+ * Newer statuses skew more recent (Pending Approval 0–4 days ago) down to
+ * older ones (Completed up to ~3 weeks ago), like a real request pipeline. */
+export const PROCUREMENT_REQUESTS_SEED: ProcurementRequest[] = (() => {
+  const rows: ProcurementRequest[] = [];
+  let seq = 56;
+
+  const TYPES: ProcurementRequestType[] = ['Medication', 'Medical Supplies', 'Equipment'];
+  const PRIORITIES: ProcurementPriority[] = ['High', 'Medium', 'Low'];
+
+  function push(
+    status: ProcurementRequestStatus,
+    requestType: ProcurementRequestType,
+    department: (typeof PROCUREMENT_DEPARTMENTS)[number],
+    priority: ProcurementPriority,
+    daysAgo: number,
+    itemCount: number,
+  ) {
+    const pool = REQUESTERS_BY_DEPARTMENT[department];
+    const requestedBy = pool[seq % pool.length]!;
+    const createdAt = pastDateAt(daysAgo, 8 + (seq % 10), (seq * 7) % 60);
+    const items = buildRequestItems(requestType, seq, itemCount);
+    const base: ProcurementRequest = {
+      id: requestId(seq),
+      requestType,
+      department,
+      requestedBy,
+      priority,
+      createdAt,
+      items,
+      status,
+    };
+    if (status !== 'Pending Approval' && status !== 'Rejected') {
+      base.approvedBy = 'Mr. Emeka Obi';
+    }
+    if (status === 'Ordered' || status === 'Partially Received' || status === 'Completed') {
+      base.supplier = SUPPLIER_DIRECTORY[seq % SUPPLIER_DIRECTORY.length]!.name;
+      base.poNumber = `PO-${new Date().getFullYear()}-${String(1 + (seq % 12)).padStart(2, '0')}-${String(700 + seq).padStart(4, '0')}`;
+    }
+    rows.push(base);
+    seq -= 1;
+  }
+
+  // 18 Pending Approval — freshest
+  for (let i = 0; i < 18; i++) {
+    push(
+      'Pending Approval',
+      TYPES[i % TYPES.length]!,
+      PROCUREMENT_DEPARTMENTS[i % PROCUREMENT_DEPARTMENTS.length]!,
+      PRIORITIES[i % PRIORITIES.length]!,
+      i % 5,
+      4 + (i % 12),
+    );
+  }
+  // 12 Approved
+  for (let i = 0; i < 12; i++) {
+    push(
+      'Approved',
+      TYPES[(i + 1) % TYPES.length]!,
+      PROCUREMENT_DEPARTMENTS[(i + 1) % PROCUREMENT_DEPARTMENTS.length]!,
+      PRIORITIES[(i + 2) % PRIORITIES.length]!,
+      1 + (i % 6),
+      3 + (i % 10),
+    );
+  }
+  // 10 Ordered
+  for (let i = 0; i < 10; i++) {
+    push(
+      'Ordered',
+      TYPES[(i + 2) % TYPES.length]!,
+      PROCUREMENT_DEPARTMENTS[(i + 2) % PROCUREMENT_DEPARTMENTS.length]!,
+      PRIORITIES[i % PRIORITIES.length]!,
+      2 + (i % 7),
+      5 + (i % 8),
+    );
+  }
+  // 4 Partially Received
+  for (let i = 0; i < 4; i++) {
+    push(
+      'Partially Received',
+      TYPES[i % TYPES.length]!,
+      PROCUREMENT_DEPARTMENTS[(i + 3) % PROCUREMENT_DEPARTMENTS.length]!,
+      PRIORITIES[(i + 1) % PRIORITIES.length]!,
+      5 + i,
+      6 + i,
+    );
+  }
+  // 12 Completed — oldest
+  for (let i = 0; i < 12; i++) {
+    push(
+      'Completed',
+      TYPES[(i + 1) % TYPES.length]!,
+      PROCUREMENT_DEPARTMENTS[i % PROCUREMENT_DEPARTMENTS.length]!,
+      PRIORITIES[(i + 2) % PRIORITIES.length]!,
+      6 + i,
+      4 + (i % 10),
+    );
+  }
+
+  return rows;
+})();

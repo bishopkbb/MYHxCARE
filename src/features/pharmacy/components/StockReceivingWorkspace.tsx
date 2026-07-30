@@ -30,7 +30,6 @@ import {
   getCatalogEntry,
   getSupplierInfo,
   INVENTORY_LOCATION_OPTIONS,
-  PO_OPTIONS,
   type StockReceiptItem,
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
 import {
@@ -106,6 +105,17 @@ export function StockReceivingWorkspace() {
   const openPOs = useOpenPurchaseOrders();
   const allPOs = usePurchaseOrders();
   const receipts = useReceipts();
+
+  // Live, not the static PO_OPTIONS snapshot — a purchase order created just
+  // now (e.g. Procurement Requests marking a request "Ordered") must be
+  // selectable here immediately, not only after a reload.
+  const poOptions = useMemo(
+    () =>
+      openPOs
+        .filter((po) => po.status === 'Pending')
+        .map((po) => ({ value: po.poNumber, label: po.poNumber })),
+    [openPOs],
+  );
 
   const [selectedPoNumber, setSelectedPoNumber] = useState('');
   const [supplier, setSupplier] = useState('');
@@ -359,7 +369,7 @@ export function StockReceivingWorkspace() {
                     id="sr-po"
                     value={selectedPoNumber}
                     onChange={handlePoSelect}
-                    options={PO_OPTIONS}
+                    options={poOptions}
                     placeholder="Select purchase order"
                   />
                 </div>

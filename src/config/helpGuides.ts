@@ -1105,6 +1105,30 @@ const LOW_STOCK_ALERTS_GUIDE: HelpGuide = {
   ],
 };
 
+const PROCUREMENT_REQUESTS_GUIDE: HelpGuide = {
+  id: 'procurement-requests',
+  title: 'Procurement Requests',
+  intro: 'Create and manage requests for medication and supplies procurement.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Pending Approval, Approved, Ordered, Partially Received, and Completed are clickable — each filters the table to that status.',
+    },
+    {
+      heading: 'New Request',
+      body: 'Pick a request type first — the item picker searches medications, medical supplies, or equipment separately. Request Templates starts a request pre-filled from a common preset instead.',
+    },
+    {
+      heading: 'Approving and ordering',
+      body: 'Approve or Reject a Pending Approval request from its detail view. Marking an Approved request "Ordered" creates a real purchase order and sends it straight to Stock Receiving — it isn’t just a status change.',
+    },
+    {
+      heading: 'Request Overview and Recent Requests',
+      body: 'The donut chart breaks every request down by status. Recent Requests lists the newest five — select one to open its full detail.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2431,6 +2455,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse')) return NURSE_DASHBOARD_GUIDE;
   if (pathname.startsWith('/wards')) return BED_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/low-stock-alerts')) return LOW_STOCK_ALERTS_GUIDE;
+  if (pathname.startsWith('/pharmacy/procurement-requests')) return PROCUREMENT_REQUESTS_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;

@@ -17,6 +17,7 @@ import {
   PURCHASE_ORDERS_SEED,
   STOCK_RECEIPTS_SEED,
   type PurchaseOrder,
+  type PurchaseOrderItem,
   type StockReceipt,
   type StockReceiptItem,
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
@@ -62,6 +63,28 @@ export function useReceipts(): StockReceipt[] {
 
 export function getPurchaseOrder(poNumber: string): PurchaseOrder | null {
   return purchaseOrders.find((po) => po.poNumber === poNumber) ?? null;
+}
+
+let poSeq = PURCHASE_ORDERS_SEED.length;
+
+/** Creates a real, live Pending purchase order — the one genuine write
+ * Procurement Requests makes into this store when a pharmacist marks an
+ * Approved request "Ordered". It shows up in Stock Receiving's Pending
+ * Purchase Orders immediately, same as any other PO. */
+export function addPurchaseOrder(input: { supplier: string; items: PurchaseOrderItem[] }): string {
+  poSeq += 1;
+  const now = new Date();
+  const poNumberValue = `PO-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(700 + poSeq).padStart(4, '0')}`;
+  const po: PurchaseOrder = {
+    poNumber: poNumberValue,
+    supplier: input.supplier,
+    createdAt: now.toISOString(),
+    status: 'Pending',
+    items: input.items,
+  };
+  purchaseOrders = [po, ...purchaseOrders];
+  emit();
+  return poNumberValue;
 }
 
 let receiptSeq = 0;
