@@ -39,7 +39,8 @@ export type NewRequestInitial = {
 /** Raises a new procurement request — lazy-loaded (checklist §14). The item
  * picker searches the real catalog for the chosen request type (medication
  * strengths from Drug Inventory's own catalog, or the supplies/equipment
- * pools) rather than a long unfiltered scroll. `initial` lets Request
+ * pools) rather than a long unfiltered scroll, plus an "Add custom item"
+ * fallback for anything genuinely not in the catalog. `initial` lets Request
  * Templates and row-level "Create Purchase Order" actions open this
  * pre-filled instead of starting blank. */
 export function NewProcurementRequestModal({
@@ -60,6 +61,10 @@ export function NewProcurementRequestModal({
   const [items, setItems] = useState<ProcurementRequestItem[]>(initial?.items ?? []);
   const [itemSearch, setItemSearch] = useState(initial?.itemName ?? '');
   const [qtyInputs, setQtyInputs] = useState<Record<string, string>>({});
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [customName, setCustomName] = useState('');
+  const [customPrice, setCustomPrice] = useState('');
+  const [customQty, setCustomQty] = useState('');
 
   const catalog = useMemo(() => getProcurementCatalog(requestType), [requestType]);
   const availableItems = useMemo(
@@ -81,6 +86,36 @@ export function NewProcurementRequestModal({
     setItems([]);
     setItemSearch('');
     setQtyInputs({});
+    setShowCustomForm(false);
+    setCustomName('');
+    setCustomPrice('');
+    setCustomQty('');
+  }
+
+  const customNameTrimmed = customName.trim();
+  const customQtyNum = Number(customQty);
+  const customPriceNum = Number(customPrice);
+  const isDuplicateCustomName = items.some(
+    (it) => it.name.toLowerCase() === customNameTrimmed.toLowerCase(),
+  );
+  const canAddCustom =
+    customNameTrimmed !== '' &&
+    customQty !== '' &&
+    customQtyNum > 0 &&
+    customPrice !== '' &&
+    customPriceNum >= 0 &&
+    !isDuplicateCustomName;
+
+  function handleAddCustomItem() {
+    if (!canAddCustom) return;
+    setItems((prev) => [
+      ...prev,
+      { name: customNameTrimmed, quantity: customQtyNum, unitPrice: customPriceNum },
+    ]);
+    setCustomName('');
+    setCustomPrice('');
+    setCustomQty('');
+    setShowCustomForm(false);
   }
 
   function handleAddRow(catalogItem: { name: string; unitPrice: number }) {
@@ -317,6 +352,108 @@ export function NewProcurementRequestModal({
                         </div>
                       );
                     })
+                  )}
+                </div>
+
+                <div className="mt-2.5" style={{ borderTop: '1px solid rgba(0,100,130,0.1)' }}>
+                  {!showCustomForm ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomForm(true)}
+                      className={`mt-2.5 flex h-11 w-full items-center justify-center gap-1.5 rounded-[8px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                      style={{ fontSize: 14, color: '#00B4D8', border: '1px dashed #00B4D8' }}
+                    >
+                      <Plus style={{ width: 15, height: 15 }} />
+                      Add Item Not in Catalog
+                    </button>
+                  ) : (
+                    <div
+                      className="mt-2.5 flex flex-col gap-2 rounded-[8px] p-2.5"
+                      style={{ background: '#F5FBFD' }}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p
+                          className="font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          Custom Item
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowCustomForm(false);
+                            setCustomName('');
+                            setCustomPrice('');
+                            setCustomQty('');
+                          }}
+                          aria-label="Cancel custom item"
+                          className={`flex size-9 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,0,0,0.06)] ${FOCUS_RING}`}
+                        >
+                          <X style={{ width: 15, height: 15, color: '#4A7080' }} />
+                        </button>
+                      </div>
+                      <input
+                        id="npr-custom-name"
+                        type="text"
+                        value={customName}
+                        onChange={(e) => setCustomName(e.target.value)}
+                        placeholder="Item name"
+                        className={`h-10 w-full rounded-[8px] px-3 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
+                        style={{
+                          fontSize: 14,
+                          border: `1px solid ${isDuplicateCustomName ? '#EF4444' : 'rgba(0,100,130,0.18)'}`,
+                          color: '#0D2630',
+                          background: '#FFFFFF',
+                        }}
+                      />
+                      {isDuplicateCustomName && (
+                        <p style={{ fontSize: 14, color: '#DC2626' }}>
+                          An item with this name is already selected.
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <input
+                          id="npr-custom-qty"
+                          type="number"
+                          min={1}
+                          value={customQty}
+                          onChange={(e) => setCustomQty(e.target.value)}
+                          placeholder="Qty"
+                          className={`h-10 w-24 rounded-[8px] px-2.5 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            border: '1px solid rgba(0,100,130,0.18)',
+                            color: '#0D2630',
+                            background: '#FFFFFF',
+                          }}
+                        />
+                        <input
+                          id="npr-custom-price"
+                          type="number"
+                          min={0}
+                          value={customPrice}
+                          onChange={(e) => setCustomPrice(e.target.value)}
+                          placeholder="Unit price (₦)"
+                          className={`h-10 min-w-0 flex-1 rounded-[8px] px-2.5 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            border: '1px solid rgba(0,100,130,0.18)',
+                            color: '#0D2630',
+                            background: '#FFFFFF',
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddCustomItem}
+                          disabled={!canAddCustom}
+                          aria-label="Add custom item"
+                          className={`flex size-9 shrink-0 items-center justify-center rounded-[8px] text-white transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
+                          style={{ background: '#00B4D8' }}
+                        >
+                          <Plus style={{ width: 15, height: 15 }} />
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

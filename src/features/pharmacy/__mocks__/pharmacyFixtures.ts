@@ -1420,11 +1420,33 @@ function pickByHash<T>(pool: T[], seed: number, salt: number): T {
   return pool[mixHash(seed + salt) % pool.length]!;
 }
 
-function generateSupplierName(category: SupplierCategory, i: number): string {
-  const prefix = pickByHash(PREFIX_POOL, i, 1_000);
+/** Prefix × category-suffix combos are a small pool (e.g. 36 × 5 = 180 for
+ * Pharmaceuticals) — hashing `i` alone hits birthday-paradox collisions well
+ * before 36 draws, which is exactly how two generated suppliers ended up
+ * with the identical name `Vantage Pharma Distributors` (duplicate React
+ * keys wherever supplier name is used as the key/value, e.g. the Add Stock
+ * supplier picker). Probing forward with a bumped salt on collision keeps
+ * the selection deterministic while guaranteeing every name in
+ * `SUPPLIER_DIRECTORY` is unique. */
+function generateSupplierName(
+  category: SupplierCategory,
+  i: number,
+  usedNames: Set<string>,
+): string {
   const suffixes = SUFFIX_BY_CATEGORY[category];
-  const suffix = pickByHash(suffixes, i, 2_000);
-  return `${prefix} ${suffix}`;
+  const maxAttempts = PREFIX_POOL.length * suffixes.length;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const prefix = pickByHash(PREFIX_POOL, i, 1_000 + attempt * 97);
+    const suffix = pickByHash(suffixes, i, 2_000 + attempt * 131);
+    const name = `${prefix} ${suffix}`;
+    if (!usedNames.has(name)) {
+      usedNames.add(name);
+      return name;
+    }
+  }
+  const name = `${PREFIX_POOL[i % PREFIX_POOL.length]} ${suffixes[i % suffixes.length]} ${i}`;
+  usedNames.add(name);
+  return name;
 }
 
 function generateContactPerson(i: number): string {
@@ -1471,10 +1493,11 @@ const GENERATED_SUPPLIERS: SupplierInfo[] = (() => {
     { category: 'Others', count: 3 },
   ];
   const rows: SupplierInfo[] = [];
+  const usedNames = new Set<string>(REAL_SUPPLIERS.map((s) => s.name));
   let i = 0;
   for (const spec of categoryCounts) {
     for (let k = 0; k < spec.count; k++) {
-      const name = generateSupplierName(spec.category, i);
+      const name = generateSupplierName(spec.category, i, usedNames);
       const city = NIGERIAN_CITIES[i % NIGERIAN_CITIES.length]!;
       const street = STREET_POOL[i % STREET_POOL.length]!;
       const { status, isPreferred } = statusForGeneratedIndex(i);
