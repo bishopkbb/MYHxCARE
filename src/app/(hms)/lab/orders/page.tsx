@@ -5,16 +5,28 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/hooks/useAuth';
 import {
   LAB_CATEGORIES,
-  MOCK_LAB_PATIENT,
   type LabCategory,
   type Priority,
 } from '@/features/laboratory/__mocks__/labOrderFixtures';
+import type { DirectoryPatient } from '@/features/registration/__mocks__/patientDirectoryFixtures';
+import { addLabOrder } from '@/features/laboratory/store/labResultStore';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
+import { PatientPicker } from '@/features/medical-records/components/PatientPicker';
+
+const PRIORITY_TO_CANONICAL: Record<Priority, 'STAT' | 'URGENT' | 'ROUTINE'> = {
+  stat: 'STAT',
+  urgent: 'URGENT',
+  routine: 'ROUTINE',
+};
+
+const FOCUS_RING =
+  'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
 
 // ── Priority config ───────────────────────────────────────────────────────────
 
@@ -64,7 +76,7 @@ function Checkbox({ checked, onChange }: { checked: boolean; onChange: () => voi
         e.stopPropagation();
         onChange();
       }}
-      className="flex shrink-0 items-center justify-center transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+      className={`flex shrink-0 items-center justify-center transition-colors duration-150 ${FOCUS_RING}`}
       style={{
         width: 24,
         height: 24,
@@ -198,8 +210,15 @@ function SkeletonLabCard() {
 export default function LabOrdersPage() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
 
-  const [priority, setPriority] = useState<Priority>('stat');
+  // The real entry gateway: no patient is preselected. The doctor browses or
+  // searches the full patient directory (PatientPicker — the same component
+  // Medical Records' top-level screens use) and only once one is picked does
+  // the actual order form appear below.
+  const [selectedPatient, setSelectedPatient] = useState<DirectoryPatient | null>(null);
+
+  const [priority, setPriority] = useState<Priority>('routine');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [notes, setNotes] = useState('');
   const [pageState, setPageState] = useState<PageState>('loading');
@@ -214,7 +233,13 @@ export default function LabOrdersPage() {
     setTimeout(() => setPageState('loaded'), 800);
   }
 
-  const patient = MOCK_LAB_PATIENT;
+  function handleChangePatient() {
+    setSelectedPatient(null);
+    setSelected(new Set());
+    setNotes('');
+    setPriority('routine');
+  }
+
   const totalSelected = selected.size;
 
   function toggleTest(id: string) {
@@ -227,360 +252,409 @@ export default function LabOrdersPage() {
   }
 
   function handleSubmit() {
+    if (!selectedPatient) return;
     if (totalSelected === 0) {
       toast.error('No tests selected', 'Please select at least one test to submit.');
       return;
     }
+    // Persists as real, ORDERED LabResult rows — visible on the doctor's own
+    // /lab/results *and* on the nurse's Laboratory workspace ("Doctor
+    // Requests") immediately, same canonical store the patient-context lab
+    // order screen already writes to.
+    addLabOrder({
+      patientId: selectedPatient.id,
+      patientName: selectedPatient.name,
+      mrn: selectedPatient.mrn,
+      initials: selectedPatient.initials,
+      avatarBg: selectedPatient.avatarBg,
+      age: selectedPatient.age,
+      testIds: Array.from(selected),
+      priority: PRIORITY_TO_CANONICAL[priority],
+      orderedBy: user?.name ?? 'Unknown Doctor',
+    });
     toast.success(
       'Request sent',
-      `${totalSelected} test${totalSelected !== 1 ? 's' : ''} dispatched to the laboratory at ${PRIORITY_CFG[priority].label} priority.`,
+      `${totalSelected} test${totalSelected !== 1 ? 's' : ''} dispatched to the laboratory at ${PRIORITY_CFG[priority].label} priority for ${selectedPatient.name}.`,
     );
     setSelected(new Set());
     setNotes('');
     setPriority('routine');
   }
 
+  const isUrgent = selectedPatient?.status === 'Emergency';
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      {/* ── Patient preview bar ──────────────────────────────────────────────── */}
-      <div
-        className="shrink-0 px-4 py-[10px] sm:flex sm:min-h-[56px] sm:items-center sm:gap-x-4 sm:px-5 sm:py-2"
-        style={{ background: '#1A3D4D', borderBottom: '1px solid rgba(255,255,255,0.10)' }}
-      >
-        {/* Row 1 (mobile) / nav block (sm+) */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="flex shrink-0 items-center gap-1.5 rounded-[6px] transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
-          >
-            <ChevronLeft style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.58)' }} />
-            <span
-              className="font-sans"
-              style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.58)' }}
+      {/* ── Patient preview bar — only once a patient is selected ───────────── */}
+      {selectedPatient && (
+        <div
+          className="shrink-0 px-4 py-[10px] sm:flex sm:min-h-[56px] sm:items-center sm:gap-x-4 sm:px-5 sm:py-2"
+          style={{ background: '#1A3D4D', borderBottom: '1px solid rgba(255,255,255,0.10)' }}
+        >
+          {/* Row 1 (mobile) / nav block (sm+) */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex shrink-0 items-center gap-1.5 rounded-[6px] transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
             >
-              Back to Queue
-            </span>
-          </button>
+              <ChevronLeft style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.58)' }} />
+              <span
+                className="font-sans"
+                style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.58)' }}
+              >
+                Back
+              </span>
+            </button>
 
-          <div
-            className="shrink-0"
-            style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.18)' }}
-          />
+            <div
+              className="shrink-0"
+              style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.18)' }}
+            />
 
-          {/* Avatar */}
-          <div
-            className="flex shrink-0 items-center justify-center rounded-full font-sans font-medium text-white"
-            style={{
-              width: 38,
-              height: 38,
-              background: 'rgba(255,255,255,0.15)',
-              fontSize: 14,
-              lineHeight: '22px',
-            }}
-          >
-            {patient.initials}
+            {/* Avatar */}
+            <div
+              className="flex shrink-0 items-center justify-center rounded-full font-sans font-medium text-white"
+              style={{
+                width: 38,
+                height: 38,
+                background: selectedPatient.avatarBg,
+                fontSize: 14,
+                lineHeight: '22px',
+              }}
+            >
+              {selectedPatient.initials}
+            </div>
+
+            {/* Name — mobile only */}
+            <Tooltip content={selectedPatient.name}>
+              <span
+                className="min-w-0 flex-1 truncate font-sans text-white sm:hidden"
+                style={{ fontSize: 15, lineHeight: '22px' }}
+              >
+                {selectedPatient.name}
+              </span>
+            </Tooltip>
+
+            {/* URGENT — mobile inline */}
+            {isUrgent && (
+              <span
+                className="shrink-0 font-sans font-medium sm:hidden"
+                style={{
+                  fontSize: 14,
+                  lineHeight: '20px',
+                  borderRadius: 4,
+                  padding: '2px 8px',
+                  background: 'rgba(245,158,11,0.30)',
+                  border: '1px solid rgba(245,158,11,0.45)',
+                  color: '#FCD34D',
+                }}
+              >
+                URGENT
+              </span>
+            )}
           </div>
 
-          {/* Name — mobile only */}
-          <Tooltip content={patient.name}>
+          {/* Row 2 (mobile) / info strip (sm+) */}
+          <div className="mt-1.5 flex min-w-0 [scrollbar-width:none] flex-wrap items-center gap-x-3 gap-y-0.5 sm:mt-0 sm:flex-1 sm:flex-nowrap sm:gap-x-4 sm:overflow-x-auto sm:scroll-smooth sm:whitespace-nowrap [&::-webkit-scrollbar]:hidden">
+            {/* Name — sm+ */}
             <span
-              className="min-w-0 flex-1 truncate font-sans text-white sm:hidden"
-              style={{ fontSize: 15, lineHeight: '22px' }}
+              className="hidden shrink-0 font-sans text-white sm:inline"
+              style={{ fontSize: 16, lineHeight: '24px' }}
             >
-              {patient.name}
+              {selectedPatient.name}
             </span>
-          </Tooltip>
 
-          {/* URGENT — mobile inline */}
-          {patient.isUrgent && (
             <span
-              className="shrink-0 font-sans font-medium sm:hidden"
+              className="shrink-0 font-sans"
+              style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.52)' }}
+            >
+              {selectedPatient.mrn}
+            </span>
+            <span
+              className="shrink-0 font-sans"
+              style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.52)' }}
+            >
+              {selectedPatient.age}y · {selectedPatient.gender}
+            </span>
+            <span
+              className="shrink-0 font-sans"
+              style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.52)' }}
+            >
+              BG: {selectedPatient.bloodGroup}
+            </span>
+          </div>
+
+          {/* URGENT badge — sm+ right slot */}
+          {isUrgent && (
+            <span
+              className="hidden shrink-0 font-sans font-semibold sm:ml-auto sm:inline"
               style={{
                 fontSize: 14,
                 lineHeight: '20px',
-                borderRadius: 4,
-                padding: '2px 8px',
-                background: 'rgba(245,158,11,0.30)',
-                border: '1px solid rgba(245,158,11,0.45)',
+                borderRadius: 6,
+                padding: '4px 12px',
+                background: 'rgba(245,158,11,0.22)',
+                border: '1px solid rgba(245,158,11,0.40)',
                 color: '#FCD34D',
+                letterSpacing: '0.5px',
               }}
             >
               URGENT
             </span>
           )}
         </div>
-
-        {/* Row 2 (mobile) / info strip (sm+) */}
-        <div className="mt-1.5 flex min-w-0 [scrollbar-width:none] flex-wrap items-center gap-x-3 gap-y-0.5 sm:mt-0 sm:flex-1 sm:flex-nowrap sm:gap-x-4 sm:overflow-x-auto sm:scroll-smooth sm:whitespace-nowrap [&::-webkit-scrollbar]:hidden">
-          {/* Name — sm+ */}
-          <span
-            className="hidden shrink-0 font-sans text-white sm:inline"
-            style={{ fontSize: 16, lineHeight: '24px' }}
-          >
-            {patient.name}
-          </span>
-
-          <span
-            className="shrink-0 font-sans"
-            style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.52)' }}
-          >
-            {patient.mrn}
-          </span>
-          <span
-            className="shrink-0 font-sans"
-            style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.52)' }}
-          >
-            {patient.age} · {patient.gender}
-          </span>
-          <span
-            className="shrink-0 font-sans"
-            style={{ fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.52)' }}
-          >
-            BG: {patient.bloodGroup}
-          </span>
-        </div>
-
-        {/* URGENT badge — sm+ right slot */}
-        {patient.isUrgent && (
-          <span
-            className="hidden shrink-0 font-sans font-semibold sm:ml-auto sm:inline"
-            style={{
-              fontSize: 14,
-              lineHeight: '20px',
-              borderRadius: 6,
-              padding: '4px 12px',
-              background: 'rgba(245,158,11,0.22)',
-              border: '1px solid rgba(245,158,11,0.40)',
-              color: '#FCD34D',
-              letterSpacing: '0.5px',
-            }}
-          >
-            URGENT
-          </span>
-        )}
-      </div>
+      )}
 
       {/* ── Scrollable content ───────────────────────────────────────────────── */}
       <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
         <div className="mx-auto max-w-[1200px]">
           {/* ── Page header ─────────────────────────────────────────────────── */}
           <div
-            className="px-4 sm:px-6"
+            className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6"
             style={{
               background: '#FFFFFF',
               borderBottom: '1px solid rgba(0,100,130,0.12)',
               paddingTop: 16,
               paddingBottom: 16,
               minHeight: 88,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
             }}
           >
-            <h1
-              className="font-display font-semibold"
-              style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
-            >
-              Laboratory Request
-            </h1>
-            <p
-              className="mt-0.5 font-sans"
-              style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
-            >
-              For {patient.name} · {patient.mrn}
-            </p>
+            <div>
+              <h1
+                className="font-display font-semibold"
+                style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
+              >
+                Laboratory Request
+              </h1>
+              <p
+                className="mt-0.5 font-sans"
+                style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+              >
+                {selectedPatient
+                  ? `For ${selectedPatient.name} · ${selectedPatient.mrn}`
+                  : 'Select a patient to request laboratory tests for'}
+              </p>
+            </div>
+            {selectedPatient && (
+              <button
+                type="button"
+                onClick={handleChangePatient}
+                className={`flex h-11 shrink-0 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.2)' }}
+              >
+                <ChevronLeft style={{ width: 15, height: 15 }} />
+                Change Patient
+              </button>
+            )}
           </div>
 
           <div className="px-4 py-4 sm:px-6 sm:py-5">
-            {/* ── Allergy banner — always first, never collapsible ─────────── */}
-            {patient.allergies.length > 0 && (
-              <div className="mb-4">
-                <AllergyBanner allergies={patient.allergies} />
-              </div>
-            )}
+            {!selectedPatient ? (
+              <PatientPicker onSelect={setSelectedPatient} />
+            ) : (
+              <>
+                {/* ── Allergy banner — always first, never collapsible ─────── */}
+                <div className="mb-4">
+                  <AllergyBanner allergies={selectedPatient.allergies} />
+                </div>
 
-            {/* ── Request Priority ─────────────────────────────────────────── */}
-            <div
-              className="mb-4"
-              style={{
-                borderRadius: 12,
-                border: '1px solid rgba(0,100,130,0.12)',
-                background: '#FFFFFF',
-                padding: 16,
-              }}
-            >
-              <p
-                className="font-display font-semibold"
-                style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630', marginBottom: 12 }}
-              >
-                Request Priority
-              </p>
+                {/* ── Request Priority ───────────────────────────────────── */}
+                <div
+                  className="mb-4"
+                  style={{
+                    borderRadius: 12,
+                    border: '1px solid rgba(0,100,130,0.12)',
+                    background: '#FFFFFF',
+                    padding: 16,
+                  }}
+                >
+                  <p
+                    className="font-display font-semibold"
+                    style={{
+                      fontSize: 20,
+                      lineHeight: '28px',
+                      color: '#0D2630',
+                      marginBottom: 12,
+                    }}
+                  >
+                    Request Priority
+                  </p>
 
-              {/* Priority buttons */}
-              <div className="flex gap-2">
-                {PRIORITY_ORDER.map((p) => {
-                  const c = PRIORITY_CFG[p];
-                  const isActive = priority === p;
-                  return (
+                  {/* Priority buttons */}
+                  <div className="flex gap-2">
+                    {PRIORITY_ORDER.map((p) => {
+                      const c = PRIORITY_CFG[p];
+                      const isActive = priority === p;
+                      return (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => setPriority(p)}
+                          className={`flex flex-1 items-center justify-center font-sans font-semibold transition-all duration-150 ${FOCUS_RING}`}
+                          style={{
+                            height: 48,
+                            borderRadius: 12,
+                            fontSize: 16,
+                            lineHeight: '24px',
+                            background: isActive ? c.activeBg : '#FFFFFF',
+                            border: isActive
+                              ? `2px solid ${c.activeBorder}`
+                              : '1px solid rgba(0,100,130,0.15)',
+                            color: isActive ? c.activeColor : '#2F3A40',
+                          }}
+                        >
+                          {c.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* STAT warning */}
+                  {priority === 'stat' && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <AlertTriangle
+                        style={{ width: 16, height: 16, color: '#EF4444', flexShrink: 0 }}
+                      />
+                      <p
+                        className="font-sans"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#EF4444' }}
+                      >
+                        {PRIORITY_CFG.stat.warning}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Lab category cards ─────────────────────────────────── */}
+                {pageState === 'loading' && (
+                  <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <SkeletonLabCard key={i} />
+                    ))}
+                  </div>
+                )}
+                {pageState === 'error' && (
+                  <div className="mb-4 flex flex-col items-center justify-center gap-3 py-12 text-center">
+                    <AlertCircle style={{ width: 40, height: 40, color: '#EF4444' }} />
+                    <p
+                      className="font-sans font-semibold"
+                      style={{ fontSize: 16, color: '#0D2630' }}
+                    >
+                      Failed to load lab tests
+                    </p>
                     <button
-                      key={p}
                       type="button"
-                      onClick={() => setPriority(p)}
-                      className="flex flex-1 items-center justify-center font-sans font-semibold transition-all duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                      onClick={handleRetry}
+                      className={`flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
                       style={{
-                        height: 48,
+                        height: 40,
                         borderRadius: 12,
-                        fontSize: 16,
-                        lineHeight: '24px',
-                        background: isActive ? c.activeBg : '#FFFFFF',
-                        border: isActive
-                          ? `2px solid ${c.activeBorder}`
-                          : '1px solid rgba(0,100,130,0.15)',
-                        color: isActive ? c.activeColor : '#2F3A40',
+                        padding: '0 20px',
+                        background: '#00B4D8',
+                        fontSize: 14,
+                        lineHeight: '22px',
                       }}
                     >
-                      {c.label}
+                      <RefreshCw style={{ width: 16, height: 16 }} />
+                      Retry
                     </button>
-                  );
-                })}
-              </div>
+                  </div>
+                )}
+                {pageState === 'loaded' && (
+                  <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {LAB_CATEGORIES.map((cat) => (
+                      <LabCard
+                        key={cat.id}
+                        category={cat}
+                        selected={selected}
+                        onToggle={toggleTest}
+                      />
+                    ))}
+                  </div>
+                )}
 
-              {/* STAT warning */}
-              {priority === 'stat' && (
-                <div className="mt-3 flex items-center gap-2">
-                  <AlertTriangle
-                    style={{ width: 16, height: 16, color: '#EF4444', flexShrink: 0 }}
+                {/* ── Clinical Notes for Laboratory ──────────────────────── */}
+                <div
+                  className="mb-4"
+                  style={{
+                    borderRadius: 12,
+                    border: '1px solid rgba(0,100,130,0.12)',
+                    background: '#FFFFFF',
+                    padding: 16,
+                  }}
+                >
+                  <p
+                    className="font-sans font-semibold"
+                    style={{
+                      fontSize: 16,
+                      lineHeight: '24px',
+                      color: '#2F3A40',
+                      paddingBottom: 8,
+                    }}
+                  >
+                    Clinical Notes for Laboratory
+                  </p>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Clinical indication, relevant history, suspected diagnosis for the laboratory team…"
+                    className="w-full resize-none font-sans outline-none placeholder:font-sans"
+                    style={{
+                      minHeight: 96,
+                      borderRadius: 12,
+                      border: '1px solid rgba(0,100,130,0.12)',
+                      padding: '10px 12px',
+                      fontSize: 14,
+                      lineHeight: '22px',
+                      color: '#0D2630',
+                      background: '#FFFFFF',
+                      fontFamily: 'inherit',
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.border = '1px solid #00B4D8';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.border = '1px solid rgba(0,100,130,0.12)';
+                    }}
                   />
+                </div>
+
+                {/* ── Submit row ──────────────────────────────────────────── */}
+                <div className="flex items-center justify-between gap-4">
+                  {/* Selection count */}
                   <p
                     className="font-sans"
-                    style={{ fontSize: 14, lineHeight: '22px', color: '#EF4444' }}
+                    style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
                   >
-                    {PRIORITY_CFG.stat.warning}
+                    {totalSelected === 0
+                      ? 'No tests selected'
+                      : `${totalSelected} test${totalSelected !== 1 ? 's' : ''} selected`}
                   </p>
+
+                  <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      className={`flex shrink-0 items-center gap-2.5 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                      style={{
+                        height: 44,
+                        borderRadius: 12,
+                        padding: '0 24px',
+                        background: '#00B4D8',
+                        fontSize: 14,
+                        lineHeight: '22px',
+                        boxShadow: '0px 4px 20px 0px rgba(0,180,216,0.30)',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <Send style={{ width: 16, height: 16, flexShrink: 0 }} />
+                      Send Request to Laboratory
+                    </button>
+                  </PermissionGate>
                 </div>
-              )}
-            </div>
-
-            {/* ── Lab category cards ───────────────────────────────────────── */}
-            {pageState === 'loading' && (
-              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <SkeletonLabCard key={i} />
-                ))}
-              </div>
+              </>
             )}
-            {pageState === 'error' && (
-              <div className="mb-4 flex flex-col items-center justify-center gap-3 py-12 text-center">
-                <AlertCircle style={{ width: 40, height: 40, color: '#EF4444' }} />
-                <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-                  Failed to load lab tests
-                </p>
-                <button
-                  type="button"
-                  onClick={handleRetry}
-                  className="flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                  style={{
-                    height: 40,
-                    borderRadius: 12,
-                    padding: '0 20px',
-                    background: '#00B4D8',
-                    fontSize: 14,
-                    lineHeight: '22px',
-                  }}
-                >
-                  <RefreshCw style={{ width: 16, height: 16 }} />
-                  Retry
-                </button>
-              </div>
-            )}
-            {pageState === 'loaded' && (
-              <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {LAB_CATEGORIES.map((cat) => (
-                  <LabCard key={cat.id} category={cat} selected={selected} onToggle={toggleTest} />
-                ))}
-              </div>
-            )}
-
-            {/* ── Clinical Notes for Laboratory ────────────────────────────── */}
-            <div
-              className="mb-4"
-              style={{
-                borderRadius: 12,
-                border: '1px solid rgba(0,100,130,0.12)',
-                background: '#FFFFFF',
-                padding: 16,
-              }}
-            >
-              <p
-                className="font-sans font-semibold"
-                style={{
-                  fontSize: 16,
-                  lineHeight: '24px',
-                  color: '#2F3A40',
-                  paddingBottom: 8,
-                }}
-              >
-                Clinical Notes for Laboratory
-              </p>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Clinical indication, relevant history, suspected diagnosis for the laboratory team…"
-                className="w-full resize-none font-sans outline-none placeholder:font-sans"
-                style={{
-                  minHeight: 96,
-                  borderRadius: 12,
-                  border: '1px solid rgba(0,100,130,0.12)',
-                  padding: '10px 12px',
-                  fontSize: 14,
-                  lineHeight: '22px',
-                  color: '#0D2630',
-                  background: '#FFFFFF',
-                  fontFamily: 'inherit',
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.border = '1px solid #00B4D8';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.border = '1px solid rgba(0,100,130,0.12)';
-                }}
-              />
-            </div>
-
-            {/* ── Submit row ───────────────────────────────────────────────── */}
-            <div className="flex items-center justify-between gap-4">
-              {/* Selection count */}
-              <p
-                className="font-sans"
-                style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-              >
-                {totalSelected === 0
-                  ? 'No tests selected'
-                  : `${totalSelected} test${totalSelected !== 1 ? 's' : ''} selected`}
-              </p>
-
-              <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="flex shrink-0 items-center gap-2.5 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                  style={{
-                    height: 44,
-                    borderRadius: 12,
-                    padding: '0 24px',
-                    background: '#00B4D8',
-                    fontSize: 14,
-                    lineHeight: '22px',
-                    boxShadow: '0px 4px 20px 0px rgba(0,180,216,0.30)',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  <Send style={{ width: 16, height: 16, flexShrink: 0 }} />
-                  Send Request to Laboratory
-                </button>
-              </PermissionGate>
-            </div>
 
             <div className="h-6" />
           </div>

@@ -1146,9 +1146,9 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
               )}
             </div>
 
-            {/* ── Action bar — max-w 622px, space-between ───────────────────────── */}
+            {/* ── Action bar — always visible regardless of step ────────────────── */}
             <div
-              className="flex max-w-[622px] items-center justify-between"
+              className="flex max-w-[760px] flex-wrap items-center justify-between gap-3"
               style={{
                 borderTop: '1px solid #0064821F',
                 padding: '14px 20px',
@@ -1172,22 +1172,42 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
                 </button>
               </PermissionGate>
 
-              <PermissionGate permission={PERMISSIONS.REFERRALS_WRITE}>
-                <button
-                  type="button"
-                  onClick={() => router.push(ROUTES.patientReferral(id))}
-                  className="rounded-[12px] px-5 font-sans font-semibold transition-colors duration-150 hover:bg-amber-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                  style={{
-                    fontSize: 16,
-                    lineHeight: '24px',
-                    color: '#D97706',
-                    border: '1px solid #F59E0B',
-                    height: 44,
-                  }}
-                >
-                  Refer Patient
-                </button>
-              </PermissionGate>
+              <div className="flex flex-wrap items-center gap-3">
+                <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+                  <button
+                    type="button"
+                    onClick={() => router.push(ROUTES.patientLabOrder(id))}
+                    className="flex items-center gap-2 rounded-[12px] px-5 font-sans font-semibold transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                    style={{
+                      fontSize: 16,
+                      lineHeight: '24px',
+                      color: '#00B4D8',
+                      border: '1px solid #00B4D8',
+                      height: 44,
+                    }}
+                  >
+                    <FlaskConical style={{ width: 16, height: 16, flexShrink: 0 }} />
+                    Request Lab Test
+                  </button>
+                </PermissionGate>
+
+                <PermissionGate permission={PERMISSIONS.REFERRALS_WRITE}>
+                  <button
+                    type="button"
+                    onClick={() => router.push(ROUTES.patientReferral(id))}
+                    className="rounded-[12px] px-5 font-sans font-semibold transition-colors duration-150 hover:bg-amber-50 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                    style={{
+                      fontSize: 16,
+                      lineHeight: '24px',
+                      color: '#D97706',
+                      border: '1px solid #F59E0B',
+                      height: 44,
+                    }}
+                  >
+                    Refer Patient
+                  </button>
+                </PermissionGate>
+              </div>
 
               <PermissionGate permission={PERMISSIONS.ENCOUNTERS_WRITE}>
                 <button
