@@ -1,8 +1,8 @@
 'use client';
 
 import { CheckCircle2, Star, X } from 'lucide-react';
+import { useState } from 'react';
 
-import { StarRating } from '@components/shared/StarRating';
 import {
   getSupplierDisplayStatus,
   type SupplierInfo,
@@ -34,6 +34,40 @@ function DetailRow({ label, value, color }: { label: string; value: string; colo
   );
 }
 
+/** Click a star to rate — this is the one real write action behind the
+ * Performance Rating column/detail row, which used to only ever display a
+ * seeded number with no way to actually rate a supplier. Hover previews the
+ * value about to be applied; the click itself is the save, matching this
+ * modal's other one-click actions (Approve/Reject/Preferred/Deactivate). */
+function RatingInput({ rating, onRate }: { rating: number; onRate: (value: number) => void }) {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const display = hovered ?? Math.round(rating);
+
+  return (
+    <div className="flex items-center gap-0.5" onMouseLeave={() => setHovered(null)}>
+      {[1, 2, 3, 4, 5].map((value) => (
+        <button
+          key={value}
+          type="button"
+          onClick={() => onRate(value)}
+          onMouseEnter={() => setHovered(value)}
+          aria-label={`Rate ${value} star${value === 1 ? '' : 's'}`}
+          className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(245,158,11,0.08)] ${FOCUS_RING}`}
+        >
+          <Star
+            style={{
+              width: 18,
+              height: 18,
+              color: value <= display ? '#F59E0B' : '#D1D9DC',
+            }}
+            fill={value <= display ? '#F59E0B' : 'none'}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /** Full detail of one supplier — lazy-loaded (checklist §14). Footer
  * actions change with status: Approve/Reject while Pending Approval, Mark
  * as Preferred/Deactivate while Active, Remove Preferred/Deactivate while
@@ -44,6 +78,7 @@ export function SupplierDetailModal({
   onReject,
   onTogglePreferred,
   onToggleActive,
+  onRate,
   onClose,
 }: {
   supplier: SupplierInfo;
@@ -51,6 +86,7 @@ export function SupplierDetailModal({
   onReject: (name: string) => void;
   onTogglePreferred: (name: string, isPreferred: boolean) => void;
   onToggleActive: (name: string) => void;
+  onRate: (name: string, rating: number) => void;
   onClose: () => void;
 }) {
   const displayStatus = getSupplierDisplayStatus(supplier);
@@ -102,19 +138,24 @@ export function SupplierDetailModal({
             <DetailRow label="Status" value={displayStatus} color={STATUS_COLOR[displayStatus]} />
             <div className="flex items-center justify-between gap-3 py-1.5">
               <span style={{ fontSize: 14, color: '#4A7080' }}>Performance Rating</span>
-              {supplier.performanceRating > 0 ? (
-                <div className="flex items-center gap-1.5">
-                  <StarRating rating={supplier.performanceRating} size={15} />
-                  <span
-                    className="font-sans font-medium"
-                    style={{ fontSize: 14, color: '#0D2630' }}
-                  >
-                    {supplier.performanceRating.toFixed(1)}
-                  </span>
-                </div>
-              ) : (
-                <span style={{ fontSize: 14, color: '#8A98A3' }}>Not yet rated</span>
-              )}
+              <span
+                className="font-sans font-medium"
+                style={{
+                  fontSize: 14,
+                  color: supplier.performanceRating > 0 ? '#0D2630' : '#8A98A3',
+                }}
+              >
+                {supplier.performanceRating > 0
+                  ? supplier.performanceRating.toFixed(1)
+                  : 'Not yet rated'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3 py-1">
+              <span style={{ fontSize: 14, color: '#4A7080' }}>Rate this supplier</span>
+              <RatingInput
+                rating={supplier.performanceRating}
+                onRate={(value) => onRate(supplier.name, value)}
+              />
             </div>
             <DetailRow
               label="Last Order Date"

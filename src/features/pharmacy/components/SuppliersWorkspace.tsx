@@ -43,6 +43,7 @@ import {
 import {
   addSupplier,
   approveSupplier,
+  rateSupplier,
   rejectSupplier,
   setSupplierPreferred,
   toggleSupplierActive,
@@ -367,6 +368,11 @@ export function SuppliersWorkspace() {
     toggleSupplierActive(name);
     setModal(null);
     toast.success('Status updated', `${name}'s status has been updated.`);
+  }
+
+  function handleRateSupplier(name: string, rating: number) {
+    rateSupplier(name, rating);
+    toast.success('Rating saved', `${name} rated ${rating} star${rating === 1 ? '' : 's'}.`);
   }
 
   function handleSupplierContracts() {
@@ -1041,11 +1047,12 @@ export function SuppliersWorkspace() {
       )}
       {modal?.type === 'detail' && (
         <SupplierDetailModal
-          supplier={modal.supplier}
+          supplier={allSuppliers.find((s) => s.name === modal.supplier.name) ?? modal.supplier}
           onApprove={handleApprove}
           onReject={handleReject}
           onTogglePreferred={handleTogglePreferred}
           onToggleActive={handleToggleActive}
+          onRate={handleRateSupplier}
           onClose={() => setModal(null)}
         />
       )}

@@ -101,6 +101,14 @@ export function setSupplierPreferred(name: string, isPreferred: boolean): void {
   emit();
 }
 
+/** The only place a supplier's Performance Rating ever changes — called from
+ * the click-to-rate stars in `SupplierDetailModal`, not a seeded/derived
+ * value. */
+export function rateSupplier(name: string, rating: number): void {
+  suppliers = suppliers.map((s) => (s.name === name ? { ...s, performanceRating: rating } : s));
+  emit();
+}
+
 export function toggleSupplierActive(name: string): void {
   suppliers = suppliers.map((s) =>
     s.name === name
