@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Adverse Drug Reactions' };
+import { AdverseDrugReactionsWorkspace } from '@/features/pharmacy/components/AdverseDrugReactionsWorkspace';
 
 export default function AdverseDrugReactionsPage() {
-  return (
-    <ComingSoon
-      title="Adverse Drug Reactions"
-      description="Reporting, tracking, and reviewing adverse drug reaction cases is on the way."
-    />
-  );
+  return <AdverseDrugReactionsWorkspace />;
 }

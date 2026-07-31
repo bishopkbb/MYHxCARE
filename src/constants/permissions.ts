@@ -26,6 +26,7 @@ export const PERMISSIONS = {
 
   PHARMACY_READ: 'pharmacy:read',
   PHARMACY_DISPENSE: 'pharmacy:dispense',
+  PHARMACY_ADR_WRITE: 'pharmacy:adr:write',
 
   EMERGENCY_READ: 'emergency:read',
   EMERGENCY_WRITE: 'emergency:write',

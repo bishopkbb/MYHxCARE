@@ -9,6 +9,7 @@
 
 import { DOCTORS } from '@/features/shared/__mocks__/doctorDirectory';
 import { PHARMACY_LOCATIONS, type PharmacyLocationId } from '@/constants/pharmacyLocations';
+import { DIRECTORY_PATIENTS } from '@/features/registration/__mocks__/patientDirectoryFixtures';
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
 
 // ── Prescription queue ───────────────────────────────────────────────────────
@@ -3249,4 +3250,237 @@ export const PROCUREMENT_REQUESTS_SEED: ProcurementRequest[] = (() => {
   }
 
   return rows;
+})();
+
+// ── Adverse Drug Reactions (ADR) ────────────────────────────────────────────
+
+export type ADRSeverity = 'Mild' | 'Moderate' | 'Severe' | 'Unknown';
+export type ADRCausality = 'Definite' | 'Probable' | 'Possible' | 'Unlikely';
+export type ADRStatus = 'Under Assessment' | 'Resolved' | 'Reported to NPC';
+export type ADRDrugClass =
+  'Antibiotics' | 'Analgesics' | 'Cardiovascular' | 'Anticonvulsants' | 'Others';
+
+export type ADRReport = {
+  id: string;
+  patientId: string;
+  patientName: string;
+  mrn: string;
+  suspectedDrugs: string[];
+  drugClass: ADRDrugClass;
+  reaction: string;
+  severity: ADRSeverity;
+  causality: ADRCausality;
+  status: ADRStatus;
+  onsetDate: string; // ISO date
+  reportedAt: string; // ISO datetime
+  reportedBy: string;
+  actionTaken?: string;
+  notes?: string;
+};
+
+export const ADR_STATUS_OPTIONS: SelectOption[] = [
+  { value: 'Under Assessment', label: 'Under Assessment' },
+  { value: 'Resolved', label: 'Resolved' },
+  { value: 'Reported to NPC', label: 'Reported to NPC' },
+];
+
+export const ADR_SEVERITY_OPTIONS: SelectOption[] = [
+  { value: 'Mild', label: 'Mild' },
+  { value: 'Moderate', label: 'Moderate' },
+  { value: 'Severe', label: 'Severe' },
+  { value: 'Unknown', label: 'Unknown' },
+];
+
+export const ADR_CAUSALITY_OPTIONS: SelectOption[] = [
+  { value: 'Definite', label: 'Definite' },
+  { value: 'Probable', label: 'Probable' },
+  { value: 'Possible', label: 'Possible' },
+  { value: 'Unlikely', label: 'Unlikely' },
+];
+
+export const ADR_SEVERITY_COLOR: Record<
+  ADRSeverity,
+  { color: string; border: string; bg: string }
+> = {
+  Mild: { color: '#16A34A', border: 'rgba(22,163,74,0.35)', bg: 'rgba(22,163,74,0.08)' },
+  Moderate: { color: '#D97706', border: 'rgba(217,119,6,0.35)', bg: 'rgba(217,119,6,0.08)' },
+  Severe: { color: '#DC2626', border: 'rgba(220,38,38,0.35)', bg: 'rgba(220,38,38,0.08)' },
+  Unknown: { color: '#6B7280', border: 'rgba(107,114,128,0.35)', bg: 'rgba(107,114,128,0.08)' },
+};
+
+export const ADR_CAUSALITY_COLOR: Record<
+  ADRCausality,
+  { color: string; border: string; bg: string }
+> = {
+  Definite: { color: '#DC2626', border: 'rgba(220,38,38,0.35)', bg: 'rgba(220,38,38,0.08)' },
+  Probable: { color: '#7C3AED', border: 'rgba(124,58,237,0.35)', bg: 'rgba(124,58,237,0.08)' },
+  Possible: { color: '#2563EB', border: 'rgba(37,99,235,0.35)', bg: 'rgba(37,99,235,0.08)' },
+  Unlikely: { color: '#6B7280', border: 'rgba(107,114,128,0.35)', bg: 'rgba(107,114,128,0.08)' },
+};
+
+export const ADR_STATUS_COLOR: Record<ADRStatus, { color: string; border: string; bg: string }> = {
+  'Under Assessment': {
+    color: '#D97706',
+    border: 'rgba(217,119,6,0.35)',
+    bg: 'rgba(217,119,6,0.08)',
+  },
+  Resolved: { color: '#16A34A', border: 'rgba(22,163,74,0.35)', bg: 'rgba(22,163,74,0.08)' },
+  'Reported to NPC': {
+    color: '#7C3AED',
+    border: 'rgba(124,58,237,0.35)',
+    bg: 'rgba(124,58,237,0.08)',
+  },
+};
+
+/** Fixed display order for the "Top Suspected Drug Classes" panel — matches
+ * the order these classes are seeded in, so the panel never needs a sort. */
+export const ADR_DRUG_CLASSES: ADRDrugClass[] = [
+  'Antibiotics',
+  'Analgesics',
+  'Cardiovascular',
+  'Anticonvulsants',
+  'Others',
+];
+
+type ADRDrugPoolEntry = { drug: string; reactions: string[] };
+
+const ADR_DRUG_POOL: Record<ADRDrugClass, ADRDrugPoolEntry[]> = {
+  Antibiotics: [
+    { drug: 'Amoxicillin 500mg', reactions: ['Skin rash, itching', 'Urticaria, pruritus'] },
+    { drug: 'Ciprofloxacin 500mg', reactions: ['Dizziness, headache', 'Tendon pain'] },
+    { drug: 'Vancomycin 1g', reactions: ['Red man syndrome', 'Fever, chills'] },
+    { drug: 'Metronidazole 400mg', reactions: ['Nausea, metallic taste'] },
+    { drug: 'Ceftriaxone 1g', reactions: ['Urticaria, pruritus'] },
+    { drug: 'Doxycycline 100mg', reactions: ['Photosensitivity rash'] },
+    { drug: 'Azithromycin 250mg', reactions: ['GI upset, diarrhea'] },
+  ],
+  Analgesics: [
+    { drug: 'Diclofenac 50mg', reactions: ['Gastric pain, heartburn'] },
+    { drug: 'Ibuprofen 400mg', reactions: ['GI bleeding', 'Epigastric pain'] },
+    { drug: 'Tramadol 50mg', reactions: ['Dizziness, nausea'] },
+    { drug: 'Morphine Sulfate 10mg', reactions: ['Drowsiness, constipation'] },
+    { drug: 'Aspirin 300mg', reactions: ['Tinnitus, GI upset'] },
+  ],
+  Cardiovascular: [
+    { drug: 'Warfarin 5mg', reactions: ['Bleeding gums, bruising'] },
+    { drug: 'Lisinopril 10mg', reactions: ['Dry cough'] },
+    { drug: 'Amlodipine 5mg', reactions: ['Ankle swelling'] },
+    { drug: 'Atorvastatin 20mg', reactions: ['Muscle pain'] },
+    { drug: 'Clopidogrel 75mg', reactions: ['Easy bruising'] },
+  ],
+  Anticonvulsants: [
+    { drug: 'Carbamazepine 200mg', reactions: ['SJS (Skin peeling, fever)'] },
+    { drug: 'Phenytoin 100mg', reactions: ['Gum hyperplasia'] },
+    { drug: 'Sodium Valproate 500mg', reactions: ['Tremor, weight gain'] },
+    { drug: 'Lamotrigine 100mg', reactions: ['Skin rash'] },
+  ],
+  Others: [
+    { drug: 'Metformin 500mg', reactions: ['Nausea, diarrhea'] },
+    { drug: 'Insulin Glargine', reactions: ['Hypoglycemia'] },
+    { drug: 'Chlorphenamine 4mg', reactions: ['Drowsiness'] },
+    { drug: 'Omeprazole 20mg', reactions: ['Headache'] },
+    { drug: 'Prednisolone 5mg', reactions: ['Mood changes, insomnia'] },
+  ],
+};
+
+/** Autocomplete suggestions for the Report New ADR form — not a hard
+ * constraint, since ADR reporting must allow any suspected substance, in or
+ * out of the hospital's own formulary. */
+export const ADR_SUSPECTED_DRUG_SUGGESTIONS: string[] = Object.values(ADR_DRUG_POOL)
+  .flat()
+  .map((entry) => entry.drug);
+
+export const ADR_DRUG_CLASS_OPTIONS: SelectOption[] = ADR_DRUG_CLASSES.map((c) => ({
+  value: c,
+  label: c,
+}));
+
+const ADR_DRUG_CLASS_COUNTS: { drugClass: ADRDrugClass; count: number }[] = [
+  { drugClass: 'Antibiotics', count: 46 },
+  { drugClass: 'Analgesics', count: 28 },
+  { drugClass: 'Cardiovascular', count: 20 },
+  { drugClass: 'Anticonvulsants', count: 12 },
+  { drugClass: 'Others', count: 22 },
+];
+
+const ADR_REPORTERS = [
+  'Pharm. Adaeze',
+  'Pharm. Victoria',
+  'Pharm. John',
+  'Pharm. Grace',
+  'Pharm. Ngozi',
+  'Pharm. Chidi',
+];
+
+/** severity (46/42/24/16), status (88/16/24), and causality (55/43/20/10)
+ * each hit an exact target distribution but are assigned via independently
+ * salted rotations of the same generation index — so no two of these
+ * attributes are correlated with each other or with drug class, matching
+ * how the real sample rows mix them freely (e.g. Severe + Under Assessment
+ * appears alongside Severe + Reported to NPC). */
+function adrSeverityForIndex(i: number): ADRSeverity {
+  if (i < 46) return 'Mild';
+  if (i < 46 + 42) return 'Moderate';
+  if (i < 46 + 42 + 24) return 'Severe';
+  return 'Unknown';
+}
+
+function adrStatusForIndex(i: number): ADRStatus {
+  const j = (i * 37 + 5) % 128;
+  if (j < 88) return 'Resolved';
+  if (j < 88 + 16) return 'Under Assessment';
+  return 'Reported to NPC';
+}
+
+function adrCausalityForIndex(i: number): ADRCausality {
+  const j = (i * 53 + 11) % 128;
+  if (j < 55) return 'Possible';
+  if (j < 55 + 43) return 'Probable';
+  if (j < 55 + 43 + 20) return 'Definite';
+  return 'Unlikely';
+}
+
+function adrReportId(n: number): string {
+  return `ADR-${new Date().getFullYear()}-${String(n).padStart(4, '0')}`;
+}
+
+/** 128 seeded reports — Report ID and dates are assigned by recency rank
+ * (a decorrelated permutation of the generation index via `*41+7 mod 128`,
+ * 41 being coprime with 128) so the newest report always gets the highest
+ * ID number, independent of the drug-class-grouped generation order. */
+export const ADR_REPORTS: ADRReport[] = (() => {
+  const total = ADR_DRUG_CLASS_COUNTS.reduce((sum, s) => sum + s.count, 0);
+  const rows: (ADRReport & { recencyRank: number })[] = [];
+  let idx = 0;
+  for (const spec of ADR_DRUG_CLASS_COUNTS) {
+    const pool = ADR_DRUG_POOL[spec.drugClass];
+    for (let k = 0; k < spec.count; k++) {
+      const patient = DIRECTORY_PATIENTS[mixHash(idx + 9_000) % DIRECTORY_PATIENTS.length]!;
+      const pick = pool[mixHash(idx + 8_000) % pool.length]!;
+      const reaction = pick.reactions[mixHash(idx + 7_000) % pick.reactions.length]!;
+      const recencyRank = (idx * 41 + 7) % total;
+
+      rows.push({
+        id: adrReportId(total - recencyRank),
+        patientId: patient.id,
+        patientName: patient.name,
+        mrn: patient.mrn,
+        suspectedDrugs: [pick.drug],
+        drugClass: spec.drugClass,
+        reaction,
+        severity: adrSeverityForIndex(idx),
+        causality: adrCausalityForIndex(idx),
+        status: adrStatusForIndex(idx),
+        onsetDate: pastDateAt(recencyRank + 2 + (idx % 3), 0, 0).slice(0, 10),
+        reportedAt: pastDateAt(recencyRank, 8 + (idx % 10), (idx * 17) % 60),
+        reportedBy: ADR_REPORTERS[mixHash(idx + 6_000) % ADR_REPORTERS.length]!,
+        recencyRank,
+      });
+      idx++;
+    }
+  }
+
+  return rows
+    .sort((a, b) => a.recencyRank - b.recencyRank)
+    .map(({ recencyRank: _recencyRank, ...report }) => report);
 })();

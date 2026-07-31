@@ -118,3 +118,30 @@ export function isToday(date: Date | string): boolean {
 export function isSameDay(a: Date | string, b: Date | string): boolean {
   return watDateKey(coerce(a)) === watDateKey(coerce(b));
 }
+
+/** Returns "YYYY-MM-DD" for the date's calendar day in WAT — the safe way
+ * to default an `<input type="date">` or bound a "today" filter. Plain
+ * `new Date().toISOString().slice(0, 10)` reads the UTC calendar day, which
+ * drifts a day off WAT for part of every 24h cycle (WAT is UTC+1, so late
+ * WAT evenings are still the previous UTC day, and vice versa). */
+export function toWATDateInput(date: Date | string = new Date()): string {
+  return watDateKey(coerce(date));
+}
+
+/** First day of the current WAT month, as "YYYY-MM-DD". */
+export function watMonthStartInput(): string {
+  return `${toWATDateInput().slice(0, 7)}-01`;
+}
+
+/** Timestamp (ms) for midnight WAT on the 1st of the WAT month `monthsAgo`
+ * months before the current one (0 = this month) — for "this month vs last
+ * month" boundaries. Plain `new Date(year, month, 1).getTime()` uses the
+ * system's local timezone, which drifts the boundary off WAT. */
+export function watMonthStartTimestamp(monthsAgo = 0): number {
+  const [y, m] = watMonthStartInput().split('-').map(Number) as [number, number];
+  const zeroBased = m - 1 - monthsAgo;
+  const year = y + Math.floor(zeroBased / 12);
+  const month = ((zeroBased % 12) + 12) % 12;
+  const mm = String(month + 1).padStart(2, '0');
+  return new Date(`${year}-${mm}-01T00:00:00+01:00`).getTime();
+}

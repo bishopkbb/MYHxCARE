@@ -98,7 +98,13 @@ export const MOCK_USERS: User[] = [
     workspaceRole: 'PHARMACIST',
     department: 'Pharmacy',
     departmentId: 'dept_pharmacy',
-    permissions: ['patients:read', 'pharmacy:read', 'pharmacy:dispense', 'notifications:read'],
+    permissions: [
+      'patients:read',
+      'pharmacy:read',
+      'pharmacy:dispense',
+      'pharmacy:adr:write',
+      'notifications:read',
+    ],
   },
   {
     id: 'usr_004',

@@ -1153,6 +1153,30 @@ const SUPPLIERS_GUIDE: HelpGuide = {
   ],
 };
 
+const ADR_GUIDE: HelpGuide = {
+  id: 'adr',
+  title: 'Adverse Drug Reactions (ADR)',
+  intro: 'Report, monitor, and manage adverse drug reactions to improve patient safety.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Under Assessment, Serious ADRs, Resolved, and This Month are clickable — each filters or scopes the table to that subset.',
+    },
+    {
+      heading: 'Reporting a new ADR',
+      body: 'Report New ADR requires picking a real patient from the directory first, so the allergy banner and MRN are genuine. Severity, causality, and drug class are all captured at report time.',
+    },
+    {
+      heading: 'Status lifecycle',
+      body: 'A new report starts Under Assessment. From there it can be Marked as Resolved, or — for Severe cases — Reported to NPC (the National Pharmacovigilance Centre). Both are terminal, audit-safe states.',
+    },
+    {
+      heading: 'ADR by Severity and Top Suspected Drug Classes',
+      body: 'The donut chart breaks every report down by severity. Top Suspected Drug Classes ranks drug classes by how many reports name a drug in that class.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2481,6 +2505,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/low-stock-alerts')) return LOW_STOCK_ALERTS_GUIDE;
   if (pathname.startsWith('/pharmacy/procurement-requests')) return PROCUREMENT_REQUESTS_GUIDE;
   if (pathname.startsWith('/pharmacy/suppliers')) return SUPPLIERS_GUIDE;
+  if (pathname.startsWith('/pharmacy/adr')) return ADR_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;
