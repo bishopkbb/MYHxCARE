@@ -1,14 +1,14 @@
 'use client';
 
 /**
- * The canonical StaffShift entity + reactive store — replacing four
+ * The canonical StaffShift entity + reactive store — replacing five
  * independently-declared, independently-seeded shift populations
  * (Registration's `RegistrationShift`, Medical Records' `RecordsShift`,
- * Nurse Station's `NurseShift`, and Doctor's Dashboard/Duty Roster's
- * `DoctorShift`, all structurally near-identical). Every module's own
- * audit docs referred to reusing a canonical `StaffShift` entity that did
- * not actually exist anywhere in the codebase — this is that entity, finally
- * built.
+ * Nurse Station's `NurseShift`, Doctor's Dashboard/Duty Roster's
+ * `DoctorShift`, and Pharmacy's `PharmacyShift`, all structurally
+ * near-identical). Every module's own audit docs referred to reusing a
+ * canonical `StaffShift` entity that did not actually exist anywhere in the
+ * codebase — this is that entity, finally built.
  *
  * Deliberately NOT unified here (still open, see
  * `MYHXCARE_SYSTEM_CONSISTENCY_REGISTER.md` SYS-005): My Schedule's own
@@ -23,11 +23,12 @@
  * on Shift Handover's 12-hour Day/Night vs. this store's 8-hour Morning/
  * Afternoon/Night granularity — a larger structural pass, not a rename.
  *
- * Each of the four migrated workspaces keeps its own long-standing display
- * shape (`RegistrationShift`/`RecordsShift`/`NurseShift`/`DoctorShift`) as a
- * derived projection of this canonical row — the adapter pattern already
- * proven for SYS-004's LabResult unification, chosen again here to avoid
- * rewriting four ~1000+ line workspace components' existing, working UI.
+ * Each of the five migrated workspaces keeps its own long-standing display
+ * shape (`RegistrationShift`/`RecordsShift`/`NurseShift`/`DoctorShift`/
+ * `PharmacyShift`) as a derived projection of this canonical row — the
+ * adapter pattern already proven for SYS-004's LabResult unification, chosen
+ * again here to avoid rewriting five ~1000+ line workspace components'
+ * existing, working UI.
  *
  * Swap out by pointing these actions at real `/rosters`/`/duty-assignments`
  * endpoints in Phase 6.
@@ -48,15 +49,20 @@ import {
   type NurseShift,
 } from '@/features/nursing/__mocks__/nurseWorkforceFixtures';
 import { MOCK_ROSTER, type DoctorShift } from '@/features/workforce/__mocks__/workforceFixtures';
+import {
+  MOCK_PHARMACY_ROSTER,
+  type PharmacyShift,
+} from '@/features/pharmacy/__mocks__/pharmacyWorkforceFixtures';
 
 export type ShiftType = 'MORNING' | 'AFTERNOON' | 'NIGHT' | 'ON_CALL' | 'EMERGENCY';
 export type ShiftStatus = 'ON_DUTY' | 'SCHEDULED' | 'ON_CALL' | 'COMPLETED' | 'CANCELLED';
 
 /** Which workspace's roster this shift belongs to — the discriminator that
- * lets one shared store back four separately-scoped screens (a Matron's
+ * lets one shared store back five separately-scoped screens (a Matron's
  * Nursing Workforce Management should never show a Registration officer's
  * shift, even though both now live in the same store). */
-export type StaffShiftHomeModule = 'registration' | 'medical-records' | 'nursing' | 'clinical';
+export type StaffShiftHomeModule =
+  'registration' | 'medical-records' | 'nursing' | 'clinical' | 'pharmacy';
 
 export type StaffShift = {
   id: string;
@@ -94,12 +100,16 @@ function fromDoctor(s: DoctorShift): StaffShift {
   const { doctorName, ...rest } = s;
   return { ...rest, staffName: doctorName, homeModule: 'clinical' };
 }
+function fromPharmacy(s: PharmacyShift): StaffShift {
+  return { ...s, homeModule: 'pharmacy' };
+}
 
 const SEED: StaffShift[] = [
   ...MOCK_REGISTRATION_ROSTER.map(fromRegistration),
   ...MOCK_RECORDS_ROSTER.map(fromRecords),
   ...MOCK_NURSE_ROSTER.map(fromNurse),
   ...MOCK_ROSTER.map(fromDoctor),
+  ...MOCK_PHARMACY_ROSTER.map(fromPharmacy),
 ];
 
 let shifts: StaffShift[] = [...SEED];

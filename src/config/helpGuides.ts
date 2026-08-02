@@ -1789,6 +1789,30 @@ const NURSE_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const PHARMACY_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'pharmacy-workforce-management',
+  title: 'Workforce Management',
+  intro: 'Manage pharmacy staff schedules, duty rosters, and campus coverage.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Staff on Duty, Today’s Shifts, On-Call Staff, Shift Acknowledgement, Coverage Status, and Shift Changes summarize the roster at a glance.',
+    },
+    {
+      heading: "Today's Roster",
+      body: 'Search by staff name or filter by shift type, role, and status. Each row shows the campus location, shift time, and acknowledgement state.',
+    },
+    {
+      heading: 'Create and edit shifts',
+      body: 'Create Shift opens a form for staff name, role, location, shift type, and status. The pencil icon on a row reopens the same form pre-filled for editing.',
+    },
+    {
+      heading: 'Coverage and acknowledgement',
+      body: 'The Coverage Overview panel tracks campus coverage by shift. Pending Shift Acknowledgement lists staff who haven’t confirmed their shift yet, with a one-tap reminder.',
+    },
+  ],
+};
+
 const NURSE_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'nurse-workforce-management',
   title: 'Workforce Management',
@@ -2737,6 +2761,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (/^\/nurse\/my-patients\/[^/]+/.test(pathname)) return PATIENT_RECORD_GUIDE;
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
   if (pathname.startsWith('/nurse/workforce-management')) return NURSE_WORKFORCE_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/workforce')) return PHARMACY_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/nurse/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/nurse/reports')) return NURSING_REPORTS_GUIDE;
   if (pathname.startsWith('/nurse/admissions')) return ADMISSIONS_GUIDE;

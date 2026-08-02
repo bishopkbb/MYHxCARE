@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Workforce Management' };
+import { PharmacyWorkforceManagementWorkspace } from '@/features/pharmacy/components/PharmacyWorkforceManagementWorkspace';
 
 export default function PharmacyWorkforceManagementPage() {
-  return (
-    <ComingSoon
-      title="Workforce Management"
-      description="Pharmacy staff scheduling, coverage, and shift management is on the way."
-    />
-  );
+  return <PharmacyWorkforceManagementWorkspace />;
 }
