@@ -1346,6 +1346,30 @@ const STOCK_MOVEMENT_REPORT_GUIDE: HelpGuide = {
   ],
 };
 
+const EXPIRY_REPORT_GUIDE: HelpGuide = {
+  id: 'expiry-report',
+  title: 'Expiry Report',
+  intro: 'Track medication expiry across the pharmacy and the value at risk.',
+  sections: [
+    {
+      heading: 'The same live batches, an expiry lens',
+      body: 'Like Inventory Report, this reads live from inventoryStore.ts — the same batches Expiry Management, Batch Management, and Low Stock Alerts already show, classified with the same getExpiryBucket() helper.',
+    },
+    {
+      heading: 'Expiry Date Range really filters',
+      body: 'Unlike Location on Inventory Report, Expiry Date Range genuinely filters the details table here — batches carry a real expiryDate, so the range narrows to whatever falls inside it.',
+    },
+    {
+      heading: 'The timeline chart',
+      body: 'Expiry Timeline buckets real batch expiry dates into the next 12 months, plus a bar for what has already expired — it is not a decorative series.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'View Details opens a read-only snapshot; Go to Expiry Management is the real place to mark a batch returned or transfer it — this report stays read-only.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2682,6 +2706,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/reports/dispensing')) return DISPENSING_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/inventory')) return INVENTORY_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/stock-movement')) return STOCK_MOVEMENT_REPORT_GUIDE;
+  if (pathname.startsWith('/pharmacy/reports/expiry')) return EXPIRY_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;

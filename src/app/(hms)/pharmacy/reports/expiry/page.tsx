@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Expiry Reports' };
+import { ExpiryReportWorkspace } from '@/features/pharmacy/components/ExpiryReportWorkspace';
 
 export default function ExpiryReportsPage() {
-  return (
-    <ComingSoon
-      title="Expiry Reports"
-      description="Historical wastage and expiry-loss reporting by medication and batch is on the way."
-    />
-  );
+  return <ExpiryReportWorkspace />;
 }
