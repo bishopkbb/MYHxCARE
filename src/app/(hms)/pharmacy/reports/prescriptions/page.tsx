@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Prescription Reports' };
+import { PrescriptionReportWorkspace } from '@/features/pharmacy/components/PrescriptionReportWorkspace';
 
 export default function PrescriptionReportsPage() {
-  return (
-    <ComingSoon
-      title="Prescription Reports"
-      description="Prescribing volume, top medications, and prescriber breakdowns are on the way."
-    />
-  );
+  return <PrescriptionReportWorkspace />;
 }

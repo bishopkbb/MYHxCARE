@@ -1250,6 +1250,30 @@ const PHARMACY_QUEUE_MONITOR_GUIDE: HelpGuide = {
   ],
 };
 
+const PRESCRIPTION_REPORT_GUIDE: HelpGuide = {
+  id: 'prescription-report',
+  title: 'Prescription Report',
+  intro: 'Comprehensive overview of prescriptions and dispensing activities.',
+  sections: [
+    {
+      heading: 'Stat cards and filters',
+      body: 'Filters (date range, location, prescriber, department, type — More Filters adds status) are staged as you change them. Generate Report applies them to the summary panels, charts, and table together.',
+    },
+    {
+      heading: 'Prescriptions Trend',
+      body: 'Switch between Daily, Weekly, and Monthly views — Weekly is a real aggregation of the same daily figures, so the two can never disagree.',
+    },
+    {
+      heading: 'Prescriptions by Department and the sidebar panels',
+      body: 'The donut, Prescription Summary, Top Prescribers, and Top Prescribed Medications all share the same underlying totals — figures that share a total (New + Repeat, department slices) are computed from it, not entered separately.',
+    },
+    {
+      heading: 'Row actions and exporting',
+      body: 'View opens a read-only record; a Pending prescription also links straight to the live Prescription Queue. Export Report and Schedule Report both act on whatever the table currently shows.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2582,6 +2606,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/audit-trail')) return DISPENSING_AUDIT_TRAIL_GUIDE;
   if (pathname.startsWith('/pharmacy/medication-returns')) return MEDICATION_RETURNS_GUIDE;
   if (pathname.startsWith('/pharmacy/queue-monitor')) return PHARMACY_QUEUE_MONITOR_GUIDE;
+  if (pathname.startsWith('/pharmacy/reports/prescriptions')) return PRESCRIPTION_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;
