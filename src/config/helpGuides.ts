@@ -1394,6 +1394,30 @@ const PROCUREMENT_REPORT_GUIDE: HelpGuide = {
   ],
 };
 
+const ADR_REPORT_GUIDE: HelpGuide = {
+  id: 'adr-report',
+  title: 'ADR Report',
+  intro: 'Track adverse drug reaction reports from assessment through to closure.',
+  sections: [
+    {
+      heading: 'The same live report log',
+      body: 'Reads live from adrReportStore.ts — the same reports Adverse Drug Reactions already shows, using the same severity, causality, and status colour maps for consistency.',
+    },
+    {
+      heading: 'Stat cards and the severity donut',
+      body: 'Total Reports, Under Assessment, Resolved, and Reported to NPC always describe the full log — Generate Report’s filters scope only the details table below.',
+    },
+    {
+      heading: 'The trend chart',
+      body: 'ADR Reports Trend is bucketed from real reportedAt dates over the last 14 days, not a decorative series.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'View Details opens a read-only snapshot; Go to Adverse Drug Reactions is the real place to mark a case resolved or reported to NPC — this report stays read-only.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2732,6 +2756,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/reports/stock-movement')) return STOCK_MOVEMENT_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/expiry')) return EXPIRY_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/procurement')) return PROCUREMENT_REPORT_GUIDE;
+  if (pathname.startsWith('/pharmacy/reports/adr')) return ADR_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;

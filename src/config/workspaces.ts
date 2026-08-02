@@ -610,6 +610,7 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           },
           { label: 'Expiry Reports', href: '/pharmacy/reports/expiry', icon: CalendarClock },
           { label: 'Procurement Reports', href: '/pharmacy/reports/procurement', icon: Receipt },
+          { label: 'ADR Reports', href: '/pharmacy/reports/adr', icon: ShieldAlert },
         ],
       },
       {

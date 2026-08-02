@@ -76,6 +76,7 @@ export const ROUTES = {
   pharmacyReportsStockMovement: '/pharmacy/reports/stock-movement',
   pharmacyReportsExpiry: '/pharmacy/reports/expiry',
   pharmacyReportsProcurement: '/pharmacy/reports/procurement',
+  pharmacyReportsAdr: '/pharmacy/reports/adr',
 
   // Lab sub-routes
   labOrders: '/lab/orders',
