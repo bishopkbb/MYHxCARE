@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
@@ -24,6 +25,8 @@ import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { useAuth } from '@hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { formatTime } from '@/utils/datetime';
+import { WORKSPACE_NAV } from '@/config/workspaces';
+import { resolveWorkspace } from '@/types/auth.types';
 import {
   buildSeedConversations,
   getDirectoryExcluding,
@@ -135,9 +138,16 @@ function SkeletonBubble({ align }: { align: 'left' | 'right' }) {
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export function StaffChatWorkspace() {
+  const router = useRouter();
   const toast = useToast();
   const { user } = useAuth();
   const selfId = user?.id ?? 'usr_001';
+  // Same shared page for every workspace — the breadcrumb/back-link adapts to
+  // whichever workspace the logged-in user belongs to (mirrors AppTopbar's
+  // and ProfileWorkspace's resolveWorkspace()-driven pattern) rather than
+  // forking this page per workspace.
+  const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
+  const { workspaceLabel, homeRoute } = WORKSPACE_NAV[workspaceId];
   const [pageState, setPageState] = useState<PageState>('loading');
   const [conversations, setConversations] = useState<Conversation[]>(() =>
     buildSeedConversations(selfId),
@@ -369,717 +379,752 @@ export function StaffChatWorkspace() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <main className="flex flex-1 overflow-hidden" style={{ background: '#F5FBFD' }}>
-        <div className="mx-auto flex w-full max-w-[1200px] flex-1 gap-4 overflow-hidden p-4 sm:gap-5 sm:p-6">
-          {/* ══ CONVERSATION LIST ══════════════════════════════════════════ */}
+      <main className="flex flex-1 flex-col overflow-hidden" style={{ background: '#F5FBFD' }}>
+        <div className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col overflow-hidden p-4 sm:p-6">
+          {/* ── Breadcrumb — routes back to whichever workspace dashboard the
+              logged-in user belongs to ─────────────────────────────────── */}
           <div
-            className={`flex w-full flex-col overflow-hidden lg:w-[380px] lg:shrink-0 ${
-              showChatOnMobile ? 'hidden lg:flex' : 'flex'
-            }`}
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid rgba(0,180,216,0.28)',
-              borderRadius: 12,
-            }}
+            className="mb-3 flex shrink-0 flex-wrap items-center gap-1.5"
+            style={{ fontSize: 14 }}
           >
-            {/* Header */}
-            <div className="flex shrink-0 items-center justify-between px-4 py-4 sm:px-5">
-              <h1
-                className="font-sans font-semibold"
-                style={{ fontSize: 20, lineHeight: '28px', color: '#25464D' }}
-              >
-                Messages
-              </h1>
-              <div className="relative">
-                <button
-                  ref={newMenuButtonRef}
-                  type="button"
-                  onClick={() => setNewMenuOpen((v) => !v)}
-                  aria-expanded={newMenuOpen}
-                  className={`flex items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                  style={{ height: 36, background: '#00B4D8', fontSize: 14, lineHeight: '22px' }}
-                >
-                  <Plus style={{ width: 16, height: 16 }} />
-                  New
-                </button>
-                <RowMenuPortal
-                  open={newMenuOpen}
-                  anchorRef={newMenuButtonRef}
-                  onClose={() => setNewMenuOpen(false)}
-                  width={256}
-                >
-                  <p
-                    className="px-4 pt-1 pb-2 font-sans font-semibold"
-                    style={{ fontSize: 14, color: '#8A98A3' }}
-                  >
-                    Start a conversation
-                  </p>
-                  {directoryAvailable.length === 0 ? (
-                    <p className="px-4 py-2 font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
-                      You&apos;re already messaging everyone in the directory.
-                    </p>
-                  ) : (
-                    directoryAvailable.map((staff) => (
-                      <button
-                        key={staff.id}
-                        type="button"
-                        onClick={() => startNewConversation(staff)}
-                        className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                      >
-                        <Avatar
-                          initials={staff.initials}
-                          bg={staff.avatarBg}
-                          online={staff.online}
-                          size={32}
-                        />
-                        <span>
-                          <span
-                            className="block font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {staff.name}
-                          </span>
-                          <span
-                            className="block font-sans"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {staff.department}
-                          </span>
-                        </span>
-                      </button>
-                    ))
-                  )}
-                </RowMenuPortal>
-              </div>
-            </div>
-
-            {/* Search */}
-            <div className="shrink-0 px-4 pb-3 sm:px-5">
-              <div className="relative">
-                <Search
-                  className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
-                  style={{ width: 16, height: 16, color: '#8A98A3' }}
-                />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search staff or departments…"
-                  className={`h-[42px] w-full rounded-[12px] pr-4 pl-9 font-sans outline-none placeholder:text-[#8A98A3] ${FOCUS_RING}`}
-                  style={{
-                    background: '#F5FBFD',
-                    border: '1px solid #0064821F',
-                    color: '#2F3A40',
-                    fontSize: 14,
-                    lineHeight: '22px',
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* List */}
-            <div className="flex-1 overflow-y-auto scroll-smooth">
-              {pageState === 'loading' &&
-                Array.from({ length: 5 }).map((_, i) => <SkeletonConversationRow key={i} />)}
-
-              {pageState === 'error' && (
-                <div className="flex flex-col items-center justify-center gap-3 px-4 py-14 text-center">
-                  <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
-                  <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-                    Failed to load conversations
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleRetry}
-                    className={`flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
-                    style={{
-                      height: 40,
-                      borderRadius: 12,
-                      padding: '0 20px',
-                      background: '#00B4D8',
-                      fontSize: 14,
-                    }}
-                  >
-                    <RefreshCw style={{ width: 16, height: 16 }} />
-                    Retry
-                  </button>
-                </div>
-              )}
-
-              {pageState === 'loaded' && filteredConversations.length === 0 && (
-                <div className="flex flex-col items-center justify-center gap-3 px-4 py-14 text-center">
-                  <div
-                    className="flex size-14 items-center justify-center rounded-full"
-                    style={{ background: 'rgba(226,237,241,0.6)' }}
-                  >
-                    <Search style={{ width: 22, height: 22, color: '#8A98A3' }} />
-                  </div>
-                  <div>
-                    <p className="font-sans font-medium" style={{ fontSize: 16, color: '#4A7080' }}>
-                      No conversations found
-                    </p>
-                    <p className="mt-0.5 font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
-                      Try a different name or department
-                    </p>
-                  </div>
-                  {hasActiveSearch && (
-                    <button
-                      type="button"
-                      onClick={() => setSearch('')}
-                      className={`mt-1 font-sans font-semibold transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
-                      style={{ fontSize: 14, color: '#00B4D8' }}
-                    >
-                      Clear search
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {pageState === 'loaded' &&
-                filteredConversations.map((c) => {
-                  const isActive = c.id === activeId;
-                  const isUnread = c.unreadCount > 0;
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => selectConversation(c.id)}
-                      className={`flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors duration-150 sm:px-5 ${FOCUS_RING}`}
-                      style={{
-                        background: isActive ? '#E6F8FD' : 'transparent',
-                        borderLeft: isActive ? '3px solid #00B4D8' : '3px solid transparent',
-                        borderBottom: '1px solid rgba(0,100,130,0.08)',
-                      }}
-                    >
-                      <Avatar initials={c.initials} bg={c.avatarBg} online={c.online} />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <Tooltip content={c.staffName}>
-                            <span
-                              className="truncate font-sans font-semibold"
-                              style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                            >
-                              {c.staffName}
-                            </span>
-                          </Tooltip>
-                          <span
-                            className="shrink-0 font-sans"
-                            style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
-                          >
-                            {formatTime(c.lastMessageAt)}
-                          </span>
-                        </div>
-                        <Tooltip content={c.department}>
-                          <p
-                            className="truncate font-sans"
-                            style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
-                          >
-                            {c.department}
-                          </p>
-                        </Tooltip>
-                        <div className="mt-0.5 flex items-center justify-between gap-2">
-                          <Tooltip content={c.lastMessagePreview}>
-                            <p
-                              className="truncate font-sans"
-                              style={{
-                                fontSize: 14,
-                                lineHeight: '22px',
-                                color: isUnread ? '#25464D' : '#4A7080',
-                                fontWeight: isUnread ? 500 : 400,
-                              }}
-                            >
-                              {c.lastMessagePreview}
-                            </p>
-                          </Tooltip>
-                          {isUnread && (
-                            <span
-                              className="flex shrink-0 items-center justify-center rounded-full font-sans font-semibold text-white"
-                              style={{ width: 22, height: 22, background: '#00B4D8', fontSize: 14 }}
-                            >
-                              {c.unreadCount}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-            </div>
+            <button
+              type="button"
+              onClick={() => router.push(homeRoute)}
+              className={`font-sans transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+              style={{ color: '#4A7080' }}
+            >
+              {workspaceLabel}
+            </button>
+            <span style={{ color: '#8A98A3' }}>/</span>
+            <span className="font-sans font-medium" style={{ color: '#0D2630' }}>
+              Messages
+            </span>
           </div>
 
-          {/* ══ CHAT PANE ═══════════════════════════════════════════════════ */}
-          <div
-            className={`flex min-w-0 flex-1 flex-col overflow-hidden ${
-              showChatOnMobile ? 'flex' : 'hidden lg:flex'
-            }`}
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid rgba(0,180,216,0.28)',
-              borderRadius: 12,
-            }}
-          >
-            {pageState !== 'loaded' ? (
-              <div className="flex flex-1 flex-col">
-                <div
-                  className="flex shrink-0 items-center gap-3 px-4 py-3 sm:px-5"
-                  style={{ borderBottom: '1px solid #0064821F' }}
+          <div className="flex flex-1 gap-4 overflow-hidden sm:gap-5">
+            {/* ══ CONVERSATION LIST ══════════════════════════════════════════ */}
+            <div
+              className={`flex w-full flex-col overflow-hidden lg:w-[380px] lg:shrink-0 ${
+                showChatOnMobile ? 'hidden lg:flex' : 'flex'
+              }`}
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid rgba(0,180,216,0.28)',
+                borderRadius: 12,
+              }}
+            >
+              {/* Header */}
+              <div className="flex shrink-0 items-center justify-between px-4 py-4 sm:px-5">
+                <h1
+                  className="font-sans font-semibold"
+                  style={{ fontSize: 20, lineHeight: '28px', color: '#25464D' }}
                 >
-                  <div className="size-10 shrink-0 animate-pulse rounded-full bg-slate-100" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-40 animate-pulse rounded bg-slate-100" />
-                    <div className="h-3.5 w-24 animate-pulse rounded bg-slate-100" />
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col justify-end gap-3 p-5">
-                  <SkeletonBubble align="left" />
-                  <SkeletonBubble align="right" />
-                  <SkeletonBubble align="left" />
+                  Messages
+                </h1>
+                <div className="relative">
+                  <button
+                    ref={newMenuButtonRef}
+                    type="button"
+                    onClick={() => setNewMenuOpen((v) => !v)}
+                    aria-expanded={newMenuOpen}
+                    className={`flex items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                    style={{ height: 36, background: '#00B4D8', fontSize: 14, lineHeight: '22px' }}
+                  >
+                    <Plus style={{ width: 16, height: 16 }} />
+                    New
+                  </button>
+                  <RowMenuPortal
+                    open={newMenuOpen}
+                    anchorRef={newMenuButtonRef}
+                    onClose={() => setNewMenuOpen(false)}
+                    width={256}
+                  >
+                    <p
+                      className="px-4 pt-1 pb-2 font-sans font-semibold"
+                      style={{ fontSize: 14, color: '#8A98A3' }}
+                    >
+                      Start a conversation
+                    </p>
+                    {directoryAvailable.length === 0 ? (
+                      <p className="px-4 py-2 font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
+                        You&apos;re already messaging everyone in the directory.
+                      </p>
+                    ) : (
+                      directoryAvailable.map((staff) => (
+                        <button
+                          key={staff.id}
+                          type="button"
+                          onClick={() => startNewConversation(staff)}
+                          className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                        >
+                          <Avatar
+                            initials={staff.initials}
+                            bg={staff.avatarBg}
+                            online={staff.online}
+                            size={32}
+                          />
+                          <span>
+                            <span
+                              className="block font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {staff.name}
+                            </span>
+                            <span
+                              className="block font-sans"
+                              style={{ fontSize: 14, color: '#4A7080' }}
+                            >
+                              {staff.department}
+                            </span>
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </RowMenuPortal>
                 </div>
               </div>
-            ) : (
-              <>
-                {/* Chat header */}
-                <div
-                  className="flex shrink-0 items-center gap-3 px-4 py-3 sm:px-5"
-                  style={{ borderBottom: '1px solid #0064821F' }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setShowChatOnMobile(false)}
-                    aria-label="Back to Messages"
-                    className={`flex size-11 shrink-0 items-center justify-center lg:hidden ${FOCUS_RING}`}
-                  >
-                    <ChevronLeft style={{ width: 20, height: 20, color: '#4A7080' }} />
-                  </button>
-                  <Avatar
-                    initials={activeConversation.initials}
-                    bg={activeConversation.avatarBg}
-                    online={activeConversation.online}
+
+              {/* Search */}
+              <div className="shrink-0 px-4 pb-3 sm:px-5">
+                <div className="relative">
+                  <Search
+                    className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
+                    style={{ width: 16, height: 16, color: '#8A98A3' }}
                   />
-                  <div className="min-w-0 flex-1">
-                    <Tooltip content={activeConversation.staffName}>
-                      <p
-                        className="truncate font-sans font-semibold"
-                        style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
-                      >
-                        {activeConversation.staffName}
-                      </p>
-                    </Tooltip>
-                    <div className="flex items-center gap-1.5">
-                      <Tooltip content={activeConversation.department}>
-                        <span
-                          className="truncate font-sans"
-                          style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
-                        >
-                          {activeConversation.department}
-                        </span>
-                      </Tooltip>
-                      {activeConversation.online && (
-                        <>
-                          <span
-                            className="shrink-0 rounded-full"
-                            style={{ width: 6, height: 6, background: '#22C55E' }}
-                          />
-                          <span
-                            className="shrink-0 font-sans font-semibold"
-                            style={{ fontSize: 14, color: '#22C55E' }}
-                          >
-                            Online
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCall}
-                    aria-label={`Call ${activeConversation.staffName}`}
-                    className={`flex size-11 shrink-0 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                  >
-                    <Phone style={{ width: 20, height: 20, color: '#4A7080' }} />
-                  </button>
-                  <div className="relative shrink-0">
-                    <button
-                      ref={chatMenuButtonRef}
-                      type="button"
-                      onClick={() => setChatMenuOpen((v) => !v)}
-                      aria-expanded={chatMenuOpen}
-                      aria-label="More conversation actions"
-                      className={`flex size-11 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                    >
-                      <MoreVertical style={{ width: 20, height: 20, color: '#4A7080' }} />
-                    </button>
-                    <RowMenuPortal
-                      open={chatMenuOpen}
-                      anchorRef={chatMenuButtonRef}
-                      onClose={() => setChatMenuOpen(false)}
-                      width={224}
-                    >
-                      <button
-                        type="button"
-                        onClick={toggleMute}
-                        className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                        style={{ fontSize: 14, color: '#2F3A40' }}
-                      >
-                        {mutedIds.has(activeConversation.id)
-                          ? 'Unmute conversation'
-                          : 'Mute conversation'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={markAsUnread}
-                        className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                        style={{ fontSize: 14, color: '#2F3A40' }}
-                      >
-                        Mark as unread
-                      </button>
-                      <div className="my-1 h-px" style={{ background: 'rgba(0,100,130,0.08)' }} />
-                      <button
-                        type="button"
-                        onClick={openPatientPicker}
-                        className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                        style={{ fontSize: 14, color: '#2F3A40' }}
-                      >
-                        {activeConversation.patientContext
-                          ? 'Change patient context'
-                          : 'Add patient context'}
-                      </button>
-                      {activeConversation.patientContext && (
-                        <button
-                          type="button"
-                          onClick={removePatientContext}
-                          className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] ${FOCUS_RING}`}
-                          style={{ fontSize: 14, color: '#EF4444' }}
-                        >
-                          Remove patient context
-                        </button>
-                      )}
-                    </RowMenuPortal>
-                  </div>
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search staff or departments…"
+                    className={`h-[42px] w-full rounded-[12px] pr-4 pl-9 font-sans outline-none placeholder:text-[#8A98A3] ${FOCUS_RING}`}
+                    style={{
+                      background: '#F5FBFD',
+                      border: '1px solid #0064821F',
+                      color: '#2F3A40',
+                      fontSize: 14,
+                      lineHeight: '22px',
+                    }}
+                  />
                 </div>
+              </div>
 
-                {/* Patient context strip — click to change the linked patient */}
-                {activeConversation.patientContext && (
-                  <button
-                    type="button"
-                    onClick={openPatientPicker}
-                    className={`group flex shrink-0 items-center gap-2 px-4 py-2 text-left transition-colors duration-150 hover:bg-[#F0FBFE] sm:px-5 ${FOCUS_RING}`}
-                    style={{ background: '#FAFAFA', borderBottom: '1px solid #0064821F' }}
-                  >
-                    <Stethoscope
-                      style={{ width: 15, height: 15, color: '#00B4D8', flexShrink: 0 }}
-                    />
-                    <Tooltip
-                      content={`Patient context: ${activeConversation.patientContext.name} · ${' '} ${activeConversation.patientContext.mrn}`}
-                    >
-                      <p
-                        className="min-w-0 flex-1 truncate font-sans"
-                        style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
-                      >
-                        Patient context: {activeConversation.patientContext.name} ·{' '}
-                        {activeConversation.patientContext.mrn}
-                      </p>
-                    </Tooltip>
-                    <ChevronDown
-                      className="shrink-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-                      style={{ width: 14, height: 14, color: '#00B4D8' }}
-                    />
-                  </button>
-                )}
-                {!activeConversation.patientContext && (
-                  <button
-                    type="button"
-                    onClick={openPatientPicker}
-                    className={`flex shrink-0 items-center gap-2 px-4 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] sm:px-5 ${FOCUS_RING}`}
-                    style={{ background: '#FAFAFA', borderBottom: '1px solid #0064821F' }}
-                  >
-                    <Stethoscope
-                      style={{ width: 15, height: 15, color: '#8A98A3', flexShrink: 0 }}
-                    />
+              {/* List */}
+              <div className="flex-1 overflow-y-auto scroll-smooth">
+                {pageState === 'loading' &&
+                  Array.from({ length: 5 }).map((_, i) => <SkeletonConversationRow key={i} />)}
+
+                {pageState === 'error' && (
+                  <div className="flex flex-col items-center justify-center gap-3 px-4 py-14 text-center">
+                    <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
                     <p
-                      className="font-sans"
-                      style={{ fontSize: 14, lineHeight: '22px', color: '#8A98A3' }}
+                      className="font-sans font-semibold"
+                      style={{ fontSize: 16, color: '#0D2630' }}
                     >
-                      + Add patient context
+                      Failed to load conversations
                     </p>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={handleRetry}
+                      className={`flex items-center gap-2 font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
+                      style={{
+                        height: 40,
+                        borderRadius: 12,
+                        padding: '0 20px',
+                        background: '#00B4D8',
+                        fontSize: 14,
+                      }}
+                    >
+                      <RefreshCw style={{ width: 16, height: 16 }} />
+                      Retry
+                    </button>
+                  </div>
                 )}
 
-                {/* Message thread */}
-                <div className="flex-1 overflow-y-auto scroll-smooth px-4 py-4 sm:px-5">
-                  {activeConversation.messages.length === 0 && !isOtherTyping && (
-                    <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-                      <div
-                        className="flex size-14 items-center justify-center rounded-full"
-                        style={{ background: 'rgba(226,237,241,0.6)' }}
-                      >
-                        <Send style={{ width: 22, height: 22, color: '#8A98A3' }} />
-                      </div>
+                {pageState === 'loaded' && filteredConversations.length === 0 && (
+                  <div className="flex flex-col items-center justify-center gap-3 px-4 py-14 text-center">
+                    <div
+                      className="flex size-14 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(226,237,241,0.6)' }}
+                    >
+                      <Search style={{ width: 22, height: 22, color: '#8A98A3' }} />
+                    </div>
+                    <div>
                       <p
                         className="font-sans font-medium"
                         style={{ fontSize: 16, color: '#4A7080' }}
                       >
-                        No messages yet
+                        No conversations found
                       </p>
-                      <p className="font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
-                        Say hello to {activeConversation.staffName}
+                      <p className="mt-0.5 font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
+                        Try a different name or department
                       </p>
                     </div>
-                  )}
-
-                  {messageGroups.map((group) => (
-                    <div key={group.dayLabel} className="mb-4">
-                      <div className="mb-4 flex items-center gap-3">
-                        <div
-                          className="h-px flex-1"
-                          style={{ background: 'rgba(0,100,130,0.12)' }}
-                        />
-                        <span
-                          className="shrink-0 font-sans font-medium"
-                          style={{ fontSize: 14, lineHeight: '18px', color: '#4A7080' }}
-                        >
-                          {group.dayLabel}
-                        </span>
-                        <div
-                          className="h-px flex-1"
-                          style={{ background: 'rgba(0,100,130,0.12)' }}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-4">
-                        {group.messages.map((msg) => (
-                          <div
-                            key={msg.id}
-                            className={`flex ${msg.sender === 'me' ? 'justify-end' : 'items-end gap-2'}`}
-                          >
-                            {msg.sender === 'them' && (
-                              <Avatar
-                                initials={activeConversation.initials}
-                                bg={activeConversation.avatarBg}
-                                size={32}
-                              />
-                            )}
-                            <div
-                              className="flex flex-col"
-                              style={{
-                                alignItems: msg.sender === 'me' ? 'flex-end' : 'flex-start',
-                              }}
-                            >
-                              {msg.sender === 'them' && (
-                                <p
-                                  className="mb-1 font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#25464D' }}
-                                >
-                                  {activeConversation.staffName}
-                                </p>
-                              )}
-                              <div
-                                className="font-sans whitespace-pre-line"
-                                style={{
-                                  maxWidth: 420,
-                                  padding: '10px 16px',
-                                  fontSize: 14,
-                                  lineHeight: '22px',
-                                  color: msg.sender === 'me' ? '#FFFFFF' : '#0D2630',
-                                  background: msg.sender === 'me' ? '#00B4D8' : '#FFFFFF',
-                                  boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.10)',
-                                  borderTopLeftRadius: 16,
-                                  borderTopRightRadius: 16,
-                                  borderBottomRightRadius: msg.sender === 'me' ? 4 : 16,
-                                  borderBottomLeftRadius: msg.sender === 'me' ? 16 : 4,
-                                }}
-                              >
-                                {msg.text}
-                              </div>
-                              <p
-                                className="mt-1 font-sans"
-                                style={{ fontSize: 14, lineHeight: '18px', color: '#4A7080' }}
-                              >
-                                {formatTime(msg.sentAt)}
-                                {msg.sender === 'me' ? ' · Sent' : ''}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Typing indicator — roaming brand-gradient border while active */}
-                  {isOtherTyping && (
-                    <div className="mt-2 flex items-end gap-2">
-                      <Avatar
-                        initials={activeConversation.initials}
-                        bg={activeConversation.avatarBg}
-                        size={32}
-                      />
-                      <div
-                        className="typing-gradient-border"
-                        style={{ padding: 1.5, borderRadius: '4px 16px 16px 16px' }}
+                    {hasActiveSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setSearch('')}
+                        className={`mt-1 font-sans font-semibold transition-opacity duration-150 hover:opacity-80 ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#00B4D8' }}
                       >
-                        <div
-                          className="relative z-[1] flex items-center gap-1.5 px-4 py-3"
-                          style={{ borderRadius: 'inherit' }}
-                        >
-                          {[0, 0.22, 0.44].map((delay, i) => (
-                            <span
-                              key={i}
-                              className="cs-dot rounded-full"
-                              style={{
-                                width: 6,
-                                height: 6,
-                                background: '#4A7080',
-                                animationDelay: `${delay}s`,
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div ref={messagesEndRef} />
-                </div>
-
-                {/* Attached file chip */}
-                {attachedFileName && (
-                  <div
-                    className="mx-4 mb-2 flex items-center gap-2 rounded-[10px] px-3 py-2 sm:mx-5"
-                    style={{ background: '#E6F8FD', border: '1px solid rgba(0,180,216,0.3)' }}
-                  >
-                    <Paperclip style={{ width: 14, height: 14, color: '#00B4D8', flexShrink: 0 }} />
-                    <Tooltip content={attachedFileName}>
-                      <span
-                        className="min-w-0 flex-1 truncate font-sans"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        {attachedFileName}
-                      </span>
-                    </Tooltip>
-                    <button
-                      type="button"
-                      onClick={() => setAttachedFileName(null)}
-                      aria-label="Remove attachment"
-                      className={`relative flex size-6 shrink-0 items-center justify-center rounded-full transition-colors duration-150 before:absolute before:-inset-2.5 before:content-[''] hover:bg-white ${FOCUS_RING}`}
-                    >
-                      <X style={{ width: 14, height: 14, color: '#4A7080' }} />
-                    </button>
+                        Clear search
+                      </button>
+                    )}
                   </div>
                 )}
 
-                {/* Input row — icons and composer stack on mobile so the
-                    textarea/send pair gets its own full-width breathing
-                    room; sm+ keeps them inline as a single row. */}
-                <div
-                  className="flex shrink-0 flex-col gap-2 px-4 py-3 sm:flex-row sm:items-end sm:px-5"
-                  style={{ borderTop: '1px solid #0064821F' }}
-                >
-                  <div className="flex shrink-0 items-center gap-1 sm:pb-1">
-                    <div className="relative">
+                {pageState === 'loaded' &&
+                  filteredConversations.map((c) => {
+                    const isActive = c.id === activeId;
+                    const isUnread = c.unreadCount > 0;
+                    return (
                       <button
-                        ref={templateMenuButtonRef}
+                        key={c.id}
                         type="button"
-                        onClick={() => setTemplateMenuOpen((v) => !v)}
-                        aria-expanded={templateMenuOpen}
-                        aria-label="Insert message template"
-                        className={`flex size-11 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                        onClick={() => selectConversation(c.id)}
+                        className={`flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors duration-150 sm:px-5 ${FOCUS_RING}`}
+                        style={{
+                          background: isActive ? '#E6F8FD' : 'transparent',
+                          borderLeft: isActive ? '3px solid #00B4D8' : '3px solid transparent',
+                          borderBottom: '1px solid rgba(0,100,130,0.08)',
+                        }}
                       >
-                        <FileText style={{ width: 18, height: 18, color: '#4A7080' }} />
+                        <Avatar initials={c.initials} bg={c.avatarBg} online={c.online} />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <Tooltip content={c.staffName}>
+                              <span
+                                className="truncate font-sans font-semibold"
+                                style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                              >
+                                {c.staffName}
+                              </span>
+                            </Tooltip>
+                            <span
+                              className="shrink-0 font-sans"
+                              style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
+                            >
+                              {formatTime(c.lastMessageAt)}
+                            </span>
+                          </div>
+                          <Tooltip content={c.department}>
+                            <p
+                              className="truncate font-sans"
+                              style={{ fontSize: 14, lineHeight: '20px', color: '#4A7080' }}
+                            >
+                              {c.department}
+                            </p>
+                          </Tooltip>
+                          <div className="mt-0.5 flex items-center justify-between gap-2">
+                            <Tooltip content={c.lastMessagePreview}>
+                              <p
+                                className="truncate font-sans"
+                                style={{
+                                  fontSize: 14,
+                                  lineHeight: '22px',
+                                  color: isUnread ? '#25464D' : '#4A7080',
+                                  fontWeight: isUnread ? 500 : 400,
+                                }}
+                              >
+                                {c.lastMessagePreview}
+                              </p>
+                            </Tooltip>
+                            {isUnread && (
+                              <span
+                                className="flex shrink-0 items-center justify-center rounded-full font-sans font-semibold text-white"
+                                style={{
+                                  width: 22,
+                                  height: 22,
+                                  background: '#00B4D8',
+                                  fontSize: 14,
+                                }}
+                              >
+                                {c.unreadCount}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </button>
-                      <RowMenuPortal
-                        open={templateMenuOpen}
-                        anchorRef={templateMenuButtonRef}
-                        onClose={() => setTemplateMenuOpen(false)}
-                        width={288}
-                        align="left"
-                      >
-                        {MESSAGE_TEMPLATES.map((tpl) => (
-                          <button
-                            key={tpl}
-                            type="button"
-                            onClick={() => insertTemplate(tpl)}
-                            className={`block w-full px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                            style={{ fontSize: 14, color: '#2F3A40' }}
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* ══ CHAT PANE ═══════════════════════════════════════════════════ */}
+            <div
+              className={`flex min-w-0 flex-1 flex-col overflow-hidden ${
+                showChatOnMobile ? 'flex' : 'hidden lg:flex'
+              }`}
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid rgba(0,180,216,0.28)',
+                borderRadius: 12,
+              }}
+            >
+              {pageState !== 'loaded' ? (
+                <div className="flex flex-1 flex-col">
+                  <div
+                    className="flex shrink-0 items-center gap-3 px-4 py-3 sm:px-5"
+                    style={{ borderBottom: '1px solid #0064821F' }}
+                  >
+                    <div className="size-10 shrink-0 animate-pulse rounded-full bg-slate-100" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-40 animate-pulse rounded bg-slate-100" />
+                      <div className="h-3.5 w-24 animate-pulse rounded bg-slate-100" />
+                    </div>
+                  </div>
+                  <div className="flex flex-1 flex-col justify-end gap-3 p-5">
+                    <SkeletonBubble align="left" />
+                    <SkeletonBubble align="right" />
+                    <SkeletonBubble align="left" />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Chat header */}
+                  <div
+                    className="flex shrink-0 items-center gap-3 px-4 py-3 sm:px-5"
+                    style={{ borderBottom: '1px solid #0064821F' }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setShowChatOnMobile(false)}
+                      aria-label="Back to Messages"
+                      className={`flex size-11 shrink-0 items-center justify-center lg:hidden ${FOCUS_RING}`}
+                    >
+                      <ChevronLeft style={{ width: 20, height: 20, color: '#4A7080' }} />
+                    </button>
+                    <Avatar
+                      initials={activeConversation.initials}
+                      bg={activeConversation.avatarBg}
+                      online={activeConversation.online}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <Tooltip content={activeConversation.staffName}>
+                        <p
+                          className="truncate font-sans font-semibold"
+                          style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                        >
+                          {activeConversation.staffName}
+                        </p>
+                      </Tooltip>
+                      <div className="flex items-center gap-1.5">
+                        <Tooltip content={activeConversation.department}>
+                          <span
+                            className="truncate font-sans"
+                            style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}
                           >
-                            {tpl}
-                          </button>
-                        ))}
-                      </RowMenuPortal>
+                            {activeConversation.department}
+                          </span>
+                        </Tooltip>
+                        {activeConversation.online && (
+                          <>
+                            <span
+                              className="shrink-0 rounded-full"
+                              style={{ width: 6, height: 6, background: '#22C55E' }}
+                            />
+                            <span
+                              className="shrink-0 font-sans font-semibold"
+                              style={{ fontSize: 14, color: '#22C55E' }}
+                            >
+                              Online
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
                     <button
                       type="button"
-                      onClick={insertPatientContext}
-                      aria-label="Insert patient context"
-                      className={`flex size-11 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                      onClick={handleCall}
+                      aria-label={`Call ${activeConversation.staffName}`}
+                      className={`flex size-11 shrink-0 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
                     >
-                      <Stethoscope style={{ width: 18, height: 18, color: '#4A7080' }} />
+                      <Phone style={{ width: 20, height: 20, color: '#4A7080' }} />
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleAttachClick}
-                      aria-label="Attach a file"
-                      className={`flex size-11 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                    >
-                      <Paperclip style={{ width: 18, height: 18, color: '#4A7080' }} />
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileSelected}
-                    />
+                    <div className="relative shrink-0">
+                      <button
+                        ref={chatMenuButtonRef}
+                        type="button"
+                        onClick={() => setChatMenuOpen((v) => !v)}
+                        aria-expanded={chatMenuOpen}
+                        aria-label="More conversation actions"
+                        className={`flex size-11 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                      >
+                        <MoreVertical style={{ width: 20, height: 20, color: '#4A7080' }} />
+                      </button>
+                      <RowMenuPortal
+                        open={chatMenuOpen}
+                        anchorRef={chatMenuButtonRef}
+                        onClose={() => setChatMenuOpen(false)}
+                        width={224}
+                      >
+                        <button
+                          type="button"
+                          onClick={toggleMute}
+                          className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                          style={{ fontSize: 14, color: '#2F3A40' }}
+                        >
+                          {mutedIds.has(activeConversation.id)
+                            ? 'Unmute conversation'
+                            : 'Mute conversation'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={markAsUnread}
+                          className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                          style={{ fontSize: 14, color: '#2F3A40' }}
+                        >
+                          Mark as unread
+                        </button>
+                        <div className="my-1 h-px" style={{ background: 'rgba(0,100,130,0.08)' }} />
+                        <button
+                          type="button"
+                          onClick={openPatientPicker}
+                          className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                          style={{ fontSize: 14, color: '#2F3A40' }}
+                        >
+                          {activeConversation.patientContext
+                            ? 'Change patient context'
+                            : 'Add patient context'}
+                        </button>
+                        {activeConversation.patientContext && (
+                          <button
+                            type="button"
+                            onClick={removePatientContext}
+                            className={`flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] ${FOCUS_RING}`}
+                            style={{ fontSize: 14, color: '#EF4444' }}
+                          >
+                            Remove patient context
+                          </button>
+                        )}
+                      </RowMenuPortal>
+                    </div>
                   </div>
 
-                  <div className="flex min-w-0 flex-1 items-end gap-2">
-                    <textarea
-                      ref={textareaRef}
-                      value={draft}
-                      onChange={handleDraftChange}
-                      onKeyDown={handleDraftKeyDown}
-                      rows={1}
-                      placeholder={`Message ${activeConversation.staffName}…`}
-                      className={`min-w-0 flex-1 resize-none rounded-[12px] px-3.5 py-2.5 font-sans outline-none placeholder:text-[#8A98A3] ${FOCUS_RING}`}
-                      style={{
-                        background: '#E6F8FD',
-                        color: '#0D2630',
-                        fontSize: 14,
-                        lineHeight: '22px',
-                        minHeight: 42,
-                        maxHeight: 120,
-                      }}
-                    />
-
+                  {/* Patient context strip — click to change the linked patient */}
+                  {activeConversation.patientContext && (
                     <button
                       type="button"
-                      onClick={handleSend}
-                      disabled={!draft.trim() && !attachedFileName}
-                      aria-label="Send message"
-                      className={`flex size-10 shrink-0 items-center justify-center rounded-[10px] transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
-                      style={{ background: '#00B4D8' }}
+                      onClick={openPatientPicker}
+                      className={`group flex shrink-0 items-center gap-2 px-4 py-2 text-left transition-colors duration-150 hover:bg-[#F0FBFE] sm:px-5 ${FOCUS_RING}`}
+                      style={{ background: '#FAFAFA', borderBottom: '1px solid #0064821F' }}
                     >
-                      <Send style={{ width: 18, height: 18, color: '#FFFFFF' }} />
+                      <Stethoscope
+                        style={{ width: 15, height: 15, color: '#00B4D8', flexShrink: 0 }}
+                      />
+                      <Tooltip
+                        content={`Patient context: ${activeConversation.patientContext.name} · ${' '} ${activeConversation.patientContext.mrn}`}
+                      >
+                        <p
+                          className="min-w-0 flex-1 truncate font-sans"
+                          style={{ fontSize: 14, lineHeight: '22px', color: '#00B4D8' }}
+                        >
+                          Patient context: {activeConversation.patientContext.name} ·{' '}
+                          {activeConversation.patientContext.mrn}
+                        </p>
+                      </Tooltip>
+                      <ChevronDown
+                        className="shrink-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                        style={{ width: 14, height: 14, color: '#00B4D8' }}
+                      />
                     </button>
-                  </div>
-                </div>
+                  )}
+                  {!activeConversation.patientContext && (
+                    <button
+                      type="button"
+                      onClick={openPatientPicker}
+                      className={`flex shrink-0 items-center gap-2 px-4 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] sm:px-5 ${FOCUS_RING}`}
+                      style={{ background: '#FAFAFA', borderBottom: '1px solid #0064821F' }}
+                    >
+                      <Stethoscope
+                        style={{ width: 15, height: 15, color: '#8A98A3', flexShrink: 0 }}
+                      />
+                      <p
+                        className="font-sans"
+                        style={{ fontSize: 14, lineHeight: '22px', color: '#8A98A3' }}
+                      >
+                        + Add patient context
+                      </p>
+                    </button>
+                  )}
 
-                {/* Keyboard hint — its own line so it wraps cleanly instead
+                  {/* Message thread */}
+                  <div className="flex-1 overflow-y-auto scroll-smooth px-4 py-4 sm:px-5">
+                    {activeConversation.messages.length === 0 && !isOtherTyping && (
+                      <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
+                        <div
+                          className="flex size-14 items-center justify-center rounded-full"
+                          style={{ background: 'rgba(226,237,241,0.6)' }}
+                        >
+                          <Send style={{ width: 22, height: 22, color: '#8A98A3' }} />
+                        </div>
+                        <p
+                          className="font-sans font-medium"
+                          style={{ fontSize: 16, color: '#4A7080' }}
+                        >
+                          No messages yet
+                        </p>
+                        <p className="font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
+                          Say hello to {activeConversation.staffName}
+                        </p>
+                      </div>
+                    )}
+
+                    {messageGroups.map((group) => (
+                      <div key={group.dayLabel} className="mb-4">
+                        <div className="mb-4 flex items-center gap-3">
+                          <div
+                            className="h-px flex-1"
+                            style={{ background: 'rgba(0,100,130,0.12)' }}
+                          />
+                          <span
+                            className="shrink-0 font-sans font-medium"
+                            style={{ fontSize: 14, lineHeight: '18px', color: '#4A7080' }}
+                          >
+                            {group.dayLabel}
+                          </span>
+                          <div
+                            className="h-px flex-1"
+                            style={{ background: 'rgba(0,100,130,0.12)' }}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-4">
+                          {group.messages.map((msg) => (
+                            <div
+                              key={msg.id}
+                              className={`flex ${msg.sender === 'me' ? 'justify-end' : 'items-end gap-2'}`}
+                            >
+                              {msg.sender === 'them' && (
+                                <Avatar
+                                  initials={activeConversation.initials}
+                                  bg={activeConversation.avatarBg}
+                                  size={32}
+                                />
+                              )}
+                              <div
+                                className="flex flex-col"
+                                style={{
+                                  alignItems: msg.sender === 'me' ? 'flex-end' : 'flex-start',
+                                }}
+                              >
+                                {msg.sender === 'them' && (
+                                  <p
+                                    className="mb-1 font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#25464D' }}
+                                  >
+                                    {activeConversation.staffName}
+                                  </p>
+                                )}
+                                <div
+                                  className="font-sans whitespace-pre-line"
+                                  style={{
+                                    maxWidth: 420,
+                                    padding: '10px 16px',
+                                    fontSize: 14,
+                                    lineHeight: '22px',
+                                    color: msg.sender === 'me' ? '#FFFFFF' : '#0D2630',
+                                    background: msg.sender === 'me' ? '#00B4D8' : '#FFFFFF',
+                                    boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.10)',
+                                    borderTopLeftRadius: 16,
+                                    borderTopRightRadius: 16,
+                                    borderBottomRightRadius: msg.sender === 'me' ? 4 : 16,
+                                    borderBottomLeftRadius: msg.sender === 'me' ? 16 : 4,
+                                  }}
+                                >
+                                  {msg.text}
+                                </div>
+                                <p
+                                  className="mt-1 font-sans"
+                                  style={{ fontSize: 14, lineHeight: '18px', color: '#4A7080' }}
+                                >
+                                  {formatTime(msg.sentAt)}
+                                  {msg.sender === 'me' ? ' · Sent' : ''}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Typing indicator — roaming brand-gradient border while active */}
+                    {isOtherTyping && (
+                      <div className="mt-2 flex items-end gap-2">
+                        <Avatar
+                          initials={activeConversation.initials}
+                          bg={activeConversation.avatarBg}
+                          size={32}
+                        />
+                        <div
+                          className="typing-gradient-border"
+                          style={{ padding: 1.5, borderRadius: '4px 16px 16px 16px' }}
+                        >
+                          <div
+                            className="relative z-[1] flex items-center gap-1.5 px-4 py-3"
+                            style={{ borderRadius: 'inherit' }}
+                          >
+                            {[0, 0.22, 0.44].map((delay, i) => (
+                              <span
+                                key={i}
+                                className="cs-dot rounded-full"
+                                style={{
+                                  width: 6,
+                                  height: 6,
+                                  background: '#4A7080',
+                                  animationDelay: `${delay}s`,
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div ref={messagesEndRef} />
+                  </div>
+
+                  {/* Attached file chip */}
+                  {attachedFileName && (
+                    <div
+                      className="mx-4 mb-2 flex items-center gap-2 rounded-[10px] px-3 py-2 sm:mx-5"
+                      style={{ background: '#E6F8FD', border: '1px solid rgba(0,180,216,0.3)' }}
+                    >
+                      <Paperclip
+                        style={{ width: 14, height: 14, color: '#00B4D8', flexShrink: 0 }}
+                      />
+                      <Tooltip content={attachedFileName}>
+                        <span
+                          className="min-w-0 flex-1 truncate font-sans"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {attachedFileName}
+                        </span>
+                      </Tooltip>
+                      <button
+                        type="button"
+                        onClick={() => setAttachedFileName(null)}
+                        aria-label="Remove attachment"
+                        className={`relative flex size-6 shrink-0 items-center justify-center rounded-full transition-colors duration-150 before:absolute before:-inset-2.5 before:content-[''] hover:bg-white ${FOCUS_RING}`}
+                      >
+                        <X style={{ width: 14, height: 14, color: '#4A7080' }} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Input row — icons and composer stack on mobile so the
+                    textarea/send pair gets its own full-width breathing
+                    room; sm+ keeps them inline as a single row. */}
+                  <div
+                    className="flex shrink-0 flex-col gap-2 px-4 py-3 sm:flex-row sm:items-end sm:px-5"
+                    style={{ borderTop: '1px solid #0064821F' }}
+                  >
+                    <div className="flex shrink-0 items-center gap-1 sm:pb-1">
+                      <div className="relative">
+                        <button
+                          ref={templateMenuButtonRef}
+                          type="button"
+                          onClick={() => setTemplateMenuOpen((v) => !v)}
+                          aria-expanded={templateMenuOpen}
+                          aria-label="Insert message template"
+                          className={`flex size-11 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                        >
+                          <FileText style={{ width: 18, height: 18, color: '#4A7080' }} />
+                        </button>
+                        <RowMenuPortal
+                          open={templateMenuOpen}
+                          anchorRef={templateMenuButtonRef}
+                          onClose={() => setTemplateMenuOpen(false)}
+                          width={288}
+                          align="left"
+                        >
+                          {MESSAGE_TEMPLATES.map((tpl) => (
+                            <button
+                              key={tpl}
+                              type="button"
+                              onClick={() => insertTemplate(tpl)}
+                              className={`block w-full px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                              style={{ fontSize: 14, color: '#2F3A40' }}
+                            >
+                              {tpl}
+                            </button>
+                          ))}
+                        </RowMenuPortal>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={insertPatientContext}
+                        aria-label="Insert patient context"
+                        className={`flex size-11 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                      >
+                        <Stethoscope style={{ width: 18, height: 18, color: '#4A7080' }} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAttachClick}
+                        aria-label="Attach a file"
+                        className={`flex size-11 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                      >
+                        <Paperclip style={{ width: 18, height: 18, color: '#4A7080' }} />
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        className="hidden"
+                        onChange={handleFileSelected}
+                      />
+                    </div>
+
+                    <div className="flex min-w-0 flex-1 items-end gap-2">
+                      <textarea
+                        ref={textareaRef}
+                        value={draft}
+                        onChange={handleDraftChange}
+                        onKeyDown={handleDraftKeyDown}
+                        rows={1}
+                        placeholder={`Message ${activeConversation.staffName}…`}
+                        className={`min-w-0 flex-1 resize-none rounded-[12px] px-3.5 py-2.5 font-sans outline-none placeholder:text-[#8A98A3] ${FOCUS_RING}`}
+                        style={{
+                          background: '#E6F8FD',
+                          color: '#0D2630',
+                          fontSize: 14,
+                          lineHeight: '22px',
+                          minHeight: 42,
+                          maxHeight: 120,
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={handleSend}
+                        disabled={!draft.trim() && !attachedFileName}
+                        aria-label="Send message"
+                        className={`flex size-10 shrink-0 items-center justify-center rounded-[10px] transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
+                        style={{ background: '#00B4D8' }}
+                      >
+                        <Send style={{ width: 18, height: 18, color: '#FFFFFF' }} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Keyboard hint — its own line so it wraps cleanly instead
                     of clipping inside the placeholder at narrow widths. */}
-                <p
-                  className="shrink-0 px-4 pb-2 font-sans sm:px-5"
-                  style={{ fontSize: 14, lineHeight: '18px', color: '#8A98A3' }}
-                >
-                  Enter to send · Shift+Enter for new line
-                </p>
+                  <p
+                    className="shrink-0 px-4 pb-2 font-sans sm:px-5"
+                    style={{ fontSize: 14, lineHeight: '18px', color: '#8A98A3' }}
+                  >
+                    Enter to send · Shift+Enter for new line
+                  </p>
 
-                {/* Governance footer */}
-                <p
-                  className="shrink-0 pb-3 text-center font-sans"
-                  style={{ fontSize: 14, color: '#8A98A3' }}
-                >
-                  🔒 Secure staff messaging · All messages are audit-logged per MYHxCare governance
-                  policy
-                </p>
-              </>
-            )}
+                  {/* Governance footer */}
+                  <p
+                    className="shrink-0 pb-3 text-center font-sans"
+                    style={{ fontSize: 14, color: '#8A98A3' }}
+                  >
+                    🔒 Secure staff messaging · All messages are audit-logged per MYHxCare
+                    governance policy
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </main>
