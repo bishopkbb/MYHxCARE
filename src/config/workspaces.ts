@@ -29,7 +29,6 @@ import {
   Package,
   PieChart,
   Pill,
-  Printer,
   Receipt,
   Repeat,
   Settings,
@@ -574,7 +573,6 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         label: 'OPERATIONS',
         items: [
           { label: 'Dispensing Audit Trail', href: '/pharmacy/audit-trail', icon: FileCheck2 },
-          { label: 'Label Printing', href: '/pharmacy/label-printing', icon: Printer },
           { label: 'Medication Returns', href: '/pharmacy/medication-returns', icon: Undo2 },
           { label: 'Pharmacy Queue Monitor', href: '/pharmacy/queue-monitor', icon: Activity },
         ],

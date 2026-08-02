@@ -63,7 +63,6 @@ export const ROUTES = {
   pharmacyAdr: '/pharmacy/adr',
   // Operations
   pharmacyAuditTrail: '/pharmacy/audit-trail',
-  pharmacyLabelPrinting: '/pharmacy/label-printing',
   pharmacyMedicationReturns: '/pharmacy/medication-returns',
   pharmacyQueueMonitor: '/pharmacy/queue-monitor',
   // Schedule & Workforce
