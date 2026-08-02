@@ -17,14 +17,18 @@ import {
   Mail,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
+import { useAuth } from '@hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
+import { WORKSPACE_NAV } from '@/config/workspaces';
+import { resolveWorkspace } from '@/types/auth.types';
 import {
   CATEGORY_CFG,
   DEPARTMENT_OPTIONS,
@@ -64,7 +68,14 @@ function relativeTime(iso: string): string {
 }
 
 export function AnnouncementsWorkspace() {
+  const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
+  // Same shared page for every workspace — the breadcrumb/back-link adapts
+  // to whichever workspace the logged-in user belongs to (mirrors the same
+  // resolveWorkspace()-driven pattern already used by Messages/Notifications).
+  const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
+  const { workspaceLabel, homeRoute } = WORKSPACE_NAV[workspaceId];
   const announcements = useAnnouncements();
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [department, setDepartment] = useState('');
@@ -153,7 +164,24 @@ export function AnnouncementsWorkspace() {
     <div className="flex flex-1 flex-col overflow-hidden">
       <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
         <div className="mx-auto max-w-[1512px] px-4 py-4 sm:px-6 sm:py-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+          {/* ── Breadcrumb — routes back to whichever workspace dashboard the
+              logged-in user belongs to ─────────────────────────────────── */}
+          <div className="flex flex-wrap items-center gap-1.5" style={{ fontSize: 14 }}>
+            <button
+              type="button"
+              onClick={() => router.push(homeRoute)}
+              className={`font-sans transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+              style={{ color: '#4A7080' }}
+            >
+              {workspaceLabel}
+            </button>
+            <span style={{ color: '#8A98A3' }}>/</span>
+            <span className="font-sans font-medium" style={{ color: '#0D2630' }}>
+              Announcements
+            </span>
+          </div>
+
+          <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1
                 className="font-display font-semibold"
