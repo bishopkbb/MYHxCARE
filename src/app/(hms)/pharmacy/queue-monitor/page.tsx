@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Pharmacy Queue Monitor' };
+import { PharmacyQueueMonitorWorkspace } from '@/features/pharmacy/components/PharmacyQueueMonitorWorkspace';
 
 export default function PharmacyQueueMonitorPage() {
-  return (
-    <ComingSoon
-      title="Pharmacy Queue Monitor"
-      description="A live, large-display view of the dispensing queue for the pharmacy counter is on the way."
-    />
-  );
+  return <PharmacyQueueMonitorWorkspace />;
 }

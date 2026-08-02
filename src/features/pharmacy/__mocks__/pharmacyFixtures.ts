@@ -367,13 +367,18 @@ const CURATED_PENDING: PharmacyQueueEntry[] = [
   buildQueueEntry('dp-006', 6.35, 'Pending Verification', { priority: 'High' }),
 ];
 
-const GENERATED_PENDING: PharmacyQueueEntry[] = Array.from({ length: 27 }, (_, i) =>
-  buildQueueEntry(
+const GENERATED_PENDING: PharmacyQueueEntry[] = Array.from({ length: 27 }, (_, i) => {
+  const entry = buildQueueEntry(
     `dp-${String((i % 60) + 7).padStart(3, '0')}`,
     1 + (i % 8),
     'Pending Verification',
-  ),
-);
+  );
+  // One held before verification even starts — e.g. an allergy flag the
+  // pharmacist wants the prescriber to confirm first. Gives Queue Monitor's
+  // On Hold bucket cross-stage variety, not just Ready for Pickup holds.
+  if (i === 4) entry.isOnHold = true;
+  return entry;
+});
 
 const GENERATED_READY_FOR_PICKUP: PharmacyQueueEntry[] = Array.from({ length: 21 }, (_, i) => {
   const entry = buildQueueEntry(
@@ -391,9 +396,15 @@ const GENERATED_READY_FOR_PICKUP: PharmacyQueueEntry[] = Array.from({ length: 21
 
 // A pharmacist has opened these and started verification but not finished —
 // mid-pipeline, ahead of the Pending Verification queue.
-const GENERATED_IN_PROGRESS: PharmacyQueueEntry[] = Array.from({ length: 8 }, (_, i) =>
-  buildQueueEntry(`dp-${String((i % 60) + 100).padStart(3, '0')}`, 0.5 + i * 0.3, 'In Progress'),
-);
+const GENERATED_IN_PROGRESS: PharmacyQueueEntry[] = Array.from({ length: 8 }, (_, i) => {
+  const entry = buildQueueEntry(
+    `dp-${String((i % 60) + 100).padStart(3, '0')}`,
+    0.5 + i * 0.3,
+    'In Progress',
+  );
+  if (i === 1) entry.isOnHold = true;
+  return entry;
+});
 
 // Verified and cleared — waiting on the pharmacist to physically dispense
 // (the step before a prescription becomes Ready for Pickup).

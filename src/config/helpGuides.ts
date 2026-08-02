@@ -1226,6 +1226,30 @@ const MEDICATION_RETURNS_GUIDE: HelpGuide = {
   ],
 };
 
+const PHARMACY_QUEUE_MONITOR_GUIDE: HelpGuide = {
+  id: 'pharmacy-queue-monitor',
+  title: 'Pharmacy Queue Monitor',
+  intro: 'Monitor all pharmacy queues in real-time and manage patient flow efficiently.',
+  sections: [
+    {
+      heading: 'One live queue, four views',
+      body: 'This is the same live dispensing queue Prescription Queue and Medication Pickup Queue read from — Prescription Waiting, Dispensing, Ready for Pickup, and On Hold are just different ways of looking at it, not separate data.',
+    },
+    {
+      heading: 'Stat cards and tabs',
+      body: 'Prescription Waiting, Dispensing, Ready for Pickup, and On Hold are clickable — each scopes the table to that queue. On Hold is a cross-cutting flag, so a held entry shows there instead of its underlying stage.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'Move to Next Queue advances an entry one stage. Mark as Ready for Pickup jumps straight to ready and logs a real dispense — it shows up in Dispensing Audit Trail too. Put On Hold / Release Hold works at any stage.',
+    },
+    {
+      heading: 'Queue Overview and Average Wait Time',
+      body: "The donut chart breaks the live queue down by type. Average Wait Time by Queue is computed from each entry's own joined or dispensed time, not a static estimate.",
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2557,6 +2581,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/adr')) return ADR_GUIDE;
   if (pathname.startsWith('/pharmacy/audit-trail')) return DISPENSING_AUDIT_TRAIL_GUIDE;
   if (pathname.startsWith('/pharmacy/medication-returns')) return MEDICATION_RETURNS_GUIDE;
+  if (pathname.startsWith('/pharmacy/queue-monitor')) return PHARMACY_QUEUE_MONITOR_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;

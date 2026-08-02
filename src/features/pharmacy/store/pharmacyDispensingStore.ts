@@ -27,7 +27,18 @@ import {
   PHARMACY_QUEUE_SEED,
   type DispensingActivityEntry,
   type PharmacyQueueEntry,
+  type PharmacyQueueStage,
 } from '@/features/pharmacy/__mocks__/pharmacyFixtures';
+
+/** The single-step progression Pharmacy Queue Monitor's "Move to Next
+ * Queue" walks through — one stage per click, distinct from
+ * `verifyAndDispense()`'s "jump straight to Ready for Pickup" shortcut. */
+const QUEUE_STAGE_ORDER: PharmacyQueueStage[] = [
+  'Pending Verification',
+  'In Progress',
+  'Ready for Dispense',
+  'Ready for Pickup',
+];
 
 let queue: PharmacyQueueEntry[] = [...PHARMACY_QUEUE_SEED];
 let activityLog: DispensingActivityEntry[] = [...DISPENSING_ACTIVITY_SEED];
@@ -195,6 +206,53 @@ export function verifyAndDispense(rxNo: string, dispensedBy: string): void {
     },
     ...activityLog,
   ];
+  emit();
+}
+
+/** Moves a queue entry one step forward (Pending Verification → In
+ * Progress → Ready for Dispense → Ready for Pickup) — Pharmacy Queue
+ * Monitor's "Move to Next Queue" action. Reaching Ready for Pickup this way
+ * logs a real dispense activity entry too, exactly like `verifyAndDispense()`,
+ * so it shows up in Dispensing Audit Trail the same way. No-ops for an entry
+ * already at Ready for Pickup or in a terminal stage (Collected/Cancelled). */
+export function advanceQueueStage(rxNo: string, dispensedBy: string): void {
+  const idx = queue.findIndex((e) => e.rxNo === rxNo);
+  if (idx === -1) return;
+  const entry = queue[idx]!;
+  const stageIdx = QUEUE_STAGE_ORDER.indexOf(entry.stage);
+  if (stageIdx === -1 || stageIdx === QUEUE_STAGE_ORDER.length - 1) return;
+  const nextStage = QUEUE_STAGE_ORDER[stageIdx + 1]!;
+  const now = new Date().toISOString();
+
+  queue = queue.map((e, i) =>
+    i === idx
+      ? {
+          ...e,
+          stage: nextStage,
+          ...(nextStage === 'Ready for Pickup' ? { dispensedAt: now } : {}),
+        }
+      : e,
+  );
+
+  if (nextStage === 'Ready for Pickup') {
+    activityLog = [
+      {
+        id: `da-${rxNo}-${Date.now()}`,
+        medicationName: `${entry.medicationName} ${entry.dose}`,
+        patientId: entry.patientId,
+        rxNo: entry.rxNo,
+        dispensedAt: now,
+        dose: entry.dose,
+        qty: entry.quantity,
+        unit: entry.form,
+        doctorName: entry.doctorName,
+        department: entry.department,
+        status: 'Completed',
+        dispensedBy,
+      },
+      ...activityLog,
+    ];
+  }
   emit();
 }
 
