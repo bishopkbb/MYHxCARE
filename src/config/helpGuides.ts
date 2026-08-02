@@ -1370,6 +1370,30 @@ const EXPIRY_REPORT_GUIDE: HelpGuide = {
   ],
 };
 
+const PROCUREMENT_REPORT_GUIDE: HelpGuide = {
+  id: 'procurement-report',
+  title: 'Procurement Report',
+  intro: 'Track purchase requests from submission through to receiving.',
+  sections: [
+    {
+      heading: 'The same real request log',
+      body: 'Reads live from procurementRequestStore.ts — the same requests Procurement Requests already shows, not a parallel invented dataset.',
+    },
+    {
+      heading: 'Where Ordered requests go',
+      body: 'Marking a request Ordered creates a real purchase order in Stock Receiving, which becomes real inventory once received — that same event also feeds Stock Movement Report’s ledger.',
+    },
+    {
+      heading: 'Stat cards and the trend chart',
+      body: 'Total Requests, Pending Approval, Approved, Ordered / In Transit, and Completed always sum consistently because they come from one disjoint status partition. The 14-day trend is bucketed from real request dates.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'View Details opens a read-only snapshot of the request and its line items; Go to Procurement Requests is the real place to approve, reject, or mark it ordered.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2707,6 +2731,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/reports/inventory')) return INVENTORY_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/stock-movement')) return STOCK_MOVEMENT_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/expiry')) return EXPIRY_REPORT_GUIDE;
+  if (pathname.startsWith('/pharmacy/reports/procurement')) return PROCUREMENT_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;

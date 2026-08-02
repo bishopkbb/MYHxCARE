@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Procurement Reports' };
+import { ProcurementReportWorkspace } from '@/features/pharmacy/components/ProcurementReportWorkspace';
 
 export default function ProcurementReportsPage() {
-  return (
-    <ComingSoon
-      title="Procurement Reports"
-      description="Purchase-order spend, supplier performance, and lead-time analytics are on the way."
-    />
-  );
+  return <ProcurementReportWorkspace />;
 }
