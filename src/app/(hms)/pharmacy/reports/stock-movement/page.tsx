@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Stock Movement Reports' };
+import { StockMovementReportWorkspace } from '@/features/pharmacy/components/StockMovementReportWorkspace';
 
 export default function StockMovementReportsPage() {
-  return (
-    <ComingSoon
-      title="Stock Movement Reports"
-      description="A full audit of stock receipts, transfers, adjustments, and dispensing movements is on the way."
-    />
-  );
+  return <StockMovementReportWorkspace />;
 }

@@ -1322,6 +1322,30 @@ const INVENTORY_REPORT_GUIDE: HelpGuide = {
   ],
 };
 
+const STOCK_MOVEMENT_REPORT_GUIDE: HelpGuide = {
+  id: 'stock-movement-report',
+  title: 'Stock Movement Report',
+  intro: 'Every stock in, stock out, transfer, and adjustment across the pharmacy.',
+  sections: [
+    {
+      heading: 'Four real workflows, one ledger',
+      body: 'Stock Receiving, Stock Transfers, Stock Adjustments, and Medication Returns each already mutate the real inventory — this report unifies their events into one movement ledger rather than inventing a separate log.',
+    },
+    {
+      heading: 'In vs. Out',
+      body: 'A completed transfer produces two rows — an Out at the source location and an In at the destination — so total Stock In and Stock Out from transfers always balance exactly.',
+    },
+    {
+      heading: 'Stat cards and the trend chart',
+      body: 'Every stat card and the 14-day trend chart are computed from real event dates and quantities, not a decorative series — sparse days are real gaps, not a display bug.',
+    },
+    {
+      heading: 'Filters and the details table',
+      body: 'Date Range, Location, Movement Type, and Direction all genuinely filter the table. Generate Report applies them; the stat cards and sidebar always describe the full ledger.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2657,6 +2681,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/reports/prescriptions')) return PRESCRIPTION_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/dispensing')) return DISPENSING_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/inventory')) return INVENTORY_REPORT_GUIDE;
+  if (pathname.startsWith('/pharmacy/reports/stock-movement')) return STOCK_MOVEMENT_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;
