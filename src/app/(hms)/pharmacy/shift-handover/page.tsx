@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Shift Handover' };
+import { PharmacyShiftHandoverWorkspace } from '@/features/pharmacy/components/PharmacyShiftHandoverWorkspace';
 
 export default function PharmacyShiftHandoverPage() {
-  return (
-    <ComingSoon
-      title="Shift Handover"
-      description="Structured shift handover notes between outgoing and incoming pharmacy staff are on the way."
-    />
-  );
+  return <PharmacyShiftHandoverWorkspace />;
 }

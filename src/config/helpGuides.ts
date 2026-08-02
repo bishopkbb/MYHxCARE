@@ -1841,6 +1841,30 @@ const PHARMACY_MY_SCHEDULE_GUIDE: HelpGuide = {
   ],
 };
 
+const PHARMACY_SHIFT_HANDOVER_GUIDE: HelpGuide = {
+  id: 'pharmacy-shift-handover',
+  title: 'Shift Handover',
+  intro: 'Structured shift handover notes between outgoing and incoming pharmacy staff.',
+  sections: [
+    {
+      heading: 'Dispensing Summary',
+      body: 'Pending Verification, Ready for Pickup, Dispensed Today, and On Hold counts summarize the queue at hand-off, with a preview of prescriptions still awaiting verification.',
+    },
+    {
+      heading: 'Outstanding Tasks and Priority Follow-ups',
+      body: 'Outstanding Tasks tracks a per-shift checklist by category. Priority Follow-ups lists prescriptions currently on hold that the incoming pharmacist needs to review.',
+    },
+    {
+      heading: 'Controlled Drugs and Low Stock',
+      body: 'Controlled Drugs Pending Approval lists dispenses awaiting a second pharmacist countersignature. Low Stock Medicines flags items below reorder level.',
+    },
+    {
+      heading: 'Signatures and completing handover',
+      body: 'The incoming pharmacist signs to accept responsibility for the queue and stock. Save as Draft preserves progress; Complete Handover finalizes the transfer once signed.',
+    },
+  ],
+};
+
 const NURSE_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'nurse-workforce-management',
   title: 'Workforce Management',
@@ -2791,6 +2815,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/workforce-management')) return NURSE_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/workforce')) return PHARMACY_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/my-schedule')) return PHARMACY_MY_SCHEDULE_GUIDE;
+  if (pathname.startsWith('/pharmacy/shift-handover')) return PHARMACY_SHIFT_HANDOVER_GUIDE;
   if (pathname.startsWith('/nurse/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/nurse/reports')) return NURSING_REPORTS_GUIDE;
   if (pathname.startsWith('/nurse/admissions')) return ADMISSIONS_GUIDE;

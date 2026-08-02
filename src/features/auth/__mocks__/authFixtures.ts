@@ -104,6 +104,7 @@ export const MOCK_USERS: User[] = [
       'pharmacy:dispense',
       'pharmacy:adr:write',
       'pharmacy:audit:write',
+      'shift_handover:write',
       'notifications:read',
     ],
   },
