@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Dispensing Audit Trail' };
+import { DispensingAuditTrailWorkspace } from '@/features/pharmacy/components/DispensingAuditTrailWorkspace';
 
 export default function DispensingAuditTrailPage() {
-  return (
-    <ComingSoon
-      title="Dispensing Audit Trail"
-      description="A complete, timestamped audit log of every dispensing action and who performed it is on the way."
-    />
-  );
+  return <DispensingAuditTrailWorkspace />;
 }

@@ -145,6 +145,13 @@ export function useRecentDispensingActivity(): DispensingActivityEntry[] {
   return useSyncExternalStore(subscribe, activityGetSnapshot, activityGetServerSnapshot);
 }
 
+/** Plain (non-hook) snapshot — lets auditTrailStore.ts bridge real dispense
+ * activity into the audit log without a React hook, mirroring
+ * `getAllQueueEntriesSnapshot()` above. */
+export function getRecentDispensingActivitySnapshot(): DispensingActivityEntry[] {
+  return activityGetSnapshot();
+}
+
 /** Injects a fully-built queue entry — e.g. a refill request the pharmacist
  * approved becoming a real, dispensable prescription in this same queue,
  * rather than a dead-end "approved" label with nothing behind it. */
@@ -184,10 +191,10 @@ export function verifyAndDispense(rxNo: string, dispensedBy: string): void {
       doctorName: entry.doctorName,
       department: entry.department,
       status: 'Completed',
+      dispensedBy,
     },
     ...activityLog,
   ];
-  void dispensedBy;
   emit();
 }
 

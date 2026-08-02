@@ -516,6 +516,9 @@ export type DispensingActivityEntry = {
    * approved, mirroring the second-signature requirement for controlled
    * substances. */
   approvedBy?: string;
+  /** Who actually dispensed it — only set on live entries `verifyAndDispense()`
+   * creates; the 300+ seeded historical rows predate this field. */
+  dispensedBy?: string;
 };
 
 const CURATED_DISPENSING_ACTIVITY: DispensingActivityEntry[] = [
@@ -3483,4 +3486,250 @@ export const ADR_REPORTS: ADRReport[] = (() => {
   return rows
     .sort((a, b) => a.recencyRank - b.recencyRank)
     .map(({ recencyRank: _recencyRank, ...report }) => report);
+})();
+
+// ── Dispensing Audit Trail ──────────────────────────────────────────────────
+
+export type AuditAction = 'Dispense' | 'Modify' | 'Void' | 'Access' | 'Delete';
+export type AuditOutcome = 'Success' | 'Voided' | 'Deleted';
+export type AuditModule = 'Dispensing' | 'Inventory' | 'Prescriptions' | 'Procurement';
+
+export type AuditTrailEvent = {
+  id: string;
+  timestamp: string; // ISO
+  userName: string;
+  userRole: string;
+  ipAddress: string;
+  action: AuditAction;
+  outcome: AuditOutcome;
+  /** Unset when the action has no associated patient (e.g. Delete) — used for
+   * the detail modal's "View Profile" link. */
+  patientId?: string;
+  /** '—' when the action has no associated patient (e.g. Delete). */
+  patientName: string;
+  mrn: string;
+  /** '—' when the action has no associated medication (e.g. Access, Delete). */
+  medicationName: string;
+  details: string;
+  module: AuditModule;
+};
+
+export const AUDIT_ACTION_OPTIONS: SelectOption[] = [
+  { value: 'Dispense', label: 'Dispense' },
+  { value: 'Modify', label: 'Modify' },
+  { value: 'Void', label: 'Void' },
+  { value: 'Access', label: 'Access' },
+  { value: 'Delete', label: 'Delete' },
+];
+
+export const AUDIT_OUTCOME_OPTIONS: SelectOption[] = [
+  { value: 'Success', label: 'Success' },
+  { value: 'Voided', label: 'Voided' },
+  { value: 'Deleted', label: 'Deleted' },
+];
+
+export const AUDIT_MODULE_OPTIONS: SelectOption[] = [
+  { value: 'Dispensing', label: 'Dispensing' },
+  { value: 'Inventory', label: 'Inventory' },
+  { value: 'Prescriptions', label: 'Prescriptions' },
+  { value: 'Procurement', label: 'Procurement' },
+];
+
+export const AUDIT_ACTION_COLOR: Record<
+  AuditAction,
+  { color: string; border: string; bg: string }
+> = {
+  Dispense: { color: '#16A34A', border: 'rgba(22,163,74,0.35)', bg: 'rgba(22,163,74,0.08)' },
+  Modify: { color: '#D97706', border: 'rgba(217,119,6,0.35)', bg: 'rgba(217,119,6,0.08)' },
+  Void: { color: '#DC2626', border: 'rgba(220,38,38,0.35)', bg: 'rgba(220,38,38,0.08)' },
+  Access: { color: '#2563EB', border: 'rgba(37,99,235,0.35)', bg: 'rgba(37,99,235,0.08)' },
+  Delete: { color: '#DC2626', border: 'rgba(220,38,38,0.35)', bg: 'rgba(220,38,38,0.08)' },
+};
+
+export const AUDIT_OUTCOME_COLOR: Record<
+  AuditOutcome,
+  { color: string; border: string; bg: string }
+> = {
+  Success: { color: '#16A34A', border: 'rgba(22,163,74,0.35)', bg: 'rgba(22,163,74,0.08)' },
+  Voided: { color: '#D97706', border: 'rgba(217,119,6,0.35)', bg: 'rgba(217,119,6,0.08)' },
+  Deleted: { color: '#DC2626', border: 'rgba(220,38,38,0.35)', bg: 'rgba(220,38,38,0.08)' },
+};
+
+type AuditUser = { name: string; role: string; ip: string };
+
+/** The 4 named users the "Actions by User" panel breaks out individually —
+ * everyone else rolls up into "Others". Weighted 5x in the picker pool below
+ * so they dominate the log the way four regular staff pharmacists would. */
+const AUDIT_NAMED_USERS: AuditUser[] = [
+  { name: 'Pharm. Adaeze', role: 'Pharmacist', ip: '192.168.1.45' },
+  { name: 'Pharm. Victoria', role: 'Pharmacist', ip: '192.168.1.32' },
+  { name: 'Pharm. John', role: 'Pharmacist', ip: '192.168.1.45' },
+  { name: 'Pharm. Grace', role: 'Pharmacist', ip: '192.168.1.22' },
+];
+
+const AUDIT_OTHER_USERS: AuditUser[] = [
+  { name: 'Pharm. Ngozi', role: 'Pharmacist', ip: '192.168.1.51' },
+  { name: 'Pharm. Chidi', role: 'Pharmacy Technician', ip: '192.168.1.38' },
+  { name: 'Mr. Emeka Obi', role: 'Chief Pharmacist', ip: '192.168.1.10' },
+];
+
+export const AUDIT_USER_OPTIONS: SelectOption[] = [...AUDIT_NAMED_USERS, ...AUDIT_OTHER_USERS].map(
+  (u) => ({ value: u.name, label: u.name }),
+);
+
+/** The users the "Actions by User" panel breaks out individually — anyone
+ * else in an event's `userName` rolls up into "Others". */
+export const AUDIT_NAMED_USER_NAMES: string[] = AUDIT_NAMED_USERS.map((u) => u.name);
+
+const AUDIT_USER_POOL: AuditUser[] = [
+  ...AUDIT_NAMED_USERS,
+  ...AUDIT_NAMED_USERS,
+  ...AUDIT_NAMED_USERS,
+  ...AUDIT_NAMED_USERS,
+  ...AUDIT_NAMED_USERS,
+  ...AUDIT_OTHER_USERS,
+];
+
+const AUDIT_MODULE_POOL: AuditModule[] = [
+  ...Array<AuditModule>(18).fill('Dispensing'),
+  'Inventory',
+  'Prescriptions',
+  'Procurement',
+];
+
+const FORM_TO_UNIT_LABEL: Record<string, string> = {
+  Capsule: 'caps',
+  Tablet: 'tabs',
+  Inhaler: 'inhalers',
+  Nebules: 'nebules',
+  Injection: 'vials',
+};
+
+const AUDIT_VOID_REASONS = [
+  'Patient not available',
+  'Prescription cancelled by doctor',
+  'Insurance authorization failed',
+  'Duplicate entry',
+  'Stock discrepancy found',
+];
+
+const AUDIT_MODIFY_TEMPLATES = [
+  (a: number, b: number) => `Quantity changed from ${a} to ${b}`,
+  () => 'Instructions updated from OD to BD',
+  () => 'Dosage adjusted per prescriber note',
+  () => 'Patient allergy note updated',
+];
+
+const AUDIT_ACCESS_DETAILS = [
+  'Viewed patient prescription and dispense history',
+  'Viewed medication history',
+  'Viewed patient allergy record',
+  'Searched patient dispensing records',
+];
+
+const AUDIT_DELETE_DETAILS = [
+  'Deleted draft dispense record',
+  'Deleted duplicate audit entry',
+  'Removed erroneous test record',
+];
+
+const AUDIT_ACTION_COUNTS: { action: AuditAction; count: number }[] = [
+  { action: 'Dispense', count: 686 },
+  { action: 'Access', count: 512 },
+  { action: 'Modify', count: 32 },
+  { action: 'Void', count: 12 },
+  { action: 'Delete', count: 6 },
+];
+
+/** Today gets exactly 86 events (matching a realistic "today so far" spike);
+ * the remaining events spread across the past 89 days via a decorrelated
+ * hash so no two attributes (action, user, day) are positionally linked. */
+function auditDayForGlobalIndex(globalIdx: number): number {
+  if (globalIdx < 86) return 0;
+  const rest = globalIdx - 86;
+  return 1 + (mixHash(rest + 20_000) % 89);
+}
+
+function auditEventId(n: number): string {
+  return `evt-${String(n).padStart(6, '0')}`;
+}
+
+export const AUDIT_TRAIL_EVENTS: AuditTrailEvent[] = (() => {
+  const rows: AuditTrailEvent[] = [];
+  let globalIdx = 0;
+
+  for (const spec of AUDIT_ACTION_COUNTS) {
+    for (let k = 0; k < spec.count; k++) {
+      const user = AUDIT_USER_POOL[mixHash(globalIdx + 10_000) % AUDIT_USER_POOL.length]!;
+      const patient = DIRECTORY_PATIENTS[mixHash(globalIdx + 11_000) % DIRECTORY_PATIENTS.length]!;
+      const medication = INVENTORY_CATALOG[mixHash(globalIdx + 12_000) % INVENTORY_CATALOG.length]!;
+      const auditModule =
+        AUDIT_MODULE_POOL[mixHash(globalIdx + 13_000) % AUDIT_MODULE_POOL.length]!;
+      const day = auditDayForGlobalIndex(globalIdx);
+      const hour = 8 + (mixHash(globalIdx + 14_000) % 10);
+      const minute = mixHash(globalIdx + 15_000) % 60;
+      const timestamp = pastDateAt(day, hour, minute);
+      const unitLabel = FORM_TO_UNIT_LABEL[medication.form] ?? 'units';
+      const qty = 10 + (mixHash(globalIdx + 16_000) % 40);
+      const batchNo = `${medication.name.slice(0, 3).toUpperCase()}${2500 + (mixHash(globalIdx + 17_000) % 99)}`;
+
+      let outcome: AuditOutcome = 'Success';
+      let patientId: string | undefined = patient.id;
+      let patientName = patient.name;
+      let mrn = patient.mrn;
+      let medicationName = `${medication.name} ${medication.strength}`;
+      let details = '';
+
+      switch (spec.action) {
+        case 'Dispense':
+          details = `Dispensed ${qty} ${unitLabel} | Batch ${batchNo} | Qty: ${qty}`;
+          break;
+        case 'Modify': {
+          const template =
+            AUDIT_MODIFY_TEMPLATES[mixHash(globalIdx + 18_000) % AUDIT_MODIFY_TEMPLATES.length]!;
+          const a = 10 + (mixHash(globalIdx + 19_000) % 40);
+          const b = 10 + (mixHash(globalIdx + 21_000) % 40);
+          details = template(a, b);
+          break;
+        }
+        case 'Void':
+          outcome = 'Voided';
+          details = `Dispense voided | Reason: ${AUDIT_VOID_REASONS[mixHash(globalIdx + 22_000) % AUDIT_VOID_REASONS.length]}`;
+          break;
+        case 'Access':
+          medicationName = '—';
+          details =
+            AUDIT_ACCESS_DETAILS[mixHash(globalIdx + 23_000) % AUDIT_ACCESS_DETAILS.length]!;
+          break;
+        case 'Delete':
+          outcome = 'Deleted';
+          patientId = undefined;
+          patientName = '—';
+          mrn = '—';
+          medicationName = '—';
+          details =
+            AUDIT_DELETE_DETAILS[mixHash(globalIdx + 24_000) % AUDIT_DELETE_DETAILS.length]!;
+          break;
+      }
+
+      rows.push({
+        id: auditEventId(globalIdx),
+        timestamp,
+        userName: user.name,
+        userRole: user.role,
+        ipAddress: user.ip,
+        action: spec.action,
+        outcome,
+        ...(patientId ? { patientId } : {}),
+        patientName,
+        mrn,
+        medicationName,
+        details,
+        module: auditModule,
+      });
+      globalIdx++;
+    }
+  }
+
+  return rows.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 })();

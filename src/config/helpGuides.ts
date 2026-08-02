@@ -1177,6 +1177,31 @@ const ADR_GUIDE: HelpGuide = {
   ],
 };
 
+const DISPENSING_AUDIT_TRAIL_GUIDE: HelpGuide = {
+  id: 'dispensing-audit-trail',
+  title: 'Dispensing Audit Trail',
+  intro:
+    'Track and review all dispensing activities for accountability, compliance, and patient safety.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: "Today's Events, Modified Records, Deleted / Voided, and Accessed Records are clickable — each filters the table to that subset.",
+    },
+    {
+      heading: 'Immutability',
+      body: 'Records here can never be edited or deleted — Void and Delete are themselves logged as new events, not erasures of the original. See Retention Policy for the full rule set.',
+    },
+    {
+      heading: 'Live events',
+      body: 'A real dispense completed on Dispense Medication, Prescription Queue, or Prescription Details appears here immediately as a new Dispense event — this log is not a separate, disconnected record.',
+    },
+    {
+      heading: 'Audit Trail Summary and Actions by User',
+      body: 'The donut chart breaks every event down by action. Actions by User ranks staff by event count for the current month.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2506,6 +2531,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/procurement-requests')) return PROCUREMENT_REQUESTS_GUIDE;
   if (pathname.startsWith('/pharmacy/suppliers')) return SUPPLIERS_GUIDE;
   if (pathname.startsWith('/pharmacy/adr')) return ADR_GUIDE;
+  if (pathname.startsWith('/pharmacy/audit-trail')) return DISPENSING_AUDIT_TRAIL_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;

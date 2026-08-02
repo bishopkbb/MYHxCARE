@@ -103,6 +103,7 @@ export const MOCK_USERS: User[] = [
       'pharmacy:read',
       'pharmacy:dispense',
       'pharmacy:adr:write',
+      'pharmacy:audit:write',
       'notifications:read',
     ],
   },
