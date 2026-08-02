@@ -3733,3 +3733,207 @@ export const AUDIT_TRAIL_EVENTS: AuditTrailEvent[] = (() => {
 
   return rows.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 })();
+
+// ── Medication Returns ───────────────────────────────────────────────────────
+
+export type ReturnStatus = 'Pending' | 'Completed' | 'Rejected';
+export type ReturnType =
+  'Patient Return' | 'Ward Return' | 'Pharmacy Correction' | 'Expired/Damaged';
+export type ReturnReasonCategory =
+  'Therapy changed' | 'Duplicate dispense' | 'Adverse reaction' | 'Order cancelled' | 'Others';
+export type RefundType = 'Refund' | 'Credit Note' | 'None';
+
+export type MedicationReturn = {
+  id: string;
+  returnDate: string; // ISO
+  patientId: string;
+  patientName: string;
+  mrn: string;
+  medicationName: string;
+  strength: string;
+  form: string;
+  category: string;
+  /** ₦ per unit — carried so `completeReturn()` can restock at a real price,
+   * not just flip a status. */
+  unitPrice: number;
+  qtyReturned: number;
+  returnType: ReturnType;
+  reason: string;
+  reasonCategory: ReturnReasonCategory;
+  status: ReturnStatus;
+  returnedBy: string;
+  refundType: RefundType;
+  refundAmount: number;
+  rejectedReason?: string;
+};
+
+export const RETURN_STATUS_OPTIONS: SelectOption[] = [
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Completed', label: 'Completed' },
+  { value: 'Rejected', label: 'Rejected' },
+];
+
+export const RETURN_TYPE_OPTIONS: SelectOption[] = [
+  { value: 'Patient Return', label: 'Patient Return' },
+  { value: 'Ward Return', label: 'Ward Return' },
+  { value: 'Pharmacy Correction', label: 'Pharmacy Correction' },
+  { value: 'Expired/Damaged', label: 'Expired/Damaged' },
+];
+
+export const RETURN_STATUS_COLOR: Record<
+  ReturnStatus,
+  { color: string; border: string; bg: string }
+> = {
+  Pending: { color: '#D97706', border: 'rgba(217,119,6,0.35)', bg: 'rgba(217,119,6,0.08)' },
+  Completed: { color: '#16A34A', border: 'rgba(22,163,74,0.35)', bg: 'rgba(22,163,74,0.08)' },
+  Rejected: { color: '#DC2626', border: 'rgba(220,38,38,0.35)', bg: 'rgba(220,38,38,0.08)' },
+};
+
+type ReturnUser = { name: string; ip: string };
+
+const RETURN_USERS: ReturnUser[] = [
+  { name: 'Pharm. Adaeze', ip: '192.168.1.45' },
+  { name: 'Pharm. Victoria', ip: '192.168.1.32' },
+  { name: 'Pharm. John', ip: '192.168.1.45' },
+  { name: 'Pharm. Grace', ip: '192.168.1.22' },
+  { name: 'Pharm. Ngozi', ip: '192.168.1.51' },
+];
+
+export const RETURN_PROCESSED_BY_OPTIONS: SelectOption[] = RETURN_USERS.map((u) => ({
+  value: u.name,
+  label: u.name,
+}));
+
+type ReturnReasonEntry = { reason: string; category: ReturnReasonCategory };
+
+const RETURN_REASON_POOL: ReturnReasonEntry[] = [
+  { reason: 'Therapy changed', category: 'Therapy changed' },
+  { reason: 'Duplicate dispense', category: 'Duplicate dispense' },
+  { reason: 'Adverse reaction', category: 'Adverse reaction' },
+  { reason: 'Order cancelled', category: 'Order cancelled' },
+];
+
+const RETURN_OTHER_REASONS: string[] = [
+  'Patient not available',
+  'Patient deceased',
+  'Prescribing error',
+  'Incorrect medication dispensed',
+  'Patient refused medication',
+];
+
+export const RETURN_REASON_OPTIONS: SelectOption[] = [
+  ...RETURN_REASON_POOL.map((r) => r.reason),
+  ...RETURN_OTHER_REASONS,
+].map((r) => ({ value: r, label: r }));
+
+/** Fixed display order for the "Returns by Reason" donut. */
+export const RETURN_REASON_CATEGORIES: ReturnReasonCategory[] = [
+  'Therapy changed',
+  'Duplicate dispense',
+  'Adverse reaction',
+  'Order cancelled',
+  'Others',
+];
+
+const RETURN_REASON_CATEGORY_COUNTS: { category: ReturnReasonCategory; count: number }[] = [
+  { category: 'Therapy changed', count: 48 },
+  { category: 'Duplicate dispense', count: 42 },
+  { category: 'Adverse reaction', count: 26 },
+  { category: 'Order cancelled', count: 18 },
+  { category: 'Others', count: 22 },
+];
+
+const RETURN_TOTAL = RETURN_REASON_CATEGORY_COUNTS.reduce((sum, s) => sum + s.count, 0);
+
+/** Completed/Pending/Rejected counts, decorrelated from reason category via
+ * a rotated hash — a rejected return can have any reason, same as a
+ * completed one. Chosen so Completed (120) and Rejected (12) exactly match
+ * the two reference numbers that already check out against the 156 total;
+ * Pending absorbs the remainder (24) rather than the reference's own
+ * internally-inconsistent 18 (which didn't sum against the other two). */
+function returnStatusForIndex(i: number): ReturnStatus {
+  const j = (i * 41 + 13) % RETURN_TOTAL;
+  if (j < 120) return 'Completed';
+  if (j < 120 + 24) return 'Pending';
+  return 'Rejected';
+}
+
+function returnTypeForIndex(i: number): ReturnType {
+  const pool: ReturnType[] = [
+    'Patient Return',
+    'Patient Return',
+    'Patient Return',
+    'Ward Return',
+    'Pharmacy Correction',
+    'Expired/Damaged',
+  ];
+  return pool[mixHash(i + 30_000) % pool.length]!;
+}
+
+function returnId(n: number): string {
+  return `RTN-${new Date().getFullYear()}-${String(n).padStart(4, '0')}`;
+}
+
+export const MEDICATION_RETURNS: MedicationReturn[] = (() => {
+  const rows: (MedicationReturn & { recencyRank: number })[] = [];
+  let globalIdx = 0;
+
+  for (const spec of RETURN_REASON_CATEGORY_COUNTS) {
+    const reasonChoices =
+      spec.category === 'Others'
+        ? RETURN_OTHER_REASONS
+        : [RETURN_REASON_POOL.find((r) => r.category === spec.category)!.reason];
+
+    for (let k = 0; k < spec.count; k++) {
+      const patient = DIRECTORY_PATIENTS[mixHash(globalIdx + 31_000) % DIRECTORY_PATIENTS.length]!;
+      const medication = INVENTORY_CATALOG[mixHash(globalIdx + 32_000) % INVENTORY_CATALOG.length]!;
+      const user = RETURN_USERS[mixHash(globalIdx + 33_000) % RETURN_USERS.length]!;
+      const reason = reasonChoices[mixHash(globalIdx + 34_000) % reasonChoices.length]!;
+      const status = returnStatusForIndex(globalIdx);
+      const qtyReturned = 1 + (mixHash(globalIdx + 35_000) % 30);
+      const recencyRank = (globalIdx * 37 + 5) % RETURN_TOTAL;
+
+      const rawAmount = qtyReturned * medication.unitPrice;
+      const refundAmount = status === 'Rejected' ? 0 : Math.round(rawAmount / 50) * 50;
+      const refundType: RefundType =
+        status === 'Rejected'
+          ? 'None'
+          : mixHash(globalIdx + 36_000) % 2 === 0
+            ? 'Credit Note'
+            : 'Refund';
+
+      rows.push({
+        id: returnId(RETURN_TOTAL - recencyRank),
+        returnDate: pastDateAt(recencyRank, 8 + (globalIdx % 10), (globalIdx * 13) % 60),
+        patientId: patient.id,
+        patientName: patient.name,
+        mrn: patient.mrn,
+        medicationName: medication.name,
+        strength: medication.strength,
+        form: medication.form,
+        category: medication.category,
+        unitPrice: medication.unitPrice,
+        qtyReturned,
+        returnType: returnTypeForIndex(globalIdx),
+        reason,
+        reasonCategory: spec.category,
+        status,
+        returnedBy: user.name,
+        refundType,
+        refundAmount,
+        ...(status === 'Rejected'
+          ? {
+              rejectedReason:
+                RETURN_OTHER_REASONS[mixHash(globalIdx + 37_000) % RETURN_OTHER_REASONS.length]!,
+            }
+          : {}),
+        recencyRank,
+      });
+      globalIdx++;
+    }
+  }
+
+  return rows
+    .sort((a, b) => a.recencyRank - b.recencyRank)
+    .map(({ recencyRank: _recencyRank, ...ret }) => ret);
+})();

@@ -1202,6 +1202,30 @@ const DISPENSING_AUDIT_TRAIL_GUIDE: HelpGuide = {
   ],
 };
 
+const MEDICATION_RETURNS_GUIDE: HelpGuide = {
+  id: 'medication-returns',
+  title: 'Medication Returns',
+  intro: 'Manage returned medications and update inventory accurately.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Returns This Month, Pending Processing, Completed, and Rejected are clickable — each filters or scopes the table to that subset.',
+    },
+    {
+      heading: 'Recording a new return',
+      body: 'New Return requires picking a real patient first — if they have recent dispensing history, you can select directly from it. Otherwise search the drug catalog. Either way the return is tied to real medication data, not free text.',
+    },
+    {
+      heading: 'Completing a return',
+      body: 'Completing a Pending return actually restocks the units into Drug Inventory as a new quarantined batch — unless the return type is Expired/Damaged, which is destroyed instead of resold.',
+    },
+    {
+      heading: 'Returns by Reason and Returns by Status',
+      body: 'The donut chart breaks every return down by reason category. Returns by Status ranks Completed, Pending, and Rejected by count.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2532,6 +2556,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/suppliers')) return SUPPLIERS_GUIDE;
   if (pathname.startsWith('/pharmacy/adr')) return ADR_GUIDE;
   if (pathname.startsWith('/pharmacy/audit-trail')) return DISPENSING_AUDIT_TRAIL_GUIDE;
+  if (pathname.startsWith('/pharmacy/medication-returns')) return MEDICATION_RETURNS_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;

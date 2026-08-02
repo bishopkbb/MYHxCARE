@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Medication Returns' };
+import { MedicationReturnsWorkspace } from '@/features/pharmacy/components/MedicationReturnsWorkspace';
 
 export default function MedicationReturnsPage() {
-  return (
-    <ComingSoon
-      title="Medication Returns"
-      description="Processing ward and patient medication returns back into stock is on the way."
-    />
-  );
+  return <MedicationReturnsWorkspace />;
 }
