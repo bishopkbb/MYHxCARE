@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Dispensing Reports' };
+import { DispensingReportWorkspace } from '@/features/pharmacy/components/DispensingReportWorkspace';
 
 export default function DispensingReportsPage() {
-  return (
-    <ComingSoon
-      title="Dispensing Reports"
-      description="Turnaround-time and dispensing-volume analytics by pharmacist and shift are on the way."
-    />
-  );
+  return <DispensingReportWorkspace />;
 }

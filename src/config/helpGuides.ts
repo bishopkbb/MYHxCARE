@@ -1274,6 +1274,30 @@ const PRESCRIPTION_REPORT_GUIDE: HelpGuide = {
   ],
 };
 
+const DISPENSING_REPORT_GUIDE: HelpGuide = {
+  id: 'dispensing-report',
+  title: 'Dispensing Report',
+  intro: 'Comprehensive overview of medication dispensing activities.',
+  sections: [
+    {
+      heading: 'Where the rows come from',
+      body: "Dispensing Details is the Dispensed subset of Prescription Report's own records, enriched with the medication, quantity, and pharmacist that report has no reason to carry — the same RX shows up in both.",
+    },
+    {
+      heading: 'Stat cards and filters',
+      body: 'Filters (date range, location, pharmacist, department, dispensed by) are staged as you change them. Generate Report applies them to the summary panels, charts, and table together.',
+    },
+    {
+      heading: 'Dispensing Trend',
+      body: 'Switch between Daily, Weekly, and Monthly views — Weekly is a real aggregation of the same daily figures.',
+    },
+    {
+      heading: 'Dispensed By and System entries',
+      body: '"System" identifies auto-dispensed records with no individual pharmacist attached — the footer note about manual and system-generated records is about this same distinction.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2607,6 +2631,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/medication-returns')) return MEDICATION_RETURNS_GUIDE;
   if (pathname.startsWith('/pharmacy/queue-monitor')) return PHARMACY_QUEUE_MONITOR_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/prescriptions')) return PRESCRIPTION_REPORT_GUIDE;
+  if (pathname.startsWith('/pharmacy/reports/dispensing')) return DISPENSING_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;
