@@ -7,7 +7,7 @@ import { useState, type ReactNode } from 'react';
 
 import { ROUTES } from '@/constants/routes';
 import { isClinicalRole, resolveWorkspace } from '@/types/auth.types';
-import { findWorkspaceRoute } from '@/config/workspaces';
+import { findWorkspaceRoute, WORKSPACE_NAV } from '@/config/workspaces';
 import { useToast } from '@/hooks/useToast';
 import { MOCK_DOCTOR_PROFILE, getStaffProfile } from '@/features/profile/__mocks__/profileFixtures';
 import {
@@ -228,7 +228,11 @@ export default function SettingsPage() {
   const department = user?.department ?? MOCK_DOCTOR_PROFILE.department;
   const initials = getInitials(name);
   const isClinical = user ? isClinicalRole(user.workspaceRole) : true;
+  // Same shared page for every workspace — the breadcrumb/back-link adapts
+  // to whichever workspace the logged-in user belongs to (mirrors the same
+  // resolveWorkspace()-driven pattern used by Messages/Notifications/Announcements).
   const workspaceId = user ? resolveWorkspace(user.workspaceRole) : 'clinical';
+  const { workspaceLabel, homeRoute } = WORKSPACE_NAV[workspaceId];
   const profileHref = findWorkspaceRoute(workspaceId, 'Profile') ?? ROUTES.profile;
   const staffProfile = getStaffProfile(workspaceId, role, department);
 
@@ -294,8 +298,25 @@ export default function SettingsPage() {
     <div className="flex flex-1 flex-col overflow-hidden">
       <main className="flex-1 overflow-y-auto scroll-smooth" style={{ background: '#F5FBFD' }}>
         <div className="mx-auto max-w-[1200px] px-4 py-4 sm:px-6 sm:py-5">
+          {/* ── Breadcrumb — routes back to whichever workspace dashboard the
+              logged-in user belongs to ─────────────────────────────────── */}
+          <div className="flex flex-wrap items-center gap-1.5" style={{ fontSize: 14 }}>
+            <button
+              type="button"
+              onClick={() => router.push(homeRoute)}
+              className={`font-sans transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+              style={{ color: '#4A7080' }}
+            >
+              {workspaceLabel}
+            </button>
+            <span style={{ color: '#8A98A3' }}>/</span>
+            <span className="font-sans font-medium" style={{ color: '#0D2630' }}>
+              Settings
+            </span>
+          </div>
+
           {/* ── Header ─────────────────────────────────────────────────────── */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1
                 className="font-display font-semibold"
