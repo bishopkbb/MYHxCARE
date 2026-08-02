@@ -1298,6 +1298,30 @@ const DISPENSING_REPORT_GUIDE: HelpGuide = {
   ],
 };
 
+const INVENTORY_REPORT_GUIDE: HelpGuide = {
+  id: 'inventory-report',
+  title: 'Inventory Reports',
+  intro: 'Comprehensive overview of pharmacy inventory and stock status.',
+  sections: [
+    {
+      heading: 'A live snapshot, not a history',
+      body: 'Unlike Prescription and Dispensing Report, this reads the same live inventory Drug Inventory and Batch Management already show — adjust stock or complete a transfer there and the numbers here update immediately.',
+    },
+    {
+      heading: 'What filters and what doesn’t',
+      body: 'Location, Category, Supplier, and Stock Status genuinely filter the details table. Date Range is collected but batches carry no received-date field to filter against.',
+    },
+    {
+      heading: 'Stat cards and the category donut',
+      body: 'Every stat card, the donut, and the summary panel always describe the full current inventory; Generate Report’s filters scope only the table below, same as the other report screens.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'View Details opens a read-only snapshot of that batch; Go to Drug Inventory is the real place to adjust stock — this report stays read-only.',
+    },
+  ],
+};
+
 const EXPIRY_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'expiry-management',
   title: 'Expiry Management',
@@ -2632,6 +2656,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/pharmacy/queue-monitor')) return PHARMACY_QUEUE_MONITOR_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/prescriptions')) return PRESCRIPTION_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/reports/dispensing')) return DISPENSING_REPORT_GUIDE;
+  if (pathname.startsWith('/pharmacy/reports/inventory')) return INVENTORY_REPORT_GUIDE;
   if (pathname.startsWith('/pharmacy/expiry')) return EXPIRY_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/batch-management')) return BATCH_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/stock-adjustments')) return STOCK_ADJUSTMENTS_GUIDE;

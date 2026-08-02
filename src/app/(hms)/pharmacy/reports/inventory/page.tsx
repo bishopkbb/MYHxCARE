@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Inventory Reports' };
+import { InventoryReportWorkspace } from '@/features/pharmacy/components/InventoryReportWorkspace';
 
 export default function InventoryReportsPage() {
-  return (
-    <ComingSoon
-      title="Inventory Reports"
-      description="Stock valuation, turnover, and category-level inventory analytics are on the way."
-    />
-  );
+  return <InventoryReportWorkspace />;
 }
