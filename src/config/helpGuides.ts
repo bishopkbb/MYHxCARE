@@ -1813,6 +1813,34 @@ const PHARMACY_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
   ],
 };
 
+const PHARMACY_MY_SCHEDULE_GUIDE: HelpGuide = {
+  id: 'pharmacy-my-schedule',
+  title: 'My Schedule',
+  intro: 'Your personal shift calendar, upcoming assignments, and on-call rota.',
+  sections: [
+    {
+      heading: "Today's Active Shift",
+      body: 'Shows your current shift, time range, and location. Acknowledge Shift confirms you have seen it; a progress bar tracks time remaining.',
+    },
+    {
+      heading: 'This Week',
+      body: 'A day-by-day strip of your shifts for the current week, colour-coded by shift type, with an acknowledgement indicator on each day.',
+    },
+    {
+      heading: 'Upcoming Shifts',
+      body: 'Lists your next shifts with time and location. Shifts awaiting your response show Confirm Shift and Cannot Attend actions.',
+    },
+    {
+      heading: 'Campus On-Call Rota',
+      body: 'Shows who is covering on-call across the week, highlighting the pharmacist currently on duty and your own on-call slots.',
+    },
+    {
+      heading: 'Monthly Overview',
+      body: 'Totals your morning, afternoon, night, and on-call shifts for the current month.',
+    },
+  ],
+};
+
 const NURSE_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'nurse-workforce-management',
   title: 'Workforce Management',
@@ -2762,6 +2790,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/nurse/my-patients')) return MY_PATIENTS_GUIDE;
   if (pathname.startsWith('/nurse/workforce-management')) return NURSE_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/pharmacy/workforce')) return PHARMACY_WORKFORCE_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/pharmacy/my-schedule')) return PHARMACY_MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/nurse/messages')) return COLLABORATION_GUIDE;
   if (pathname.startsWith('/nurse/reports')) return NURSING_REPORTS_GUIDE;
   if (pathname.startsWith('/nurse/admissions')) return ADMISSIONS_GUIDE;

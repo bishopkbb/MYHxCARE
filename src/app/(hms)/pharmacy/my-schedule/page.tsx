@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { PharmacyScheduleWorkspace } from '@/features/pharmacy/components/PharmacyScheduleWorkspace';
 
 export const metadata = { title: 'My Schedule' };
 
 export default function PharmacyMySchedulePage() {
-  return (
-    <ComingSoon
-      title="My Schedule"
-      description="Your personal shift calendar and upcoming on-call assignments are on the way."
-    />
-  );
+  return <PharmacyScheduleWorkspace />;
 }
