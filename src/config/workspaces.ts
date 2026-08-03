@@ -1,8 +1,11 @@
 import {
   Activity,
+  AlertTriangle,
   Archive,
   ArrowLeftRight,
+  BadgeCheck,
   BarChart2,
+  Beaker,
   BedDouble,
   BedSingle,
   Bell,
@@ -13,13 +16,18 @@ import {
   LayoutList,
   ClipboardCheck,
   ClipboardList,
+  Clock,
   CreditCard,
+  Droplets,
   FileCheck2,
   Files,
   FileText,
   FlaskConical,
+  Gauge,
   History,
+  Inbox,
   LayoutDashboard,
+  ListChecks,
   ListOrdered,
   Lock,
   LogOut,
@@ -29,14 +37,19 @@ import {
   Package,
   PieChart,
   Pill,
+  Radar,
   Receipt,
   Repeat,
+  Search,
+  Send,
   Settings,
   Share2,
   Shield,
   ShieldAlert,
+  ShieldCheck,
   Siren,
   Stethoscope,
+  Timer,
   TrendingUp,
   Undo2,
   Upload,
@@ -44,6 +57,7 @@ import {
   UserCheck,
   UserPlus,
   Users,
+  Wrench,
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -625,29 +639,102 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
 
   laboratory: {
     workspaceLabel: 'Laboratory',
-    homeRoute: '/lab',
+    homeRoute: '/laboratory',
     sections: [
       {
-        items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
+        items: [{ label: 'Dashboard', href: '/laboratory', icon: LayoutDashboard }],
       },
       {
-        label: 'Laboratory',
+        label: 'LABORATORY OPERATIONS',
         items: [
-          { label: 'Order Worklist', href: '/lab/orders', icon: ClipboardList },
-          { label: 'Sample Tracking', href: '/lab/samples', icon: FlaskConical },
-          { label: 'Result Entry', href: '/lab/results', icon: FileCheck2 },
+          { label: 'Laboratory Orders', href: '/laboratory/orders', icon: ClipboardList },
+          { label: 'Sample Collection', href: '/laboratory/sample-collection', icon: FlaskConical },
+          { label: 'Sample Reception', href: '/laboratory/sample-reception', icon: Inbox },
+          { label: 'Sample Tracking', href: '/laboratory/sample-tracking', icon: Radar },
+          { label: 'Test Work Queue', href: '/laboratory/test-work-queue', icon: ListChecks },
+          { label: 'Result Entry', href: '/laboratory/result-entry', icon: NotebookPen },
+          {
+            label: 'Result Verification',
+            href: '/laboratory/result-verification',
+            icon: BadgeCheck,
+          },
+          { label: 'Published Results', href: '/laboratory/published-results', icon: Send },
+          { label: 'Critical Results', href: '/laboratory/critical-results', icon: AlertTriangle },
         ],
       },
       {
-        label: 'Scheduling',
-        items: [{ label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays }],
+        label: 'PATIENT RECORDS',
+        items: [
+          { label: 'Patient Search', href: '/laboratory/patient-search', icon: Search },
+          { label: 'Laboratory History', href: '/laboratory/history', icon: History },
+          { label: 'Clinical Timeline', href: '/laboratory/clinical-timeline', icon: Clock },
+        ],
+      },
+      {
+        label: 'QUALITY MANAGEMENT',
+        items: [
+          {
+            label: 'Quality Control (QC)',
+            href: '/laboratory/quality-control',
+            icon: ShieldCheck,
+          },
+          {
+            label: 'Equipment Calibration',
+            href: '/laboratory/equipment-calibration',
+            icon: Gauge,
+          },
+          {
+            label: 'Instrument Maintenance',
+            href: '/laboratory/instrument-maintenance',
+            icon: Wrench,
+          },
+          { label: 'Reagent Management', href: '/laboratory/reagent-management', icon: Beaker },
+        ],
+      },
+      {
+        label: 'INVENTORY',
+        items: [
+          { label: 'Laboratory Inventory', href: '/laboratory/inventory', icon: Package },
+          { label: 'Stock Receiving', href: '/laboratory/stock-receiving', icon: Upload },
+          {
+            label: 'Reagent Consumption',
+            href: '/laboratory/reagent-consumption',
+            icon: Droplets,
+          },
+          { label: 'Batch Management', href: '/laboratory/batch-management', icon: Archive },
+          {
+            label: 'Expiry Management',
+            href: '/laboratory/expiry-management',
+            icon: CalendarClock,
+          },
+          { label: 'Procurement Requests', href: '/laboratory/procurement-requests', icon: Files },
+          { label: 'Suppliers', href: '/laboratory/suppliers', icon: Building2 },
+        ],
       },
       {
         label: 'COMMUNICATION',
         items: [
-          { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
-          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+          { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 4 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 12 },
           { label: 'Announcements', href: '/announcements', icon: Megaphone },
+        ],
+      },
+      {
+        label: 'REPORTS',
+        items: [
+          { label: 'Laboratory Reports', href: '/laboratory/reports', icon: BarChart2 },
+          { label: 'Sample Reports', href: '/laboratory/reports/samples', icon: PieChart },
+          {
+            label: 'Turnaround Time Reports',
+            href: '/laboratory/reports/turnaround-time',
+            icon: Timer,
+          },
+          {
+            label: 'Quality Control Reports',
+            href: '/laboratory/reports/quality-control',
+            icon: ShieldCheck,
+          },
+          { label: 'Equipment Reports', href: '/laboratory/reports/equipment', icon: Gauge },
         ],
       },
       {

@@ -1789,6 +1789,34 @@ const NURSE_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_DASHBOARD_GUIDE: HelpGuide = {
+  id: 'laboratory-dashboard',
+  title: 'Laboratory Dashboard',
+  intro: 'Your testing pipeline, turnaround time, and quality overview for the laboratory.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Pending Orders, Samples Awaiting Collection, Samples Received Today, Results Awaiting Entry, Results Awaiting Verification, Critical Results, Average TAT, and Active Equipment summarize the lab at a glance.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: 'Receive Sample, Print Sample Label, Enter Test Result, Verify Result, Publish Result, Report Critical Value, Perform QC Check, and Receive Stock jump straight to each task.',
+    },
+    {
+      heading: 'Work Queues and TAT',
+      body: 'Work Queues shows pending and urgent counts per stage of the pipeline. Turnaround Time Overview breaks down average TAT by department.',
+    },
+    {
+      heading: 'Critical Results and Sample Status',
+      body: 'Critical Results lists flagged values needing attention. Sample Status Overview and Tests by Department show today’s testing volume.',
+    },
+    {
+      heading: 'Quality Control and Equipment',
+      body: 'Quality Control (QC) Today tracks pass/fail/pending counts for daily runs. Equipment Status shows which analyzers are online, due for maintenance, or offline.',
+    },
+  ],
+};
+
 const PHARMACY_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'pharmacy-workforce-management',
   title: 'Workforce Management',
@@ -2761,6 +2789,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/referrals')) return REFERRALS_INDEX_GUIDE;
   if (pathname.startsWith('/lab/orders')) return LAB_ORDERS_GUIDE;
   if (pathname.startsWith('/lab/results')) return LAB_RESULTS_GUIDE;
+  if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;
   if (pathname.startsWith('/medical-records/clinical-documents')) return CLINICAL_DOCUMENTS_GUIDE;

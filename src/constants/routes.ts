@@ -84,6 +84,43 @@ export const ROUTES = {
   labResults: '/lab/results',
   labBloodBank: '/lab/blood-bank',
 
+  // Laboratory workspace sub-routes (Lab Scientist/Technician persona — deliberately
+  // /laboratory/*, distinct from the doctor-facing /lab/* routes above, per SYS-017)
+  laboratory: '/laboratory',
+  // Laboratory Operations
+  laboratoryOrders: '/laboratory/orders',
+  laboratorySampleCollection: '/laboratory/sample-collection',
+  laboratorySampleReception: '/laboratory/sample-reception',
+  laboratorySampleTracking: '/laboratory/sample-tracking',
+  laboratoryTestWorkQueue: '/laboratory/test-work-queue',
+  laboratoryResultEntry: '/laboratory/result-entry',
+  laboratoryResultVerification: '/laboratory/result-verification',
+  laboratoryPublishedResults: '/laboratory/published-results',
+  laboratoryCriticalResults: '/laboratory/critical-results',
+  // Patient Records
+  laboratoryPatientSearch: '/laboratory/patient-search',
+  laboratoryHistory: '/laboratory/history',
+  laboratoryClinicalTimeline: '/laboratory/clinical-timeline',
+  // Quality Management
+  laboratoryQualityControl: '/laboratory/quality-control',
+  laboratoryEquipmentCalibration: '/laboratory/equipment-calibration',
+  laboratoryInstrumentMaintenance: '/laboratory/instrument-maintenance',
+  laboratoryReagentManagement: '/laboratory/reagent-management',
+  // Inventory
+  laboratoryInventory: '/laboratory/inventory',
+  laboratoryStockReceiving: '/laboratory/stock-receiving',
+  laboratoryReagentConsumption: '/laboratory/reagent-consumption',
+  laboratoryBatchManagement: '/laboratory/batch-management',
+  laboratoryExpiryManagement: '/laboratory/expiry-management',
+  laboratoryProcurementRequests: '/laboratory/procurement-requests',
+  laboratorySuppliers: '/laboratory/suppliers',
+  // Reports
+  laboratoryReports: '/laboratory/reports',
+  laboratorySampleReports: '/laboratory/reports/samples',
+  laboratoryTatReports: '/laboratory/reports/turnaround-time',
+  laboratoryQcReports: '/laboratory/reports/quality-control',
+  laboratoryEquipmentReports: '/laboratory/reports/equipment',
+
   // Billing sub-routes
   billingCharges: '/billing/charges',
   billingInvoices: '/billing/invoices',
