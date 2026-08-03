@@ -1789,6 +1789,34 @@ const NURSE_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_ORDERS_GUIDE: HelpGuide = {
+  id: 'laboratory-orders',
+  title: 'Laboratory Orders',
+  intro: 'Every test requisition from order to verification, grouped by the doctor who placed it.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Orders, New Orders, In Progress, Completed Today, Critical, and Average TAT summarize the incoming worklist at a glance.',
+    },
+    {
+      heading: 'Filters and tabs',
+      body: 'Search by patient, MRN, or order ID, then narrow by Date Range, Priority, or Department. The tab strip switches between New, In Progress, Awaiting Result Entry, Awaiting Verification, Completed, and Rejected orders.',
+    },
+    {
+      heading: 'The order table',
+      body: 'Each row is one requisition — one or more tests ordered together for the same patient at the same time. Select rows with the checkbox to receive samples or export in bulk; use the row menu for single-order actions.',
+    },
+    {
+      heading: 'Order details and workflow status',
+      body: 'Click a row to open its detail panel: patient and order information, every test on the requisition, and a Workflow Status stepper tracking progress from Ordered through Published.',
+    },
+    {
+      heading: 'Actions',
+      body: 'Receive Sample logs specimen receipt against every pending test on the order. Print Label prints a specimen label. Add Note records a comment on the order.',
+    },
+  ],
+};
+
 const LABORATORY_DASHBOARD_GUIDE: HelpGuide = {
   id: 'laboratory-dashboard',
   title: 'Laboratory Dashboard',
@@ -2789,6 +2817,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/referrals')) return REFERRALS_INDEX_GUIDE;
   if (pathname.startsWith('/lab/orders')) return LAB_ORDERS_GUIDE;
   if (pathname.startsWith('/lab/results')) return LAB_RESULTS_GUIDE;
+  if (pathname.startsWith('/laboratory/orders')) return LABORATORY_ORDERS_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;

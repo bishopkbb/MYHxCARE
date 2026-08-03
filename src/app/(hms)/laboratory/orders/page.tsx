@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Laboratory Orders' };
+import { LaboratoryOrdersWorkspace } from '@/features/laboratory/components/LaboratoryOrdersWorkspace';
 
 export default function LaboratoryOrdersPage() {
-  return (
-    <ComingSoon
-      title="Laboratory Orders"
-      description="The full incoming test-order worklist, prioritized by urgency, is on the way."
-    />
-  );
+  return <LaboratoryOrdersWorkspace />;
 }
