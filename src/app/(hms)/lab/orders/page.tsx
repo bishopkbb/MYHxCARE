@@ -268,6 +268,7 @@ export default function LabOrdersPage() {
       initials: selectedPatient.initials,
       avatarBg: selectedPatient.avatarBg,
       age: selectedPatient.age,
+      gender: selectedPatient.gender,
       testIds: Array.from(selected),
       priority: PRIORITY_TO_CANONICAL[priority],
       orderedBy: user?.name ?? 'Unknown Doctor',

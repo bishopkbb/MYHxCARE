@@ -108,6 +108,11 @@ export type LabResult = {
   notes?: LabResultNote[];
   lastFollowUpAt?: string;
   followUpCount?: number;
+  /** True when the Lab Scientist logged this requisition directly (Sample
+   * Collection's "Walk-in Collection"), with no doctor's order behind it —
+   * a real, common path for self-referred tests (genotype, blood group,
+   * HIV, etc.). Undefined/false for every doctor-placed order. */
+  isWalkIn?: boolean;
 };
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {

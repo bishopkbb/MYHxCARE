@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Sample Collection' };
+import { LaboratorySampleCollectionWorkspace } from '@/features/laboratory/components/LaboratorySampleCollectionWorkspace';
 
 export default function SampleCollectionPage() {
-  return (
-    <ComingSoon
-      title="Sample Collection"
-      description="Phlebotomy worklist and specimen-labelling for samples awaiting collection is on the way."
-    />
-  );
+  return <LaboratorySampleCollectionWorkspace />;
 }

@@ -1,35 +1,28 @@
 'use client';
 
 import {
+  ActivitySquare,
   AlertCircle,
-  AlertTriangle,
   CheckCircle2,
-  ClipboardList,
   Clock,
-  FlaskConical,
-  MoreVertical,
-  Printer,
+  ClipboardList,
+  Plus,
   RefreshCw,
   Search,
-  ShieldCheck,
-  Sparkles,
-  StickyNote,
   TestTube2,
-  Timer,
   UserRound,
   X,
+  XCircle,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { ExportMenu } from '@components/ExportMenu';
 import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
-import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -38,19 +31,29 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { formatDate, formatDateTime, formatTime, isSameDay, isToday } from '@/utils/datetime';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
-import { addNote, collectSample, useLabResults } from '@/features/laboratory/store/labResultStore';
-import { groupIntoOrders, type RawLabOrder } from '@/features/laboratory/utils/labOrders';
+import { collectSample, useLabResults } from '@/features/laboratory/store/labResultStore';
+import {
+  deriveSampleId,
+  deriveSampleType,
+  groupIntoOrders,
+  orderSampleType,
+  type RawLabOrder,
+} from '@/features/laboratory/utils/labOrders';
 import type {
   LabDepartment,
   LabResult,
-  LabResultFlag,
   LabResultPriority,
   LabResultStatus,
 } from '@/features/laboratory/__mocks__/labResultFixtures';
-import type { ReceiveSampleInput } from './ReceiveSampleModal';
+import type { CollectSampleInput } from './CollectSampleModal';
 
-const ReceiveSampleModal = dynamic(
-  () => import('./ReceiveSampleModal').then((m) => m.ReceiveSampleModal),
+const CollectSampleModal = dynamic(
+  () => import('./CollectSampleModal').then((m) => m.CollectSampleModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+
+const WalkInCollectionModal = dynamic(
+  () => import('./WalkInCollectionModal').then((m) => m.WalkInCollectionModal),
   { ssr: false, loading: () => <ModalLoadingFallback /> },
 );
 
@@ -59,76 +62,73 @@ const FOCUS_RING =
 
 type PageState = 'loading' | 'loaded' | 'error';
 
-type OrderStatus =
-  | 'New'
+// ── Collection status — a different, 5-bucket taxonomy layered on top of the
+// same shared `RawLabOrder` grouping Orders uses, scoped to today's
+// phlebotomy queue (see labOrders.ts). A requisition fully collected on a
+// prior day and never rejected deliberately surfaces in none of these 5
+// buckets — same as the reference screen's own tab set, which has no
+// catch-all "All" tab. ────────────────────────────────────────────────────
+
+type CollectionStatus =
+  | 'Pending Collection'
   | 'In Progress'
-  | 'Awaiting Result Entry'
-  | 'Awaiting Verification'
-  | 'Completed'
-  | 'Rejected';
+  | 'Collected Today'
+  | 'Collection Overdue'
+  | 'Rejected'
+  | 'Collected (Older)';
 
-type LabOrder = RawLabOrder & {
-  status: OrderStatus;
-  isNew: boolean;
-  isCritical: boolean;
-  completedAt?: string;
-  tatMs?: number;
+const COLLECTION_TABS: CollectionStatus[] = [
+  'Pending Collection',
+  'In Progress',
+  'Collected Today',
+  'Collection Overdue',
+  'Rejected',
+];
+
+/** Collection-turnaround SLA, from order placement to specimen draw — a
+ * different real thing than `TEST_TAT_HOURS` in
+ * `nursing/__mocks__/laboratoryFixtures.ts` (that's a result-turnaround
+ * target, measured from collection to result). No such target exists
+ * anywhere in the codebase yet, so these are new, priority-based constants. */
+const COLLECTION_SLA_MS: Record<LabResultPriority, number> = {
+  STAT: 30 * 60_000,
+  URGENT: 2 * 60 * 60_000,
+  ROUTINE: 4 * 60 * 60_000,
 };
 
-// ── Order status — layered on top of the shared `RawLabOrder` grouping from
-// `labOrders.ts` (see that file for why an "Order" is a real, derived, never-
-// persisted grouping of LabResult rows). This screen's own 6-state
-// full-lifecycle taxonomy; other screens (e.g. Sample Collection) derive a
-// different taxonomy from the same raw grouping. ───────────────────────────
-
-const TEST_STATUS_RANK: Record<LabResultStatus, number> = {
-  ORDERED: 0,
-  SAMPLE_COLLECTED: 1,
-  IN_PROCESS: 2,
-  RESULTED: 3,
-  VERIFIED: 4,
-  REJECTED: -1,
-};
-
-function deriveOrderStatus(tests: LabResult[]): OrderStatus {
+function deriveCollectionStatus(order: RawLabOrder, nowMs: number): CollectionStatus {
+  const { tests, priority, orderedAt } = order;
   if (tests.some((t) => t.status === 'REJECTED')) return 'Rejected';
-  if (tests.every((t) => t.status === 'VERIFIED')) return 'Completed';
-  if (tests.every((t) => t.status === 'ORDERED')) return 'New';
-  const minRank = Math.min(...tests.map((t) => TEST_STATUS_RANK[t.status]));
-  if (minRank <= 1) return 'In Progress';
-  if (minRank === 2) return 'Awaiting Result Entry';
-  return 'Awaiting Verification';
+
+  const noneStillOrdered = tests.every((t) => t.status !== 'ORDERED');
+  if (noneStillOrdered) {
+    const maxCollectedAt = tests.reduce<string | undefined>((max, t) => {
+      if (!t.sampleCollectedAt) return max;
+      if (!max || new Date(t.sampleCollectedAt).getTime() > new Date(max).getTime()) {
+        return t.sampleCollectedAt;
+      }
+      return max;
+    }, undefined);
+    return maxCollectedAt && isToday(maxCollectedAt) ? 'Collected Today' : 'Collected (Older)';
+  }
+
+  const someCollected = tests.some((t) => t.status !== 'ORDERED');
+  if (someCollected) return 'In Progress';
+
+  const elapsed = nowMs - new Date(orderedAt).getTime();
+  return elapsed > COLLECTION_SLA_MS[priority] ? 'Collection Overdue' : 'Pending Collection';
 }
 
-function formatHrsMin(ms: number): string {
-  const totalMinutes = Math.max(0, Math.round(ms / 60000));
-  const hrs = Math.floor(totalMinutes / 60);
-  const mins = totalMinutes % 60;
-  return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+/** Tests still eligible for a (re)collection action — either never drawn, or
+ * drawn but rejected by the lab and awaiting a fresh sample. */
+function collectibleTests(order: RawLabOrder): LabResult[] {
+  return order.tests.filter((t) => t.status === 'ORDERED' || t.status === 'REJECTED');
 }
 
-function buildOrder(raw: RawLabOrder): LabOrder {
-  const { tests, orderedAt } = raw;
-  const status = deriveOrderStatus(tests);
-  const maxResultAt = tests.reduce<string | undefined>((max, t) => {
-    if (!t.resultAt) return max;
-    if (!max || new Date(t.resultAt).getTime() > new Date(max).getTime()) return t.resultAt;
-    return max;
-  }, undefined);
-  const completion =
-    status === 'Completed' && maxResultAt
-      ? {
-          completedAt: maxResultAt,
-          tatMs: new Date(maxResultAt).getTime() - new Date(orderedAt).getTime(),
-        }
-      : {};
-  return {
-    ...raw,
-    status,
-    isNew: status === 'New',
-    isCritical: tests.some((t) => t.flag === 'CRITICAL'),
-    ...completion,
-  };
+type SampleOrder = RawLabOrder & { status: CollectionStatus };
+
+function buildSampleOrder(raw: RawLabOrder, nowMs: number): SampleOrder {
+  return { ...raw, status: deriveCollectionStatus(raw, nowMs) };
 }
 
 // ── Config ─────────────────────────────────────────────────────────────────
@@ -141,30 +141,29 @@ const DEPARTMENTS: LabDepartment[] = [
   'Coagulation',
 ];
 
-const ORDER_STATUSES: OrderStatus[] = [
-  'New',
-  'In Progress',
-  'Awaiting Result Entry',
-  'Awaiting Verification',
-  'Completed',
-  'Rejected',
-];
-
-const ORDER_STATUS_CFG: Record<OrderStatus, { color: string; border: string; bg: string }> = {
-  New: { color: '#8B5CF6', border: 'rgba(139,92,246,0.4)', bg: 'rgba(139,92,246,0.08)' },
+const STATUS_CFG: Record<CollectionStatus, { color: string; border: string; bg: string }> = {
+  'Pending Collection': {
+    color: '#8B5CF6',
+    border: 'rgba(139,92,246,0.4)',
+    bg: 'rgba(139,92,246,0.08)',
+  },
   'In Progress': { color: '#3B82F6', border: 'rgba(59,130,246,0.4)', bg: 'rgba(59,130,246,0.08)' },
-  'Awaiting Result Entry': {
-    color: '#D97706',
-    border: 'rgba(245,158,11,0.4)',
-    bg: 'rgba(245,158,11,0.08)',
+  'Collected Today': {
+    color: '#16A34A',
+    border: 'rgba(34,197,94,0.4)',
+    bg: 'rgba(34,197,94,0.08)',
   },
-  'Awaiting Verification': {
-    color: '#00B4D8',
-    border: 'rgba(0,180,216,0.4)',
-    bg: 'rgba(0,180,216,0.08)',
+  'Collection Overdue': {
+    color: '#DC2626',
+    border: 'rgba(220,38,38,0.4)',
+    bg: 'rgba(220,38,38,0.08)',
   },
-  Completed: { color: '#16A34A', border: 'rgba(34,197,94,0.4)', bg: 'rgba(34,197,94,0.08)' },
   Rejected: { color: '#EF4444', border: 'rgba(239,68,68,0.4)', bg: 'rgba(239,68,68,0.08)' },
+  'Collected (Older)': {
+    color: '#16A34A',
+    border: 'rgba(34,197,94,0.4)',
+    bg: 'rgba(34,197,94,0.08)',
+  },
 };
 
 const PRIORITY_CFG: Record<LabResultPriority, { color: string; border: string; bg: string }> = {
@@ -189,13 +188,13 @@ const TEST_STATUS_CFG: Record<
     color: '#8B5CF6',
     border: 'rgba(139,92,246,0.4)',
     bg: 'rgba(139,92,246,0.08)',
-    label: 'Ordered',
+    label: 'Pending',
   },
   SAMPLE_COLLECTED: {
     color: '#3B82F6',
     border: 'rgba(59,130,246,0.4)',
     bg: 'rgba(59,130,246,0.08)',
-    label: 'Sample Collected',
+    label: 'Collected',
   },
   IN_PROCESS: {
     color: '#D97706',
@@ -223,44 +222,9 @@ const TEST_STATUS_CFG: Record<
   },
 };
 
-const FLAG_LABEL: Record<LabResultFlag, string> = {
-  NORMAL: 'Normal',
-  ABNORMAL: 'Abnormal',
-  CRITICAL: 'Critical',
-};
-const FLAG_COLOR: Record<LabResultFlag, string> = {
-  NORMAL: '#16A34A',
-  ABNORMAL: '#D97706',
-  CRITICAL: '#DC2626',
-};
-
-const STEPPER_STEPS: { label: string; icon: LucideIcon }[] = [
-  { label: 'Ordered', icon: ClipboardList },
-  { label: 'Sample Collection', icon: TestTube2 },
-  { label: 'Result Entry', icon: FlaskConical },
-  { label: 'Verification', icon: ShieldCheck },
-  { label: 'Published', icon: CheckCircle2 },
-];
-
-function stepIndexForOrder(status: OrderStatus): number {
-  switch (status) {
-    case 'New':
-      return 0;
-    case 'In Progress':
-    case 'Rejected':
-      return 1;
-    case 'Awaiting Result Entry':
-      return 2;
-    case 'Awaiting Verification':
-      return 3;
-    case 'Completed':
-      return 4;
-  }
-}
-
-type FilterKey = 'dateRange' | 'priority' | 'department';
+type FilterKey = 'dateRange' | 'department' | 'priority';
 type FilterState = Record<FilterKey, string>;
-const FILTER_DEFAULTS: FilterState = { dateRange: 'ALL', priority: 'ALL', department: 'ALL' };
+const FILTER_DEFAULTS: FilterState = { dateRange: 'ALL', department: 'ALL', priority: 'ALL' };
 const FILTER_DEFS: {
   key: FilterKey;
   defaultLabel: string;
@@ -276,6 +240,11 @@ const FILTER_DEFS: {
     ],
   },
   {
+    key: 'department',
+    defaultLabel: 'All Departments',
+    options: DEPARTMENTS.map((d) => ({ value: d, label: d })),
+  },
+  {
     key: 'priority',
     defaultLabel: 'All Priorities',
     options: [
@@ -284,54 +253,43 @@ const FILTER_DEFS: {
       { value: 'ROUTINE', label: 'Routine' },
     ],
   },
-  {
-    key: 'department',
-    defaultLabel: 'All Departments',
-    options: DEPARTMENTS.map((d) => ({ value: d, label: d })),
-  },
 ];
-
-const TABS: ('All Orders' | OrderStatus)[] = ['All Orders', ...ORDER_STATUSES];
 
 // ── Export ─────────────────────────────────────────────────────────────────
 
-function exportOrdersAsCSV(orders: LabOrder[]) {
-  downloadCSV('laboratory-orders', [
+function exportOrdersAsCSV(orders: SampleOrder[]) {
+  downloadCSV('sample-collection', [
     [
       'Order ID',
       'Patient',
       'MRN',
       'Test(s)',
-      'Ordered By',
       'Department',
       'Priority',
       'Status',
-      'Ordered Date',
-      'Ordered Time',
-      'TAT',
+      'Requested Date',
+      'Requested Time',
     ],
     ...orders.map((o) => [
       o.orderId,
       o.patientName,
       o.mrn,
       o.tests.map((t) => t.testName).join('; '),
-      o.orderedBy,
       Array.from(new Set(o.tests.map((t) => t.department))).join('; '),
       o.priority,
       o.status,
       formatDate(o.orderedAt),
       formatTime(o.orderedAt),
-      o.tatMs !== undefined ? formatHrsMin(o.tatMs) : '—',
     ]),
   ]);
 }
 
-function exportOrdersAsPDF(orders: LabOrder[]) {
+function exportOrdersAsPDF(orders: SampleOrder[]) {
   const body = `
-    <h1>Laboratory Orders</h1>
-    <p class="meta">${orders.length} order${orders.length === 1 ? '' : 's'}</p>
+    <h1>Sample Collection</h1>
+    <p class="meta">${orders.length} requisition${orders.length === 1 ? '' : 's'}</p>
     <table>
-      <thead><tr><th>Order ID</th><th>Patient</th><th>MRN</th><th>Test(s)</th><th>Department</th><th>Priority</th><th>Status</th><th>Ordered</th></tr></thead>
+      <thead><tr><th>Order ID</th><th>Patient</th><th>MRN</th><th>Test(s)</th><th>Department</th><th>Priority</th><th>Status</th><th>Requested</th></tr></thead>
       <tbody>
         ${orders
           .map(
@@ -342,25 +300,7 @@ function exportOrdersAsPDF(orders: LabOrder[]) {
       </tbody>
     </table>
   `;
-  downloadPDF('laboratory-orders', body);
-}
-
-function specimenLabelBody(order: LabOrder): string {
-  return `
-    <h1>Specimen Label</h1>
-    <p class="meta">${escapeHtml(order.orderId)}</p>
-    <hr />
-    <p><strong>${escapeHtml(order.patientName)}</strong></p>
-    <p>MRN: ${escapeHtml(order.mrn)}</p>
-    ${order.ward ? `<p>${escapeHtml(order.ward)}${order.bed ? ` — ${escapeHtml(order.bed)}` : ''}</p>` : ''}
-    <p>Ordered by: ${escapeHtml(order.orderedBy)}</p>
-    <p>Ordered: ${escapeHtml(formatDateTime(order.orderedAt))}</p>
-    <hr />
-    <table>
-      <thead><tr><th>Test</th><th>Department</th></tr></thead>
-      <tbody>${order.tests.map((t) => `<tr><td>${escapeHtml(t.testName)}</td><td>${escapeHtml(t.department)}</td></tr>`).join('')}</tbody>
-    </table>
-  `;
+  downloadPDF('sample-collection', body);
 }
 
 // ── Skeletons ──────────────────────────────────────────────────────────────
@@ -392,78 +332,13 @@ function SkeletonRow() {
       <div className="h-3.5 w-32 shrink-0 animate-pulse rounded bg-slate-200" />
       <div className="h-3.5 flex-1 animate-pulse rounded bg-slate-200" />
       <div className="h-3.5 w-20 shrink-0 animate-pulse rounded bg-slate-200" />
-      <div className="h-3.5 w-20 shrink-0 animate-pulse rounded bg-slate-200" />
-    </div>
-  );
-}
-
-// ── Row action menu ──────────────────────────────────────────────────────────
-
-function OrderRowMenu({
-  order,
-  open,
-  onToggle,
-  onView,
-  onReceive,
-  onPrint,
-}: {
-  order: LabOrder;
-  open: boolean;
-  onToggle: () => void;
-  onView: () => void;
-  onReceive?: (() => void) | undefined;
-  onPrint: () => void;
-}) {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  return (
-    <div className="relative">
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={onToggle}
-        aria-label={`More actions for ${order.orderId}`}
-        className={`flex size-11 shrink-0 items-center justify-center rounded-[10px] transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-      >
-        <MoreVertical style={{ width: 16, height: 16, color: '#4A7080' }} />
-      </button>
-      <RowMenuPortal open={open} anchorRef={buttonRef} onClose={onToggle} width={200}>
-        <button
-          type="button"
-          onClick={onView}
-          className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-          style={{ fontSize: 14, color: '#0D2630' }}
-        >
-          <ClipboardList style={{ width: 15, height: 15, color: '#00B4D8' }} />
-          View Order
-        </button>
-        {onReceive && (
-          <button
-            type="button"
-            onClick={onReceive}
-            className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-            style={{ fontSize: 14, color: '#0D2630' }}
-          >
-            <TestTube2 style={{ width: 15, height: 15, color: '#22C55E' }} />
-            Receive Sample
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={onPrint}
-          className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-          style={{ fontSize: 14, color: '#0D2630' }}
-        >
-          <Printer style={{ width: 15, height: 15, color: '#4A7080' }} />
-          Print Label
-        </button>
-      </RowMenuPortal>
     </div>
   );
 }
 
 // ── Main workspace ───────────────────────────────────────────────────────────
 
-export function LaboratoryOrdersWorkspace() {
+export function LaboratorySampleCollectionWorkspace() {
   const router = useRouter();
   const { user } = useAuth();
   const toast = useToast();
@@ -482,41 +357,43 @@ export function LaboratoryOrdersWorkspace() {
     setTimeout(() => setPageState('loaded'), 700);
   }
 
-  const orders = useMemo<LabOrder[]>(() => groupIntoOrders(results).map(buildOrder), [results]);
+  const orders = useMemo<SampleOrder[]>(() => {
+    const nowMs = now.getTime();
+    return groupIntoOrders(results).map((raw) => buildSampleOrder(raw, nowMs));
+  }, [results, now]);
 
   // ── Stat cards — always over the full, unfiltered order set ─────────────
-  const newCount = useMemo(() => orders.filter((o) => o.status === 'New').length, [orders]);
+  const pendingCount = useMemo(
+    () => orders.filter((o) => o.status === 'Pending Collection').length,
+    [orders],
+  );
   const inProgressCount = useMemo(
     () => orders.filter((o) => o.status === 'In Progress').length,
     [orders],
   );
-  const completedTodayCount = useMemo(
-    () =>
-      orders.filter((o) => o.status === 'Completed' && o.completedAt && isToday(o.completedAt))
-        .length,
+  const collectedTodayCount = useMemo(
+    () => orders.filter((o) => o.status === 'Collected Today').length,
     [orders],
   );
-  const criticalCount = useMemo(() => orders.filter((o) => o.isCritical).length, [orders]);
-  const avgTatLabel = useMemo(() => {
-    const completed = orders.filter((o) => o.tatMs !== undefined);
-    if (completed.length === 0) return '—';
-    const avg = completed.reduce((sum, o) => sum + (o.tatMs ?? 0), 0) / completed.length;
-    return formatHrsMin(avg);
-  }, [orders]);
+  const overdueCount = useMemo(
+    () => orders.filter((o) => o.status === 'Collection Overdue').length,
+    [orders],
+  );
+  const rejectedCount = useMemo(
+    () => orders.filter((o) => o.status === 'Rejected').length,
+    [orders],
+  );
 
   // ── Filters / search / tabs / pagination ─────────────────────────────────
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
-  const [tab, setTab] = useState<'All Orders' | OrderStatus>('All Orders');
+  const [tab, setTab] = useState<CollectionStatus>('Pending Collection');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedGroupKey, setSelectedGroupKey] = useState<string | null>(null);
-  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
-  const [receiveTarget, setReceiveTarget] = useState<LabOrder | null>(null);
-  const [noteOpen, setNoteOpen] = useState(false);
-  const [noteDraft, setNoteDraft] = useState('');
-  const [rowMenuOpenKey, setRowMenuOpenKey] = useState<string | null>(null);
+  const [collectTarget, setCollectTarget] = useState<SampleOrder | null>(null);
+  const [walkInOpen, setWalkInOpen] = useState(false);
 
   function setFilter(key: FilterKey, value: string) {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -539,10 +416,10 @@ export function LaboratoryOrdersWorkspace() {
         return new Date(o.orderedAt).getTime() >= sevenDaysAgo.getTime();
       });
     }
-    if (filters.priority !== 'ALL') list = list.filter((o) => o.priority === filters.priority);
     if (filters.department !== 'ALL') {
       list = list.filter((o) => o.tests.some((t) => t.department === filters.department));
     }
+    if (filters.priority !== 'ALL') list = list.filter((o) => o.priority === filters.priority);
     const q = search.trim().toLowerCase();
     if (q) {
       list = list.filter(
@@ -556,31 +433,28 @@ export function LaboratoryOrdersWorkspace() {
   }, [orders, filters, search, now]);
 
   const tabCounts = useMemo(() => {
-    const counts = { 'All Orders': preTabFiltered.length } as Record<
-      'All Orders' | OrderStatus,
-      number
-    >;
-    for (const s of ORDER_STATUSES) counts[s] = 0;
-    for (const o of preTabFiltered) counts[o.status] += 1;
+    const counts = {} as Record<CollectionStatus, number>;
+    for (const s of COLLECTION_TABS) counts[s] = 0;
+    for (const o of preTabFiltered) {
+      if (o.status in counts) counts[o.status] += 1;
+    }
     return counts;
   }, [preTabFiltered]);
 
   const filtered = useMemo(
-    () => (tab === 'All Orders' ? preTabFiltered : preTabFiltered.filter((o) => o.status === tab)),
+    () => preTabFiltered.filter((o) => o.status === tab),
     [preTabFiltered, tab],
   );
 
-  const hasActiveFilters =
-    search !== '' || Object.values(filters).some((v) => v !== 'ALL') || tab !== 'All Orders';
+  const hasActiveFilters = search !== '' || Object.values(filters).some((v) => v !== 'ALL');
 
   function clearFilters() {
     setSearch('');
     setFilters(FILTER_DEFAULTS);
-    setTab('All Orders');
     setPage(1);
   }
 
-  function selectTab(next: 'All Orders' | OrderStatus) {
+  function selectTab(next: CollectionStatus) {
     setTab(next);
     setPage(1);
     setSelectedGroupKey(null);
@@ -595,81 +469,20 @@ export function LaboratoryOrdersWorkspace() {
     ? orders.find((o) => o.groupKey === selectedGroupKey)
     : undefined;
 
-  function openOrder(order: LabOrder) {
+  function openOrder(order: SampleOrder) {
     setSelectedGroupKey(order.groupKey);
-    setNoteOpen(false);
-    setNoteDraft('');
   }
 
-  function toggleSelected(groupKey: string) {
-    setSelectedKeys((prev) => {
-      const next = new Set(prev);
-      if (next.has(groupKey)) next.delete(groupKey);
-      else next.add(groupKey);
-      return next;
-    });
-  }
-
-  const allPageSelected =
-    pageRows.length > 0 && pageRows.every((o) => selectedKeys.has(o.groupKey));
-
-  function toggleSelectAllOnPage() {
-    setSelectedKeys((prev) => {
-      const next = new Set(prev);
-      if (allPageSelected) pageRows.forEach((o) => next.delete(o.groupKey));
-      else pageRows.forEach((o) => next.add(o.groupKey));
-      return next;
-    });
-  }
-
-  const selectedOrders = orders.filter((o) => selectedKeys.has(o.groupKey));
-
-  function handleReceiveConfirm(input: ReceiveSampleInput) {
-    if (!receiveTarget) return;
-    const pending = receiveTarget.tests.filter((t) => t.status === 'ORDERED');
-    for (const t of pending) {
-      collectSample(t.id, user?.name ?? 'Lab Scientist', input.collectedAt);
+  function handleCollectConfirm(input: CollectSampleInput) {
+    if (!collectTarget) return;
+    for (const id of input.testIds) {
+      collectSample(id, user?.name ?? 'Lab Scientist', input.collectedAt);
     }
     toast.success(
-      'Sample received',
-      `${receiveTarget.orderId} — ${pending.length} test${pending.length === 1 ? '' : 's'} logged in.`,
+      'Sample collected',
+      `${collectTarget.orderId} — ${input.testIds.length} test${input.testIds.length === 1 ? '' : 's'} drawn (${input.sampleType}).`,
     );
-    setReceiveTarget(null);
-  }
-
-  function handleBulkReceive() {
-    const nowIso = new Date().toISOString();
-    let count = 0;
-    for (const o of selectedOrders) {
-      const pending = o.tests.filter((t) => t.status === 'ORDERED');
-      for (const t of pending) {
-        collectSample(t.id, user?.name ?? 'Lab Scientist', nowIso);
-        count += 1;
-      }
-    }
-    toast.success(
-      'Samples received',
-      `${count} test${count === 1 ? '' : 's'} across ${selectedOrders.length} order${selectedOrders.length === 1 ? '' : 's'} logged in.`,
-    );
-    setSelectedKeys(new Set());
-  }
-
-  function handlePrintLabel(order: LabOrder) {
-    downloadPDF(`specimen-label-${order.orderId}`, specimenLabelBody(order));
-  }
-
-  function handleSaveNote() {
-    if (!selectedOrder || !noteDraft.trim()) return;
-    const targetTest = selectedOrder.tests[0];
-    if (!targetTest) return;
-    addNote(targetTest.id, {
-      text: noteDraft.trim(),
-      author: user?.name ?? 'Lab Scientist',
-      createdAt: new Date().toISOString(),
-    });
-    toast.success('Note added', `Your note on ${selectedOrder.orderId} has been saved.`);
-    setNoteDraft('');
-    setNoteOpen(false);
+    setCollectTarget(null);
   }
 
   if (pageState === 'error') {
@@ -683,7 +496,7 @@ export function LaboratoryOrdersWorkspace() {
             >
               <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
               <p className="font-sans font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-                Failed to load laboratory orders
+                Failed to load the collection worklist
               </p>
               <button
                 type="button"
@@ -717,67 +530,81 @@ export function LaboratoryOrdersWorkspace() {
                 className="font-display font-semibold"
                 style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
               >
-                Laboratory Orders
+                Sample Collection
               </h1>
               <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-                Track every test requisition from order to verification
+                Manage specimen collection for laboratory orders
               </p>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={handleRetry}
+                className={`flex h-11 shrink-0 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.2)' }}
+              >
+                <RefreshCw style={{ width: 15, height: 15 }} />
+                Refresh
+              </button>
+              <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+                <button
+                  type="button"
+                  onClick={() => setWalkInOpen(true)}
+                  className={`flex h-11 shrink-0 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                  style={{ fontSize: 14, background: '#00B4D8' }}
+                >
+                  <Plus style={{ width: 15, height: 15 }} />
+                  Walk-in Collection
+                </button>
+              </PermissionGate>
             </div>
           </div>
 
           {/* ── Stat cards ─────────────────────────────────────────────────── */}
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
             {pageState === 'loading' ? (
-              Array.from({ length: 6 }).map((_, i) => <SkeletonStatCard key={i} />)
+              Array.from({ length: 5 }).map((_, i) => <SkeletonStatCard key={i} />)
             ) : (
               <>
                 <StatCard
                   icon={ClipboardList}
-                  label="Total Orders"
-                  value={orders.length}
-                  info="Across all statuses"
-                  accent="#00B4D8"
-                  iconBg="rgba(0,180,216,0.1)"
-                />
-                <StatCard
-                  icon={Sparkles}
-                  label="New Orders"
-                  value={newCount}
-                  info="Awaiting sample collection"
+                  label="Pending Collection"
+                  value={pendingCount}
+                  info="Awaiting specimen draw"
                   accent="#8B5CF6"
                   iconBg="rgba(139,92,246,0.1)"
                 />
                 <StatCard
-                  icon={Timer}
-                  label="In Progress"
+                  icon={ActivitySquare}
+                  label="Collection In Progress"
                   value={inProgressCount}
-                  info="Sample collected, en route"
+                  info="Partially drawn"
                   accent="#3B82F6"
                   iconBg="rgba(59,130,246,0.1)"
                 />
                 <StatCard
                   icon={CheckCircle2}
-                  label="Completed Today"
-                  value={completedTodayCount}
-                  info="Verified since midnight (WAT)"
+                  label="Collected Today"
+                  value={collectedTodayCount}
+                  info="Since midnight (WAT)"
                   accent="#16A34A"
                   iconBg="rgba(22,163,74,0.1)"
                 />
                 <StatCard
-                  icon={AlertTriangle}
-                  label="Critical"
-                  value={criticalCount}
-                  info="Contains a critical flag"
+                  icon={Clock}
+                  label="Collection Overdue"
+                  value={overdueCount}
+                  info="Past the collection SLA"
                   accent="#DC2626"
                   iconBg="rgba(220,38,38,0.1)"
                 />
                 <StatCard
-                  icon={Clock}
-                  label="Average TAT"
-                  value={avgTatLabel}
-                  info="Completed orders (hrs:min)"
-                  accent="#D97706"
-                  iconBg="rgba(245,158,11,0.1)"
+                  icon={XCircle}
+                  label="Collection Rejected"
+                  value={rejectedCount}
+                  info="Needs recollection"
+                  accent="#EF4444"
+                  iconBg="rgba(239,68,68,0.1)"
                 />
               </>
             )}
@@ -846,7 +673,7 @@ export function LaboratoryOrdersWorkspace() {
                     className="flex gap-1"
                     style={{ borderBottom: '1px solid rgba(0,100,130,0.12)' }}
                   >
-                    {TABS.map((t) => (
+                    {COLLECTION_TABS.map((t) => (
                       <button
                         key={t}
                         type="button"
@@ -873,54 +700,12 @@ export function LaboratoryOrdersWorkspace() {
               <div className="mt-4 flex flex-col gap-4 xl:flex-row xl:items-start">
                 {/* ── List pane ─────────────────────────────────────────────── */}
                 <div className={`min-w-0 flex-1 ${selectedOrder ? 'hidden xl:block' : 'block'}`}>
-                  {selectedKeys.size > 0 && (
-                    <div
-                      className="mb-3 flex flex-wrap items-center justify-between gap-2.5 rounded-[10px] px-4 py-2.5"
-                      style={{
-                        background: 'rgba(0,180,216,0.06)',
-                        border: '1px solid rgba(0,180,216,0.25)',
-                      }}
-                    >
-                      <p
-                        className="font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        {selectedKeys.size} order{selectedKeys.size === 1 ? '' : 's'} selected
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
-                          <button
-                            type="button"
-                            onClick={handleBulkReceive}
-                            className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                            style={{ fontSize: 14, background: '#00B4D8' }}
-                          >
-                            <TestTube2 style={{ width: 14, height: 14 }} />
-                            Receive Sample
-                          </button>
-                        </PermissionGate>
-                        <button
-                          type="button"
-                          onClick={() => exportOrdersAsCSV(selectedOrders)}
-                          className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-white ${FOCUS_RING}`}
-                          style={{
-                            fontSize: 14,
-                            color: '#0D2630',
-                            border: '1px solid rgba(0,100,130,0.18)',
-                          }}
-                        >
-                          Export Selected
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
                   <div
                     className="rounded-[12px] p-4 sm:p-5"
                     style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                   >
                     <div className="overflow-x-auto scroll-smooth">
-                      <div className="min-w-[1580px]">
+                      <div className="min-w-[1440px]">
                         <div
                           className="flex items-center rounded-t-[8px]"
                           style={{
@@ -928,26 +713,15 @@ export function LaboratoryOrdersWorkspace() {
                             borderBottom: '1px solid #E6F8FD',
                           }}
                         >
-                          <div className="flex w-11 shrink-0 items-center justify-center py-2.5">
-                            <input
-                              type="checkbox"
-                              checked={allPageSelected}
-                              onChange={toggleSelectAllOnPage}
-                              aria-label="Select all orders on this page"
-                              className="size-4 shrink-0 accent-[#00B4D8]"
-                            />
-                          </div>
                           {[
                             ['Order ID', 'w-44', 'left'],
                             ['Patient', 'w-44', 'left'],
                             ['Age/Gender', 'w-32', 'center'],
-                            ['Test(s)', 'min-w-[180px] flex-1', 'center'],
-                            ['Ordered By', 'w-40', 'left'],
+                            ['Test(s)', 'min-w-[160px] flex-1', 'center'],
                             ['Department', 'w-32', 'left'],
-                            ['Priority', 'w-24', 'left'],
+                            ['Priority', 'w-24', 'center'],
+                            ['Requested At', 'w-32', 'left'],
                             ['Status', 'w-52', 'center'],
-                            ['Ordered', 'w-32', 'left'],
-                            ['TAT', 'w-20', 'left'],
                           ].map(([label, width, align]) => (
                             <div
                               key={label}
@@ -961,12 +735,12 @@ export function LaboratoryOrdersWorkspace() {
                               </span>
                             </div>
                           ))}
-                          <div className="w-14 shrink-0 py-2.5 pr-3 text-right">
+                          <div className="w-32 shrink-0 py-2.5 pr-3 text-center">
                             <span
                               className="font-sans font-bold tracking-wider uppercase"
                               style={{ fontSize: 14, color: '#4A7080' }}
                             >
-                              Actions
+                              Action
                             </span>
                           </div>
                         </div>
@@ -983,7 +757,7 @@ export function LaboratoryOrdersWorkspace() {
                               className="font-sans font-medium"
                               style={{ fontSize: 16, color: '#4A7080' }}
                             >
-                              No orders match your filters
+                              No requisitions match your filters
                             </p>
                             {hasActiveFilters && (
                               <button
@@ -999,26 +773,17 @@ export function LaboratoryOrdersWorkspace() {
                         )}
 
                         {pageRows.map((order) => {
-                          const statusCfg = ORDER_STATUS_CFG[order.status];
+                          const statusCfg = STATUS_CFG[order.status];
                           const priorityCfg = PRIORITY_CFG[order.priority];
                           const uniqueDepartments = Array.from(
                             new Set(order.tests.map((t) => t.department)),
                           );
-                          const tatIsFinal =
-                            order.status === 'Completed' && order.tatMs !== undefined;
-                          const tatLabel = tatIsFinal
-                            ? formatHrsMin(order.tatMs!)
-                            : order.status === 'Rejected'
-                              ? '—'
-                              : formatHrsMin(now.getTime() - new Date(order.orderedAt).getTime());
                           const testsLabel =
                             order.tests.length === 1
                               ? order.tests[0]!.testName
                               : `${order.tests.length} tests`;
                           const testsTooltip = order.tests.map((t) => t.testName).join(', ');
-                          const pendingCount = order.tests.filter(
-                            (t) => t.status === 'ORDERED',
-                          ).length;
+                          const collectible = collectibleTests(order);
 
                           return (
                             <div
@@ -1031,19 +796,7 @@ export function LaboratoryOrdersWorkspace() {
                                   selectedGroupKey === order.groupKey ? '#E6F8FD' : 'transparent',
                               }}
                             >
-                              <div
-                                className="flex w-11 shrink-0 items-center justify-center py-3"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={selectedKeys.has(order.groupKey)}
-                                  onChange={() => toggleSelected(order.groupKey)}
-                                  aria-label={`Select order ${order.orderId}`}
-                                  className="size-4 shrink-0 accent-[#00B4D8]"
-                                />
-                              </div>
-                              <div className="w-44 shrink-0 py-3 pr-2">
+                              <div className="w-44 shrink-0 py-3 pr-2 pl-3">
                                 <div className="flex items-center gap-1.5">
                                   <Tooltip content={order.orderId}>
                                     <p
@@ -1053,18 +806,6 @@ export function LaboratoryOrdersWorkspace() {
                                       {order.orderId}
                                     </p>
                                   </Tooltip>
-                                  {order.isNew && (
-                                    <span
-                                      className="shrink-0 rounded-full px-1.5 py-0.5 font-sans font-semibold whitespace-nowrap"
-                                      style={{
-                                        fontSize: 14,
-                                        color: '#FFFFFF',
-                                        background: '#00B4D8',
-                                      }}
-                                    >
-                                      NEW
-                                    </span>
-                                  )}
                                   {order.isWalkIn && (
                                     <span
                                       className="shrink-0 rounded-full px-1.5 py-0.5 font-sans font-semibold whitespace-nowrap"
@@ -1104,23 +845,13 @@ export function LaboratoryOrdersWorkspace() {
                                   {order.gender ? ` · ${order.gender[0]}` : ''}
                                 </p>
                               </div>
-                              <div className="min-w-[180px] flex-1 py-3 pr-2 text-center">
+                              <div className="min-w-[160px] flex-1 py-3 pr-2 text-center">
                                 <Tooltip content={testsTooltip}>
                                   <p
                                     className="truncate"
                                     style={{ fontSize: 14, color: '#0D2630' }}
                                   >
                                     {testsLabel}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-40 shrink-0 py-3 pr-2">
-                                <Tooltip content={order.orderedBy}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {order.orderedBy}
                                   </p>
                                 </Tooltip>
                               </div>
@@ -1151,7 +882,7 @@ export function LaboratoryOrdersWorkspace() {
                                   </Tooltip>
                                 )}
                               </div>
-                              <div className="w-24 shrink-0 py-3 pr-2">
+                              <div className="w-24 shrink-0 py-3 pr-2 text-center">
                                 <span
                                   className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
                                   style={{
@@ -1163,6 +894,14 @@ export function LaboratoryOrdersWorkspace() {
                                 >
                                   {order.priority}
                                 </span>
+                              </div>
+                              <div className="w-32 shrink-0 py-3 pr-2">
+                                <p style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {formatDate(order.orderedAt)}
+                                </p>
+                                <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {formatTime(order.orderedAt)}
+                                </p>
                               </div>
                               <div className="w-52 shrink-0 py-3 pr-2 text-center">
                                 <span
@@ -1177,53 +916,36 @@ export function LaboratoryOrdersWorkspace() {
                                   {order.status}
                                 </span>
                               </div>
-                              <div className="w-32 shrink-0 py-3 pr-2">
-                                <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {formatDate(order.orderedAt)}
-                                </p>
-                                <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                  {formatTime(order.orderedAt)}
-                                </p>
-                              </div>
-                              <div className="w-20 shrink-0 py-3 pr-2">
-                                <p
-                                  style={{
-                                    fontSize: 14,
-                                    color: tatIsFinal ? '#0D2630' : '#8A98A3',
-                                  }}
-                                >
-                                  {tatLabel}
-                                </p>
-                              </div>
                               <div
-                                className="flex w-14 shrink-0 items-center justify-end py-3 pr-3"
+                                className="flex w-32 shrink-0 items-center justify-center py-3 pr-3"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <OrderRowMenu
-                                  order={order}
-                                  open={rowMenuOpenKey === order.groupKey}
-                                  onToggle={() =>
-                                    setRowMenuOpenKey(
-                                      rowMenuOpenKey === order.groupKey ? null : order.groupKey,
-                                    )
-                                  }
-                                  onView={() => {
-                                    setRowMenuOpenKey(null);
-                                    openOrder(order);
-                                  }}
-                                  onReceive={
-                                    pendingCount > 0
-                                      ? () => {
-                                          setRowMenuOpenKey(null);
-                                          setReceiveTarget(order);
-                                        }
-                                      : undefined
-                                  }
-                                  onPrint={() => {
-                                    setRowMenuOpenKey(null);
-                                    handlePrintLabel(order);
-                                  }}
-                                />
+                                {collectible.length > 0 ? (
+                                  <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+                                    <button
+                                      type="button"
+                                      onClick={() => setCollectTarget(order)}
+                                      className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                                      style={{ fontSize: 14, background: '#00B4D8' }}
+                                    >
+                                      <TestTube2 style={{ width: 14, height: 14 }} />
+                                      {order.status === 'Rejected' ? 'Recollect' : 'Collect'}
+                                    </button>
+                                  </PermissionGate>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => openOrder(order)}
+                                    className={`flex h-9 items-center rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                                    style={{
+                                      fontSize: 14,
+                                      color: '#4A7080',
+                                      border: '1px solid rgba(0,100,130,0.18)',
+                                    }}
+                                  >
+                                    View
+                                  </button>
+                                )}
                               </div>
                             </div>
                           );
@@ -1245,6 +967,39 @@ export function LaboratoryOrdersWorkspace() {
                       />
                     )}
                   </div>
+
+                  <div
+                    className="mt-4 flex flex-wrap items-start justify-between gap-3 rounded-[12px] p-4"
+                    style={{
+                      background: 'rgba(0,180,216,0.06)',
+                      border: '1px solid rgba(0,180,216,0.2)',
+                    }}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <AlertCircle
+                        style={{
+                          width: 16,
+                          height: 16,
+                          color: '#00B4D8',
+                          flexShrink: 0,
+                          marginTop: 2,
+                        }}
+                      />
+                      <div>
+                        <p
+                          className="font-sans font-semibold"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          Collection Guidelines
+                        </p>
+                        <p className="mt-0.5" style={{ fontSize: 14, color: '#4A7080' }}>
+                          Verify patient identity, explain the procedure, use the correct tube type,
+                          label immediately, and ensure sample integrity before dispatch to the lab
+                          bench.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* ── Detail pane ───────────────────────────────────────────── */}
@@ -1265,14 +1020,6 @@ export function LaboratoryOrdersWorkspace() {
                         >
                           {selectedOrder.orderId}
                         </p>
-                        {selectedOrder.isNew && (
-                          <span
-                            className="rounded-full px-2.5 py-0.5 font-sans font-semibold"
-                            style={{ fontSize: 14, color: '#FFFFFF', background: '#00B4D8' }}
-                          >
-                            NEW
-                          </span>
-                        )}
                         {selectedOrder.isWalkIn && (
                           <span
                             className="rounded-full px-2.5 py-0.5 font-sans font-semibold whitespace-nowrap"
@@ -1366,15 +1113,9 @@ export function LaboratoryOrdersWorkspace() {
                         </p>
                         <div className="mt-3 flex flex-col gap-2">
                           {[
-                            ['Ordered By', selectedOrder.orderedBy],
-                            ['Ordered', formatDateTime(selectedOrder.orderedAt)],
+                            ['Requested By', selectedOrder.orderedBy],
+                            ['Requested', formatDateTime(selectedOrder.orderedAt)],
                             ['Priority', selectedOrder.priority],
-                            [
-                              'Department(s)',
-                              Array.from(
-                                new Set(selectedOrder.tests.map((t) => t.department)),
-                              ).join(', '),
-                            ],
                           ].map(([label, value]) => (
                             <div key={label} className="flex items-center justify-between gap-2">
                               <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
@@ -1430,201 +1171,105 @@ export function LaboratoryOrdersWorkspace() {
                                       {t.testName}
                                     </p>
                                   </Tooltip>
-                                  <p style={{ fontSize: 14, color: '#4A7080' }}>{t.department}</p>
+                                  <p style={{ fontSize: 14, color: '#4A7080' }}>
+                                    {deriveSampleType(t)}
+                                  </p>
                                 </div>
-                                <div className="flex shrink-0 flex-col items-end gap-1">
-                                  <span
-                                    className="rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
-                                    style={{
-                                      fontSize: 14,
-                                      color: cfg.color,
-                                      border: `1px solid ${cfg.border}`,
-                                      background: cfg.bg,
-                                    }}
-                                  >
-                                    {cfg.label}
-                                  </span>
-                                  {t.flag && (
-                                    <span style={{ fontSize: 14, color: FLAG_COLOR[t.flag] }}>
-                                      {FLAG_LABEL[t.flag]}
-                                    </span>
-                                  )}
-                                </div>
+                                <span
+                                  className="shrink-0 rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
+                                  style={{
+                                    fontSize: 14,
+                                    color: cfg.color,
+                                    border: `1px solid ${cfg.border}`,
+                                    background: cfg.bg,
+                                  }}
+                                >
+                                  {cfg.label}
+                                </span>
                               </div>
                             );
                           })}
                         </div>
                       </div>
 
-                      {/* Workflow Status stepper */}
+                      {/* Collection Details */}
                       <div className="mt-5">
                         <p
                           className="font-sans font-semibold"
                           style={{ fontSize: 16, color: '#0D2630' }}
                         >
-                          Workflow Status
+                          Collection Details
                         </p>
-                        <div className="mt-3 overflow-x-auto scroll-smooth">
-                          <div className="flex min-w-[560px] items-start">
-                            {STEPPER_STEPS.map((step, i) => {
-                              const stepIndex = stepIndexForOrder(selectedOrder.status);
-                              const isErrorStep = selectedOrder.status === 'Rejected' && i === 1;
-                              const done = !isErrorStep && i < stepIndex;
-                              const active = !isErrorStep && i === stepIndex;
-                              const Icon = step.icon;
-                              return (
-                                <div key={step.label} className="flex flex-1 items-start">
-                                  <div className="flex flex-1 flex-col items-center gap-1.5">
-                                    <div
-                                      className="flex size-9 shrink-0 items-center justify-center rounded-full"
-                                      style={{
-                                        background: isErrorStep
-                                          ? 'rgba(239,68,68,0.12)'
-                                          : active || done
-                                            ? '#00B4D8'
-                                            : 'rgba(0,100,130,0.08)',
-                                        border:
-                                          !active && !done && !isErrorStep
-                                            ? '1.5px solid rgba(0,100,130,0.2)'
-                                            : 'none',
-                                      }}
-                                    >
-                                      {isErrorStep ? (
-                                        <AlertTriangle
-                                          style={{ width: 15, height: 15, color: '#EF4444' }}
-                                        />
-                                      ) : done ? (
-                                        <CheckCircle2
-                                          style={{ width: 15, height: 15, color: '#FFFFFF' }}
-                                        />
-                                      ) : (
-                                        <Icon
-                                          style={{
-                                            width: 15,
-                                            height: 15,
-                                            color: active ? '#FFFFFF' : '#8A98A3',
-                                          }}
-                                        />
-                                      )}
-                                    </div>
-                                    <p
-                                      className="text-center font-sans font-medium"
-                                      style={{
-                                        fontSize: 14,
-                                        color: isErrorStep
-                                          ? '#EF4444'
-                                          : active || done
-                                            ? '#0D2630'
-                                            : '#8A98A3',
-                                      }}
-                                    >
-                                      {step.label}
-                                    </p>
-                                  </div>
-                                  {i < STEPPER_STEPS.length - 1 && (
-                                    <div
-                                      className="mt-4 h-px flex-1"
-                                      style={{ borderTop: '1px dashed rgba(0,100,130,0.25)' }}
-                                    />
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
+                        <div className="mt-3 flex flex-col gap-2">
+                          {(() => {
+                            const collectedTests = selectedOrder.tests.filter(
+                              (t) => t.sampleCollectedAt,
+                            );
+                            const maxCollectedAt = collectedTests.reduce<string | undefined>(
+                              (max, t) => {
+                                if (!t.sampleCollectedAt) return max;
+                                if (
+                                  !max ||
+                                  new Date(t.sampleCollectedAt).getTime() > new Date(max).getTime()
+                                ) {
+                                  return t.sampleCollectedAt;
+                                }
+                                return max;
+                              },
+                              undefined,
+                            );
+                            const collectedBy = collectedTests[0]?.sampleCollectedBy;
+                            const rows: [string, string][] = [
+                              ['Sample Type', orderSampleType(selectedOrder.tests)],
+                              ['Collection Status', selectedOrder.status],
+                              ['Collected By', collectedBy ?? '—'],
+                              [
+                                'Collection Date / Time',
+                                maxCollectedAt ? formatDateTime(maxCollectedAt) : '—',
+                              ],
+                              [
+                                'Sample ID',
+                                collectedTests.length > 0
+                                  ? deriveSampleId(selectedOrder.groupKey, selectedOrder.orderedAt)
+                                  : '—',
+                              ],
+                            ];
+                            return rows.map(([label, value]) => (
+                              <div key={label} className="flex items-center justify-between gap-2">
+                                <span style={{ fontSize: 14, color: '#8A98A3' }}>{label}</span>
+                                <Tooltip content={value}>
+                                  <span
+                                    className="max-w-[200px] truncate text-right font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {value}
+                                  </span>
+                                </Tooltip>
+                              </div>
+                            ));
+                          })()}
                         </div>
-                        {selectedOrder.status === 'Rejected' && (
-                          <p className="mt-2" style={{ fontSize: 14, color: '#EF4444' }}>
-                            {selectedOrder.tests.find((t) => t.status === 'REJECTED')
-                              ?.rejectionReason ?? 'Sample rejected — recollection required.'}
-                          </p>
-                        )}
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex shrink-0 flex-col gap-2.5 p-4 pt-0 sm:p-5 sm:pt-0">
-                      <div className="flex items-center gap-2.5">
+                    {collectibleTests(selectedOrder).length > 0 && (
+                      <div className="shrink-0 p-4 pt-0 sm:p-5 sm:pt-0">
                         <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
-                          {selectedOrder.tests.some((t) => t.status === 'ORDERED') && (
-                            <button
-                              type="button"
-                              onClick={() => setReceiveTarget(selectedOrder)}
-                              className={`flex h-11 flex-1 items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                              style={{ fontSize: 14, background: '#00B4D8' }}
-                            >
-                              <TestTube2 style={{ width: 15, height: 15 }} />
-                              Receive Sample
-                            </button>
-                          )}
-                        </PermissionGate>
-                        <button
-                          type="button"
-                          onClick={() => handlePrintLabel(selectedOrder)}
-                          className={`flex h-11 flex-1 items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                          style={{
-                            fontSize: 14,
-                            color: '#0D2630',
-                            border: '1px solid rgba(0,100,130,0.2)',
-                          }}
-                        >
-                          <Printer style={{ width: 15, height: 15 }} />
-                          Print Label
-                        </button>
-                      </div>
-                      <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
-                        {noteOpen ? (
-                          <div className="flex flex-col gap-2">
-                            <textarea
-                              rows={2}
-                              value={noteDraft}
-                              onChange={(e) => setNoteDraft(e.target.value)}
-                              placeholder="Add a note about this order"
-                              className={`w-full resize-none rounded-[10px] px-3.5 py-2.5 font-sans transition-colors duration-150 placeholder:text-[#8A98A3] focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8]/40 focus:outline-none ${FOCUS_RING}`}
-                              style={{
-                                fontSize: 14,
-                                color: '#0D2630',
-                                border: '1px solid rgba(0,100,130,0.18)',
-                              }}
-                            />
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={handleSaveNote}
-                                className={`flex h-9 items-center rounded-[8px] px-3.5 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                                style={{ fontSize: 14, background: '#00B4D8' }}
-                              >
-                                Save Note
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setNoteOpen(false);
-                                  setNoteDraft('');
-                                }}
-                                className={`flex h-9 items-center rounded-[8px] px-3.5 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                                style={{ fontSize: 14, color: '#4A7080' }}
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
                           <button
                             type="button"
-                            onClick={() => setNoteOpen(true)}
-                            className={`flex h-11 items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                            style={{
-                              fontSize: 14,
-                              color: '#4A7080',
-                              border: '1px solid rgba(0,100,130,0.2)',
-                            }}
+                            onClick={() => setCollectTarget(selectedOrder)}
+                            className={`flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                            style={{ fontSize: 14, background: '#00B4D8' }}
                           >
-                            <StickyNote style={{ width: 15, height: 15 }} />
-                            Add Note
+                            <TestTube2 style={{ width: 15, height: 15 }} />
+                            {selectedOrder.status === 'Rejected'
+                              ? 'Recollect Sample'
+                              : 'Start Collection'}
                           </button>
-                        )}
-                      </PermissionGate>
-                    </div>
+                        </PermissionGate>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1646,18 +1291,22 @@ export function LaboratoryOrdersWorkspace() {
         </div>
       </main>
 
-      {receiveTarget && (
-        <ReceiveSampleModal
-          orderId={receiveTarget.orderId}
-          patientName={receiveTarget.patientName}
-          mrn={receiveTarget.mrn}
-          pendingTestNames={receiveTarget.tests
-            .filter((t) => t.status === 'ORDERED')
-            .map((t) => t.testName)}
-          onClose={() => setReceiveTarget(null)}
-          onConfirm={handleReceiveConfirm}
+      {collectTarget && (
+        <CollectSampleModal
+          orderId={collectTarget.orderId}
+          patientName={collectTarget.patientName}
+          mrn={collectTarget.mrn}
+          pendingTests={collectibleTests(collectTarget).map((t) => ({
+            id: t.id,
+            testName: t.testName,
+          }))}
+          defaultSampleType={orderSampleType(collectibleTests(collectTarget))}
+          onClose={() => setCollectTarget(null)}
+          onConfirm={handleCollectConfirm}
         />
       )}
+
+      {walkInOpen && <WalkInCollectionModal onClose={() => setWalkInOpen(false)} />}
     </div>
   );
 }

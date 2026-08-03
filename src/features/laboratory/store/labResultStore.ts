@@ -29,6 +29,7 @@ import {
   type LabResultPriority,
   type LabResultRow,
 } from '@/features/laboratory/__mocks__/labResultFixtures';
+import type { Gender } from '@/types/patient.types';
 
 let results: LabResult[] = [...CANONICAL_LAB_RESULTS];
 const listeners = new Set<() => void>();
@@ -100,9 +101,11 @@ export function addLabOrder(params: {
   initials: string;
   avatarBg: string;
   age?: number;
+  gender?: Gender;
   testIds: string[];
   priority: LabResultPriority;
   orderedBy: string;
+  isWalkIn?: boolean;
 }): void {
   const orderedAt = new Date().toISOString();
   const newOrders: LabResult[] = params.testIds.map((testId) => {
@@ -115,12 +118,14 @@ export function addLabOrder(params: {
       initials: params.initials,
       avatarBg: params.avatarBg,
       ...(params.age !== undefined ? { age: params.age } : {}),
+      ...(params.gender ? { gender: params.gender } : {}),
       testName: findTestName(testId),
       department: findDepartmentForTest(testId),
       priority: params.priority,
       status: 'ORDERED',
       orderedBy: params.orderedBy,
       orderedAt,
+      ...(params.isWalkIn ? { isWalkIn: true } : {}),
     };
   });
   results = [...newOrders, ...results];

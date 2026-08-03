@@ -256,6 +256,9 @@ export default function PatientLabOrderPage({ params }: { params: Promise<{ id: 
       initials: patient.initials,
       avatarBg,
       ...(Number.isFinite(parsedAge) ? { age: parsedAge } : {}),
+      ...(patient.gender === 'Male' || patient.gender === 'Female' || patient.gender === 'Other'
+        ? { gender: patient.gender }
+        : {}),
       testIds: Array.from(selected),
       priority: PRIORITY_TO_CANONICAL[priority],
       orderedBy: user?.name ?? 'Unknown Doctor',
