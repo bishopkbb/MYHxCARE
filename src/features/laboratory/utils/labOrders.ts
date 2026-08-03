@@ -168,3 +168,34 @@ export function deriveSampleId(groupKey: string, orderedAt: string): string {
   const seq = simpleHash(`sample:${groupKey}`) % 10000;
   return `SMP${yymmdd}-${String(seq).padStart(4, '0')}`;
 }
+
+// ── Collection point — derived, not persisted ────────────────────────────────
+// No field on LabResult captures "OPD Phlebotomy vs Maternity Unit vs
+// Cardiology Unit" — that granularity doesn't exist in the data model, and
+// inventing a multi-value enum nothing else in the app ever sets would be
+// fabricating operational data. The one real, non-fabricated distinction
+// available is whether the order carries a real `ward` (an admitted patient,
+// whose specimen must physically travel to the lab) or not (a walk-in/OPD
+// patient, drawn on-site).
+
+/** Real ward name when the order has one, else the on-site desk. */
+export function deriveCollectionPoint(order: RawLabOrder): string {
+  return order.ward ?? 'OPD Phlebotomy';
+}
+
+// ── Reception-stage test filters — shared between Sample Reception's table
+// and its Receive/Reject modals. ────────────────────────────────────────────
+
+/** Tests that have reached the bench and are awaiting a reception decision
+ * (receive or reject) — mirrors `collectibleTests()` on Sample Collection. */
+export function awaitingReceptionTests(order: RawLabOrder): LabResult[] {
+  return order.tests.filter((t) => t.status === 'SAMPLE_COLLECTED');
+}
+
+/** Tests that have already been logged in at the bench (received into the
+ * lab pipeline, whatever stage they're at now). */
+export function receivedTests(order: RawLabOrder): LabResult[] {
+  return order.tests.filter((t) =>
+    (['IN_PROCESS', 'RESULTED', 'VERIFIED'] as LabResult['status'][]).includes(t.status),
+  );
+}

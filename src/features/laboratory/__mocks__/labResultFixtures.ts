@@ -113,6 +113,16 @@ export type LabResult = {
    * a real, common path for self-referred tests (genotype, blood group,
    * HIV, etc.). Undefined/false for every doctor-placed order. */
   isWalkIn?: boolean;
+  /** Set by Sample Reception's `receiveSample()` — when the specimen
+   * physically arrived at the bench, distinct from `sampleCollectedAt`
+   * (when it left the patient). */
+  receivedAt?: string;
+  receivedBy?: string;
+  /** Set by Sample Reception's `rejectSample()` — distinct from
+   * `rejectionReason` (the why) so "Rejected Today" can be date-scoped the
+   * same way "Collected Today"/"Received Today" are. */
+  rejectedAt?: string;
+  rejectedBy?: string;
 };
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {

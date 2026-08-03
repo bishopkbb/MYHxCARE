@@ -160,6 +160,28 @@ export function acknowledgeCritical(id: string, ackBy: string): void {
   });
 }
 
+/** Lab Scientist action — Sample Reception: the specimen has physically
+ * arrived at the bench and been logged in. The one real transition to
+ * `IN_PROCESS` — nothing set this live before Sample Reception existed. */
+export function receiveSample(id: string, receivedBy: string, receivedAt: string): void {
+  updateResult(id, { status: 'IN_PROCESS', receivedAt, receivedBy });
+}
+
+/** Lab Scientist action — Sample Reception rejects a specimen on inspection
+ * (hemolysis, insufficient volume, wrong tube, mislabeling, etc.). The
+ * nurse's own `collectSample()` is what un-rejects it later via
+ * recollection — this is the forward direction, which nothing set live
+ * before Sample Reception existed (every prior `REJECTED` row was static
+ * seed data). */
+export function rejectSample(id: string, rejectedBy: string, reason: string): void {
+  updateResult(id, {
+    status: 'REJECTED',
+    rejectionReason: reason,
+    rejectedAt: new Date().toISOString(),
+    rejectedBy,
+  });
+}
+
 /** Nurse action — chases an overdue result with the lab. */
 export function recordFollowUp(id: string): number {
   const existing = results.find((r) => r.id === id);

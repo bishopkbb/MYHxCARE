@@ -1789,6 +1789,35 @@ const NURSE_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_SAMPLE_RECEPTION_GUIDE: HelpGuide = {
+  id: 'laboratory-sample-reception',
+  title: 'Sample Reception',
+  intro:
+    'Log incoming specimens at the bench — receive them into the lab or reject them on inspection.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Awaiting Reception, Received Today, Rejected Today, In Transit, Pending Verification, and Overdue (Not Received) summarize the incoming queue at a glance.',
+    },
+    {
+      heading: 'Filters and tabs',
+      body: 'Search by patient, MRN, order ID, or sample ID, then narrow by Date Range, Department, Collection Point, or Priority. The tab strip switches between Awaiting Reception, Received, Rejected, Pending Verification, and All Samples.',
+    },
+    {
+      heading: 'Receiving a specimen',
+      body: 'Receive opens a checklist confirming volume, temperature, and specimen integrity before logging it into the lab pipeline. Reject records a reason and flags the specimen for recollection.',
+    },
+    {
+      heading: 'Specimen details',
+      body: 'Click a row to open its detail panel: patient and order information, every test on the requisition, and Sample Details (sample id/type, collected and received timestamps).',
+    },
+    {
+      heading: 'Bulk actions',
+      body: 'Select rows with the checkbox, then use Receive Samples to log in every selected specimen at once, or Print Labels to print specimen labels for the current filtered list.',
+    },
+  ],
+};
+
 const LABORATORY_SAMPLE_COLLECTION_GUIDE: HelpGuide = {
   id: 'laboratory-sample-collection',
   title: 'Sample Collection',
@@ -2848,6 +2877,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/orders')) return LABORATORY_ORDERS_GUIDE;
   if (pathname.startsWith('/laboratory/sample-collection'))
     return LABORATORY_SAMPLE_COLLECTION_GUIDE;
+  if (pathname.startsWith('/laboratory/sample-reception')) return LABORATORY_SAMPLE_RECEPTION_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;
