@@ -39,7 +39,11 @@ import { useToast } from '@/hooks/useToast';
 import { formatDate, formatDateTime, formatTime, isSameDay, isToday } from '@/utils/datetime';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import { addNote, collectSample, useLabResults } from '@/features/laboratory/store/labResultStore';
-import { groupIntoOrders, type RawLabOrder } from '@/features/laboratory/utils/labOrders';
+import {
+  groupIntoOrders,
+  TEST_STATUS_RANK,
+  type RawLabOrder,
+} from '@/features/laboratory/utils/labOrders';
 import type {
   LabDepartment,
   LabResult,
@@ -80,15 +84,6 @@ type LabOrder = RawLabOrder & {
 // persisted grouping of LabResult rows). This screen's own 6-state
 // full-lifecycle taxonomy; other screens (e.g. Sample Collection) derive a
 // different taxonomy from the same raw grouping. ───────────────────────────
-
-const TEST_STATUS_RANK: Record<LabResultStatus, number> = {
-  ORDERED: 0,
-  SAMPLE_COLLECTED: 1,
-  IN_PROCESS: 2,
-  RESULTED: 3,
-  VERIFIED: 4,
-  REJECTED: -1,
-};
 
 function deriveOrderStatus(tests: LabResult[]): OrderStatus {
   if (tests.some((t) => t.status === 'REJECTED')) return 'Rejected';

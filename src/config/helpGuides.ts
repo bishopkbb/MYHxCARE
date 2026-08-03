@@ -1789,6 +1789,30 @@ const NURSE_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_SAMPLE_TRACKING_GUIDE: HelpGuide = {
+  id: 'laboratory-sample-tracking',
+  title: 'Sample Tracking',
+  intro: 'Every specimen in one place — where it is right now, from collection to publication.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Collected, Received, In Analysis, Awaiting Verification, Published, and Rejected summarize where every specimen currently sits.',
+    },
+    {
+      heading: 'Filters and tabs',
+      body: 'Search by patient, MRN, order ID, or sample ID, then narrow by Date Range, Department, or Sample Type. The tab strip switches between All Samples and each individual stage.',
+    },
+    {
+      heading: 'The tracking table',
+      body: 'Each row is one specimen, showing its current status and current location at a glance. The row menu offers View Details or Print Label.',
+    },
+    {
+      heading: 'The Tracking Timeline',
+      body: 'Click a row to open its detail panel: patient and sample information, plus a chain-of-custody timeline from Collected through Published, with real timestamps at each stage that has been reached.',
+    },
+  ],
+};
+
 const LABORATORY_SAMPLE_RECEPTION_GUIDE: HelpGuide = {
   id: 'laboratory-sample-reception',
   title: 'Sample Reception',
@@ -2878,6 +2902,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/sample-collection'))
     return LABORATORY_SAMPLE_COLLECTION_GUIDE;
   if (pathname.startsWith('/laboratory/sample-reception')) return LABORATORY_SAMPLE_RECEPTION_GUIDE;
+  if (pathname.startsWith('/laboratory/sample-tracking')) return LABORATORY_SAMPLE_TRACKING_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;

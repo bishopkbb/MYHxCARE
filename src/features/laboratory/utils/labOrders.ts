@@ -18,8 +18,21 @@ import type {
   LabDepartment,
   LabResult,
   LabResultPriority,
+  LabResultStatus,
 } from '@/features/laboratory/__mocks__/labResultFixtures';
 import type { Gender } from '@/types/patient.types';
+
+/** Shared rank of the real workflow stages — used anywhere an order's status
+ * is "as advanced as its least-progressed test." `REJECTED` is intentionally
+ * out of band (-1): it's a blocking exception, never a point on this ladder. */
+export const TEST_STATUS_RANK: Record<LabResultStatus, number> = {
+  ORDERED: 0,
+  SAMPLE_COLLECTED: 1,
+  IN_PROCESS: 2,
+  RESULTED: 3,
+  VERIFIED: 4,
+  REJECTED: -1,
+};
 
 export type RawLabOrder = {
   orderId: string;
@@ -198,4 +211,60 @@ export function receivedTests(order: RawLabOrder): LabResult[] {
   return order.tests.filter((t) =>
     (['IN_PROCESS', 'RESULTED', 'VERIFIED'] as LabResult['status'][]).includes(t.status),
   );
+}
+
+// ── Tracking stage — Sample Tracking's own full-pipeline taxonomy ────────────
+// Read-only/visibility concept, not a new store state: `IN_PROCESS` is one
+// real status, but "Received" (just logged in) vs "In Analysis" (been on the
+// bench a while) is a real, non-fabricated read of elapsed time since the
+// test's own `receivedAt` (or `sampleCollectedAt` if it was never explicitly
+// received) — not a persisted field, not a guess unconnected to real data.
+
+export type TrackingStage =
+  'Collected' | 'Received' | 'In Analysis' | 'Awaiting Verification' | 'Published' | 'Rejected';
+
+const ANALYSIS_START_MS = 20 * 60_000;
+
+/** `undefined` means the order hasn't been collected at all yet (every test
+ * still `ORDERED`) — Sample Tracking's universe deliberately excludes those;
+ * that's what Orders/Sample Collection are for. */
+export function deriveTrackingStage(order: RawLabOrder, nowMs: number): TrackingStage | undefined {
+  const { tests } = order;
+  if (tests.some((t) => t.status === 'REJECTED')) return 'Rejected';
+
+  const trackable = tests.filter((t) => t.status !== 'ORDERED');
+  if (trackable.length === 0) return undefined;
+
+  const minRank = Math.min(...trackable.map((t) => TEST_STATUS_RANK[t.status]));
+  if (minRank === 1) return 'Collected';
+  if (minRank === 3) return 'Awaiting Verification';
+  if (minRank === 4) return 'Published';
+
+  // minRank === 2 (IN_PROCESS) — split on real elapsed time since the
+  // earliest still-in-process test was logged in.
+  const referenceMs = trackable
+    .filter((t) => t.status === 'IN_PROCESS')
+    .reduce<number | undefined>((earliest, t) => {
+      const ts = t.receivedAt ?? t.sampleCollectedAt;
+      if (!ts) return earliest;
+      const ms = new Date(ts).getTime();
+      return earliest === undefined ? ms : Math.min(earliest, ms);
+    }, undefined);
+  return referenceMs !== undefined && nowMs - referenceMs > ANALYSIS_START_MS
+    ? 'In Analysis'
+    : 'Received';
+}
+
+/** Coarse, real-derivable location — no field captures per-bench/per-analyzer
+ * assignment, and inventing one would be fabricating data nothing else
+ * produces or reads. Deliberately coarser than the reference image. */
+export function deriveCurrentLocation(order: RawLabOrder, stage: TrackingStage): string {
+  if (stage === 'Collected' || stage === 'Rejected') return deriveCollectionPoint(order);
+  if (stage === 'Received') return 'Sample Reception';
+  if (stage === 'In Analysis') {
+    const inProcess = order.tests.find((t) => t.status === 'IN_PROCESS');
+    return `${(inProcess ?? order.tests[0]!).department} Lab`;
+  }
+  if (stage === 'Awaiting Verification') return 'Result Verification';
+  return '—'; // Published
 }
