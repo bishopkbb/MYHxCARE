@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Test Work Queue' };
+import { LaboratoryTestWorkQueueWorkspace } from '@/features/laboratory/components/LaboratoryTestWorkQueueWorkspace';
 
 export default function TestWorkQueuePage() {
-  return (
-    <ComingSoon
-      title="Test Work Queue"
-      description="A bench-side worklist of tests currently in process, grouped by department, is on the way."
-    />
-  );
+  return <LaboratoryTestWorkQueueWorkspace />;
 }

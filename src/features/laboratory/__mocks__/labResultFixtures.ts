@@ -123,6 +123,18 @@ export type LabResult = {
    * same way "Collected Today"/"Received Today" are. */
   rejectedAt?: string;
   rejectedBy?: string;
+  /** Set by Test Work Queue's `startTest()` — the bench actually began
+   * working this specific test, distinct from `receivedAt` (logged in, not
+   * necessarily started yet). */
+  analysisStartedAt?: string;
+  analysisStartedBy?: string;
+  /** Set by Test Work Queue's `putTestOnHold()` — paused without being
+   * rejected outright (reagent shortage, instrument down, etc.). Cleared by
+   * `resumeTest()`. */
+  isOnHold?: boolean;
+  holdReason?: string;
+  heldAt?: string;
+  heldBy?: string;
 };
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {

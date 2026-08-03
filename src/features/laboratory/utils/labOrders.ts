@@ -13,7 +13,7 @@
  * once instead of being re-implemented per screen.
  */
 
-import { WAT_TZ } from '@/utils/datetime';
+import { WAT_TZ, isToday } from '@/utils/datetime';
 import type {
   LabDepartment,
   LabResult,
@@ -267,4 +267,30 @@ export function deriveCurrentLocation(order: RawLabOrder, stage: TrackingStage):
   }
   if (stage === 'Awaiting Verification') return 'Result Verification';
   return '—'; // Published
+}
+
+// ── Test Work Queue filters — the bench-side "currently mine to work" set,
+// shared between the table and the Start/Hold/Resume actions. ──────────────
+
+/** The order's tests actually in the queue's universe (received, not yet
+ * resulted) — same narrowing convention as `awaitingReceptionTests()`. */
+export function relevantTests(order: RawLabOrder): LabResult[] {
+  return order.tests.filter((t) => t.status === 'IN_PROCESS');
+}
+
+/** An order counts as "completed today" once every test that was ever
+ * `IN_PROCESS` has resulted, and the latest such result landed today — same
+ * date-scoped pattern as Sample Reception's `receivedToday()`. */
+export function completedToday(order: RawLabOrder): boolean {
+  if (order.tests.some((t) => t.status === 'IN_PROCESS')) return false;
+  const resultedTests = order.tests.filter(
+    (t) => (t.status === 'RESULTED' || t.status === 'VERIFIED') && t.resultAt,
+  );
+  if (resultedTests.length === 0) return false;
+  const maxResultAt = resultedTests.reduce<string | undefined>((max, t) => {
+    if (!t.resultAt) return max;
+    if (!max || new Date(t.resultAt).getTime() > new Date(max).getTime()) return t.resultAt;
+    return max;
+  }, undefined);
+  return !!maxResultAt && isToday(maxResultAt);
 }

@@ -182,6 +182,42 @@ export function rejectSample(id: string, rejectedBy: string, reason: string): vo
   });
 }
 
+/** Lab Scientist action — Test Work Queue: claims and starts an in-process
+ * test at the bench. Nothing set this live before Test Work Queue existed —
+ * `IN_PROCESS` previously had no "actually being worked on right now" signal,
+ * only "received." */
+export function startTest(id: string, startedBy: string): void {
+  updateResult(id, { analysisStartedAt: new Date().toISOString(), analysisStartedBy: startedBy });
+}
+
+/** Lab Scientist action — pauses an in-process test (reagent shortage,
+ * instrument down, needs recollection confirmation, etc.) without rejecting
+ * the specimen outright. */
+export function putTestOnHold(id: string, heldBy: string, reason: string): void {
+  updateResult(id, {
+    isOnHold: true,
+    holdReason: reason,
+    heldAt: new Date().toISOString(),
+    heldBy,
+  });
+}
+
+/** Lab Scientist action — clears a hold. Only the hold fields are cleared;
+ * `analysisStartedAt` is left as-is since resuming isn't restarting. */
+export function resumeTest(id: string): void {
+  const idx = results.findIndex((r) => r.id === id);
+  if (idx === -1) return;
+  const {
+    isOnHold: _isOnHold,
+    holdReason: _holdReason,
+    heldAt: _heldAt,
+    heldBy: _heldBy,
+    ...rest
+  } = results[idx]!;
+  results = results.map((r, i) => (i === idx ? rest : r));
+  emit();
+}
+
 /** Nurse action — chases an overdue result with the lab. */
 export function recordFollowUp(id: string): number {
   const existing = results.find((r) => r.id === id);
