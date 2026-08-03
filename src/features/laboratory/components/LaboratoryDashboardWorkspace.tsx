@@ -239,10 +239,10 @@ function Panel({
   const router = useRouter();
   return (
     <div
-      className="rounded-[12px] p-4 sm:p-5"
+      className="flex h-full flex-col rounded-[12px] p-4 sm:p-5"
       style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex shrink-0 items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           {Icon && <Icon style={{ width: 18, height: 18, color: '#00B4D8' }} />}
           <h2 className="font-display font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
@@ -260,7 +260,7 @@ function Panel({
           </button>
         )}
       </div>
-      <div className="mt-3">{children}</div>
+      <div className="mt-3 flex min-h-0 flex-1 flex-col">{children}</div>
     </div>
   );
 }
@@ -289,7 +289,7 @@ function LabStatCard({
 }) {
   return (
     <div
-      className="flex flex-col rounded-[12px] p-4"
+      className="flex h-full flex-col rounded-[12px] p-4"
       style={{
         background: '#FFFFFF',
         border: `1px solid ${accent}`,
@@ -320,7 +320,7 @@ function LabStatCard({
       <button
         type="button"
         onClick={onView}
-        className={`mt-2.5 flex items-center gap-1 self-start font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+        className={`mt-auto flex items-center gap-1 self-start pt-2.5 font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
         style={{ fontSize: 14, color: accent }}
       >
         {viewLabel} →
@@ -1097,7 +1097,7 @@ export function LaboratoryDashboardWorkspace() {
                     icon={Timer}
                     onViewAll={() => router.push(ROUTES.laboratoryTatReports)}
                   >
-                    <div className="flex flex-col items-center gap-1 pb-2 text-center">
+                    <div className="flex shrink-0 flex-col items-center gap-1 pb-2 text-center">
                       <span
                         className="font-display font-black"
                         style={{ fontSize: 24, color: '#0D9488' }}
@@ -1108,13 +1108,14 @@ export function LaboratoryDashboardWorkspace() {
                         Average TAT (hrs:min)
                       </span>
                     </div>
-                    <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+                    <div className="flex flex-1 flex-col items-center justify-center gap-6 sm:flex-row">
                       <AnimatedDonutChart
                         breakdown={tatDonutBreakdown}
                         total={tatDonutTotal}
+                        size={180}
                         ariaLabel="Turnaround time by department"
                       />
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2.5">
                         {tatByDepartment.map((d) => (
                           <div key={d.department} className="flex items-center gap-2">
                             <span
@@ -1229,13 +1230,14 @@ export function LaboratoryDashboardWorkspace() {
 
                 <div className="lg:col-span-1">
                   <Panel title="Sample Status Overview" icon={FlaskConical}>
-                    <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+                    <div className="flex flex-1 flex-col items-center justify-center gap-6 sm:flex-row">
                       <AnimatedDonutChart
                         breakdown={sampleStatusBuckets}
                         total={totalSamples}
+                        size={180}
                         ariaLabel="Sample status breakdown"
                       />
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2.5">
                         {sampleStatusBuckets.map((b) => {
                           const percent =
                             totalSamples > 0 ? Math.round((b.value / totalSamples) * 100) : 0;
@@ -1265,7 +1267,7 @@ export function LaboratoryDashboardWorkspace() {
                       </div>
                     </div>
                     <p
-                      className="mt-3 text-center font-sans"
+                      className="mt-3 shrink-0 text-center font-sans"
                       style={{ fontSize: 14, color: '#8A98A3' }}
                     >
                       Total Samples: {totalSamples}
