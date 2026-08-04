@@ -37,6 +37,11 @@ export const metadata: Metadata = {
   },
   description: 'Hospital Management System — Nnamdi Azikiwe University Medical Centre (UniZik)',
   robots: { index: false, follow: false },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'MYHxCare',
+  },
 };
 
 export default function RootLayout({
