@@ -1817,6 +1817,34 @@ const LABORATORY_TEST_WORK_QUEUE_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_RESULT_ENTRY_GUIDE: HelpGuide = {
+  id: 'laboratory-result-entry',
+  title: 'Result Entry',
+  intro: 'Structured, reference-range-aware entry for a test that has been started at the bench.',
+  sections: [
+    {
+      heading: 'Getting here',
+      body: 'Open from Test Work Queue’s Continue button, from Scan Another Sample, or by picking an in-progress order from the list shown when no order is selected yet.',
+    },
+    {
+      heading: 'Entering a result',
+      body: 'Each test lists its own parameters with units, reference range, and previous result for comparison. The Flag column updates live as you type, and turns red for a value outside the safe critical threshold.',
+    },
+    {
+      heading: 'Saving your work',
+      body: 'Save as Draft keeps everything you have entered without finalizing — come back later and it is still there. Finalize & Send for Verification requires every parameter filled in, then moves the tests to Result Verification.',
+    },
+    {
+      heading: 'Add Reflex Test',
+      body: 'Adds another test run directly off the same sample, without a new draw — it appears in the entry list immediately.',
+    },
+    {
+      heading: 'Comments',
+      body: 'Use the comment icon next to any parameter, or the Add Comment box at the bottom, to record an observation that will travel with the finalized result.',
+    },
+  ],
+};
+
 const LABORATORY_SAMPLE_TRACKING_GUIDE: HelpGuide = {
   id: 'laboratory-sample-tracking',
   title: 'Sample Tracking',
@@ -2932,6 +2960,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/sample-reception')) return LABORATORY_SAMPLE_RECEPTION_GUIDE;
   if (pathname.startsWith('/laboratory/sample-tracking')) return LABORATORY_SAMPLE_TRACKING_GUIDE;
   if (pathname.startsWith('/laboratory/test-work-queue')) return LABORATORY_TEST_WORK_QUEUE_GUIDE;
+  if (pathname.startsWith('/laboratory/result-entry')) return LABORATORY_RESULT_ENTRY_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;

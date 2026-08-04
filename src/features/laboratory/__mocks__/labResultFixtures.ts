@@ -54,6 +54,13 @@ export type LabResultRow = {
   valueAbnormal?: boolean;
   reference: string;
   flag?: 'H' | 'L' | 'A';
+  /** Set by Result Entry — the catalog's unit for this parameter, carried
+   * onto the row so a resulted value is self-describing without a live
+   * catalog lookup. */
+  unit?: string;
+  /** Set by Result Entry — which method the scientist selected/confirmed for
+   * this parameter (defaults to the catalog's own default). */
+  method?: string;
 };
 
 // Named LabResultNote (not ClinicalNote) — this is a comment thread on a lab
@@ -706,5 +713,85 @@ export const CANONICAL_LAB_RESULTS: LabResult[] = [
     resultAt: atOffset(0, 6, 20),
     rows: [{ parameter: 'S. typhi O agglutinin', value: '1:80', reference: '<1:80' }],
     comment: 'Titre within normal limits. Typhoid unlikely.',
+  },
+
+  // ── Multi-test panel order — one draw serving four tests together, the
+  // pattern Result Entry exists for (every order above is single-test).
+  // Same patient/MRN as `lr-001` (Nkechi Obiora), ordered after that earlier
+  // FBC resulted, so Result Entry's "Previous Result" column has a real,
+  // non-fabricated value to show for at least one parameter. Sample already
+  // received; awaiting Start Test on Test Work Queue.
+  {
+    id: 'lab-018',
+    patientId: 'p1',
+    mrn: 'MRN-2024-00451',
+    patientName: 'Nkechi Obiora',
+    initials: 'NO',
+    avatarBg: '#EF4444',
+    testName: 'Full Blood Count (FBC)',
+    department: 'Hematology',
+    priority: 'URGENT',
+    status: 'IN_PROCESS',
+    orderedBy: 'Dr. Adaeze Okonkwo',
+    orderedAt: atOffset(0, 10, 0),
+    sampleCollectedAt: atOffset(0, 10, 10),
+    sampleCollectedBy: 'Nurse Chidinma Eze',
+    receivedAt: atOffset(0, 10, 20),
+    receivedBy: 'Mary Nwankwo (Lab Receptionist)',
+    comment: 'Fever, weakness, suspected malaria.',
+  },
+  {
+    id: 'lab-019',
+    patientId: 'p1',
+    mrn: 'MRN-2024-00451',
+    patientName: 'Nkechi Obiora',
+    initials: 'NO',
+    avatarBg: '#EF4444',
+    testName: 'Malaria Parasite (MP)',
+    department: 'Microbiology',
+    priority: 'URGENT',
+    status: 'IN_PROCESS',
+    orderedBy: 'Dr. Adaeze Okonkwo',
+    orderedAt: atOffset(0, 10, 0),
+    sampleCollectedAt: atOffset(0, 10, 10),
+    sampleCollectedBy: 'Nurse Chidinma Eze',
+    receivedAt: atOffset(0, 10, 20),
+    receivedBy: 'Mary Nwankwo (Lab Receptionist)',
+  },
+  {
+    id: 'lab-020',
+    patientId: 'p1',
+    mrn: 'MRN-2024-00451',
+    patientName: 'Nkechi Obiora',
+    initials: 'NO',
+    avatarBg: '#EF4444',
+    testName: 'Fasting Blood Sugar (FBS)',
+    department: 'Biochemistry',
+    priority: 'ROUTINE',
+    status: 'IN_PROCESS',
+    orderedBy: 'Dr. Adaeze Okonkwo',
+    orderedAt: atOffset(0, 10, 0),
+    sampleCollectedAt: atOffset(0, 10, 10),
+    sampleCollectedBy: 'Nurse Chidinma Eze',
+    receivedAt: atOffset(0, 10, 20),
+    receivedBy: 'Mary Nwankwo (Lab Receptionist)',
+  },
+  {
+    id: 'lab-021',
+    patientId: 'p1',
+    mrn: 'MRN-2024-00451',
+    patientName: 'Nkechi Obiora',
+    initials: 'NO',
+    avatarBg: '#EF4444',
+    testName: 'Urea, Creatinine & Electrolytes (U&E)',
+    department: 'Biochemistry',
+    priority: 'URGENT',
+    status: 'IN_PROCESS',
+    orderedBy: 'Dr. Adaeze Okonkwo',
+    orderedAt: atOffset(0, 10, 0),
+    sampleCollectedAt: atOffset(0, 10, 10),
+    sampleCollectedBy: 'Nurse Chidinma Eze',
+    receivedAt: atOffset(0, 10, 20),
+    receivedBy: 'Mary Nwankwo (Lab Receptionist)',
   },
 ];

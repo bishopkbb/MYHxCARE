@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Result Entry' };
+import { LaboratoryResultEntryWorkspace } from '@/features/laboratory/components/LaboratoryResultEntryWorkspace';
 
 export default function ResultEntryPage() {
-  return (
-    <ComingSoon
-      title="Result Entry"
-      description="Structured, reference-range-aware result entry for tests awaiting a value is on the way."
-    />
-  );
+  return <LaboratoryResultEntryWorkspace />;
 }

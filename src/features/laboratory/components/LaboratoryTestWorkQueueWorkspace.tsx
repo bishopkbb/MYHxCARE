@@ -1059,7 +1059,11 @@ export function LaboratoryTestWorkQueueWorkspace() {
                                 {canContinue && (
                                   <button
                                     type="button"
-                                    onClick={() => router.push(ROUTES.laboratoryResultEntry)}
+                                    onClick={() =>
+                                      router.push(
+                                        `${ROUTES.laboratoryResultEntry}?order=${encodeURIComponent(order.groupKey)}`,
+                                      )
+                                    }
                                     className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
                                     style={{ fontSize: 14, background: '#3B82F6' }}
                                   >
@@ -1426,7 +1430,11 @@ export function LaboratoryTestWorkQueueWorkspace() {
                           {selectedOrder.status === 'In Progress' && (
                             <button
                               type="button"
-                              onClick={() => router.push(ROUTES.laboratoryResultEntry)}
+                              onClick={() =>
+                                router.push(
+                                  `${ROUTES.laboratoryResultEntry}?order=${encodeURIComponent(selectedOrder.groupKey)}`,
+                                )
+                              }
                               className={`flex h-11 flex-1 items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
                               style={{ fontSize: 14, background: '#3B82F6' }}
                             >

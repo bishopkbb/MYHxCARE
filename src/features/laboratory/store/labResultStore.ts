@@ -202,6 +202,72 @@ export function putTestOnHold(id: string, heldBy: string, reason: string): void 
   });
 }
 
+/** Lab Scientist action — Result Entry: persists in-progress parameter
+ * values without finalizing. Status stays `IN_PROCESS` so the test remains
+ * on Test Work Queue; lets a scientist leave mid-entry and pick up later
+ * from the same real values instead of losing work. */
+export function saveResultDraft(id: string, rows: LabResultRow[], comment?: string): void {
+  updateResult(id, { rows, ...(comment !== undefined ? { comment } : {}) });
+}
+
+/** Lab Scientist action — Result Entry: the one real transition to
+ * `RESULTED`. `criticalValueLabel` is only ever set here when `flag` is
+ * `CRITICAL`, matching the shape every existing critical seed row already
+ * uses, so a live-entered critical value flows straight into the
+ * already-built Critical Results page. */
+export function finalizeResult(
+  id: string,
+  rows: LabResultRow[],
+  flag: LabResultFlag,
+  criticalValueLabel: string | undefined,
+  comment?: string,
+): void {
+  updateResult(id, {
+    rows,
+    status: 'RESULTED',
+    resultAt: new Date().toISOString(),
+    flag,
+    ...(comment !== undefined ? { comment } : {}),
+    ...(criticalValueLabel !== undefined ? { criticalValueLabel } : {}),
+  });
+}
+
+/** Lab Scientist action — Result Entry's "Add Reflex Test": appends one new
+ * test to an existing order (same patient/`orderedAt`/`orderedBy`, so
+ * `groupIntoOrders()` naturally folds it in), already `IN_PROCESS` and
+ * started — a reflex test runs directly off the specimen already at the
+ * bench, not a fresh draw/reception cycle. */
+export function addReflexTest(groupKey: string, testId: string, addedBy: string): void {
+  const source = results.find((r) => `${r.patientId ?? r.mrn}|${r.orderedAt}` === groupKey);
+  if (!source) return;
+  seq += 1;
+  const now = new Date().toISOString();
+  const newTest: LabResult = {
+    id: `lab-reflex-${seq}`,
+    ...(source.patientId ? { patientId: source.patientId } : {}),
+    mrn: source.mrn,
+    patientName: source.patientName,
+    initials: source.initials,
+    avatarBg: source.avatarBg,
+    ...(source.age !== undefined ? { age: source.age } : {}),
+    ...(source.gender ? { gender: source.gender } : {}),
+    ...(source.ward ? { ward: source.ward } : {}),
+    ...(source.bed ? { bed: source.bed } : {}),
+    testName: findTestName(testId),
+    department: findDepartmentForTest(testId),
+    priority: source.priority,
+    status: 'IN_PROCESS',
+    orderedBy: source.orderedBy,
+    orderedAt: source.orderedAt,
+    receivedAt: now,
+    receivedBy: addedBy,
+    analysisStartedAt: now,
+    analysisStartedBy: addedBy,
+  };
+  results = [newTest, ...results];
+  emit();
+}
+
 /** Lab Scientist action — clears a hold. Only the hold fields are cleared;
  * `analysisStartedAt` is left as-is since resuming isn't restarting. */
 export function resumeTest(id: string): void {
