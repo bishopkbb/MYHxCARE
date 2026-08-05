@@ -294,3 +294,13 @@ export function completedToday(order: RawLabOrder): boolean {
   }, undefined);
   return !!maxResultAt && isToday(maxResultAt);
 }
+
+// ── Result Verification filters — the lab's own second-reviewer QC queue,
+// shared between the table and the verify modal. ───────────────────────────
+
+/** Tests that have a value but haven't had the lab's own QC sign-off yet —
+ * same narrowing convention as `awaitingReceptionTests()`. Distinct from
+ * `status === 'VERIFIED'`, which is the doctor's own downstream transition. */
+export function awaitingVerificationTests(order: RawLabOrder): LabResult[] {
+  return order.tests.filter((t) => t.status === 'RESULTED' && !t.labVerifiedAt);
+}

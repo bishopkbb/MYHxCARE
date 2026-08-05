@@ -268,6 +268,14 @@ export function addReflexTest(groupKey: string, testId: string, addedBy: string)
   emit();
 }
 
+/** Lab Scientist action — Result Verification's second-reviewer QC sign-off
+ * on a `RESULTED` test. Deliberately does not touch `status` — that stays
+ * the doctor's own `verifyResult()` transition on `/lab/results`, which
+ * reads `status`/`doctorReviewedAt` only and is unaffected either way. */
+export function markLabVerified(id: string, verifiedBy: string): void {
+  updateResult(id, { labVerifiedAt: new Date().toISOString(), labVerifiedBy: verifiedBy });
+}
+
 /** Lab Scientist action — clears a hold. Only the hold fields are cleared;
  * `analysisStartedAt` is left as-is since resuming isn't restarting. */
 export function resumeTest(id: string): void {

@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Result Verification' };
+import { LaboratoryResultVerificationWorkspace } from '@/features/laboratory/components/LaboratoryResultVerificationWorkspace';
 
 export default function ResultVerificationPage() {
-  return (
-    <ComingSoon
-      title="Result Verification"
-      description="Second-reviewer sign-off on entered results before they publish is on the way."
-    />
-  );
+  return <LaboratoryResultVerificationWorkspace />;
 }

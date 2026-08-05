@@ -142,6 +142,14 @@ export type LabResult = {
   holdReason?: string;
   heldAt?: string;
   heldBy?: string;
+  /** Set by Result Verification's `markLabVerified()` — the lab's own
+   * second-reviewer QC pass on a `RESULTED` test, distinct from
+   * `doctorReviewedAt`/`status: 'VERIFIED'` (the doctor's own sign-off on
+   * `/lab/results`) and from `criticalAcknowledgedAt` (the nurse's "I told
+   * the doctor" step). Never changes `status` — the doctor's own queue is
+   * unaffected by this field either way. */
+  labVerifiedAt?: string;
+  labVerifiedBy?: string;
 };
 
 function atOffset(dayOffset: number, hour: number, minute: number): string {
