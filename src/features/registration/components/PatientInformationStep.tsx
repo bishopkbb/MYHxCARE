@@ -16,7 +16,6 @@ import { FormField } from '@components/shared/FormField';
 import { FormInput } from '@components/shared/FormInput';
 import { FormPhoneInput } from '@components/shared/FormPhoneInput';
 import { FormSelect } from '@components/shared/FormSelect';
-import { FormTextarea } from '@components/shared/FormTextarea';
 import { useToast } from '@/hooks/useToast';
 import { resizeImageToDataUrl } from '@providers/AvatarProvider';
 import {
@@ -24,15 +23,15 @@ import {
   type PatientInformationValues,
 } from '@/features/registration/schemas/registerPatientSchema';
 import {
+  DEPARTMENTS_BY_FACULTY,
+  FACULTY_HMO_MAP,
+  FACULTY_OPTIONS,
   GENDER_OPTIONS,
-  INSURANCE_PROVIDER_OPTIONS,
   LGAS_BY_STATE,
   MARITAL_STATUS_OPTIONS,
   NATIONALITY_OPTIONS,
   NIGERIA_STATES,
-  PATIENT_CATEGORY_OPTIONS,
-  PLAN_TYPE_OPTIONS,
-  RELATIONSHIP_OPTIONS,
+  PATIENT_TYPE_OPTIONS,
   type SelectOption,
 } from '@/features/registration/__mocks__/registerPatientOptions';
 
@@ -135,12 +134,13 @@ export function PatientInformationStep({
   const dateOfBirth = watch('dateOfBirth');
   const state = watch('state');
   const phoneCountryCode = watch('phoneCountryCode');
-  const emergencyPhoneCountryCode = watch('emergencyPhoneCountryCode');
-  const emergencyAltPhoneCountryCode = watch('emergencyAltPhoneCountryCode');
-  const insuranceProvider = watch('insuranceProvider');
+  const patientType = watch('patientType');
+  const facultyId = watch('facultyId');
 
   const age = computeAge(dateOfBirth);
   const lgaOptions = LGAS_BY_STATE[state] ?? [];
+  const departmentOptions = DEPARTMENTS_BY_FACULTY[facultyId ?? ''] ?? [];
+  const assignedHMOLabel = FACULTY_HMO_MAP[facultyId ?? ''] ?? '';
 
   async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -173,6 +173,22 @@ export function PatientInformationStep({
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
       {/* ── Left column ─────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4">
+        <Card title="Patient Type">
+          <p className="mb-3.5" style={{ fontSize: 14, color: '#8A98A3' }}>
+            This determines which registration details are required below.
+          </p>
+          <div className="max-w-sm">
+            <SelectField
+              {...formProps}
+              name="patientType"
+              label="Patient Type"
+              required
+              placeholder="Select patient type"
+              options={PATIENT_TYPE_OPTIONS}
+            />
+          </div>
+        </Card>
+
         <Card title="Basic Information">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <FormField
@@ -335,138 +351,75 @@ export function PatientInformationStep({
           </div>
         </Card>
 
-        <Card title="Emergency Contact">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <FormField
-              label="Full Name"
-              htmlFor="emergencyFullName"
-              required
-              error={errors.emergencyFullName?.message}
-            >
-              <FormInput
-                id="emergencyFullName"
-                placeholder="Enter full name"
-                hasError={!!errors.emergencyFullName}
-                {...register('emergencyFullName')}
-              />
-            </FormField>
-            <SelectField
-              {...formProps}
-              name="emergencyRelationship"
-              label="Relationship"
-              required
-              placeholder="Select relationship"
-              options={RELATIONSHIP_OPTIONS}
-            />
-            <FormField
-              label="Phone Number"
-              htmlFor="emergencyPhoneNumber"
-              required
-              error={errors.emergencyPhoneNumber?.message}
-            >
-              <FormPhoneInput
-                countryCode={emergencyPhoneCountryCode}
-                onCountryCodeChange={(v) => setValue('emergencyPhoneCountryCode', v)}
-                hasError={!!errors.emergencyPhoneNumber}
-                numberInputProps={{
-                  id: 'emergencyPhoneNumber',
-                  placeholder: 'Phone number',
-                  ...register('emergencyPhoneNumber'),
+        {patientType === 'STUDENT' && (
+          <Card title="Student (TISHIP) Details">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <FormField
+                label="Registration Number"
+                htmlFor="studentRegistrationNumber"
+                required
+                error={errors.studentRegistrationNumber?.message}
+              >
+                <FormInput
+                  id="studentRegistrationNumber"
+                  placeholder="e.g. 2021/245678"
+                  hasError={!!errors.studentRegistrationNumber}
+                  {...register('studentRegistrationNumber')}
+                />
+              </FormField>
+              <SelectField
+                {...formProps}
+                name="facultyId"
+                label="Faculty"
+                required
+                placeholder="Select faculty"
+                options={FACULTY_OPTIONS}
+                onValueChange={(v) => {
+                  setValue('departmentId', '');
+                  setValue('assignedHMO', FACULTY_HMO_MAP[v] ?? '');
                 }}
               />
-            </FormField>
+              <SelectField
+                {...formProps}
+                name="departmentId"
+                label="Department"
+                required
+                placeholder={facultyId ? 'Select department' : 'Select faculty first'}
+                options={departmentOptions}
+                disabled={!facultyId}
+              />
 
-            <FormField
-              label="Alternate Phone"
-              htmlFor="emergencyAltPhoneNumber"
-              error={errors.emergencyAltPhoneNumber?.message}
-            >
-              <FormPhoneInput
-                countryCode={emergencyAltPhoneCountryCode}
-                onCountryCodeChange={(v) => setValue('emergencyAltPhoneCountryCode', v)}
-                hasError={!!errors.emergencyAltPhoneNumber}
-                numberInputProps={{
-                  id: 'emergencyAltPhoneNumber',
-                  placeholder: 'Alternate number',
-                  ...register('emergencyAltPhoneNumber'),
-                }}
-              />
-            </FormField>
-            <FormField label="Address" htmlFor="emergencyAddress" className="sm:col-span-2">
-              <FormInput
-                id="emergencyAddress"
-                placeholder="Enter contact address"
-                {...register('emergencyAddress')}
-              />
-            </FormField>
-          </div>
-        </Card>
+              <FormField
+                label="Assigned HMO"
+                htmlFor="assignedHMO"
+                hint="Determined automatically from Faculty — not user-selectable."
+                className="sm:col-span-2"
+              >
+                <FormInput id="assignedHMO" value={assignedHMOLabel || '—'} disabled readOnly />
+              </FormField>
+            </div>
+          </Card>
+        )}
 
-        <Card title="Insurance Details">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <SelectField
-              {...formProps}
-              name="insuranceProvider"
-              label="Insurance Provider"
-              placeholder="Select provider"
-              options={INSURANCE_PROVIDER_OPTIONS}
-            />
-            <FormField
-              label="Policy/Member ID"
-              htmlFor="policyMemberId"
-              required={!!insuranceProvider}
-              error={errors.policyMemberId?.message}
-            >
-              <FormInput
-                id="policyMemberId"
-                placeholder="Enter policy or member ID"
-                hasError={!!errors.policyMemberId}
-                {...register('policyMemberId')}
-              />
-            </FormField>
-            <FormField label="Group Number" htmlFor="groupNumber">
-              <FormInput
-                id="groupNumber"
-                placeholder="Enter group number"
-                {...register('groupNumber')}
-              />
-            </FormField>
-
-            <SelectField
-              {...formProps}
-              name="planType"
-              label="Plan Type"
-              placeholder="Select plan type"
-              options={PLAN_TYPE_OPTIONS}
-            />
-            <FormField
-              label="Policy Holder Name"
-              htmlFor="policyHolderName"
-              className="sm:col-span-2"
-            >
-              <FormInput
-                id="policyHolderName"
-                placeholder="Enter policy holder name"
-                {...register('policyHolderName')}
-              />
-            </FormField>
-
-            <FormField label="Valid From" htmlFor="insuranceValidFrom">
-              <FormDateInput id="insuranceValidFrom" {...register('insuranceValidFrom')} />
-            </FormField>
-            <FormField
-              label="Valid To"
-              htmlFor="insuranceValidTo"
-              error={errors.insuranceValidTo?.message}
-            >
-              <FormDateInput
-                id="insuranceValidTo"
-                hasError={!!errors.insuranceValidTo}
-                {...register('insuranceValidTo')}
-              />
-            </FormField>
-          </div>
-        </Card>
+        {patientType === 'STAFF_NHIA' && (
+          <Card title="Staff (NHIA) Details">
+            <div className="max-w-sm">
+              <FormField
+                label="NHIA Registration Number"
+                htmlFor="nhiaRegistrationNumber"
+                required
+                error={errors.nhiaRegistrationNumber?.message}
+              >
+                <FormInput
+                  id="nhiaRegistrationNumber"
+                  placeholder="e.g. 7082342-1"
+                  hasError={!!errors.nhiaRegistrationNumber}
+                  {...register('nhiaRegistrationNumber')}
+                />
+              </FormField>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* ── Right column ────────────────────────────────────────────────── */}
@@ -554,27 +507,6 @@ export function PatientInformationStep({
             <Camera style={{ width: 14, height: 14 }} />
             Take Photo
           </button>
-        </Card>
-
-        <Card title="Patient Category">
-          <div className="flex flex-col gap-4">
-            <SelectField
-              {...formProps}
-              name="categoryType"
-              label="Category Type"
-              required
-              placeholder="Select category"
-              options={PATIENT_CATEGORY_OPTIONS}
-            />
-            <FormField label="Category Description" htmlFor="categoryDescription">
-              <FormTextarea
-                id="categoryDescription"
-                rows={3}
-                placeholder="Enter description (optional)"
-                {...register('categoryDescription')}
-              />
-            </FormField>
-          </div>
         </Card>
 
         <div

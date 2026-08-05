@@ -137,6 +137,17 @@ const MARITAL_LABELS: Record<string, MaritalStatus> = {
   separated: 'Separated',
 };
 
+// Category is still a free-text field Patient Directory's own filter and
+// AssignCategoryModal.tsx operate on (unrelated screens, untouched by the
+// UNIZIK reconciliation) — derived from the wizard's own `patientType` so
+// those two keep working against a sane value without the wizard collecting
+// a second, redundant category selection.
+const CATEGORY_BY_PATIENT_TYPE: Record<string, string> = {
+  STUDENT: 'Student',
+  STAFF_NHIA: 'NHIS / Insurance',
+  OUTPATIENT: 'Regular / Private',
+};
+
 export type NewDirectoryPatientInput = {
   firstName: string;
   lastName: string;
@@ -151,8 +162,18 @@ export type NewDirectoryPatientInput = {
   phoneNumber: string;
   email?: string | undefined;
   address: string;
-  categoryLabel: string;
-  insuranceProviderLabel?: string | undefined;
+  /** UNIZIK's own 3-class model — see `PatientType` in `registerPatientSchema.ts`. */
+  patientType: 'STUDENT' | 'STAFF_NHIA' | 'OUTPATIENT';
+  studentRegistrationNumber?: string | undefined;
+  facultyLabel?: string | undefined;
+  departmentLabel?: string | undefined;
+  /** Never user-chosen — derived from Faculty via FACULTY_HMO_MAP. */
+  assignedHMO?: string | undefined;
+  nhiaRegistrationNumber?: string | undefined;
+  bloodGroup?: string | undefined;
+  genotype?: string | undefined;
+  height?: string | undefined;
+  weight?: string | undefined;
   mrn: string;
   patientId: string;
   /** Step 2's "Known Allergies" entries — same shape as
@@ -168,9 +189,10 @@ export type NewDirectoryPatientInput = {
 /** Register Patient's "Complete Registration" calling this is what makes a
  * new patient actually findable in Patient Directory and Check-In search —
  * before this, finishing the wizard only showed a success screen with an
- * MRN nobody else could look up. Registration's own intake form doesn't
- * capture student ID, faculty, or blood group yet, so those are left
- * honestly unset ('—' / 'Unknown') rather than fabricated. */
+ * MRN nobody else could look up. Student ID, faculty, and blood group are
+ * now populated with real data when the registering patient type provides
+ * them (Student / has a filled-in Clinical Profile); otherwise left honestly
+ * unset ('—' / 'Unknown') rather than fabricated. */
 export function addDirectoryPatient(input: NewDirectoryPatientInput): DirectoryPatient {
   const fullName = [input.firstName, input.middleName, input.lastName].filter(Boolean).join(' ');
   const initials = `${input.firstName[0] ?? ''}${input.lastName[0] ?? ''}`.toUpperCase();
@@ -187,21 +209,27 @@ export function addDirectoryPatient(input: NewDirectoryPatientInput): DirectoryP
     email: input.email ?? '',
     mrn: input.mrn,
     patientId: input.patientId,
-    studentId: '—',
+    studentId: input.studentRegistrationNumber ?? '—',
     age,
     gender:
       input.genderValue === 'female' ? 'Female' : input.genderValue === 'other' ? 'Other' : 'Male',
     dateOfBirth: input.dateOfBirth,
-    faculty: '—',
+    faculty: input.facultyLabel ?? '—',
     maritalStatus: MARITAL_LABELS[input.maritalStatusValue ?? ''] ?? 'Single',
     nationality: input.nationalityLabel,
     lastVisit: 'Today',
     status: 'Active',
-    category: input.categoryLabel,
-    insuranceProvider: input.insuranceProviderLabel ?? 'None',
-    bloodGroup: 'Unknown',
+    category: CATEGORY_BY_PATIENT_TYPE[input.patientType] ?? 'Regular / Private',
+    insuranceProvider: input.patientType === 'STAFF_NHIA' ? 'NHIS' : (input.assignedHMO ?? 'None'),
+    bloodGroup: input.bloodGroup || 'Unknown',
     address: input.address,
     dateRegistered: new Date().toISOString().slice(0, 10),
+    patientType: input.patientType,
+    departmentLabel: input.departmentLabel,
+    nhiaRegistrationNumber: input.nhiaRegistrationNumber,
+    genotype: input.genotype,
+    height: input.height,
+    weight: input.weight,
     allergies: (input.allergies ?? []).map((a, i) => ({
       id: `alg-reg-${Date.now()}-${i}`,
       substance: a.substance,

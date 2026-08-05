@@ -5,7 +5,8 @@ const phoneNumberField = z
   .min(1, 'Phone number is required')
   .regex(/^\d{7,11}$/, 'Enter a valid phone number (7–11 digits, no spaces)');
 
-const optionalPhoneNumberField = z
+/** Shared with `additionalDetailsSchema.ts` for the Next of Kin's optional alternate phone. */
+export const optionalPhoneNumberField = z
   .string()
   .regex(/^\d{7,11}$/, 'Enter a valid phone number (7–11 digits, no spaces)')
   .optional()
@@ -20,8 +21,19 @@ function isWithinHumanLifespan(dateStr: string): boolean {
   return years <= 150;
 }
 
+export const PATIENT_TYPES = ['STUDENT', 'STAFF_NHIA', 'OUTPATIENT'] as const;
+export type PatientType = (typeof PATIENT_TYPES)[number];
+
 export const patientInformationSchema = z
   .object({
+    // Patient Type — the very first field of the wizard; drives which of the
+    // fields below are actually required. See UNIZIK Medical Records' own
+    // 3-class registration spec (Student/TISHIP, Staff/NHIA, Outpatient).
+    // Plain string (like gender/nationality below), not z.enum, so it can
+    // default to '' and force an explicit choice — PATIENT_TYPES/PatientType
+    // above are for typed comparisons elsewhere, not the runtime shape here.
+    patientType: z.string().min(1, 'Patient type is required'),
+
     // Basic Information
     firstName: z.string().trim().min(2, 'First name must be at least 2 characters'),
     middleName: z.string().trim().optional(),
@@ -43,52 +55,62 @@ export const patientInformationSchema = z
     lga: z.string().min(1, 'LGA is required'),
     cityTown: z.string().trim().min(1, 'City/Town is required'),
 
-    // Emergency Contact
-    emergencyFullName: z.string().trim().min(2, 'Full name must be at least 2 characters'),
-    emergencyRelationship: z.string().min(1, 'Relationship is required'),
-    emergencyPhoneCountryCode: z.string().min(1),
-    emergencyPhoneNumber: phoneNumberField,
-    emergencyAltPhoneCountryCode: z.string().min(1),
-    emergencyAltPhoneNumber: optionalPhoneNumberField,
-    emergencyAddress: z.string().trim().optional(),
+    // Student (TISHIP) — required only when patientType is STUDENT.
+    // Alphanumeric on purpose: real UNIZIK reg numbers carry slashes/hyphens.
+    studentRegistrationNumber: z
+      .string()
+      .trim()
+      .regex(/^[A-Za-z0-9/-]+$/, 'Use letters, numbers, "/" or "-" only')
+      .optional()
+      .or(z.literal('')),
+    facultyId: z.string().optional(),
+    departmentId: z.string().optional(),
+    // Never chosen by the user — display-only, populated from `facultyId` via
+    // FACULTY_HMO_MAP (mocks "the backend determines the HMO").
+    assignedHMO: z.string().optional(),
 
-    // Insurance Details (optional block — validated together below)
-    insuranceProvider: z.string().optional(),
-    policyMemberId: z.string().trim().optional(),
-    groupNumber: z.string().trim().optional(),
-    planType: z.string().optional(),
-    policyHolderName: z.string().trim().optional(),
-    insuranceValidFrom: z.string().optional().or(z.literal('')),
-    insuranceValidTo: z.string().optional().or(z.literal('')),
-
-    // Patient Category
-    categoryType: z.string().min(1, 'Category type is required'),
-    categoryDescription: z.string().trim().optional(),
+    // Staff (NHIA) — required only when patientType is STAFF_NHIA. Plain
+    // string, not a number: real values look like "7082342-1".
+    nhiaRegistrationNumber: z
+      .string()
+      .trim()
+      .regex(/^[A-Za-z0-9-]+$/, 'Use letters, numbers, or "-" only')
+      .optional()
+      .or(z.literal('')),
   })
   .superRefine((values, ctx) => {
-    if (values.insuranceProvider && !values.policyMemberId) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['policyMemberId'],
-        message: 'Policy/Member ID is required once an insurance provider is selected',
-      });
-    }
-    if (values.insuranceValidFrom && values.insuranceValidTo) {
-      const from = new Date(values.insuranceValidFrom).getTime();
-      const to = new Date(values.insuranceValidTo).getTime();
-      if (to < from) {
+    if (values.patientType === 'STUDENT') {
+      if (!values.studentRegistrationNumber) {
         ctx.addIssue({
           code: 'custom',
-          path: ['insuranceValidTo'],
-          message: 'Valid To date cannot be before Valid From date',
+          path: ['studentRegistrationNumber'],
+          message: 'Student Registration Number is required',
         });
       }
+      if (!values.facultyId) {
+        ctx.addIssue({ code: 'custom', path: ['facultyId'], message: 'Faculty is required' });
+      }
+      if (!values.departmentId) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['departmentId'],
+          message: 'Department is required',
+        });
+      }
+    }
+    if (values.patientType === 'STAFF_NHIA' && !values.nhiaRegistrationNumber) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['nhiaRegistrationNumber'],
+        message: 'NHIA Registration Number is required',
+      });
     }
   });
 
 export type PatientInformationValues = z.infer<typeof patientInformationSchema>;
 
 export const PATIENT_INFORMATION_DEFAULTS: PatientInformationValues = {
+  patientType: '',
   firstName: '',
   middleName: '',
   lastName: '',
@@ -104,22 +126,11 @@ export const PATIENT_INFORMATION_DEFAULTS: PatientInformationValues = {
   state: '',
   lga: '',
   cityTown: '',
-  emergencyFullName: '',
-  emergencyRelationship: '',
-  emergencyPhoneCountryCode: '+234',
-  emergencyPhoneNumber: '',
-  emergencyAltPhoneCountryCode: '+234',
-  emergencyAltPhoneNumber: '',
-  emergencyAddress: '',
-  insuranceProvider: '',
-  policyMemberId: '',
-  groupNumber: '',
-  planType: '',
-  policyHolderName: '',
-  insuranceValidFrom: '',
-  insuranceValidTo: '',
-  categoryType: '',
-  categoryDescription: '',
+  studentRegistrationNumber: '',
+  facultyId: '',
+  departmentId: '',
+  assignedHMO: '',
+  nhiaRegistrationNumber: '',
 };
 
 /** Computes a patient's age in whole years from a WAT "today" reference. */

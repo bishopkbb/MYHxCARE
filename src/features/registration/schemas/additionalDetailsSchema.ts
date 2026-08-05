@@ -1,9 +1,29 @@
 import { z } from 'zod';
 
-import type { AllergySeverity } from '@/types/patient.types';
+import type { AllergySeverity, BloodGroup } from '@/types/patient.types';
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
+import { optionalPhoneNumberField } from '@/features/registration/schemas/registerPatientSchema';
 
 // ─── Reference data ─────────────────────────────────────────────────────────
+
+export const GENOTYPES = ['AA', 'AS', 'SS', 'AC', 'SC'] as const;
+export type Genotype = (typeof GENOTYPES)[number];
+
+export const GENOTYPE_OPTIONS: { value: Genotype; label: string }[] = GENOTYPES.map((g) => ({
+  value: g,
+  label: g,
+}));
+
+export const BLOOD_GROUP_OPTIONS: { value: BloodGroup; label: string }[] = [
+  'A+',
+  'A-',
+  'B+',
+  'B-',
+  'AB+',
+  'AB-',
+  'O+',
+  'O-',
+].map((g) => ({ value: g as BloodGroup, label: g }));
 
 export const ALLERGY_SEVERITY_OPTIONS: { value: AllergySeverity; label: string }[] = [
   { value: 'MILD', label: 'Mild' },
@@ -67,14 +87,17 @@ const phoneNumberField = z
 
 export const additionalDetailsSchema = z
   .object({
-    // Next of Kin — distinct from the Emergency Contact captured in Step 1;
-    // NOK is the legal/administrative contact, Emergency Contact is who to
-    // call in a crisis. The same person often fills both roles, but they're
-    // recorded separately since they don't always match.
+    // Next of Kin — the patient's one legal/administrative contact, per
+    // UNIZIK Medical Records' registration spec (Name, Phone, Relationship).
+    // Alternate phone and address are optional extras, not part of that
+    // spec, kept because the registration desk already captured them.
     nokName: z.string().trim().min(2, 'Full name must be at least 2 characters'),
     nokRelationship: z.string().min(1, 'Relationship is required'),
     nokPhoneCountryCode: z.string().min(1),
     nokPhoneNumber: phoneNumberField,
+    nokAltPhoneCountryCode: z.string().min(1),
+    nokAltPhoneNumber: optionalPhoneNumberField,
+    nokAddress: z.string().trim().optional(),
 
     // Known Allergies
     hasNoKnownAllergies: z.boolean(),
@@ -91,6 +114,15 @@ export const additionalDetailsSchema = z
     hasDisability: z.enum(['yes', 'no']),
     disabilityTypes: z.array(z.string()),
     disabilityNotes: z.string().trim().optional(),
+
+    // Clinical Profile — optional at registration for every patient class
+    // (UNIZIK's own spec: "these could be optional so they can be updated
+    // when the information is available"), captured here rather than Step 1
+    // since they're clinical, not identifying, information.
+    height: z.string().trim().optional(),
+    weight: z.string().trim().optional(),
+    bloodGroup: z.string().optional(),
+    genotype: z.string().optional(),
 
     // Communication
     preferredLanguage: z.string().min(1, 'Preferred language is required'),
@@ -149,12 +181,19 @@ export const ADDITIONAL_DETAILS_DEFAULTS: AdditionalDetailsValues = {
   nokRelationship: '',
   nokPhoneCountryCode: '+234',
   nokPhoneNumber: '',
+  nokAltPhoneCountryCode: '+234',
+  nokAltPhoneNumber: '',
+  nokAddress: '',
   hasNoKnownAllergies: false,
   allergies: [],
   chronicConditions: [],
   otherChronicCondition: '',
   currentMedications: '',
   pastSurgeries: '',
+  height: '',
+  weight: '',
+  bloodGroup: '',
+  genotype: '',
   hasDisability: 'no',
   disabilityTypes: [],
   disabilityNotes: '',

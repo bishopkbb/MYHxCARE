@@ -18,8 +18,10 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { FormTextarea } from '@components/shared/FormTextarea';
 import {
   ALLERGY_SEVERITY_OPTIONS,
+  BLOOD_GROUP_OPTIONS,
   CHRONIC_CONDITION_OPTIONS,
   DISABILITY_TYPE_OPTIONS,
+  GENOTYPE_OPTIONS,
   PREFERRED_LANGUAGE_OPTIONS,
   REFERRAL_SOURCE_OPTIONS,
   type AdditionalDetailsValues,
@@ -130,6 +132,7 @@ export function AdditionalDetailsStep({ register, control, errors, watch, setVal
   const { fields, append, remove } = useFieldArray({ control, name: 'allergies' });
   const hasNoKnownAllergies = watch('hasNoKnownAllergies');
   const nokPhoneCountryCode = watch('nokPhoneCountryCode');
+  const nokAltPhoneCountryCode = watch('nokAltPhoneCountryCode');
   const hasDisability = watch('hasDisability');
   const chronicConditions = watch('chronicConditions');
   const disabilityTypes = watch('disabilityTypes');
@@ -143,8 +146,7 @@ export function AdditionalDetailsStep({ register, control, errors, watch, setVal
       <div className="flex flex-col gap-4">
         <Card title="Next of Kin">
           <p className="mb-3.5" style={{ fontSize: 14, color: '#8A98A3' }}>
-            The patient&apos;s primary legal contact — may be the same person as the Emergency
-            Contact, but recorded separately since they don&apos;t always match.
+            The patient&apos;s primary contact for emergencies and administrative matters.
           </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <FormField label="Full Name" htmlFor="nokName" required error={errors.nokName?.message}>
@@ -178,6 +180,30 @@ export function AdditionalDetailsStep({ register, control, errors, watch, setVal
                   placeholder: 'Phone number',
                   ...register('nokPhoneNumber'),
                 }}
+              />
+            </FormField>
+
+            <FormField
+              label="Alternate Phone"
+              htmlFor="nokAltPhoneNumber"
+              error={errors.nokAltPhoneNumber?.message}
+            >
+              <FormPhoneInput
+                countryCode={nokAltPhoneCountryCode}
+                onCountryCodeChange={(v) => setValue('nokAltPhoneCountryCode', v)}
+                hasError={!!errors.nokAltPhoneNumber}
+                numberInputProps={{
+                  id: 'nokAltPhoneNumber',
+                  placeholder: 'Alternate number',
+                  ...register('nokAltPhoneNumber'),
+                }}
+              />
+            </FormField>
+            <FormField label="Address" htmlFor="nokAddress" className="sm:col-span-2">
+              <FormInput
+                id="nokAddress"
+                placeholder="Enter contact address"
+                {...register('nokAddress')}
               />
             </FormField>
           </div>
@@ -321,6 +347,34 @@ export function AdditionalDetailsStep({ register, control, errors, watch, setVal
                 {...register('pastSurgeries')}
               />
             </FormField>
+          </div>
+        </Card>
+
+        <Card title="Clinical Profile">
+          <p className="mb-3.5" style={{ fontSize: 14, color: '#8A98A3' }}>
+            Optional at registration — can be updated later once available.
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField label="Height (cm)" htmlFor="height">
+              <FormInput id="height" placeholder="e.g. 170" {...register('height')} />
+            </FormField>
+            <FormField label="Weight (kg)" htmlFor="weight">
+              <FormInput id="weight" placeholder="e.g. 65" {...register('weight')} />
+            </FormField>
+            <SelectField
+              {...formProps}
+              name="bloodGroup"
+              label="Blood Group"
+              placeholder="Select blood group"
+              options={BLOOD_GROUP_OPTIONS}
+            />
+            <SelectField
+              {...formProps}
+              name="genotype"
+              label="Genotype"
+              placeholder="Select genotype"
+              options={GENOTYPE_OPTIONS}
+            />
           </div>
         </Card>
       </div>

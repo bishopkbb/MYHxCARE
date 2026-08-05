@@ -27,11 +27,12 @@ import {
   PATIENT_INFORMATION_DEFAULTS,
   patientInformationSchema,
   type PatientInformationValues,
+  type PatientType,
 } from '@/features/registration/schemas/registerPatientSchema';
 import {
-  INSURANCE_PROVIDER_OPTIONS,
+  DEPARTMENTS_BY_FACULTY,
+  FACULTY_OPTIONS,
   NATIONALITY_OPTIONS,
-  PATIENT_CATEGORY_OPTIONS,
   type SelectOption,
 } from '@/features/registration/__mocks__/registerPatientOptions';
 import type { DirectoryPatient } from '@/features/registration/__mocks__/patientDirectoryFixtures';
@@ -339,6 +340,8 @@ export default function RegisterPatientPage() {
     // This is what actually makes the new patient findable in Patient
     // Directory and Check-In search — before this, finishing the wizard
     // only showed a success screen with an MRN nobody else could look up.
+    const departmentOptions = DEPARTMENTS_BY_FACULTY[step1Data.facultyId ?? ''] ?? [];
+
     addDirectoryPatient({
       firstName: step1Data.firstName,
       lastName: step1Data.lastName,
@@ -351,11 +354,20 @@ export default function RegisterPatientPage() {
       phoneNumber: step1Data.phoneNumber,
       email: step1Data.email,
       address: step1Data.address,
-      categoryLabel:
-        labelFor(PATIENT_CATEGORY_OPTIONS, step1Data.categoryType) || 'Regular / Private',
-      insuranceProviderLabel: step1Data.insuranceProvider
-        ? labelFor(INSURANCE_PROVIDER_OPTIONS, step1Data.insuranceProvider)
+      patientType: step1Data.patientType as PatientType,
+      studentRegistrationNumber: step1Data.studentRegistrationNumber || undefined,
+      facultyLabel: step1Data.facultyId
+        ? labelFor(FACULTY_OPTIONS, step1Data.facultyId)
         : undefined,
+      departmentLabel: step1Data.departmentId
+        ? labelFor(departmentOptions, step1Data.departmentId)
+        : undefined,
+      assignedHMO: step1Data.assignedHMO || undefined,
+      nhiaRegistrationNumber: step1Data.nhiaRegistrationNumber || undefined,
+      bloodGroup: step2Data.bloodGroup || undefined,
+      genotype: step2Data.genotype || undefined,
+      height: step2Data.height || undefined,
+      weight: step2Data.weight || undefined,
       mrn: finalIds.mrn,
       patientId: finalIds.patientId,
       allergies: step2Data.hasNoKnownAllergies ? [] : step2Data.allergies,

@@ -60,6 +60,10 @@ export const PLAN_TYPE_OPTIONS: SelectOption[] = [
   { value: 'family', label: 'Family' },
 ];
 
+// Kept for Patient Directory's own category filter and AssignCategoryModal —
+// unrelated screens outside the registration wizard. The wizard itself now
+// drives patient classification off PATIENT_TYPE_OPTIONS below, per UNIZIK
+// Medical Records' 3-class registration spec.
 export const PATIENT_CATEGORY_OPTIONS: SelectOption[] = [
   { value: 'regular', label: 'Regular / Private' },
   { value: 'student', label: 'Student' },
@@ -69,6 +73,89 @@ export const PATIENT_CATEGORY_OPTIONS: SelectOption[] = [
   { value: 'emergency', label: 'Emergency' },
   { value: 'vip', label: 'VIP' },
 ];
+
+// ─── UNIZIK patient classification (Registration wizard) ────────────────────
+// The official 3-class model from UNIZIK Medical Records: Student (TISHIP),
+// Staff (NHIA), and everyone else (non-NHIA staff / other outpatients).
+// Values match `PatientType` in registerPatientSchema.ts.
+export const PATIENT_TYPE_OPTIONS: SelectOption[] = [
+  { value: 'STUDENT', label: 'Student (TISHIP)' },
+  { value: 'STAFF_NHIA', label: 'Staff (NHIA)' },
+  { value: 'OUTPATIENT', label: 'Staff / Non-NHIA / Other Outpatient' },
+];
+
+// Same 8 faculties already seeded in patientDirectoryFixtures.ts's FACULTIES
+// array, kept in agreement so a registered student's faculty always matches
+// what Patient Directory already shows for the wider (fixture) population.
+export const FACULTY_OPTIONS: SelectOption[] = [
+  { value: 'medicine', label: 'Medicine' },
+  { value: 'engineering', label: 'Engineering' },
+  { value: 'law', label: 'Law' },
+  { value: 'pharmacy', label: 'Pharmacy' },
+  { value: 'nursing', label: 'Nursing' },
+  { value: 'business', label: 'Business' },
+  { value: 'education', label: 'Education' },
+  { value: 'natural-sciences', label: 'Natural Sciences' },
+];
+
+export const DEPARTMENTS_BY_FACULTY: Record<string, SelectOption[]> = {
+  medicine: [
+    { value: 'human-anatomy', label: 'Human Anatomy' },
+    { value: 'physiology', label: 'Physiology' },
+    { value: 'medicine-surgery', label: 'Medicine & Surgery' },
+  ],
+  engineering: [
+    { value: 'civil-engineering', label: 'Civil Engineering' },
+    { value: 'electrical-engineering', label: 'Electrical Engineering' },
+    { value: 'mechanical-engineering', label: 'Mechanical Engineering' },
+    { value: 'computer-engineering', label: 'Computer Engineering' },
+  ],
+  law: [
+    { value: 'public-law', label: 'Public & Private Law' },
+    { value: 'commercial-law', label: 'Commercial & Property Law' },
+    { value: 'international-law', label: 'International Law' },
+  ],
+  pharmacy: [
+    { value: 'clinical-pharmacy', label: 'Clinical Pharmacy' },
+    { value: 'pharmaceutics', label: 'Pharmaceutics' },
+    { value: 'pharmacology', label: 'Pharmacology' },
+  ],
+  nursing: [
+    { value: 'nursing-science', label: 'Nursing Science' },
+    { value: 'public-health-nursing', label: 'Public Health Nursing' },
+  ],
+  business: [
+    { value: 'accountancy', label: 'Accountancy' },
+    { value: 'banking-finance', label: 'Banking & Finance' },
+    { value: 'business-admin', label: 'Business Administration' },
+    { value: 'marketing', label: 'Marketing' },
+  ],
+  education: [
+    { value: 'educational-mgmt', label: 'Educational Management' },
+    { value: 'science-education', label: 'Science Education' },
+    { value: 'arts-education', label: 'Arts Education' },
+  ],
+  'natural-sciences': [
+    { value: 'biology', label: 'Biology' },
+    { value: 'chemistry', label: 'Chemistry' },
+    { value: 'physics', label: 'Physics' },
+    { value: 'computer-science', label: 'Computer Science' },
+  ],
+};
+
+// Mocks "the backend determines the HMO from the selected Faculty" — the
+// frontend only ever displays this, never lets the user pick it. The 4 real
+// HMOs UNIZIK students are split across.
+export const FACULTY_HMO_MAP: Record<string, string> = {
+  medicine: 'Hygeia HMO',
+  pharmacy: 'Hygeia HMO',
+  nursing: 'Hygeia HMO',
+  engineering: 'Reliance HMO',
+  'natural-sciences': 'Reliance HMO',
+  law: 'AXA Mansard Health',
+  business: 'AXA Mansard Health',
+  education: 'Avon Healthcare',
+};
 
 export const PHONE_COUNTRY_CODE_OPTIONS: SelectOption[] = [
   { value: '+234', label: '+234' },

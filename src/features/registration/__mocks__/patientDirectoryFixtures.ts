@@ -49,6 +49,14 @@ export type DirectoryPatient = {
    * allergy capture) — real allergy data only exists for patients registered
    * through `patientDirectoryStore.addDirectoryPatient()`. */
   allergies: Allergy[];
+  /** UNIZIK's 3-class model — only set for patients registered through
+   * `addDirectoryPatient()` post-reconciliation; seeded demo rows predate it. */
+  patientType?: 'STUDENT' | 'STAFF_NHIA' | 'OUTPATIENT' | undefined;
+  departmentLabel?: string | undefined;
+  nhiaRegistrationNumber?: string | undefined;
+  genotype?: string | undefined;
+  height?: string | undefined;
+  weight?: string | undefined;
 };
 
 export type DirectoryStat = {

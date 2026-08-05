@@ -12,21 +12,23 @@ import {
 } from '@/features/registration/schemas/registerPatientSchema';
 import type { AdditionalDetailsValues } from '@/features/registration/schemas/additionalDetailsSchema';
 import {
+  BLOOD_GROUP_OPTIONS,
   CHRONIC_CONDITION_OPTIONS,
   DISABILITY_TYPE_OPTIONS,
+  GENOTYPE_OPTIONS,
   PREFERRED_LANGUAGE_OPTIONS,
   REFERRAL_SOURCE_OPTIONS,
 } from '@/features/registration/schemas/additionalDetailsSchema';
 import { Tooltip } from '@components/shared/Tooltip';
 import {
+  DEPARTMENTS_BY_FACULTY,
+  FACULTY_OPTIONS,
   GENDER_OPTIONS,
-  INSURANCE_PROVIDER_OPTIONS,
   LGAS_BY_STATE,
   MARITAL_STATUS_OPTIONS,
   NATIONALITY_OPTIONS,
   NIGERIA_STATES,
-  PATIENT_CATEGORY_OPTIONS,
-  PLAN_TYPE_OPTIONS,
+  PATIENT_TYPE_OPTIONS,
   RELATIONSHIP_OPTIONS,
   type SelectOption,
 } from '@/features/registration/__mocks__/registerPatientOptions';
@@ -125,7 +127,10 @@ export function ReviewConfirmStep({
         recordedBy: registrationOfficerName,
       }));
 
-  const hasInsurance = Boolean(step1.insuranceProvider);
+  const departmentOptions = DEPARTMENTS_BY_FACULTY[step1.facultyId ?? ''] ?? [];
+  const hasClinicalProfile = Boolean(
+    step2.height || step2.weight || step2.bloodGroup || step2.genotype,
+  );
   const chronicConditionLabels = step2.chronicConditions
     .filter((c) => c !== 'other')
     .map((c) => labelFor(CHRONIC_CONDITION_OPTIONS, c));
@@ -157,7 +162,7 @@ export function ReviewConfirmStep({
           </p>
           <p style={{ fontSize: 14, color: '#4A7080' }}>
             {age !== null ? `${age} yrs` : '—'} · {labelFor(GENDER_OPTIONS, step1.gender)} ·{' '}
-            {labelFor(PATIENT_CATEGORY_OPTIONS, step1.categoryType)}
+            {labelFor(PATIENT_TYPE_OPTIONS, step1.patientType)}
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
@@ -199,29 +204,21 @@ export function ReviewConfirmStep({
             </div>
           </SummaryCard>
 
-          <SummaryCard title="Emergency Contact" onEdit={() => onEditStep(1)}>
-            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
-              <Field label="Full Name" value={step1.emergencyFullName} />
-              <Field
-                label="Relationship"
-                value={labelFor(RELATIONSHIP_OPTIONS, step1.emergencyRelationship)}
-              />
-              <Field
-                label="Phone"
-                value={`${step1.emergencyPhoneCountryCode} ${step1.emergencyPhoneNumber}`}
-              />
-            </div>
-          </SummaryCard>
-
-          {hasInsurance && (
-            <SummaryCard title="Insurance Details" onEdit={() => onEditStep(1)}>
+          {step1.patientType === 'STUDENT' && (
+            <SummaryCard title="Student (TISHIP) Details" onEdit={() => onEditStep(1)}>
               <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
-                <Field
-                  label="Provider"
-                  value={labelFor(INSURANCE_PROVIDER_OPTIONS, step1.insuranceProvider)}
-                />
-                <Field label="Policy/Member ID" value={step1.policyMemberId} />
-                <Field label="Plan Type" value={labelFor(PLAN_TYPE_OPTIONS, step1.planType)} />
+                <Field label="Reg. Number" value={step1.studentRegistrationNumber} />
+                <Field label="Faculty" value={labelFor(FACULTY_OPTIONS, step1.facultyId)} />
+                <Field label="Department" value={labelFor(departmentOptions, step1.departmentId)} />
+                <Field label="Assigned HMO" value={step1.assignedHMO} />
+              </div>
+            </SummaryCard>
+          )}
+
+          {step1.patientType === 'STAFF_NHIA' && (
+            <SummaryCard title="Staff (NHIA) Details" onEdit={() => onEditStep(1)}>
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
+                <Field label="NHIA Reg. Number" value={step1.nhiaRegistrationNumber} />
               </div>
             </SummaryCard>
           )}
@@ -234,6 +231,13 @@ export function ReviewConfirmStep({
                 value={labelFor(RELATIONSHIP_OPTIONS, step2.nokRelationship)}
               />
               <Field label="Phone" value={`${step2.nokPhoneCountryCode} ${step2.nokPhoneNumber}`} />
+              {step2.nokAltPhoneNumber && (
+                <Field
+                  label="Alternate Phone"
+                  value={`${step2.nokAltPhoneCountryCode} ${step2.nokAltPhoneNumber}`}
+                />
+              )}
+              {step2.nokAddress && <Field label="Address" value={step2.nokAddress} />}
             </div>
           </SummaryCard>
 
@@ -265,6 +269,24 @@ export function ReviewConfirmStep({
               <Field label="Past Surgeries" value={step2.pastSurgeries || 'None reported'} />
             </div>
           </SummaryCard>
+
+          {hasClinicalProfile && (
+            <SummaryCard title="Clinical Profile" onEdit={() => onEditStep(2)}>
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                {step2.height && <Field label="Height" value={`${step2.height} cm`} />}
+                {step2.weight && <Field label="Weight" value={`${step2.weight} kg`} />}
+                {step2.bloodGroup && (
+                  <Field
+                    label="Blood Group"
+                    value={labelFor(BLOOD_GROUP_OPTIONS, step2.bloodGroup)}
+                  />
+                )}
+                {step2.genotype && (
+                  <Field label="Genotype" value={labelFor(GENOTYPE_OPTIONS, step2.genotype)} />
+                )}
+              </div>
+            </SummaryCard>
+          )}
         </div>
 
         {/* ── Right column ──────────────────────────────────────────────── */}
