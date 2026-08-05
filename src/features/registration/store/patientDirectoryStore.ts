@@ -16,6 +16,7 @@
 import { useSyncExternalStore } from 'react';
 
 import type { AllergySeverity } from '@/types/patient.types';
+import { TENANT_CONFIG } from '@/constants/tenant';
 import { computeAge } from '@/features/registration/schemas/registerPatientSchema';
 import {
   DIRECTORY_PATIENTS,
@@ -93,22 +94,41 @@ export function findPotentialDuplicates(input: DuplicateCheckInput): DirectoryPa
 // ── Identifier reservation ───────────────────────────────────────────────────
 // A module-level monotonic counter, not `Math.random()` — two officers
 // registering patients seconds apart used to have a real (if small) chance of
-// generating the same 4-digit MRN suffix. This is only as collision-resistant
-// as JS's single-threaded execution allows (every tab still starts its own
-// counter) — genuine atomicity needs a real server-side sequence, which is
-// exactly what `POST /patients/reserve-identifier` in the backend API
-// contract calls for. This is the best available mitigation at the mock layer.
+// generating the same MRN suffix. This is only as collision-resistant as JS's
+// single-threaded execution allows (every tab still starts its own counter)
+// — genuine atomicity needs a real server-side sequence, which is exactly
+// what `POST /patients/reserve-identifier` in the backend API contract calls
+// for. This is the best available mitigation at the mock layer.
+//
+// The real backend returns an opaque, tenant-prefixed MRN per the
+// institution actually onboarded — e.g. `NAU-A8B78N87393485` — not a
+// human-readable year/sequence. `TENANT_CONFIG.mrnPrefix` (`constants/
+// tenant.ts`) is what a real multi-tenant swap would drive per-tenant; the
+// suffix below mimics that opaque shape while still guaranteeing
+// uniqueness within a session by encoding `identifierSeq` into its first
+// four characters, then padding out with randomness for visual authenticity.
+
+const OPAQUE_ID_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const OPAQUE_ID_LENGTH = 14;
 
 let identifierSeq = DIRECTORY_PATIENTS.length;
 
+function generateOpaqueSuffix(seq: number): string {
+  const seqPart = seq.toString(36).toUpperCase().padStart(4, '0');
+  const randomPart = Array.from(
+    { length: OPAQUE_ID_LENGTH - seqPart.length },
+    () => OPAQUE_ID_CHARS[Math.floor(Math.random() * OPAQUE_ID_CHARS.length)],
+  ).join('');
+  return `${seqPart}${randomPart}`;
+}
+
 export function reserveIdentifier(): { mrn: string; patientId: string } {
   identifierSeq += 1;
-  const year = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Africa/Lagos',
-    year: 'numeric',
-  }).format(new Date());
   const seq = String(identifierSeq).padStart(5, '0');
-  return { mrn: `MRN-${year}-${seq}`, patientId: `PT-${seq}` };
+  return {
+    mrn: `${TENANT_CONFIG.mrnPrefix}-${generateOpaqueSuffix(identifierSeq)}`,
+    patientId: `PT-${seq}`,
+  };
 }
 
 // ── Register Patient → Directory (the arrival→identity bridge) ─────────────

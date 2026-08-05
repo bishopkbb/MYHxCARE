@@ -1,10 +1,12 @@
 import type { MetadataRoute } from 'next';
 
+import { TENANT_CONFIG } from '@/constants/tenant';
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'MYHxCare HMS',
     short_name: 'MYHxCare',
-    description: 'Hospital Management System — Nnamdi Azikiwe University Medical Centre (UniZik)',
+    description: `Hospital Management System — ${TENANT_CONFIG.name}`,
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

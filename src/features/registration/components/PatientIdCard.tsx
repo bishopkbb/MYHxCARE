@@ -1,6 +1,7 @@
 'use client';
 
 import { getInitials } from '@lib/utils';
+import { TENANT_CONFIG } from '@/constants/tenant';
 import { computeAge } from '@/features/registration/schemas/registerPatientSchema';
 import { formatHumanDate } from '@/utils/datetime';
 import { Tooltip } from '@components/shared/Tooltip';
@@ -52,12 +53,12 @@ export function PatientIdCard({ card }: { card: PatientCard }) {
         <div className="flex min-w-0 items-center gap-2">
           <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/20">
             <span className="font-display font-bold text-white" style={{ fontSize: 14 }}>
-              U
+              N
             </span>
           </div>
-          <Tooltip content={`UNIZIK Medical Centre`}>
+          <Tooltip content={TENANT_CONFIG.name}>
             <span className="truncate font-sans font-semibold text-white" style={{ fontSize: 14 }}>
-              UNIZIK Medical Centre
+              {TENANT_CONFIG.name}
             </span>
           </Tooltip>
         </div>

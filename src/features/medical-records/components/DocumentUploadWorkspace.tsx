@@ -27,6 +27,7 @@ import { PermissionGate } from '@components/shared/PermissionGate';
 import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
+import { TENANT_CONFIG } from '@/constants/tenant';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/useToast';
 import { formatHumanDate } from '@/utils/datetime';
@@ -996,7 +997,7 @@ export function DocumentUploadWorkspace() {
                             className="font-display text-center font-semibold"
                             style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            UNIZIK MEDICAL CENTRE
+                            {TENANT_CONFIG.name.toUpperCase()}
                           </p>
                           <p className="text-center" style={{ fontSize: 14, color: '#4A7080' }}>
                             {previewDoc.category.toUpperCase()}

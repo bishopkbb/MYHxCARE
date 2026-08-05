@@ -1,7 +1,6 @@
-// The four real Nnamdi Azikiwe University Medical Centre pharmacy outlets —
-// one per campus: Awka (Main Campus, the flagship centre), Nnewi, Mbaukwu,
-// and Ifite-Ogwari. These IDs must match the values returned by
-// GET /api/v1/pharmacy/locations.
+// The four real NAU Medical Centre pharmacy outlets — one per campus: Awka
+// (Main Campus, the flagship centre), Nnewi, Mbaukwu, and Ifite-Ogwari.
+// These IDs must match the values returned by GET /api/v1/pharmacy/locations.
 
 export type PharmacyDispenseType =
   'OUTPATIENT' | 'INPATIENT' | 'EMERGENCY' | 'SURGICAL' | 'ONCOLOGY';

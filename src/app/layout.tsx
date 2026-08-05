@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { DM_Mono, DM_Sans, Outfit } from 'next/font/google';
 
+import { TENANT_CONFIG } from '@/constants/tenant';
 import { ServiceWorkerRegistrar } from '@lib/pwa/ServiceWorkerRegistrar';
 import { OfflineBanner } from '@components/shared/OfflineBanner';
 import { Toaster } from '@components/shared/Toaster';
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
     default: 'MYHxCare HMS',
     template: '%s — MYHxCare HMS',
   },
-  description: 'Hospital Management System — Nnamdi Azikiwe University Medical Centre (UniZik)',
+  description: `Hospital Management System — ${TENANT_CONFIG.name}`,
   robots: { index: false, follow: false },
   appleWebApp: {
     capable: true,

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 
 import { PERMISSIONS, type Permission } from '@/constants/permissions';
+import { TENANT_CONFIG } from '@/constants/tenant';
 import type { WorkspaceId } from '@/types/auth.types';
 
 // ── Notification preferences ─────────────────────────────────────────────────
@@ -276,7 +277,7 @@ export const ROLE_PERMISSION_ITEMS: RolePermissionItem[] = [
 export const ABOUT_APP_INFO = {
   version: 'MYHxCARE HMS v2.4.1',
   platform: 'Web Application · Next.js PWA',
-  institution: 'Nnamdi Azikiwe University Medical Centre',
+  institution: TENANT_CONFIG.name,
   supportEmail: 'support@myhxcare.ng',
   lastUpdated: '2026-06-30',
 };

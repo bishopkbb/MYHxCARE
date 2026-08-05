@@ -20,6 +20,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import { TENANT_CONFIG } from '@/constants/tenant';
+
 function atOffset(dayOffset: number, hour: number, minute: number): string {
   const d = new Date();
   d.setDate(d.getDate() + dayOffset);
@@ -475,14 +477,14 @@ export const MOCK_IMMUNIZATIONS: ImmunizationEntry[] = [
     vaccine: 'Hepatitis B',
     doseLabel: 'Dose 3 of 3',
     dateGiven: atOffset(-21, 16, 30),
-    givenBy: 'UNIZIK Medical Centre',
+    givenBy: TENANT_CONFIG.name,
   },
   {
     id: 'imm-002',
     vaccine: 'Tetanus Toxoid',
     doseLabel: 'Dose 1',
     dateGiven: atOffset(-21, 16, 30),
-    givenBy: 'UNIZIK Medical Centre',
+    givenBy: TENANT_CONFIG.name,
     nextDueDate: atOffset(345, 9, 0),
   },
   {
@@ -490,7 +492,7 @@ export const MOCK_IMMUNIZATIONS: ImmunizationEntry[] = [
     vaccine: 'COVID-19 (Booster)',
     doseLabel: 'Booster',
     dateGiven: atOffset(-90, 10, 0),
-    givenBy: 'UNIZIK Medical Centre',
+    givenBy: TENANT_CONFIG.name,
   },
 ];
 

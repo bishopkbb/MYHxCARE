@@ -7,6 +7,7 @@ import { ChevronLeft, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
 import { resolveWorkspace } from '@/types/auth.types';
+import { TENANT_CONFIG } from '@/constants/tenant';
 import { WORKSPACE_NAV } from '@/config/workspaces';
 import type { NavItem } from '@/config/workspaces';
 import { Tooltip } from '@components/shared/Tooltip';
@@ -255,12 +256,12 @@ export function AppSidebar({
                   MyHxCare HMS
                 </p>
               </Tooltip>
-              <Tooltip content={`UNIZIK Medical Centre`}>
+              <Tooltip content={TENANT_CONFIG.name}>
                 <p
                   className="text-sm leading-5 lg:truncate lg:leading-5.5"
                   style={{ color: '#0098CC' }}
                 >
-                  UNIZIK Medical Centre
+                  {TENANT_CONFIG.name}
                 </p>
               </Tooltip>
             </div>

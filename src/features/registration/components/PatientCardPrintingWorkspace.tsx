@@ -27,6 +27,7 @@ import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { getInitials } from '@lib/utils';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
+import { TENANT_CONFIG } from '@/constants/tenant';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { downloadPDF, escapeHtml } from '@/utils/export';
@@ -100,7 +101,7 @@ function buildCardHtml(card: PatientCard): string {
       <tr><th>Issue Date</th><td>${escapeHtml(formatHumanDate(card.issueDate))}</td></tr>
       <tr><th>Expiry Date</th><td>${escapeHtml(formatHumanDate(card.expiryDate))}</td></tr>
     </table>
-    <p class="content">UNIZIK Medical Centre — property of the university. If found, please return to the Registration desk.</p>
+    <p class="content">${escapeHtml(TENANT_CONFIG.name)} — property of the university. If found, please return to the Registration desk.</p>
   `;
 }
 
