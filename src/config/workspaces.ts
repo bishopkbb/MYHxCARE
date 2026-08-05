@@ -712,6 +712,19 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         ],
       },
       {
+        label: 'SCHEDULE & WORKFORCE',
+        items: [
+          {
+            label: 'Workforce Management',
+            href: '/laboratory/workforce-management',
+            icon: CalendarDays,
+            permission: PERMISSIONS.DUTY_ROSTER_WRITE,
+          },
+          { label: 'My Schedule', href: '/laboratory/my-schedule', icon: CalendarCheck },
+          { label: 'Shift Handover', href: '/laboratory/shift-handover', icon: Share2 },
+        ],
+      },
+      {
         label: 'COMMUNICATION',
         items: [
           { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 4 },

@@ -157,7 +157,14 @@ export const MOCK_USERS: User[] = [
     workspaceRole: 'LAB_SCIENTIST',
     department: 'Haematology Laboratory',
     departmentId: 'dept_lab_haematology',
-    permissions: ['patients:read', 'lab_orders:read', 'lab_orders:write', 'notifications:read'],
+    permissions: [
+      'patients:read',
+      'lab_orders:read',
+      'lab_orders:write',
+      'duty_roster:read',
+      'duty_roster:write',
+      'notifications:read',
+    ],
   },
   {
     id: 'usr_007',

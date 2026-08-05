@@ -1921,6 +1921,82 @@ const LABORATORY_CRITICAL_RESULTS_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'laboratory-workforce-management',
+  title: 'Workforce Management',
+  intro: 'Manage laboratory staff schedules, duty rosters, and department coverage.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Staff on Duty, Today’s Shifts, On-Call Staff, Shift Acknowledgement, Coverage Status, and Shift Changes summarize the roster at a glance.',
+    },
+    {
+      heading: "Today's Roster",
+      body: 'Search by staff name or filter by shift type, role, and status. Each row shows the department, shift time, and acknowledgement state.',
+    },
+    {
+      heading: 'Create and edit shifts',
+      body: 'Create Shift opens a form for staff name, role, department, shift type, and status. The pencil icon on a row reopens the same form pre-filled for editing.',
+    },
+    {
+      heading: 'Coverage and acknowledgement',
+      body: 'The Coverage Overview panel tracks department coverage by shift. Pending Shift Acknowledgement lists staff who haven’t confirmed their shift yet, with a one-tap reminder.',
+    },
+  ],
+};
+
+const LABORATORY_MY_SCHEDULE_GUIDE: HelpGuide = {
+  id: 'laboratory-my-schedule',
+  title: 'My Schedule',
+  intro: 'Your personal shift calendar, upcoming assignments, and on-call rota.',
+  sections: [
+    {
+      heading: "Today's Active Shift",
+      body: 'Shows your current shift, time range, and department. Acknowledge Shift confirms you have seen it; a progress bar tracks time remaining.',
+    },
+    {
+      heading: 'This Week',
+      body: 'A day-by-day strip of your shifts for the current week, colour-coded by shift type, with an acknowledgement indicator on each day.',
+    },
+    {
+      heading: 'Upcoming Shifts',
+      body: 'Lists your next shifts with time and department. Shifts awaiting your response show Confirm Shift and Cannot Attend actions.',
+    },
+    {
+      heading: 'Department On-Call Rota',
+      body: 'Shows who is covering on-call across the week, highlighting the scientist currently on duty and your own on-call slots.',
+    },
+    {
+      heading: 'Monthly Overview',
+      body: 'Totals your morning, afternoon, night, and on-call shifts for the current month.',
+    },
+  ],
+};
+
+const LABORATORY_SHIFT_HANDOVER_GUIDE: HelpGuide = {
+  id: 'laboratory-shift-handover',
+  title: 'Shift Handover',
+  intro: 'Structured shift handover notes between outgoing and incoming laboratory staff.',
+  sections: [
+    {
+      heading: 'Testing Summary',
+      body: 'Pending Result Entry, Awaiting Verification, Published Today, and On Hold counts summarize the test pipeline at hand-off, with a preview of tests still awaiting verification.',
+    },
+    {
+      heading: 'Outstanding Tasks and Priority Follow-ups',
+      body: 'Outstanding Tasks tracks a per-shift checklist by category. Priority Follow-ups lists critical results not yet communicated to the ward that the incoming scientist needs to review.',
+    },
+    {
+      heading: 'Low Stock Reagents',
+      body: 'Flags reagents below reorder level, so the incoming shift knows what to watch or reorder.',
+    },
+    {
+      heading: 'Signatures and completing handover',
+      body: 'The incoming scientist signs to accept responsibility for the pipeline and reagent stock. Save as Draft preserves progress; Complete Handover finalizes the transfer once signed.',
+    },
+  ],
+};
+
 const LABORATORY_SAMPLE_TRACKING_GUIDE: HelpGuide = {
   id: 'laboratory-sample-tracking',
   title: 'Sample Tracking',
@@ -3042,6 +3118,10 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/published-results'))
     return LABORATORY_PUBLISHED_RESULTS_GUIDE;
   if (pathname.startsWith('/laboratory/critical-results')) return LABORATORY_CRITICAL_RESULTS_GUIDE;
+  if (pathname.startsWith('/laboratory/workforce-management'))
+    return LABORATORY_WORKFORCE_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/laboratory/my-schedule')) return LABORATORY_MY_SCHEDULE_GUIDE;
+  if (pathname.startsWith('/laboratory/shift-handover')) return LABORATORY_SHIFT_HANDOVER_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;
