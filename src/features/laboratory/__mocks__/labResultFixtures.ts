@@ -105,6 +105,13 @@ export type LabResult = {
   /** Set only when `flag === 'CRITICAL'` — the nurse-side relay-to-doctor
    * workflow. */
   criticalValueLabel?: string;
+  /** Set by Critical Results' `communicateCritical()` — the lab's own "I
+   * called/paged the ward about this" step, upstream of and distinct from
+   * `criticalAcknowledgedAt` (the nurse's own "I got the call and told the
+   * doctor" step, set on the nursing Laboratory workspace). Neither action
+   * ever touches the other's field. */
+  criticalCommunicatedAt?: string;
+  criticalCommunicatedBy?: string;
   criticalAcknowledgedAt?: string;
   criticalAcknowledgedBy?: string;
   /** Set once a doctor has reviewed/verified — distinct from

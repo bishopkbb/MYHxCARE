@@ -160,6 +160,17 @@ export function acknowledgeCritical(id: string, ackBy: string): void {
   });
 }
 
+/** Lab Scientist action — Critical Results: the lab's own "I called/paged
+ * the ward about this critical value" step, upstream of the nurse's own
+ * `acknowledgeCritical()`. Never sets `criticalAcknowledgedAt` — that stays
+ * exclusively the nursing workspace's own transition. */
+export function communicateCritical(id: string, communicatedBy: string): void {
+  updateResult(id, {
+    criticalCommunicatedAt: new Date().toISOString(),
+    criticalCommunicatedBy: communicatedBy,
+  });
+}
+
 /** Lab Scientist action — Sample Reception: the specimen has physically
  * arrived at the bench and been logged in. The one real transition to
  * `IN_PROCESS` — nothing set this live before Sample Reception existed. */

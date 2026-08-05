@@ -18,6 +18,7 @@ import type {
   LabDepartment,
   LabResult,
   LabResultPriority,
+  LabResultRow,
   LabResultStatus,
 } from '@/features/laboratory/__mocks__/labResultFixtures';
 import type { Gender } from '@/types/patient.types';
@@ -312,4 +313,28 @@ export function awaitingVerificationTests(order: RawLabOrder): LabResult[] {
  * narrowing convention as `awaitingVerificationTests()`. */
 export function publishedTests(order: RawLabOrder): LabResult[] {
   return order.tests.filter((t) => t.status === 'VERIFIED');
+}
+
+// ── Critical Results — the lab's own notification-tracking log. ────────────
+// Unlike every other screen this one is naturally per-*test* (a critical
+// flag is a per-test event), not per-order — callers flatten
+// `groupIntoOrders()`'s output through this filter rather than grouping by
+// it, reusing the same real derivations (`deriveSampleId`, `orderId`,
+// `deriveCollectionPoint`) without a new grouping shape.
+
+/** Every critical-flagged test on the order — usually zero or one, but a
+ * multi-test order can have more than one parameter cross critical. */
+export function criticalTests(order: RawLabOrder): LabResult[] {
+  return order.tests.filter((t) => t.flag === 'CRITICAL');
+}
+
+/** The specific row that actually triggered the critical flag — matched by
+ * parameter name against `criticalValueLabel` (e.g. "Potassium (K+) 6.2
+ * mmol/L"), so the table/detail panel can show the real value and reference
+ * range instead of just the compound label string. `undefined` when the
+ * test predates structured `rows` (rare in seed data, always true for
+ * anything produced through Result Entry). */
+export function findCriticalRow(test: LabResult): LabResultRow | undefined {
+  if (!test.criticalValueLabel || !test.rows) return undefined;
+  return test.rows.find((r) => test.criticalValueLabel!.startsWith(r.parameter));
 }

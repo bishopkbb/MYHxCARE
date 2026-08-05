@@ -1897,6 +1897,30 @@ const LABORATORY_PUBLISHED_RESULTS_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_CRITICAL_RESULTS_GUIDE: HelpGuide = {
+  id: 'laboratory-critical-results',
+  title: 'Critical Results',
+  intro: 'The lab’s own notification log for every flagged critical value.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Critical Results, Awaiting Review, Communicated, Acknowledged, and Avg Response Time summarize how quickly critical values are being acted on.',
+    },
+    {
+      heading: 'Filters and tabs',
+      body: 'Search by patient, MRN, order ID, or sample ID, then narrow by Date Range, Department, or Sample Type. All Critical, High Priority, Pending Communication, and Acknowledged switch between views of the same log.',
+    },
+    {
+      heading: 'Acknowledge & Communicate',
+      body: 'Records that the lab called or paged the ward about this value. It does not acknowledge on the clinical team’s behalf — that happens separately once the ward confirms receipt, and shows up here automatically once it does.',
+    },
+    {
+      heading: 'Critical Result Details',
+      body: 'Select a row to preview the full result, its critical range, and response history on the right, including View Full Result and Add Comment.',
+    },
+  ],
+};
+
 const LABORATORY_SAMPLE_TRACKING_GUIDE: HelpGuide = {
   id: 'laboratory-sample-tracking',
   title: 'Sample Tracking',
@@ -3017,6 +3041,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
     return LABORATORY_RESULT_VERIFICATION_GUIDE;
   if (pathname.startsWith('/laboratory/published-results'))
     return LABORATORY_PUBLISHED_RESULTS_GUIDE;
+  if (pathname.startsWith('/laboratory/critical-results')) return LABORATORY_CRITICAL_RESULTS_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;

@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Critical Results' };
+import { LaboratoryCriticalResultsWorkspace } from '@/features/laboratory/components/LaboratoryCriticalResultsWorkspace';
 
 export default function CriticalResultsPage() {
-  return (
-    <ComingSoon
-      title="Critical Results"
-      description="A dedicated worklist for flagged critical values requiring immediate physician notification is on the way."
-    />
-  );
+  return <LaboratoryCriticalResultsWorkspace />;
 }
