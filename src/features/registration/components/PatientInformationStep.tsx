@@ -1,6 +1,7 @@
 'use client';
 
 import { Camera, Info, RefreshCw, Upload, User as UserIcon } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRef, useState } from 'react';
 import {
   Controller,
@@ -16,6 +17,7 @@ import { FormField } from '@components/shared/FormField';
 import { FormInput } from '@components/shared/FormInput';
 import { FormPhoneInput } from '@components/shared/FormPhoneInput';
 import { FormSelect } from '@components/shared/FormSelect';
+import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { useToast } from '@/hooks/useToast';
 import { resizeImageToDataUrl } from '@providers/AvatarProvider';
 import {
@@ -36,6 +38,11 @@ import {
 } from '@/features/registration/__mocks__/registerPatientOptions';
 
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
+
+const TakePhotoModal = dynamic(() => import('./TakePhotoModal').then((m) => m.TakePhotoModal), {
+  ssr: false,
+  loading: () => <ModalLoadingFallback />,
+});
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -129,6 +136,7 @@ export function PatientInformationStep({
 }: PatientInformationStepProps) {
   const toast = useToast();
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   const dateOfBirth = watch('dateOfBirth');
@@ -501,6 +509,7 @@ export function PatientInformationStep({
           </div>
           <button
             type="button"
+            onClick={() => setCameraOpen(true)}
             className="mt-3 flex w-full items-center justify-center gap-1.5 font-sans font-medium transition-opacity duration-150 hover:opacity-70 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
             style={{ fontSize: 14, color: '#00B4D8' }}
           >
@@ -520,6 +529,16 @@ export function PatientInformationStep({
           </p>
         </div>
       </div>
+
+      {cameraOpen && (
+        <TakePhotoModal
+          onClose={() => setCameraOpen(false)}
+          onCapture={(dataUrl) => {
+            onPhotoUploaded(dataUrl);
+            setCameraOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
