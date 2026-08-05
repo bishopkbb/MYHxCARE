@@ -894,18 +894,22 @@ export default function DashboardPage() {
                           <button
                             type="button"
                             onClick={() => {
+                              let encounterId = '';
                               if (patient.patientId) {
                                 startEncounterQueueRow(patient.patientId);
-                                startEncounter({
+                                const encounter = startEncounter({
                                   patientId: patient.patientId,
                                   patientName: patient.name,
                                   mrn: patient.mrn,
                                   attendingPhysicianId: user?.id,
                                   attendingPhysicianName: user?.name,
+                                  departmentId: user?.departmentId,
+                                  departmentName: user?.department,
                                 });
+                                encounterId = encounter.id;
                               }
                               router.push(
-                                `/patients/${patient.patientId ?? patient.id}/consultation`,
+                                `/patients/${patient.patientId ?? patient.id}/consultation?encounterId=${encounterId}`,
                               );
                             }}
                             className="h-9 rounded-[8px] bg-white px-[10px] text-sm leading-5.5 font-medium text-[#00B4D8] transition-colors duration-150 hover:bg-[#00B4D8] hover:text-white focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"

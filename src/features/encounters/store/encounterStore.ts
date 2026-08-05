@@ -45,12 +45,27 @@ export function useEncounters(): Encounter[] {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
+/** Direct lookup by the real encounter id — the id `startEncounter()`
+ * returns and callers now carry through as `?encounterId=` on the
+ * consultation route, instead of re-deriving "the active encounter" by
+ * scanning for `patientId` + non-terminal status every time. */
+export function getEncounterById(id: string): Encounter | undefined {
+  return encounters.find((e) => e.id === id);
+}
+
 export type StartEncounterInput = {
   patientId: string;
   patientName: string;
   mrn: string;
   attendingPhysicianId?: string | undefined;
   attendingPhysicianName?: string | undefined;
+  /** The attending's own department — the real "where" for an OPD encounter,
+   * same derivation `completeEncounter()` already used at the *end* of a
+   * visit (`user?.departmentId`/`user?.department`). Passing it here too
+   * means the encounter carries a real department from the moment it starts,
+   * not just once completion re-derives it. */
+  departmentId?: string | undefined;
+  departmentName?: string | undefined;
 };
 
 /** Called the moment a doctor clicks "Start Consultation" (every entry point —
@@ -85,8 +100,8 @@ export function startEncounter(input: StartEncounterInput): Encounter {
     },
     type: 'OPD',
     status: 'IN_CONSULTATION',
-    departmentId: 'dept-unknown',
-    departmentName: 'General',
+    departmentId: input.departmentId ?? 'dept-unknown',
+    departmentName: input.departmentName ?? 'General',
     ...(input.attendingPhysicianId ? { attendingPhysicianId: input.attendingPhysicianId } : {}),
     ...(input.attendingPhysicianName
       ? { attendingPhysicianName: input.attendingPhysicianName }

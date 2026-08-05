@@ -836,17 +836,23 @@ export default function EncountersPage() {
                       type="button"
                       disabled={patient.status === 'completed'}
                       onClick={() => {
+                        let encounterId = '';
                         if (patient.patientId) {
                           startEncounterQueueRow(patient.patientId);
-                          startEncounter({
+                          const encounter = startEncounter({
                             patientId: patient.patientId,
                             patientName: patient.name,
                             mrn: patient.mrn,
                             attendingPhysicianId: user?.id,
                             attendingPhysicianName: user?.name,
+                            departmentId: user?.departmentId,
+                            departmentName: user?.department,
                           });
+                          encounterId = encounter.id;
                         }
-                        router.push(`/patients/${patient.patientId ?? patient.id}/consultation`);
+                        router.push(
+                          `/patients/${patient.patientId ?? patient.id}/consultation?encounterId=${encounterId}`,
+                        );
                       }}
                       className="flex min-h-[44px] flex-1 items-center justify-center rounded-[8px] text-sm font-medium text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"
                       style={{
@@ -1133,18 +1139,22 @@ export default function EncountersPage() {
                           type="button"
                           disabled={patient.status === 'completed'}
                           onClick={() => {
+                            let encounterId = '';
                             if (patient.patientId) {
                               startEncounterQueueRow(patient.patientId);
-                              startEncounter({
+                              const encounter = startEncounter({
                                 patientId: patient.patientId,
                                 patientName: patient.name,
                                 mrn: patient.mrn,
                                 attendingPhysicianId: user?.id,
                                 attendingPhysicianName: user?.name,
+                                departmentId: user?.departmentId,
+                                departmentName: user?.department,
                               });
+                              encounterId = encounter.id;
                             }
                             router.push(
-                              `/patients/${patient.patientId ?? patient.id}/consultation`,
+                              `/patients/${patient.patientId ?? patient.id}/consultation?encounterId=${encounterId}`,
                             );
                           }}
                           className="cursor-pointer rounded-[8px] px-3 py-2 text-center text-sm leading-5.5 font-medium whitespace-nowrap text-white transition-opacity duration-150 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-default disabled:opacity-60"

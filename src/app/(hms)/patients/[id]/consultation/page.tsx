@@ -18,7 +18,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { use, useMemo, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,7 +32,7 @@ import {
   saveConsultationDraft,
 } from '@/features/encounters/store/consultationDraftStore';
 import { completeEncounterQueueRow } from '@/features/encounters/store/encounterQueueStore';
-import { completeEncounter } from '@/features/encounters/store/encounterStore';
+import { completeEncounter, getEncounterById } from '@/features/encounters/store/encounterStore';
 import { addAdmission, useAdmissions } from '@/features/nursing/store/admissionsStore';
 import type { NewAdmissionInput } from '@/features/nursing/components/NewAdmissionModal';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
@@ -165,6 +165,18 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
   const [showRequestAdmission, setShowRequestAdmission] = useState(false);
   const admissionsForWards = useAdmissions();
 
+  // Read via `window.location.search` in an effect (same convention as
+  // Patient Card Printing's `?prefill=` handoff and Registration's Patient
+  // Profile fix) rather than `useSearchParams()`, which would opt this route
+  // out of static optimization unless wrapped in a Suspense boundary.
+  const [encounterId, setEncounterId] = useState<string | null>(null);
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setEncounterId(new URLSearchParams(window.location.search).get('encounterId'));
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, []);
+
   function setField<K extends keyof ConsultationForm>(key: K, value: ConsultationForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
@@ -203,13 +215,19 @@ export default function ConsultationPage({ params }: { params: Promise<{ id: str
       .map((r) => `${VITAL_SHORT_LABEL[r.key] ?? r.key} ${r.value}`)
       .join(' · ');
 
+    // Prefer the department the encounter actually started with (real id
+    // carried via `?encounterId=` since Start Consultation) over re-deriving
+    // from the logged-in user again — the doctor completing the note isn't
+    // always the one who started it.
+    const startedEncounter = encounterId ? getEncounterById(encounterId) : undefined;
+
     completeEncounter({
       patientId: patient.id,
       patientName: patient.name,
       mrn: patient.mrn,
       fileNumber: patient.fileNumber,
-      departmentId: user?.departmentId ?? 'dept-unknown',
-      departmentName: user?.department ?? 'General',
+      departmentId: startedEncounter?.departmentId ?? user?.departmentId ?? 'dept-unknown',
+      departmentName: startedEncounter?.departmentName ?? user?.department ?? 'General',
       attendingPhysicianId: user?.id ?? 'unknown',
       attendingPhysicianName: user?.name ?? 'Attending Physician',
       chiefComplaint: form.chiefComplaint,
