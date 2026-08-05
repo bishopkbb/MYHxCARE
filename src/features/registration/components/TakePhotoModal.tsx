@@ -13,7 +13,24 @@ const FOCUS_RING =
 // same shape/size.
 const CAPTURE_SIZE = 400;
 
-type CameraState = 'requesting' | 'live' | 'denied' | 'unavailable' | 'error';
+type CameraState = 'requesting' | 'live' | 'denied' | 'unavailable' | 'insecure' | 'error';
+
+/** Waits for the video element to actually have a frame ready — assigning
+ * `.srcObject` alone doesn't guarantee a frame is decoded yet, and calling
+ * `.play()` before that on some mobile browsers (notably iOS/Android
+ * Chrome) silently no-ops, leaving a blank/frozen preview even though the
+ * permission prompt was accepted and the stream is technically attached.
+ * This is the actual root cause of "camera doesn't connect on my phone"
+ * reports — the fix is waiting for readiness, then explicitly starting
+ * playback and surfacing (not swallowing) a rejected play(). */
+async function playWhenReady(video: HTMLVideoElement): Promise<void> {
+  if (video.readyState < 1) {
+    await new Promise<void>((resolve) => {
+      video.onloadedmetadata = () => resolve();
+    });
+  }
+  await video.play();
+}
 
 /** "Take Photo" on Register Patient's Patient Photograph card — was a dead
  * button with no handler at all. Requests the camera (prompting the browser
@@ -36,6 +53,7 @@ export function TakePhotoModal({
   const [devices, setDevices] = useState<{ value: string; label: string }[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [retryToken, setRetryToken] = useState(0);
+  const [errorDetail, setErrorDetail] = useState('');
 
   function stopCurrentStream() {
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -56,19 +74,52 @@ export function TakePhotoModal({
   }
 
   async function startStream(deviceId?: string) {
+    // getUserMedia is only exposed at all in a secure context (HTTPS, or
+    // localhost) — on plain HTTP over a LAN IP (a common way this gets
+    // tested against a second device) `navigator.mediaDevices` is simply
+    // `undefined` in every modern browser, which looks identical to "no
+    // camera hardware" unless checked for separately and reported honestly.
+    if (typeof window !== 'undefined' && !window.isSecureContext) {
+      setCameraState('insecure');
+      return;
+    }
     if (!navigator.mediaDevices?.getUserMedia) {
       setCameraState('unavailable');
       return;
     }
     setCameraState('requesting');
+    setErrorDetail('');
     stopCurrentStream();
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: 'user' },
-        audio: false,
-      });
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: 'user' },
+          audio: false,
+        });
+      } catch (err) {
+        // Some devices/browsers reject a `facingMode` constraint they don't
+        // recognise as over-constrained rather than just ignoring it — retry
+        // once with a bare `video: true` before treating this as a real
+        // failure, rather than giving up on the very first attempt.
+        const canFallback =
+          !deviceId && err instanceof DOMException && err.name === 'OverconstrainedError';
+        if (!canFallback) throw err;
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
       streamRef.current = stream;
-      if (videoRef.current) videoRef.current.srcObject = stream;
+      const video = videoRef.current;
+      if (video) {
+        video.srcObject = stream;
+        try {
+          await playWhenReady(video);
+        } catch {
+          // Autoplay was blocked (some browsers require a direct user
+          // gesture) — the stream is still live and attached, so leave the
+          // officer able to capture; a tap on Capture is itself a user
+          // gesture and will resume playback then.
+        }
+      }
       setCameraState('live');
       const activeId = stream.getVideoTracks()[0]?.getSettings().deviceId;
       await refreshDeviceList(activeId ?? deviceId);
@@ -78,7 +129,17 @@ export function TakePhotoModal({
         setCameraState('denied');
       } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
         setCameraState('unavailable');
+      } else if (name === 'NotReadableError') {
+        setErrorDetail('The camera is already in use by another app or browser tab.');
+        setCameraState('error');
       } else {
+        setErrorDetail(
+          err instanceof DOMException
+            ? `${err.name}: ${err.message}`
+            : err instanceof Error
+              ? err.message
+              : String(err),
+        );
         setCameraState('error');
       }
     }
@@ -111,6 +172,11 @@ export function TakePhotoModal({
   function handleCapture() {
     const video = videoRef.current;
     if (!video) return;
+    // Capturing is itself a user gesture — if autoplay was blocked earlier
+    // (some mobile browsers require direct interaction), this resumes
+    // playback so the frame actually reflects what's in front of the
+    // camera right now rather than a stale/blank one.
+    if (video.paused) video.play().catch(() => {});
 
     const canvas = document.createElement('canvas');
     canvas.width = CAPTURE_SIZE;
@@ -143,7 +209,11 @@ export function TakePhotoModal({
     denied:
       'Camera access was denied. Allow camera access for this site in your browser settings, then try again.',
     unavailable: 'No camera or capture device was found. Use Upload Photo instead.',
-    error: 'Could not start the camera. Try again, or use Upload Photo instead.',
+    insecure:
+      'Camera access requires a secure (HTTPS) connection. Ask your administrator to enable HTTPS on this address, or use Upload Photo instead.',
+    error: errorDetail
+      ? `Could not start the camera (${errorDetail}). Try again, or use Upload Photo instead.`
+      : 'Could not start the camera. Try again, or use Upload Photo instead.',
   };
 
   return (
@@ -208,25 +278,28 @@ export function TakePhotoModal({
               )}
               {(cameraState === 'denied' ||
                 cameraState === 'unavailable' ||
+                cameraState === 'insecure' ||
                 cameraState === 'error') && (
                 <div className="flex flex-col items-center gap-3 px-6 text-center">
                   <AlertTriangle style={{ width: 24, height: 24, color: '#F59E0B' }} />
                   <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)' }}>
                     {stateMessage[cameraState]}
                   </p>
-                  <button
-                    type="button"
-                    onClick={handleRetry}
-                    className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-white/10 ${FOCUS_RING}`}
-                    style={{
-                      fontSize: 14,
-                      color: '#FFFFFF',
-                      border: '1px solid rgba(255,255,255,0.35)',
-                    }}
-                  >
-                    <RefreshCw style={{ width: 13, height: 13 }} />
-                    Try Again
-                  </button>
+                  {cameraState !== 'insecure' && (
+                    <button
+                      type="button"
+                      onClick={handleRetry}
+                      className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-white/10 ${FOCUS_RING}`}
+                      style={{
+                        fontSize: 14,
+                        color: '#FFFFFF',
+                        border: '1px solid rgba(255,255,255,0.35)',
+                      }}
+                    >
+                      <RefreshCw style={{ width: 13, height: 13 }} />
+                      Try Again
+                    </button>
+                  )}
                 </div>
               )}
               {capturedDataUrl ? (
