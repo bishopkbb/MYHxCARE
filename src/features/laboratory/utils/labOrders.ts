@@ -304,3 +304,12 @@ export function completedToday(order: RawLabOrder): boolean {
 export function awaitingVerificationTests(order: RawLabOrder): LabResult[] {
   return order.tests.filter((t) => t.status === 'RESULTED' && !t.labVerifiedAt);
 }
+
+// ── Published Results — the doctor-verified archive. ────────────────────────
+
+/** Tests the doctor has verified — the app's one real "published" signal
+ * (`verifyResult()` is the only transition to this terminal status). Same
+ * narrowing convention as `awaitingVerificationTests()`. */
+export function publishedTests(order: RawLabOrder): LabResult[] {
+  return order.tests.filter((t) => t.status === 'VERIFIED');
+}

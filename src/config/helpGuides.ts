@@ -1873,6 +1873,30 @@ const LABORATORY_RESULT_VERIFICATION_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_PUBLISHED_RESULTS_GUIDE: HelpGuide = {
+  id: 'laboratory-published-results',
+  title: 'Published Results',
+  intro: 'A searchable archive of every result a doctor has verified.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Published Today, Results This Week, This Month, Critical Results Reported, and Avg TAT (Published) summarize the published archive at a glance.',
+    },
+    {
+      heading: 'Filters and tabs',
+      body: 'Search by patient, MRN, order ID, or sample ID, then narrow by Date Range, Department, or Sample Type. All Published and Critical Results switch between views of the same archive.',
+    },
+    {
+      heading: 'Result Summary',
+      body: 'Select a row to preview it on the right, including patient and order information, every published test, and who verified it.',
+    },
+    {
+      heading: 'Reports',
+      body: 'View Full Report opens a read-only report of every test’s final values. Print Report generates a printable version — for one result or, from the header, for the whole filtered list.',
+    },
+  ],
+};
+
 const LABORATORY_SAMPLE_TRACKING_GUIDE: HelpGuide = {
   id: 'laboratory-sample-tracking',
   title: 'Sample Tracking',
@@ -2991,6 +3015,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/result-entry')) return LABORATORY_RESULT_ENTRY_GUIDE;
   if (pathname.startsWith('/laboratory/result-verification'))
     return LABORATORY_RESULT_VERIFICATION_GUIDE;
+  if (pathname.startsWith('/laboratory/published-results'))
+    return LABORATORY_PUBLISHED_RESULTS_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;

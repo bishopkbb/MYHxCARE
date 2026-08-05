@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Published Results' };
+import { LaboratoryPublishedResultsWorkspace } from '@/features/laboratory/components/LaboratoryPublishedResultsWorkspace';
 
 export default function PublishedResultsPage() {
-  return (
-    <ComingSoon
-      title="Published Results"
-      description="A searchable archive of every verified, published result is on the way."
-    />
-  );
+  return <LaboratoryPublishedResultsWorkspace />;
 }
