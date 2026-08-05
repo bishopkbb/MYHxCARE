@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Laboratory History' };
+import { LaboratoryHistoryWorkspace } from '@/features/laboratory/components/LaboratoryHistoryWorkspace';
 
 export default function LaboratoryHistoryPage() {
-  return (
-    <ComingSoon
-      title="Laboratory History"
-      description="A patient's full historical test results, trended over time, is on the way."
-    />
-  );
+  return <LaboratoryHistoryWorkspace />;
 }

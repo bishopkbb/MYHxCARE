@@ -40,7 +40,6 @@ import {
   Radar,
   Receipt,
   Repeat,
-  Search,
   Send,
   Settings,
   Share2,
@@ -665,7 +664,6 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
       {
         label: 'PATIENT RECORDS',
         items: [
-          { label: 'Patient Search', href: '/laboratory/patient-search', icon: Search },
           { label: 'Laboratory History', href: '/laboratory/history', icon: History },
           { label: 'Clinical Timeline', href: '/laboratory/clinical-timeline', icon: Clock },
         ],

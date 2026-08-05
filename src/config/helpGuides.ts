@@ -1997,6 +1997,30 @@ const LABORATORY_SHIFT_HANDOVER_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_HISTORY_GUIDE: HelpGuide = {
+  id: 'laboratory-history',
+  title: 'Laboratory History',
+  intro: 'A patient’s full laboratory order history, searchable by name or MRN.',
+  sections: [
+    {
+      heading: 'Finding a patient',
+      body: 'Search by name or MRN to select a patient. The most recently ordered patients appear first when the search is empty.',
+    },
+    {
+      heading: 'Patient summary',
+      body: 'Once a patient is selected, the banner and right-rail Patient Summary show their identity, contact details, blood group, and allergies — Change Patient returns to search.',
+    },
+    {
+      heading: 'Filters and tabs',
+      body: 'Narrow by Date Range, Order Status, or Department. All Orders, Completed, Pending, and Cancelled switch between views of the same history.',
+    },
+    {
+      heading: 'Viewing and printing',
+      body: 'The eye icon opens a read-only report for that order; the row menu prints it directly. Print History and Export cover the whole filtered list.',
+    },
+  ],
+};
+
 const LABORATORY_SAMPLE_TRACKING_GUIDE: HelpGuide = {
   id: 'laboratory-sample-tracking',
   title: 'Sample Tracking',
@@ -3122,6 +3146,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
     return LABORATORY_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/laboratory/my-schedule')) return LABORATORY_MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/laboratory/shift-handover')) return LABORATORY_SHIFT_HANDOVER_GUIDE;
+  if (pathname.startsWith('/laboratory/history')) return LABORATORY_HISTORY_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;

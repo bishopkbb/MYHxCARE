@@ -98,7 +98,6 @@ export const ROUTES = {
   laboratoryPublishedResults: '/laboratory/published-results',
   laboratoryCriticalResults: '/laboratory/critical-results',
   // Patient Records
-  laboratoryPatientSearch: '/laboratory/patient-search',
   laboratoryHistory: '/laboratory/history',
   laboratoryClinicalTimeline: '/laboratory/clinical-timeline',
   // Quality Management
