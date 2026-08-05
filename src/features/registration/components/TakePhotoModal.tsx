@@ -160,6 +160,36 @@ export function TakePhotoModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- retryToken deliberately re-runs this from scratch
   }, [retryToken]);
 
+  // Once denied, the browser will never show the permission prompt again for
+  // this site — the officer has to go fix it in browser/OS settings, which
+  // happens outside this tab. Watching the Permissions API (where supported
+  // — Chrome/Edge; Firefox/Safari don't expose 'camera' as a queryable name
+  // and are left to the manual Try Again button) means the moment they flip
+  // it to Allow, this modal notices and reconnects on its own instead of
+  // requiring them to remember to come back and click something.
+  useEffect(() => {
+    let status: PermissionStatus | null = null;
+    let cancelled = false;
+    navigator.permissions
+      ?.query({ name: 'camera' as PermissionName })
+      .then((result) => {
+        if (cancelled) return;
+        status = result;
+        result.onchange = () => {
+          if (result.state === 'granted') setRetryToken((t) => t + 1);
+        };
+      })
+      .catch(() => {
+        // Permissions API doesn't support querying 'camera' here — no
+        // proactive signal available, getUserMedia's own result is the only
+        // source of truth in that case.
+      });
+    return () => {
+      cancelled = true;
+      if (status) status.onchange = null;
+    };
+  }, []);
+
   function handleDeviceChange(deviceId: string) {
     setSelectedDeviceId(deviceId);
     startStream(deviceId);
@@ -206,8 +236,13 @@ export function TakePhotoModal({
   }
 
   const stateMessage: Partial<Record<CameraState, string>> = {
+    // Once the browser has a stored "block" for this site, no script can
+    // re-prompt or override it — that's deliberate browser security, not
+    // something fixable in code. This modal watches for the permission
+    // changing (see the effect above) and reconnects automatically the
+    // moment it's fixed, but the fix itself has to happen outside this tab.
     denied:
-      'Camera access was denied. Allow camera access for this site in your browser settings, then try again.',
+      'Camera access is blocked for this site. Click the camera icon (or padlock) in your browser’s address bar → Camera → Allow, then this will reconnect automatically. If no icon appears, check Windows Settings → Privacy & security → Camera and make sure your browser is allowed.',
     unavailable: 'No camera or capture device was found. Use Upload Photo instead.',
     insecure:
       'Camera access requires a secure (HTTPS) connection. Ask your administrator to enable HTTPS on this address, or use Upload Photo instead.',
