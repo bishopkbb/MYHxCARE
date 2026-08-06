@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Quality Control (QC)' };
+import { QualityControlWorkspace } from '@/features/laboratory/components/QualityControlWorkspace';
 
 export default function QualityControlPage() {
-  return (
-    <ComingSoon
-      title="Quality Control (QC)"
-      description="Daily QC run logging, Levey-Jennings charts, and pass/fail tracking per analyzer is on the way."
-    />
-  );
+  return <QualityControlWorkspace />;
 }

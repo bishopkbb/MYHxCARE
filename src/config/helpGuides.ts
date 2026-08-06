@@ -2021,6 +2021,30 @@ const LABORATORY_HISTORY_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_QUALITY_CONTROL_GUIDE: HelpGuide = {
+  id: 'laboratory-quality-control',
+  title: 'Quality Control (QC)',
+  intro: 'Log, review, and act on instrument control runs across every analyzer.',
+  sections: [
+    {
+      heading: 'Stat cards and filters',
+      body: "The six cards summarize today's runs, pass/fail counts, in-progress runs, active control lots, and the next run due. Narrow the QC Runs list by Date, Department, Instrument, Test Group, QC Type, or Status.",
+    },
+    {
+      heading: 'Logging a run',
+      body: "New QC Run evaluates every entered value against its test's target range automatically — Passed, Failed, or flagged with a Westgard rule (1-2s, 1-3s, 2-2s). Save as In Progress to log results later.",
+    },
+    {
+      heading: 'QC Runs and Levey-Jennings',
+      body: "Select a run to see its full Control Results in the side panel, or View Chart to plot that test's history on the Levey-Jennings tab with ±1/2/3 SD bands.",
+    },
+    {
+      heading: 'Westgard Rules, QC Lots, Corrective Actions',
+      body: 'Westgard Rules lists every flagged result across all runs. QC Lots tracks control lot inventory and expiry. Corrective Actions are raised automatically for failed runs — select one to record a root cause and mark it resolved.',
+    },
+  ],
+};
+
 const LABORATORY_CLINICAL_TIMELINE_GUIDE: HelpGuide = {
   id: 'laboratory-clinical-timeline',
   title: 'Clinical Timeline',
@@ -3174,6 +3198,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/clinical-timeline'))
     return LABORATORY_CLINICAL_TIMELINE_GUIDE;
   if (pathname.startsWith('/laboratory/history')) return LABORATORY_HISTORY_GUIDE;
+  if (pathname.startsWith('/laboratory/quality-control')) return LABORATORY_QUALITY_CONTROL_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;

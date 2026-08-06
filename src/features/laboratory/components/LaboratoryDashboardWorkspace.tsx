@@ -46,9 +46,9 @@ import {
   EQUIPMENT_STATUS,
   getEquipmentOnlineSummary,
   LAB_NOTIFICATIONS,
-  QC_TODAY,
   type EquipmentStatus,
 } from '@/features/laboratory/__mocks__/labDashboardFixtures';
+import { getMostRecentQcRunAt, getQcTodaySummary } from '@/features/laboratory/store/qcStore';
 
 type PageState = 'loading' | 'loaded' | 'error';
 type Shift = 'Morning' | 'Afternoon' | 'Night';
@@ -494,6 +494,7 @@ export function LaboratoryDashboardWorkspace() {
   }, [results]);
 
   const equipmentSummary = getEquipmentOnlineSummary();
+  const qcTodaySummary = getQcTodaySummary();
 
   const workQueues = useMemo(() => {
     function urgentCount(rows: LabResult[]) {
@@ -1291,7 +1292,7 @@ export function LaboratoryDashboardWorkspace() {
                           className="font-display font-black"
                           style={{ fontSize: 22, color: '#16A34A' }}
                         >
-                          {QC_TODAY.passed}
+                          {qcTodaySummary.passed}
                         </span>
                         <span className="font-sans" style={{ fontSize: 14, color: '#4A7080' }}>
                           Passed
@@ -1306,7 +1307,7 @@ export function LaboratoryDashboardWorkspace() {
                           className="font-display font-black"
                           style={{ fontSize: 22, color: '#DC2626' }}
                         >
-                          {QC_TODAY.failed}
+                          {qcTodaySummary.failed}
                         </span>
                         <span className="font-sans" style={{ fontSize: 14, color: '#4A7080' }}>
                           Failed
@@ -1321,7 +1322,7 @@ export function LaboratoryDashboardWorkspace() {
                           className="font-display font-black"
                           style={{ fontSize: 22, color: '#4A7080' }}
                         >
-                          {QC_TODAY.pending}
+                          {qcTodaySummary.inProgress}
                         </span>
                         <span className="font-sans" style={{ fontSize: 14, color: '#4A7080' }}>
                           Pending
@@ -1329,7 +1330,11 @@ export function LaboratoryDashboardWorkspace() {
                       </div>
                     </div>
                     <p className="mt-3 font-sans" style={{ fontSize: 14, color: '#8A98A3' }}>
-                      Last QC run: {formatWATTime(now)}
+                      Last QC run:{' '}
+                      {(() => {
+                        const lastRunAt = getMostRecentQcRunAt();
+                        return lastRunAt ? formatWATTime(new Date(lastRunAt)) : '—';
+                      })()}
                     </p>
                   </Panel>
                 </div>
