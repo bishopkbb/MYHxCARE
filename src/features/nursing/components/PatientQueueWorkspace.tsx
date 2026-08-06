@@ -21,6 +21,11 @@ import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { FormSelect } from '@components/shared/FormSelect';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/useAuth';
@@ -460,317 +465,304 @@ export function PatientQueueWorkspace() {
                   className="min-w-0 flex-1 rounded-[12px] p-4"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
-                  <div className="overflow-x-auto scroll-smooth">
-                    <div className="min-w-[1280px]">
-                      <div
-                        className="flex items-center rounded-t-[8px]"
-                        style={{
-                          background: 'rgba(226,237,241,0.4)',
-                          borderBottom: '1px solid #E6F8FD',
-                        }}
-                      >
-                        {[
-                          ['Patient', 'min-w-[180px] flex-1 pl-3'],
-                          ['Ward/Location', 'w-36'],
-                          ['Bed/Clinic', 'w-28'],
-                          ['Assigned Doctor', 'w-44'],
-                          ['Next Nursing Task', 'w-52'],
-                          ['Due Time', 'w-28'],
-                          ['Priority', 'w-24'],
-                          ['Status', 'w-28'],
-                        ].map(([label, width]) => (
-                          <div key={label} className={`${width} shrink-0 py-2.5 pr-2`}>
-                            <span
-                              className="font-sans font-bold tracking-wider uppercase"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {label}
-                            </span>
-                          </div>
-                        ))}
-                        <div className="w-64 shrink-0 py-2.5 pr-3 text-right">
+                  <ScrollableTable minWidth={1280} maxHeight={640}>
+                    <div
+                      className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                      style={{
+                        background: TABLE_HEADER_BG,
+                        borderBottom: '1px solid #E6F8FD',
+                      }}
+                    >
+                      {[
+                        ['Patient', 'min-w-[180px] flex-1 pl-3'],
+                        ['Ward/Location', 'w-36'],
+                        ['Bed/Clinic', 'w-28'],
+                        ['Assigned Doctor', 'w-44'],
+                        ['Next Nursing Task', 'w-52'],
+                        ['Due Time', 'w-28'],
+                        ['Priority', 'w-24'],
+                        ['Status', 'w-28'],
+                      ].map(([label, width]) => (
+                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2`}>
                           <span
                             className="font-sans font-bold tracking-wider uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
                           >
-                            Actions
+                            {label}
                           </span>
                         </div>
+                      ))}
+                      <div className="w-64 shrink-0 py-2.5 pr-3 text-right">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Actions
+                        </span>
                       </div>
+                    </div>
 
-                      {pageState === 'loading' &&
-                        Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)}
+                    {pageState === 'loading' &&
+                      Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)}
 
-                      {pageState === 'loaded' && pageRows.length === 0 && (
-                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                          <div
-                            className="flex size-14 items-center justify-center rounded-full"
-                            style={{ background: 'rgba(226,237,241,0.6)' }}
-                          >
-                            <ClipboardList style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                          </div>
-                          <div>
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 16, color: '#4A7080' }}
-                            >
-                              No patients match this filter
-                            </p>
-                            <p className="mt-0.5" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              Try a different ward, priority, task type, or status filter.
-                            </p>
-                          </div>
-                          {hasActiveFilters && (
-                            <button
-                              type="button"
-                              onClick={clearFilters}
-                              className="mt-1 font-sans font-medium transition-colors duration-150 hover:underline focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                              style={{ fontSize: 14, color: '#00B4D8' }}
-                            >
-                              Clear all filters
-                            </button>
-                          )}
+                    {pageState === 'loaded' && pageRows.length === 0 && (
+                      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                        <div
+                          className="flex size-14 items-center justify-center rounded-full"
+                          style={{ background: 'rgba(226,237,241,0.6)' }}
+                        >
+                          <ClipboardList style={{ width: 24, height: 24, color: '#8A98A3' }} />
                         </div>
-                      )}
+                        <div>
+                          <p
+                            className="font-sans font-medium"
+                            style={{ fontSize: 16, color: '#4A7080' }}
+                          >
+                            No patients match this filter
+                          </p>
+                          <p className="mt-0.5" style={{ fontSize: 14, color: '#8A98A3' }}>
+                            Try a different ward, priority, task type, or status filter.
+                          </p>
+                        </div>
+                        {hasActiveFilters && (
+                          <button
+                            type="button"
+                            onClick={clearFilters}
+                            className="mt-1 font-sans font-medium transition-colors duration-150 hover:underline focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            style={{ fontSize: 14, color: '#00B4D8' }}
+                          >
+                            Clear all filters
+                          </button>
+                        )}
+                      </div>
+                    )}
 
-                      {pageState === 'loaded' &&
-                        pageRows.map((task) => {
-                          const taskCfg = TASK_TYPE_CFG[task.taskType];
-                          const priorityCfg = PRIORITY_CFG[task.priority];
-                          const statusCfg = STATUS_CFG[task.status];
-                          const TaskIcon: LucideIcon = taskCfg.icon;
-                          const isPreAdmission = Boolean(task.preAdmissionEntryId);
-                          return (
-                            <div
-                              key={task.id}
-                              onClick={() => setSelectedId(task.id)}
-                              className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                              style={{
-                                borderBottom: '1px solid rgba(0,100,130,0.08)',
-                                background: selectedId === task.id ? '#E6F8FD' : 'transparent',
-                              }}
-                            >
-                              <div className="flex min-w-[180px] flex-1 items-center gap-2.5 py-3 pr-2 pl-3">
-                                <div
-                                  className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
-                                  style={{ background: task.avatarBg }}
-                                >
-                                  {task.initials}
-                                </div>
-                                <div className="min-w-0">
-                                  <Tooltip content={task.patientName}>
-                                    <p
-                                      className="truncate font-sans font-medium"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {task.patientName}
-                                    </p>
-                                  </Tooltip>
-                                  <Tooltip content={task.mrn}>
-                                    <p
-                                      className="truncate"
-                                      style={{ fontSize: 14, color: '#00B4D8' }}
-                                    >
-                                      {task.mrn}
-                                    </p>
-                                  </Tooltip>
-                                </div>
+                    {pageState === 'loaded' &&
+                      pageRows.map((task) => {
+                        const taskCfg = TASK_TYPE_CFG[task.taskType];
+                        const priorityCfg = PRIORITY_CFG[task.priority];
+                        const statusCfg = STATUS_CFG[task.status];
+                        const TaskIcon: LucideIcon = taskCfg.icon;
+                        const isPreAdmission = Boolean(task.preAdmissionEntryId);
+                        return (
+                          <div
+                            key={task.id}
+                            onClick={() => setSelectedId(task.id)}
+                            className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                            style={{
+                              borderBottom: '1px solid rgba(0,100,130,0.08)',
+                              background: selectedId === task.id ? '#E6F8FD' : 'transparent',
+                            }}
+                          >
+                            <div className="flex min-w-[180px] flex-1 items-center gap-2.5 py-3 pr-2 pl-3">
+                              <div
+                                className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                                style={{ background: task.avatarBg }}
+                              >
+                                {task.initials}
                               </div>
-                              <div className="w-36 shrink-0 py-3 pr-2">
-                                <Tooltip content={task.ward ?? task.department ?? '—'}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {task.ward ?? task.department ?? '—'}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-2">
-                                <Tooltip content={task.bed ?? task.assignedClinic ?? '—'}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {task.bed ?? task.assignedClinic ?? '—'}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-44 shrink-0 py-3 pr-2">
-                                <Tooltip content={task.doctorName}>
+                              <div className="min-w-0">
+                                <Tooltip content={task.patientName}>
                                   <p
                                     className="truncate font-sans font-medium"
                                     style={{ fontSize: 14, color: '#0D2630' }}
                                   >
-                                    {task.doctorName}
+                                    {task.patientName}
                                   </p>
                                 </Tooltip>
-                                <Tooltip content={task.doctorRole}>
+                                <Tooltip content={task.mrn}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#00B4D8' }}
+                                  >
+                                    {task.mrn}
+                                  </p>
+                                </Tooltip>
+                              </div>
+                            </div>
+                            <div className="w-36 shrink-0 py-3 pr-2">
+                              <Tooltip content={task.ward ?? task.department ?? '—'}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {task.ward ?? task.department ?? '—'}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-28 shrink-0 py-3 pr-2">
+                              <Tooltip content={task.bed ?? task.assignedClinic ?? '—'}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {task.bed ?? task.assignedClinic ?? '—'}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-44 shrink-0 py-3 pr-2">
+                              <Tooltip content={task.doctorName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {task.doctorName}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={task.doctorRole}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {task.doctorRole}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="flex w-52 shrink-0 items-center gap-2 py-3 pr-2">
+                              <div
+                                className="flex size-7 shrink-0 items-center justify-center rounded-full"
+                                style={{ background: taskCfg.bg }}
+                              >
+                                <TaskIcon style={{ width: 13, height: 13, color: taskCfg.color }} />
+                              </div>
+                              <div className="min-w-0">
+                                <Tooltip content={task.taskType}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {task.taskType}
+                                  </p>
+                                </Tooltip>
+                                <Tooltip content={task.taskDetail}>
                                   <p
                                     className="truncate"
                                     style={{ fontSize: 14, color: '#8A98A3' }}
                                   >
-                                    {task.doctorRole}
+                                    {task.taskDetail}
                                   </p>
                                 </Tooltip>
                               </div>
-                              <div className="flex w-52 shrink-0 items-center gap-2 py-3 pr-2">
-                                <div
-                                  className="flex size-7 shrink-0 items-center justify-center rounded-full"
-                                  style={{ background: taskCfg.bg }}
-                                >
-                                  <TaskIcon
-                                    style={{ width: 13, height: 13, color: taskCfg.color }}
-                                  />
-                                </div>
-                                <div className="min-w-0">
-                                  <Tooltip content={task.taskType}>
-                                    <p
-                                      className="truncate font-sans font-medium"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {task.taskType}
-                                    </p>
-                                  </Tooltip>
-                                  <Tooltip content={task.taskDetail}>
-                                    <p
-                                      className="truncate"
-                                      style={{ fontSize: 14, color: '#8A98A3' }}
-                                    >
-                                      {task.taskDetail}
-                                    </p>
-                                  </Tooltip>
-                                </div>
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-2">
+                            </div>
+                            <div className="w-28 shrink-0 py-3 pr-2">
+                              <p
+                                className="font-sans font-medium whitespace-nowrap"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {formatTime(task.dueTime)}
+                              </p>
+                              <Tooltip
+                                content={task.status === 'Completed' ? 'Done' : task.dueLabel}
+                              >
                                 <p
-                                  className="font-sans font-medium whitespace-nowrap"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                  className="truncate"
+                                  style={{
+                                    fontSize: 14,
+                                    color: task.overdue ? '#EF4444' : '#8A98A3',
+                                  }}
                                 >
-                                  {formatTime(task.dueTime)}
+                                  {task.status === 'Completed' ? 'Done' : task.dueLabel}
                                 </p>
-                                <Tooltip
-                                  content={task.status === 'Completed' ? 'Done' : task.dueLabel}
-                                >
-                                  <p
-                                    className="truncate"
+                              </Tooltip>
+                            </div>
+                            <div className="w-24 shrink-0 py-3 pr-2">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                                style={{
+                                  fontSize: 14,
+                                  whiteSpace: 'nowrap',
+                                  color: priorityCfg.color,
+                                  border: `1px solid ${priorityCfg.border}`,
+                                  background: priorityCfg.bg,
+                                }}
+                              >
+                                {task.priority}
+                              </span>
+                            </div>
+                            <div className="w-28 shrink-0 py-3 pr-2">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                                style={{
+                                  fontSize: 14,
+                                  whiteSpace: 'nowrap',
+                                  color: statusCfg.color,
+                                  border: `1px solid ${statusCfg.border}`,
+                                  background: statusCfg.bg,
+                                }}
+                              >
+                                {task.status}
+                              </span>
+                            </div>
+                            <div
+                              className="flex w-64 shrink-0 items-center justify-end gap-1 py-3 pr-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {isPreAdmission ? (
+                                <PermissionGate permission={PERMISSIONS.ADMISSIONS_WRITE}>
+                                  <button
+                                    type="button"
+                                    onClick={() => openReassign(task)}
+                                    aria-label={`Reassign ${task.patientName}`}
+                                    className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                  >
+                                    <Repeat style={{ width: 15, height: 15, color: '#4A7080' }} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => markEmergency(task)}
+                                    disabled={task.isEmergency}
+                                    aria-label={`Prioritize ${task.patientName} as emergency`}
+                                    className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
+                                  >
+                                    <AlertTriangle
+                                      style={{ width: 15, height: 15, color: '#EF4444' }}
+                                    />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartTriage(task)}
+                                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                                     style={{
                                       fontSize: 14,
-                                      color: task.overdue ? '#EF4444' : '#8A98A3',
+                                      background: '#00B4D8',
+                                      whiteSpace: 'nowrap',
                                     }}
                                   >
-                                    {task.status === 'Completed' ? 'Done' : task.dueLabel}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-24 shrink-0 py-3 pr-2">
-                                <span
-                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                  style={{
-                                    fontSize: 14,
-                                    whiteSpace: 'nowrap',
-                                    color: priorityCfg.color,
-                                    border: `1px solid ${priorityCfg.border}`,
-                                    background: priorityCfg.bg,
-                                  }}
-                                >
-                                  {task.priority}
-                                </span>
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-2">
-                                <span
-                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                  style={{
-                                    fontSize: 14,
-                                    whiteSpace: 'nowrap',
-                                    color: statusCfg.color,
-                                    border: `1px solid ${statusCfg.border}`,
-                                    background: statusCfg.bg,
-                                  }}
-                                >
-                                  {task.status}
-                                </span>
-                              </div>
-                              <div
-                                className="flex w-64 shrink-0 items-center justify-end gap-1 py-3 pr-3"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                {isPreAdmission ? (
+                                    <UserPlus style={{ width: 14, height: 14 }} />
+                                    Start Triage
+                                  </button>
+                                </PermissionGate>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedId(task.id)}
+                                    aria-label={`View ${task.patientName}`}
+                                    className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                  >
+                                    <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                                  </button>
                                   <PermissionGate permission={PERMISSIONS.ADMISSIONS_WRITE}>
                                     <button
                                       type="button"
-                                      onClick={() => openReassign(task)}
-                                      aria-label={`Reassign ${task.patientName}`}
-                                      className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                      onClick={() => handleEdit(task)}
+                                      aria-label={`Edit task for ${task.patientName}`}
+                                      className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                                     >
-                                      <Repeat style={{ width: 15, height: 15, color: '#4A7080' }} />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => markEmergency(task)}
-                                      disabled={task.isEmergency}
-                                      aria-label={`Prioritize ${task.patientName} as emergency`}
-                                      className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
-                                    >
-                                      <AlertTriangle
-                                        style={{ width: 15, height: 15, color: '#EF4444' }}
+                                      <SquarePen
+                                        style={{ width: 15, height: 15, color: '#4A7080' }}
                                       />
                                     </button>
                                     <button
                                       type="button"
-                                      onClick={() => handleStartTriage(task)}
-                                      className="flex h-9 shrink-0 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                      style={{
-                                        fontSize: 14,
-                                        background: '#00B4D8',
-                                        whiteSpace: 'nowrap',
-                                      }}
+                                      onClick={() => markStatus(task.id, 'Completed')}
+                                      disabled={task.status === 'Completed'}
+                                      aria-label={`Mark task complete for ${task.patientName}`}
+                                      className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
                                     >
-                                      <UserPlus style={{ width: 14, height: 14 }} />
-                                      Start Triage
+                                      <CheckCircle2
+                                        style={{ width: 15, height: 15, color: '#22C55E' }}
+                                      />
                                     </button>
                                   </PermissionGate>
-                                ) : (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() => setSelectedId(task.id)}
-                                      aria-label={`View ${task.patientName}`}
-                                      className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                    >
-                                      <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                                    </button>
-                                    <PermissionGate permission={PERMISSIONS.ADMISSIONS_WRITE}>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleEdit(task)}
-                                        aria-label={`Edit task for ${task.patientName}`}
-                                        className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                                      >
-                                        <SquarePen
-                                          style={{ width: 15, height: 15, color: '#4A7080' }}
-                                        />
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => markStatus(task.id, 'Completed')}
-                                        disabled={task.status === 'Completed'}
-                                        aria-label={`Mark task complete for ${task.patientName}`}
-                                        className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-30"
-                                      >
-                                        <CheckCircle2
-                                          style={{ width: 15, height: 15, color: '#22C55E' }}
-                                        />
-                                      </button>
-                                    </PermissionGate>
-                                  </>
-                                )}
-                              </div>
+                                </>
+                              )}
                             </div>
-                          );
-                        })}
-                    </div>
-                  </div>
+                          </div>
+                        );
+                      })}
+                  </ScrollableTable>
 
                   {pageState === 'loaded' && filtered.length > 0 && (
                     <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">

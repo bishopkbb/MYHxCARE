@@ -2,6 +2,12 @@
 
 import { Lock, X } from 'lucide-react';
 
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
+
 import { formatHumanDate, formatTime } from '@/utils/datetime';
 import type { LabTestOrder } from '@/features/nursing/__mocks__/laboratoryFixtures';
 
@@ -149,50 +155,51 @@ export function LabResultDetailModal({
                 </div>
 
                 {order.resultRows && order.resultRows.length > 0 && (
-                  <div className="overflow-x-auto scroll-smooth">
-                    <div className="min-w-[420px]">
-                      <div
-                        className="flex"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.1)' }}
-                      >
-                        {['Parameter', 'Value', 'Reference'].map((h) => (
-                          <div key={h} className="min-w-0 flex-1 py-2 pr-2">
-                            <span
-                              className="font-sans font-bold tracking-wider uppercase"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {h}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      {order.resultRows.map((r) => (
-                        <div
-                          key={r.parameter}
-                          className="flex"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
-                        >
-                          <div className="min-w-0 flex-1 py-2.5 pr-2">
-                            <p style={{ fontSize: 14, color: '#0D2630' }}>{r.parameter}</p>
-                          </div>
-                          <div className="min-w-0 flex-1 py-2.5 pr-2">
-                            <p
-                              className="font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                color: r.flag ? FLAG_COLOR[r.flag] : '#0D2630',
-                              }}
-                            >
-                              {r.value}
-                            </p>
-                          </div>
-                          <div className="min-w-0 flex-1 py-2.5 pr-2">
-                            <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.reference}</p>
-                          </div>
+                  <ScrollableTable minWidth={420}>
+                    <div
+                      className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                      style={{
+                        background: TABLE_HEADER_BG,
+                        borderBottom: '1px solid rgba(0,100,130,0.1)',
+                      }}
+                    >
+                      {['Parameter', 'Value', 'Reference'].map((h) => (
+                        <div key={h} className="min-w-0 flex-1 py-2 pr-2">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            {h}
+                          </span>
                         </div>
                       ))}
                     </div>
-                  </div>
+                    {order.resultRows.map((r) => (
+                      <div
+                        key={r.parameter}
+                        className="flex"
+                        style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
+                      >
+                        <div className="min-w-0 flex-1 py-2.5 pr-2">
+                          <p style={{ fontSize: 14, color: '#0D2630' }}>{r.parameter}</p>
+                        </div>
+                        <div className="min-w-0 flex-1 py-2.5 pr-2">
+                          <p
+                            className="font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              color: r.flag ? FLAG_COLOR[r.flag] : '#0D2630',
+                            }}
+                          >
+                            {r.value}
+                          </p>
+                        </div>
+                        <div className="min-w-0 flex-1 py-2.5 pr-2">
+                          <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.reference}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </ScrollableTable>
                 )}
 
                 {order.resultComment && (

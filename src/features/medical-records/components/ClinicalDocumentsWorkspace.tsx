@@ -17,6 +17,11 @@ import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -496,12 +501,12 @@ export function ClinicalDocumentsWorkspace() {
                       </button>
                     </div>
 
-                    <div className="mt-3 overflow-x-auto scroll-smooth">
-                      <div className="min-w-[910px]">
+                    <div className="mt-3">
+                      <ScrollableTable minWidth={910} maxHeight={640}>
                         <div
-                          className="flex rounded-t-[8px]"
+                          className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
                           style={{
-                            background: 'rgba(226,237,241,0.4)',
+                            background: TABLE_HEADER_BG,
                             borderBottom: '1px solid #E6F8FD',
                           }}
                         >
@@ -734,7 +739,7 @@ export function ClinicalDocumentsWorkspace() {
                             </div>
                           );
                         })}
-                      </div>
+                      </ScrollableTable>
                     </div>
 
                     {filteredDocs.length > 0 && (

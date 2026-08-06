@@ -28,6 +28,11 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -856,225 +861,218 @@ export function AdverseDrugReactionsWorkspace() {
                 </div>
               </div>
 
-              <div className="mt-3 overflow-x-auto scroll-smooth">
-                <div style={{ minWidth: 1360 }}>
-                  <div
-                    className="flex rounded-t-[8px]"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
-                  >
-                    <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Report ID
-                      </span>
-                    </div>
-                    <div className="min-w-[160px] flex-1 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Patient
-                      </span>
-                    </div>
-                    <div className="w-40 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Suspected Drug(s)
-                      </span>
-                    </div>
-                    <div className="w-40 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Reaction
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Severity
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Causality
-                      </span>
-                    </div>
-                    <div className="w-36 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Status
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Report Date
-                      </span>
-                    </div>
-                    <div className="w-32 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Reported By
-                      </span>
-                    </div>
-                    <div className="flex w-20 shrink-0 items-center justify-end py-2.5 pr-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Actions
-                      </span>
-                    </div>
+              <ScrollableTable minWidth={1360} maxHeight={640} className="mt-3">
+                <div
+                  className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Report ID
+                    </span>
                   </div>
+                  <div className="min-w-[160px] flex-1 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Patient
+                    </span>
+                  </div>
+                  <div className="w-40 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Suspected Drug(s)
+                    </span>
+                  </div>
+                  <div className="w-40 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Reaction
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Severity
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Causality
+                    </span>
+                  </div>
+                  <div className="w-36 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Status
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Report Date
+                    </span>
+                  </div>
+                  <div className="w-32 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Reported By
+                    </span>
+                  </div>
+                  <div className="flex w-20 shrink-0 items-center justify-end py-2.5 pr-3">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Actions
+                    </span>
+                  </div>
+                </div>
 
-                  {pageRows.length === 0 && (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                      <div
-                        className="flex size-14 items-center justify-center rounded-full"
-                        style={{ background: 'rgba(226,237,241,0.6)' }}
-                      >
-                        <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                      </div>
-                      <p
-                        className="font-sans font-medium"
-                        style={{ fontSize: 16, color: '#4A7080' }}
-                      >
-                        No ADR reports match your filters
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleClearFilters}
-                        className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                        style={{ fontSize: 14, color: '#00B4D8' }}
-                      >
-                        Clear all filters
-                      </button>
+                {pageRows.length === 0 && (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <div
+                      className="flex size-14 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(226,237,241,0.6)' }}
+                    >
+                      <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
                     </div>
-                  )}
+                    <p className="font-sans font-medium" style={{ fontSize: 16, color: '#4A7080' }}>
+                      No ADR reports match your filters
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                      style={{ fontSize: 14, color: '#00B4D8' }}
+                    >
+                      Clear all filters
+                    </button>
+                  </div>
+                )}
 
-                  {pageRows.map((r) => {
-                    const severityCfg = ADR_SEVERITY_COLOR[r.severity];
-                    const causalityCfg = ADR_CAUSALITY_COLOR[r.causality];
-                    const statusCfg = ADR_STATUS_COLOR[r.status];
-                    return (
-                      <div
-                        key={r.id}
-                        className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                      >
-                        <div className="w-32 shrink-0 py-3 pr-2 pl-3">
+                {pageRows.map((r) => {
+                  const severityCfg = ADR_SEVERITY_COLOR[r.severity];
+                  const causalityCfg = ADR_CAUSALITY_COLOR[r.causality];
+                  const statusCfg = ADR_STATUS_COLOR[r.status];
+                  return (
+                    <div
+                      key={r.id}
+                      className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                      style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                    >
+                      <div className="w-32 shrink-0 py-3 pr-2 pl-3">
+                        <p
+                          className="font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {r.id}
+                        </p>
+                      </div>
+                      <div className="min-w-[160px] flex-1 py-3 pr-2">
+                        <Tooltip content={r.patientName}>
                           <p
-                            className="font-sans font-medium"
+                            className="truncate font-sans font-medium"
                             style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            {r.id}
+                            {r.patientName}
                           </p>
-                        </div>
-                        <div className="min-w-[160px] flex-1 py-3 pr-2">
-                          <Tooltip content={r.patientName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {r.patientName}
-                            </p>
-                          </Tooltip>
-                          <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.mrn}</p>
-                        </div>
-                        <div className="w-40 shrink-0 py-3 pr-2">
-                          <Tooltip content={r.suspectedDrugs.join(', ')}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.suspectedDrugs.join(', ')}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-40 shrink-0 py-3 pr-2">
-                          <Tooltip content={r.reaction}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.reaction}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <Badge
-                            label={r.severity}
-                            color={severityCfg.color}
-                            border={severityCfg.border}
-                            bg={severityCfg.bg}
-                          />
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <Badge
-                            label={r.causality}
-                            color={causalityCfg.color}
-                            border={causalityCfg.border}
-                            bg={causalityCfg.bg}
-                          />
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <Badge
-                            label={r.status}
-                            color={statusCfg.color}
-                            border={statusCfg.border}
-                            bg={statusCfg.bg}
-                          />
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>
-                            {formatHumanDate(r.reportedAt)}
-                          </p>
-                          <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                            {formatTime(r.reportedAt)}
-                          </p>
-                        </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
-                          <Tooltip content={r.reportedBy}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.reportedBy}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="flex w-20 shrink-0 items-center justify-end gap-1 py-3 pr-3">
-                          <button
-                            type="button"
-                            onClick={() => setModal({ type: 'detail', report: r })}
-                            aria-label={`View ${r.id}`}
-                            className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                          >
-                            <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                          </button>
-                          <RowMenu
-                            report={r}
-                            onView={() => setModal({ type: 'detail', report: r })}
-                            onResolve={() => handleResolve(r.id)}
-                            onReportToNPC={() => handleReportToNPC(r.id)}
-                          />
-                        </div>
+                        </Tooltip>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.mrn}</p>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      <div className="w-40 shrink-0 py-3 pr-2">
+                        <Tooltip content={r.suspectedDrugs.join(', ')}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {r.suspectedDrugs.join(', ')}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-40 shrink-0 py-3 pr-2">
+                        <Tooltip content={r.reaction}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {r.reaction}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <Badge
+                          label={r.severity}
+                          color={severityCfg.color}
+                          border={severityCfg.border}
+                          bg={severityCfg.bg}
+                        />
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <Badge
+                          label={r.causality}
+                          color={causalityCfg.color}
+                          border={causalityCfg.border}
+                          bg={causalityCfg.bg}
+                        />
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <Badge
+                          label={r.status}
+                          color={statusCfg.color}
+                          border={statusCfg.border}
+                          bg={statusCfg.bg}
+                        />
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>
+                          {formatHumanDate(r.reportedAt)}
+                        </p>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>{formatTime(r.reportedAt)}</p>
+                      </div>
+                      <div className="w-32 shrink-0 py-3 pr-2">
+                        <Tooltip content={r.reportedBy}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {r.reportedBy}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="flex w-20 shrink-0 items-center justify-end gap-1 py-3 pr-3">
+                        <button
+                          type="button"
+                          onClick={() => setModal({ type: 'detail', report: r })}
+                          aria-label={`View ${r.id}`}
+                          className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                        >
+                          <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                        </button>
+                        <RowMenu
+                          report={r}
+                          onView={() => setModal({ type: 'detail', report: r })}
+                          onResolve={() => handleResolve(r.id)}
+                          onReportToNPC={() => handleReportToNPC(r.id)}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </ScrollableTable>
 
               <Pagination
                 page={currentPage}

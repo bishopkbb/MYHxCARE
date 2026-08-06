@@ -30,6 +30,11 @@ import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { StatCardCompact } from '@components/shared/StatCard';
 import { useToast } from '@/hooks/useToast';
@@ -813,169 +818,174 @@ export function RecordsWorkforceManagementWorkspace() {
                 </div>
 
                 {/* Desktop table — lg+ */}
-                <div className="hidden overflow-x-auto scroll-smooth lg:block">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderTop: '1px solid #0064821F',
-                      borderBottom: '1px solid #0064821F',
-                    }}
-                  >
-                    {COLS.map((col) => (
-                      <div key={col.key} className={`${col.width} min-w-0 px-3 py-3 ${col.align}`}>
-                        <Tooltip content={col.label}>
-                          <span
-                            className="block truncate font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {col.label}
-                          </span>
-                        </Tooltip>
-                      </div>
-                    ))}
-                  </div>
+                <div className="hidden lg:block">
+                  <ScrollableTable minWidth={900}>
+                    <div
+                      className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                      style={{
+                        background: TABLE_HEADER_BG,
+                        borderTop: '1px solid #0064821F',
+                        borderBottom: '1px solid #0064821F',
+                      }}
+                    >
+                      {COLS.map((col) => (
+                        <div
+                          key={col.key}
+                          className={`${col.width} min-w-0 px-3 py-3 ${col.align}`}
+                        >
+                          <Tooltip content={col.label}>
+                            <span
+                              className="block truncate font-sans font-bold tracking-wider uppercase"
+                              style={{ fontSize: 14, color: '#4A7080' }}
+                            >
+                              {col.label}
+                            </span>
+                          </Tooltip>
+                        </div>
+                      ))}
+                    </div>
 
-                  {paginated.map((shift) => {
-                    const typeCfg = SHIFT_TYPE_CFG[shift.shiftType];
-                    const statusCfg = STATUS_CFG[shift.status];
-                    const menuOpen = openRowMenuId === shift.id;
-                    return (
-                      <div
-                        key={shift.id}
-                        className="flex items-center transition-colors duration-150 hover:bg-[#F5FBFD]"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                      >
-                        <div className="flex w-[20%] min-w-0 items-center gap-2.5 px-3 py-3">
-                          <div
-                            className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
-                            style={{ background: shift.avatarBg }}
-                          >
-                            {shift.initials}
-                          </div>
-                          <Tooltip content={shift.staffName}>
-                            <p
-                              className="min-w-0 truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
+                    {paginated.map((shift) => {
+                      const typeCfg = SHIFT_TYPE_CFG[shift.shiftType];
+                      const statusCfg = STATUS_CFG[shift.status];
+                      const menuOpen = openRowMenuId === shift.id;
+                      return (
+                        <div
+                          key={shift.id}
+                          className="flex items-center transition-colors duration-150 hover:bg-[#F5FBFD]"
+                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                        >
+                          <div className="flex w-[20%] min-w-0 items-center gap-2.5 px-3 py-3">
+                            <div
+                              className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                              style={{ background: shift.avatarBg }}
                             >
-                              {shift.staffName}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-[10%] min-w-0 px-3 py-3">
-                          <Tooltip content={shift.role}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {shift.role}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-28 shrink-0 px-3 py-3">
-                          <span
-                            className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              color: typeCfg.color,
-                              border: `1px solid ${typeCfg.border}`,
-                              background: typeCfg.bg,
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {typeCfg.label}
-                          </span>
-                        </div>
-                        <div className="w-[14%] min-w-0 px-3 py-3">
-                          <Tooltip content={shift.timeRange}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {shift.timeRange}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="min-w-0 flex-1 px-3 py-3">
-                          <Tooltip content={shift.ward}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {shift.ward}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-28 shrink-0 px-3 py-3">
-                          <span
-                            className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              color: statusCfg.color,
-                              border: `1px solid ${statusCfg.border}`,
-                              background: statusCfg.bg,
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {statusCfg.label}
-                          </span>
-                        </div>
-                        <div className="flex w-32 shrink-0 justify-center px-3 py-3">
-                          {shift.acknowledged ? (
-                            <CheckCircle2 style={{ width: 19, height: 19, color: '#22C55E' }} />
-                          ) : (
-                            <Clock style={{ width: 19, height: 19, color: '#F59E0B' }} />
-                          )}
-                        </div>
-                        <div className="flex w-28 shrink-0 items-center gap-1.5 px-3 py-3">
-                          <button
-                            type="button"
-                            onClick={() => setViewingShift(shift)}
-                            aria-label={`View ${shift.staffName}'s shift`}
-                            className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          >
-                            <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditingShift(shift)}
-                            aria-label={`Edit ${shift.staffName}'s shift`}
-                            className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          >
-                            <Pencil style={{ width: 15, height: 15, color: '#4A7080' }} />
-                          </button>
-                          <div className="relative shrink-0">
-                            <button
-                              ref={getRowMenuButtonRef(shift.id)}
-                              type="button"
-                              onClick={() => setOpenRowMenuId(menuOpen ? null : shift.id)}
-                              aria-label="More actions"
-                              className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                            >
-                              <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
-                            </button>
-                            <RowMenuPortal
-                              open={menuOpen}
-                              anchorRef={getRowMenuButtonRef(shift.id)}
-                              onClose={() => setOpenRowMenuId(null)}
-                              width={160}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => handleDuplicateShift(shift)}
-                                className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                              {shift.initials}
+                            </div>
+                            <Tooltip content={shift.staffName}>
+                              <p
+                                className="min-w-0 truncate font-sans font-medium"
                                 style={{ fontSize: 14, color: '#0D2630' }}
                               >
-                                Duplicate Shift
-                              </button>
+                                {shift.staffName}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-[10%] min-w-0 px-3 py-3">
+                            <Tooltip content={shift.role}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {shift.role}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-28 shrink-0 px-3 py-3">
+                            <span
+                              className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
+                              style={{
+                                fontSize: 14,
+                                color: typeCfg.color,
+                                border: `1px solid ${typeCfg.border}`,
+                                background: typeCfg.bg,
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {typeCfg.label}
+                            </span>
+                          </div>
+                          <div className="w-[14%] min-w-0 px-3 py-3">
+                            <Tooltip content={shift.timeRange}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {shift.timeRange}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="min-w-0 flex-1 px-3 py-3">
+                            <Tooltip content={shift.ward}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {shift.ward}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-28 shrink-0 px-3 py-3">
+                            <span
+                              className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
+                              style={{
+                                fontSize: 14,
+                                color: statusCfg.color,
+                                border: `1px solid ${statusCfg.border}`,
+                                background: statusCfg.bg,
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {statusCfg.label}
+                            </span>
+                          </div>
+                          <div className="flex w-32 shrink-0 justify-center px-3 py-3">
+                            {shift.acknowledged ? (
+                              <CheckCircle2 style={{ width: 19, height: 19, color: '#22C55E' }} />
+                            ) : (
+                              <Clock style={{ width: 19, height: 19, color: '#F59E0B' }} />
+                            )}
+                          </div>
+                          <div className="flex w-28 shrink-0 items-center gap-1.5 px-3 py-3">
+                            <button
+                              type="button"
+                              onClick={() => setViewingShift(shift)}
+                              aria-label={`View ${shift.staffName}'s shift`}
+                              className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            >
+                              <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingShift(shift)}
+                              aria-label={`Edit ${shift.staffName}'s shift`}
+                              className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            >
+                              <Pencil style={{ width: 15, height: 15, color: '#4A7080' }} />
+                            </button>
+                            <div className="relative shrink-0">
                               <button
+                                ref={getRowMenuButtonRef(shift.id)}
                                 type="button"
-                                onClick={() => handleCancelShift(shift)}
-                                disabled={
-                                  shift.status === 'CANCELLED' || shift.status === 'COMPLETED'
-                                }
-                                className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
-                                style={{ fontSize: 14, color: '#EF4444' }}
+                                onClick={() => setOpenRowMenuId(menuOpen ? null : shift.id)}
+                                aria-label="More actions"
+                                className="flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                               >
-                                Cancel Shift
+                                <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
                               </button>
-                            </RowMenuPortal>
+                              <RowMenuPortal
+                                open={menuOpen}
+                                anchorRef={getRowMenuButtonRef(shift.id)}
+                                onClose={() => setOpenRowMenuId(null)}
+                                width={160}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => handleDuplicateShift(shift)}
+                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  Duplicate Shift
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCancelShift(shift)}
+                                  disabled={
+                                    shift.status === 'CANCELLED' || shift.status === 'COMPLETED'
+                                  }
+                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(239,68,68,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+                                  style={{ fontSize: 14, color: '#EF4444' }}
+                                >
+                                  Cancel Shift
+                                </button>
+                              </RowMenuPortal>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </ScrollableTable>
                 </div>
 
                 <Pagination

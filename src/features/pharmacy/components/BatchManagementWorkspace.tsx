@@ -25,6 +25,11 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
@@ -576,236 +581,234 @@ export function BatchManagementWorkspace() {
                 >
                   Batch List ({filtered.length})
                 </h2>
-                <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 1480 }}>
-                    <div
-                      className="flex rounded-t-[8px]"
-                      style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #E6F8FD',
-                      }}
-                    >
-                      <div className="w-28 shrink-0 py-2.5 pr-2 pl-3">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Batch No.
-                        </span>
-                      </div>
-                      <div className="min-w-[160px] flex-1 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Medication
-                        </span>
-                      </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Manufacturer
-                        </span>
-                      </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Mfg. Date
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Expiry Date
-                        </span>
-                      </div>
-                      <div className="w-44 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Location
-                        </span>
-                      </div>
-                      <div className="w-24 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Stock Qty
-                        </span>
-                      </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2 pl-3">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Status
-                        </span>
-                      </div>
-                      <div className="w-28 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Value
-                        </span>
-                      </div>
-                      <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Actions
-                        </span>
-                      </div>
+                <ScrollableTable minWidth={1480} maxHeight={640} className="mt-3">
+                  <div
+                    className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                    style={{
+                      background: TABLE_HEADER_BG,
+                      borderBottom: '1px solid #E6F8FD',
+                    }}
+                  >
+                    <div className="w-28 shrink-0 py-2.5 pr-2 pl-3">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Batch No.
+                      </span>
                     </div>
-
-                    {pageRows.length === 0 && (
-                      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                        <div
-                          className="flex size-14 items-center justify-center rounded-full"
-                          style={{ background: 'rgba(226,237,241,0.6)' }}
-                        >
-                          <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                        </div>
-                        <p
-                          className="font-sans font-medium"
-                          style={{ fontSize: 16, color: '#4A7080' }}
-                        >
-                          No batches match your filters
-                        </p>
-                        <button
-                          type="button"
-                          onClick={handleClearFilters}
-                          className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                          style={{ fontSize: 14, color: '#00B4D8' }}
-                        >
-                          Clear all filters
-                        </button>
-                      </div>
-                    )}
-
-                    {pageRows.map(({ row, status, daysLeft }) => {
-                      const statusCfg = STATUS_CFG[status];
-                      return (
-                        <div
-                          key={row.id}
-                          className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                        >
-                          <div className="w-28 shrink-0 py-3 pr-2 pl-3">
-                            <Tooltip content={row.batchNo}>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {row.batchNo}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="min-w-[160px] flex-1 py-3 pr-2">
-                            <Tooltip content={row.medicationName}>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {row.medicationName}
-                              </p>
-                            </Tooltip>
-                            <Tooltip content={`${row.strength} ${row.form}`}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {row.strength} {row.form}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-40 shrink-0 py-3 pr-2">
-                            <Tooltip content={row.manufacturer ?? '—'}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {row.manufacturer ?? '—'}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-32 shrink-0 py-3 pr-2">
-                            <p style={{ fontSize: 14, color: '#4A7080' }}>
-                              {row.mfgDate ? formatDate(row.mfgDate) : '—'}
-                            </p>
-                          </div>
-                          <div className="w-36 shrink-0 py-3 pr-2">
-                            <p style={{ fontSize: 14, color: '#0D2630' }}>
-                              {formatDate(row.expiryDate)}
-                            </p>
-                            <p
-                              style={{
-                                fontSize: 14,
-                                color:
-                                  daysLeft < 0 ? '#DC2626' : daysLeft <= 60 ? '#D97706' : '#8A98A3',
-                              }}
-                            >
-                              {daysLeft >= 0
-                                ? `${daysLeft} days left`
-                                : `${Math.abs(daysLeft)} days ago`}
-                            </p>
-                          </div>
-                          <div className="w-44 shrink-0 py-3 pr-2">
-                            <Tooltip content={getPharmacyLocation(row.locationId).name}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {getPharmacyLocation(row.locationId).name}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-24 shrink-0 py-3 pr-2 text-right">
-                            <p style={{ fontSize: 14, color: '#0D2630' }}>
-                              {row.stockQty.toLocaleString('en-GB')}
-                            </p>
-                          </div>
-                          <div className="w-40 shrink-0 py-3 pr-2 pl-3">
-                            <span
-                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                whiteSpace: 'nowrap',
-                                color: statusCfg.color,
-                                border: `1px solid ${statusCfg.border}`,
-                                background: statusCfg.bg,
-                              }}
-                            >
-                              {status}
-                            </span>
-                          </div>
-                          <div className="w-28 shrink-0 py-3 pr-2 text-right">
-                            <p style={{ fontSize: 14, color: '#0D2630' }}>
-                              {formatCurrency(row.stockQty * row.unitPrice)}
-                            </p>
-                          </div>
-                          <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
-                            <button
-                              type="button"
-                              onClick={() => setModal({ type: 'detail', row })}
-                              aria-label={`View batch ${row.batchNo}`}
-                              className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                            >
-                              <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                            </button>
-                            <RowMenu
-                              row={row}
-                              onView={() => setModal({ type: 'detail', row })}
-                              onAdjust={() => setModal({ type: 'adjust', row })}
-                              onToggleHold={() => handleToggleHold(row)}
-                              onTransfer={() => router.push(ROUTES.pharmacyTransfers)}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
+                    <div className="min-w-[160px] flex-1 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Medication
+                      </span>
+                    </div>
+                    <div className="w-40 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Manufacturer
+                      </span>
+                    </div>
+                    <div className="w-32 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Mfg. Date
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Expiry Date
+                      </span>
+                    </div>
+                    <div className="w-44 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Location
+                      </span>
+                    </div>
+                    <div className="w-24 shrink-0 py-2.5 pr-2 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Stock Qty
+                      </span>
+                    </div>
+                    <div className="w-40 shrink-0 py-2.5 pr-2 pl-3">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Status
+                      </span>
+                    </div>
+                    <div className="w-28 shrink-0 py-2.5 pr-2 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Value
+                      </span>
+                    </div>
+                    <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Actions
+                      </span>
+                    </div>
                   </div>
-                </div>
+
+                  {pageRows.length === 0 && (
+                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                      <div
+                        className="flex size-14 items-center justify-center rounded-full"
+                        style={{ background: 'rgba(226,237,241,0.6)' }}
+                      >
+                        <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                      </div>
+                      <p
+                        className="font-sans font-medium"
+                        style={{ fontSize: 16, color: '#4A7080' }}
+                      >
+                        No batches match your filters
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#00B4D8' }}
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  )}
+
+                  {pageRows.map(({ row, status, daysLeft }) => {
+                    const statusCfg = STATUS_CFG[status];
+                    return (
+                      <div
+                        key={row.id}
+                        className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                      >
+                        <div className="w-28 shrink-0 py-3 pr-2 pl-3">
+                          <Tooltip content={row.batchNo}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {row.batchNo}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="min-w-[160px] flex-1 py-3 pr-2">
+                          <Tooltip content={row.medicationName}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {row.medicationName}
+                            </p>
+                          </Tooltip>
+                          <Tooltip content={`${row.strength} ${row.form}`}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                              {row.strength} {row.form}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-40 shrink-0 py-3 pr-2">
+                          <Tooltip content={row.manufacturer ?? '—'}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {row.manufacturer ?? '—'}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-32 shrink-0 py-3 pr-2">
+                          <p style={{ fontSize: 14, color: '#4A7080' }}>
+                            {row.mfgDate ? formatDate(row.mfgDate) : '—'}
+                          </p>
+                        </div>
+                        <div className="w-36 shrink-0 py-3 pr-2">
+                          <p style={{ fontSize: 14, color: '#0D2630' }}>
+                            {formatDate(row.expiryDate)}
+                          </p>
+                          <p
+                            style={{
+                              fontSize: 14,
+                              color:
+                                daysLeft < 0 ? '#DC2626' : daysLeft <= 60 ? '#D97706' : '#8A98A3',
+                            }}
+                          >
+                            {daysLeft >= 0
+                              ? `${daysLeft} days left`
+                              : `${Math.abs(daysLeft)} days ago`}
+                          </p>
+                        </div>
+                        <div className="w-44 shrink-0 py-3 pr-2">
+                          <Tooltip content={getPharmacyLocation(row.locationId).name}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {getPharmacyLocation(row.locationId).name}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-24 shrink-0 py-3 pr-2 text-right">
+                          <p style={{ fontSize: 14, color: '#0D2630' }}>
+                            {row.stockQty.toLocaleString('en-GB')}
+                          </p>
+                        </div>
+                        <div className="w-40 shrink-0 py-3 pr-2 pl-3">
+                          <span
+                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              whiteSpace: 'nowrap',
+                              color: statusCfg.color,
+                              border: `1px solid ${statusCfg.border}`,
+                              background: statusCfg.bg,
+                            }}
+                          >
+                            {status}
+                          </span>
+                        </div>
+                        <div className="w-28 shrink-0 py-3 pr-2 text-right">
+                          <p style={{ fontSize: 14, color: '#0D2630' }}>
+                            {formatCurrency(row.stockQty * row.unitPrice)}
+                          </p>
+                        </div>
+                        <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
+                          <button
+                            type="button"
+                            onClick={() => setModal({ type: 'detail', row })}
+                            aria-label={`View batch ${row.batchNo}`}
+                            className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                          >
+                            <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                          </button>
+                          <RowMenu
+                            row={row}
+                            onView={() => setModal({ type: 'detail', row })}
+                            onAdjust={() => setModal({ type: 'adjust', row })}
+                            onToggleHold={() => handleToggleHold(row)}
+                            onTransfer={() => router.push(ROUTES.pharmacyTransfers)}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </ScrollableTable>
 
                 <Pagination
                   page={currentPage}

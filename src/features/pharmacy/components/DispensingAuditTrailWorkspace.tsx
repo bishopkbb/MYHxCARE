@@ -28,6 +28,11 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -806,228 +811,221 @@ export function DispensingAuditTrailWorkspace() {
                 </div>
               </div>
 
-              <div className="mt-3 overflow-x-auto scroll-smooth">
-                <div style={{ minWidth: 1560 }}>
-                  <div
-                    className="flex rounded-t-[8px]"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
-                  >
-                    <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Date &amp; Time
-                      </span>
-                    </div>
-                    <div className="w-36 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        User
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Action
-                      </span>
-                    </div>
-                    <div className="w-36 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Patient
-                      </span>
-                    </div>
-                    <div className="w-36 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Medication
-                      </span>
-                    </div>
-                    <div className="min-w-[180px] flex-1 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Details
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Module
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        IP Address
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Outcome
-                      </span>
-                    </div>
-                    <div className="flex w-20 shrink-0 items-center justify-end py-2.5 pr-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Actions
-                      </span>
-                    </div>
+              <ScrollableTable minWidth={1560} maxHeight={640} className="mt-3">
+                <div
+                  className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Date &amp; Time
+                    </span>
                   </div>
-
-                  {pageRows.length === 0 && (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                      <div
-                        className="flex size-14 items-center justify-center rounded-full"
-                        style={{ background: 'rgba(226,237,241,0.6)' }}
-                      >
-                        <Shield style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                      </div>
-                      <p
-                        className="font-sans font-medium"
-                        style={{ fontSize: 16, color: '#4A7080' }}
-                      >
-                        No audit events match your filters
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleClearFilters}
-                        className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                        style={{ fontSize: 14, color: '#00B4D8' }}
-                      >
-                        Clear all filters
-                      </button>
-                    </div>
-                  )}
-
-                  {pageRows.map((e) => {
-                    const actionCfg = AUDIT_ACTION_COLOR[e.action];
-                    const ActionIcon = ACTION_ICON[e.action];
-                    return (
-                      <div
-                        key={e.id}
-                        className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                      >
-                        <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                          <p style={{ fontSize: 14, color: '#0D2630' }}>
-                            {formatHumanDate(e.timestamp)}
-                          </p>
-                          <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                            {formatTime(e.timestamp)}
-                          </p>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <Tooltip content={e.userName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {e.userName}
-                            </p>
-                          </Tooltip>
-                          <RoleBadge role={e.userRole} />
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <div className="flex items-center gap-1.5">
-                            <ActionIcon
-                              style={{
-                                width: 15,
-                                height: 15,
-                                color: actionCfg.color,
-                                flexShrink: 0,
-                              }}
-                            />
-                            <span
-                              className="font-sans font-medium"
-                              style={{ fontSize: 14, color: actionCfg.color }}
-                            >
-                              {e.action}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          {e.patientName !== '—' ? (
-                            <>
-                              <Tooltip content={e.patientName}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {e.patientName}
-                                </p>
-                              </Tooltip>
-                              <p style={{ fontSize: 14, color: '#8A98A3' }}>{e.mrn}</p>
-                            </>
-                          ) : (
-                            <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
-                          )}
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <Tooltip content={e.medicationName}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {e.medicationName}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="min-w-[180px] flex-1 py-3 pr-2">
-                          <Tooltip content={e.details}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {e.details}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{e.module}</p>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{e.ipAddress}</p>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <OutcomeBadge event={e} />
-                        </div>
-                        <div className="flex w-20 shrink-0 items-center justify-end gap-1 py-3 pr-3">
-                          <button
-                            type="button"
-                            onClick={() => setModal({ type: 'detail', event: e })}
-                            aria-label={`View ${e.id}`}
-                            className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                          >
-                            <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                          </button>
-                          <RowMenu
-                            event={e}
-                            onView={() => setModal({ type: 'detail', event: e })}
-                            onExport={() => handleExportRecord(e)}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <div className="w-36 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      User
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Action
+                    </span>
+                  </div>
+                  <div className="w-36 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Patient
+                    </span>
+                  </div>
+                  <div className="w-36 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Medication
+                    </span>
+                  </div>
+                  <div className="min-w-[180px] flex-1 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Details
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Module
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      IP Address
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Outcome
+                    </span>
+                  </div>
+                  <div className="flex w-20 shrink-0 items-center justify-end py-2.5 pr-3">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Actions
+                    </span>
+                  </div>
                 </div>
-              </div>
+
+                {pageRows.length === 0 && (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <div
+                      className="flex size-14 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(226,237,241,0.6)' }}
+                    >
+                      <Shield style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                    </div>
+                    <p className="font-sans font-medium" style={{ fontSize: 16, color: '#4A7080' }}>
+                      No audit events match your filters
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                      style={{ fontSize: 14, color: '#00B4D8' }}
+                    >
+                      Clear all filters
+                    </button>
+                  </div>
+                )}
+
+                {pageRows.map((e) => {
+                  const actionCfg = AUDIT_ACTION_COLOR[e.action];
+                  const ActionIcon = ACTION_ICON[e.action];
+                  return (
+                    <div
+                      key={e.id}
+                      className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                      style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                    >
+                      <div className="w-32 shrink-0 py-3 pr-2 pl-3">
+                        <p style={{ fontSize: 14, color: '#0D2630' }}>
+                          {formatHumanDate(e.timestamp)}
+                        </p>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>{formatTime(e.timestamp)}</p>
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <Tooltip content={e.userName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {e.userName}
+                          </p>
+                        </Tooltip>
+                        <RoleBadge role={e.userRole} />
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <div className="flex items-center gap-1.5">
+                          <ActionIcon
+                            style={{
+                              width: 15,
+                              height: 15,
+                              color: actionCfg.color,
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span
+                            className="font-sans font-medium"
+                            style={{ fontSize: 14, color: actionCfg.color }}
+                          >
+                            {e.action}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        {e.patientName !== '—' ? (
+                          <>
+                            <Tooltip content={e.patientName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {e.patientName}
+                              </p>
+                            </Tooltip>
+                            <p style={{ fontSize: 14, color: '#8A98A3' }}>{e.mrn}</p>
+                          </>
+                        ) : (
+                          <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
+                        )}
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <Tooltip content={e.medicationName}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {e.medicationName}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="min-w-[180px] flex-1 py-3 pr-2">
+                        <Tooltip content={e.details}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {e.details}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{e.module}</p>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{e.ipAddress}</p>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <OutcomeBadge event={e} />
+                      </div>
+                      <div className="flex w-20 shrink-0 items-center justify-end gap-1 py-3 pr-3">
+                        <button
+                          type="button"
+                          onClick={() => setModal({ type: 'detail', event: e })}
+                          aria-label={`View ${e.id}`}
+                          className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                        >
+                          <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                        </button>
+                        <RowMenu
+                          event={e}
+                          onView={() => setModal({ type: 'detail', event: e })}
+                          onExport={() => handleExportRecord(e)}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </ScrollableTable>
 
               <Pagination
                 page={currentPage}

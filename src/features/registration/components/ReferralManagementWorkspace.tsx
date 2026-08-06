@@ -18,6 +18,11 @@ import { useMemo, useRef, useState } from 'react';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { getInitials } from '@lib/utils';
@@ -521,12 +526,12 @@ export function ReferralManagementWorkspace() {
                 </div>
 
                 {/* ── Table ────────────────────────────────────────────────── */}
-                <div className="mt-4 overflow-x-auto scroll-smooth">
-                  <div className="min-w-[1220px]">
+                <div className="mt-4">
+                  <ScrollableTable minWidth={1220} maxHeight={640}>
                     <div
-                      className="flex rounded-t-[8px]"
+                      className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
                       style={{
-                        background: 'rgba(226,237,241,0.4)',
+                        background: TABLE_HEADER_BG,
                         borderBottom: '1px solid #E6F8FD',
                       }}
                     >
@@ -743,7 +748,7 @@ export function ReferralManagementWorkspace() {
                         </div>
                       );
                     })}
-                  </div>
+                  </ScrollableTable>
                 </div>
 
                 {filtered.length > 0 && (

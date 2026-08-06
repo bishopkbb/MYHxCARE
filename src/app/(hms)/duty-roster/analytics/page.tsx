@@ -15,6 +15,11 @@ import { useEffect, useState } from 'react';
 import { ExportMenu } from '@/components/ExportMenu';
 import { ROUTES } from '@/constants/routes';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import {
   ANALYTICS_PERIODS,
@@ -504,99 +509,101 @@ export default function WorkforceAnalyticsPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="hidden overflow-x-auto scroll-smooth lg:block">
-                      <div
-                        className="flex"
-                        style={{
-                          background: 'rgba(226,237,241,0.4)',
-                          borderTop: '1px solid #0064821F',
-                          borderBottom: '1px solid #0064821F',
-                        }}
-                      >
-                        <div className="w-[30%] px-4 py-3">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Doctor
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1 px-4 py-3">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Department
-                          </span>
-                        </div>
-                        <div className="w-32 shrink-0 px-4 py-3">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Overtime
-                          </span>
-                        </div>
-                        <div className="w-28 shrink-0 px-4 py-3">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Shifts
-                          </span>
-                        </div>
-                      </div>
-                      {overtimeData.map((o) => (
+                    <div className="hidden lg:block">
+                      <ScrollableTable minWidth={720}>
                         <div
-                          key={o.id}
-                          className="flex items-center transition-colors duration-150 hover:bg-[#F5FBFD]"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                          className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                          style={{
+                            background: TABLE_HEADER_BG,
+                            borderTop: '1px solid #0064821F',
+                            borderBottom: '1px solid #0064821F',
+                          }}
                         >
-                          <div className="flex w-[30%] min-w-0 items-center gap-2.5 px-4 py-3">
-                            <div
-                              className="flex size-8 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
-                              style={{ background: o.avatarBg }}
+                          <div className="w-[30%] px-4 py-3">
+                            <span
+                              className="font-sans font-bold tracking-wider uppercase"
+                              style={{ fontSize: 14, color: '#4A7080' }}
                             >
-                              {o.initials}
-                            </div>
-                            <Tooltip content={o.doctorName}>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {o.doctorName}
-                              </p>
-                            </Tooltip>
+                              Doctor
+                            </span>
                           </div>
                           <div className="min-w-0 flex-1 px-4 py-3">
-                            <Tooltip content={o.department}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {o.department}
-                              </p>
-                            </Tooltip>
+                            <span
+                              className="font-sans font-bold tracking-wider uppercase"
+                              style={{ fontSize: 14, color: '#4A7080' }}
+                            >
+                              Department
+                            </span>
                           </div>
                           <div className="w-32 shrink-0 px-4 py-3">
                             <span
-                              className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                whiteSpace: 'nowrap',
-                                color: o.overtimeHours >= 30 ? '#EF4444' : '#F59E0B',
-                                border: `1px solid ${o.overtimeHours >= 30 ? 'rgba(239,68,68,0.40)' : 'rgba(245,158,11,0.40)'}`,
-                                background:
-                                  o.overtimeHours >= 30
-                                    ? 'rgba(239,68,68,0.06)'
-                                    : 'rgba(245,158,11,0.06)',
-                              }}
+                              className="font-sans font-bold tracking-wider uppercase"
+                              style={{ fontSize: 14, color: '#4A7080' }}
                             >
-                              {o.overtimeHours}h
+                              Overtime
                             </span>
                           </div>
                           <div className="w-28 shrink-0 px-4 py-3">
-                            <p style={{ fontSize: 14, color: '#4A7080' }}>{o.shiftsCount}</p>
+                            <span
+                              className="font-sans font-bold tracking-wider uppercase"
+                              style={{ fontSize: 14, color: '#4A7080' }}
+                            >
+                              Shifts
+                            </span>
                           </div>
                         </div>
-                      ))}
+                        {overtimeData.map((o) => (
+                          <div
+                            key={o.id}
+                            className="flex items-center transition-colors duration-150 hover:bg-[#F5FBFD]"
+                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                          >
+                            <div className="flex w-[30%] min-w-0 items-center gap-2.5 px-4 py-3">
+                              <div
+                                className="flex size-8 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                                style={{ background: o.avatarBg }}
+                              >
+                                {o.initials}
+                              </div>
+                              <Tooltip content={o.doctorName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {o.doctorName}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="min-w-0 flex-1 px-4 py-3">
+                              <Tooltip content={o.department}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {o.department}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-32 shrink-0 px-4 py-3">
+                              <span
+                                className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
+                                style={{
+                                  fontSize: 14,
+                                  whiteSpace: 'nowrap',
+                                  color: o.overtimeHours >= 30 ? '#EF4444' : '#F59E0B',
+                                  border: `1px solid ${o.overtimeHours >= 30 ? 'rgba(239,68,68,0.40)' : 'rgba(245,158,11,0.40)'}`,
+                                  background:
+                                    o.overtimeHours >= 30
+                                      ? 'rgba(239,68,68,0.06)'
+                                      : 'rgba(245,158,11,0.06)',
+                                }}
+                              >
+                                {o.overtimeHours}h
+                              </span>
+                            </div>
+                            <div className="w-28 shrink-0 px-4 py-3">
+                              <p style={{ fontSize: 14, color: '#4A7080' }}>{o.shiftsCount}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </ScrollableTable>
                     </div>
 
                     <div className="flex flex-col gap-2 px-4 py-3 lg:hidden">

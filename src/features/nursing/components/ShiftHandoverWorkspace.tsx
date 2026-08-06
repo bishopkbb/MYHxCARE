@@ -27,6 +27,11 @@ import { useRouter } from 'next/navigation';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
@@ -487,115 +492,113 @@ export function ShiftHandoverWorkspace() {
                 />
               </div>
 
-              <div className="mt-4 overflow-x-auto scroll-smooth">
-                <div className="min-w-[720px]">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
+              <ScrollableTable minWidth={720} maxHeight={640} className="mt-4">
+                <div
+                  className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <span
+                    className="w-24 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <span
-                      className="w-24 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Bed
-                    </span>
-                    <span
-                      className="w-36 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Patient
-                    </span>
-                    <span
-                      className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Diagnosis
-                    </span>
-                    <span
-                      className="w-28 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Length of Stay
-                    </span>
-                    <span
-                      className="w-28 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Condition
-                    </span>
-                    <span
-                      className="w-40 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Notes
-                    </span>
-                  </div>
-                  {HANDOVER_PATIENTS.map((p, idx) => {
-                    const cfg = CONDITION_CFG[p.condition]!;
-                    return (
-                      <div
-                        key={p.bed}
-                        className="flex items-center"
-                        style={{
-                          borderBottom:
-                            idx === HANDOVER_PATIENTS.length - 1
-                              ? undefined
-                              : '1px solid rgba(0,100,130,0.08)',
-                        }}
-                      >
-                        <div className="w-24 shrink-0 py-3 pr-2 pl-3">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{p.bed}</p>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <Tooltip content={p.patientName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {p.patientName}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="min-w-0 flex-1 py-3 pr-2">
-                          <Tooltip content={p.diagnosis}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {p.diagnosis}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>
-                            {p.lengthOfStayDays} day{p.lengthOfStayDays === 1 ? '' : 's'}
-                          </p>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <span
-                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                            style={{
-                              fontSize: 14,
-                              color: cfg.color,
-                              background: cfg.bg,
-                              border: `1px solid ${cfg.border}`,
-                            }}
-                          >
-                            {p.condition}
-                          </span>
-                        </div>
-                        <div className="w-40 shrink-0 py-3 pr-3">
-                          <Tooltip content={p.notes}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {p.notes}
-                            </p>
-                          </Tooltip>
-                        </div>
-                      </div>
-                    );
-                  })}
+                    Bed
+                  </span>
+                  <span
+                    className="w-36 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Patient
+                  </span>
+                  <span
+                    className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Diagnosis
+                  </span>
+                  <span
+                    className="w-28 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Length of Stay
+                  </span>
+                  <span
+                    className="w-28 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Condition
+                  </span>
+                  <span
+                    className="w-40 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Notes
+                  </span>
                 </div>
-              </div>
+                {HANDOVER_PATIENTS.map((p, idx) => {
+                  const cfg = CONDITION_CFG[p.condition]!;
+                  return (
+                    <div
+                      key={p.bed}
+                      className="flex items-center"
+                      style={{
+                        borderBottom:
+                          idx === HANDOVER_PATIENTS.length - 1
+                            ? undefined
+                            : '1px solid rgba(0,100,130,0.08)',
+                      }}
+                    >
+                      <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{p.bed}</p>
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <Tooltip content={p.patientName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {p.patientName}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="min-w-0 flex-1 py-3 pr-2">
+                        <Tooltip content={p.diagnosis}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {p.diagnosis}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>
+                          {p.lengthOfStayDays} day{p.lengthOfStayDays === 1 ? '' : 's'}
+                        </p>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <span
+                          className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                          style={{
+                            fontSize: 14,
+                            color: cfg.color,
+                            background: cfg.bg,
+                            border: `1px solid ${cfg.border}`,
+                          }}
+                        >
+                          {p.condition}
+                        </span>
+                      </div>
+                      <div className="w-40 shrink-0 py-3 pr-3">
+                        <Tooltip content={p.notes}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {p.notes}
+                          </p>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  );
+                })}
+              </ScrollableTable>
 
               <button
                 type="button"
@@ -647,91 +650,89 @@ export function ShiftHandoverWorkspace() {
             </SectionCard>
 
             <SectionCard title="Critical Patients" icon={AlertTriangle} iconColor="#EF4444">
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[480px]">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
+              <ScrollableTable minWidth={480} maxHeight={640}>
+                <div
+                  className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <span
+                    className="w-20 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <span
-                      className="w-20 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Bed
-                    </span>
-                    <span
-                      className="w-32 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Patient
-                    </span>
-                    <span
-                      className="w-28 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Diagnosis
-                    </span>
-                    <span
-                      className="min-w-0 flex-1 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Reason
-                    </span>
-                  </div>
-                  {CRITICAL_PATIENTS.map((p, idx) => {
-                    const cfg = CRITICAL_STATUS_CFG[p.status]!;
-                    return (
-                      <div
-                        key={p.bed}
-                        className="flex items-center"
-                        style={{
-                          borderBottom:
-                            idx === CRITICAL_PATIENTS.length - 1
-                              ? undefined
-                              : '1px solid rgba(0,100,130,0.08)',
-                        }}
-                      >
-                        <div className="w-20 shrink-0 py-3 pr-2 pl-3">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{p.bed}</p>
-                        </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
-                          <Tooltip content={p.patientName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {p.patientName}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <span
-                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                            style={{
-                              fontSize: 14,
-                              color: cfg.color,
-                              background: cfg.bg,
-                              border: `1px solid ${cfg.border}`,
-                            }}
-                          >
-                            {p.status}
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1 py-3 pr-3">
-                          <Tooltip content={p.reason}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {p.reason}
-                            </p>
-                          </Tooltip>
-                        </div>
-                      </div>
-                    );
-                  })}
+                    Bed
+                  </span>
+                  <span
+                    className="w-32 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Patient
+                  </span>
+                  <span
+                    className="w-28 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Diagnosis
+                  </span>
+                  <span
+                    className="min-w-0 flex-1 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Reason
+                  </span>
                 </div>
-              </div>
+                {CRITICAL_PATIENTS.map((p, idx) => {
+                  const cfg = CRITICAL_STATUS_CFG[p.status]!;
+                  return (
+                    <div
+                      key={p.bed}
+                      className="flex items-center"
+                      style={{
+                        borderBottom:
+                          idx === CRITICAL_PATIENTS.length - 1
+                            ? undefined
+                            : '1px solid rgba(0,100,130,0.08)',
+                      }}
+                    >
+                      <div className="w-20 shrink-0 py-3 pr-2 pl-3">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{p.bed}</p>
+                      </div>
+                      <div className="w-32 shrink-0 py-3 pr-2">
+                        <Tooltip content={p.patientName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {p.patientName}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <span
+                          className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                          style={{
+                            fontSize: 14,
+                            color: cfg.color,
+                            background: cfg.bg,
+                            border: `1px solid ${cfg.border}`,
+                          }}
+                        >
+                          {p.status}
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1 py-3 pr-3">
+                        <Tooltip content={p.reason}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {p.reason}
+                          </p>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  );
+                })}
+              </ScrollableTable>
               <button
                 type="button"
                 onClick={() => setCriticalModalOpen(true)}
@@ -749,93 +750,91 @@ export function ShiftHandoverWorkspace() {
               <p className="-mt-1.5 mb-2.5" style={{ fontSize: 14, color: '#8A98A3' }}>
                 Within next 4 hours
               </p>
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[540px]">
+              <ScrollableTable minWidth={540} maxHeight={640}>
+                <div
+                  className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <span
+                    className="w-24 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Time
+                  </span>
+                  <span
+                    className="w-32 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Patient
+                  </span>
+                  <span
+                    className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Medication
+                  </span>
+                  <span
+                    className="w-20 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Dose
+                  </span>
+                  <span
+                    className="w-20 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Route
+                  </span>
+                </div>
+                {MEDICATION_DUE.map((m, idx) => (
                   <div
-                    className="flex"
+                    key={`${m.time}-${m.patientName}`}
+                    className="flex items-center"
                     style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
+                      borderBottom:
+                        idx === MEDICATION_DUE.length - 1
+                          ? undefined
+                          : '1px solid rgba(0,100,130,0.08)',
                     }}
                   >
-                    <span
-                      className="w-24 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Time
-                    </span>
-                    <span
-                      className="w-32 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Patient
-                    </span>
-                    <span
-                      className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Medication
-                    </span>
-                    <span
-                      className="w-20 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Dose
-                    </span>
-                    <span
-                      className="w-20 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Route
-                    </span>
-                  </div>
-                  {MEDICATION_DUE.map((m, idx) => (
-                    <div
-                      key={`${m.time}-${m.patientName}`}
-                      className="flex items-center"
-                      style={{
-                        borderBottom:
-                          idx === MEDICATION_DUE.length - 1
-                            ? undefined
-                            : '1px solid rgba(0,100,130,0.08)',
-                      }}
-                    >
-                      <div className="w-24 shrink-0 py-3 pr-2 pl-3">
-                        <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {m.time}
-                        </p>
-                      </div>
-                      <div className="w-32 shrink-0 py-3 pr-2">
-                        <Tooltip content={m.patientName}>
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {m.patientName}
-                          </p>
-                        </Tooltip>
-                      </div>
-                      <div className="min-w-0 flex-1 py-3 pr-2">
-                        <Tooltip content={m.medication}>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {m.medication}
-                          </p>
-                        </Tooltip>
-                      </div>
-                      <div className="w-20 shrink-0 py-3 pr-2">
-                        <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {m.dose}
-                        </p>
-                      </div>
-                      <div className="w-20 shrink-0 py-3 pr-3">
-                        <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
-                          {m.route}
-                        </p>
-                      </div>
+                    <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                      <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {m.time}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="w-32 shrink-0 py-3 pr-2">
+                      <Tooltip content={m.patientName}>
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {m.patientName}
+                        </p>
+                      </Tooltip>
+                    </div>
+                    <div className="min-w-0 flex-1 py-3 pr-2">
+                      <Tooltip content={m.medication}>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {m.medication}
+                        </p>
+                      </Tooltip>
+                    </div>
+                    <div className="w-20 shrink-0 py-3 pr-2">
+                      <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {m.dose}
+                      </p>
+                    </div>
+                    <div className="w-20 shrink-0 py-3 pr-3">
+                      <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
+                        {m.route}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </ScrollableTable>
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.nurseMedicationAdministration)}
@@ -847,95 +846,93 @@ export function ShiftHandoverWorkspace() {
             </SectionCard>
 
             <SectionCard title="Pending Investigations" icon={FlaskConical} iconColor="#EF4444">
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[520px]">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
+              <ScrollableTable minWidth={520} maxHeight={640}>
+                <div
+                  className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <span
+                    className="w-32 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <span
-                      className="w-32 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Patient
-                    </span>
-                    <span
-                      className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Investigation
-                    </span>
-                    <span
-                      className="w-36 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Ordered By
-                    </span>
-                    <span
-                      className="w-28 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Status
-                    </span>
-                  </div>
-                  {PENDING_INVESTIGATIONS.map((inv, idx) => {
-                    const cfg = INVESTIGATION_STATUS_CFG[inv.status]!;
-                    return (
-                      <div
-                        key={`${inv.patientName}-${inv.investigation}`}
-                        className="flex items-center"
-                        style={{
-                          borderBottom:
-                            idx === PENDING_INVESTIGATIONS.length - 1
-                              ? undefined
-                              : '1px solid rgba(0,100,130,0.08)',
-                        }}
-                      >
-                        <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                          <Tooltip content={inv.patientName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {inv.patientName}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="min-w-0 flex-1 py-3 pr-2">
-                          <Tooltip content={inv.investigation}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {inv.investigation}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <Tooltip content={inv.orderedBy}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {inv.orderedBy}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-3">
-                          <span
-                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                            style={{
-                              fontSize: 14,
-                              color: cfg.color,
-                              background: cfg.bg,
-                              border: `1px solid ${cfg.border}`,
-                            }}
-                          >
-                            {inv.status}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                    Patient
+                  </span>
+                  <span
+                    className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Investigation
+                  </span>
+                  <span
+                    className="w-36 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Ordered By
+                  </span>
+                  <span
+                    className="w-28 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Status
+                  </span>
                 </div>
-              </div>
+                {PENDING_INVESTIGATIONS.map((inv, idx) => {
+                  const cfg = INVESTIGATION_STATUS_CFG[inv.status]!;
+                  return (
+                    <div
+                      key={`${inv.patientName}-${inv.investigation}`}
+                      className="flex items-center"
+                      style={{
+                        borderBottom:
+                          idx === PENDING_INVESTIGATIONS.length - 1
+                            ? undefined
+                            : '1px solid rgba(0,100,130,0.08)',
+                      }}
+                    >
+                      <div className="w-32 shrink-0 py-3 pr-2 pl-3">
+                        <Tooltip content={inv.patientName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {inv.patientName}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="min-w-0 flex-1 py-3 pr-2">
+                        <Tooltip content={inv.investigation}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {inv.investigation}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <Tooltip content={inv.orderedBy}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {inv.orderedBy}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-3">
+                        <span
+                          className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                          style={{
+                            fontSize: 14,
+                            color: cfg.color,
+                            background: cfg.bg,
+                            border: `1px solid ${cfg.border}`,
+                          }}
+                        >
+                          {inv.status}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </ScrollableTable>
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.nurseLaboratory)}

@@ -27,6 +27,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -731,268 +736,254 @@ export function DischargesWorkspace() {
                   </div>
 
                   {/* Table */}
-                  <div className="mt-4 overflow-x-auto scroll-smooth">
-                    <div className="min-w-[1020px]">
-                      <div
-                        className="flex items-center rounded-t-[8px]"
-                        style={{
-                          background: 'rgba(226,237,241,0.4)',
-                          borderBottom: '1px solid #E6F8FD',
-                        }}
-                      >
-                        {(
-                          [
-                            ['Patient', 'min-w-[170px] flex-1 pl-3'],
-                            ['MRN', 'w-28'],
-                            ['Ward/Bed', 'w-32'],
-                            ['Planned', 'w-28'],
-                            ['Type', 'w-28'],
-                            ['Step', 'w-36'],
-                            ['Status', 'w-28'],
-                          ] as [string, string][]
-                        ).map(([label, width]) => (
-                          <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
-                            <span
-                              className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {label}
-                            </span>
-                          </div>
-                        ))}
-                        <div
-                          className="sticky right-0 z-10 w-24 shrink-0 py-2.5 pr-3 text-right"
-                          style={{ background: '#E2EDF1' }}
-                        >
+                  <ScrollableTable minWidth={1020} maxHeight={640}>
+                    <div
+                      className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                      style={{
+                        background: TABLE_HEADER_BG,
+                        borderBottom: '1px solid #E6F8FD',
+                      }}
+                    >
+                      {(
+                        [
+                          ['Patient', 'min-w-[170px] flex-1 pl-3'],
+                          ['MRN', 'w-28'],
+                          ['Ward/Bed', 'w-32'],
+                          ['Planned', 'w-28'],
+                          ['Type', 'w-28'],
+                          ['Step', 'w-36'],
+                          ['Status', 'w-28'],
+                        ] as [string, string][]
+                      ).map(([label, width]) => (
+                        <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
                           >
-                            Actions
+                            {label}
                           </span>
                         </div>
+                      ))}
+                      <div
+                        className="sticky right-0 z-10 w-24 shrink-0 py-2.5 pr-3 text-right"
+                        style={{ background: '#E2EDF1' }}
+                      >
+                        <span
+                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Actions
+                        </span>
                       </div>
+                    </div>
 
-                      {pageState === 'loading' &&
-                        Array.from({ length: 6 }).map((_, i) => (
+                    {pageState === 'loading' &&
+                      Array.from({ length: 6 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="flex min-h-[60px] animate-pulse items-center"
+                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                        >
+                          <div className="flex min-w-[170px] flex-1 items-center gap-2 py-3 pr-1.5 pl-3">
+                            <div className="size-9 shrink-0 rounded-full bg-slate-100" />
+                            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                              <div className="h-3.5 w-28 rounded bg-slate-100" />
+                              <div className="h-3.5 w-14 rounded bg-slate-100" />
+                            </div>
+                          </div>
+                          <div className="w-28 shrink-0 py-3 pr-1.5">
+                            <div className="h-3.5 w-16 rounded bg-slate-100" />
+                          </div>
+                          <div className="w-32 shrink-0 py-3 pr-1.5">
+                            <div className="h-3.5 w-20 rounded bg-slate-100" />
+                          </div>
+                          <div className="w-28 shrink-0 py-3 pr-1.5">
+                            <div className="h-3.5 w-20 rounded bg-slate-100" />
+                          </div>
+                          <div className="w-28 shrink-0 py-3 pr-1.5">
+                            <div className="h-5 w-16 rounded-full bg-slate-100" />
+                          </div>
+                          <div className="w-36 shrink-0 py-3 pr-1.5">
+                            <div className="h-3.5 w-20 rounded bg-slate-100" />
+                          </div>
+                          <div className="w-28 shrink-0 py-3 pr-1.5">
+                            <div className="h-5 w-16 rounded-full bg-slate-100" />
+                          </div>
                           <div
-                            key={i}
-                            className="flex min-h-[60px] animate-pulse items-center"
+                            className="sticky right-0 flex w-24 shrink-0 items-center justify-end py-3 pr-3"
+                            style={{ background: '#FFFFFF' }}
+                          >
+                            <div className="size-9 rounded-[10px] bg-slate-100" />
+                          </div>
+                        </div>
+                      ))}
+
+                    {pageState === 'loaded' && pageRows.length === 0 && (
+                      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                        <div
+                          className="flex size-14 items-center justify-center rounded-full"
+                          style={{ background: 'rgba(226,237,241,0.6)' }}
+                        >
+                          <ClipboardCheck style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                        </div>
+                        <p
+                          className="font-sans font-medium"
+                          style={{ fontSize: 16, color: '#4A7080' }}
+                        >
+                          No discharges match this filter
+                        </p>
+                        {hasActiveFilters && (
+                          <button
+                            type="button"
+                            onClick={clearFilters}
+                            className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                            style={{ fontSize: 14, color: '#00B4D8' }}
+                          >
+                            Clear all filters
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {pageState === 'loaded' &&
+                      pageRows.map((d) => {
+                        const cfg = STATUS_CFG[d.status];
+                        const step = stepInfo(d.currentStep);
+                        const StepIcon = STEP_ICON[d.currentStep];
+                        const isMenuOpen = openMenuId === d.id;
+                        return (
+                          <div
+                            key={d.id}
+                            className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
                             style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                           >
-                            <div className="flex min-w-[170px] flex-1 items-center gap-2 py-3 pr-1.5 pl-3">
-                              <div className="size-9 shrink-0 rounded-full bg-slate-100" />
-                              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                                <div className="h-3.5 w-28 rounded bg-slate-100" />
-                                <div className="h-3.5 w-14 rounded bg-slate-100" />
-                              </div>
-                            </div>
-                            <div className="w-28 shrink-0 py-3 pr-1.5">
-                              <div className="h-3.5 w-16 rounded bg-slate-100" />
-                            </div>
-                            <div className="w-32 shrink-0 py-3 pr-1.5">
-                              <div className="h-3.5 w-20 rounded bg-slate-100" />
-                            </div>
-                            <div className="w-28 shrink-0 py-3 pr-1.5">
-                              <div className="h-3.5 w-20 rounded bg-slate-100" />
-                            </div>
-                            <div className="w-28 shrink-0 py-3 pr-1.5">
-                              <div className="h-5 w-16 rounded-full bg-slate-100" />
-                            </div>
-                            <div className="w-36 shrink-0 py-3 pr-1.5">
-                              <div className="h-3.5 w-20 rounded bg-slate-100" />
-                            </div>
-                            <div className="w-28 shrink-0 py-3 pr-1.5">
-                              <div className="h-5 w-16 rounded-full bg-slate-100" />
-                            </div>
-                            <div
-                              className="sticky right-0 flex w-24 shrink-0 items-center justify-end py-3 pr-3"
-                              style={{ background: '#FFFFFF' }}
-                            >
-                              <div className="size-9 rounded-[10px] bg-slate-100" />
-                            </div>
-                          </div>
-                        ))}
-
-                      {pageState === 'loaded' && pageRows.length === 0 && (
-                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                          <div
-                            className="flex size-14 items-center justify-center rounded-full"
-                            style={{ background: 'rgba(226,237,241,0.6)' }}
-                          >
-                            <ClipboardCheck style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                          </div>
-                          <p
-                            className="font-sans font-medium"
-                            style={{ fontSize: 16, color: '#4A7080' }}
-                          >
-                            No discharges match this filter
-                          </p>
-                          {hasActiveFilters && (
-                            <button
-                              type="button"
-                              onClick={clearFilters}
-                              className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                              style={{ fontSize: 14, color: '#00B4D8' }}
-                            >
-                              Clear all filters
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-                      {pageState === 'loaded' &&
-                        pageRows.map((d) => {
-                          const cfg = STATUS_CFG[d.status];
-                          const step = stepInfo(d.currentStep);
-                          const StepIcon = STEP_ICON[d.currentStep];
-                          const isMenuOpen = openMenuId === d.id;
-                          return (
-                            <div
-                              key={d.id}
-                              className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                              style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                            >
-                              <div className="min-w-[170px] flex-1 py-3 pr-1.5 pl-3">
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className="font-display flex size-9 shrink-0 items-center justify-center rounded-full font-semibold text-white"
-                                    style={{
-                                      background: avatarColorFor(d.patientName),
-                                      fontSize: 14,
-                                    }}
-                                  >
-                                    {initialsOf(d.patientName)}
-                                  </div>
-                                  <div className="min-w-0">
-                                    <Tooltip content={d.patientName}>
-                                      <p
-                                        className="truncate font-sans font-medium"
-                                        style={{ fontSize: 14, color: '#0D2630' }}
-                                      >
-                                        {d.patientName}
-                                      </p>
-                                    </Tooltip>
-                                    <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                      {d.age} Y / {d.gender[0]}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <Tooltip content={d.mrn}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#00B4D8' }}
-                                  >
-                                    {d.mrn}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-32 shrink-0 py-3 pr-1.5">
-                                <Tooltip content={d.ward}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {d.ward}
-                                  </p>
-                                </Tooltip>
-                                <Tooltip content={d.bed}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#8A98A3' }}
-                                  >
-                                    {d.bed}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <p
-                                  className="whitespace-nowrap"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {formatDate(d.plannedDischargeAt)}
-                                </p>
-                                <p
-                                  className="whitespace-nowrap"
-                                  style={{ fontSize: 14, color: '#8A98A3' }}
-                                >
-                                  {formatTime(d.plannedDischargeAt)}
-                                </p>
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <Tooltip content={d.dischargeType}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {d.dischargeType}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-36 shrink-0 py-3 pr-1.5">
-                                {StepIcon && (
-                                  <div className="flex items-center gap-1.5">
-                                    <div
-                                      className="flex size-6 shrink-0 items-center justify-center rounded-full"
-                                      style={{ background: `${STEP_COLOR[d.currentStep]}1A` }}
-                                    >
-                                      <StepIcon
-                                        style={{
-                                          width: 13,
-                                          height: 13,
-                                          color: STEP_COLOR[d.currentStep],
-                                        }}
-                                      />
-                                    </div>
-                                    <Tooltip content={step?.shortLabel}>
-                                      <p
-                                        className="truncate"
-                                        style={{ fontSize: 14, color: '#0D2630' }}
-                                      >
-                                        {step?.shortLabel}
-                                      </p>
-                                    </Tooltip>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <span
-                                  className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
+                            <div className="min-w-[170px] flex-1 py-3 pr-1.5 pl-3">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="font-display flex size-9 shrink-0 items-center justify-center rounded-full font-semibold text-white"
                                   style={{
+                                    background: avatarColorFor(d.patientName),
                                     fontSize: 14,
-                                    color: cfg.color,
-                                    border: `1px solid ${cfg.border}`,
-                                    background: cfg.bg,
                                   }}
                                 >
-                                  {d.status}
-                                </span>
-                              </div>
-                              <div
-                                className={`sticky right-0 flex w-24 shrink-0 items-center justify-end py-3 pr-3 ${isMenuOpen ? 'z-30' : 'z-10'}`}
-                                style={{ background: '#FFFFFF' }}
-                              >
-                                <PermissionGate permission={PERMISSIONS.DISCHARGES_WRITE}>
-                                  <RowMenu
-                                    record={d}
-                                    open={isMenuOpen}
-                                    onToggle={() => setOpenMenuId(isMenuOpen ? null : d.id)}
-                                    onViewPatient={() => {
-                                      setOpenMenuId(null);
-                                      viewPatient(d);
-                                    }}
-                                    onAdvance={() => advanceDischarge(d)}
-                                    onCancel={() => cancelDischarge(d)}
-                                  />
-                                </PermissionGate>
+                                  {initialsOf(d.patientName)}
+                                </div>
+                                <div className="min-w-0">
+                                  <Tooltip content={d.patientName}>
+                                    <p
+                                      className="truncate font-sans font-medium"
+                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                    >
+                                      {d.patientName}
+                                    </p>
+                                  </Tooltip>
+                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                    {d.age} Y / {d.gender[0]}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          );
-                        })}
-                    </div>
-                  </div>
+                            <div className="w-28 shrink-0 py-3 pr-1.5">
+                              <Tooltip content={d.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                  {d.mrn}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-32 shrink-0 py-3 pr-1.5">
+                              <Tooltip content={d.ward}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                                  {d.ward}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={d.bed}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {d.bed}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-28 shrink-0 py-3 pr-1.5">
+                              <p
+                                className="whitespace-nowrap"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {formatDate(d.plannedDischargeAt)}
+                              </p>
+                              <p
+                                className="whitespace-nowrap"
+                                style={{ fontSize: 14, color: '#8A98A3' }}
+                              >
+                                {formatTime(d.plannedDischargeAt)}
+                              </p>
+                            </div>
+                            <div className="w-28 shrink-0 py-3 pr-1.5">
+                              <Tooltip content={d.dischargeType}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {d.dischargeType}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-36 shrink-0 py-3 pr-1.5">
+                              {StepIcon && (
+                                <div className="flex items-center gap-1.5">
+                                  <div
+                                    className="flex size-6 shrink-0 items-center justify-center rounded-full"
+                                    style={{ background: `${STEP_COLOR[d.currentStep]}1A` }}
+                                  >
+                                    <StepIcon
+                                      style={{
+                                        width: 13,
+                                        height: 13,
+                                        color: STEP_COLOR[d.currentStep],
+                                      }}
+                                    />
+                                  </div>
+                                  <Tooltip content={step?.shortLabel}>
+                                    <p
+                                      className="truncate"
+                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                    >
+                                      {step?.shortLabel}
+                                    </p>
+                                  </Tooltip>
+                                </div>
+                              )}
+                            </div>
+                            <div className="w-28 shrink-0 py-3 pr-1.5">
+                              <span
+                                className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
+                                style={{
+                                  fontSize: 14,
+                                  color: cfg.color,
+                                  border: `1px solid ${cfg.border}`,
+                                  background: cfg.bg,
+                                }}
+                              >
+                                {d.status}
+                              </span>
+                            </div>
+                            <div
+                              className={`sticky right-0 flex w-24 shrink-0 items-center justify-end py-3 pr-3 ${isMenuOpen ? 'z-30' : 'z-10'}`}
+                              style={{ background: '#FFFFFF' }}
+                            >
+                              <PermissionGate permission={PERMISSIONS.DISCHARGES_WRITE}>
+                                <RowMenu
+                                  record={d}
+                                  open={isMenuOpen}
+                                  onToggle={() => setOpenMenuId(isMenuOpen ? null : d.id)}
+                                  onViewPatient={() => {
+                                    setOpenMenuId(null);
+                                    viewPatient(d);
+                                  }}
+                                  onAdvance={() => advanceDischarge(d)}
+                                  onCancel={() => cancelDischarge(d)}
+                                />
+                              </PermissionGate>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </ScrollableTable>
 
                   {/* Pagination */}
                   {pageState === 'loaded' && filtered.length > 0 && (

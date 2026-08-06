@@ -28,6 +28,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { ROUTES } from '@/constants/routes';
@@ -601,112 +606,110 @@ function PatientClinicalTimelinePanel({
                   className="overflow-hidden rounded-[12px]"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
-                  <div className="overflow-x-auto scroll-smooth">
-                    <div className="min-w-[720px]">
-                      <div
-                        className="flex"
-                        style={{
-                          background: 'rgba(226,237,241,0.4)',
-                          borderBottom: '1px solid #E6F8FD',
-                        }}
+                  <ScrollableTable minWidth={720} maxHeight={640}>
+                    <div
+                      className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                      style={{
+                        background: TABLE_HEADER_BG,
+                        borderBottom: '1px solid #E6F8FD',
+                      }}
+                    >
+                      <span
+                        className="w-36 shrink-0 py-2.5 pr-2 pl-4 font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
                       >
-                        <span
-                          className="w-36 shrink-0 py-2.5 pr-2 pl-4 font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Category
-                        </span>
-                        <span
-                          className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Event
-                        </span>
-                        <span
-                          className="w-40 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          When
-                        </span>
-                        <span
-                          className="w-40 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Recorded By
-                        </span>
-                        <span
-                          className="w-28 shrink-0 py-2.5 pr-4 text-right font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Actions
-                        </span>
-                      </div>
-                      {visibleEvents.map((event, idx) => {
-                        const cfg = TIMELINE_CATEGORY_CFG[event.category];
-                        return (
-                          <div
-                            key={event.id}
-                            className="flex items-center"
-                            style={{
-                              borderBottom:
-                                idx === visibleEvents.length - 1
-                                  ? undefined
-                                  : '1px solid rgba(0,100,130,0.08)',
-                            }}
-                          >
-                            <div className="w-36 shrink-0 py-3 pr-2 pl-4">
-                              <span
-                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                                style={{
-                                  fontSize: 14,
-                                  color: cfg.color,
-                                  background: cfg.badgeBg,
-                                  border: `1px solid ${cfg.badgeBorder}`,
-                                }}
-                              >
-                                {cfg.label}
-                              </span>
-                            </div>
-                            <div className="min-w-0 flex-1 py-3 pr-2">
-                              <Tooltip content={event.title}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {event.title}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-40 shrink-0 py-3 pr-2">
-                              <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                {formatHumanDate(event.occurredAt)}
-                              </p>
-                              <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {formatTime(event.occurredAt)}
-                              </p>
-                            </div>
-                            <div className="w-40 shrink-0 py-3 pr-2">
-                              <Tooltip content={event.actor}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {event.actor}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="flex w-28 shrink-0 justify-end py-3 pr-4">
-                              <button
-                                type="button"
-                                onClick={() => setDetailEvent(event)}
-                                aria-label={`View details for ${event.title}`}
-                                className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                              >
-                                <ChevronRight style={{ width: 16, height: 16, color: '#4A7080' }} />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
+                        Category
+                      </span>
+                      <span
+                        className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Event
+                      </span>
+                      <span
+                        className="w-40 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        When
+                      </span>
+                      <span
+                        className="w-40 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Recorded By
+                      </span>
+                      <span
+                        className="w-28 shrink-0 py-2.5 pr-4 text-right font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Actions
+                      </span>
                     </div>
-                  </div>
+                    {visibleEvents.map((event, idx) => {
+                      const cfg = TIMELINE_CATEGORY_CFG[event.category];
+                      return (
+                        <div
+                          key={event.id}
+                          className="flex items-center"
+                          style={{
+                            borderBottom:
+                              idx === visibleEvents.length - 1
+                                ? undefined
+                                : '1px solid rgba(0,100,130,0.08)',
+                          }}
+                        >
+                          <div className="w-36 shrink-0 py-3 pr-2 pl-4">
+                            <span
+                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                              style={{
+                                fontSize: 14,
+                                color: cfg.color,
+                                background: cfg.badgeBg,
+                                border: `1px solid ${cfg.badgeBorder}`,
+                              }}
+                            >
+                              {cfg.label}
+                            </span>
+                          </div>
+                          <div className="min-w-0 flex-1 py-3 pr-2">
+                            <Tooltip content={event.title}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {event.title}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-40 shrink-0 py-3 pr-2">
+                            <p style={{ fontSize: 14, color: '#4A7080' }}>
+                              {formatHumanDate(event.occurredAt)}
+                            </p>
+                            <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                              {formatTime(event.occurredAt)}
+                            </p>
+                          </div>
+                          <div className="w-40 shrink-0 py-3 pr-2">
+                            <Tooltip content={event.actor}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {event.actor}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="flex w-28 shrink-0 justify-end py-3 pr-4">
+                            <button
+                              type="button"
+                              onClick={() => setDetailEvent(event)}
+                              aria-label={`View details for ${event.title}`}
+                              className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                            >
+                              <ChevronRight style={{ width: 16, height: 16, color: '#4A7080' }} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </ScrollableTable>
                 </div>
               ) : (
                 <div>

@@ -7,6 +7,11 @@ import { useEffect, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { StatMini } from '@components/shared/StatCard';
 import { ROUTES } from '@/constants/routes';
@@ -261,148 +266,150 @@ export default function StaffAssignmentPage() {
               </div>
             ) : (
               <>
-                <div className="hidden overflow-x-auto scroll-smooth lg:block">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderTop: '1px solid #0064821F',
-                      borderBottom: '1px solid #0064821F',
-                    }}
-                  >
-                    <div className="w-[24%] px-4 py-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Doctor
-                      </span>
+                <div className="hidden lg:block">
+                  <ScrollableTable minWidth={900} maxHeight={640}>
+                    <div
+                      className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                      style={{
+                        background: TABLE_HEADER_BG,
+                        borderTop: '1px solid #0064821F',
+                        borderBottom: '1px solid #0064821F',
+                      }}
+                    >
+                      <div className="w-[24%] px-4 py-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Doctor
+                        </span>
+                      </div>
+                      <div className="w-[14%] px-4 py-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Role
+                        </span>
+                      </div>
+                      <div className="w-[20%] px-4 py-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Department
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1 px-4 py-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Current Ward
+                        </span>
+                      </div>
+                      <div className="w-30 shrink-0 px-4 py-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Status
+                        </span>
+                      </div>
+                      <div className="w-28 shrink-0 px-4 py-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Actions
+                        </span>
+                      </div>
                     </div>
-                    <div className="w-[14%] px-4 py-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Role
-                      </span>
-                    </div>
-                    <div className="w-[20%] px-4 py-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Department
-                      </span>
-                    </div>
-                    <div className="min-w-0 flex-1 px-4 py-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Current Ward
-                      </span>
-                    </div>
-                    <div className="w-30 shrink-0 px-4 py-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Status
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 px-4 py-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Actions
-                      </span>
-                    </div>
-                  </div>
-                  {paginated.map((doctor) => {
-                    const statusMeta = ASSIGNMENT_STATUS_META[doctor.status];
-                    return (
-                      <div
-                        key={doctor.id}
-                        className="flex items-center transition-colors duration-150 hover:bg-[#F5FBFD]"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                      >
-                        <div className="flex w-[24%] min-w-0 items-center gap-2.5 px-4 py-3">
-                          <div
-                            className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
-                            style={{ background: doctor.avatarBg }}
-                          >
-                            {doctor.initials}
-                          </div>
-                          <Tooltip content={doctor.name}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
+                    {paginated.map((doctor) => {
+                      const statusMeta = ASSIGNMENT_STATUS_META[doctor.status];
+                      return (
+                        <div
+                          key={doctor.id}
+                          className="flex items-center transition-colors duration-150 hover:bg-[#F5FBFD]"
+                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                        >
+                          <div className="flex w-[24%] min-w-0 items-center gap-2.5 px-4 py-3">
+                            <div
+                              className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                              style={{ background: doctor.avatarBg }}
                             >
-                              {doctor.name}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-[14%] px-4 py-3">
-                          <Tooltip content={doctor.role}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {doctor.role}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-[20%] px-4 py-3">
-                          <Tooltip content={doctor.department}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {doctor.department}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="min-w-0 flex-1 px-4 py-3">
-                          <Tooltip content={doctor.currentWard ?? 'Not assigned'}>
-                            <p
-                              className="truncate"
+                              {doctor.initials}
+                            </div>
+                            <Tooltip content={doctor.name}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {doctor.name}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-[14%] px-4 py-3">
+                            <Tooltip content={doctor.role}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {doctor.role}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-[20%] px-4 py-3">
+                            <Tooltip content={doctor.department}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {doctor.department}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="min-w-0 flex-1 px-4 py-3">
+                            <Tooltip content={doctor.currentWard ?? 'Not assigned'}>
+                              <p
+                                className="truncate"
+                                style={{
+                                  fontSize: 14,
+                                  color: doctor.currentWard ? '#4A7080' : '#8A98A3',
+                                }}
+                              >
+                                {doctor.currentWard ?? 'Not assigned'}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-30 shrink-0 px-4 py-3">
+                            <span
+                              className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
                               style={{
                                 fontSize: 14,
-                                color: doctor.currentWard ? '#4A7080' : '#8A98A3',
+                                whiteSpace: 'nowrap',
+                                color: statusMeta.color,
+                                border: `1px solid ${statusMeta.border}`,
+                                background: statusMeta.bg,
                               }}
                             >
-                              {doctor.currentWard ?? 'Not assigned'}
-                            </p>
-                          </Tooltip>
+                              {statusMeta.label}
+                            </span>
+                          </div>
+                          <div className="w-28 shrink-0 px-4 py-3">
+                            <button
+                              type="button"
+                              onClick={() => setAssigning(doctor)}
+                              className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                              style={{
+                                fontSize: 14,
+                                color: '#00B4D8',
+                                border: '1px solid #00B4D8',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              <UserCog style={{ width: 14, height: 14 }} />
+                              {doctor.status === 'UNASSIGNED' ? 'Assign' : 'Reassign'}
+                            </button>
+                          </div>
                         </div>
-                        <div className="w-30 shrink-0 px-4 py-3">
-                          <span
-                            className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              whiteSpace: 'nowrap',
-                              color: statusMeta.color,
-                              border: `1px solid ${statusMeta.border}`,
-                              background: statusMeta.bg,
-                            }}
-                          >
-                            {statusMeta.label}
-                          </span>
-                        </div>
-                        <div className="w-28 shrink-0 px-4 py-3">
-                          <button
-                            type="button"
-                            onClick={() => setAssigning(doctor)}
-                            className="flex items-center gap-1.5 rounded-[8px] px-3 py-1.5 font-sans font-medium transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                            style={{
-                              fontSize: 14,
-                              color: '#00B4D8',
-                              border: '1px solid #00B4D8',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            <UserCog style={{ width: 14, height: 14 }} />
-                            {doctor.status === 'UNASSIGNED' ? 'Assign' : 'Reassign'}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </ScrollableTable>
                 </div>
 
                 <div className="flex flex-col gap-2 px-4 py-3 lg:hidden">

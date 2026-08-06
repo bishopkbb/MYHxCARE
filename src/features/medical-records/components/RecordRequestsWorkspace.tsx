@@ -5,6 +5,11 @@ import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -203,227 +208,225 @@ export function RecordRequestsWorkspace() {
                   className="mt-4 rounded-[12px] p-4 sm:p-5"
                   style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                 >
-                  <div className="overflow-x-auto scroll-smooth">
-                    <div className="min-w-[1080px]">
-                      <div
-                        className="flex rounded-t-[8px]"
-                        style={{
-                          background: 'rgba(226,237,241,0.4)',
-                          borderBottom: '1px solid #E6F8FD',
-                        }}
-                      >
-                        <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
-                          <span
-                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Request ID
-                          </span>
-                        </div>
-                        <div className="w-36 shrink-0 py-2.5 pr-2">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Patient
-                          </span>
-                        </div>
-                        <div className="w-28 shrink-0 py-2.5 pr-2">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            MRN
-                          </span>
-                        </div>
-                        <div className="w-36 shrink-0 py-2.5 pr-2">
-                          <span
-                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Record Type
-                          </span>
-                        </div>
-                        <div className="w-40 shrink-0 py-2.5 pr-2">
-                          <span
-                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Requested By
-                          </span>
-                        </div>
-                        <div className="w-32 shrink-0 py-2.5 pr-2">
-                          <span
-                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Request Date
-                          </span>
-                        </div>
-                        <div className="min-w-[160px] flex-1 py-2.5 pr-2">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Purpose
-                          </span>
-                        </div>
-                        <div className="w-28 shrink-0 py-2.5 pr-2">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Status
-                          </span>
-                        </div>
-                        <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Actions
-                          </span>
-                        </div>
+                  <ScrollableTable minWidth={1080} maxHeight={640}>
+                    <div
+                      className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                      style={{
+                        background: TABLE_HEADER_BG,
+                        borderBottom: '1px solid #E6F8FD',
+                      }}
+                    >
+                      <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
+                        <span
+                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Request ID
+                        </span>
                       </div>
-
-                      {pageRows.length === 0 && (
-                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                          <div
-                            className="flex size-14 items-center justify-center rounded-full"
-                            style={{ background: 'rgba(226,237,241,0.6)' }}
-                          >
-                            <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                          </div>
-                          <p
-                            className="font-sans font-medium"
-                            style={{ fontSize: 16, color: '#4A7080' }}
-                          >
-                            No requests in this tab
-                          </p>
-                        </div>
-                      )}
-
-                      {pageRows.map((req) => {
-                        const statusCfg = STATUS_CFG[req.status];
-                        const typeCfg = RECORD_TYPE_CFG[req.recordType];
-                        return (
-                          <div
-                            key={req.id}
-                            onClick={() => openRequest(req)}
-                            className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                            style={{
-                              borderBottom: '1px solid rgba(0,100,130,0.08)',
-                              background: selectedId === req.id ? '#E6F8FD' : 'transparent',
-                            }}
-                          >
-                            <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                              <Tooltip content={req.requestNumber}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {req.requestNumber}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-36 shrink-0 py-3 pr-2">
-                              <Tooltip content={req.patientName}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {req.patientName}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-28 shrink-0 py-3 pr-2">
-                              <Tooltip content={req.mrn}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                                  {req.mrn}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-36 shrink-0 py-3 pr-2">
-                              <span
-                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                style={{
-                                  fontSize: 14,
-                                  whiteSpace: 'nowrap',
-                                  color: typeCfg.color,
-                                  border: `1px solid ${typeCfg.border}`,
-                                  background: typeCfg.bg,
-                                }}
-                              >
-                                {req.recordType}
-                              </span>
-                            </div>
-                            <div className="w-40 shrink-0 py-3 pr-2">
-                              <Tooltip content={req.requestedBy}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {req.requestedBy}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-32 shrink-0 py-3 pr-2">
-                              <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                {formatHumanDate(req.requestDate)}
-                              </p>
-                              <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {formatTime(req.requestDate)}
-                              </p>
-                            </div>
-                            <div className="min-w-[160px] flex-1 py-3 pr-2">
-                              <Tooltip content={req.purpose}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {req.purpose}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-28 shrink-0 py-3 pr-2">
-                              <span
-                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                style={{
-                                  fontSize: 14,
-                                  whiteSpace: 'nowrap',
-                                  color: statusCfg.color,
-                                  border: `1px solid ${statusCfg.border}`,
-                                  background: statusCfg.bg,
-                                }}
-                              >
-                                {req.status}
-                              </span>
-                            </div>
-                            <div
-                              className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => openRequest(req)}
-                                aria-label={`View request ${req.requestNumber}`}
-                                className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                              >
-                                <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  toast.info(
-                                    'More actions',
-                                    `Additional actions for ${req.requestNumber}.`,
-                                  )
-                                }
-                                aria-label={`More actions for ${req.requestNumber}`}
-                                className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                              >
-                                <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
+                      <div className="w-36 shrink-0 py-2.5 pr-2">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Patient
+                        </span>
+                      </div>
+                      <div className="w-28 shrink-0 py-2.5 pr-2">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          MRN
+                        </span>
+                      </div>
+                      <div className="w-36 shrink-0 py-2.5 pr-2">
+                        <span
+                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Record Type
+                        </span>
+                      </div>
+                      <div className="w-40 shrink-0 py-2.5 pr-2">
+                        <span
+                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Requested By
+                        </span>
+                      </div>
+                      <div className="w-32 shrink-0 py-2.5 pr-2">
+                        <span
+                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Request Date
+                        </span>
+                      </div>
+                      <div className="min-w-[160px] flex-1 py-2.5 pr-2">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Purpose
+                        </span>
+                      </div>
+                      <div className="w-28 shrink-0 py-2.5 pr-2">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Status
+                        </span>
+                      </div>
+                      <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Actions
+                        </span>
+                      </div>
                     </div>
-                  </div>
+
+                    {pageRows.length === 0 && (
+                      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                        <div
+                          className="flex size-14 items-center justify-center rounded-full"
+                          style={{ background: 'rgba(226,237,241,0.6)' }}
+                        >
+                          <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                        </div>
+                        <p
+                          className="font-sans font-medium"
+                          style={{ fontSize: 16, color: '#4A7080' }}
+                        >
+                          No requests in this tab
+                        </p>
+                      </div>
+                    )}
+
+                    {pageRows.map((req) => {
+                      const statusCfg = STATUS_CFG[req.status];
+                      const typeCfg = RECORD_TYPE_CFG[req.recordType];
+                      return (
+                        <div
+                          key={req.id}
+                          onClick={() => openRequest(req)}
+                          className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                          style={{
+                            borderBottom: '1px solid rgba(0,100,130,0.08)',
+                            background: selectedId === req.id ? '#E6F8FD' : 'transparent',
+                          }}
+                        >
+                          <div className="w-32 shrink-0 py-3 pr-2 pl-3">
+                            <Tooltip content={req.requestNumber}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {req.requestNumber}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-36 shrink-0 py-3 pr-2">
+                            <Tooltip content={req.patientName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {req.patientName}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-28 shrink-0 py-3 pr-2">
+                            <Tooltip content={req.mrn}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                {req.mrn}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-36 shrink-0 py-3 pr-2">
+                            <span
+                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                              style={{
+                                fontSize: 14,
+                                whiteSpace: 'nowrap',
+                                color: typeCfg.color,
+                                border: `1px solid ${typeCfg.border}`,
+                                background: typeCfg.bg,
+                              }}
+                            >
+                              {req.recordType}
+                            </span>
+                          </div>
+                          <div className="w-40 shrink-0 py-3 pr-2">
+                            <Tooltip content={req.requestedBy}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {req.requestedBy}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-32 shrink-0 py-3 pr-2">
+                            <p style={{ fontSize: 14, color: '#4A7080' }}>
+                              {formatHumanDate(req.requestDate)}
+                            </p>
+                            <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                              {formatTime(req.requestDate)}
+                            </p>
+                          </div>
+                          <div className="min-w-[160px] flex-1 py-3 pr-2">
+                            <Tooltip content={req.purpose}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {req.purpose}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-28 shrink-0 py-3 pr-2">
+                            <span
+                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                              style={{
+                                fontSize: 14,
+                                whiteSpace: 'nowrap',
+                                color: statusCfg.color,
+                                border: `1px solid ${statusCfg.border}`,
+                                background: statusCfg.bg,
+                              }}
+                            >
+                              {req.status}
+                            </span>
+                          </div>
+                          <div
+                            className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => openRequest(req)}
+                              aria-label={`View request ${req.requestNumber}`}
+                              className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            >
+                              <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                toast.info(
+                                  'More actions',
+                                  `Additional actions for ${req.requestNumber}.`,
+                                )
+                              }
+                              aria-label={`More actions for ${req.requestNumber}`}
+                              className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            >
+                              <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </ScrollableTable>
 
                   {filtered.length > 0 && (
                     <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">

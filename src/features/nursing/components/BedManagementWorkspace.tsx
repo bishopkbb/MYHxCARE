@@ -29,6 +29,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -1264,153 +1269,148 @@ export function BedManagementWorkspace() {
               <h2 className="font-display font-semibold" style={{ fontSize: 18, color: '#0D2630' }}>
                 {selectedWard.name} – {selectedWard.floor}
               </h2>
-              <div className="mt-3 overflow-x-auto scroll-smooth">
-                <div className="min-w-[800px]">
-                  <div
-                    className="flex items-center rounded-t-[8px]"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
-                  >
-                    {(
-                      [
-                        ['Bed', 'w-20 pl-3'],
-                        ['Room', 'w-24'],
-                        ['Status', 'w-40'],
-                        ['Patient', 'min-w-[160px] flex-1'],
-                        ['Doctor', 'w-36'],
-                      ] as [string, string][]
-                    ).map(([label, width]) => (
-                      <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          {label}
-                        </span>
-                      </div>
-                    ))}
-                    <div
-                      className="sticky right-0 z-10 w-40 shrink-0 py-2.5 pr-3 text-right"
-                      style={{ background: '#E2EDF1' }}
-                    >
+              <ScrollableTable minWidth={800} maxHeight={640}>
+                <div
+                  className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  {(
+                    [
+                      ['Bed', 'w-20 pl-3'],
+                      ['Room', 'w-24'],
+                      ['Status', 'w-40'],
+                      ['Patient', 'min-w-[160px] flex-1'],
+                      ['Doctor', 'w-36'],
+                    ] as [string, string][]
+                  ).map(([label, width]) => (
+                    <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
                       <span
                         className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                         style={{ fontSize: 14, color: '#4A7080' }}
                       >
-                        Actions
+                        {label}
                       </span>
                     </div>
+                  ))}
+                  <div
+                    className="sticky right-0 z-10 w-40 shrink-0 py-2.5 pr-3 text-right"
+                    style={{ background: '#E2EDF1' }}
+                  >
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Actions
+                    </span>
                   </div>
+                </div>
 
-                  {pageRows.length === 0 && (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                      <BedDouble style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                      <p
-                        className="font-sans font-medium"
-                        style={{ fontSize: 16, color: '#4A7080' }}
-                      >
-                        No beds match this filter
-                      </p>
-                    </div>
-                  )}
+                {pageRows.length === 0 && (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <BedDouble style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                    <p className="font-sans font-medium" style={{ fontSize: 16, color: '#4A7080' }}>
+                      No beds match this filter
+                    </p>
+                  </div>
+                )}
 
-                  {pageRows.map((bed) => {
-                    const cfg = BED_STATUS_CFG[bed.status];
-                    const isSelected = selectedBedId === bed.id;
-                    return (
-                      <div
-                        key={bed.id}
-                        onClick={() => setSelectedBedId(bed.id)}
-                        className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                        style={{
-                          borderBottom: '1px solid rgba(0,100,130,0.08)',
-                          background: isSelected ? '#E6F8FD' : 'transparent',
-                        }}
-                      >
-                        <div className="w-20 shrink-0 py-3 pr-1.5 pl-3">
-                          <div className="flex items-center gap-1">
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {bed.bedCode}
-                            </p>
-                            {bed.isIsolation && (
-                              <Biohazard style={{ width: 13, height: 13, color: '#F59E0B' }} />
-                            )}
-                          </div>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-1.5">
-                          <Tooltip content={bed.room}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {bed.room}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-40 shrink-0 py-3 pr-1.5">
-                          <span
-                            className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
-                            style={{
-                              fontSize: 14,
-                              color: cfg.color,
-                              border: `1px solid ${cfg.border}`,
-                              background: cfg.bg,
-                            }}
+                {pageRows.map((bed) => {
+                  const cfg = BED_STATUS_CFG[bed.status];
+                  const isSelected = selectedBedId === bed.id;
+                  return (
+                    <div
+                      key={bed.id}
+                      onClick={() => setSelectedBedId(bed.id)}
+                      className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                      style={{
+                        borderBottom: '1px solid rgba(0,100,130,0.08)',
+                        background: isSelected ? '#E6F8FD' : 'transparent',
+                      }}
+                    >
+                      <div className="w-20 shrink-0 py-3 pr-1.5 pl-3">
+                        <div className="flex items-center gap-1">
+                          <p
+                            className="font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            {bed.status}
-                          </span>
-                        </div>
-                        <div className="min-w-[160px] flex-1 py-3 pr-1.5">
-                          <Tooltip content={bed.patientName ?? '—'}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                              {bed.patientName ?? '—'}
-                            </p>
-                          </Tooltip>
-                          {bed.mrn && (
-                            <Tooltip content={bed.mrn}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {bed.mrn}
-                              </p>
-                            </Tooltip>
+                            {bed.bedCode}
+                          </p>
+                          {bed.isIsolation && (
+                            <Biohazard style={{ width: 13, height: 13, color: '#F59E0B' }} />
                           )}
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-1.5">
-                          <Tooltip content={bed.doctorName ?? '—'}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {bed.doctorName ?? '—'}
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-1.5">
+                        <Tooltip content={bed.room}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {bed.room}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-40 shrink-0 py-3 pr-1.5">
+                        <span
+                          className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
+                          style={{
+                            fontSize: 14,
+                            color: cfg.color,
+                            border: `1px solid ${cfg.border}`,
+                            background: cfg.bg,
+                          }}
+                        >
+                          {bed.status}
+                        </span>
+                      </div>
+                      <div className="min-w-[160px] flex-1 py-3 pr-1.5">
+                        <Tooltip content={bed.patientName ?? '—'}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                            {bed.patientName ?? '—'}
+                          </p>
+                        </Tooltip>
+                        {bed.mrn && (
+                          <Tooltip content={bed.mrn}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                              {bed.mrn}
                             </p>
                           </Tooltip>
-                        </div>
-                        <div
-                          className={`sticky right-0 flex w-40 shrink-0 items-center justify-end py-3 pr-3 ${openListMenuId === bed.id ? 'z-30' : 'z-10'}`}
-                          style={{ background: isSelected ? '#E6F8FD' : '#FFFFFF' }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <PermissionGate permission={PERMISSIONS.WARDS_WRITE}>
-                            <ListRowActions
-                              bed={bed}
-                              menuOpen={openListMenuId === bed.id}
-                              onToggleMenu={() =>
-                                setOpenListMenuId(openListMenuId === bed.id ? null : bed.id)
-                              }
-                              onAllocate={() => openAllocate(bed)}
-                              onReserve={() => reserveBed(bed)}
-                              onCancelReservation={() => cancelReservation(bed)}
-                              onMarkOutOfService={() => markOutOfService(bed)}
-                              onReturnToService={() => returnToService(bed)}
-                              onDischarge={() => dischargePatient(bed)}
-                              onMarkReady={() => markReady(bed)}
-                              onTransfer={() => openTransfer(bed)}
-                            />
-                          </PermissionGate>
-                        </div>
+                        )}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      <div className="w-36 shrink-0 py-3 pr-1.5">
+                        <Tooltip content={bed.doctorName ?? '—'}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {bed.doctorName ?? '—'}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div
+                        className={`sticky right-0 flex w-40 shrink-0 items-center justify-end py-3 pr-3 ${openListMenuId === bed.id ? 'z-30' : 'z-10'}`}
+                        style={{ background: isSelected ? '#E6F8FD' : '#FFFFFF' }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <PermissionGate permission={PERMISSIONS.WARDS_WRITE}>
+                          <ListRowActions
+                            bed={bed}
+                            menuOpen={openListMenuId === bed.id}
+                            onToggleMenu={() =>
+                              setOpenListMenuId(openListMenuId === bed.id ? null : bed.id)
+                            }
+                            onAllocate={() => openAllocate(bed)}
+                            onReserve={() => reserveBed(bed)}
+                            onCancelReservation={() => cancelReservation(bed)}
+                            onMarkOutOfService={() => markOutOfService(bed)}
+                            onReturnToService={() => returnToService(bed)}
+                            onDischarge={() => dischargePatient(bed)}
+                            onMarkReady={() => markReady(bed)}
+                            onTransfer={() => openTransfer(bed)}
+                          />
+                        </PermissionGate>
+                      </div>
+                    </div>
+                  );
+                })}
+              </ScrollableTable>
 
               {filteredBeds.length > 0 && (
                 <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">

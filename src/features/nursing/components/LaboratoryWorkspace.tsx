@@ -25,6 +25,11 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -732,308 +737,292 @@ export function LaboratoryWorkspace() {
                   </div>
 
                   {/* ── Table ────────────────────────────────────────────────── */}
-                  <div className="mt-4 overflow-x-auto scroll-smooth">
-                    <div className="min-w-[1150px]">
-                      <div
-                        className="flex items-center rounded-t-[8px]"
-                        style={{
-                          background: 'rgba(226,237,241,0.4)',
-                          borderBottom: '1px solid #E6F8FD',
-                        }}
-                      >
-                        {(
-                          [
-                            ['Patient', 'min-w-[170px] flex-1 pl-3'],
-                            ['MRN', 'w-28'],
-                            ['Test / Panel', 'w-40'],
-                            ['Department', 'w-28'],
-                            ['Priority', 'w-24'],
-                            ['Ordered By', 'w-32'],
-                            ['Ordered', 'w-28'],
-                            ['Status', 'w-36'],
-                          ] as [string, string][]
-                        ).map(([label, width]) => (
-                          <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
-                            <span
-                              className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {label}
-                            </span>
-                          </div>
-                        ))}
-                        <div
-                          className="sticky right-0 z-10 w-20 shrink-0 py-2.5 pr-3 text-right"
-                          style={{ background: '#E2EDF1' }}
-                        >
+                  <ScrollableTable minWidth={1150} maxHeight={640}>
+                    <div
+                      className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                      style={{
+                        background: TABLE_HEADER_BG,
+                        borderBottom: '1px solid #E6F8FD',
+                      }}
+                    >
+                      {(
+                        [
+                          ['Patient', 'min-w-[170px] flex-1 pl-3'],
+                          ['MRN', 'w-28'],
+                          ['Test / Panel', 'w-40'],
+                          ['Department', 'w-28'],
+                          ['Priority', 'w-24'],
+                          ['Ordered By', 'w-32'],
+                          ['Ordered', 'w-28'],
+                          ['Status', 'w-36'],
+                        ] as [string, string][]
+                      ).map(([label, width]) => (
+                        <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
                           >
-                            Actions
+                            {label}
                           </span>
                         </div>
+                      ))}
+                      <div
+                        className="sticky right-0 z-10 w-20 shrink-0 py-2.5 pr-3 text-right"
+                        style={{ background: '#E2EDF1' }}
+                      >
+                        <span
+                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Actions
+                        </span>
                       </div>
+                    </div>
 
-                      {pageState === 'loading' &&
-                        Array.from({ length: 5 }).map((_, i) => (
+                    {pageState === 'loading' &&
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="flex min-h-[60px] animate-pulse items-center"
+                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                        >
+                          <div className="flex min-w-[170px] flex-1 items-center gap-2 py-3 pr-1.5 pl-3">
+                            <div className="size-9 shrink-0 rounded-full bg-slate-100" />
+                            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                              <div className="h-3.5 w-28 rounded bg-slate-100" />
+                              <div className="h-3.5 w-14 rounded bg-slate-100" />
+                            </div>
+                          </div>
+                          {['w-28', 'w-40', 'w-28', 'w-24', 'w-32', 'w-28', 'w-36'].map((w, wi) => (
+                            <div key={wi} className={`${w} shrink-0 py-3 pr-1.5`}>
+                              <div className="h-3.5 w-4/5 rounded bg-slate-100" />
+                            </div>
+                          ))}
                           <div
-                            key={i}
-                            className="flex min-h-[60px] animate-pulse items-center"
+                            className="sticky right-0 flex w-20 shrink-0 items-center justify-end py-3 pr-3"
+                            style={{ background: '#FFFFFF' }}
+                          >
+                            <div className="size-9 rounded-[10px] bg-slate-100" />
+                          </div>
+                        </div>
+                      ))}
+
+                    {pageState === 'loaded' && pageRows.length === 0 && (
+                      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                        <div
+                          className="flex size-14 items-center justify-center rounded-full"
+                          style={{ background: 'rgba(226,237,241,0.6)' }}
+                        >
+                          <Beaker style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                        </div>
+                        <p
+                          className="font-sans font-medium"
+                          style={{ fontSize: 16, color: '#4A7080' }}
+                        >
+                          No tests match this filter
+                        </p>
+                        {hasActiveFilters && (
+                          <button
+                            type="button"
+                            onClick={clearFilters}
+                            className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                            style={{ fontSize: 14, color: '#00B4D8' }}
+                          >
+                            Clear all filters
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {pageState === 'loaded' &&
+                      pageRows.map((o) => {
+                        const statusCfg = STATUS_CFG[o.status];
+                        const priorityCfg = PRIORITY_CFG[o.priority]!;
+                        const overdue = isOverdue(o, nowMs);
+                        const isMenuOpen = openMenuId === o.id;
+                        const needsAck = o.resultFlag === 'Critical' && !o.criticalAcknowledgedAt;
+                        return (
+                          <div
+                            key={o.id}
+                            className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
                             style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                           >
-                            <div className="flex min-w-[170px] flex-1 items-center gap-2 py-3 pr-1.5 pl-3">
-                              <div className="size-9 shrink-0 rounded-full bg-slate-100" />
-                              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                                <div className="h-3.5 w-28 rounded bg-slate-100" />
-                                <div className="h-3.5 w-14 rounded bg-slate-100" />
+                            <div className="min-w-[170px] flex-1 py-3 pr-1.5 pl-3">
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className="font-display flex size-9 shrink-0 items-center justify-center rounded-full font-semibold text-white"
+                                  style={{
+                                    background: avatarColorFor(o.patientName),
+                                    fontSize: 14,
+                                  }}
+                                >
+                                  {initialsOf(o.patientName)}
+                                </div>
+                                <div className="min-w-0">
+                                  <Tooltip content={o.patientName}>
+                                    <p
+                                      className="truncate font-sans font-medium"
+                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                    >
+                                      {o.patientName}
+                                    </p>
+                                  </Tooltip>
+                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                    {o.age !== undefined && o.gender
+                                      ? `${o.age} Y / ${o.gender[0]}`
+                                      : '—'}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                            {['w-28', 'w-40', 'w-28', 'w-24', 'w-32', 'w-28', 'w-36'].map(
-                              (w, wi) => (
-                                <div key={wi} className={`${w} shrink-0 py-3 pr-1.5`}>
-                                  <div className="h-3.5 w-4/5 rounded bg-slate-100" />
-                                </div>
-                              ),
-                            )}
+                            <div className="w-28 shrink-0 py-3 pr-1.5">
+                              <Tooltip content={o.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                  {o.mrn}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-40 shrink-0 py-3 pr-1.5">
+                              <Tooltip content={o.testName}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                                  {o.testName}
+                                </p>
+                              </Tooltip>
+                              {FASTING_REQUIRED_TESTS.has(o.testName) && (
+                                <p style={{ fontSize: 14, color: '#F59E0B' }}>Fasting required</p>
+                              )}
+                            </div>
+                            <div className="w-28 shrink-0 py-3 pr-1.5">
+                              <Tooltip content={o.department}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {o.department}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-24 shrink-0 py-3 pr-1.5">
+                              <span
+                                className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
+                                style={{
+                                  fontSize: 14,
+                                  color: priorityCfg.color,
+                                  border: `1px solid ${priorityCfg.border}`,
+                                  background: priorityCfg.bg,
+                                }}
+                              >
+                                {o.priority}
+                              </span>
+                            </div>
+                            <div className="w-32 shrink-0 py-3 pr-1.5">
+                              <Tooltip content={o.orderedBy}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {o.orderedBy}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-28 shrink-0 py-3 pr-1.5">
+                              <p
+                                className="whitespace-nowrap"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {formatDate(o.orderedAt)}
+                              </p>
+                              <p
+                                className="whitespace-nowrap"
+                                style={{ fontSize: 14, color: '#8A98A3' }}
+                              >
+                                {formatTime(o.orderedAt)}
+                              </p>
+                            </div>
+                            <div className="w-36 shrink-0 py-3 pr-1.5">
+                              <span
+                                className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
+                                style={{
+                                  fontSize: 14,
+                                  color: statusCfg.color,
+                                  border: `1px solid ${statusCfg.border}`,
+                                  background: statusCfg.bg,
+                                }}
+                              >
+                                {o.status}
+                              </span>
+                              {overdue && (
+                                <p
+                                  className="mt-0.5 flex items-center gap-1"
+                                  style={{ fontSize: 14, color: '#EF4444' }}
+                                >
+                                  <Clock style={{ width: 12, height: 12 }} />
+                                  Overdue
+                                </p>
+                              )}
+                              {o.lastFollowUpAt && (
+                                <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  Followed up {toRelativeTime(o.lastFollowUpAt)}
+                                </p>
+                              )}
+                              {o.status === 'Completed' && o.resultFlag && (
+                                <span
+                                  className="mt-0.5 inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
+                                  style={{
+                                    fontSize: 14,
+                                    color: RESULT_FLAG_CFG[o.resultFlag]!.color,
+                                    border: `1px solid ${RESULT_FLAG_CFG[o.resultFlag]!.border}`,
+                                    background: RESULT_FLAG_CFG[o.resultFlag]!.bg,
+                                  }}
+                                >
+                                  {o.resultFlag}
+                                </span>
+                              )}
+                            </div>
                             <div
-                              className="sticky right-0 flex w-20 shrink-0 items-center justify-end py-3 pr-3"
+                              className={`sticky right-0 flex w-20 shrink-0 items-center justify-end py-3 pr-3 ${isMenuOpen ? 'z-30' : 'z-10'}`}
                               style={{ background: '#FFFFFF' }}
                             >
-                              <div className="size-9 rounded-[10px] bg-slate-100" />
+                              <PermissionGate permission={PERMISSIONS.LAB_RESULTS_WRITE}>
+                                <RowMenu
+                                  order={o}
+                                  open={isMenuOpen}
+                                  onToggle={() => setOpenMenuId(isMenuOpen ? null : o.id)}
+                                  onView={() => {
+                                    setOpenMenuId(null);
+                                    setViewTarget(o);
+                                  }}
+                                  onViewPatient={
+                                    o.patientId
+                                      ? () => {
+                                          setOpenMenuId(null);
+                                          router.push(ROUTES.nursePatientRecord(o.patientId!));
+                                        }
+                                      : undefined
+                                  }
+                                  onCollect={
+                                    o.status === 'Ordered' || o.status === 'Rejected'
+                                      ? () => {
+                                          setOpenMenuId(null);
+                                          setCollectTarget(o);
+                                        }
+                                      : undefined
+                                  }
+                                  onAcknowledge={
+                                    needsAck
+                                      ? () => {
+                                          setOpenMenuId(null);
+                                          setAcknowledgeTarget(o);
+                                        }
+                                      : undefined
+                                  }
+                                  onFollowUp={
+                                    overdue &&
+                                    (o.status === 'Sample Collected' || o.status === 'In Process')
+                                      ? () => handleFollowUp(o)
+                                      : undefined
+                                  }
+                                />
+                              </PermissionGate>
                             </div>
                           </div>
-                        ))}
-
-                      {pageState === 'loaded' && pageRows.length === 0 && (
-                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                          <div
-                            className="flex size-14 items-center justify-center rounded-full"
-                            style={{ background: 'rgba(226,237,241,0.6)' }}
-                          >
-                            <Beaker style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                          </div>
-                          <p
-                            className="font-sans font-medium"
-                            style={{ fontSize: 16, color: '#4A7080' }}
-                          >
-                            No tests match this filter
-                          </p>
-                          {hasActiveFilters && (
-                            <button
-                              type="button"
-                              onClick={clearFilters}
-                              className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                              style={{ fontSize: 14, color: '#00B4D8' }}
-                            >
-                              Clear all filters
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-                      {pageState === 'loaded' &&
-                        pageRows.map((o) => {
-                          const statusCfg = STATUS_CFG[o.status];
-                          const priorityCfg = PRIORITY_CFG[o.priority]!;
-                          const overdue = isOverdue(o, nowMs);
-                          const isMenuOpen = openMenuId === o.id;
-                          const needsAck = o.resultFlag === 'Critical' && !o.criticalAcknowledgedAt;
-                          return (
-                            <div
-                              key={o.id}
-                              className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                              style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                            >
-                              <div className="min-w-[170px] flex-1 py-3 pr-1.5 pl-3">
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className="font-display flex size-9 shrink-0 items-center justify-center rounded-full font-semibold text-white"
-                                    style={{
-                                      background: avatarColorFor(o.patientName),
-                                      fontSize: 14,
-                                    }}
-                                  >
-                                    {initialsOf(o.patientName)}
-                                  </div>
-                                  <div className="min-w-0">
-                                    <Tooltip content={o.patientName}>
-                                      <p
-                                        className="truncate font-sans font-medium"
-                                        style={{ fontSize: 14, color: '#0D2630' }}
-                                      >
-                                        {o.patientName}
-                                      </p>
-                                    </Tooltip>
-                                    <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                      {o.age !== undefined && o.gender
-                                        ? `${o.age} Y / ${o.gender[0]}`
-                                        : '—'}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <Tooltip content={o.mrn}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#00B4D8' }}
-                                  >
-                                    {o.mrn}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-40 shrink-0 py-3 pr-1.5">
-                                <Tooltip content={o.testName}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {o.testName}
-                                  </p>
-                                </Tooltip>
-                                {FASTING_REQUIRED_TESTS.has(o.testName) && (
-                                  <p style={{ fontSize: 14, color: '#F59E0B' }}>Fasting required</p>
-                                )}
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <Tooltip content={o.department}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {o.department}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-24 shrink-0 py-3 pr-1.5">
-                                <span
-                                  className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
-                                  style={{
-                                    fontSize: 14,
-                                    color: priorityCfg.color,
-                                    border: `1px solid ${priorityCfg.border}`,
-                                    background: priorityCfg.bg,
-                                  }}
-                                >
-                                  {o.priority}
-                                </span>
-                              </div>
-                              <div className="w-32 shrink-0 py-3 pr-1.5">
-                                <Tooltip content={o.orderedBy}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {o.orderedBy}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-28 shrink-0 py-3 pr-1.5">
-                                <p
-                                  className="whitespace-nowrap"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {formatDate(o.orderedAt)}
-                                </p>
-                                <p
-                                  className="whitespace-nowrap"
-                                  style={{ fontSize: 14, color: '#8A98A3' }}
-                                >
-                                  {formatTime(o.orderedAt)}
-                                </p>
-                              </div>
-                              <div className="w-36 shrink-0 py-3 pr-1.5">
-                                <span
-                                  className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
-                                  style={{
-                                    fontSize: 14,
-                                    color: statusCfg.color,
-                                    border: `1px solid ${statusCfg.border}`,
-                                    background: statusCfg.bg,
-                                  }}
-                                >
-                                  {o.status}
-                                </span>
-                                {overdue && (
-                                  <p
-                                    className="mt-0.5 flex items-center gap-1"
-                                    style={{ fontSize: 14, color: '#EF4444' }}
-                                  >
-                                    <Clock style={{ width: 12, height: 12 }} />
-                                    Overdue
-                                  </p>
-                                )}
-                                {o.lastFollowUpAt && (
-                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                    Followed up {toRelativeTime(o.lastFollowUpAt)}
-                                  </p>
-                                )}
-                                {o.status === 'Completed' && o.resultFlag && (
-                                  <span
-                                    className="mt-0.5 inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
-                                    style={{
-                                      fontSize: 14,
-                                      color: RESULT_FLAG_CFG[o.resultFlag]!.color,
-                                      border: `1px solid ${RESULT_FLAG_CFG[o.resultFlag]!.border}`,
-                                      background: RESULT_FLAG_CFG[o.resultFlag]!.bg,
-                                    }}
-                                  >
-                                    {o.resultFlag}
-                                  </span>
-                                )}
-                              </div>
-                              <div
-                                className={`sticky right-0 flex w-20 shrink-0 items-center justify-end py-3 pr-3 ${isMenuOpen ? 'z-30' : 'z-10'}`}
-                                style={{ background: '#FFFFFF' }}
-                              >
-                                <PermissionGate permission={PERMISSIONS.LAB_RESULTS_WRITE}>
-                                  <RowMenu
-                                    order={o}
-                                    open={isMenuOpen}
-                                    onToggle={() => setOpenMenuId(isMenuOpen ? null : o.id)}
-                                    onView={() => {
-                                      setOpenMenuId(null);
-                                      setViewTarget(o);
-                                    }}
-                                    onViewPatient={
-                                      o.patientId
-                                        ? () => {
-                                            setOpenMenuId(null);
-                                            router.push(ROUTES.nursePatientRecord(o.patientId!));
-                                          }
-                                        : undefined
-                                    }
-                                    onCollect={
-                                      o.status === 'Ordered' || o.status === 'Rejected'
-                                        ? () => {
-                                            setOpenMenuId(null);
-                                            setCollectTarget(o);
-                                          }
-                                        : undefined
-                                    }
-                                    onAcknowledge={
-                                      needsAck
-                                        ? () => {
-                                            setOpenMenuId(null);
-                                            setAcknowledgeTarget(o);
-                                          }
-                                        : undefined
-                                    }
-                                    onFollowUp={
-                                      overdue &&
-                                      (o.status === 'Sample Collected' || o.status === 'In Process')
-                                        ? () => handleFollowUp(o)
-                                        : undefined
-                                    }
-                                  />
-                                </PermissionGate>
-                              </div>
-                            </div>
-                          );
-                        })}
-                    </div>
-                  </div>
+                        );
+                      })}
+                  </ScrollableTable>
 
                   {pageState === 'loaded' && sorted.length > 0 && (
                     <Pagination

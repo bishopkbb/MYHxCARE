@@ -9,6 +9,11 @@ import { FormField } from '@components/shared/FormField';
 import { FormInput } from '@components/shared/FormInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -647,12 +652,12 @@ export function InsuranceVerificationWorkspace() {
                     >
                       3. Coverage Details
                     </h2>
-                    <div className="mt-3 overflow-x-auto scroll-smooth">
-                      <div className="min-w-[720px]">
+                    <div className="mt-3">
+                      <ScrollableTable minWidth={720}>
                         <div
-                          className="flex rounded-t-[8px]"
+                          className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
                           style={{
-                            background: 'rgba(226,237,241,0.4)',
+                            background: TABLE_HEADER_BG,
                             borderBottom: '1px solid #E6F8FD',
                           }}
                         >
@@ -763,7 +768,7 @@ export function InsuranceVerificationWorkspace() {
                             </div>
                           </div>
                         ))}
-                      </div>
+                      </ScrollableTable>
                     </div>
                     <p className="mt-3" style={{ fontSize: 14, color: '#8A98A3' }}>
                       Note: Coverage details are based on the information provided by the insurance

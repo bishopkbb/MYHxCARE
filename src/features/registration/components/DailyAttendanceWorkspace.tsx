@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { FormDateInput } from '@components/shared/FormDateInput';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { FormSelect } from '@components/shared/FormSelect';
 import { getInitials } from '@lib/utils';
@@ -719,220 +724,214 @@ export function DailyAttendanceWorkspace() {
               className="mt-3 rounded-[12px] p-4 sm:p-5"
               style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
             >
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[1240px]">
-                  <div
-                    className="flex rounded-t-[8px]"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
-                  >
-                    <div className="w-24 shrink-0 py-2.5 pr-2 pl-3">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Queue #
-                      </span>
-                    </div>
-                    <div className="w-44 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Patient
-                      </span>
-                    </div>
-                    <div className="w-32 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        MRN
-                      </span>
-                    </div>
-                    <div className="min-w-[140px] flex-1 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Department
-                      </span>
-                    </div>
-                    <div className="w-40 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Doctor
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Check-In
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Check-Out
-                      </span>
-                    </div>
-                    <div className="w-36 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Visit Status
-                      </span>
-                    </div>
-                    <div className="w-20 shrink-0 py-2.5 pr-3 text-right">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Actions
-                      </span>
-                    </div>
+              <ScrollableTable minWidth={1240} maxHeight={640}>
+                <div
+                  className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <div className="w-24 shrink-0 py-2.5 pr-2 pl-3">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Queue #
+                    </span>
                   </div>
+                  <div className="w-44 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Patient
+                    </span>
+                  </div>
+                  <div className="w-32 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      MRN
+                    </span>
+                  </div>
+                  <div className="min-w-[140px] flex-1 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Department
+                    </span>
+                  </div>
+                  <div className="w-40 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Doctor
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Check-In
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Check-Out
+                    </span>
+                  </div>
+                  <div className="w-36 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Visit Status
+                    </span>
+                  </div>
+                  <div className="w-20 shrink-0 py-2.5 pr-3 text-right">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Actions
+                    </span>
+                  </div>
+                </div>
 
-                  {pageRows.length === 0 && (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                      <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                        No patients match your filters
-                      </p>
-                    </div>
-                  )}
+                {pageRows.length === 0 && (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <p style={{ fontSize: 14, color: '#8A98A3' }}>No patients match your filters</p>
+                  </div>
+                )}
 
-                  {pageRows.map((r, i) => {
-                    const cfg = STATUS_CFG[r.status];
-                    return (
-                      <div
-                        key={r.id}
-                        onClick={() => setSelectedId(r.id)}
-                        className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                        style={{
-                          borderBottom: '1px solid rgba(0,100,130,0.08)',
-                          background: selectedId === r.id ? '#E6F8FD' : 'transparent',
-                        }}
-                      >
-                        <div className="w-24 shrink-0 py-3 pr-2 pl-3">
-                          <Tooltip content={r.id}>
+                {pageRows.map((r, i) => {
+                  const cfg = STATUS_CFG[r.status];
+                  return (
+                    <div
+                      key={r.id}
+                      onClick={() => setSelectedId(r.id)}
+                      className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                      style={{
+                        borderBottom: '1px solid rgba(0,100,130,0.08)',
+                        background: selectedId === r.id ? '#E6F8FD' : 'transparent',
+                      }}
+                    >
+                      <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                        <Tooltip content={r.id}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#00B4D8' }}
+                          >
+                            {r.id}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="flex w-44 shrink-0 items-center gap-2.5 py-3 pr-2">
+                        <div
+                          className="flex size-8 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                          style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
+                        >
+                          {getInitials(r.patientName)}
+                        </div>
+                        <div className="min-w-0">
+                          <Tooltip content={r.patientName}>
                             <p
                               className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#00B4D8' }}
+                              style={{ fontSize: 14, color: '#0D2630' }}
                             >
-                              {r.id}
+                              {r.patientName}
                             </p>
                           </Tooltip>
-                        </div>
-                        <div className="flex w-44 shrink-0 items-center gap-2.5 py-3 pr-2">
-                          <div
-                            className="flex size-8 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
-                            style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
-                          >
-                            {getInitials(r.patientName)}
-                          </div>
-                          <div className="min-w-0">
-                            <Tooltip content={r.patientName}>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {r.patientName}
-                              </p>
-                            </Tooltip>
-                            <Tooltip content={`${r.gender} , ${r.age} Yrs`}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {r.gender}, {r.age} Yrs
-                              </p>
-                            </Tooltip>
-                          </div>
-                        </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
-                          <Tooltip content={r.mrn}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.mrn}
+                          <Tooltip content={`${r.gender} , ${r.age} Yrs`}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                              {r.gender}, {r.age} Yrs
                             </p>
                           </Tooltip>
-                        </div>
-                        <div className="min-w-[140px] flex-1 py-3 pr-2">
-                          <Tooltip content={r.department}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.department}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-40 shrink-0 py-3 pr-2">
-                          <Tooltip content={r.doctor}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.doctor}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>
-                            {formatCheckTime(r.checkInTime)}
-                          </p>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <p
-                            style={{ fontSize: 14, color: r.checkOutTime ? '#4A7080' : '#8A98A3' }}
-                          >
-                            {formatCheckTime(r.checkOutTime)}
-                          </p>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <span
-                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              whiteSpace: 'nowrap',
-                              color: cfg.color,
-                              border: `1px solid ${cfg.border}`,
-                              background: cfg.bg,
-                            }}
-                          >
-                            {r.status}
-                          </span>
-                        </div>
-                        <div
-                          className="flex w-20 shrink-0 items-center justify-end gap-1 py-3 pr-3"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedId(r.id);
-                              handleViewPatient();
-                            }}
-                            aria-label={`View ${r.patientName}`}
-                            className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          >
-                            <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              toast.info('More actions', `Additional actions for ${r.id}.`)
-                            }
-                            aria-label={`More actions for ${r.id}`}
-                            className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          >
-                            <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
-                          </button>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      <div className="w-32 shrink-0 py-3 pr-2">
+                        <Tooltip content={r.mrn}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {r.mrn}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="min-w-[140px] flex-1 py-3 pr-2">
+                        <Tooltip content={r.department}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {r.department}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-40 shrink-0 py-3 pr-2">
+                        <Tooltip content={r.doctor}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {r.doctor}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>
+                          {formatCheckTime(r.checkInTime)}
+                        </p>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: r.checkOutTime ? '#4A7080' : '#8A98A3' }}>
+                          {formatCheckTime(r.checkOutTime)}
+                        </p>
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <span
+                          className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                          style={{
+                            fontSize: 14,
+                            whiteSpace: 'nowrap',
+                            color: cfg.color,
+                            border: `1px solid ${cfg.border}`,
+                            background: cfg.bg,
+                          }}
+                        >
+                          {r.status}
+                        </span>
+                      </div>
+                      <div
+                        className="flex w-20 shrink-0 items-center justify-end gap-1 py-3 pr-3"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedId(r.id);
+                            handleViewPatient();
+                          }}
+                          aria-label={`View ${r.patientName}`}
+                          className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                        >
+                          <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            toast.info('More actions', `Additional actions for ${r.id}.`)
+                          }
+                          aria-label={`More actions for ${r.id}`}
+                          className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                        >
+                          <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </ScrollableTable>
 
               {rows.length > 0 && (
                 <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">

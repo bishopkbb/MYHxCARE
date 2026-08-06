@@ -21,6 +21,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCardTrend } from '@components/shared/StatCard';
 import { UserAvatar } from '@components/shared/UserAvatar';
 import { ExportMenu } from '@/components/ExportMenu';
@@ -576,346 +581,341 @@ export default function PatientDirectoryPage() {
                 </div>
               </div>
 
-              <div className="mt-3 overflow-x-auto scroll-smooth">
-                <div className="min-w-[1080px]">
-                  <div
-                    className="flex items-center rounded-t-[8px]"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
-                  >
-                    <div className="w-10 shrink-0 py-3 pl-4">
-                      <input
-                        type="checkbox"
-                        checked={
-                          pagePatients.length > 0 &&
-                          pagePatients.every((p) => selectedIds.has(p.id))
-                        }
-                        onChange={toggleAllOnPage}
-                        style={{ accentColor: '#00B4D8' }}
-                        className="size-4 cursor-pointer rounded"
-                        aria-label="Select all patients on this page"
-                      />
-                    </div>
-                    <div className="min-w-[180px] flex-1 py-3 pr-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Patient
-                      </span>
-                    </div>
-                    <div className="w-32 shrink-0 py-3 pr-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        MRN
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-3 pr-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Student ID
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-3 pr-3">
-                      <Tooltip content={`Age/Gender`}>
-                        <span
-                          className="truncate font-sans font-bold tracking-wide uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Age/Gender
-                        </span>
-                      </Tooltip>
-                    </div>
-                    <div className="w-40 shrink-0 py-3 pr-3">
-                      <Tooltip content={`Faculty/Dept`}>
-                        <span
-                          className="truncate font-sans font-bold tracking-wide uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Faculty/Dept
-                        </span>
-                      </Tooltip>
-                    </div>
-                    <div className="w-28 shrink-0 py-3 pr-3">
-                      <Tooltip content={`Last Visit`}>
-                        <span
-                          className="truncate font-sans font-bold tracking-wide uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Last Visit
-                        </span>
-                      </Tooltip>
-                    </div>
-                    <div className="w-24 shrink-0 py-3 pr-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Status
-                      </span>
-                    </div>
-                    <div className="w-32 shrink-0 py-3 pr-4 text-right">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Actions
-                      </span>
-                    </div>
+              <ScrollableTable minWidth={1080} maxHeight={640} className="mt-3">
+                <div
+                  className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <div className="w-10 shrink-0 py-3 pl-4">
+                    <input
+                      type="checkbox"
+                      checked={
+                        pagePatients.length > 0 && pagePatients.every((p) => selectedIds.has(p.id))
+                      }
+                      onChange={toggleAllOnPage}
+                      style={{ accentColor: '#00B4D8' }}
+                      className="size-4 cursor-pointer rounded"
+                      aria-label="Select all patients on this page"
+                    />
                   </div>
-
-                  {pageState === 'loading' &&
-                    Array.from({ length: rowsPerPage }).map((_, i) => <SkeletonRow key={i} />)}
-
-                  {pageState === 'error' && (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                      <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
-                      <p
-                        className="font-sans font-semibold"
-                        style={{ fontSize: 16, color: '#0D2630' }}
+                  <div className="min-w-[180px] flex-1 py-3 pr-3">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Patient
+                    </span>
+                  </div>
+                  <div className="w-32 shrink-0 py-3 pr-3">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      MRN
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-3 pr-3">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Student ID
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-3 pr-3">
+                    <Tooltip content={`Age/Gender`}>
+                      <span
+                        className="truncate font-sans font-bold tracking-wide uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
                       >
-                        Failed to load patients
+                        Age/Gender
+                      </span>
+                    </Tooltip>
+                  </div>
+                  <div className="w-40 shrink-0 py-3 pr-3">
+                    <Tooltip content={`Faculty/Dept`}>
+                      <span
+                        className="truncate font-sans font-bold tracking-wide uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Faculty/Dept
+                      </span>
+                    </Tooltip>
+                  </div>
+                  <div className="w-28 shrink-0 py-3 pr-3">
+                    <Tooltip content={`Last Visit`}>
+                      <span
+                        className="truncate font-sans font-bold tracking-wide uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Last Visit
+                      </span>
+                    </Tooltip>
+                  </div>
+                  <div className="w-24 shrink-0 py-3 pr-3">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Status
+                    </span>
+                  </div>
+                  <div className="w-32 shrink-0 py-3 pr-4 text-right">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Actions
+                    </span>
+                  </div>
+                </div>
+
+                {pageState === 'loading' &&
+                  Array.from({ length: rowsPerPage }).map((_, i) => <SkeletonRow key={i} />)}
+
+                {pageState === 'error' && (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <AlertCircle style={{ width: 36, height: 36, color: '#EF4444' }} />
+                    <p
+                      className="font-sans font-semibold"
+                      style={{ fontSize: 16, color: '#0D2630' }}
+                    >
+                      Failed to load patients
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleRetry}
+                      className="flex items-center gap-2 rounded-[12px] font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                      style={{
+                        height: 40,
+                        padding: '0 20px',
+                        background: '#00B4D8',
+                        fontSize: 14,
+                      }}
+                    >
+                      <RefreshCw style={{ width: 16, height: 16 }} />
+                      Retry
+                    </button>
+                  </div>
+                )}
+
+                {pageState === 'loaded' && pagePatients.length === 0 && (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <div
+                      className="flex size-14 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(226,237,241,0.6)' }}
+                    >
+                      <Users style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                    </div>
+                    <div>
+                      <p
+                        className="font-sans font-medium"
+                        style={{ fontSize: 16, color: '#4A7080' }}
+                      >
+                        No patients match this search
                       </p>
+                      <p className="mt-0.5" style={{ fontSize: 14, color: '#8A98A3' }}>
+                        Try adjusting your search or clearing the filters
+                      </p>
+                    </div>
+                    {hasActiveFilters && (
                       <button
                         type="button"
-                        onClick={handleRetry}
-                        className="flex items-center gap-2 rounded-[12px] font-sans font-semibold text-white transition-opacity duration-150 hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                        onClick={resetFilters}
+                        className="mt-1 font-sans font-medium transition-colors duration-150 hover:underline focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                        style={{ fontSize: 14, color: '#00B4D8' }}
+                      >
+                        Clear all filters
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {pageState === 'loaded' &&
+                  pagePatients.map((patient) => {
+                    const cfg = STATUS_CFG[patient.status];
+                    const isSelected = selectedPatientId === patient.id;
+                    return (
+                      <div
+                        key={patient.id}
+                        onClick={() => setSelectedPatientId(patient.id)}
+                        className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
                         style={{
-                          height: 40,
-                          padding: '0 20px',
-                          background: '#00B4D8',
-                          fontSize: 14,
+                          borderBottom: '1px solid rgba(0,100,130,0.08)',
+                          background: isSelected ? '#E6F8FD' : 'transparent',
                         }}
                       >
-                        <RefreshCw style={{ width: 16, height: 16 }} />
-                        Retry
-                      </button>
-                    </div>
-                  )}
-
-                  {pageState === 'loaded' && pagePatients.length === 0 && (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                      <div
-                        className="flex size-14 items-center justify-center rounded-full"
-                        style={{ background: 'rgba(226,237,241,0.6)' }}
-                      >
-                        <Users style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                      </div>
-                      <div>
-                        <p
-                          className="font-sans font-medium"
-                          style={{ fontSize: 16, color: '#4A7080' }}
-                        >
-                          No patients match this search
-                        </p>
-                        <p className="mt-0.5" style={{ fontSize: 14, color: '#8A98A3' }}>
-                          Try adjusting your search or clearing the filters
-                        </p>
-                      </div>
-                      {hasActiveFilters && (
-                        <button
-                          type="button"
-                          onClick={resetFilters}
-                          className="mt-1 font-sans font-medium transition-colors duration-150 hover:underline focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          style={{ fontSize: 14, color: '#00B4D8' }}
-                        >
-                          Clear all filters
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {pageState === 'loaded' &&
-                    pagePatients.map((patient) => {
-                      const cfg = STATUS_CFG[patient.status];
-                      const isSelected = selectedPatientId === patient.id;
-                      return (
                         <div
-                          key={patient.id}
-                          onClick={() => setSelectedPatientId(patient.id)}
-                          className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                          style={{
-                            borderBottom: '1px solid rgba(0,100,130,0.08)',
-                            background: isSelected ? '#E6F8FD' : 'transparent',
-                          }}
+                          className="w-10 shrink-0 py-3 pl-4"
+                          onClick={(e) => e.stopPropagation()}
                         >
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(patient.id)}
+                            onChange={() => toggleRow(patient.id)}
+                            style={{ accentColor: '#00B4D8' }}
+                            className="size-4 cursor-pointer rounded"
+                            aria-label={`Select ${patient.name}`}
+                          />
+                        </div>
+                        <div className="flex min-w-[180px] flex-1 items-center gap-3 py-3 pr-3">
                           <div
-                            className="w-10 shrink-0 py-3 pl-4"
-                            onClick={(e) => e.stopPropagation()}
+                            className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
+                            style={{ background: patient.avatarBg }}
                           >
-                            <input
-                              type="checkbox"
-                              checked={selectedIds.has(patient.id)}
-                              onChange={() => toggleRow(patient.id)}
-                              style={{ accentColor: '#00B4D8' }}
-                              className="size-4 cursor-pointer rounded"
-                              aria-label={`Select ${patient.name}`}
-                            />
+                            {patient.initials}
                           </div>
-                          <div className="flex min-w-[180px] flex-1 items-center gap-3 py-3 pr-3">
-                            <div
-                              className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
-                              style={{ background: patient.avatarBg }}
-                            >
-                              {patient.initials}
-                            </div>
-                            <div className="min-w-0">
-                              <Tooltip content={patient.name}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {patient.name}
-                                </p>
-                              </Tooltip>
-                              <Tooltip content={patient.phone}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {patient.phone}
-                                </p>
-                              </Tooltip>
-                            </div>
-                          </div>
-                          <div className="w-32 shrink-0 py-3 pr-3">
-                            <Tooltip content={patient.mrn}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
-                                {patient.mrn}
+                          <div className="min-w-0">
+                            <Tooltip content={patient.name}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {patient.name}
                               </p>
                             </Tooltip>
-                          </div>
-                          <div className="w-28 shrink-0 py-3 pr-3">
-                            <Tooltip content={patient.studentId}>
+                            <Tooltip content={patient.phone}>
                               <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {patient.studentId}
+                                {patient.phone}
                               </p>
                             </Tooltip>
                           </div>
-                          <div className="w-28 shrink-0 py-3 pr-3">
-                            <p style={{ fontSize: 14, color: '#4A7080' }}>
-                              {patient.age} / {patient.gender[0]}
+                        </div>
+                        <div className="w-32 shrink-0 py-3 pr-3">
+                          <Tooltip content={patient.mrn}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                              {patient.mrn}
                             </p>
-                          </div>
-                          <div className="w-40 shrink-0 py-3 pr-3">
-                            <Tooltip content={patient.faculty}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {patient.faculty}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-28 shrink-0 py-3 pr-3">
-                            <Tooltip content={patient.lastVisit}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {patient.lastVisit}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-24 shrink-0 py-3 pr-3">
-                            <span
-                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                whiteSpace: 'nowrap',
-                                color: cfg.color,
-                                border: `1px solid ${cfg.border}`,
-                                background: cfg.bg,
-                              }}
-                            >
-                              {patient.status}
-                            </span>
-                          </div>
-                          <div
-                            className="flex w-32 shrink-0 items-center justify-end gap-1 py-3 pr-4"
-                            onClick={(e) => e.stopPropagation()}
+                          </Tooltip>
+                        </div>
+                        <div className="w-28 shrink-0 py-3 pr-3">
+                          <Tooltip content={patient.studentId}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {patient.studentId}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-28 shrink-0 py-3 pr-3">
+                          <p style={{ fontSize: 14, color: '#4A7080' }}>
+                            {patient.age} / {patient.gender[0]}
+                          </p>
+                        </div>
+                        <div className="w-40 shrink-0 py-3 pr-3">
+                          <Tooltip content={patient.faculty}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {patient.faculty}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-28 shrink-0 py-3 pr-3">
+                          <Tooltip content={patient.lastVisit}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {patient.lastVisit}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-24 shrink-0 py-3 pr-3">
+                          <span
+                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              whiteSpace: 'nowrap',
+                              color: cfg.color,
+                              border: `1px solid ${cfg.border}`,
+                              background: cfg.bg,
+                            }}
                           >
-                            <button
-                              type="button"
-                              onClick={() => setSelectedPatientId(patient.id)}
-                              aria-label={`View ${patient.name}`}
-                              className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                            >
-                              <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                            </button>
+                            {patient.status}
+                          </span>
+                        </div>
+                        <div
+                          className="flex w-32 shrink-0 items-center justify-end gap-1 py-3 pr-4"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setSelectedPatientId(patient.id)}
+                            aria-label={`View ${patient.name}`}
+                            className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          >
+                            <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              router.push(`${ROUTES.registrationProfile}?patientId=${patient.id}`)
+                            }
+                            aria-label={`Edit ${patient.name}`}
+                            className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          >
+                            <Pencil style={{ width: 15, height: 15, color: '#4A7080' }} />
+                          </button>
+                          <div
+                            ref={openActionMenuId === patient.id ? actionMenuRef : null}
+                            className="relative"
+                          >
                             <button
                               type="button"
                               onClick={() =>
-                                router.push(`${ROUTES.registrationProfile}?patientId=${patient.id}`)
+                                setOpenActionMenuId((id) => (id === patient.id ? null : patient.id))
                               }
-                              aria-label={`Edit ${patient.name}`}
+                              aria-label={`More actions for ${patient.name}`}
                               className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
                             >
-                              <Pencil style={{ width: 15, height: 15, color: '#4A7080' }} />
+                              <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
                             </button>
-                            <div
-                              ref={openActionMenuId === patient.id ? actionMenuRef : null}
-                              className="relative"
-                            >
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setOpenActionMenuId((id) =>
-                                    id === patient.id ? null : patient.id,
-                                  )
-                                }
-                                aria-label={`More actions for ${patient.name}`}
-                                className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                            {openActionMenuId === patient.id && (
+                              <div
+                                className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 w-44 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
+                                style={{
+                                  border: '1px solid rgba(0,100,130,0.12)',
+                                  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                                }}
                               >
-                                <MoreVertical style={{ width: 15, height: 15, color: '#4A7080' }} />
-                              </button>
-                              {openActionMenuId === patient.id && (
-                                <div
-                                  className="animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 absolute top-full right-0 z-30 mt-1 w-44 overflow-hidden rounded-[12px] bg-white py-1.5 duration-150"
-                                  style={{
-                                    border: '1px solid rgba(0,100,130,0.12)',
-                                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    router.push(ROUTES.registrationCheckIn);
+                                    setOpenActionMenuId(null);
                                   }}
+                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                                  style={{ fontSize: 14, color: '#2F3A40' }}
                                 >
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      router.push(ROUTES.registrationCheckIn);
-                                      setOpenActionMenuId(null);
-                                    }}
-                                    className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                    style={{ fontSize: 14, color: '#2F3A40' }}
-                                  >
-                                    Check-In Patient
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      router.push(ROUTES.registrationAppointments);
-                                      setOpenActionMenuId(null);
-                                    }}
-                                    className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                    style={{ fontSize: 14, color: '#2F3A40' }}
-                                  >
-                                    Schedule Appointment
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setOpenActionMenuId(null);
-                                      printCardsFor([patient]);
-                                    }}
-                                    className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
-                                    style={{ fontSize: 14, color: '#2F3A40' }}
-                                  >
-                                    Print Patient Card
-                                  </button>
-                                </div>
-                              )}
-                            </div>
+                                  Check-In Patient
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    router.push(ROUTES.registrationAppointments);
+                                    setOpenActionMenuId(null);
+                                  }}
+                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                                  style={{ fontSize: 14, color: '#2F3A40' }}
+                                >
+                                  Schedule Appointment
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOpenActionMenuId(null);
+                                    printCardsFor([patient]);
+                                  }}
+                                  className="flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
+                                  style={{ fontSize: 14, color: '#2F3A40' }}
+                                >
+                                  Print Patient Card
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      );
-                    })}
-                </div>
-              </div>
+                      </div>
+                    );
+                  })}
+              </ScrollableTable>
 
               {/* ── Pagination ────────────────────────────────────────────── */}
               {pageState === 'loaded' && filteredPatients.length > 0 && (

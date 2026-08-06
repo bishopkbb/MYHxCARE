@@ -15,6 +15,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { QuickActionTile } from '@components/shared/QuickActionTile';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { StatCardTrend } from '@components/shared/StatCard';
 import { ROUTES } from '@/constants/routes';
@@ -224,125 +229,123 @@ export default function RegistrationDashboardPage() {
                       View All
                     </button>
                   </div>
-                  <div className="mt-3 overflow-x-auto scroll-smooth">
-                    <div className="min-w-[480px]">
-                      <div
-                        className="flex rounded-t-[8px]"
-                        style={{
-                          background: 'rgba(226,237,241,0.4)',
-                          borderBottom: '1px solid #E6F8FD',
-                        }}
-                      >
-                        <div className="w-24 shrink-0 py-2.5 pr-2 pl-3">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Time
-                          </span>
-                        </div>
-                        <div className="w-30 shrink-0 py-2.5 pr-2">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Patient
-                          </span>
-                        </div>
-                        <div className="min-w-0 flex-1 py-2.5 pr-2">
-                          <span
-                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Appointment With
-                          </span>
-                        </div>
-                        <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
-                          <span
-                            className="font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Status
-                          </span>
-                        </div>
+                  <ScrollableTable minWidth={480} className="mt-3">
+                    <div
+                      className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                      style={{
+                        background: TABLE_HEADER_BG,
+                        borderBottom: '1px solid #E6F8FD',
+                      }}
+                    >
+                      <div className="w-24 shrink-0 py-2.5 pr-2 pl-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Time
+                        </span>
                       </div>
+                      <div className="w-30 shrink-0 py-2.5 pr-2">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Patient
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1 py-2.5 pr-2">
+                        <span
+                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Appointment With
+                        </span>
+                      </div>
+                      <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Status
+                        </span>
+                      </div>
+                    </div>
 
-                      {(pageState === 'loading' ? [] : TODAY_APPOINTMENTS).map((appt) => {
-                        const cfg = APPT_STATUS_CFG[appt.status];
-                        return (
-                          <div
-                            key={appt.id}
-                            className="flex items-center"
-                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                          >
-                            <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                    {(pageState === 'loading' ? [] : TODAY_APPOINTMENTS).map((appt) => {
+                      const cfg = APPT_STATUS_CFG[appt.status];
+                      return (
+                        <div
+                          key={appt.id}
+                          className="flex items-center"
+                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                        >
+                          <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                            <p
+                              className="font-sans font-medium whitespace-nowrap"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {appt.time}
+                            </p>
+                          </div>
+                          <div className="w-30 shrink-0 py-3 pr-2">
+                            <Tooltip content={appt.patient}>
                               <p
-                                className="font-sans font-medium whitespace-nowrap"
+                                className="truncate font-sans font-medium"
                                 style={{ fontSize: 14, color: '#0D2630' }}
                               >
-                                {appt.time}
+                                {appt.patient}
                               </p>
-                            </div>
-                            <div className="w-30 shrink-0 py-3 pr-2">
-                              <Tooltip content={appt.patient}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {appt.patient}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="min-w-0 flex-1 py-3 pr-2">
-                              <Tooltip content={appt.appointmentWith}>
-                                <p
-                                  className="truncate whitespace-nowrap"
-                                  style={{ fontSize: 14, color: '#4A7080' }}
-                                >
-                                  {appt.appointmentWith}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-24 shrink-0 py-3 pr-3 text-right">
-                              <span
-                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                style={{
-                                  fontSize: 14,
-                                  whiteSpace: 'nowrap',
-                                  color: cfg.color,
-                                  border: `1px solid ${cfg.border}`,
-                                  background: cfg.bg,
-                                }}
+                            </Tooltip>
+                          </div>
+                          <div className="min-w-0 flex-1 py-3 pr-2">
+                            <Tooltip content={appt.appointmentWith}>
+                              <p
+                                className="truncate whitespace-nowrap"
+                                style={{ fontSize: 14, color: '#4A7080' }}
                               >
-                                {appt.status}
-                              </span>
-                            </div>
+                                {appt.appointmentWith}
+                              </p>
+                            </Tooltip>
                           </div>
-                        );
-                      })}
-                      {pageState === 'loading' &&
-                        Array.from({ length: 5 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center"
-                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                          >
-                            <div className="w-24 shrink-0 py-3 pr-2 pl-3">
-                              <div className="h-4 w-14 animate-pulse rounded bg-slate-100" />
-                            </div>
-                            <div className="w-30 shrink-0 py-3 pr-2">
-                              <div className="h-4 w-20 animate-pulse rounded bg-slate-100" />
-                            </div>
-                            <div className="min-w-0 flex-1 py-3 pr-2">
-                              <div className="h-4 w-32 animate-pulse rounded bg-slate-100" />
-                            </div>
-                            <div className="w-24 shrink-0 py-3 pr-3 text-right">
-                              <div className="ml-auto h-6 w-16 animate-pulse rounded-full bg-slate-100" />
-                            </div>
+                          <div className="w-24 shrink-0 py-3 pr-3 text-right">
+                            <span
+                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                              style={{
+                                fontSize: 14,
+                                whiteSpace: 'nowrap',
+                                color: cfg.color,
+                                border: `1px solid ${cfg.border}`,
+                                background: cfg.bg,
+                              }}
+                            >
+                              {appt.status}
+                            </span>
                           </div>
-                        ))}
-                    </div>
-                  </div>
+                        </div>
+                      );
+                    })}
+                    {pageState === 'loading' &&
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center"
+                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                        >
+                          <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                            <div className="h-4 w-14 animate-pulse rounded bg-slate-100" />
+                          </div>
+                          <div className="w-30 shrink-0 py-3 pr-2">
+                            <div className="h-4 w-20 animate-pulse rounded bg-slate-100" />
+                          </div>
+                          <div className="min-w-0 flex-1 py-3 pr-2">
+                            <div className="h-4 w-32 animate-pulse rounded bg-slate-100" />
+                          </div>
+                          <div className="w-24 shrink-0 py-3 pr-3 text-right">
+                            <div className="ml-auto h-6 w-16 animate-pulse rounded-full bg-slate-100" />
+                          </div>
+                        </div>
+                      ))}
+                  </ScrollableTable>
                   <button
                     type="button"
                     onClick={() => router.push(ROUTES.registrationAppointments)}

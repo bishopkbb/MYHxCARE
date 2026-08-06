@@ -20,6 +20,11 @@ import { useRef, useState } from 'react';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -642,243 +647,238 @@ function PatientMARPanel({
               {/* Table — column widths kept tight so Actions is always visible
                   without needing to scroll on a typical 1200px page; sticky
                   right-0 on Actions is a second safety net on narrower windows. */}
-              <div className="mt-4 overflow-x-auto scroll-smooth">
-                <div className="min-w-[850px]">
-                  <div
-                    className="flex items-center rounded-t-[8px]"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
-                  >
-                    {[
-                      ['Medication', 'min-w-[110px] flex-1 pl-3'],
-                      ['Dose', 'w-[60px]'],
-                      ['Route', 'w-16'],
-                      ['Frequency', 'w-24'],
-                      ['Time Due', 'w-24'],
-                      ['Status', 'w-24'],
-                      ['Notes', 'w-28'],
-                    ].map(([label, width]) => (
-                      <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          {label}
-                        </span>
-                      </div>
-                    ))}
-                    <div
-                      className="sticky right-0 z-10 w-40 shrink-0 py-2.5 pr-3 text-right"
-                      style={{ background: '#E2EDF1' }}
-                    >
+              <ScrollableTable minWidth={850} maxHeight={640}>
+                <div
+                  className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  {[
+                    ['Medication', 'min-w-[110px] flex-1 pl-3'],
+                    ['Dose', 'w-[60px]'],
+                    ['Route', 'w-16'],
+                    ['Frequency', 'w-24'],
+                    ['Time Due', 'w-24'],
+                    ['Status', 'w-24'],
+                    ['Notes', 'w-28'],
+                  ].map(([label, width]) => (
+                    <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
                       <span
-                        className="font-sans font-bold tracking-wider uppercase"
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                         style={{ fontSize: 14, color: '#4A7080' }}
                       >
-                        Actions
+                        {label}
                       </span>
                     </div>
+                  ))}
+                  <div
+                    className="sticky right-0 z-10 w-40 shrink-0 py-2.5 pr-3 text-right"
+                    style={{ background: '#E2EDF1' }}
+                  >
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Actions
+                    </span>
                   </div>
+                </div>
 
-                  {pageRows.length === 0 && (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                      <div
-                        className="flex size-14 items-center justify-center rounded-full"
-                        style={{ background: 'rgba(226,237,241,0.6)' }}
-                      >
-                        <Pill style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                      </div>
-                      <p
-                        className="font-sans font-medium"
-                        style={{ fontSize: 16, color: '#4A7080' }}
-                      >
-                        No medications match this filter
-                      </p>
-                      {(timeFilter !== 'All' || showHeld) && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setTimeFilter('All');
-                            setShowHeld(false);
-                          }}
-                          className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                          style={{ fontSize: 14, color: '#00B4D8' }}
-                        >
-                          Clear all filters
-                        </button>
-                      )}
+                {pageRows.length === 0 && (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <div
+                      className="flex size-14 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(226,237,241,0.6)' }}
+                    >
+                      <Pill style={{ width: 24, height: 24, color: '#8A98A3' }} />
                     </div>
-                  )}
-
-                  {pageRows.map((order) => {
-                    const cfg = STATUS_CFG[order.status];
-                    const isSelected = selectedId === order.id;
-                    return (
-                      <div
-                        key={order.id}
-                        onClick={() => setSelectedId(order.id)}
-                        className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                        style={{
-                          borderBottom: '1px solid rgba(0,100,130,0.08)',
-                          background: isSelected ? '#E6F8FD' : 'transparent',
+                    <p className="font-sans font-medium" style={{ fontSize: 16, color: '#4A7080' }}>
+                      No medications match this filter
+                    </p>
+                    {(timeFilter !== 'All' || showHeld) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTimeFilter('All');
+                          setShowHeld(false);
                         }}
+                        className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#00B4D8' }}
                       >
-                        <div className="min-w-[110px] flex-1 py-3 pr-1.5 pl-3">
-                          <div className="flex items-center gap-1.5">
-                            <Tooltip content={order.medication}>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{
-                                  fontSize: 14,
-                                  color: order.status === 'Overdue' ? '#EF4444' : '#0D2630',
-                                }}
-                              >
-                                {order.medication}
-                              </p>
-                            </Tooltip>
-                            {order.isHighAlert && (
-                              <ShieldAlert
-                                aria-label="High alert medication"
-                                style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0 }}
-                              />
-                            )}
-                          </div>
-                        </div>
-                        <div className="w-[60px] shrink-0 py-3 pr-1.5">
-                          <Tooltip content={order.dose}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {order.dose}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-16 shrink-0 py-3 pr-1.5">
-                          <Tooltip content={order.route}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {order.route}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-1.5">
-                          <Tooltip content={order.frequency}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {order.frequency}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-1.5">
-                          <Tooltip content={order.timeDueLabel ?? formatTime(order.timeDue)}>
+                        Clear all filters
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {pageRows.map((order) => {
+                  const cfg = STATUS_CFG[order.status];
+                  const isSelected = selectedId === order.id;
+                  return (
+                    <div
+                      key={order.id}
+                      onClick={() => setSelectedId(order.id)}
+                      className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                      style={{
+                        borderBottom: '1px solid rgba(0,100,130,0.08)',
+                        background: isSelected ? '#E6F8FD' : 'transparent',
+                      }}
+                    >
+                      <div className="min-w-[110px] flex-1 py-3 pr-1.5 pl-3">
+                        <div className="flex items-center gap-1.5">
+                          <Tooltip content={order.medication}>
                             <p
-                              className="truncate"
+                              className="truncate font-sans font-medium"
                               style={{
                                 fontSize: 14,
                                 color: order.status === 'Overdue' ? '#EF4444' : '#0D2630',
                               }}
                             >
-                              {order.timeDueLabel ?? formatTime(order.timeDue)}
+                              {order.medication}
                             </p>
                           </Tooltip>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-1.5">
-                          <span
-                            className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
-                            style={{
-                              fontSize: 14,
-                              color: cfg.color,
-                              border: `1px solid ${cfg.border}`,
-                              background: cfg.bg,
-                            }}
-                          >
-                            {order.status}
-                          </span>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-1.5">
-                          {order.administeredBy ? (
-                            <>
-                              <Tooltip content={order.administeredBy}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {order.administeredBy}
-                                </p>
-                              </Tooltip>
-                              <Tooltip content={order.remarks}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                  {order.remarks}
-                                </p>
-                              </Tooltip>
-                            </>
-                          ) : (
-                            <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
+                          {order.isHighAlert && (
+                            <ShieldAlert
+                              aria-label="High alert medication"
+                              style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0 }}
+                            />
                           )}
                         </div>
-                        <div
-                          className={`sticky right-0 flex w-40 shrink-0 items-center justify-end gap-1 py-3 pr-3 ${openMenuId === order.id ? 'z-30' : 'z-10'}`}
-                          style={{ background: isSelected ? '#E6F8FD' : '#FFFFFF' }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <PermissionGate permission={PERMISSIONS.MEDICATION_ADMIN_WRITE}>
-                            {order.status === 'Completed' ? (
-                              <button
-                                type="button"
-                                onClick={() => setViewTargetId(order.id)}
-                                className={`flex h-11 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                                style={{
-                                  fontSize: 14,
-                                  color: '#00B4D8',
-                                  border: '1px solid rgba(0,180,216,0.35)',
-                                }}
-                              >
-                                <Eye style={{ width: 14, height: 14 }} />
-                                View
-                              </button>
-                            ) : order.status === 'Overdue' || order.status === 'Missed' ? (
-                              <button
-                                type="button"
-                                onClick={() => markMissedDose(order.id)}
-                                className={`flex h-11 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium text-white shadow-sm transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                                style={{
-                                  fontSize: 14,
-                                  background: '#EF4444',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                <XCircle style={{ width: 14, height: 14 }} />
-                                Missed Dose
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => administerMedication(order.id)}
-                                className={`flex h-11 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium text-white shadow-sm transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                                style={{
-                                  fontSize: 14,
-                                  background: '#00B4D8',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                <Syringe style={{ width: 14, height: 14 }} />
-                                Administer
-                              </button>
-                            )}
-                            <RowMenu
-                              open={openMenuId === order.id}
-                              onToggle={() =>
-                                setOpenMenuId(openMenuId === order.id ? null : order.id)
-                              }
-                              onHold={() => holdMedication(order.id)}
-                              onMissed={() => markMissedDose(order.id)}
-                              onReaction={() => documentReaction(order.id)}
-                            />
-                          </PermissionGate>
-                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      <div className="w-[60px] shrink-0 py-3 pr-1.5">
+                        <Tooltip content={order.dose}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {order.dose}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-16 shrink-0 py-3 pr-1.5">
+                        <Tooltip content={order.route}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {order.route}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-1.5">
+                        <Tooltip content={order.frequency}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {order.frequency}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-1.5">
+                        <Tooltip content={order.timeDueLabel ?? formatTime(order.timeDue)}>
+                          <p
+                            className="truncate"
+                            style={{
+                              fontSize: 14,
+                              color: order.status === 'Overdue' ? '#EF4444' : '#0D2630',
+                            }}
+                          >
+                            {order.timeDueLabel ?? formatTime(order.timeDue)}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-1.5">
+                        <span
+                          className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
+                          style={{
+                            fontSize: 14,
+                            color: cfg.color,
+                            border: `1px solid ${cfg.border}`,
+                            background: cfg.bg,
+                          }}
+                        >
+                          {order.status}
+                        </span>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-1.5">
+                        {order.administeredBy ? (
+                          <>
+                            <Tooltip content={order.administeredBy}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {order.administeredBy}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={order.remarks}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {order.remarks}
+                              </p>
+                            </Tooltip>
+                          </>
+                        ) : (
+                          <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
+                        )}
+                      </div>
+                      <div
+                        className={`sticky right-0 flex w-40 shrink-0 items-center justify-end gap-1 py-3 pr-3 ${openMenuId === order.id ? 'z-30' : 'z-10'}`}
+                        style={{ background: isSelected ? '#E6F8FD' : '#FFFFFF' }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <PermissionGate permission={PERMISSIONS.MEDICATION_ADMIN_WRITE}>
+                          {order.status === 'Completed' ? (
+                            <button
+                              type="button"
+                              onClick={() => setViewTargetId(order.id)}
+                              className={`flex h-11 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                              style={{
+                                fontSize: 14,
+                                color: '#00B4D8',
+                                border: '1px solid rgba(0,180,216,0.35)',
+                              }}
+                            >
+                              <Eye style={{ width: 14, height: 14 }} />
+                              View
+                            </button>
+                          ) : order.status === 'Overdue' || order.status === 'Missed' ? (
+                            <button
+                              type="button"
+                              onClick={() => markMissedDose(order.id)}
+                              className={`flex h-11 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium text-white shadow-sm transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                              style={{
+                                fontSize: 14,
+                                background: '#EF4444',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              <XCircle style={{ width: 14, height: 14 }} />
+                              Missed Dose
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => administerMedication(order.id)}
+                              className={`flex h-11 items-center gap-1.5 rounded-[10px] px-3.5 font-sans font-medium text-white shadow-sm transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                              style={{
+                                fontSize: 14,
+                                background: '#00B4D8',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              <Syringe style={{ width: 14, height: 14 }} />
+                              Administer
+                            </button>
+                          )}
+                          <RowMenu
+                            open={openMenuId === order.id}
+                            onToggle={() =>
+                              setOpenMenuId(openMenuId === order.id ? null : order.id)
+                            }
+                            onHold={() => holdMedication(order.id)}
+                            onMissed={() => markMissedDose(order.id)}
+                            onReaction={() => documentReaction(order.id)}
+                          />
+                        </PermissionGate>
+                      </div>
+                    </div>
+                  );
+                })}
+              </ScrollableTable>
 
               {/* Pagination */}
               {filtered.length > 0 && (

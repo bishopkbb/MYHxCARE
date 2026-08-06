@@ -25,6 +25,11 @@ import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
 import { AnimatedDonutChart } from '@components/shared/AnimatedDonutChart';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -741,273 +746,269 @@ export function PrescriptionQueueWorkspace() {
                 >
                   Prescription Queue ({filtered.length})
                 </h2>
-                <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 1420 }}>
-                    <div
-                      className="flex rounded-t-[8px]"
-                      style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #E6F8FD',
-                      }}
-                    >
-                      <div className="flex w-10 shrink-0 items-center py-2.5 pl-3">
-                        <input
-                          type="checkbox"
-                          checked={
-                            pageRows.length > 0 && pageRows.every((e) => selected.has(e.rxNo))
-                          }
-                          onChange={toggleSelectAllOnPage}
-                          aria-label="Select all rows on this page"
-                          className={`size-5 shrink-0 rounded ${FOCUS_RING}`}
-                          style={{ accentColor: '#00B4D8' }}
-                        />
-                      </div>
-                      <div className="w-28 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Rx No.
-                        </span>
-                      </div>
-                      <div className="w-44 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Patient
-                        </span>
-                      </div>
-                      <div className="w-28 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Age / Gender
-                        </span>
-                      </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Prescriber
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Department
-                        </span>
-                      </div>
-                      <div className="min-w-[200px] flex-1 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Medication (Summary)
-                        </span>
-                      </div>
-                      <div className="w-24 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Priority
-                        </span>
-                      </div>
-                      <div className="w-44 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Status
-                        </span>
-                      </div>
-                      <div className="w-20 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Received
-                        </span>
-                      </div>
-                      <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Actions
-                        </span>
-                      </div>
+                <ScrollableTable minWidth={1420} maxHeight={640} className="mt-3">
+                  <div
+                    className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                    style={{
+                      background: TABLE_HEADER_BG,
+                      borderBottom: '1px solid #E6F8FD',
+                    }}
+                  >
+                    <div className="flex w-10 shrink-0 items-center py-2.5 pl-3">
+                      <input
+                        type="checkbox"
+                        checked={pageRows.length > 0 && pageRows.every((e) => selected.has(e.rxNo))}
+                        onChange={toggleSelectAllOnPage}
+                        aria-label="Select all rows on this page"
+                        className={`size-5 shrink-0 rounded ${FOCUS_RING}`}
+                        style={{ accentColor: '#00B4D8' }}
+                      />
                     </div>
-
-                    {pageState === 'loading' &&
-                      Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)}
-
-                    {pageState === 'loaded' && pageRows.length === 0 && (
-                      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                        <div
-                          className="flex size-14 items-center justify-center rounded-full"
-                          style={{ background: 'rgba(226,237,241,0.6)' }}
-                        >
-                          <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                        </div>
-                        <p
-                          className="font-sans font-medium"
-                          style={{ fontSize: 16, color: '#4A7080' }}
-                        >
-                          No prescriptions match your filters
-                        </p>
-                        <button
-                          type="button"
-                          onClick={handleClearFilters}
-                          className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                          style={{ fontSize: 14, color: '#00B4D8' }}
-                        >
-                          Clear all filters
-                        </button>
-                      </div>
-                    )}
-
-                    {pageState === 'loaded' &&
-                      pageRows.map((entry) => {
-                        const patient = getPatientDetail(entry.patientId);
-                        const priorityCfg = PRIORITY_CFG[entry.priority]!;
-                        const stageCfg = STAGE_CFG[entry.stage] ?? STAGE_CFG['Cancelled']!;
-                        const isSelected = selected.has(entry.rxNo);
-                        const highlightAllergy =
-                          settings.highlightAllergyRows && entry.hasAllergyAlert;
-                        return (
-                          <div
-                            key={entry.rxNo}
-                            className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                            style={{
-                              borderBottom: '1px solid rgba(0,100,130,0.08)',
-                              background: highlightAllergy ? 'rgba(220,38,38,0.03)' : undefined,
-                            }}
-                          >
-                            <div className="flex w-10 shrink-0 items-center py-3 pl-3">
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={() => toggleSelected(entry.rxNo)}
-                                aria-label={`Select ${entry.rxNo}`}
-                                className={`size-5 shrink-0 rounded ${FOCUS_RING}`}
-                                style={{ accentColor: '#00B4D8' }}
-                              />
-                            </div>
-                            <div className="w-28 shrink-0 py-3 pr-2">
-                              <Tooltip content={entry.rxNo}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {entry.rxNo}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-44 shrink-0 py-3 pr-2">
-                              <Tooltip content={patient.name}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {patient.name}
-                                </p>
-                              </Tooltip>
-                              <Tooltip content={patient.mrn}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                  {patient.mrn}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-28 shrink-0 py-3 pr-2">
-                              <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                {ageGenderLabel(patient)}
-                              </p>
-                            </div>
-                            <div className="w-40 shrink-0 py-3 pr-2">
-                              <Tooltip content={entry.doctorName}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {entry.doctorName}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-36 shrink-0 py-3 pr-2">
-                              <Tooltip content={entry.department}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {entry.department}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="min-w-[200px] flex-1 py-3 pr-2">
-                              <Tooltip content={`${entry.medicationName} ${entry.dose}`}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {entry.medicationName} {entry.dose}
-                                </p>
-                              </Tooltip>
-                              <p style={{ fontSize: 14, color: '#8A98A3' }}>1 item</p>
-                            </div>
-                            <div className="w-24 shrink-0 py-3 pr-2">
-                              <span
-                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                style={{
-                                  fontSize: 14,
-                                  whiteSpace: 'nowrap',
-                                  color: priorityCfg.color,
-                                  border: `1px solid ${priorityCfg.border}`,
-                                  background: priorityCfg.bg,
-                                }}
-                              >
-                                {entry.priority}
-                              </span>
-                            </div>
-                            <div className="w-44 shrink-0 py-3 pr-2">
-                              <span
-                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                style={{
-                                  fontSize: 14,
-                                  whiteSpace: 'nowrap',
-                                  color: stageCfg.color,
-                                  border: `1px solid ${stageCfg.border}`,
-                                  background: stageCfg.bg,
-                                }}
-                              >
-                                {entry.stage}
-                              </span>
-                            </div>
-                            <div className="w-20 shrink-0 py-3 pr-2">
-                              <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                {formatTime(entry.receivedAt)}
-                              </p>
-                            </div>
-                            <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
-                              <button
-                                type="button"
-                                onClick={() => viewDetails(entry.rxNo)}
-                                aria-label={`View ${entry.rxNo}`}
-                                className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                              >
-                                <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                              </button>
-                              <RowMenu
-                                entry={entry}
-                                onView={() => viewDetails(entry.rxNo)}
-                                onVerify={() => handleVerifyAndDispense(entry.rxNo)}
-                                onCancel={() => handleCancel(entry.rxNo)}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="w-28 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Rx No.
+                      </span>
+                    </div>
+                    <div className="w-44 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Patient
+                      </span>
+                    </div>
+                    <div className="w-28 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Age / Gender
+                      </span>
+                    </div>
+                    <div className="w-40 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Prescriber
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Department
+                      </span>
+                    </div>
+                    <div className="min-w-[200px] flex-1 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Medication (Summary)
+                      </span>
+                    </div>
+                    <div className="w-24 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Priority
+                      </span>
+                    </div>
+                    <div className="w-44 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Status
+                      </span>
+                    </div>
+                    <div className="w-20 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Received
+                      </span>
+                    </div>
+                    <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Actions
+                      </span>
+                    </div>
                   </div>
-                </div>
+
+                  {pageState === 'loading' &&
+                    Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)}
+
+                  {pageState === 'loaded' && pageRows.length === 0 && (
+                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                      <div
+                        className="flex size-14 items-center justify-center rounded-full"
+                        style={{ background: 'rgba(226,237,241,0.6)' }}
+                      >
+                        <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                      </div>
+                      <p
+                        className="font-sans font-medium"
+                        style={{ fontSize: 16, color: '#4A7080' }}
+                      >
+                        No prescriptions match your filters
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#00B4D8' }}
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  )}
+
+                  {pageState === 'loaded' &&
+                    pageRows.map((entry) => {
+                      const patient = getPatientDetail(entry.patientId);
+                      const priorityCfg = PRIORITY_CFG[entry.priority]!;
+                      const stageCfg = STAGE_CFG[entry.stage] ?? STAGE_CFG['Cancelled']!;
+                      const isSelected = selected.has(entry.rxNo);
+                      const highlightAllergy =
+                        settings.highlightAllergyRows && entry.hasAllergyAlert;
+                      return (
+                        <div
+                          key={entry.rxNo}
+                          className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                          style={{
+                            borderBottom: '1px solid rgba(0,100,130,0.08)',
+                            background: highlightAllergy ? 'rgba(220,38,38,0.03)' : undefined,
+                          }}
+                        >
+                          <div className="flex w-10 shrink-0 items-center py-3 pl-3">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleSelected(entry.rxNo)}
+                              aria-label={`Select ${entry.rxNo}`}
+                              className={`size-5 shrink-0 rounded ${FOCUS_RING}`}
+                              style={{ accentColor: '#00B4D8' }}
+                            />
+                          </div>
+                          <div className="w-28 shrink-0 py-3 pr-2">
+                            <Tooltip content={entry.rxNo}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {entry.rxNo}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-44 shrink-0 py-3 pr-2">
+                            <Tooltip content={patient.name}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {patient.name}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={patient.mrn}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {patient.mrn}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-28 shrink-0 py-3 pr-2">
+                            <p style={{ fontSize: 14, color: '#4A7080' }}>
+                              {ageGenderLabel(patient)}
+                            </p>
+                          </div>
+                          <div className="w-40 shrink-0 py-3 pr-2">
+                            <Tooltip content={entry.doctorName}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {entry.doctorName}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-36 shrink-0 py-3 pr-2">
+                            <Tooltip content={entry.department}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {entry.department}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="min-w-[200px] flex-1 py-3 pr-2">
+                            <Tooltip content={`${entry.medicationName} ${entry.dose}`}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {entry.medicationName} {entry.dose}
+                              </p>
+                            </Tooltip>
+                            <p style={{ fontSize: 14, color: '#8A98A3' }}>1 item</p>
+                          </div>
+                          <div className="w-24 shrink-0 py-3 pr-2">
+                            <span
+                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                              style={{
+                                fontSize: 14,
+                                whiteSpace: 'nowrap',
+                                color: priorityCfg.color,
+                                border: `1px solid ${priorityCfg.border}`,
+                                background: priorityCfg.bg,
+                              }}
+                            >
+                              {entry.priority}
+                            </span>
+                          </div>
+                          <div className="w-44 shrink-0 py-3 pr-2">
+                            <span
+                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                              style={{
+                                fontSize: 14,
+                                whiteSpace: 'nowrap',
+                                color: stageCfg.color,
+                                border: `1px solid ${stageCfg.border}`,
+                                background: stageCfg.bg,
+                              }}
+                            >
+                              {entry.stage}
+                            </span>
+                          </div>
+                          <div className="w-20 shrink-0 py-3 pr-2">
+                            <p style={{ fontSize: 14, color: '#4A7080' }}>
+                              {formatTime(entry.receivedAt)}
+                            </p>
+                          </div>
+                          <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
+                            <button
+                              type="button"
+                              onClick={() => viewDetails(entry.rxNo)}
+                              aria-label={`View ${entry.rxNo}`}
+                              className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                            >
+                              <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                            </button>
+                            <RowMenu
+                              entry={entry}
+                              onView={() => viewDetails(entry.rxNo)}
+                              onVerify={() => handleVerifyAndDispense(entry.rxNo)}
+                              onCancel={() => handleCancel(entry.rxNo)}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                </ScrollableTable>
 
                 {pageState === 'loaded' && (
                   <Pagination

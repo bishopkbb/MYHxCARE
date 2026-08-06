@@ -26,6 +26,11 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -857,218 +862,213 @@ export function MedicationReturnsWorkspace() {
                 </div>
               </div>
 
-              <div className="mt-3 overflow-x-auto scroll-smooth">
-                <div style={{ minWidth: 1480 }}>
-                  <div
-                    className="flex rounded-t-[8px]"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
-                  >
-                    <div className="w-28 shrink-0 py-2.5 pr-2 pl-3">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Return ID
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Return Date
-                      </span>
-                    </div>
-                    <div className="w-36 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Patient
-                      </span>
-                    </div>
-                    <div className="min-w-[160px] flex-1 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Medication
-                      </span>
-                    </div>
-                    <div className="w-24 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Qty Returned
-                      </span>
-                    </div>
-                    <div className="w-32 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Reason
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Status
-                      </span>
-                    </div>
-                    <div className="w-32 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Returned By
-                      </span>
-                    </div>
-                    <div className="w-32 shrink-0 py-2.5 pr-2 text-right">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Refund / Adj.
-                      </span>
-                    </div>
-                    <div className="flex w-20 shrink-0 items-center justify-end py-2.5 pr-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Actions
-                      </span>
-                    </div>
+              <ScrollableTable minWidth={1480} maxHeight={640} className="mt-3">
+                <div
+                  className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <div className="w-28 shrink-0 py-2.5 pr-2 pl-3">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Return ID
+                    </span>
                   </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Return Date
+                    </span>
+                  </div>
+                  <div className="w-36 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Patient
+                    </span>
+                  </div>
+                  <div className="min-w-[160px] flex-1 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Medication
+                    </span>
+                  </div>
+                  <div className="w-24 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Qty Returned
+                    </span>
+                  </div>
+                  <div className="w-32 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Reason
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Status
+                    </span>
+                  </div>
+                  <div className="w-32 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Returned By
+                    </span>
+                  </div>
+                  <div className="w-32 shrink-0 py-2.5 pr-2 text-right">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Refund / Adj.
+                    </span>
+                  </div>
+                  <div className="flex w-20 shrink-0 items-center justify-end py-2.5 pr-3">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Actions
+                    </span>
+                  </div>
+                </div>
 
-                  {pageRows.length === 0 && (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                      <div
-                        className="flex size-14 items-center justify-center rounded-full"
-                        style={{ background: 'rgba(226,237,241,0.6)' }}
-                      >
-                        <FileText style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                      </div>
+                {pageRows.length === 0 && (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <div
+                      className="flex size-14 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(226,237,241,0.6)' }}
+                    >
+                      <FileText style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                    </div>
+                    <p className="font-sans font-medium" style={{ fontSize: 16, color: '#4A7080' }}>
+                      No returns match your filters
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                      style={{ fontSize: 14, color: '#00B4D8' }}
+                    >
+                      Clear all filters
+                    </button>
+                  </div>
+                )}
+
+                {pageRows.map((r) => (
+                  <div
+                    key={r.id}
+                    className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                    style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                  >
+                    <div className="w-28 shrink-0 py-3 pr-2 pl-3">
                       <p
                         className="font-sans font-medium"
-                        style={{ fontSize: 16, color: '#4A7080' }}
+                        style={{ fontSize: 14, color: '#0D2630' }}
                       >
-                        No returns match your filters
+                        {r.id}
                       </p>
-                      <button
-                        type="button"
-                        onClick={handleClearFilters}
-                        className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                        style={{ fontSize: 14, color: '#00B4D8' }}
-                      >
-                        Clear all filters
-                      </button>
                     </div>
-                  )}
-
-                  {pageRows.map((r) => (
-                    <div
-                      key={r.id}
-                      className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                      style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                    >
-                      <div className="w-28 shrink-0 py-3 pr-2 pl-3">
+                    <div className="w-28 shrink-0 py-3 pr-2">
+                      <p style={{ fontSize: 14, color: '#0D2630' }}>
+                        {formatHumanDate(r.returnDate)}
+                      </p>
+                      <p style={{ fontSize: 14, color: '#8A98A3' }}>{formatTime(r.returnDate)}</p>
+                    </div>
+                    <div className="w-36 shrink-0 py-3 pr-2">
+                      <Tooltip content={r.patientName}>
                         <p
-                          className="font-sans font-medium"
+                          className="truncate font-sans font-medium"
                           style={{ fontSize: 14, color: '#0D2630' }}
                         >
-                          {r.id}
+                          {r.patientName}
                         </p>
-                      </div>
-                      <div className="w-28 shrink-0 py-3 pr-2">
-                        <p style={{ fontSize: 14, color: '#0D2630' }}>
-                          {formatHumanDate(r.returnDate)}
+                      </Tooltip>
+                      <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.mrn}</p>
+                    </div>
+                    <div className="min-w-[160px] flex-1 py-3 pr-2">
+                      <Tooltip content={`${r.medicationName} ${r.strength}`}>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {r.medicationName} {r.strength}
                         </p>
-                        <p style={{ fontSize: 14, color: '#8A98A3' }}>{formatTime(r.returnDate)}</p>
-                      </div>
-                      <div className="w-36 shrink-0 py-3 pr-2">
-                        <Tooltip content={r.patientName}>
+                      </Tooltip>
+                    </div>
+                    <div className="w-24 shrink-0 py-3 pr-2">
+                      <p style={{ fontSize: 14, color: '#4A7080' }}>
+                        {r.qtyReturned} {r.form.toLowerCase()}
+                        {r.qtyReturned === 1 ? '' : 's'}
+                      </p>
+                    </div>
+                    <div className="w-32 shrink-0 py-3 pr-2">
+                      <Tooltip content={r.reason}>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {r.reason}
+                        </p>
+                      </Tooltip>
+                    </div>
+                    <div className="w-28 shrink-0 py-3 pr-2">
+                      <StatusBadge status={r.status} />
+                    </div>
+                    <div className="w-32 shrink-0 py-3 pr-2">
+                      <Tooltip content={r.returnedBy}>
+                        <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {r.returnedBy}
+                        </p>
+                      </Tooltip>
+                    </div>
+                    <div className="w-32 shrink-0 py-3 pr-2 text-right">
+                      {r.refundType === 'None' ? (
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
+                      ) : (
+                        <>
                           <p
-                            className="truncate font-sans font-medium"
+                            className="font-sans font-medium"
                             style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            {r.patientName}
+                            {formatCurrency(r.refundAmount)}
                           </p>
-                        </Tooltip>
-                        <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.mrn}</p>
-                      </div>
-                      <div className="min-w-[160px] flex-1 py-3 pr-2">
-                        <Tooltip content={`${r.medicationName} ${r.strength}`}>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {r.medicationName} {r.strength}
-                          </p>
-                        </Tooltip>
-                      </div>
-                      <div className="w-24 shrink-0 py-3 pr-2">
-                        <p style={{ fontSize: 14, color: '#4A7080' }}>
-                          {r.qtyReturned} {r.form.toLowerCase()}
-                          {r.qtyReturned === 1 ? '' : 's'}
-                        </p>
-                      </div>
-                      <div className="w-32 shrink-0 py-3 pr-2">
-                        <Tooltip content={r.reason}>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {r.reason}
-                          </p>
-                        </Tooltip>
-                      </div>
-                      <div className="w-28 shrink-0 py-3 pr-2">
-                        <StatusBadge status={r.status} />
-                      </div>
-                      <div className="w-32 shrink-0 py-3 pr-2">
-                        <Tooltip content={r.returnedBy}>
-                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                            {r.returnedBy}
-                          </p>
-                        </Tooltip>
-                      </div>
-                      <div className="w-32 shrink-0 py-3 pr-2 text-right">
-                        {r.refundType === 'None' ? (
-                          <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
-                        ) : (
-                          <>
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {formatCurrency(r.refundAmount)}
-                            </p>
-                            <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.refundType}</p>
-                          </>
-                        )}
-                      </div>
-                      <div className="flex w-20 shrink-0 items-center justify-end gap-1 py-3 pr-3">
-                        <button
-                          type="button"
-                          onClick={() => setModal({ type: 'detail', medicationReturn: r })}
-                          aria-label={`View ${r.id}`}
-                          className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                        >
-                          <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                        </button>
-                        <RowMenu
-                          medicationReturn={r}
-                          onView={() => setModal({ type: 'detail', medicationReturn: r })}
-                          onComplete={() => handleComplete(r.id)}
-                          onRejectShortcut={() => setModal({ type: 'detail', medicationReturn: r })}
-                        />
-                      </div>
+                          <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.refundType}</p>
+                        </>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="flex w-20 shrink-0 items-center justify-end gap-1 py-3 pr-3">
+                      <button
+                        type="button"
+                        onClick={() => setModal({ type: 'detail', medicationReturn: r })}
+                        aria-label={`View ${r.id}`}
+                        className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                      >
+                        <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                      </button>
+                      <RowMenu
+                        medicationReturn={r}
+                        onView={() => setModal({ type: 'detail', medicationReturn: r })}
+                        onComplete={() => handleComplete(r.id)}
+                        onRejectShortcut={() => setModal({ type: 'detail', medicationReturn: r })}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </ScrollableTable>
 
               <Pagination
                 page={currentPage}

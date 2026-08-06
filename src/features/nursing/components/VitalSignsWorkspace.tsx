@@ -23,6 +23,11 @@ import { useEffect, useRef, useState } from 'react';
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { VitalTrendChart, type VitalChartPoint } from '@components/shared/VitalTrendChart';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -962,78 +967,77 @@ function PatientVitalsPanel({
                     >
                       Recent Vital Signs
                     </h2>
-                    <div className="mt-3 overflow-x-auto scroll-smooth">
-                      <div className="min-w-[480px]">
-                        <div
-                          className="flex"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.1)' }}
-                        >
-                          {['Date & Time', 'BP', 'Pulse', 'RR', 'Temp', 'SpO₂', 'Pain', 'BS'].map(
-                            (h) => (
-                              <div key={h} className="min-w-0 flex-1 py-2 pr-2">
-                                <span
-                                  className="font-sans font-bold tracking-wider uppercase"
-                                  style={{ fontSize: 14, color: '#4A7080' }}
-                                >
-                                  {h}
-                                </span>
-                              </div>
-                            ),
-                          )}
-                        </div>
-                        {visibleReadings.map((r) => (
-                          <div
-                            key={r.id}
-                            className="flex"
-                            style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
-                          >
-                            <div className="min-w-0 flex-1 py-2.5 pr-2">
-                              <Tooltip
-                                content={`${formatHumanDate(r.recordedAt)} , ${formatTime(r.recordedAt)}`}
+                    <ScrollableTable minWidth={480} maxHeight={640} className="mt-3">
+                      <div
+                        className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{
+                          background: TABLE_HEADER_BG,
+                          borderBottom: '1px solid rgba(0,100,130,0.1)',
+                        }}
+                      >
+                        {['Date & Time', 'BP', 'Pulse', 'RR', 'Temp', 'SpO₂', 'Pain', 'BS'].map(
+                          (h) => (
+                            <div key={h} className="min-w-0 flex-1 py-2 pr-2">
+                              <span
+                                className="font-sans font-bold tracking-wider uppercase"
+                                style={{ fontSize: 14, color: '#4A7080' }}
                               >
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {formatHumanDate(r.recordedAt)}, {formatTime(r.recordedAt)}
-                                </p>
-                              </Tooltip>
+                                {h}
+                              </span>
                             </div>
-                            <div className="min-w-0 flex-1 py-2.5 pr-2">
-                              <p
-                                style={{ fontSize: 14, color: FLAG_CFG[bpFlag(r.systolic)].color }}
-                              >
-                                {r.systolic}/{r.diastolic}
-                              </p>
-                            </div>
-                            <div className="min-w-0 flex-1 py-2.5 pr-2">
-                              <p style={{ fontSize: 14, color: '#0D2630' }}>{r.pulse}</p>
-                            </div>
-                            <div className="min-w-0 flex-1 py-2.5 pr-2">
-                              <p style={{ fontSize: 14, color: '#0D2630' }}>{r.respRate}</p>
-                            </div>
-                            <div className="min-w-0 flex-1 py-2.5 pr-2">
-                              <p style={{ fontSize: 14, color: '#0D2630' }}>{r.temp.toFixed(1)}</p>
-                            </div>
-                            <div className="min-w-0 flex-1 py-2.5 pr-2">
-                              <p style={{ fontSize: 14, color: FLAG_CFG[spo2Flag(r.spo2)].color }}>
-                                {r.spo2}
-                              </p>
-                            </div>
-                            <div className="min-w-0 flex-1 py-2.5 pr-2">
-                              <p style={{ fontSize: 14, color: '#0D2630' }}>{r.painScore}</p>
-                            </div>
-                            <div className="min-w-0 flex-1 py-2.5 pr-2">
-                              <p
-                                style={{
-                                  fontSize: 14,
-                                  color: FLAG_CFG[bloodSugarFlag(r.bloodSugar)].color,
-                                }}
-                              >
-                                {r.bloodSugar}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                          ),
+                        )}
                       </div>
-                    </div>
+                      {visibleReadings.map((r) => (
+                        <div
+                          key={r.id}
+                          className="flex"
+                          style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
+                        >
+                          <div className="min-w-0 flex-1 py-2.5 pr-2">
+                            <Tooltip
+                              content={`${formatHumanDate(r.recordedAt)} , ${formatTime(r.recordedAt)}`}
+                            >
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {formatHumanDate(r.recordedAt)}, {formatTime(r.recordedAt)}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="min-w-0 flex-1 py-2.5 pr-2">
+                            <p style={{ fontSize: 14, color: FLAG_CFG[bpFlag(r.systolic)].color }}>
+                              {r.systolic}/{r.diastolic}
+                            </p>
+                          </div>
+                          <div className="min-w-0 flex-1 py-2.5 pr-2">
+                            <p style={{ fontSize: 14, color: '#0D2630' }}>{r.pulse}</p>
+                          </div>
+                          <div className="min-w-0 flex-1 py-2.5 pr-2">
+                            <p style={{ fontSize: 14, color: '#0D2630' }}>{r.respRate}</p>
+                          </div>
+                          <div className="min-w-0 flex-1 py-2.5 pr-2">
+                            <p style={{ fontSize: 14, color: '#0D2630' }}>{r.temp.toFixed(1)}</p>
+                          </div>
+                          <div className="min-w-0 flex-1 py-2.5 pr-2">
+                            <p style={{ fontSize: 14, color: FLAG_CFG[spo2Flag(r.spo2)].color }}>
+                              {r.spo2}
+                            </p>
+                          </div>
+                          <div className="min-w-0 flex-1 py-2.5 pr-2">
+                            <p style={{ fontSize: 14, color: '#0D2630' }}>{r.painScore}</p>
+                          </div>
+                          <div className="min-w-0 flex-1 py-2.5 pr-2">
+                            <p
+                              style={{
+                                fontSize: 14,
+                                color: FLAG_CFG[bloodSugarFlag(r.bloodSugar)].color,
+                              }}
+                            >
+                              {r.bloodSugar}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </ScrollableTable>
                     {readings.length > RECENT_TABLE_MIN && (
                       <button
                         type="button"

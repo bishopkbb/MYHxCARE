@@ -27,6 +27,11 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
@@ -1178,113 +1183,110 @@ function PatientObservationPanel({
                     >
                       Observation Table
                     </h2>
-                    <div className="mt-3 overflow-x-auto scroll-smooth">
-                      <div className="min-w-[860px]">
-                        <div
-                          className="flex"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.1)' }}
-                        >
-                          <div className="w-40 shrink-0 py-2 pr-2 pl-1">
+                    <ScrollableTable minWidth={860} maxHeight={640} className="mt-3">
+                      <div
+                        className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{
+                          background: TABLE_HEADER_BG,
+                          borderBottom: '1px solid rgba(0,100,130,0.1)',
+                        }}
+                      >
+                        <div className="w-40 shrink-0 py-2 pr-2 pl-1">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Date &amp; Time
+                          </span>
+                        </div>
+                        {[
+                          'BP',
+                          'Pulse',
+                          'RR',
+                          'Temp',
+                          'SpO₂',
+                          'Pain',
+                          'BS',
+                          'Intake',
+                          'Output',
+                        ].map((h) => (
+                          <div key={h} className="min-w-0 flex-1 py-2 pr-2">
                             <span
                               className="font-sans font-bold tracking-wider uppercase"
                               style={{ fontSize: 14, color: '#4A7080' }}
                             >
-                              Date &amp; Time
+                              {h}
                             </span>
                           </div>
-                          {[
-                            'BP',
-                            'Pulse',
-                            'RR',
-                            'Temp',
-                            'SpO₂',
-                            'Pain',
-                            'BS',
-                            'Intake',
-                            'Output',
-                          ].map((h) => (
-                            <div key={h} className="min-w-0 flex-1 py-2 pr-2">
-                              <span
-                                className="font-sans font-bold tracking-wider uppercase"
+                        ))}
+                      </div>
+                      {tableRows.map((r) => {
+                        const bucket = windowed.findIndex((w) => w.id === r.id);
+                        return (
+                          <div
+                            key={r.id}
+                            className="flex"
+                            style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
+                          >
+                            <div className="w-40 shrink-0 py-2.5 pr-2 pl-1">
+                              <p
+                                className="whitespace-nowrap"
                                 style={{ fontSize: 14, color: '#4A7080' }}
                               >
-                                {h}
-                              </span>
+                                {formatHumanDate(r.recordedAt)}, {formatTime(r.recordedAt)}
+                              </p>
                             </div>
-                          ))}
-                        </div>
-                        {tableRows.map((r) => {
-                          const bucket = windowed.findIndex((w) => w.id === r.id);
-                          return (
-                            <div
-                              key={r.id}
-                              className="flex"
-                              style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
-                            >
-                              <div className="w-40 shrink-0 py-2.5 pr-2 pl-1">
-                                <p
-                                  className="whitespace-nowrap"
-                                  style={{ fontSize: 14, color: '#4A7080' }}
-                                >
-                                  {formatHumanDate(r.recordedAt)}, {formatTime(r.recordedAt)}
-                                </p>
-                              </div>
-                              <div className="min-w-0 flex-1 py-2.5 pr-2">
-                                <p
-                                  style={{
-                                    fontSize: 14,
-                                    color: FLAG_CFG[bpFlag(r.systolic)].color,
-                                  }}
-                                >
-                                  {r.systolic}/{r.diastolic}
-                                </p>
-                              </div>
-                              <div className="min-w-0 flex-1 py-2.5 pr-2">
-                                <p style={{ fontSize: 14, color: '#0D2630' }}>{r.pulse}</p>
-                              </div>
-                              <div className="min-w-0 flex-1 py-2.5 pr-2">
-                                <p style={{ fontSize: 14, color: '#0D2630' }}>{r.respRate}</p>
-                              </div>
-                              <div className="min-w-0 flex-1 py-2.5 pr-2">
-                                <p style={{ fontSize: 14, color: '#0D2630' }}>
-                                  {r.temp.toFixed(1)}
-                                </p>
-                              </div>
-                              <div className="min-w-0 flex-1 py-2.5 pr-2">
-                                <p
-                                  style={{ fontSize: 14, color: FLAG_CFG[spo2Flag(r.spo2)].color }}
-                                >
-                                  {r.spo2}
-                                </p>
-                              </div>
-                              <div className="min-w-0 flex-1 py-2.5 pr-2">
-                                <p style={{ fontSize: 14, color: '#0D2630' }}>{r.painScore}</p>
-                              </div>
-                              <div className="min-w-0 flex-1 py-2.5 pr-2">
-                                <p
-                                  style={{
-                                    fontSize: 14,
-                                    color: FLAG_CFG[bloodSugarFlag(r.bloodSugar)].color,
-                                  }}
-                                >
-                                  {r.bloodSugar}
-                                </p>
-                              </div>
-                              <div className="min-w-0 flex-1 py-2.5 pr-2">
-                                <p style={{ fontSize: 14, color: '#0D2630' }}>
-                                  {intakeBuckets[bucket] ?? 0}
-                                </p>
-                              </div>
-                              <div className="min-w-0 flex-1 py-2.5 pr-2">
-                                <p style={{ fontSize: 14, color: '#0D2630' }}>
-                                  {outputBuckets[bucket] ?? 0}
-                                </p>
-                              </div>
+                            <div className="min-w-0 flex-1 py-2.5 pr-2">
+                              <p
+                                style={{
+                                  fontSize: 14,
+                                  color: FLAG_CFG[bpFlag(r.systolic)].color,
+                                }}
+                              >
+                                {r.systolic}/{r.diastolic}
+                              </p>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                            <div className="min-w-0 flex-1 py-2.5 pr-2">
+                              <p style={{ fontSize: 14, color: '#0D2630' }}>{r.pulse}</p>
+                            </div>
+                            <div className="min-w-0 flex-1 py-2.5 pr-2">
+                              <p style={{ fontSize: 14, color: '#0D2630' }}>{r.respRate}</p>
+                            </div>
+                            <div className="min-w-0 flex-1 py-2.5 pr-2">
+                              <p style={{ fontSize: 14, color: '#0D2630' }}>{r.temp.toFixed(1)}</p>
+                            </div>
+                            <div className="min-w-0 flex-1 py-2.5 pr-2">
+                              <p style={{ fontSize: 14, color: FLAG_CFG[spo2Flag(r.spo2)].color }}>
+                                {r.spo2}
+                              </p>
+                            </div>
+                            <div className="min-w-0 flex-1 py-2.5 pr-2">
+                              <p style={{ fontSize: 14, color: '#0D2630' }}>{r.painScore}</p>
+                            </div>
+                            <div className="min-w-0 flex-1 py-2.5 pr-2">
+                              <p
+                                style={{
+                                  fontSize: 14,
+                                  color: FLAG_CFG[bloodSugarFlag(r.bloodSugar)].color,
+                                }}
+                              >
+                                {r.bloodSugar}
+                              </p>
+                            </div>
+                            <div className="min-w-0 flex-1 py-2.5 pr-2">
+                              <p style={{ fontSize: 14, color: '#0D2630' }}>
+                                {intakeBuckets[bucket] ?? 0}
+                              </p>
+                            </div>
+                            <div className="min-w-0 flex-1 py-2.5 pr-2">
+                              <p style={{ fontSize: 14, color: '#0D2630' }}>
+                                {outputBuckets[bucket] ?? 0}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </ScrollableTable>
                     <Pagination
                       page={safeTablePage}
                       pageSize={tablePageSize}

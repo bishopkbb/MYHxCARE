@@ -23,6 +23,11 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
@@ -500,187 +505,185 @@ export function LowStockAlertsWorkspace() {
                 >
                   Low Stock Items ({filtered.length})
                 </h2>
-                <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 1340 }}>
-                    <div
-                      className="flex rounded-t-[8px]"
-                      style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #E6F8FD',
-                      }}
-                    >
-                      <div className="min-w-[160px] flex-1 py-2.5 pr-2 pl-3">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Medication
-                        </span>
-                      </div>
-                      <div className="w-44 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Location
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-3 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Current Stock
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-3 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Reorder Level
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2 pl-3">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Days of Stock
-                        </span>
-                      </div>
-                      <div className="w-48 shrink-0 py-2.5 pr-2 pl-3">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Alert Level
-                        </span>
-                      </div>
-                      <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Actions
-                        </span>
-                      </div>
+                <ScrollableTable minWidth={1340} maxHeight={640} className="mt-3">
+                  <div
+                    className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                    style={{
+                      background: TABLE_HEADER_BG,
+                      borderBottom: '1px solid #E6F8FD',
+                    }}
+                  >
+                    <div className="min-w-[160px] flex-1 py-2.5 pr-2 pl-3">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Medication
+                      </span>
                     </div>
-
-                    {pageRows.length === 0 && (
-                      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                        <div
-                          className="flex size-14 items-center justify-center rounded-full"
-                          style={{ background: 'rgba(226,237,241,0.6)' }}
-                        >
-                          <Package style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                        </div>
-                        <p
-                          className="font-sans font-medium"
-                          style={{ fontSize: 16, color: '#4A7080' }}
-                        >
-                          No items match your filters
-                        </p>
-                        <button
-                          type="button"
-                          onClick={handleClearFilters}
-                          className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                          style={{ fontSize: 14, color: '#00B4D8' }}
-                        >
-                          Clear all filters
-                        </button>
-                      </div>
-                    )}
-
-                    {pageRows.map(({ row, level, daysOfStock }) => {
-                      const cfg = LEVEL_CFG[level];
-                      return (
-                        <div
-                          key={row.id}
-                          className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                        >
-                          <div className="min-w-[160px] flex-1 py-3 pr-2 pl-3">
-                            <Tooltip content={row.medicationName}>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {row.medicationName}
-                              </p>
-                            </Tooltip>
-                            <Tooltip content={`${row.strength} ${row.form}`}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {row.strength} {row.form}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-44 shrink-0 py-3 pr-2">
-                            <Tooltip content={getPharmacyLocation(row.locationId).name}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {getPharmacyLocation(row.locationId).name}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-36 shrink-0 py-3 pr-3 text-right">
-                            <p style={{ fontSize: 14, color: '#0D2630' }}>
-                              {row.stockQty.toLocaleString('en-GB')}
-                            </p>
-                          </div>
-                          <div className="w-36 shrink-0 py-3 pr-3 text-right">
-                            <p style={{ fontSize: 14, color: '#4A7080' }}>
-                              {row.reorderLevel.toLocaleString('en-GB')}
-                            </p>
-                          </div>
-                          <div className="w-36 shrink-0 py-3 pr-2 pl-3">
-                            <span
-                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                whiteSpace: 'nowrap',
-                                color: cfg.color,
-                                border: `1px solid ${cfg.border}`,
-                                background: cfg.bg,
-                              }}
-                            >
-                              {daysOfStock} days
-                            </span>
-                          </div>
-                          <div className="w-48 shrink-0 py-3 pr-2 pl-3">
-                            <span
-                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                whiteSpace: 'nowrap',
-                                color: cfg.color,
-                                border: `1px solid ${cfg.border}`,
-                                background: cfg.bg,
-                              }}
-                            >
-                              {level}
-                            </span>
-                          </div>
-                          <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
-                            <button
-                              type="button"
-                              onClick={() => setModal({ type: 'detail', row })}
-                              aria-label={`View batch ${row.batchNo}`}
-                              className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                            >
-                              <Package style={{ width: 15, height: 15, color: '#4A7080' }} />
-                            </button>
-                            <RowMenu
-                              row={row}
-                              onView={() => setModal({ type: 'detail', row })}
-                              onAdjust={() => setModal({ type: 'adjust', row })}
-                              onPurchaseOrder={() => handleCreatePurchaseOrder(row)}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
+                    <div className="w-44 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Location
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-3 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Current Stock
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-3 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Reorder Level
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2 pl-3">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Days of Stock
+                      </span>
+                    </div>
+                    <div className="w-48 shrink-0 py-2.5 pr-2 pl-3">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Alert Level
+                      </span>
+                    </div>
+                    <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Actions
+                      </span>
+                    </div>
                   </div>
-                </div>
+
+                  {pageRows.length === 0 && (
+                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                      <div
+                        className="flex size-14 items-center justify-center rounded-full"
+                        style={{ background: 'rgba(226,237,241,0.6)' }}
+                      >
+                        <Package style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                      </div>
+                      <p
+                        className="font-sans font-medium"
+                        style={{ fontSize: 16, color: '#4A7080' }}
+                      >
+                        No items match your filters
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#00B4D8' }}
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  )}
+
+                  {pageRows.map(({ row, level, daysOfStock }) => {
+                    const cfg = LEVEL_CFG[level];
+                    return (
+                      <div
+                        key={row.id}
+                        className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                      >
+                        <div className="min-w-[160px] flex-1 py-3 pr-2 pl-3">
+                          <Tooltip content={row.medicationName}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {row.medicationName}
+                            </p>
+                          </Tooltip>
+                          <Tooltip content={`${row.strength} ${row.form}`}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                              {row.strength} {row.form}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-44 shrink-0 py-3 pr-2">
+                          <Tooltip content={getPharmacyLocation(row.locationId).name}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {getPharmacyLocation(row.locationId).name}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-36 shrink-0 py-3 pr-3 text-right">
+                          <p style={{ fontSize: 14, color: '#0D2630' }}>
+                            {row.stockQty.toLocaleString('en-GB')}
+                          </p>
+                        </div>
+                        <div className="w-36 shrink-0 py-3 pr-3 text-right">
+                          <p style={{ fontSize: 14, color: '#4A7080' }}>
+                            {row.reorderLevel.toLocaleString('en-GB')}
+                          </p>
+                        </div>
+                        <div className="w-36 shrink-0 py-3 pr-2 pl-3">
+                          <span
+                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              whiteSpace: 'nowrap',
+                              color: cfg.color,
+                              border: `1px solid ${cfg.border}`,
+                              background: cfg.bg,
+                            }}
+                          >
+                            {daysOfStock} days
+                          </span>
+                        </div>
+                        <div className="w-48 shrink-0 py-3 pr-2 pl-3">
+                          <span
+                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              whiteSpace: 'nowrap',
+                              color: cfg.color,
+                              border: `1px solid ${cfg.border}`,
+                              background: cfg.bg,
+                            }}
+                          >
+                            {level}
+                          </span>
+                        </div>
+                        <div className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3">
+                          <button
+                            type="button"
+                            onClick={() => setModal({ type: 'detail', row })}
+                            aria-label={`View batch ${row.batchNo}`}
+                            className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                          >
+                            <Package style={{ width: 15, height: 15, color: '#4A7080' }} />
+                          </button>
+                          <RowMenu
+                            row={row}
+                            onView={() => setModal({ type: 'detail', row })}
+                            onAdjust={() => setModal({ type: 'adjust', row })}
+                            onPurchaseOrder={() => handleCreatePurchaseOrder(row)}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </ScrollableTable>
 
                 <Pagination
                   page={currentPage}

@@ -24,6 +24,11 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PreferenceToggle } from '@components/shared/PreferenceToggle';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { ROUTES } from '@/constants/routes';
@@ -738,227 +743,222 @@ export function PharmacyQueueMonitorWorkspace() {
               </div>
 
               {/* Table */}
-              <div className="mt-3 overflow-x-auto scroll-smooth">
-                <div style={{ minWidth: 1232 }}>
-                  <div
-                    className="flex rounded-t-[8px]"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
-                  >
-                    <div className="w-24 shrink-0 py-2.5 pr-2 pl-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Queue #
-                      </span>
-                    </div>
-                    <div className="w-36 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Patient
-                      </span>
-                    </div>
-                    <div className="w-36 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Prescription ID
-                      </span>
-                    </div>
-                    <div className="w-44 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Queue Type
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Status
-                      </span>
-                    </div>
-                    <div className="w-24 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Priority
-                      </span>
-                    </div>
-                    <div className="w-28 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Joined Time
-                      </span>
-                    </div>
-                    <div className="w-36 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Est. Wait Time
-                      </span>
-                    </div>
-                    <div className="w-32 shrink-0 py-2.5 pr-2">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Pharmacist
-                      </span>
-                    </div>
-                    <div className="flex w-20 shrink-0 items-center justify-end py-2.5 pr-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Actions
-                      </span>
-                    </div>
+              <ScrollableTable minWidth={1232} maxHeight={640} className="mt-3">
+                <div
+                  className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <div className="w-24 shrink-0 py-2.5 pr-2 pl-3">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Queue #
+                    </span>
                   </div>
-
-                  {pageRows.length === 0 && (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                      <div
-                        className="flex size-14 items-center justify-center rounded-full"
-                        style={{ background: 'rgba(226,237,241,0.6)' }}
-                      >
-                        <Users style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                      </div>
-                      <p
-                        className="font-sans font-medium"
-                        style={{ fontSize: 16, color: '#4A7080' }}
-                      >
-                        No queue entries match your filters
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleClearFilters}
-                        className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                        style={{ fontSize: 14, color: '#00B4D8' }}
-                      >
-                        Clear all filters
-                      </button>
-                    </div>
-                  )}
-
-                  {pageRows.map((row) => {
-                    const typeCfg = QUEUE_TYPE_COLOR[row.queueType];
-                    const isWaitApplicable =
-                      row.queueType !== 'Ready for Pickup' && row.queueType !== 'On Hold';
-                    return (
-                      <div
-                        key={row.entry.rxNo}
-                        className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                      >
-                        <div className="w-24 shrink-0 py-3 pr-2 pl-3">
-                          <p
-                            className="font-sans font-medium"
-                            style={{ fontSize: 14, color: '#00B4D8' }}
-                          >
-                            {row.queueNumber}
-                          </p>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <Tooltip content={row.patientName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {row.patientName}
-                            </p>
-                          </Tooltip>
-                          <p style={{ fontSize: 14, color: '#8A98A3' }}>{row.mrn}</p>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{row.entry.rxNo}</p>
-                        </div>
-                        <div className="w-44 shrink-0 py-3 pr-2">
-                          <span
-                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              whiteSpace: 'nowrap',
-                              color: typeCfg.color,
-                              border: `1px solid ${typeCfg.border}`,
-                              background: typeCfg.bg,
-                            }}
-                          >
-                            {row.queueType}
-                          </span>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{row.status}</p>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-2">
-                          <p
-                            style={{
-                              fontSize: 14,
-                              color:
-                                row.entry.priority === 'High'
-                                  ? '#DC2626'
-                                  : row.entry.priority === 'Medium'
-                                    ? '#D97706'
-                                    : '#16A34A',
-                            }}
-                          >
-                            {row.entry.priority}
-                          </p>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#0D2630' }}>
-                            {formatTime(row.entry.receivedAt)}
-                          </p>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>
-                            {isWaitApplicable ? `${minutesSince(row.entry.receivedAt)} mins` : '—'}
-                          </p>
-                        </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
-                          <Tooltip content={row.pharmacist}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {row.pharmacist}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="flex w-20 shrink-0 items-center justify-end gap-1 py-3 pr-3">
-                          <button
-                            type="button"
-                            onClick={() => setModal({ type: 'detail', entry: row.entry })}
-                            aria-label={`View ${row.entry.rxNo}`}
-                            className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                          >
-                            <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                          </button>
-                          <RowMenu
-                            entry={row.entry}
-                            onView={() => setModal({ type: 'detail', entry: row.entry })}
-                            onAdvance={() => handleAdvance(row.entry.rxNo)}
-                            onMarkReady={() => handleMarkReady(row.entry.rxNo)}
-                            onToggleHold={() =>
-                              handleToggleHold(row.entry.rxNo, Boolean(row.entry.isOnHold))
-                            }
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <div className="w-36 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Patient
+                    </span>
+                  </div>
+                  <div className="w-36 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Prescription ID
+                    </span>
+                  </div>
+                  <div className="w-44 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Queue Type
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Status
+                    </span>
+                  </div>
+                  <div className="w-24 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Priority
+                    </span>
+                  </div>
+                  <div className="w-28 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Joined Time
+                    </span>
+                  </div>
+                  <div className="w-36 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Est. Wait Time
+                    </span>
+                  </div>
+                  <div className="w-32 shrink-0 py-2.5 pr-2">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Pharmacist
+                    </span>
+                  </div>
+                  <div className="flex w-20 shrink-0 items-center justify-end py-2.5 pr-3">
+                    <span
+                      className="font-sans font-bold tracking-wider uppercase"
+                      style={{ fontSize: 14, color: '#4A7080' }}
+                    >
+                      Actions
+                    </span>
+                  </div>
                 </div>
-              </div>
+
+                {pageRows.length === 0 && (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <div
+                      className="flex size-14 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(226,237,241,0.6)' }}
+                    >
+                      <Users style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                    </div>
+                    <p className="font-sans font-medium" style={{ fontSize: 16, color: '#4A7080' }}>
+                      No queue entries match your filters
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                      style={{ fontSize: 14, color: '#00B4D8' }}
+                    >
+                      Clear all filters
+                    </button>
+                  </div>
+                )}
+
+                {pageRows.map((row) => {
+                  const typeCfg = QUEUE_TYPE_COLOR[row.queueType];
+                  const isWaitApplicable =
+                    row.queueType !== 'Ready for Pickup' && row.queueType !== 'On Hold';
+                  return (
+                    <div
+                      key={row.entry.rxNo}
+                      className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                      style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                    >
+                      <div className="w-24 shrink-0 py-3 pr-2 pl-3">
+                        <p
+                          className="font-sans font-medium"
+                          style={{ fontSize: 14, color: '#00B4D8' }}
+                        >
+                          {row.queueNumber}
+                        </p>
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <Tooltip content={row.patientName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {row.patientName}
+                          </p>
+                        </Tooltip>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>{row.mrn}</p>
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{row.entry.rxNo}</p>
+                      </div>
+                      <div className="w-44 shrink-0 py-3 pr-2">
+                        <span
+                          className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                          style={{
+                            fontSize: 14,
+                            whiteSpace: 'nowrap',
+                            color: typeCfg.color,
+                            border: `1px solid ${typeCfg.border}`,
+                            background: typeCfg.bg,
+                          }}
+                        >
+                          {row.queueType}
+                        </span>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{row.status}</p>
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-2">
+                        <p
+                          style={{
+                            fontSize: 14,
+                            color:
+                              row.entry.priority === 'High'
+                                ? '#DC2626'
+                                : row.entry.priority === 'Medium'
+                                  ? '#D97706'
+                                  : '#16A34A',
+                          }}
+                        >
+                          {row.entry.priority}
+                        </p>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#0D2630' }}>
+                          {formatTime(row.entry.receivedAt)}
+                        </p>
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>
+                          {isWaitApplicable ? `${minutesSince(row.entry.receivedAt)} mins` : '—'}
+                        </p>
+                      </div>
+                      <div className="w-32 shrink-0 py-3 pr-2">
+                        <Tooltip content={row.pharmacist}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {row.pharmacist}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="flex w-20 shrink-0 items-center justify-end gap-1 py-3 pr-3">
+                        <button
+                          type="button"
+                          onClick={() => setModal({ type: 'detail', entry: row.entry })}
+                          aria-label={`View ${row.entry.rxNo}`}
+                          className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                        >
+                          <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                        </button>
+                        <RowMenu
+                          entry={row.entry}
+                          onView={() => setModal({ type: 'detail', entry: row.entry })}
+                          onAdvance={() => handleAdvance(row.entry.rxNo)}
+                          onMarkReady={() => handleMarkReady(row.entry.rxNo)}
+                          onToggleHold={() =>
+                            handleToggleHold(row.entry.rxNo, Boolean(row.entry.isOnHold))
+                          }
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </ScrollableTable>
 
               <Pagination
                 page={currentPage}

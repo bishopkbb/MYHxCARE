@@ -22,6 +22,11 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
@@ -816,209 +821,205 @@ export function DispensingReportWorkspace() {
                   Dispensing Details
                 </p>
 
-                <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 1472 }}>
+                <ScrollableTable minWidth={1472} maxHeight={640} className="mt-3">
+                  <div
+                    className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                    style={{
+                      background: TABLE_HEADER_BG,
+                      borderBottom: '1px solid #E6F8FD',
+                    }}
+                  >
+                    <div className="w-28 shrink-0 py-2.5 pr-2 pl-3">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Date &amp; Time
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Prescription ID
+                      </span>
+                    </div>
+                    <div className="w-40 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Patient
+                      </span>
+                    </div>
+                    <div className="min-w-[160px] flex-1 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Medication
+                      </span>
+                    </div>
+                    <div className="w-24 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Strength
+                      </span>
+                    </div>
+                    <div className="w-24 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Form
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Qty Dispensed
+                      </span>
+                    </div>
+                    <div className="w-32 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Dispensed By
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Department
+                      </span>
+                    </div>
+                    <div className="w-44 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Total Value (₦)
+                      </span>
+                    </div>
+                    <div className="flex w-20 shrink-0 items-center justify-end py-2.5 pr-3">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Actions
+                      </span>
+                    </div>
+                  </div>
+
+                  {pageRows.length === 0 && (
+                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                      <div
+                        className="flex size-14 items-center justify-center rounded-full"
+                        style={{ background: 'rgba(226,237,241,0.6)' }}
+                      >
+                        <FileText style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                      </div>
+                      <p
+                        className="font-sans font-medium"
+                        style={{ fontSize: 16, color: '#4A7080' }}
+                      >
+                        No dispensing records match your filters
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleResetFilters}
+                        className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#00B4D8' }}
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  )}
+
+                  {pageRows.map((r) => (
                     <div
-                      className="flex rounded-t-[8px]"
-                      style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #E6F8FD',
-                      }}
+                      key={r.id}
+                      className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                      style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                     >
-                      <div className="w-28 shrink-0 py-2.5 pr-2 pl-3">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Date &amp; Time
-                        </span>
+                      <div className="w-28 shrink-0 py-3 pr-2 pl-3">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{formatHumanDate(r.date)}</p>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>{formatTime(r.date)}</p>
                       </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Prescription ID
-                        </span>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <Tooltip content={r.id}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#00B4D8' }}
+                          >
+                            {r.id}
+                          </p>
+                        </Tooltip>
                       </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Patient
-                        </span>
+                      <div className="w-40 shrink-0 py-3 pr-2">
+                        <Tooltip content={r.patientName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {r.patientName}
+                          </p>
+                        </Tooltip>
+                        <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.mrn}</p>
                       </div>
-                      <div className="min-w-[160px] flex-1 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Medication
-                        </span>
+                      <div className="min-w-[160px] flex-1 py-3 pr-2">
+                        <Tooltip content={r.medicationName}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {r.medicationName}
+                          </p>
+                        </Tooltip>
                       </div>
-                      <div className="w-24 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Strength
-                        </span>
+                      <div className="w-24 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{r.strength}</p>
                       </div>
-                      <div className="w-24 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Form
-                        </span>
+                      <div className="w-24 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{r.form}</p>
                       </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Qty Dispensed
-                        </span>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{r.qtyDispensed}</p>
                       </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Dispensed By
-                        </span>
+                      <div className="w-32 shrink-0 py-3 pr-2">
+                        <Tooltip content={r.dispensedBy}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {r.dispensedBy}
+                          </p>
+                        </Tooltip>
                       </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Department
-                        </span>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <Tooltip content={r.department}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {r.department}
+                          </p>
+                        </Tooltip>
                       </div>
-                      <div className="w-44 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Total Value (₦)
-                        </span>
+                      <div className="w-44 shrink-0 py-3 pr-2">
+                        <p style={{ fontSize: 14, color: '#0D2630' }}>
+                          {formatCurrency(r.totalValue)}
+                        </p>
                       </div>
-                      <div className="flex w-20 shrink-0 items-center justify-end py-2.5 pr-3">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Actions
-                        </span>
+                      <div className="flex w-20 shrink-0 items-center justify-end py-3 pr-3">
+                        <RowMenu
+                          record={r}
+                          onView={() => setDetailRecord(r)}
+                          onPrint={() => handlePrintReceipt(r)}
+                        />
                       </div>
                     </div>
-
-                    {pageRows.length === 0 && (
-                      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                        <div
-                          className="flex size-14 items-center justify-center rounded-full"
-                          style={{ background: 'rgba(226,237,241,0.6)' }}
-                        >
-                          <FileText style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                        </div>
-                        <p
-                          className="font-sans font-medium"
-                          style={{ fontSize: 16, color: '#4A7080' }}
-                        >
-                          No dispensing records match your filters
-                        </p>
-                        <button
-                          type="button"
-                          onClick={handleResetFilters}
-                          className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                          style={{ fontSize: 14, color: '#00B4D8' }}
-                        >
-                          Clear all filters
-                        </button>
-                      </div>
-                    )}
-
-                    {pageRows.map((r) => (
-                      <div
-                        key={r.id}
-                        className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                      >
-                        <div className="w-28 shrink-0 py-3 pr-2 pl-3">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>
-                            {formatHumanDate(r.date)}
-                          </p>
-                          <p style={{ fontSize: 14, color: '#8A98A3' }}>{formatTime(r.date)}</p>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <Tooltip content={r.id}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#00B4D8' }}
-                            >
-                              {r.id}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-40 shrink-0 py-3 pr-2">
-                          <Tooltip content={r.patientName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {r.patientName}
-                            </p>
-                          </Tooltip>
-                          <p style={{ fontSize: 14, color: '#8A98A3' }}>{r.mrn}</p>
-                        </div>
-                        <div className="min-w-[160px] flex-1 py-3 pr-2">
-                          <Tooltip content={r.medicationName}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.medicationName}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{r.strength}</p>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{r.form}</p>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{r.qtyDispensed}</p>
-                        </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
-                          <Tooltip content={r.dispensedBy}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.dispensedBy}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <Tooltip content={r.department}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {r.department}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-44 shrink-0 py-3 pr-2">
-                          <p style={{ fontSize: 14, color: '#0D2630' }}>
-                            {formatCurrency(r.totalValue)}
-                          </p>
-                        </div>
-                        <div className="flex w-20 shrink-0 items-center justify-end py-3 pr-3">
-                          <RowMenu
-                            record={r}
-                            onView={() => setDetailRecord(r)}
-                            onPrint={() => handlePrintReceipt(r)}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  ))}
+                </ScrollableTable>
 
                 <Pagination
                   page={page}

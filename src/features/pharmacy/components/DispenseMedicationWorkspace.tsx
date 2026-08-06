@@ -15,6 +15,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -618,125 +623,123 @@ export function DispenseMedicationWorkspace() {
                 >
                   Prescription Items (1)
                 </h2>
-                <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 970 }}>
-                    <div
-                      className="flex rounded-t-[8px]"
-                      style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #E6F8FD',
-                      }}
-                    >
-                      <div className="w-10 shrink-0 py-2.5 pl-3">
-                        <span style={{ fontSize: 14, color: '#4A7080' }}>#</span>
-                      </div>
-                      <div className="min-w-[160px] flex-1 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Medication
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Strength/Form
-                        </span>
-                      </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Dose &amp; Frequency
-                        </span>
-                      </div>
-                      <div className="w-24 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Duration
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Qty Prescribed
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Qty to Dispense
-                        </span>
-                      </div>
-                      <div className="w-20 shrink-0 py-2.5 pr-3">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Route
-                        </span>
-                      </div>
+                <ScrollableTable minWidth={970} className="mt-3">
+                  <div
+                    className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                    style={{
+                      background: TABLE_HEADER_BG,
+                      borderBottom: '1px solid #E6F8FD',
+                    }}
+                  >
+                    <div className="w-10 shrink-0 py-2.5 pl-3">
+                      <span style={{ fontSize: 14, color: '#4A7080' }}>#</span>
                     </div>
-                    <div
-                      className="flex items-center"
-                      style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                    >
-                      <div className="w-10 shrink-0 py-3 pl-3">
-                        <span style={{ fontSize: 14, color: '#4A7080' }}>1</span>
-                      </div>
-                      <div className="min-w-[160px] flex-1 py-3 pr-2">
-                        <Tooltip content={entry.medicationName}>
-                          <p
-                            className="truncate font-sans font-medium"
-                            style={{ fontSize: 14, color: '#0D2630' }}
-                          >
-                            {entry.medicationName}
-                          </p>
-                        </Tooltip>
-                        <p style={{ fontSize: 14, color: '#8A98A3' }}>{entry.instructions}</p>
-                      </div>
-                      <div className="w-36 shrink-0 py-3 pr-2">
-                        <p style={{ fontSize: 14, color: '#4A7080' }}>
-                          {entry.dose} {entry.form}
-                        </p>
-                      </div>
-                      <div className="w-40 shrink-0 py-3 pr-2">
-                        <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.frequency}</p>
-                      </div>
-                      <div className="w-24 shrink-0 py-3 pr-2">
-                        <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.duration}</p>
-                      </div>
-                      <div className="w-36 shrink-0 py-3 pr-2">
-                        <p style={{ fontSize: 14, color: '#4A7080' }}>
-                          {entry.quantity} {entry.form}
-                          {entry.quantity === 1 ? '' : 's'}
-                        </p>
-                      </div>
-                      <div className="w-36 shrink-0 py-3 pr-2">
-                        <p
-                          className="font-sans font-medium"
-                          style={{ fontSize: 14, color: '#0D2630' }}
-                        >
-                          {qtyToDispense} {stock?.unit ?? entry.form}
-                          {qtyToDispense === 1 ? '' : 's'}
-                        </p>
-                      </div>
-                      <div className="w-20 shrink-0 py-3 pr-3">
-                        <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.route}</p>
-                      </div>
+                    <div className="min-w-[160px] flex-1 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Medication
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Strength/Form
+                      </span>
+                    </div>
+                    <div className="w-40 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Dose &amp; Frequency
+                      </span>
+                    </div>
+                    <div className="w-24 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Duration
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Qty Prescribed
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Qty to Dispense
+                      </span>
+                    </div>
+                    <div className="w-20 shrink-0 py-2.5 pr-3">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Route
+                      </span>
                     </div>
                   </div>
-                </div>
+                  <div
+                    className="flex items-center"
+                    style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                  >
+                    <div className="w-10 shrink-0 py-3 pl-3">
+                      <span style={{ fontSize: 14, color: '#4A7080' }}>1</span>
+                    </div>
+                    <div className="min-w-[160px] flex-1 py-3 pr-2">
+                      <Tooltip content={entry.medicationName}>
+                        <p
+                          className="truncate font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {entry.medicationName}
+                        </p>
+                      </Tooltip>
+                      <p style={{ fontSize: 14, color: '#8A98A3' }}>{entry.instructions}</p>
+                    </div>
+                    <div className="w-36 shrink-0 py-3 pr-2">
+                      <p style={{ fontSize: 14, color: '#4A7080' }}>
+                        {entry.dose} {entry.form}
+                      </p>
+                    </div>
+                    <div className="w-40 shrink-0 py-3 pr-2">
+                      <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.frequency}</p>
+                    </div>
+                    <div className="w-24 shrink-0 py-3 pr-2">
+                      <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.duration}</p>
+                    </div>
+                    <div className="w-36 shrink-0 py-3 pr-2">
+                      <p style={{ fontSize: 14, color: '#4A7080' }}>
+                        {entry.quantity} {entry.form}
+                        {entry.quantity === 1 ? '' : 's'}
+                      </p>
+                    </div>
+                    <div className="w-36 shrink-0 py-3 pr-2">
+                      <p
+                        className="font-sans font-medium"
+                        style={{ fontSize: 14, color: '#0D2630' }}
+                      >
+                        {qtyToDispense} {stock?.unit ?? entry.form}
+                        {qtyToDispense === 1 ? '' : 's'}
+                      </p>
+                    </div>
+                    <div className="w-20 shrink-0 py-3 pr-3">
+                      <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.route}</p>
+                    </div>
+                  </div>
+                </ScrollableTable>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                   <p style={{ fontSize: 14, color: '#4A7080' }}>Total Items: 1</p>
                   <p style={{ fontSize: 14, color: '#0D2630' }}>

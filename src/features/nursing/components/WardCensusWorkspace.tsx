@@ -22,6 +22,11 @@ import {
   useClaimedPatients,
 } from '@/features/nursing/store/nursingWorkflowStore';
 import type { NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import {
   ACUITY_CFG,
@@ -517,99 +522,111 @@ export function WardCensusWorkspace() {
                       </div>
                     </div>
 
-                    <div className="mt-4 overflow-x-auto scroll-smooth">
-                      <div className="min-w-[760px]">
-                        <div
-                          className="flex items-center rounded-t-[8px]"
-                          style={{
-                            background: 'rgba(226,237,241,0.4)',
-                            borderBottom: '1px solid #E6F8FD',
-                          }}
-                        >
-                          {(
-                            [
-                              ['Bed', 'w-20 pl-3'],
-                              ['Status', 'w-28'],
-                              ['Patient', 'min-w-[200px] flex-1'],
-                              ['Doctor', 'w-36'],
-                              ['Acuity', 'w-24'],
-                            ] as [string, string][]
-                          ).map(([label, width]) => (
-                            <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
-                              <span
-                                className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                                style={{ fontSize: 14, color: '#4A7080' }}
-                              >
-                                {label}
-                              </span>
-                            </div>
-                          ))}
-                          <div
-                            className="sticky right-0 z-10 w-32 shrink-0 py-2.5 pr-3 text-right"
-                            style={{ background: '#E2EDF1' }}
-                          >
+                    <ScrollableTable minWidth={760} maxHeight={640} className="mt-4">
+                      <div
+                        className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{
+                          background: TABLE_HEADER_BG,
+                          borderBottom: '1px solid #E6F8FD',
+                        }}
+                      >
+                        {(
+                          [
+                            ['Bed', 'w-20 pl-3'],
+                            ['Status', 'w-28'],
+                            ['Patient', 'min-w-[200px] flex-1'],
+                            ['Doctor', 'w-36'],
+                            ['Acuity', 'w-24'],
+                          ] as [string, string][]
+                        ).map(([label, width]) => (
+                          <div key={label} className={`${width} shrink-0 py-2.5 pr-1.5`}>
                             <span
                               className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                               style={{ fontSize: 14, color: '#4A7080' }}
                             >
-                              Actions
+                              {label}
                             </span>
                           </div>
+                        ))}
+                        <div
+                          className="sticky right-0 z-10 w-32 shrink-0 py-2.5 pr-3 text-right"
+                          style={{ background: '#E2EDF1' }}
+                        >
+                          <span
+                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Actions
+                          </span>
                         </div>
+                      </div>
 
-                        {pageState === 'loading' &&
-                          Array.from({ length: 5 }).map((_, i) => (
+                      {pageState === 'loading' &&
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="flex min-h-[52px] animate-pulse items-center px-3"
+                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                          >
+                            <div className="h-4 w-full max-w-[500px] rounded bg-slate-100" />
+                          </div>
+                        ))}
+
+                      {pageState === 'loaded' &&
+                        pageRows.map((bed) => {
+                          const cfg = BED_STATUS_CFG[bed.status];
+                          return (
                             <div
-                              key={i}
-                              className="flex min-h-[52px] animate-pulse items-center px-3"
+                              key={bed.id}
+                              className="flex items-start transition-colors duration-100 hover:bg-[#F5FBFD]"
                               style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                             >
-                              <div className="h-4 w-full max-w-[500px] rounded bg-slate-100" />
-                            </div>
-                          ))}
-
-                        {pageState === 'loaded' &&
-                          pageRows.map((bed) => {
-                            const cfg = BED_STATUS_CFG[bed.status];
-                            return (
-                              <div
-                                key={bed.id}
-                                className="flex items-start transition-colors duration-100 hover:bg-[#F5FBFD]"
-                                style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                              >
-                                <div className="w-20 shrink-0 py-3 pr-1.5 pl-3">
+                              <div className="w-20 shrink-0 py-3 pr-1.5 pl-3">
+                                <p
+                                  className="font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {bed.bedNumber}
+                                </p>
+                              </div>
+                              <div className="w-28 shrink-0 py-3 pr-1.5">
+                                <span
+                                  className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
+                                  style={{
+                                    fontSize: 14,
+                                    color: cfg.color,
+                                    border: `1px solid ${cfg.border}`,
+                                    background: cfg.bg,
+                                  }}
+                                >
+                                  {bed.status}
+                                </span>
+                              </div>
+                              <div className="min-w-[200px] flex-1 py-3 pr-1.5">
+                                <Tooltip content={bed.patientName ?? '—'}>
                                   <p
-                                    className="font-sans font-medium"
+                                    className="truncate"
                                     style={{ fontSize: 14, color: '#0D2630' }}
                                   >
-                                    {bed.bedNumber}
+                                    {bed.patientName ?? '—'}
                                   </p>
-                                </div>
-                                <div className="w-28 shrink-0 py-3 pr-1.5">
-                                  <span
-                                    className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
-                                    style={{
-                                      fontSize: 14,
-                                      color: cfg.color,
-                                      border: `1px solid ${cfg.border}`,
-                                      background: cfg.bg,
-                                    }}
+                                </Tooltip>
+                                {(bed.mrn ?? bed.admittedAt) && (
+                                  <Tooltip
+                                    content={[
+                                      bed.mrn,
+                                      bed.admittedAt
+                                        ? `Admitted ${formatDate(bed.admittedAt)}`
+                                        : null,
+                                    ]
+                                      .filter(Boolean)
+                                      .join(' · ')}
                                   >
-                                    {bed.status}
-                                  </span>
-                                </div>
-                                <div className="min-w-[200px] flex-1 py-3 pr-1.5">
-                                  <Tooltip content={bed.patientName ?? '—'}>
                                     <p
                                       className="truncate"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
+                                      style={{ fontSize: 14, color: '#8A98A3' }}
                                     >
-                                      {bed.patientName ?? '—'}
-                                    </p>
-                                  </Tooltip>
-                                  {(bed.mrn ?? bed.admittedAt) && (
-                                    <Tooltip
-                                      content={[
+                                      {[
                                         bed.mrn,
                                         bed.admittedAt
                                           ? `Admitted ${formatDate(bed.admittedAt)}`
@@ -617,87 +634,73 @@ export function WardCensusWorkspace() {
                                       ]
                                         .filter(Boolean)
                                         .join(' · ')}
-                                    >
-                                      <p
-                                        className="truncate"
-                                        style={{ fontSize: 14, color: '#8A98A3' }}
-                                      >
-                                        {[
-                                          bed.mrn,
-                                          bed.admittedAt
-                                            ? `Admitted ${formatDate(bed.admittedAt)}`
-                                            : null,
-                                        ]
-                                          .filter(Boolean)
-                                          .join(' · ')}
-                                      </p>
-                                    </Tooltip>
-                                  )}
-                                </div>
-                                <div className="w-36 shrink-0 py-3 pr-1.5">
-                                  <Tooltip content={bed.doctorName ?? '—'}>
-                                    <p
-                                      className="truncate"
-                                      style={{ fontSize: 14, color: '#4A7080' }}
-                                    >
-                                      {bed.doctorName ?? '—'}
                                     </p>
                                   </Tooltip>
-                                </div>
-                                <div className="w-24 shrink-0 py-3 pr-1.5">
-                                  {bed.acuity ? (
-                                    <span
-                                      style={{ fontSize: 14, color: ACUITY_CFG[bed.acuity].color }}
-                                    >
-                                      {bed.acuity}
-                                    </span>
-                                  ) : (
-                                    <span style={{ fontSize: 14, color: '#8A98A3' }}>—</span>
-                                  )}
-                                </div>
-                                <div
-                                  className="sticky right-0 z-10 flex w-32 shrink-0 items-center justify-end py-3 pr-3"
-                                  style={{ background: '#FFFFFF' }}
-                                >
-                                  {bed.status === 'Occupied' && isRosterWard ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => router.push(ROUTES.nursePatientRecord(bed.id))}
-                                      className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                                      style={{
-                                        fontSize: 14,
-                                        color: '#00B4D8',
-                                        border: '1px solid rgba(0,180,216,0.35)',
-                                      }}
-                                    >
-                                      View Patient
-                                    </button>
-                                  ) : (
-                                    <span style={{ fontSize: 14, color: '#8A98A3' }}>—</span>
-                                  )}
-                                </div>
+                                )}
                               </div>
-                            );
-                          })}
-
-                        {pageState === 'loaded' && pageRows.length === 0 && (
-                          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                            <div
-                              className="flex size-14 items-center justify-center rounded-full"
-                              style={{ background: 'rgba(226,237,241,0.6)' }}
-                            >
-                              <BedDouble style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                              <div className="w-36 shrink-0 py-3 pr-1.5">
+                                <Tooltip content={bed.doctorName ?? '—'}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {bed.doctorName ?? '—'}
+                                  </p>
+                                </Tooltip>
+                              </div>
+                              <div className="w-24 shrink-0 py-3 pr-1.5">
+                                {bed.acuity ? (
+                                  <span
+                                    style={{ fontSize: 14, color: ACUITY_CFG[bed.acuity].color }}
+                                  >
+                                    {bed.acuity}
+                                  </span>
+                                ) : (
+                                  <span style={{ fontSize: 14, color: '#8A98A3' }}>—</span>
+                                )}
+                              </div>
+                              <div
+                                className="sticky right-0 z-10 flex w-32 shrink-0 items-center justify-end py-3 pr-3"
+                                style={{ background: '#FFFFFF' }}
+                              >
+                                {bed.status === 'Occupied' && isRosterWard ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => router.push(ROUTES.nursePatientRecord(bed.id))}
+                                    className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                                    style={{
+                                      fontSize: 14,
+                                      color: '#00B4D8',
+                                      border: '1px solid rgba(0,180,216,0.35)',
+                                    }}
+                                  >
+                                    View Patient
+                                  </button>
+                                ) : (
+                                  <span style={{ fontSize: 14, color: '#8A98A3' }}>—</span>
+                                )}
+                              </div>
                             </div>
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 16, color: '#4A7080' }}
-                            >
-                              No beds recorded for this ward
-                            </p>
+                          );
+                        })}
+
+                      {pageState === 'loaded' && pageRows.length === 0 && (
+                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                          <div
+                            className="flex size-14 items-center justify-center rounded-full"
+                            style={{ background: 'rgba(226,237,241,0.6)' }}
+                          >
+                            <BedDouble style={{ width: 24, height: 24, color: '#8A98A3' }} />
                           </div>
-                        )}
-                      </div>
-                    </div>
+                          <p
+                            className="font-sans font-medium"
+                            style={{ fontSize: 16, color: '#4A7080' }}
+                          >
+                            No beds recorded for this ward
+                          </p>
+                        </div>
+                      )}
+                    </ScrollableTable>
 
                     {pageState === 'loaded' && selectedBeds.length > 0 && (
                       <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">

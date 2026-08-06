@@ -2,6 +2,11 @@
 
 import { Eye, Search, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import {
   DIRECTORY_PATIENTS,
@@ -54,11 +59,11 @@ export function PatientPicker({ onSelect }: { onSelect: (patient: DirectoryPatie
         />
       </div>
 
-      <div className="mt-3 overflow-x-auto scroll-smooth">
-        <div className="min-w-[720px]">
+      <div className="mt-3">
+        <ScrollableTable minWidth={720}>
           <div
-            className="flex rounded-t-[8px]"
-            style={{ background: 'rgba(226,237,241,0.4)', borderBottom: '1px solid #E6F8FD' }}
+            className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+            style={{ background: TABLE_HEADER_BG, borderBottom: '1px solid #E6F8FD' }}
           >
             <div className="min-w-0 flex-1 py-2.5 pr-2 pl-3">
               <span
@@ -187,7 +192,7 @@ export function PatientPicker({ onSelect }: { onSelect: (patient: DirectoryPatie
               </div>
             </div>
           ))}
-        </div>
+        </ScrollableTable>
       </div>
 
       {filtered.length > 0 && (

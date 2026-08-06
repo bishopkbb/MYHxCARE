@@ -19,6 +19,11 @@ import { useMemo, useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { ROUTES } from '@/constants/routes';
@@ -549,189 +554,187 @@ export function StockReceivingWorkspace() {
                   </p>
                 </div>
               ) : (
-                <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 1100 }}>
-                    <div
-                      className="flex rounded-t-[8px]"
-                      style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #E6F8FD',
-                      }}
-                    >
-                      <div className="w-10 shrink-0 py-2.5 pr-2 pl-3">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          #
-                        </span>
-                      </div>
-                      <div className="min-w-[160px] flex-1 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Medication
-                        </span>
-                      </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Batch No.
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Expiry Date
-                        </span>
-                      </div>
-                      <div className="w-24 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Ordered
-                        </span>
-                      </div>
-                      <div className="w-28 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Received
-                        </span>
-                      </div>
-                      <div className="w-28 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Unit Price
-                        </span>
-                      </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Total Price
-                        </span>
-                      </div>
-                      <div className="w-16 shrink-0 py-2.5 pr-3 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Actions
-                        </span>
-                      </div>
-                    </div>
-
-                    {items.map((item, index) => (
-                      <div
-                        key={`${item.medicationName}-${item.batchNo}-${index}`}
-                        className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                <ScrollableTable minWidth={1100} maxHeight={640} className="mt-3">
+                  <div
+                    className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                    style={{
+                      background: TABLE_HEADER_BG,
+                      borderBottom: '1px solid #E6F8FD',
+                    }}
+                  >
+                    <div className="w-10 shrink-0 py-2.5 pr-2 pl-3">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
                       >
-                        <div className="w-10 shrink-0 py-3 pr-2 pl-3">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{index + 1}</p>
-                        </div>
-                        <div className="min-w-[160px] flex-1 py-3 pr-2">
-                          <Tooltip content={`${item.medicationName} ${item.strength}`}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {item.medicationName} {item.strength}
-                            </p>
-                          </Tooltip>
-                          <Tooltip content={item.form}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {item.form}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-32 shrink-0 py-2 pr-2">
-                          <input
-                            type="text"
-                            value={item.batchNo}
-                            onChange={(e) => updateItem(index, { batchNo: e.target.value })}
-                            className={`h-9 w-full rounded-[8px] px-2.5 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
-                            style={{
-                              fontSize: 14,
-                              border: '1px solid rgba(0,100,130,0.18)',
-                              color: '#0D2630',
-                            }}
-                          />
-                        </div>
-                        <div className="w-36 shrink-0 py-2 pr-2">
-                          <input
-                            type="date"
-                            value={item.expiryDate}
-                            onChange={(e) => updateItem(index, { expiryDate: e.target.value })}
-                            className={`h-9 w-full rounded-[8px] px-2.5 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
-                            style={{
-                              fontSize: 14,
-                              border: '1px solid rgba(0,100,130,0.18)',
-                              color: '#0D2630',
-                            }}
-                          />
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-2 text-right">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>
-                            {item.orderedQty.toLocaleString('en-GB')}
-                          </p>
-                        </div>
-                        <div className="w-28 shrink-0 py-2 pr-2">
-                          <input
-                            type="number"
-                            min={0}
-                            value={item.receivedQty}
-                            onChange={(e) =>
-                              updateItem(index, {
-                                receivedQty: Math.max(0, Number(e.target.value)),
-                              })
-                            }
-                            className={`h-9 w-full rounded-[8px] px-2.5 text-right font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
-                            style={{
-                              fontSize: 14,
-                              border: '1px solid rgba(0,100,130,0.18)',
-                              color: '#0D2630',
-                            }}
-                          />
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-2 text-right">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>
-                            {formatCurrency(item.unitPrice)}
-                          </p>
-                        </div>
-                        <div className="w-32 shrink-0 py-3 pr-2 text-right">
+                        #
+                      </span>
+                    </div>
+                    <div className="min-w-[160px] flex-1 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Medication
+                      </span>
+                    </div>
+                    <div className="w-32 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Batch No.
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Expiry Date
+                      </span>
+                    </div>
+                    <div className="w-24 shrink-0 py-2.5 pr-2 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Ordered
+                      </span>
+                    </div>
+                    <div className="w-28 shrink-0 py-2.5 pr-2 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Received
+                      </span>
+                    </div>
+                    <div className="w-28 shrink-0 py-2.5 pr-2 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Unit Price
+                      </span>
+                    </div>
+                    <div className="w-32 shrink-0 py-2.5 pr-2 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Total Price
+                      </span>
+                    </div>
+                    <div className="w-16 shrink-0 py-2.5 pr-3 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Actions
+                      </span>
+                    </div>
+                  </div>
+
+                  {items.map((item, index) => (
+                    <div
+                      key={`${item.medicationName}-${item.batchNo}-${index}`}
+                      className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                      style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                    >
+                      <div className="w-10 shrink-0 py-3 pr-2 pl-3">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{index + 1}</p>
+                      </div>
+                      <div className="min-w-[160px] flex-1 py-3 pr-2">
+                        <Tooltip content={`${item.medicationName} ${item.strength}`}>
                           <p
-                            className="font-sans font-medium"
+                            className="truncate font-sans font-medium"
                             style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            {formatCurrency(item.receivedQty * item.unitPrice)}
+                            {item.medicationName} {item.strength}
                           </p>
-                        </div>
-                        <div className="flex w-16 shrink-0 items-center justify-end py-3 pr-3">
-                          <button
-                            type="button"
-                            onClick={() => removeItem(index)}
-                            aria-label={`Remove ${item.medicationName}`}
-                            className={`flex size-9 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(220,38,38,0.08)] ${FOCUS_RING}`}
-                          >
-                            <Trash2 style={{ width: 15, height: 15, color: '#DC2626' }} />
-                          </button>
-                        </div>
+                        </Tooltip>
+                        <Tooltip content={item.form}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                            {item.form}
+                          </p>
+                        </Tooltip>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                      <div className="w-32 shrink-0 py-2 pr-2">
+                        <input
+                          type="text"
+                          value={item.batchNo}
+                          onChange={(e) => updateItem(index, { batchNo: e.target.value })}
+                          className={`h-9 w-full rounded-[8px] px-2.5 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            border: '1px solid rgba(0,100,130,0.18)',
+                            color: '#0D2630',
+                          }}
+                        />
+                      </div>
+                      <div className="w-36 shrink-0 py-2 pr-2">
+                        <input
+                          type="date"
+                          value={item.expiryDate}
+                          onChange={(e) => updateItem(index, { expiryDate: e.target.value })}
+                          className={`h-9 w-full rounded-[8px] px-2.5 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            border: '1px solid rgba(0,100,130,0.18)',
+                            color: '#0D2630',
+                          }}
+                        />
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-2 text-right">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>
+                          {item.orderedQty.toLocaleString('en-GB')}
+                        </p>
+                      </div>
+                      <div className="w-28 shrink-0 py-2 pr-2">
+                        <input
+                          type="number"
+                          min={0}
+                          value={item.receivedQty}
+                          onChange={(e) =>
+                            updateItem(index, {
+                              receivedQty: Math.max(0, Number(e.target.value)),
+                            })
+                          }
+                          className={`h-9 w-full rounded-[8px] px-2.5 text-right font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            border: '1px solid rgba(0,100,130,0.18)',
+                            color: '#0D2630',
+                          }}
+                        />
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-2 text-right">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>
+                          {formatCurrency(item.unitPrice)}
+                        </p>
+                      </div>
+                      <div className="w-32 shrink-0 py-3 pr-2 text-right">
+                        <p
+                          className="font-sans font-medium"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {formatCurrency(item.receivedQty * item.unitPrice)}
+                        </p>
+                      </div>
+                      <div className="flex w-16 shrink-0 items-center justify-end py-3 pr-3">
+                        <button
+                          type="button"
+                          onClick={() => removeItem(index)}
+                          aria-label={`Remove ${item.medicationName}`}
+                          className={`flex size-9 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(220,38,38,0.08)] ${FOCUS_RING}`}
+                        >
+                          <Trash2 style={{ width: 15, height: 15, color: '#DC2626' }} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </ScrollableTable>
               )}
             </div>
 

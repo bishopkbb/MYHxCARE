@@ -28,6 +28,11 @@ import { useRouter } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 
 import { AllergyBanner } from '@/components/clinical/AllergyBanner';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -1251,33 +1256,58 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.pastDiagnoses && (
-                        <div className="overflow-x-auto scroll-smooth">
-                          <div className="min-w-[360px]">
+                        <ScrollableTable minWidth={360} maxHeight={640}>
+                          <div
+                            className={`flex items-center px-4 py-[5px] ${TABLE_HEADER_STICKY_CLASS}`}
+                            style={{ background: TABLE_HEADER_BG }}
+                          >
+                            <span
+                              className="w-[55%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Condition / Diagnosis
+                            </span>
+                            <span
+                              className="w-[25%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Date Diagnosed
+                            </span>
+                            <span
+                              className="w-[20%] text-right font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Status
+                            </span>
+                          </div>
+                          {patient.medicalHistory.pastDiagnoses.length === 0 ? (
                             <div
                               className="flex items-center px-4 py-[5px]"
-                              style={{ background: '#E6F8FD' }}
+                              style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                             >
                               <span
-                                className="w-[55%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[55%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Condition / Diagnosis
+                                No diagnoses recorded
                               </span>
                               <span
-                                className="w-[25%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[25%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Date Diagnosed
+                                –
                               </span>
                               <span
-                                className="w-[20%] text-right font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[20%] text-right"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Status
+                                –
                               </span>
                             </div>
-                            {patient.medicalHistory.pastDiagnoses.length === 0 ? (
+                          ) : (
+                            patient.medicalHistory.pastDiagnoses.map((row, i) => (
                               <div
+                                key={i}
                                 className="flex items-center px-4 py-[5px]"
                                 style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                               >
@@ -1285,55 +1315,28 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                                   className="w-[55%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  No diagnoses recorded
+                                  {row.condition}
                                 </span>
                                 <span
                                   className="w-[25%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  –
+                                  {row.dateDiagnosed}
                                 </span>
                                 <span
-                                  className="w-[20%] text-right"
-                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  className="w-[20%] text-right font-medium"
+                                  style={{
+                                    fontSize: 14,
+                                    lineHeight: '22px',
+                                    color: row.status === 'Active' ? '#22C55E' : '#2F3A40',
+                                  }}
                                 >
-                                  –
+                                  {row.status}
                                 </span>
                               </div>
-                            ) : (
-                              patient.medicalHistory.pastDiagnoses.map((row, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center px-4 py-[5px]"
-                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
-                                >
-                                  <span
-                                    className="w-[55%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.condition}
-                                  </span>
-                                  <span
-                                    className="w-[25%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.dateDiagnosed}
-                                  </span>
-                                  <span
-                                    className="w-[20%] text-right font-medium"
-                                    style={{
-                                      fontSize: 14,
-                                      lineHeight: '22px',
-                                      color: row.status === 'Active' ? '#22C55E' : '#2F3A40',
-                                    }}
-                                  >
-                                    {row.status}
-                                  </span>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
+                            ))
+                          )}
+                        </ScrollableTable>
                       )}
                     </div>
 
@@ -1367,33 +1370,58 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.familyHistory && (
-                        <div className="overflow-x-auto scroll-smooth">
-                          <div className="min-w-[360px]">
+                        <ScrollableTable minWidth={360} maxHeight={640}>
+                          <div
+                            className={`flex items-center px-4 py-[5px] ${TABLE_HEADER_STICKY_CLASS}`}
+                            style={{ background: TABLE_HEADER_BG }}
+                          >
+                            <span
+                              className="w-[40%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Condition
+                            </span>
+                            <span
+                              className="w-[30%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Relationship
+                            </span>
+                            <span
+                              className="w-[30%] text-right font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Notes
+                            </span>
+                          </div>
+                          {patient.medicalHistory.familyHistory.length === 0 ? (
                             <div
                               className="flex items-center px-4 py-[5px]"
-                              style={{ background: '#E6F8FD' }}
+                              style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                             >
                               <span
-                                className="w-[40%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[40%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Condition
+                                No family history recorded
                               </span>
                               <span
-                                className="w-[30%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[30%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Relationship
+                                –
                               </span>
                               <span
-                                className="w-[30%] text-right font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[30%] text-right"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Notes
+                                –
                               </span>
                             </div>
-                            {patient.medicalHistory.familyHistory.length === 0 ? (
+                          ) : (
+                            patient.medicalHistory.familyHistory.map((row, i) => (
                               <div
+                                key={i}
                                 className="flex items-center px-4 py-[5px]"
                                 style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                               >
@@ -1401,51 +1429,24 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                                   className="w-[40%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  No family history recorded
+                                  {row.condition}
                                 </span>
                                 <span
                                   className="w-[30%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  –
+                                  {row.relationship}
                                 </span>
                                 <span
                                   className="w-[30%] text-right"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  –
+                                  {row.notes}
                                 </span>
                               </div>
-                            ) : (
-                              patient.medicalHistory.familyHistory.map((row, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center px-4 py-[5px]"
-                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
-                                >
-                                  <span
-                                    className="w-[40%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.condition}
-                                  </span>
-                                  <span
-                                    className="w-[30%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.relationship}
-                                  </span>
-                                  <span
-                                    className="w-[30%] text-right"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.notes}
-                                  </span>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
+                            ))
+                          )}
+                        </ScrollableTable>
                       )}
                     </div>
 
@@ -1481,33 +1482,58 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.immunizationHistory && (
-                        <div className="overflow-x-auto scroll-smooth">
-                          <div className="min-w-[360px]">
+                        <ScrollableTable minWidth={360} maxHeight={640}>
+                          <div
+                            className={`flex items-center px-4 py-[5px] ${TABLE_HEADER_STICKY_CLASS}`}
+                            style={{ background: TABLE_HEADER_BG }}
+                          >
+                            <span
+                              className="w-[40%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Vaccine
+                            </span>
+                            <span
+                              className="w-[35%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Date Administered
+                            </span>
+                            <span
+                              className="w-[25%] text-right font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Next Due
+                            </span>
+                          </div>
+                          {patient.medicalHistory.immunizationHistory.length === 0 ? (
                             <div
                               className="flex items-center px-4 py-[5px]"
-                              style={{ background: '#E6F8FD' }}
+                              style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                             >
                               <span
-                                className="w-[40%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[40%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Vaccine
+                                No immunization records
                               </span>
                               <span
-                                className="w-[35%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[35%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Date Administered
+                                –
                               </span>
                               <span
-                                className="w-[25%] text-right font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[25%] text-right"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Next Due
+                                –
                               </span>
                             </div>
-                            {patient.medicalHistory.immunizationHistory.length === 0 ? (
+                          ) : (
+                            patient.medicalHistory.immunizationHistory.map((row, i) => (
                               <div
+                                key={i}
                                 className="flex items-center px-4 py-[5px]"
                                 style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                               >
@@ -1515,51 +1541,24 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                                   className="w-[40%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  No immunization records
+                                  {row.vaccine}
                                 </span>
                                 <span
                                   className="w-[35%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  –
+                                  {row.dateAdministered}
                                 </span>
                                 <span
                                   className="w-[25%] text-right"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  –
+                                  {row.nextDue ?? '–'}
                                 </span>
                               </div>
-                            ) : (
-                              patient.medicalHistory.immunizationHistory.map((row, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center px-4 py-[5px]"
-                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
-                                >
-                                  <span
-                                    className="w-[40%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.vaccine}
-                                  </span>
-                                  <span
-                                    className="w-[35%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.dateAdministered}
-                                  </span>
-                                  <span
-                                    className="w-[25%] text-right"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.nextDue ?? '–'}
-                                  </span>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
+                            ))
+                          )}
+                        </ScrollableTable>
                       )}
                     </div>
                   </div>
@@ -1596,33 +1595,58 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.surgicalHistory && (
-                        <div className="overflow-x-auto scroll-smooth">
-                          <div className="min-w-[360px]">
+                        <ScrollableTable minWidth={360} maxHeight={640}>
+                          <div
+                            className={`flex items-center px-4 py-[5px] ${TABLE_HEADER_STICKY_CLASS}`}
+                            style={{ background: TABLE_HEADER_BG }}
+                          >
+                            <span
+                              className="w-[50%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Surgery / Procedure
+                            </span>
+                            <span
+                              className="w-[25%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Date
+                            </span>
+                            <span
+                              className="w-[25%] text-right font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Hospital
+                            </span>
+                          </div>
+                          {patient.medicalHistory.surgicalHistory.length === 0 ? (
                             <div
                               className="flex items-center px-4 py-[5px]"
-                              style={{ background: '#E6F8FD' }}
+                              style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                             >
                               <span
-                                className="w-[50%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[50%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Surgery / Procedure
+                                No surgical history recorded
                               </span>
                               <span
-                                className="w-[25%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[25%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Date
+                                –
                               </span>
                               <span
-                                className="w-[25%] text-right font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[25%] text-right"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Hospital
+                                –
                               </span>
                             </div>
-                            {patient.medicalHistory.surgicalHistory.length === 0 ? (
+                          ) : (
+                            patient.medicalHistory.surgicalHistory.map((row, i) => (
                               <div
+                                key={i}
                                 className="flex items-center px-4 py-[5px]"
                                 style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                               >
@@ -1630,51 +1654,24 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                                   className="w-[50%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  No surgical history recorded
+                                  {row.procedure}
                                 </span>
                                 <span
                                   className="w-[25%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  –
+                                  {row.date}
                                 </span>
                                 <span
                                   className="w-[25%] text-right"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  –
+                                  {row.hospital}
                                 </span>
                               </div>
-                            ) : (
-                              patient.medicalHistory.surgicalHistory.map((row, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center px-4 py-[5px]"
-                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
-                                >
-                                  <span
-                                    className="w-[50%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.procedure}
-                                  </span>
-                                  <span
-                                    className="w-[25%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.date}
-                                  </span>
-                                  <span
-                                    className="w-[25%] text-right"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.hospital}
-                                  </span>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
+                            ))
+                          )}
+                        </ScrollableTable>
                       )}
                     </div>
 
@@ -1710,33 +1707,58 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.chronicConditions && (
-                        <div className="overflow-x-auto scroll-smooth">
-                          <div className="min-w-[360px]">
+                        <ScrollableTable minWidth={360} maxHeight={640}>
+                          <div
+                            className={`flex items-center px-4 py-[5px] ${TABLE_HEADER_STICKY_CLASS}`}
+                            style={{ background: TABLE_HEADER_BG }}
+                          >
+                            <span
+                              className="w-[55%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Condition
+                            </span>
+                            <span
+                              className="w-[20%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Date
+                            </span>
+                            <span
+                              className="w-[25%] text-right font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Status
+                            </span>
+                          </div>
+                          {patient.medicalHistory.chronicConditions.length === 0 ? (
                             <div
                               className="flex items-center px-4 py-[5px]"
-                              style={{ background: '#E6F8FD' }}
+                              style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                             >
                               <span
-                                className="w-[55%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[55%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Condition
+                                None recorded
                               </span>
                               <span
-                                className="w-[20%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[20%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Date
+                                –
                               </span>
                               <span
-                                className="w-[25%] text-right font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[25%] text-right"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Status
+                                –
                               </span>
                             </div>
-                            {patient.medicalHistory.chronicConditions.length === 0 ? (
+                          ) : (
+                            patient.medicalHistory.chronicConditions.map((row, i) => (
                               <div
+                                key={i}
                                 className="flex items-center px-4 py-[5px]"
                                 style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                               >
@@ -1744,55 +1766,28 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                                   className="w-[55%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  None recorded
+                                  {row.condition}
                                 </span>
                                 <span
                                   className="w-[20%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  –
+                                  {row.date}
                                 </span>
                                 <span
-                                  className="w-[25%] text-right"
-                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
+                                  className="w-[25%] text-right font-medium"
+                                  style={{
+                                    fontSize: 14,
+                                    lineHeight: '22px',
+                                    color: row.status === 'Active' ? '#22C55E' : '#2F3A40',
+                                  }}
                                 >
-                                  –
+                                  {row.status}
                                 </span>
                               </div>
-                            ) : (
-                              patient.medicalHistory.chronicConditions.map((row, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center px-4 py-[5px]"
-                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
-                                >
-                                  <span
-                                    className="w-[55%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.condition}
-                                  </span>
-                                  <span
-                                    className="w-[20%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.date}
-                                  </span>
-                                  <span
-                                    className="w-[25%] text-right font-medium"
-                                    style={{
-                                      fontSize: 14,
-                                      lineHeight: '22px',
-                                      color: row.status === 'Active' ? '#22C55E' : '#2F3A40',
-                                    }}
-                                  >
-                                    {row.status}
-                                  </span>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
+                            ))
+                          )}
+                        </ScrollableTable>
                       )}
                     </div>
 
@@ -1826,39 +1821,70 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                         />
                       </button>
                       {openSections.allergiesHistory && (
-                        <div className="overflow-x-auto scroll-smooth">
-                          <div className="min-w-[440px]">
+                        <ScrollableTable minWidth={440} maxHeight={640}>
+                          <div
+                            className={`flex items-center px-4 py-[5px] ${TABLE_HEADER_STICKY_CLASS}`}
+                            style={{ background: TABLE_HEADER_BG }}
+                          >
+                            <span
+                              className="w-[22%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Allergen
+                            </span>
+                            <span
+                              className="w-[33%] font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Reaction
+                            </span>
+                            <span
+                              className="w-[20%] text-center font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Severity
+                            </span>
+                            <span
+                              className="w-[25%] text-right font-medium uppercase"
+                              style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                            >
+                              Noted On
+                            </span>
+                          </div>
+                          {patient.medicalHistory.allergiesHistory.length === 0 ? (
                             <div
                               className="flex items-center px-4 py-[5px]"
-                              style={{ background: '#E6F8FD' }}
+                              style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                             >
                               <span
-                                className="w-[22%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[22%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Allergen
+                                No allergies recorded
                               </span>
                               <span
-                                className="w-[33%] font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[33%]"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Reaction
+                                –
                               </span>
                               <span
-                                className="w-[20%] text-center font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[20%] text-center"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Severity
+                                –
                               </span>
                               <span
-                                className="w-[25%] text-right font-medium uppercase"
-                                style={{ fontSize: 14, lineHeight: '22px', color: '#25464D' }}
+                                className="w-[25%] text-right"
+                                style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                               >
-                                Noted On
+                                –
                               </span>
                             </div>
-                            {patient.medicalHistory.allergiesHistory.length === 0 ? (
+                          ) : (
+                            patient.medicalHistory.allergiesHistory.map((row, i) => (
                               <div
+                                key={i}
                                 className="flex items-center px-4 py-[5px]"
                                 style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
                               >
@@ -1866,69 +1892,36 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                                   className="w-[22%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  No allergies recorded
+                                  {row.allergen}
                                 </span>
                                 <span
                                   className="w-[33%]"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  –
+                                  {row.reaction}
                                 </span>
-                                <span
-                                  className="w-[20%] text-center"
-                                  style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                >
-                                  –
+                                <span className="flex w-[20%] justify-center">
+                                  <span
+                                    className="inline-flex items-center rounded-full px-2.5 py-0.5 font-medium"
+                                    style={{
+                                      fontSize: 14,
+                                      lineHeight: '18px',
+                                      ...medSeverityStyles[row.severity],
+                                    }}
+                                  >
+                                    {row.severity}
+                                  </span>
                                 </span>
                                 <span
                                   className="w-[25%] text-right"
                                   style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
                                 >
-                                  –
+                                  {row.notedOn}
                                 </span>
                               </div>
-                            ) : (
-                              patient.medicalHistory.allergiesHistory.map((row, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center px-4 py-[5px]"
-                                  style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
-                                >
-                                  <span
-                                    className="w-[22%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.allergen}
-                                  </span>
-                                  <span
-                                    className="w-[33%]"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.reaction}
-                                  </span>
-                                  <span className="flex w-[20%] justify-center">
-                                    <span
-                                      className="inline-flex items-center rounded-full px-2.5 py-0.5 font-medium"
-                                      style={{
-                                        fontSize: 14,
-                                        lineHeight: '18px',
-                                        ...medSeverityStyles[row.severity],
-                                      }}
-                                    >
-                                      {row.severity}
-                                    </span>
-                                  </span>
-                                  <span
-                                    className="w-[25%] text-right"
-                                    style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}
-                                  >
-                                    {row.notedOn}
-                                  </span>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
+                            ))
+                          )}
+                        </ScrollableTable>
                       )}
                     </div>
                   </div>

@@ -30,6 +30,11 @@ import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { StatCardCompact } from '@components/shared/StatCard';
 import { useToast } from '@/hooks/useToast';
@@ -811,11 +816,11 @@ export function PharmacyWorkforceManagementWorkspace() {
                 </div>
 
                 {/* Desktop table — lg+ */}
-                <div className="hidden overflow-x-auto scroll-smooth lg:block">
+                <ScrollableTable minWidth={900} maxHeight={640} className="hidden lg:block">
                   <div
-                    className="flex"
+                    className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
                     style={{
-                      background: 'rgba(226,237,241,0.4)',
+                      background: TABLE_HEADER_BG,
                       borderTop: '1px solid #0064821F',
                       borderBottom: '1px solid #0064821F',
                     }}
@@ -974,7 +979,7 @@ export function PharmacyWorkforceManagementWorkspace() {
                       </div>
                     );
                   })}
-                </div>
+                </ScrollableTable>
 
                 <Pagination
                   page={clampedPage}

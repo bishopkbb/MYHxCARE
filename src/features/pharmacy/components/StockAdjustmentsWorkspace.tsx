@@ -20,6 +20,11 @@ import { AnimatedDonutChart } from '@components/shared/AnimatedDonutChart';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { StatCard } from '@components/shared/StatCard';
 import { getPharmacyLocation } from '@/constants/pharmacyLocations';
@@ -542,218 +547,216 @@ export function StockAdjustmentsWorkspace() {
                 >
                   Adjustments List ({filtered.length})
                 </h2>
-                <div className="mt-3 overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 1380 }}>
-                    <div
-                      className="flex rounded-t-[8px]"
-                      style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #E6F8FD',
-                      }}
-                    >
-                      <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Adjustment ID
-                        </span>
-                      </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Date & Time
-                        </span>
-                      </div>
-                      <div className="w-44 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Location
-                        </span>
-                      </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Type
-                        </span>
-                      </div>
-                      <div className="w-44 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Reason
-                        </span>
-                      </div>
-                      <div className="w-28 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Items / Qty
-                        </span>
-                      </div>
-                      <div className="w-32 shrink-0 py-2.5 pr-2 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Value Impact
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Adjusted By
-                        </span>
-                      </div>
-                      <div className="min-w-[90px] flex-1 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Reference
-                        </span>
-                      </div>
-                      <div className="w-16 shrink-0 py-2.5 pr-3 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Actions
-                        </span>
-                      </div>
+                <ScrollableTable minWidth={1380} maxHeight={640} className="mt-3">
+                  <div
+                    className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                    style={{
+                      background: TABLE_HEADER_BG,
+                      borderBottom: '1px solid #E6F8FD',
+                    }}
+                  >
+                    <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Adjustment ID
+                      </span>
                     </div>
-
-                    {pageRows.length === 0 && (
-                      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                        <div
-                          className="flex size-14 items-center justify-center rounded-full"
-                          style={{ background: 'rgba(226,237,241,0.6)' }}
-                        >
-                          <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                        </div>
-                        <p
-                          className="font-sans font-medium"
-                          style={{ fontSize: 16, color: '#4A7080' }}
-                        >
-                          No adjustments match your filters
-                        </p>
-                        <button
-                          type="button"
-                          onClick={handleClearFilters}
-                          className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
-                          style={{ fontSize: 14, color: '#00B4D8' }}
-                        >
-                          Clear all filters
-                        </button>
-                      </div>
-                    )}
-
-                    {pageRows.map((a) => {
-                      const typeCfg = TYPE_CFG[a.adjustmentType];
-                      const qty = getAdjustmentQty(a);
-                      const impact = getAdjustmentValueImpact(a);
-                      return (
-                        <div
-                          key={a.id}
-                          className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                        >
-                          <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                            <Tooltip content={a.id}>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {a.id}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-32 shrink-0 py-3 pr-2">
-                            <p style={{ fontSize: 14, color: '#4A7080' }}>
-                              {formatDateTime(a.adjustedAt)}
-                            </p>
-                          </div>
-                          <div className="w-44 shrink-0 py-3 pr-2">
-                            <Tooltip content={getPharmacyLocation(a.locationId).name}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                                {getPharmacyLocation(a.locationId).name}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-32 shrink-0 py-3 pr-2 pl-3">
-                            <span
-                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                whiteSpace: 'nowrap',
-                                color: typeCfg.color,
-                                border: `1px solid ${typeCfg.border}`,
-                                background: typeCfg.bg,
-                              }}
-                            >
-                              {a.adjustmentType}
-                            </span>
-                          </div>
-                          <div className="w-44 shrink-0 py-3 pr-2">
-                            <Tooltip content={a.reason}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {a.reason}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-28 shrink-0 py-3 pr-2 text-right">
-                            <p style={{ fontSize: 14, color: '#0D2630' }}>
-                              {a.items.length} items / {qty.toLocaleString('en-GB')}
-                            </p>
-                          </div>
-                          <div className="w-32 shrink-0 py-3 pr-2 text-right">
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 14, color: impact >= 0 ? '#16A34A' : '#DC2626' }}
-                            >
-                              {impact >= 0 ? '+' : '-'}
-                              {formatCurrency(Math.abs(impact))}
-                            </p>
-                          </div>
-                          <div className="w-36 shrink-0 py-3 pr-2">
-                            <Tooltip content={a.adjustedBy}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {a.adjustedBy}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="min-w-[90px] flex-1 py-3 pr-2">
-                            <Tooltip content={a.referenceNo ?? '—'}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {a.referenceNo ?? '—'}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="flex w-16 shrink-0 items-center justify-end py-3 pr-3">
-                            <button
-                              type="button"
-                              onClick={() => setModal({ type: 'detail', adjustment: a })}
-                              aria-label={`View ${a.id}`}
-                              className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                            >
-                              <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    <div className="w-32 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Date & Time
+                      </span>
+                    </div>
+                    <div className="w-44 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Location
+                      </span>
+                    </div>
+                    <div className="w-32 shrink-0 py-2.5 pr-2 pl-3">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Type
+                      </span>
+                    </div>
+                    <div className="w-44 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Reason
+                      </span>
+                    </div>
+                    <div className="w-28 shrink-0 py-2.5 pr-2 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Items / Qty
+                      </span>
+                    </div>
+                    <div className="w-32 shrink-0 py-2.5 pr-2 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Value Impact
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Adjusted By
+                      </span>
+                    </div>
+                    <div className="min-w-[90px] flex-1 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Reference
+                      </span>
+                    </div>
+                    <div className="w-16 shrink-0 py-2.5 pr-3 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Actions
+                      </span>
+                    </div>
                   </div>
-                </div>
+
+                  {pageRows.length === 0 && (
+                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                      <div
+                        className="flex size-14 items-center justify-center rounded-full"
+                        style={{ background: 'rgba(226,237,241,0.6)' }}
+                      >
+                        <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
+                      </div>
+                      <p
+                        className="font-sans font-medium"
+                        style={{ fontSize: 16, color: '#4A7080' }}
+                      >
+                        No adjustments match your filters
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        className={`mt-1 font-sans font-medium transition-colors duration-150 hover:underline ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#00B4D8' }}
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  )}
+
+                  {pageRows.map((a) => {
+                    const typeCfg = TYPE_CFG[a.adjustmentType];
+                    const qty = getAdjustmentQty(a);
+                    const impact = getAdjustmentValueImpact(a);
+                    return (
+                      <div
+                        key={a.id}
+                        className="flex items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                      >
+                        <div className="w-32 shrink-0 py-3 pr-2 pl-3">
+                          <Tooltip content={a.id}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {a.id}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-32 shrink-0 py-3 pr-2">
+                          <p style={{ fontSize: 14, color: '#4A7080' }}>
+                            {formatDateTime(a.adjustedAt)}
+                          </p>
+                        </div>
+                        <div className="w-44 shrink-0 py-3 pr-2">
+                          <Tooltip content={getPharmacyLocation(a.locationId).name}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                              {getPharmacyLocation(a.locationId).name}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-32 shrink-0 py-3 pr-2 pl-3">
+                          <span
+                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              whiteSpace: 'nowrap',
+                              color: typeCfg.color,
+                              border: `1px solid ${typeCfg.border}`,
+                              background: typeCfg.bg,
+                            }}
+                          >
+                            {a.adjustmentType}
+                          </span>
+                        </div>
+                        <div className="w-44 shrink-0 py-3 pr-2">
+                          <Tooltip content={a.reason}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {a.reason}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-28 shrink-0 py-3 pr-2 text-right">
+                          <p style={{ fontSize: 14, color: '#0D2630' }}>
+                            {a.items.length} items / {qty.toLocaleString('en-GB')}
+                          </p>
+                        </div>
+                        <div className="w-32 shrink-0 py-3 pr-2 text-right">
+                          <p
+                            className="font-sans font-medium"
+                            style={{ fontSize: 14, color: impact >= 0 ? '#16A34A' : '#DC2626' }}
+                          >
+                            {impact >= 0 ? '+' : '-'}
+                            {formatCurrency(Math.abs(impact))}
+                          </p>
+                        </div>
+                        <div className="w-36 shrink-0 py-3 pr-2">
+                          <Tooltip content={a.adjustedBy}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {a.adjustedBy}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="min-w-[90px] flex-1 py-3 pr-2">
+                          <Tooltip content={a.referenceNo ?? '—'}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {a.referenceNo ?? '—'}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="flex w-16 shrink-0 items-center justify-end py-3 pr-3">
+                          <button
+                            type="button"
+                            onClick={() => setModal({ type: 'detail', adjustment: a })}
+                            aria-label={`View ${a.id}`}
+                            className={`flex size-11 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                          >
+                            <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </ScrollableTable>
 
                 <Pagination
                   page={currentPage}

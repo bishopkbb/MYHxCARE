@@ -24,6 +24,11 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -553,113 +558,111 @@ export function PharmacyShiftHandoverWorkspace() {
                 />
               </div>
 
-              <div className="mt-4 overflow-x-auto scroll-smooth">
-                <div className="min-w-[760px]">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
+              <ScrollableTable minWidth={760} className="mt-4">
+                <div
+                  className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <span
+                    className="w-36 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <span
-                      className="w-36 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Rx No
-                    </span>
-                    <span
-                      className="w-36 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Patient
-                    </span>
-                    <span
-                      className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Medication
-                    </span>
-                    <span
-                      className="w-28 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Priority
-                    </span>
-                    <span
-                      className="w-40 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Prescriber
-                    </span>
-                  </div>
-                  {pendingPreview.length === 0 ? (
-                    <EmptyRow label="No prescriptions pending verification." />
-                  ) : (
-                    pendingPreview.map((entry, idx) => {
-                      const cfg = PRIORITY_CFG[entry.priority]!;
-                      const patientName = getPatientDetail(entry.patientId).name;
-                      return (
-                        <div
-                          key={entry.rxNo}
-                          className="flex items-center"
-                          style={{
-                            borderBottom:
-                              idx === pendingPreview.length - 1
-                                ? undefined
-                                : '1px solid rgba(0,100,130,0.08)',
-                          }}
-                        >
-                          <div className="w-36 shrink-0 py-3 pr-2 pl-3">
-                            <Tooltip content={entry.rxNo}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {entry.rxNo}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-36 shrink-0 py-3 pr-2">
-                            <Tooltip content={patientName}>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {patientName}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="min-w-0 flex-1 py-3 pr-2">
-                            <Tooltip content={entry.medicationName}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {entry.medicationName}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-28 shrink-0 py-3 pr-2">
-                            <span
-                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                              style={{
-                                fontSize: 14,
-                                color: cfg.color,
-                                background: cfg.bg,
-                                border: `1px solid ${cfg.border}`,
-                              }}
-                            >
-                              {entry.priority}
-                            </span>
-                          </div>
-                          <div className="w-40 shrink-0 py-3 pr-3">
-                            <Tooltip content={entry.doctorName}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {entry.doctorName}
-                              </p>
-                            </Tooltip>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
+                    Rx No
+                  </span>
+                  <span
+                    className="w-36 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Patient
+                  </span>
+                  <span
+                    className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Medication
+                  </span>
+                  <span
+                    className="w-28 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Priority
+                  </span>
+                  <span
+                    className="w-40 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Prescriber
+                  </span>
                 </div>
-              </div>
+                {pendingPreview.length === 0 ? (
+                  <EmptyRow label="No prescriptions pending verification." />
+                ) : (
+                  pendingPreview.map((entry, idx) => {
+                    const cfg = PRIORITY_CFG[entry.priority]!;
+                    const patientName = getPatientDetail(entry.patientId).name;
+                    return (
+                      <div
+                        key={entry.rxNo}
+                        className="flex items-center"
+                        style={{
+                          borderBottom:
+                            idx === pendingPreview.length - 1
+                              ? undefined
+                              : '1px solid rgba(0,100,130,0.08)',
+                        }}
+                      >
+                        <div className="w-36 shrink-0 py-3 pr-2 pl-3">
+                          <Tooltip content={entry.rxNo}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {entry.rxNo}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-36 shrink-0 py-3 pr-2">
+                          <Tooltip content={patientName}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {patientName}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="min-w-0 flex-1 py-3 pr-2">
+                          <Tooltip content={entry.medicationName}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {entry.medicationName}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-28 shrink-0 py-3 pr-2">
+                          <span
+                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                            style={{
+                              fontSize: 14,
+                              color: cfg.color,
+                              background: cfg.bg,
+                              border: `1px solid ${cfg.border}`,
+                            }}
+                          >
+                            {entry.priority}
+                          </span>
+                        </div>
+                        <div className="w-40 shrink-0 py-3 pr-3">
+                          <Tooltip content={entry.doctorName}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {entry.doctorName}
+                            </p>
+                          </Tooltip>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </ScrollableTable>
 
               <button
                 type="button"
@@ -711,109 +714,107 @@ export function PharmacyShiftHandoverWorkspace() {
             </SectionCard>
 
             <SectionCard title="Priority Follow-ups" icon={AlertTriangle} iconColor="#EF4444">
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[640px]">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
+              <ScrollableTable minWidth={640}>
+                <div
+                  className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <span
+                    className="w-36 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <span
-                      className="w-36 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Rx No
-                    </span>
-                    <span
-                      className="w-32 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Patient
-                    </span>
-                    <span
-                      className="w-24 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Priority
-                    </span>
-                    <span
-                      className="min-w-0 flex-1 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Stage
-                    </span>
-                  </div>
-                  {onHoldPreview.length === 0 ? (
-                    <EmptyRow label="No prescriptions on hold." />
-                  ) : (
-                    onHoldPreview.map((entry, idx) => {
-                      const stageCfg = STAGE_CFG[entry.stage] ?? STAGE_CFG['Pending Verification']!;
-                      const priorityCfg = PRIORITY_CFG[entry.priority]!;
-                      const patientName = getPatientDetail(entry.patientId).name;
-                      return (
-                        <div
-                          key={entry.rxNo}
-                          className="flex items-center"
-                          style={{
-                            borderBottom:
-                              idx === onHoldPreview.length - 1
-                                ? undefined
-                                : '1px solid rgba(0,100,130,0.08)',
-                          }}
-                        >
-                          <div className="w-36 shrink-0 py-3 pr-2 pl-3">
-                            <Tooltip content={entry.rxNo}>
-                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                {entry.rxNo}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-32 shrink-0 py-3 pr-2">
-                            <Tooltip content={patientName}>
-                              <p
-                                className="truncate font-sans font-medium"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {patientName}
-                              </p>
-                            </Tooltip>
-                          </div>
-                          <div className="w-24 shrink-0 py-3 pr-2">
+                    Rx No
+                  </span>
+                  <span
+                    className="w-32 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Patient
+                  </span>
+                  <span
+                    className="w-24 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Priority
+                  </span>
+                  <span
+                    className="min-w-0 flex-1 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Stage
+                  </span>
+                </div>
+                {onHoldPreview.length === 0 ? (
+                  <EmptyRow label="No prescriptions on hold." />
+                ) : (
+                  onHoldPreview.map((entry, idx) => {
+                    const stageCfg = STAGE_CFG[entry.stage] ?? STAGE_CFG['Pending Verification']!;
+                    const priorityCfg = PRIORITY_CFG[entry.priority]!;
+                    const patientName = getPatientDetail(entry.patientId).name;
+                    return (
+                      <div
+                        key={entry.rxNo}
+                        className="flex items-center"
+                        style={{
+                          borderBottom:
+                            idx === onHoldPreview.length - 1
+                              ? undefined
+                              : '1px solid rgba(0,100,130,0.08)',
+                        }}
+                      >
+                        <div className="w-36 shrink-0 py-3 pr-2 pl-3">
+                          <Tooltip content={entry.rxNo}>
+                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                              {entry.rxNo}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-32 shrink-0 py-3 pr-2">
+                          <Tooltip content={patientName}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {patientName}
+                            </p>
+                          </Tooltip>
+                        </div>
+                        <div className="w-24 shrink-0 py-3 pr-2">
+                          <span
+                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                            style={{
+                              fontSize: 14,
+                              color: priorityCfg.color,
+                              background: priorityCfg.bg,
+                              border: `1px solid ${priorityCfg.border}`,
+                            }}
+                          >
+                            {entry.priority}
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1 py-3 pr-3">
+                          <Tooltip content={entry.stage}>
                             <span
-                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                              className="inline-block max-w-full truncate rounded-full px-2.5 py-0.5 font-sans font-medium"
                               style={{
                                 fontSize: 14,
-                                color: priorityCfg.color,
-                                background: priorityCfg.bg,
-                                border: `1px solid ${priorityCfg.border}`,
+                                color: stageCfg.color,
+                                background: stageCfg.bg,
+                                border: `1px solid ${stageCfg.border}`,
                               }}
                             >
-                              {entry.priority}
+                              {entry.stage}
                             </span>
-                          </div>
-                          <div className="min-w-0 flex-1 py-3 pr-3">
-                            <Tooltip content={entry.stage}>
-                              <span
-                                className="inline-block max-w-full truncate rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                style={{
-                                  fontSize: 14,
-                                  color: stageCfg.color,
-                                  background: stageCfg.bg,
-                                  border: `1px solid ${stageCfg.border}`,
-                                }}
-                              >
-                                {entry.stage}
-                              </span>
-                            </Tooltip>
-                          </div>
+                          </Tooltip>
                         </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
+                      </div>
+                    );
+                  })
+                )}
+              </ScrollableTable>
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.pharmacyQueueMonitor)}
@@ -833,92 +834,84 @@ export function PharmacyShiftHandoverWorkspace() {
               iconColor="#7C3AED"
               subtitle="Requires a second pharmacist's countersignature"
             >
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[620px]">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
+              <ScrollableTable minWidth={620}>
+                <div
+                  className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <span
+                    className="w-48 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <span
-                      className="w-48 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Rx No
-                    </span>
-                    <span
-                      className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Medication
-                    </span>
-                    <span
-                      className="w-24 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Schedule
-                    </span>
-                    <span
-                      className="w-24 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Qty
-                    </span>
-                  </div>
-                  {pendingApprovalControlled.length === 0 ? (
-                    <EmptyRow label="No controlled dispenses pending approval." />
-                  ) : (
-                    pendingApprovalControlled.map((entry, idx) => (
-                      <div
-                        key={entry.id}
-                        className="flex items-center"
-                        style={{
-                          borderBottom:
-                            idx === pendingApprovalControlled.length - 1
-                              ? undefined
-                              : '1px solid rgba(0,100,130,0.08)',
-                        }}
-                      >
-                        <div className="w-48 shrink-0 py-3 pr-2 pl-3">
-                          <Tooltip content={entry.rxNo}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {entry.rxNo}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="min-w-0 flex-1 py-3 pr-2">
-                          <Tooltip content={entry.medicationName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {entry.medicationName}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-2">
-                          <p
-                            className="whitespace-nowrap"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {entry.controlledSchedule ?? '—'}
-                          </p>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-3">
-                          <p
-                            className="whitespace-nowrap"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {entry.qty} {entry.unit}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                    Rx No
+                  </span>
+                  <span
+                    className="min-w-0 flex-1 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Medication
+                  </span>
+                  <span
+                    className="w-24 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Schedule
+                  </span>
+                  <span
+                    className="w-24 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Qty
+                  </span>
                 </div>
-              </div>
+                {pendingApprovalControlled.length === 0 ? (
+                  <EmptyRow label="No controlled dispenses pending approval." />
+                ) : (
+                  pendingApprovalControlled.map((entry, idx) => (
+                    <div
+                      key={entry.id}
+                      className="flex items-center"
+                      style={{
+                        borderBottom:
+                          idx === pendingApprovalControlled.length - 1
+                            ? undefined
+                            : '1px solid rgba(0,100,130,0.08)',
+                      }}
+                    >
+                      <div className="w-48 shrink-0 py-3 pr-2 pl-3">
+                        <Tooltip content={entry.rxNo}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {entry.rxNo}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="min-w-0 flex-1 py-3 pr-2">
+                        <Tooltip content={entry.medicationName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {entry.medicationName}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-2">
+                        <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {entry.controlledSchedule ?? '—'}
+                        </p>
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-3">
+                        <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
+                          {entry.qty} {entry.unit}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </ScrollableTable>
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.pharmacyControlledDrugs)}
@@ -930,87 +923,85 @@ export function PharmacyShiftHandoverWorkspace() {
             </SectionCard>
 
             <SectionCard title="Low Stock Medicines" icon={Boxes} iconColor="#D97706">
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[520px]">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
+              <ScrollableTable minWidth={520}>
+                <div
+                  className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <span
+                    className="min-w-0 flex-1 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <span
-                      className="min-w-0 flex-1 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Medication
-                    </span>
-                    <span
-                      className="w-32 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Campus
-                    </span>
-                    <span
-                      className="w-24 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Stock
-                    </span>
-                    <span
-                      className="w-24 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Reorder At
-                    </span>
-                  </div>
-                  {lowStockRows.length === 0 ? (
-                    <EmptyRow label="No medicines currently below reorder level." />
-                  ) : (
-                    lowStockRows.map((row, idx) => (
-                      <div
-                        key={row.id}
-                        className="flex items-center"
-                        style={{
-                          borderBottom:
-                            idx === lowStockRows.length - 1
-                              ? undefined
-                              : '1px solid rgba(0,100,130,0.08)',
-                        }}
-                      >
-                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
-                          <Tooltip content={`${row.medicationName} ${row.strength}`}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {row.medicationName} {row.strength}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
-                          <Tooltip content={LOCATION_SHORT_NAME[row.locationId] ?? row.locationId}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {LOCATION_SHORT_NAME[row.locationId] ?? row.locationId}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-2">
-                          <p
-                            className="font-sans font-semibold"
-                            style={{ fontSize: 14, color: '#D97706' }}
-                          >
-                            {row.stockQty}
-                          </p>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-3">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{row.reorderLevel}</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                    Medication
+                  </span>
+                  <span
+                    className="w-32 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Campus
+                  </span>
+                  <span
+                    className="w-24 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Stock
+                  </span>
+                  <span
+                    className="w-24 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Reorder At
+                  </span>
                 </div>
-              </div>
+                {lowStockRows.length === 0 ? (
+                  <EmptyRow label="No medicines currently below reorder level." />
+                ) : (
+                  lowStockRows.map((row, idx) => (
+                    <div
+                      key={row.id}
+                      className="flex items-center"
+                      style={{
+                        borderBottom:
+                          idx === lowStockRows.length - 1
+                            ? undefined
+                            : '1px solid rgba(0,100,130,0.08)',
+                      }}
+                    >
+                      <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                        <Tooltip content={`${row.medicationName} ${row.strength}`}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {row.medicationName} {row.strength}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-32 shrink-0 py-3 pr-2">
+                        <Tooltip content={LOCATION_SHORT_NAME[row.locationId] ?? row.locationId}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {LOCATION_SHORT_NAME[row.locationId] ?? row.locationId}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-2">
+                        <p
+                          className="font-sans font-semibold"
+                          style={{ fontSize: 14, color: '#D97706' }}
+                        >
+                          {row.stockQty}
+                        </p>
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-3">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>{row.reorderLevel}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </ScrollableTable>
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.pharmacyInventory)}

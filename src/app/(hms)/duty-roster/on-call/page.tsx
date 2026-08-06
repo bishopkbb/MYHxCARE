@@ -6,6 +6,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { Pagination } from '@components/shared/Pagination';
 import { ROUTES } from '@/constants/routes';
@@ -337,99 +342,101 @@ export default function OnCallSchedulePage() {
               </div>
             ) : (
               <>
-                <div className="hidden overflow-x-auto scroll-smooth lg:block">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderTop: '1px solid #0064821F',
-                      borderBottom: '1px solid #0064821F',
-                    }}
-                  >
-                    <div className="w-[16%] px-4 py-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Date
-                      </span>
-                    </div>
-                    <div className="w-[28%] px-4 py-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Department
-                      </span>
-                    </div>
-                    <div className="w-[20%] px-4 py-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Level
-                      </span>
-                    </div>
-                    <div className="min-w-0 flex-1 px-4 py-3">
-                      <span
-                        className="font-sans font-bold tracking-wider uppercase"
-                        style={{ fontSize: 14, color: '#4A7080' }}
-                      >
-                        Doctor
-                      </span>
-                    </div>
-                  </div>
-                  {paginatedSchedule.map((entry) => {
-                    const levelMeta = ON_CALL_LEVEL_META[entry.level];
-                    return (
-                      <div
-                        key={entry.id}
-                        className="flex items-center transition-colors duration-150 hover:bg-[#F5FBFD]"
-                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                      >
-                        <div className="w-[16%] px-4 py-3">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.date}</p>
-                        </div>
-                        <div className="w-[28%] px-4 py-3">
-                          <Tooltip content={entry.department}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
-                              {entry.department}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-[20%] px-4 py-3">
-                          <span
-                            className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              whiteSpace: 'nowrap',
-                              color: levelMeta.color,
-                              border: `1px solid ${levelMeta.color}66`,
-                              background: 'transparent',
-                            }}
-                          >
-                            {levelMeta.label}
-                          </span>
-                        </div>
-                        <div className="flex min-w-0 flex-1 items-center gap-2.5 px-4 py-3">
-                          <div
-                            className="flex size-7 shrink-0 items-center justify-center rounded-full font-sans font-semibold text-white"
-                            style={{ background: entry.avatarBg, fontSize: 13 }}
-                          >
-                            {entry.initials}
-                          </div>
-                          <Tooltip content={entry.doctorName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {entry.doctorName}
-                            </p>
-                          </Tooltip>
-                        </div>
+                <div className="hidden lg:block">
+                  <ScrollableTable minWidth={720} maxHeight={640}>
+                    <div
+                      className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                      style={{
+                        background: TABLE_HEADER_BG,
+                        borderTop: '1px solid #0064821F',
+                        borderBottom: '1px solid #0064821F',
+                      }}
+                    >
+                      <div className="w-[16%] px-4 py-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Date
+                        </span>
                       </div>
-                    );
-                  })}
+                      <div className="w-[28%] px-4 py-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Department
+                        </span>
+                      </div>
+                      <div className="w-[20%] px-4 py-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Level
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1 px-4 py-3">
+                        <span
+                          className="font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Doctor
+                        </span>
+                      </div>
+                    </div>
+                    {paginatedSchedule.map((entry) => {
+                      const levelMeta = ON_CALL_LEVEL_META[entry.level];
+                      return (
+                        <div
+                          key={entry.id}
+                          className="flex items-center transition-colors duration-150 hover:bg-[#F5FBFD]"
+                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                        >
+                          <div className="w-[16%] px-4 py-3">
+                            <p style={{ fontSize: 14, color: '#4A7080' }}>{entry.date}</p>
+                          </div>
+                          <div className="w-[28%] px-4 py-3">
+                            <Tooltip content={entry.department}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                                {entry.department}
+                              </p>
+                            </Tooltip>
+                          </div>
+                          <div className="w-[20%] px-4 py-3">
+                            <span
+                              className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
+                              style={{
+                                fontSize: 14,
+                                whiteSpace: 'nowrap',
+                                color: levelMeta.color,
+                                border: `1px solid ${levelMeta.color}66`,
+                                background: 'transparent',
+                              }}
+                            >
+                              {levelMeta.label}
+                            </span>
+                          </div>
+                          <div className="flex min-w-0 flex-1 items-center gap-2.5 px-4 py-3">
+                            <div
+                              className="flex size-7 shrink-0 items-center justify-center rounded-full font-sans font-semibold text-white"
+                              style={{ background: entry.avatarBg, fontSize: 13 }}
+                            >
+                              {entry.initials}
+                            </div>
+                            <Tooltip content={entry.doctorName}>
+                              <p
+                                className="truncate font-sans font-medium"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {entry.doctorName}
+                              </p>
+                            </Tooltip>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </ScrollableTable>
                 </div>
 
                 <div className="flex flex-col gap-2 px-4 py-3 lg:hidden">

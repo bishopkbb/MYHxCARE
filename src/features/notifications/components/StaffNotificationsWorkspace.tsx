@@ -16,6 +16,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { Tooltip } from '@components/shared/Tooltip';
 import { FormSelect } from '@components/shared/FormSelect';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { useAuth } from '@hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { ROUTES } from '@/constants/routes';
@@ -425,202 +430,197 @@ export function StaffNotificationsWorkspace() {
                 className="rounded-[12px] p-4 sm:p-5"
                 style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
               >
-                <div className="overflow-x-auto scroll-smooth">
-                  <div className="min-w-[900px]">
-                    <div
-                      className="flex rounded-t-[8px]"
-                      style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #E6F8FD',
-                      }}
-                    >
-                      <div className="min-w-0 flex-1 py-2.5 pr-2 pl-3">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Notification
-                        </span>
-                      </div>
-                      <div className="w-24 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Time
-                        </span>
-                      </div>
-                      <div className="w-40 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Related Patient
-                        </span>
-                      </div>
-                      <div className="w-36 shrink-0 py-2.5 pr-2">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Department
-                        </span>
-                      </div>
-                      <div className="w-28 shrink-0 py-2.5 pr-3 text-right">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Actions
-                        </span>
-                      </div>
+                <ScrollableTable minWidth={900} maxHeight={640}>
+                  <div
+                    className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                    style={{
+                      background: TABLE_HEADER_BG,
+                      borderBottom: '1px solid #E6F8FD',
+                    }}
+                  >
+                    <div className="min-w-0 flex-1 py-2.5 pr-2 pl-3">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Notification
+                      </span>
                     </div>
+                    <div className="w-24 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Time
+                      </span>
+                    </div>
+                    <div className="w-40 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Related Patient
+                      </span>
+                    </div>
+                    <div className="w-36 shrink-0 py-2.5 pr-2">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Department
+                      </span>
+                    </div>
+                    <div className="w-28 shrink-0 py-2.5 pr-3 text-right">
+                      <span
+                        className="font-sans font-bold tracking-wider uppercase"
+                        style={{ fontSize: 14, color: '#4A7080' }}
+                      >
+                        Actions
+                      </span>
+                    </div>
+                  </div>
 
-                    {pageRows.length === 0 && (
-                      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                        <div
-                          className="flex size-14 items-center justify-center rounded-full"
-                          style={{ background: 'rgba(226,237,241,0.6)' }}
-                        >
-                          <Bell style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                        </div>
-                        <p
-                          className="font-sans font-medium"
-                          style={{ fontSize: 16, color: '#4A7080' }}
-                        >
-                          No notifications match your filters
-                        </p>
-                        <button
-                          type="button"
-                          onClick={handleReset}
-                          className="mt-1 font-sans font-medium transition-colors duration-150 hover:underline focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          style={{ fontSize: 14, color: '#00B4D8' }}
-                        >
-                          Clear all filters
-                        </button>
+                  {pageRows.length === 0 && (
+                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                      <div
+                        className="flex size-14 items-center justify-center rounded-full"
+                        style={{ background: 'rgba(226,237,241,0.6)' }}
+                      >
+                        <Bell style={{ width: 24, height: 24, color: '#8A98A3' }} />
                       </div>
-                    )}
+                      <p
+                        className="font-sans font-medium"
+                        style={{ fontSize: 16, color: '#4A7080' }}
+                      >
+                        No notifications match your filters
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleReset}
+                        className="mt-1 font-sans font-medium transition-colors duration-150 hover:underline focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                        style={{ fontSize: 14, color: '#00B4D8' }}
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  )}
 
-                    {pageRows.map((n) => {
-                      const cfg = CATEGORY_CFG[n.category];
-                      const deptCfg = DEPARTMENT_CFG[n.department] ?? {
-                        color: '#4A7080',
-                        border: 'rgba(74,112,128,0.30)',
-                        bg: 'transparent',
-                      };
-                      return (
-                        <div
-                          key={n.id}
-                          className="flex items-center"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                        >
-                          <div className="flex min-w-0 flex-1 items-start gap-2.5 py-3 pr-2 pl-3">
-                            {!n.read && (
-                              <span
-                                className="mt-1.5 size-2 shrink-0 rounded-full"
-                                style={{ background: '#00B4D8' }}
-                                aria-label="Unread"
-                              />
-                            )}
-                            <div
-                              className="flex size-9 shrink-0 items-center justify-center rounded-full"
-                              style={{ background: cfg.bg }}
-                            >
-                              <cfg.icon style={{ width: 16, height: 16, color: cfg.color }} />
-                            </div>
-                            <div className="min-w-0">
-                              <Tooltip content={n.title}>
+                  {pageRows.map((n) => {
+                    const cfg = CATEGORY_CFG[n.category];
+                    const deptCfg = DEPARTMENT_CFG[n.department] ?? {
+                      color: '#4A7080',
+                      border: 'rgba(74,112,128,0.30)',
+                      bg: 'transparent',
+                    };
+                    return (
+                      <div
+                        key={n.id}
+                        className="flex items-center"
+                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                      >
+                        <div className="flex min-w-0 flex-1 items-start gap-2.5 py-3 pr-2 pl-3">
+                          {!n.read && (
+                            <span
+                              className="mt-1.5 size-2 shrink-0 rounded-full"
+                              style={{ background: '#00B4D8' }}
+                              aria-label="Unread"
+                            />
+                          )}
+                          <div
+                            className="flex size-9 shrink-0 items-center justify-center rounded-full"
+                            style={{ background: cfg.bg }}
+                          >
+                            <cfg.icon style={{ width: 16, height: 16, color: cfg.color }} />
+                          </div>
+                          <div className="min-w-0">
+                            <Tooltip content={n.title}>
+                              <p
+                                className="truncate font-sans font-semibold"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {n.title}
+                              </p>
+                            </Tooltip>
+                            <Tooltip content={n.body}>
+                              <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                {n.body}
+                              </p>
+                            </Tooltip>
+                          </div>
+                        </div>
+                        <div className="w-24 shrink-0 py-3 pr-2">
+                          <p style={{ fontSize: 14, color: '#0D2630' }}>
+                            {formatTime(n.timestamp)}
+                          </p>
+                          <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                            {relativeTime(n.timestamp)}
+                          </p>
+                        </div>
+                        <div className="w-40 shrink-0 py-3 pr-2">
+                          {n.patientName ? (
+                            <>
+                              <Tooltip content={n.patientName}>
                                 <p
-                                  className="truncate font-sans font-semibold"
+                                  className="truncate font-sans font-medium"
                                   style={{ fontSize: 14, color: '#0D2630' }}
                                 >
-                                  {n.title}
+                                  {n.patientName}
                                 </p>
                               </Tooltip>
-                              <Tooltip content={n.body}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {n.body}
+                              <Tooltip content={n.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {n.mrn}
                                 </p>
                               </Tooltip>
-                            </div>
-                          </div>
-                          <div className="w-24 shrink-0 py-3 pr-2">
-                            <p style={{ fontSize: 14, color: '#0D2630' }}>
-                              {formatTime(n.timestamp)}
-                            </p>
-                            <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {relativeTime(n.timestamp)}
-                            </p>
-                          </div>
-                          <div className="w-40 shrink-0 py-3 pr-2">
-                            {n.patientName ? (
-                              <>
-                                <Tooltip content={n.patientName}>
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {n.patientName}
-                                  </p>
-                                </Tooltip>
-                                <Tooltip content={n.mrn}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#8A98A3' }}
-                                  >
-                                    {n.mrn}
-                                  </p>
-                                </Tooltip>
-                              </>
-                            ) : (
-                              <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
-                            )}
-                          </div>
-                          <div className="w-36 shrink-0 py-3 pr-2">
-                            <span
-                              className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                whiteSpace: 'nowrap',
-                                color: deptCfg.color,
-                                border: `1px solid ${deptCfg.border}`,
-                                background: deptCfg.bg,
-                              }}
-                            >
-                              {n.department}
-                            </span>
-                          </div>
-                          <div className="flex w-28 shrink-0 items-center justify-end gap-1 py-3 pr-3">
-                            <button
-                              type="button"
-                              onClick={() => handleView(n)}
-                              aria-label={`View ${n.title}`}
-                              className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                            >
-                              <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleOpenRecord(n)}
-                              aria-label={`Open related record for ${n.title}`}
-                              className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                            >
-                              <FolderOpen style={{ width: 15, height: 15, color: '#4A7080' }} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(n.id)}
-                              aria-label={`Delete ${n.title}`}
-                              className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(239,68,68,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                            >
-                              <Trash2 style={{ width: 15, height: 15, color: '#EF4444' }} />
-                            </button>
-                          </div>
+                            </>
+                          ) : (
+                            <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                        <div className="w-36 shrink-0 py-3 pr-2">
+                          <span
+                            className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              whiteSpace: 'nowrap',
+                              color: deptCfg.color,
+                              border: `1px solid ${deptCfg.border}`,
+                              background: deptCfg.bg,
+                            }}
+                          >
+                            {n.department}
+                          </span>
+                        </div>
+                        <div className="flex w-28 shrink-0 items-center justify-end gap-1 py-3 pr-3">
+                          <button
+                            type="button"
+                            onClick={() => handleView(n)}
+                            aria-label={`View ${n.title}`}
+                            className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          >
+                            <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenRecord(n)}
+                            aria-label={`Open related record for ${n.title}`}
+                            className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[#E6F8FD] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          >
+                            <FolderOpen style={{ width: 15, height: 15, color: '#4A7080' }} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(n.id)}
+                            aria-label={`Delete ${n.title}`}
+                            className="flex size-8 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(239,68,68,0.08)] focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          >
+                            <Trash2 style={{ width: 15, height: 15, color: '#EF4444' }} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </ScrollableTable>
 
                 {filtered.length > 0 && (
                   <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
