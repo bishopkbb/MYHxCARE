@@ -217,10 +217,20 @@ jobs:
           docker push "$IMMUTABLE_IMAGE_REF"
           docker push "$DEV_IMAGE_REF"
 
-          digest="$(
-            docker buildx imagetools inspect "$IMMUTABLE_IMAGE_REF" |
-              awk '$1 == "Digest:" { print $2; exit }'
-          )"
+          # GHCR can briefly 404 a manifest that was just pushed (read-after-write
+          # lag), so retry the inspect instead of failing on the first miss.
+          digest=""
+          for attempt in 1 2 3 4 5; do
+            if digest="$(
+              docker buildx imagetools inspect "$IMMUTABLE_IMAGE_REF" 2>/dev/null |
+                awk '$1 == "Digest:" { print $2; exit }'
+            )" && [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+              break
+            fi
+            echo "Manifest not yet readable from GHCR (attempt $attempt/5); retrying in 5s..." >&2
+            sleep 5
+            digest=""
+          done
 
           if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
             echo "Unable to resolve the published image digest." >&2
