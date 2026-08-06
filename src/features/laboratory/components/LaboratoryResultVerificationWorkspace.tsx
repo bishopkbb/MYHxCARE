@@ -26,6 +26,11 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -704,229 +709,226 @@ export function LaboratoryResultVerificationWorkspace() {
               className="min-w-0 flex-1 rounded-[12px] bg-white"
               style={{ border: '1px solid rgba(0,100,130,0.12)' }}
             >
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[1440px]">
+              <ScrollableTable minWidth={1440} maxHeight={640}>
+                <div
+                  className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{ background: TABLE_HEADER_BG }}
+                >
                   <div
-                    className="flex items-center rounded-t-[8px]"
-                    style={{ background: 'rgba(226,237,241,0.4)' }}
+                    className="w-36 shrink-0 px-3.5 py-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <div
-                      className="w-36 shrink-0 px-3.5 py-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Sample ID
-                    </div>
-                    <div
-                      className="w-36 shrink-0 py-3 pr-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Order ID
-                    </div>
-                    <div
-                      className="w-44 shrink-0 py-3 pr-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Patient
-                    </div>
-                    <div
-                      className="min-w-0 flex-1 py-3 pr-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Test(s)
-                    </div>
-                    <div
-                      className="w-32 shrink-0 py-3 pr-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Department
-                    </div>
-                    <div
-                      className="w-24 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Priority
-                    </div>
-                    <div
-                      className="w-24 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      TAT Remaining
-                    </div>
-                    <div
-                      className="w-48 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Status
-                    </div>
-                    <div
-                      className="w-36 shrink-0 py-3 pr-3 text-right font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Actions
-                    </div>
+                    Sample ID
                   </div>
+                  <div
+                    className="w-36 shrink-0 py-3 pr-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Order ID
+                  </div>
+                  <div
+                    className="w-44 shrink-0 py-3 pr-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Patient
+                  </div>
+                  <div
+                    className="min-w-0 flex-1 py-3 pr-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Test(s)
+                  </div>
+                  <div
+                    className="w-32 shrink-0 py-3 pr-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Department
+                  </div>
+                  <div
+                    className="w-24 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Priority
+                  </div>
+                  <div
+                    className="w-24 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    TAT Remaining
+                  </div>
+                  <div
+                    className="w-48 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Status
+                  </div>
+                  <div
+                    className="w-36 shrink-0 py-3 pr-3 text-right font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Actions
+                  </div>
+                </div>
 
-                  {pageRows.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                {pageRows.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <div
+                      className="flex size-14 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(0,180,216,0.1)' }}
+                    >
+                      <ClipboardCheck style={{ width: 24, height: 24, color: '#00B4D8' }} />
+                    </div>
+                    <p
+                      className="font-display font-semibold"
+                      style={{ fontSize: 16, color: '#0D2630' }}
+                    >
+                      Nothing awaiting verification
+                    </p>
+                    <p style={{ fontSize: 14, color: '#4A7080' }}>
+                      {hasActiveFilters
+                        ? 'No results match your current filters.'
+                        : 'Every resulted test has been signed off.'}
+                    </p>
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={clearFilters}
+                        className={`font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#00B4D8' }}
+                      >
+                        Clear all filters
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  pageRows.map((order) => {
+                    const priorityCfg = PRIORITY_CFG[order.priority];
+                    const sampleId = deriveSampleId(order.groupKey, order.orderedAt);
+                    const departments = Array.from(
+                      new Set(order.awaiting.map((t) => t.department)),
+                    );
+                    const departmentLabel = departments.length === 1 ? departments[0] : 'Multiple';
+                    const testsLabel =
+                      order.awaiting.length === 1
+                        ? order.awaiting[0]!.testName
+                        : `${order.awaiting.map((t) => t.testName).join(', ')}`;
+                    const isOverdue =
+                      order.tatRemainingMs !== undefined && order.tatRemainingMs < 0;
+                    return (
                       <div
-                        className="flex size-14 items-center justify-center rounded-full"
-                        style={{ background: 'rgba(0,180,216,0.1)' }}
+                        key={order.groupKey}
+                        onClick={() => openOrder(order)}
+                        className={`flex cursor-pointer items-center border-t transition-colors duration-150 hover:bg-[#F5FBFD] ${selectedOrder?.groupKey === order.groupKey ? 'bg-[#F5FBFD]' : ''}`}
+                        style={{ borderColor: 'rgba(0,100,130,0.08)' }}
                       >
-                        <ClipboardCheck style={{ width: 24, height: 24, color: '#00B4D8' }} />
-                      </div>
-                      <p
-                        className="font-display font-semibold"
-                        style={{ fontSize: 16, color: '#0D2630' }}
-                      >
-                        Nothing awaiting verification
-                      </p>
-                      <p style={{ fontSize: 14, color: '#4A7080' }}>
-                        {hasActiveFilters
-                          ? 'No results match your current filters.'
-                          : 'Every resulted test has been signed off.'}
-                      </p>
-                      {hasActiveFilters && (
-                        <button
-                          type="button"
-                          onClick={clearFilters}
-                          className={`font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+                        <div
+                          className="w-36 shrink-0 px-3.5 py-3"
                           style={{ fontSize: 14, color: '#00B4D8' }}
                         >
-                          Clear all filters
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    pageRows.map((order) => {
-                      const priorityCfg = PRIORITY_CFG[order.priority];
-                      const sampleId = deriveSampleId(order.groupKey, order.orderedAt);
-                      const departments = Array.from(
-                        new Set(order.awaiting.map((t) => t.department)),
-                      );
-                      const departmentLabel =
-                        departments.length === 1 ? departments[0] : 'Multiple';
-                      const testsLabel =
-                        order.awaiting.length === 1
-                          ? order.awaiting[0]!.testName
-                          : `${order.awaiting.map((t) => t.testName).join(', ')}`;
-                      const isOverdue =
-                        order.tatRemainingMs !== undefined && order.tatRemainingMs < 0;
-                      return (
+                          {sampleId}
+                        </div>
                         <div
-                          key={order.groupKey}
-                          onClick={() => openOrder(order)}
-                          className={`flex cursor-pointer items-center border-t transition-colors duration-150 hover:bg-[#F5FBFD] ${selectedOrder?.groupKey === order.groupKey ? 'bg-[#F5FBFD]' : ''}`}
-                          style={{ borderColor: 'rgba(0,100,130,0.08)' }}
+                          className="w-36 shrink-0 py-3 pr-3"
+                          style={{ fontSize: 14, color: '#00B4D8' }}
                         >
-                          <div
-                            className="w-36 shrink-0 px-3.5 py-3"
-                            style={{ fontSize: 14, color: '#00B4D8' }}
+                          {order.orderId}
+                        </div>
+                        <div className="w-44 shrink-0 py-3 pr-3">
+                          <p
+                            className="font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            {sampleId}
-                          </div>
+                            {order.patientName}
+                          </p>
+                          <p style={{ fontSize: 14, color: '#8A98A3' }}>{order.mrn}</p>
+                        </div>
+                        <Tooltip content={testsLabel}>
                           <div
-                            className="w-36 shrink-0 py-3 pr-3"
-                            style={{ fontSize: 14, color: '#00B4D8' }}
-                          >
-                            {order.orderId}
-                          </div>
-                          <div className="w-44 shrink-0 py-3 pr-3">
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {order.patientName}
-                            </p>
-                            <p style={{ fontSize: 14, color: '#8A98A3' }}>{order.mrn}</p>
-                          </div>
-                          <Tooltip content={testsLabel}>
-                            <div
-                              className="min-w-0 flex-1 truncate py-3 pr-3"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {testsLabel}
-                            </div>
-                          </Tooltip>
-                          <div
-                            className="w-32 shrink-0 py-3 pr-3"
+                            className="min-w-0 flex-1 truncate py-3 pr-3"
                             style={{ fontSize: 14, color: '#4A7080' }}
                           >
-                            {departmentLabel}
+                            {testsLabel}
                           </div>
-                          <div className="w-24 shrink-0 py-3 pr-3 text-center">
-                            <span
-                              className="rounded-full px-2.5 py-1 font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                color: priorityCfg.color,
-                                border: `1px solid ${priorityCfg.border}`,
-                                background: priorityCfg.bg,
-                              }}
-                            >
-                              {order.priority}
-                            </span>
-                          </div>
-                          <div
-                            className="w-24 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
-                            style={{ fontSize: 14, color: isOverdue ? '#EF4444' : '#4A7080' }}
-                          >
-                            {order.tatRemainingMs !== undefined
-                              ? formatTatRemaining(order.tatRemainingMs)
-                              : '—'}
-                          </div>
-                          <div className="w-48 shrink-0 py-3 pr-3 text-center">
-                            <span
-                              className="rounded-full px-2.5 py-1 font-sans font-medium whitespace-nowrap"
-                              style={{
-                                fontSize: 14,
-                                color: '#8B5CF6',
-                                border: '1px solid rgba(139,92,246,0.4)',
-                                background: 'rgba(139,92,246,0.08)',
-                              }}
-                            >
-                              Awaiting Verification
-                            </span>
-                          </div>
-                          <div
-                            className="flex w-36 shrink-0 items-center justify-end gap-1 py-3 pr-3"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  openOrder(order);
-                                  setVerifyTarget(order);
-                                }}
-                                className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                                style={{ fontSize: 14, background: '#00B4D8' }}
-                              >
-                                Review
-                              </button>
-                            </PermissionGate>
-                            <VerificationRowMenu
-                              open={rowMenuOpenKey === order.groupKey}
-                              onToggle={() =>
-                                setRowMenuOpenKey((k) =>
-                                  k === order.groupKey ? null : order.groupKey,
-                                )
-                              }
-                              onView={() => {
-                                openOrder(order);
-                                setRowMenuOpenKey(null);
-                              }}
-                              onAddComment={() => {
-                                setCommentTarget(order);
-                                setRowMenuOpenKey(null);
-                              }}
-                            />
-                          </div>
+                        </Tooltip>
+                        <div
+                          className="w-32 shrink-0 py-3 pr-3"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          {departmentLabel}
                         </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
+                        <div className="w-24 shrink-0 py-3 pr-3 text-center">
+                          <span
+                            className="rounded-full px-2.5 py-1 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              color: priorityCfg.color,
+                              border: `1px solid ${priorityCfg.border}`,
+                              background: priorityCfg.bg,
+                            }}
+                          >
+                            {order.priority}
+                          </span>
+                        </div>
+                        <div
+                          className="w-24 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
+                          style={{ fontSize: 14, color: isOverdue ? '#EF4444' : '#4A7080' }}
+                        >
+                          {order.tatRemainingMs !== undefined
+                            ? formatTatRemaining(order.tatRemainingMs)
+                            : '—'}
+                        </div>
+                        <div className="w-48 shrink-0 py-3 pr-3 text-center">
+                          <span
+                            className="rounded-full px-2.5 py-1 font-sans font-medium whitespace-nowrap"
+                            style={{
+                              fontSize: 14,
+                              color: '#8B5CF6',
+                              border: '1px solid rgba(139,92,246,0.4)',
+                              background: 'rgba(139,92,246,0.08)',
+                            }}
+                          >
+                            Awaiting Verification
+                          </span>
+                        </div>
+                        <div
+                          className="flex w-36 shrink-0 items-center justify-end gap-1 py-3 pr-3"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                openOrder(order);
+                                setVerifyTarget(order);
+                              }}
+                              className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                              style={{ fontSize: 14, background: '#00B4D8' }}
+                            >
+                              Review
+                            </button>
+                          </PermissionGate>
+                          <VerificationRowMenu
+                            open={rowMenuOpenKey === order.groupKey}
+                            onToggle={() =>
+                              setRowMenuOpenKey((k) =>
+                                k === order.groupKey ? null : order.groupKey,
+                              )
+                            }
+                            onView={() => {
+                              openOrder(order);
+                              setRowMenuOpenKey(null);
+                            }}
+                            onAddComment={() => {
+                              setCommentTarget(order);
+                              setRowMenuOpenKey(null);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </ScrollableTable>
 
               {pageRows.length > 0 && (
                 <div className="px-4 py-3">

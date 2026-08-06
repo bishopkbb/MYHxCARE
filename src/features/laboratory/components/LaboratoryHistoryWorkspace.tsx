@@ -24,6 +24,11 @@ import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { ROUTES } from '@/constants/routes';
 import { useToast } from '@/hooks/useToast';
@@ -813,162 +818,158 @@ export function LaboratoryHistoryWorkspace() {
                   </div>
                 ) : (
                   <>
-                    <div className="overflow-x-auto scroll-smooth">
-                      <div style={{ minWidth: 1080 }}>
-                        <div
-                          className="flex px-3 py-3"
-                          style={{
-                            background: 'rgba(226,237,241,0.4)',
-                            borderBottom: '1px solid #0064821F',
-                          }}
-                        >
-                          {[
-                            ['Order ID', 'w-[14%]'],
-                            ['Order Date', 'w-[13%]'],
-                            ['Department', 'w-[12%]'],
-                            ['Tests', 'min-w-0 flex-1'],
-                            ['Status', 'w-24 shrink-0'],
-                            ['Collected On', 'w-[13%]'],
-                            ['Result Reported On', 'w-[13%]'],
-                            ['Actions', 'w-20 shrink-0'],
-                          ].map(([label, width]) => (
-                            <Tooltip key={label} content={label!}>
+                    <ScrollableTable minWidth={1080} maxHeight={560}>
+                      <div
+                        className={`flex px-3 py-3 ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{
+                          background: TABLE_HEADER_BG,
+                          borderBottom: '1px solid #0064821F',
+                        }}
+                      >
+                        {[
+                          ['Order ID', 'w-[14%]'],
+                          ['Order Date', 'w-[13%]'],
+                          ['Department', 'w-[12%]'],
+                          ['Tests', 'min-w-0 flex-1'],
+                          ['Status', 'w-24 shrink-0'],
+                          ['Collected On', 'w-[13%]'],
+                          ['Result Reported On', 'w-[13%]'],
+                          ['Actions', 'w-20 shrink-0'],
+                        ].map(([label, width]) => (
+                          <Tooltip key={label} content={label!}>
+                            <span
+                              className={`${width} truncate pr-3 font-sans font-bold tracking-wider uppercase`}
+                              style={{ fontSize: 14, color: '#4A7080' }}
+                            >
+                              {label}
+                            </span>
+                          </Tooltip>
+                        ))}
+                      </div>
+
+                      {paginated.map(({ order, status, collectedAt, reportedAt }) => {
+                        const cfg = STATUS_CFG[status];
+                        const menuOpen = openRowMenuId === order.orderId;
+                        return (
+                          <div
+                            key={order.orderId}
+                            className="flex items-center px-3 py-3 transition-colors duration-150 hover:bg-[#F5FBFD]"
+                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                          >
+                            <Tooltip content={order.orderId}>
                               <span
-                                className={`${width} truncate pr-3 font-sans font-bold tracking-wider uppercase`}
-                                style={{ fontSize: 14, color: '#4A7080' }}
+                                className="w-[14%] truncate pr-3 font-sans font-medium"
+                                style={{ fontSize: 14, color: '#00B4D8' }}
                               >
-                                {label}
+                                {order.orderId}
                               </span>
                             </Tooltip>
-                          ))}
-                        </div>
-
-                        {paginated.map(({ order, status, collectedAt, reportedAt }) => {
-                          const cfg = STATUS_CFG[status];
-                          const menuOpen = openRowMenuId === order.orderId;
-                          return (
-                            <div
-                              key={order.orderId}
-                              className="flex items-center px-3 py-3 transition-colors duration-150 hover:bg-[#F5FBFD]"
-                              style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                            >
-                              <Tooltip content={order.orderId}>
-                                <span
-                                  className="w-[14%] truncate pr-3 font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#00B4D8' }}
-                                >
-                                  {order.orderId}
-                                </span>
-                              </Tooltip>
-                              <Tooltip content={formatDateTime(order.orderedAt)}>
-                                <span
-                                  className="w-[13%] truncate pr-3"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {formatDateTime(order.orderedAt)}
-                                </span>
-                              </Tooltip>
-                              <Tooltip content={orderDepartment(order)}>
-                                <span
-                                  className="w-[12%] truncate pr-3"
-                                  style={{ fontSize: 14, color: '#4A7080' }}
-                                >
-                                  {orderDepartment(order)}
-                                </span>
-                              </Tooltip>
-                              <Tooltip
-                                content={`${orderTestsSummary(order)} (${order.tests.length} test${order.tests.length === 1 ? '' : 's'})`}
+                            <Tooltip content={formatDateTime(order.orderedAt)}>
+                              <span
+                                className="w-[13%] truncate pr-3"
+                                style={{ fontSize: 14, color: '#0D2630' }}
                               >
-                                <span
-                                  className="min-w-0 flex-1 truncate pr-3"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {orderTestsSummary(order)}
-                                  <span style={{ color: '#8A98A3' }}>
-                                    {' '}
-                                    ({order.tests.length} test{order.tests.length === 1 ? '' : 's'})
-                                  </span>
-                                </span>
-                              </Tooltip>
-                              <span className="w-24 shrink-0 pr-3">
-                                <span
-                                  className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
-                                  style={{
-                                    fontSize: 14,
-                                    color: cfg.color,
-                                    border: `1px solid ${cfg.border}`,
-                                    background: cfg.bg,
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
-                                  {status}
+                                {formatDateTime(order.orderedAt)}
+                              </span>
+                            </Tooltip>
+                            <Tooltip content={orderDepartment(order)}>
+                              <span
+                                className="w-[12%] truncate pr-3"
+                                style={{ fontSize: 14, color: '#4A7080' }}
+                              >
+                                {orderDepartment(order)}
+                              </span>
+                            </Tooltip>
+                            <Tooltip
+                              content={`${orderTestsSummary(order)} (${order.tests.length} test${order.tests.length === 1 ? '' : 's'})`}
+                            >
+                              <span
+                                className="min-w-0 flex-1 truncate pr-3"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {orderTestsSummary(order)}
+                                <span style={{ color: '#8A98A3' }}>
+                                  {' '}
+                                  ({order.tests.length} test{order.tests.length === 1 ? '' : 's'})
                                 </span>
                               </span>
-                              <Tooltip content={collectedAt ? formatDateTime(collectedAt) : '—'}>
-                                <span
-                                  className="w-[13%] truncate pr-3"
-                                  style={{ fontSize: 14, color: '#4A7080' }}
-                                >
-                                  {collectedAt ? formatDateTime(collectedAt) : '—'}
-                                </span>
-                              </Tooltip>
-                              <Tooltip content={reportedAt ? formatDateTime(reportedAt) : '—'}>
-                                <span
-                                  className="w-[13%] truncate pr-3"
-                                  style={{ fontSize: 14, color: '#4A7080' }}
-                                >
-                                  {reportedAt ? formatDateTime(reportedAt) : '—'}
-                                </span>
-                              </Tooltip>
-                              <span className="flex w-20 shrink-0 items-center gap-1.5 pr-3">
+                            </Tooltip>
+                            <span className="w-24 shrink-0 pr-3">
+                              <span
+                                className="inline-flex rounded-full px-2.5 py-0.5 font-sans font-medium"
+                                style={{
+                                  fontSize: 14,
+                                  color: cfg.color,
+                                  border: `1px solid ${cfg.border}`,
+                                  background: cfg.bg,
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {status}
+                              </span>
+                            </span>
+                            <Tooltip content={collectedAt ? formatDateTime(collectedAt) : '—'}>
+                              <span
+                                className="w-[13%] truncate pr-3"
+                                style={{ fontSize: 14, color: '#4A7080' }}
+                              >
+                                {collectedAt ? formatDateTime(collectedAt) : '—'}
+                              </span>
+                            </Tooltip>
+                            <Tooltip content={reportedAt ? formatDateTime(reportedAt) : '—'}>
+                              <span
+                                className="w-[13%] truncate pr-3"
+                                style={{ fontSize: 14, color: '#4A7080' }}
+                              >
+                                {reportedAt ? formatDateTime(reportedAt) : '—'}
+                              </span>
+                            </Tooltip>
+                            <span className="flex w-20 shrink-0 items-center gap-1.5 pr-3">
+                              <button
+                                type="button"
+                                onClick={() => setReportTarget(order)}
+                                aria-label={`View ${order.orderId}`}
+                                className={`flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] ${FOCUS_RING}`}
+                              >
+                                <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                              </button>
+                              <div className="relative shrink-0">
                                 <button
+                                  ref={getRowMenuButtonRef(order.orderId)}
                                   type="button"
-                                  onClick={() => setReportTarget(order)}
-                                  aria-label={`View ${order.orderId}`}
+                                  onClick={() => setOpenRowMenuId(menuOpen ? null : order.orderId)}
+                                  aria-label="More actions"
                                   className={`flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] ${FOCUS_RING}`}
                                 >
-                                  <Eye style={{ width: 15, height: 15, color: '#4A7080' }} />
+                                  <MoreVertical
+                                    style={{ width: 15, height: 15, color: '#4A7080' }}
+                                  />
                                 </button>
-                                <div className="relative shrink-0">
+                                <RowMenuPortal
+                                  open={menuOpen}
+                                  anchorRef={getRowMenuButtonRef(order.orderId)}
+                                  onClose={() => setOpenRowMenuId(null)}
+                                  width={160}
+                                >
                                   <button
-                                    ref={getRowMenuButtonRef(order.orderId)}
                                     type="button"
-                                    onClick={() =>
-                                      setOpenRowMenuId(menuOpen ? null : order.orderId)
-                                    }
-                                    aria-label="More actions"
-                                    className={`flex size-8 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] ${FOCUS_RING}`}
+                                    onClick={() => {
+                                      printReport(order);
+                                      setOpenRowMenuId(null);
+                                    }}
+                                    className={`flex w-full items-center gap-2 px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] ${FOCUS_RING}`}
+                                    style={{ fontSize: 14, color: '#0D2630' }}
                                   >
-                                    <MoreVertical
-                                      style={{ width: 15, height: 15, color: '#4A7080' }}
-                                    />
+                                    <Printer style={{ width: 14, height: 14 }} />
+                                    Print Order
                                   </button>
-                                  <RowMenuPortal
-                                    open={menuOpen}
-                                    anchorRef={getRowMenuButtonRef(order.orderId)}
-                                    onClose={() => setOpenRowMenuId(null)}
-                                    width={160}
-                                  >
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        printReport(order);
-                                        setOpenRowMenuId(null);
-                                      }}
-                                      className={`flex w-full items-center gap-2 px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] ${FOCUS_RING}`}
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      <Printer style={{ width: 14, height: 14 }} />
-                                      Print Order
-                                    </button>
-                                  </RowMenuPortal>
-                                </div>
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                                </RowMenuPortal>
+                              </div>
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </ScrollableTable>
 
                     <Pagination
                       page={clampedPage}

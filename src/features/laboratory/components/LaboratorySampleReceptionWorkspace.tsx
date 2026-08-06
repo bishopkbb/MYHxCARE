@@ -24,6 +24,11 @@ import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -831,251 +836,237 @@ export function LaboratorySampleReceptionWorkspace() {
                     className="rounded-[12px] p-4 sm:p-5"
                     style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                   >
-                    <div className="overflow-x-auto scroll-smooth">
-                      <div className="min-w-[1600px]">
-                        <div
-                          className="flex items-center rounded-t-[8px]"
-                          style={{
-                            background: 'rgba(226,237,241,0.4)',
-                            borderBottom: '1px solid #E6F8FD',
-                          }}
-                        >
-                          <div className="flex w-11 shrink-0 items-center justify-center py-2.5">
-                            <input
-                              type="checkbox"
-                              checked={allPageSelected}
-                              onChange={toggleSelectAllOnPage}
-                              aria-label="Select all samples on this page"
-                              className="size-4 shrink-0 accent-[#00B4D8]"
-                            />
-                          </div>
-                          {[
-                            ['Order ID', 'w-44', 'left'],
-                            ['Patient', 'w-44', 'left'],
-                            ['Collection Point', 'w-44', 'left'],
-                            ['Sample ID', 'w-48', 'left'],
-                            ['Sample Type', 'min-w-[160px] flex-1', 'left'],
-                            ['Collected At', 'w-32', 'left'],
-                            ['Priority', 'w-24', 'center'],
-                            ['Status', 'w-52', 'center'],
-                          ].map(([label, width, align]) => (
-                            <div
-                              key={label}
-                              className={`${width} shrink-0 py-2.5 pr-2 ${align === 'center' ? 'text-center' : ''}`}
-                            >
-                              <span
-                                className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                                style={{ fontSize: 14, color: '#4A7080' }}
-                              >
-                                {label}
-                              </span>
-                            </div>
-                          ))}
-                          <div className="w-32 shrink-0 py-2.5 pr-3 text-center">
+                    <ScrollableTable minWidth={1600} maxHeight={640}>
+                      <div
+                        className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{
+                          background: TABLE_HEADER_BG,
+                          borderBottom: '1px solid #E6F8FD',
+                        }}
+                      >
+                        <div className="flex w-11 shrink-0 items-center justify-center py-2.5">
+                          <input
+                            type="checkbox"
+                            checked={allPageSelected}
+                            onChange={toggleSelectAllOnPage}
+                            aria-label="Select all samples on this page"
+                            className="size-4 shrink-0 accent-[#00B4D8]"
+                          />
+                        </div>
+                        {[
+                          ['Order ID', 'w-44', 'left'],
+                          ['Patient', 'w-44', 'left'],
+                          ['Collection Point', 'w-44', 'left'],
+                          ['Sample ID', 'w-48', 'left'],
+                          ['Sample Type', 'min-w-[160px] flex-1', 'left'],
+                          ['Collected At', 'w-32', 'left'],
+                          ['Priority', 'w-24', 'center'],
+                          ['Status', 'w-52', 'center'],
+                        ].map(([label, width, align]) => (
+                          <div
+                            key={label}
+                            className={`${width} shrink-0 py-2.5 pr-2 ${align === 'center' ? 'text-center' : ''}`}
+                          >
                             <span
-                              className="font-sans font-bold tracking-wider uppercase"
+                              className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                               style={{ fontSize: 14, color: '#4A7080' }}
                             >
-                              Action
+                              {label}
                             </span>
                           </div>
+                        ))}
+                        <div className="w-32 shrink-0 py-2.5 pr-3 text-center">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Action
+                          </span>
                         </div>
+                      </div>
 
-                        {pageRows.length === 0 && (
-                          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                            <div
-                              className="flex size-14 items-center justify-center rounded-full"
-                              style={{ background: 'rgba(226,237,241,0.6)' }}
-                            >
-                              <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                            </div>
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 16, color: '#4A7080' }}
-                            >
-                              No specimens match your filters
-                            </p>
-                            {hasActiveFilters && (
-                              <button
-                                type="button"
-                                onClick={clearFilters}
-                                className={`font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
-                                style={{ fontSize: 14, color: '#00B4D8' }}
-                              >
-                                Clear all filters
-                              </button>
-                            )}
+                      {pageRows.length === 0 && (
+                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                          <div
+                            className="flex size-14 items-center justify-center rounded-full"
+                            style={{ background: 'rgba(226,237,241,0.6)' }}
+                          >
+                            <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
                           </div>
-                        )}
-
-                        {pageRows.map((order) => {
-                          const statusCfg = STATUS_CFG[order.status];
-                          const priorityCfg = PRIORITY_CFG[order.priority];
-                          const sampleId = deriveSampleId(order.groupKey, order.orderedAt);
-                          const sampleType = orderSampleType(order.tests);
-                          const collectionPoint = deriveCollectionPoint(order);
-                          const collectedAt = order.tests.find(
-                            (t) => t.sampleCollectedAt,
-                          )?.sampleCollectedAt;
-                          const pending = awaitingReceptionTests(order);
-
-                          return (
-                            <div
-                              key={order.groupKey}
-                              onClick={() => openOrder(order)}
-                              className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                              style={{
-                                borderBottom: '1px solid rgba(0,100,130,0.08)',
-                                background:
-                                  selectedGroupKey === order.groupKey ? '#E6F8FD' : 'transparent',
-                              }}
+                          <p
+                            className="font-sans font-medium"
+                            style={{ fontSize: 16, color: '#4A7080' }}
+                          >
+                            No specimens match your filters
+                          </p>
+                          {hasActiveFilters && (
+                            <button
+                              type="button"
+                              onClick={clearFilters}
+                              className={`font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+                              style={{ fontSize: 14, color: '#00B4D8' }}
                             >
-                              <div
-                                className="flex w-11 shrink-0 items-center justify-center py-3"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={selectedKeys.has(order.groupKey)}
-                                  onChange={() => toggleSelected(order.groupKey)}
-                                  aria-label={`Select order ${order.orderId}`}
-                                  className="size-4 shrink-0 accent-[#00B4D8]"
-                                />
-                              </div>
-                              <div className="w-44 shrink-0 py-3 pr-2">
-                                <Tooltip content={order.orderId}>
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {order.orderId}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-44 shrink-0 py-3 pr-2">
-                                <Tooltip content={order.patientName}>
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {order.patientName}
-                                  </p>
-                                </Tooltip>
-                                <Tooltip content={order.mrn}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#00B4D8' }}
-                                  >
-                                    {order.mrn}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-44 shrink-0 py-3 pr-2">
-                                <Tooltip content={collectionPoint}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {collectionPoint}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-48 shrink-0 py-3 pr-2">
-                                <Tooltip content={sampleId}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {sampleId}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="min-w-[160px] flex-1 py-3 pr-2">
-                                <Tooltip content={sampleType}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {sampleType}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-32 shrink-0 py-3 pr-2">
-                                {collectedAt ? (
-                                  <>
-                                    <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                      {formatDate(collectedAt)}
-                                    </p>
-                                    <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                      {formatTime(collectedAt)}
-                                    </p>
-                                  </>
-                                ) : (
-                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
-                                )}
-                              </div>
-                              <div className="w-24 shrink-0 py-3 pr-2 text-center">
-                                <span
-                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                                  style={{
-                                    fontSize: 14,
-                                    color: priorityCfg.color,
-                                    border: `1px solid ${priorityCfg.border}`,
-                                    background: priorityCfg.bg,
-                                  }}
+                              Clear all filters
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {pageRows.map((order) => {
+                        const statusCfg = STATUS_CFG[order.status];
+                        const priorityCfg = PRIORITY_CFG[order.priority];
+                        const sampleId = deriveSampleId(order.groupKey, order.orderedAt);
+                        const sampleType = orderSampleType(order.tests);
+                        const collectionPoint = deriveCollectionPoint(order);
+                        const collectedAt = order.tests.find(
+                          (t) => t.sampleCollectedAt,
+                        )?.sampleCollectedAt;
+                        const pending = awaitingReceptionTests(order);
+
+                        return (
+                          <div
+                            key={order.groupKey}
+                            onClick={() => openOrder(order)}
+                            className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                            style={{
+                              borderBottom: '1px solid rgba(0,100,130,0.08)',
+                              background:
+                                selectedGroupKey === order.groupKey ? '#E6F8FD' : 'transparent',
+                            }}
+                          >
+                            <div
+                              className="flex w-11 shrink-0 items-center justify-center py-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedKeys.has(order.groupKey)}
+                                onChange={() => toggleSelected(order.groupKey)}
+                                aria-label={`Select order ${order.orderId}`}
+                                className="size-4 shrink-0 accent-[#00B4D8]"
+                              />
+                            </div>
+                            <div className="w-44 shrink-0 py-3 pr-2">
+                              <Tooltip content={order.orderId}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
                                 >
-                                  {order.priority}
-                                </span>
-                              </div>
-                              <div className="w-52 shrink-0 py-3 pr-2 text-center">
-                                <span
-                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                                  style={{
-                                    fontSize: 14,
-                                    color: statusCfg.color,
-                                    border: `1px solid ${statusCfg.border}`,
-                                    background: statusCfg.bg,
-                                  }}
+                                  {order.orderId}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-44 shrink-0 py-3 pr-2">
+                              <Tooltip content={order.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
                                 >
-                                  {order.status === 'Received (Older)' ? 'Received' : order.status}
-                                </span>
-                              </div>
-                              <div
-                                className="flex w-32 shrink-0 items-center justify-center py-3 pr-3"
-                                onClick={(e) => e.stopPropagation()}
+                                  {order.patientName}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={order.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                  {order.mrn}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-44 shrink-0 py-3 pr-2">
+                              <Tooltip content={collectionPoint}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {collectionPoint}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-48 shrink-0 py-3 pr-2">
+                              <Tooltip content={sampleId}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                                  {sampleId}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="min-w-[160px] flex-1 py-3 pr-2">
+                              <Tooltip content={sampleType}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {sampleType}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-32 shrink-0 py-3 pr-2">
+                              {collectedAt ? (
+                                <>
+                                  <p style={{ fontSize: 14, color: '#4A7080' }}>
+                                    {formatDate(collectedAt)}
+                                  </p>
+                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                    {formatTime(collectedAt)}
+                                  </p>
+                                </>
+                              ) : (
+                                <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
+                              )}
+                            </div>
+                            <div className="w-24 shrink-0 py-3 pr-2 text-center">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                                style={{
+                                  fontSize: 14,
+                                  color: priorityCfg.color,
+                                  border: `1px solid ${priorityCfg.border}`,
+                                  background: priorityCfg.bg,
+                                }}
                               >
-                                {pending.length > 0 ? (
-                                  <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
-                                    <button
-                                      type="button"
-                                      onClick={() => setReceiveTarget(order)}
-                                      className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                                      style={{ fontSize: 14, background: '#00B4D8' }}
-                                    >
-                                      <PackageCheck style={{ width: 14, height: 14 }} />
-                                      Receive
-                                    </button>
-                                  </PermissionGate>
-                                ) : (
+                                {order.priority}
+                              </span>
+                            </div>
+                            <div className="w-52 shrink-0 py-3 pr-2 text-center">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                                style={{
+                                  fontSize: 14,
+                                  color: statusCfg.color,
+                                  border: `1px solid ${statusCfg.border}`,
+                                  background: statusCfg.bg,
+                                }}
+                              >
+                                {order.status === 'Received (Older)' ? 'Received' : order.status}
+                              </span>
+                            </div>
+                            <div
+                              className="flex w-32 shrink-0 items-center justify-center py-3 pr-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {pending.length > 0 ? (
+                                <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
                                   <button
                                     type="button"
-                                    onClick={() => openOrder(order)}
-                                    className={`flex h-9 items-center rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                                    style={{
-                                      fontSize: 14,
-                                      color: '#4A7080',
-                                      border: '1px solid rgba(0,100,130,0.18)',
-                                    }}
+                                    onClick={() => setReceiveTarget(order)}
+                                    className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                                    style={{ fontSize: 14, background: '#00B4D8' }}
                                   >
-                                    View
+                                    <PackageCheck style={{ width: 14, height: 14 }} />
+                                    Receive
                                   </button>
-                                )}
-                              </div>
+                                </PermissionGate>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => openOrder(order)}
+                                  className={`flex h-9 items-center rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                                  style={{
+                                    fontSize: 14,
+                                    color: '#4A7080',
+                                    border: '1px solid rgba(0,100,130,0.18)',
+                                  }}
+                                >
+                                  View
+                                </button>
+                              )}
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                          </div>
+                        );
+                      })}
+                    </ScrollableTable>
 
                     {filtered.length > 0 && (
                       <Pagination

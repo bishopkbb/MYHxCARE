@@ -26,6 +26,11 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -530,12 +535,12 @@ export function LaboratoryShiftHandoverWorkspace() {
                 />
               </div>
 
-              <div className="mt-4 overflow-x-auto scroll-smooth">
-                <div className="min-w-[760px]">
+              <div className="mt-4">
+                <ScrollableTable minWidth={760}>
                   <div
-                    className="flex"
+                    className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
                     style={{
-                      background: 'rgba(226,237,241,0.4)',
+                      background: TABLE_HEADER_BG,
                       borderBottom: '1px solid #E6F8FD',
                     }}
                   >
@@ -635,7 +640,7 @@ export function LaboratoryShiftHandoverWorkspace() {
                       );
                     })
                   )}
-                </div>
+                </ScrollableTable>
               </div>
 
               <button
@@ -688,80 +693,78 @@ export function LaboratoryShiftHandoverWorkspace() {
             </SectionCard>
 
             <SectionCard title="Priority Follow-ups" icon={AlertTriangle} iconColor="#EF4444">
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[560px]">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
+              <ScrollableTable minWidth={560}>
+                <div
+                  className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <span
+                    className="w-36 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <span
-                      className="w-36 shrink-0 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Patient
-                    </span>
-                    <span
-                      className="w-44 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Test
-                    </span>
-                    <span
-                      className="min-w-0 flex-1 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Critical Value
-                    </span>
-                  </div>
-                  {followUpPreview.length === 0 ? (
-                    <EmptyRow label="No critical values awaiting communication." />
-                  ) : (
-                    followUpPreview.map(({ test }, idx) => (
-                      <div
-                        key={test.id}
-                        className="flex items-center"
-                        style={{
-                          borderBottom:
-                            idx === followUpPreview.length - 1
-                              ? undefined
-                              : '1px solid rgba(0,100,130,0.08)',
-                        }}
-                      >
-                        <div className="w-36 shrink-0 py-3 pr-2 pl-3">
-                          <Tooltip content={test.patientName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {test.patientName}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-44 shrink-0 py-3 pr-2">
-                          <Tooltip content={test.testName}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {test.testName}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="min-w-0 flex-1 py-3 pr-3">
-                          <Tooltip content={test.criticalValueLabel ?? '—'}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#EF4444' }}
-                            >
-                              {test.criticalValueLabel ?? '—'}
-                            </p>
-                          </Tooltip>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                    Patient
+                  </span>
+                  <span
+                    className="w-44 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Test
+                  </span>
+                  <span
+                    className="min-w-0 flex-1 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Critical Value
+                  </span>
                 </div>
-              </div>
+                {followUpPreview.length === 0 ? (
+                  <EmptyRow label="No critical values awaiting communication." />
+                ) : (
+                  followUpPreview.map(({ test }, idx) => (
+                    <div
+                      key={test.id}
+                      className="flex items-center"
+                      style={{
+                        borderBottom:
+                          idx === followUpPreview.length - 1
+                            ? undefined
+                            : '1px solid rgba(0,100,130,0.08)',
+                      }}
+                    >
+                      <div className="w-36 shrink-0 py-3 pr-2 pl-3">
+                        <Tooltip content={test.patientName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {test.patientName}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-44 shrink-0 py-3 pr-2">
+                        <Tooltip content={test.testName}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {test.testName}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="min-w-0 flex-1 py-3 pr-3">
+                        <Tooltip content={test.criticalValueLabel ?? '—'}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#EF4444' }}
+                          >
+                            {test.criticalValueLabel ?? '—'}
+                          </p>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </ScrollableTable>
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.laboratoryCriticalResults)}
@@ -776,89 +779,87 @@ export function LaboratoryShiftHandoverWorkspace() {
           {/* ── Low Stock Reagents ──────────────────────────────────────────── */}
           <div className="mt-4">
             <SectionCard title="Low Stock Reagents" icon={Beaker} iconColor="#D97706">
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[560px]">
-                  <div
-                    className="flex"
-                    style={{
-                      background: 'rgba(226,237,241,0.4)',
-                      borderBottom: '1px solid #E6F8FD',
-                    }}
+              <ScrollableTable minWidth={560}>
+                <div
+                  className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{
+                    background: TABLE_HEADER_BG,
+                    borderBottom: '1px solid #E6F8FD',
+                  }}
+                >
+                  <span
+                    className="min-w-0 flex-1 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <span
-                      className="min-w-0 flex-1 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Reagent
-                    </span>
-                    <span
-                      className="w-36 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Department
-                    </span>
-                    <span
-                      className="w-24 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Stock
-                    </span>
-                    <span
-                      className="w-28 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Reorder At
-                    </span>
-                  </div>
-                  {LOW_STOCK_REAGENTS.length === 0 ? (
-                    <EmptyRow label="No reagents currently below reorder level." />
-                  ) : (
-                    LOW_STOCK_REAGENTS.map((row, idx) => (
-                      <div
-                        key={row.id}
-                        className="flex items-center"
-                        style={{
-                          borderBottom:
-                            idx === LOW_STOCK_REAGENTS.length - 1
-                              ? undefined
-                              : '1px solid rgba(0,100,130,0.08)',
-                        }}
-                      >
-                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
-                          <Tooltip content={row.reagentName}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {row.reagentName}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
-                          <Tooltip content={row.department}>
-                            <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                              {row.department}
-                            </p>
-                          </Tooltip>
-                        </div>
-                        <div className="w-24 shrink-0 py-3 pr-2">
-                          <p
-                            className="font-sans font-semibold"
-                            style={{ fontSize: 14, color: '#D97706' }}
-                          >
-                            {row.stockQty} {row.unit}
-                          </p>
-                        </div>
-                        <div className="w-28 shrink-0 py-3 pr-3">
-                          <p style={{ fontSize: 14, color: '#4A7080' }}>
-                            {row.reorderLevel} {row.unit}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                    Reagent
+                  </span>
+                  <span
+                    className="w-36 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Department
+                  </span>
+                  <span
+                    className="w-24 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Stock
+                  </span>
+                  <span
+                    className="w-28 shrink-0 py-2.5 pr-3 font-sans font-bold tracking-wider uppercase"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Reorder At
+                  </span>
                 </div>
-              </div>
+                {LOW_STOCK_REAGENTS.length === 0 ? (
+                  <EmptyRow label="No reagents currently below reorder level." />
+                ) : (
+                  LOW_STOCK_REAGENTS.map((row, idx) => (
+                    <div
+                      key={row.id}
+                      className="flex items-center"
+                      style={{
+                        borderBottom:
+                          idx === LOW_STOCK_REAGENTS.length - 1
+                            ? undefined
+                            : '1px solid rgba(0,100,130,0.08)',
+                      }}
+                    >
+                      <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                        <Tooltip content={row.reagentName}>
+                          <p
+                            className="truncate font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {row.reagentName}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-36 shrink-0 py-3 pr-2">
+                        <Tooltip content={row.department}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                            {row.department}
+                          </p>
+                        </Tooltip>
+                      </div>
+                      <div className="w-24 shrink-0 py-3 pr-2">
+                        <p
+                          className="font-sans font-semibold"
+                          style={{ fontSize: 14, color: '#D97706' }}
+                        >
+                          {row.stockQty} {row.unit}
+                        </p>
+                      </div>
+                      <div className="w-28 shrink-0 py-3 pr-3">
+                        <p style={{ fontSize: 14, color: '#4A7080' }}>
+                          {row.reorderLevel} {row.unit}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </ScrollableTable>
               <button
                 type="button"
                 onClick={() => router.push(ROUTES.laboratoryReagentManagement)}

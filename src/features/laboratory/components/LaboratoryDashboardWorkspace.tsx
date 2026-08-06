@@ -34,6 +34,11 @@ import type { LucideIcon } from 'lucide-react';
 import { AnimatedDonutChart } from '@components/shared/AnimatedDonutChart';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -725,7 +730,7 @@ export function LaboratoryDashboardWorkspace() {
                 className="font-display font-semibold"
                 style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
               >
-                {getWATGreeting()}, {lastName(actorName)} 👋
+                {getWATGreeting()}, {lastName(actorName)}
               </h1>
               <p className="mt-0.5 font-sans" style={{ fontSize: 14, color: '#4A7080' }}>
                 Here&apos;s what&apos;s happening in the laboratory today.
@@ -998,97 +1003,95 @@ export function LaboratoryDashboardWorkspace() {
                     icon={ListChecks}
                     onViewAll={() => router.push(ROUTES.laboratoryTestWorkQueue)}
                   >
-                    <div className="overflow-x-auto scroll-smooth">
-                      <div className="min-w-[420px]">
-                        <div
-                          className="flex"
+                    <ScrollableTable minWidth={420}>
+                      <div
+                        className={`flex ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{
+                          background: TABLE_HEADER_BG,
+                          borderBottom: '1px solid #E6F8FD',
+                        }}
+                      >
+                        <span
+                          className="min-w-0 flex-1 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Queue
+                        </span>
+                        <span
+                          className="w-20 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Pending
+                        </span>
+                        <span
+                          className="w-16 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          Urgent
+                        </span>
+                        <span
+                          className="w-8 shrink-0 py-2.5 pr-3"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        />
+                      </div>
+                      {workQueues.map((q, idx) => (
+                        <button
+                          key={q.label}
+                          type="button"
+                          onClick={() => router.push(q.href)}
+                          className={`flex w-full items-center text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
                           style={{
-                            background: 'rgba(226,237,241,0.4)',
-                            borderBottom: '1px solid #E6F8FD',
+                            borderBottom:
+                              idx === workQueues.length - 1
+                                ? undefined
+                                : '1px solid rgba(0,100,130,0.08)',
                           }}
                         >
-                          <span
-                            className="min-w-0 flex-1 py-2.5 pr-2 pl-3 font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Queue
-                          </span>
-                          <span
-                            className="w-20 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Pending
-                          </span>
-                          <span
-                            className="w-16 shrink-0 py-2.5 pr-2 font-sans font-bold tracking-wider uppercase"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            Urgent
-                          </span>
-                          <span
-                            className="w-8 shrink-0 py-2.5 pr-3"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          />
-                        </div>
-                        {workQueues.map((q, idx) => (
-                          <button
-                            key={q.label}
-                            type="button"
-                            onClick={() => router.push(q.href)}
-                            className={`flex w-full items-center text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                            style={{
-                              borderBottom:
-                                idx === workQueues.length - 1
-                                  ? undefined
-                                  : '1px solid rgba(0,100,130,0.08)',
-                            }}
-                          >
-                            <div className="flex min-w-0 flex-1 items-center gap-2 py-3 pr-2 pl-3">
-                              <q.icon
-                                style={{ width: 15, height: 15, color: '#8A98A3', flexShrink: 0 }}
-                              />
-                              <Tooltip content={q.label}>
-                                <span
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {q.label}
-                                </span>
-                              </Tooltip>
-                            </div>
-                            <div className="w-20 shrink-0 py-3 pr-2">
+                          <div className="flex min-w-0 flex-1 items-center gap-2 py-3 pr-2 pl-3">
+                            <q.icon
+                              style={{ width: 15, height: 15, color: '#8A98A3', flexShrink: 0 }}
+                            />
+                            <Tooltip content={q.label}>
                               <span
-                                className="font-sans font-semibold"
+                                className="truncate font-sans font-medium"
                                 style={{ fontSize: 14, color: '#0D2630' }}
                               >
-                                {q.pending}
+                                {q.label}
                               </span>
-                            </div>
-                            <div className="w-16 shrink-0 py-3 pr-2">
-                              <span
-                                className="font-sans font-semibold"
-                                style={{
-                                  fontSize: 14,
-                                  color: q.urgent > 0 ? '#DC2626' : '#8A98A3',
-                                }}
-                              >
-                                {q.urgent}
-                              </span>
-                            </div>
-                            <div className="flex w-8 shrink-0 justify-end py-3 pr-3">
-                              <ChevronDown
-                                style={{
-                                  width: 14,
-                                  height: 14,
-                                  color: '#8A98A3',
-                                  transform: 'rotate(-90deg)',
-                                }}
-                              />
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                            </Tooltip>
+                          </div>
+                          <div className="w-20 shrink-0 py-3 pr-2">
+                            <span
+                              className="font-sans font-semibold"
+                              style={{ fontSize: 14, color: '#0D2630' }}
+                            >
+                              {q.pending}
+                            </span>
+                          </div>
+                          <div className="w-16 shrink-0 py-3 pr-2">
+                            <span
+                              className="font-sans font-semibold"
+                              style={{
+                                fontSize: 14,
+                                color: q.urgent > 0 ? '#DC2626' : '#8A98A3',
+                              }}
+                            >
+                              {q.urgent}
+                            </span>
+                          </div>
+                          <div className="flex w-8 shrink-0 justify-end py-3 pr-3">
+                            <ChevronDown
+                              style={{
+                                width: 14,
+                                height: 14,
+                                color: '#8A98A3',
+                                transform: 'rotate(-90deg)',
+                              }}
+                            />
+                          </div>
+                        </button>
+                      ))}
+                    </ScrollableTable>
                   </Panel>
                 </div>
 

@@ -17,6 +17,11 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -636,11 +641,11 @@ export function LaboratoryResultEntryWorkspace() {
                     Tests to Be Entered ({enterableTests.length})
                   </p>
 
-                  <div className="mt-3 overflow-x-auto scroll-smooth">
-                    <div className="min-w-[900px]">
+                  <div className="mt-3">
+                    <ScrollableTable minWidth={900}>
                       <div
-                        className="flex items-center gap-2 border-b px-2 pb-2"
-                        style={{ borderColor: 'rgba(0,100,130,0.12)' }}
+                        className={`flex items-center gap-2 border-b px-2 pb-2 ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{ borderColor: 'rgba(0,100,130,0.12)', background: TABLE_HEADER_BG }}
                       >
                         <span
                           className="min-w-0 flex-1 font-sans font-semibold"
@@ -835,7 +840,7 @@ export function LaboratoryResultEntryWorkspace() {
                           </div>
                         );
                       })}
-                    </div>
+                    </ScrollableTable>
                   </div>
 
                   {alreadyResultedTests.length > 0 && (

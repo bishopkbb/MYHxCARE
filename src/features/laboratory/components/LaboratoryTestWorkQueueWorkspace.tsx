@@ -30,6 +30,11 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -830,307 +835,293 @@ export function LaboratoryTestWorkQueueWorkspace() {
                     className="rounded-[12px] p-4 sm:p-5"
                     style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                   >
-                    <div className="overflow-x-auto scroll-smooth">
-                      <div className="min-w-[1560px]">
-                        <div
-                          className="flex items-center rounded-t-[8px]"
-                          style={{
-                            background: 'rgba(226,237,241,0.4)',
-                            borderBottom: '1px solid #E6F8FD',
-                          }}
-                        >
-                          {[
-                            ['Sample ID', 'w-48', 'left'],
-                            ['Order ID', 'w-44', 'left'],
-                            ['Patient', 'w-44', 'left'],
-                            ['Test(s)', 'min-w-[160px] flex-1', 'left'],
-                            ['Department', 'w-36', 'left'],
-                            ['Priority', 'w-24', 'center'],
-                            ['Status', 'w-40', 'center'],
-                            ['TAT Remaining', 'w-32', 'center'],
-                            ['Added At', 'w-32', 'left'],
-                          ].map(([label, width, align]) => (
-                            <div
-                              key={label}
-                              className={`${width} shrink-0 py-2.5 pr-2 ${align === 'center' ? 'text-center' : ''}`}
-                            >
-                              <span
-                                className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                                style={{ fontSize: 14, color: '#4A7080' }}
-                              >
-                                {label}
-                              </span>
-                            </div>
-                          ))}
-                          <div className="w-40 shrink-0 py-2.5 pr-3 text-center">
+                    <ScrollableTable minWidth={1560} maxHeight={640}>
+                      <div
+                        className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{
+                          background: TABLE_HEADER_BG,
+                          borderBottom: '1px solid #E6F8FD',
+                        }}
+                      >
+                        {[
+                          ['Sample ID', 'w-48', 'left'],
+                          ['Order ID', 'w-44', 'left'],
+                          ['Patient', 'w-44', 'left'],
+                          ['Test(s)', 'min-w-[160px] flex-1', 'left'],
+                          ['Department', 'w-36', 'left'],
+                          ['Priority', 'w-24', 'center'],
+                          ['Status', 'w-40', 'center'],
+                          ['TAT Remaining', 'w-32', 'center'],
+                          ['Added At', 'w-32', 'left'],
+                        ].map(([label, width, align]) => (
+                          <div
+                            key={label}
+                            className={`${width} shrink-0 py-2.5 pr-2 ${align === 'center' ? 'text-center' : ''}`}
+                          >
                             <span
-                              className="font-sans font-bold tracking-wider uppercase"
+                              className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                               style={{ fontSize: 14, color: '#4A7080' }}
                             >
-                              Action
+                              {label}
                             </span>
                           </div>
+                        ))}
+                        <div className="w-40 shrink-0 py-2.5 pr-3 text-center">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Action
+                          </span>
                         </div>
+                      </div>
 
-                        {pageRows.length === 0 && (
-                          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                            <div
-                              className="flex size-14 items-center justify-center rounded-full"
-                              style={{ background: 'rgba(226,237,241,0.6)' }}
-                            >
-                              <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                            </div>
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 16, color: '#4A7080' }}
-                            >
-                              No tests match your filters
-                            </p>
-                            {hasActiveFilters && (
-                              <button
-                                type="button"
-                                onClick={clearFilters}
-                                className={`font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
-                                style={{ fontSize: 14, color: '#00B4D8' }}
-                              >
-                                Clear all filters
-                              </button>
-                            )}
+                      {pageRows.length === 0 && (
+                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                          <div
+                            className="flex size-14 items-center justify-center rounded-full"
+                            style={{ background: 'rgba(226,237,241,0.6)' }}
+                          >
+                            <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
                           </div>
-                        )}
-
-                        {pageRows.map((order) => {
-                          const statusCfg = STATUS_CFG[order.status];
-                          const priorityCfg = PRIORITY_CFG[order.priority];
-                          const sampleId = deriveSampleId(order.groupKey, order.orderedAt);
-                          const departments = Array.from(
-                            new Set(order.tests.map((t) => t.department)),
-                          );
-                          const testsLabel =
-                            order.tests.length === 1
-                              ? order.tests[0]!.testName
-                              : `${order.tests.length} tests`;
-                          const testsTooltip = order.tests.map((t) => t.testName).join(', ');
-                          const canStart = order.status === 'In Queue';
-                          const canContinue = order.status === 'In Progress';
-                          const canResume = order.status === 'On Hold';
-
-                          return (
-                            <div
-                              key={order.groupKey}
-                              onClick={() => openOrder(order)}
-                              className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                              style={{
-                                borderBottom: '1px solid rgba(0,100,130,0.08)',
-                                background:
-                                  selectedGroupKey === order.groupKey ? '#E6F8FD' : 'transparent',
-                              }}
+                          <p
+                            className="font-sans font-medium"
+                            style={{ fontSize: 16, color: '#4A7080' }}
+                          >
+                            No tests match your filters
+                          </p>
+                          {hasActiveFilters && (
+                            <button
+                              type="button"
+                              onClick={clearFilters}
+                              className={`font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+                              style={{ fontSize: 14, color: '#00B4D8' }}
                             >
-                              <div className="w-48 shrink-0 py-3 pr-2 pl-3">
-                                <Tooltip content={sampleId}>
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {sampleId}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-44 shrink-0 py-3 pr-2">
-                                <Tooltip content={order.orderId}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#00B4D8' }}
-                                  >
-                                    {order.orderId}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-44 shrink-0 py-3 pr-2">
-                                <Tooltip content={order.patientName}>
-                                  <p
-                                    className="truncate font-sans font-medium"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {order.patientName}
-                                  </p>
-                                </Tooltip>
-                                <Tooltip content={order.mrn}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#8A98A3' }}
-                                  >
-                                    {order.mrn}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="min-w-[160px] flex-1 py-3 pr-2">
-                                <Tooltip content={testsTooltip}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {testsLabel}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-36 shrink-0 py-3 pr-2">
-                                <Tooltip content={departments.join(', ')}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#4A7080' }}
-                                  >
-                                    {departments.length === 1 ? departments[0] : 'Multiple'}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-24 shrink-0 py-3 pr-2 text-center">
-                                <span
-                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                                  style={{
-                                    fontSize: 14,
-                                    color: priorityCfg.color,
-                                    border: `1px solid ${priorityCfg.border}`,
-                                    background: priorityCfg.bg,
-                                  }}
-                                >
-                                  {order.priority}
-                                </span>
-                              </div>
-                              <div className="w-40 shrink-0 py-3 pr-2 text-center">
-                                <span
-                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                                  style={{
-                                    fontSize: 14,
-                                    color: statusCfg.color,
-                                    border: `1px solid ${statusCfg.border}`,
-                                    background: statusCfg.bg,
-                                  }}
-                                >
-                                  {order.status}
-                                </span>
-                              </div>
-                              <div className="w-32 shrink-0 py-3 pr-2 text-center">
+                              Clear all filters
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {pageRows.map((order) => {
+                        const statusCfg = STATUS_CFG[order.status];
+                        const priorityCfg = PRIORITY_CFG[order.priority];
+                        const sampleId = deriveSampleId(order.groupKey, order.orderedAt);
+                        const departments = Array.from(
+                          new Set(order.tests.map((t) => t.department)),
+                        );
+                        const testsLabel =
+                          order.tests.length === 1
+                            ? order.tests[0]!.testName
+                            : `${order.tests.length} tests`;
+                        const testsTooltip = order.tests.map((t) => t.testName).join(', ');
+                        const canStart = order.status === 'In Queue';
+                        const canContinue = order.status === 'In Progress';
+                        const canResume = order.status === 'On Hold';
+
+                        return (
+                          <div
+                            key={order.groupKey}
+                            onClick={() => openOrder(order)}
+                            className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                            style={{
+                              borderBottom: '1px solid rgba(0,100,130,0.08)',
+                              background:
+                                selectedGroupKey === order.groupKey ? '#E6F8FD' : 'transparent',
+                            }}
+                          >
+                            <div className="w-48 shrink-0 py-3 pr-2 pl-3">
+                              <Tooltip content={sampleId}>
                                 <p
-                                  style={{
-                                    fontSize: 14,
-                                    color:
-                                      order.tatRemainingMs !== undefined && order.tatRemainingMs < 0
-                                        ? '#EF4444'
-                                        : '#4A7080',
-                                  }}
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
                                 >
-                                  {order.tatRemainingMs !== undefined
-                                    ? formatTatRemaining(order.tatRemainingMs)
-                                    : '—'}
+                                  {sampleId}
                                 </p>
-                              </div>
-                              <div className="w-32 shrink-0 py-3 pr-2">
-                                {order.addedAt ? (
-                                  <>
-                                    <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                      {formatDate(order.addedAt)}
-                                    </p>
-                                    <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                      {formatTime(order.addedAt)}
-                                    </p>
-                                  </>
-                                ) : (
-                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
-                                )}
-                              </div>
-                              <div
-                                className="flex w-40 shrink-0 items-center justify-center gap-1 py-3 pr-3"
-                                onClick={(e) => e.stopPropagation()}
+                              </Tooltip>
+                            </div>
+                            <div className="w-44 shrink-0 py-3 pr-2">
+                              <Tooltip content={order.orderId}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                  {order.orderId}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-44 shrink-0 py-3 pr-2">
+                              <Tooltip content={order.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {order.patientName}
+                                </p>
+                              </Tooltip>
+                              <Tooltip content={order.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                                  {order.mrn}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="min-w-[160px] flex-1 py-3 pr-2">
+                              <Tooltip content={testsTooltip}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {testsLabel}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-36 shrink-0 py-3 pr-2">
+                              <Tooltip content={departments.join(', ')}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {departments.length === 1 ? departments[0] : 'Multiple'}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-24 shrink-0 py-3 pr-2 text-center">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                                style={{
+                                  fontSize: 14,
+                                  color: priorityCfg.color,
+                                  border: `1px solid ${priorityCfg.border}`,
+                                  background: priorityCfg.bg,
+                                }}
                               >
-                                {canStart && (
-                                  <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleStartTest(order)}
-                                      className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                                      style={{ fontSize: 14, background: '#00B4D8' }}
-                                    >
-                                      <Play style={{ width: 14, height: 14 }} />
-                                      Start Test
-                                    </button>
-                                  </PermissionGate>
-                                )}
-                                {canContinue && (
+                                {order.priority}
+                              </span>
+                            </div>
+                            <div className="w-40 shrink-0 py-3 pr-2 text-center">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                                style={{
+                                  fontSize: 14,
+                                  color: statusCfg.color,
+                                  border: `1px solid ${statusCfg.border}`,
+                                  background: statusCfg.bg,
+                                }}
+                              >
+                                {order.status}
+                              </span>
+                            </div>
+                            <div className="w-32 shrink-0 py-3 pr-2 text-center">
+                              <p
+                                style={{
+                                  fontSize: 14,
+                                  color:
+                                    order.tatRemainingMs !== undefined && order.tatRemainingMs < 0
+                                      ? '#EF4444'
+                                      : '#4A7080',
+                                }}
+                              >
+                                {order.tatRemainingMs !== undefined
+                                  ? formatTatRemaining(order.tatRemainingMs)
+                                  : '—'}
+                              </p>
+                            </div>
+                            <div className="w-32 shrink-0 py-3 pr-2">
+                              {order.addedAt ? (
+                                <>
+                                  <p style={{ fontSize: 14, color: '#4A7080' }}>
+                                    {formatDate(order.addedAt)}
+                                  </p>
+                                  <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                    {formatTime(order.addedAt)}
+                                  </p>
+                                </>
+                              ) : (
+                                <p style={{ fontSize: 14, color: '#8A98A3' }}>—</p>
+                              )}
+                            </div>
+                            <div
+                              className="flex w-40 shrink-0 items-center justify-center gap-1 py-3 pr-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {canStart && (
+                                <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      router.push(
-                                        `${ROUTES.laboratoryResultEntry}?order=${encodeURIComponent(order.groupKey)}`,
-                                      )
-                                    }
+                                    onClick={() => handleStartTest(order)}
                                     className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                                    style={{ fontSize: 14, background: '#3B82F6' }}
+                                    style={{ fontSize: 14, background: '#00B4D8' }}
                                   >
-                                    Continue
+                                    <Play style={{ width: 14, height: 14 }} />
+                                    Start Test
                                   </button>
-                                )}
-                                {canResume && (
-                                  <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleResume(order)}
-                                      className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                                      style={{ fontSize: 14, background: '#D97706' }}
-                                    >
-                                      Resume
-                                    </button>
-                                  </PermissionGate>
-                                )}
-                                {order.status === 'Completed' && (
-                                  <button
-                                    type="button"
-                                    onClick={() => openOrder(order)}
-                                    className={`flex h-9 items-center rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                                    style={{
-                                      fontSize: 14,
-                                      color: '#4A7080',
-                                      border: '1px solid rgba(0,100,130,0.18)',
-                                    }}
-                                  >
-                                    View
-                                  </button>
-                                )}
-                                <QueueRowMenu
-                                  status={order.status}
-                                  open={rowMenuOpenKey === order.groupKey}
-                                  onToggle={() =>
-                                    setRowMenuOpenKey(
-                                      rowMenuOpenKey === order.groupKey ? null : order.groupKey,
+                                </PermissionGate>
+                              )}
+                              {canContinue && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    router.push(
+                                      `${ROUTES.laboratoryResultEntry}?order=${encodeURIComponent(order.groupKey)}`,
                                     )
                                   }
-                                  onView={() => {
-                                    setRowMenuOpenKey(null);
-                                    openOrder(order);
+                                  className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                                  style={{ fontSize: 14, background: '#3B82F6' }}
+                                >
+                                  Continue
+                                </button>
+                              )}
+                              {canResume && (
+                                <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleResume(order)}
+                                    className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                                    style={{ fontSize: 14, background: '#D97706' }}
+                                  >
+                                    Resume
+                                  </button>
+                                </PermissionGate>
+                              )}
+                              {order.status === 'Completed' && (
+                                <button
+                                  type="button"
+                                  onClick={() => openOrder(order)}
+                                  className={`flex h-9 items-center rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                                  style={{
+                                    fontSize: 14,
+                                    color: '#4A7080',
+                                    border: '1px solid rgba(0,100,130,0.18)',
                                   }}
-                                  onHold={
-                                    order.status === 'In Queue' || order.status === 'In Progress'
-                                      ? () => {
-                                          setRowMenuOpenKey(null);
-                                          setHoldTarget(order);
-                                        }
-                                      : undefined
-                                  }
-                                  onResume={
-                                    order.status === 'On Hold'
-                                      ? () => {
-                                          setRowMenuOpenKey(null);
-                                          handleResume(order);
-                                        }
-                                      : undefined
-                                  }
-                                />
-                              </div>
+                                >
+                                  View
+                                </button>
+                              )}
+                              <QueueRowMenu
+                                status={order.status}
+                                open={rowMenuOpenKey === order.groupKey}
+                                onToggle={() =>
+                                  setRowMenuOpenKey(
+                                    rowMenuOpenKey === order.groupKey ? null : order.groupKey,
+                                  )
+                                }
+                                onView={() => {
+                                  setRowMenuOpenKey(null);
+                                  openOrder(order);
+                                }}
+                                onHold={
+                                  order.status === 'In Queue' || order.status === 'In Progress'
+                                    ? () => {
+                                        setRowMenuOpenKey(null);
+                                        setHoldTarget(order);
+                                      }
+                                    : undefined
+                                }
+                                onResume={
+                                  order.status === 'On Hold'
+                                    ? () => {
+                                        setRowMenuOpenKey(null);
+                                        handleResume(order);
+                                      }
+                                    : undefined
+                                }
+                              />
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                          </div>
+                        );
+                      })}
+                    </ScrollableTable>
 
                     {filtered.length > 0 && (
                       <Pagination

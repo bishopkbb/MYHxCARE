@@ -2045,6 +2045,31 @@ const LABORATORY_QUALITY_CONTROL_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
+  id: 'laboratory-quality-control-reports',
+  title: 'Quality Control Reports',
+  intro:
+    'Pass/fail trends and Westgard-rule violations across every QC run, filterable by date and instrument.',
+  sections: [
+    {
+      heading: 'Filters',
+      body: 'Narrow the whole report — stat cards, trend chart, breakdown, and table — by date range and instrument.',
+    },
+    {
+      heading: 'Stat cards and trend',
+      body: 'Total QC Runs, Pass Rate, Failed Runs, and Open Corrective Actions summarize the filtered range. The Pass Rate Trend chart plots the daily pass rate across concluded runs.',
+    },
+    {
+      heading: 'Westgard breakdown and performance table',
+      body: 'Westgard Rule Violations counts 1-2s, 1-3s, and 2-2s flags across the range. Performance by Instrument breaks totals, pass/fail, pass rate, and open corrective actions down per analyzer.',
+    },
+    {
+      heading: 'Export',
+      body: 'Print, Export CSV, and Export PDF cover the current filtered view of the performance table.',
+    },
+  ],
+};
+
 const LABORATORY_CLINICAL_TIMELINE_GUIDE: HelpGuide = {
   id: 'laboratory-clinical-timeline',
   title: 'Clinical Timeline',
@@ -3198,6 +3223,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/clinical-timeline'))
     return LABORATORY_CLINICAL_TIMELINE_GUIDE;
   if (pathname.startsWith('/laboratory/history')) return LABORATORY_HISTORY_GUIDE;
+  if (pathname.startsWith('/laboratory/reports/quality-control'))
+    return LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE;
   if (pathname.startsWith('/laboratory/quality-control')) return LABORATORY_QUALITY_CONTROL_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;

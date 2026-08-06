@@ -23,6 +23,11 @@ import { FilterDropdown } from '@components/shared/FilterDropdown';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -704,254 +709,246 @@ export function LaboratorySampleCollectionWorkspace() {
                     className="rounded-[12px] p-4 sm:p-5"
                     style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
                   >
-                    <div className="overflow-x-auto scroll-smooth">
-                      <div className="min-w-[1440px]">
-                        <div
-                          className="flex items-center rounded-t-[8px]"
-                          style={{
-                            background: 'rgba(226,237,241,0.4)',
-                            borderBottom: '1px solid #E6F8FD',
-                          }}
-                        >
-                          {[
-                            ['Order ID', 'w-44', 'left'],
-                            ['Patient', 'w-44', 'left'],
-                            ['Age/Gender', 'w-32', 'center'],
-                            ['Test(s)', 'min-w-[160px] flex-1', 'center'],
-                            ['Department', 'w-32', 'left'],
-                            ['Priority', 'w-24', 'center'],
-                            ['Requested At', 'w-32', 'left'],
-                            ['Status', 'w-52', 'center'],
-                          ].map(([label, width, align]) => (
-                            <div
-                              key={label}
-                              className={`${width} shrink-0 py-2.5 pr-2 ${align === 'center' ? 'text-center' : ''}`}
-                            >
-                              <span
-                                className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
-                                style={{ fontSize: 14, color: '#4A7080' }}
-                              >
-                                {label}
-                              </span>
-                            </div>
-                          ))}
-                          <div className="w-32 shrink-0 py-2.5 pr-3 text-center">
+                    <ScrollableTable minWidth={1440} maxHeight={640}>
+                      <div
+                        className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{
+                          background: TABLE_HEADER_BG,
+                          borderBottom: '1px solid #E6F8FD',
+                        }}
+                      >
+                        {[
+                          ['Order ID', 'w-44', 'left'],
+                          ['Patient', 'w-44', 'left'],
+                          ['Age/Gender', 'w-32', 'center'],
+                          ['Test(s)', 'min-w-[160px] flex-1', 'center'],
+                          ['Department', 'w-32', 'left'],
+                          ['Priority', 'w-24', 'center'],
+                          ['Requested At', 'w-32', 'left'],
+                          ['Status', 'w-52', 'center'],
+                        ].map(([label, width, align]) => (
+                          <div
+                            key={label}
+                            className={`${width} shrink-0 py-2.5 pr-2 ${align === 'center' ? 'text-center' : ''}`}
+                          >
                             <span
-                              className="font-sans font-bold tracking-wider uppercase"
+                              className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                               style={{ fontSize: 14, color: '#4A7080' }}
                             >
-                              Action
+                              {label}
                             </span>
                           </div>
+                        ))}
+                        <div className="w-32 shrink-0 py-2.5 pr-3 text-center">
+                          <span
+                            className="font-sans font-bold tracking-wider uppercase"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            Action
+                          </span>
                         </div>
+                      </div>
 
-                        {pageRows.length === 0 && (
-                          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-                            <div
-                              className="flex size-14 items-center justify-center rounded-full"
-                              style={{ background: 'rgba(226,237,241,0.6)' }}
-                            >
-                              <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
-                            </div>
-                            <p
-                              className="font-sans font-medium"
-                              style={{ fontSize: 16, color: '#4A7080' }}
-                            >
-                              No requisitions match your filters
-                            </p>
-                            {hasActiveFilters && (
-                              <button
-                                type="button"
-                                onClick={clearFilters}
-                                className={`font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
-                                style={{ fontSize: 14, color: '#00B4D8' }}
-                              >
-                                Clear all filters
-                              </button>
-                            )}
+                      {pageRows.length === 0 && (
+                        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                          <div
+                            className="flex size-14 items-center justify-center rounded-full"
+                            style={{ background: 'rgba(226,237,241,0.6)' }}
+                          >
+                            <Search style={{ width: 24, height: 24, color: '#8A98A3' }} />
                           </div>
-                        )}
-
-                        {pageRows.map((order) => {
-                          const statusCfg = STATUS_CFG[order.status];
-                          const priorityCfg = PRIORITY_CFG[order.priority];
-                          const uniqueDepartments = Array.from(
-                            new Set(order.tests.map((t) => t.department)),
-                          );
-                          const testsLabel =
-                            order.tests.length === 1
-                              ? order.tests[0]!.testName
-                              : `${order.tests.length} tests`;
-                          const testsTooltip = order.tests.map((t) => t.testName).join(', ');
-                          const collectible = collectibleTests(order);
-
-                          return (
-                            <div
-                              key={order.groupKey}
-                              onClick={() => openOrder(order)}
-                              className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
-                              style={{
-                                borderBottom: '1px solid rgba(0,100,130,0.08)',
-                                background:
-                                  selectedGroupKey === order.groupKey ? '#E6F8FD' : 'transparent',
-                              }}
+                          <p
+                            className="font-sans font-medium"
+                            style={{ fontSize: 16, color: '#4A7080' }}
+                          >
+                            No requisitions match your filters
+                          </p>
+                          {hasActiveFilters && (
+                            <button
+                              type="button"
+                              onClick={clearFilters}
+                              className={`font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+                              style={{ fontSize: 14, color: '#00B4D8' }}
                             >
-                              <div className="w-44 shrink-0 py-3 pr-2 pl-3">
-                                <div className="flex items-center gap-1.5">
-                                  <Tooltip content={order.orderId}>
-                                    <p
-                                      className="truncate font-sans font-medium"
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      {order.orderId}
-                                    </p>
-                                  </Tooltip>
-                                  {order.isWalkIn && (
-                                    <span
-                                      className="shrink-0 rounded-full px-1.5 py-0.5 font-sans font-semibold whitespace-nowrap"
-                                      style={{
-                                        fontSize: 14,
-                                        color: '#8B5CF6',
-                                        border: '1px solid rgba(139,92,246,0.4)',
-                                        background: 'rgba(139,92,246,0.08)',
-                                      }}
-                                    >
-                                      WALK-IN
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="w-44 shrink-0 py-3 pr-2">
-                                <Tooltip content={order.patientName}>
+                              Clear all filters
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {pageRows.map((order) => {
+                        const statusCfg = STATUS_CFG[order.status];
+                        const priorityCfg = PRIORITY_CFG[order.priority];
+                        const uniqueDepartments = Array.from(
+                          new Set(order.tests.map((t) => t.department)),
+                        );
+                        const testsLabel =
+                          order.tests.length === 1
+                            ? order.tests[0]!.testName
+                            : `${order.tests.length} tests`;
+                        const testsTooltip = order.tests.map((t) => t.testName).join(', ');
+                        const collectible = collectibleTests(order);
+
+                        return (
+                          <div
+                            key={order.groupKey}
+                            onClick={() => openOrder(order)}
+                            className="flex cursor-pointer items-center transition-colors duration-100 hover:bg-[#F5FBFD]"
+                            style={{
+                              borderBottom: '1px solid rgba(0,100,130,0.08)',
+                              background:
+                                selectedGroupKey === order.groupKey ? '#E6F8FD' : 'transparent',
+                            }}
+                          >
+                            <div className="w-44 shrink-0 py-3 pr-2 pl-3">
+                              <div className="flex items-center gap-1.5">
+                                <Tooltip content={order.orderId}>
                                   <p
                                     className="truncate font-sans font-medium"
                                     style={{ fontSize: 14, color: '#0D2630' }}
                                   >
-                                    {order.patientName}
+                                    {order.orderId}
                                   </p>
                                 </Tooltip>
-                                <Tooltip content={order.mrn}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#00B4D8' }}
+                                {order.isWalkIn && (
+                                  <span
+                                    className="shrink-0 rounded-full px-1.5 py-0.5 font-sans font-semibold whitespace-nowrap"
+                                    style={{
+                                      fontSize: 14,
+                                      color: '#8B5CF6',
+                                      border: '1px solid rgba(139,92,246,0.4)',
+                                      background: 'rgba(139,92,246,0.08)',
+                                    }}
                                   >
-                                    {order.mrn}
-                                  </p>
-                                </Tooltip>
+                                    WALK-IN
+                                  </span>
+                                )}
                               </div>
-                              <div className="w-32 shrink-0 py-3 pr-2 text-center">
-                                <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {order.age !== undefined ? order.age : '—'}
-                                  {order.gender ? ` · ${order.gender[0]}` : ''}
+                            </div>
+                            <div className="w-44 shrink-0 py-3 pr-2">
+                              <Tooltip content={order.patientName}>
+                                <p
+                                  className="truncate font-sans font-medium"
+                                  style={{ fontSize: 14, color: '#0D2630' }}
+                                >
+                                  {order.patientName}
                                 </p>
-                              </div>
-                              <div className="min-w-[160px] flex-1 py-3 pr-2 text-center">
-                                <Tooltip content={testsTooltip}>
-                                  <p
-                                    className="truncate"
-                                    style={{ fontSize: 14, color: '#0D2630' }}
-                                  >
-                                    {testsLabel}
-                                  </p>
-                                </Tooltip>
-                              </div>
-                              <div className="w-32 shrink-0 py-3 pr-2">
-                                {uniqueDepartments.length === 1 ? (
+                              </Tooltip>
+                              <Tooltip content={order.mrn}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                  {order.mrn}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-32 shrink-0 py-3 pr-2 text-center">
+                              <p style={{ fontSize: 14, color: '#4A7080' }}>
+                                {order.age !== undefined ? order.age : '—'}
+                                {order.gender ? ` · ${order.gender[0]}` : ''}
+                              </p>
+                            </div>
+                            <div className="min-w-[160px] flex-1 py-3 pr-2 text-center">
+                              <Tooltip content={testsTooltip}>
+                                <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
+                                  {testsLabel}
+                                </p>
+                              </Tooltip>
+                            </div>
+                            <div className="w-32 shrink-0 py-3 pr-2">
+                              {uniqueDepartments.length === 1 ? (
+                                <span
+                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                                  style={{
+                                    fontSize: 14,
+                                    color: DEPARTMENT_CFG[uniqueDepartments[0]!].color,
+                                    background: DEPARTMENT_CFG[uniqueDepartments[0]!].bg,
+                                  }}
+                                >
+                                  {uniqueDepartments[0]}
+                                </span>
+                              ) : (
+                                <Tooltip content={uniqueDepartments.join(', ')}>
                                   <span
                                     className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
                                     style={{
                                       fontSize: 14,
-                                      color: DEPARTMENT_CFG[uniqueDepartments[0]!].color,
-                                      background: DEPARTMENT_CFG[uniqueDepartments[0]!].bg,
+                                      color: '#4A7080',
+                                      background: 'rgba(0,100,130,0.08)',
                                     }}
                                   >
-                                    {uniqueDepartments[0]}
+                                    Multiple
                                   </span>
-                                ) : (
-                                  <Tooltip content={uniqueDepartments.join(', ')}>
-                                    <span
-                                      className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                                      style={{
-                                        fontSize: 14,
-                                        color: '#4A7080',
-                                        background: 'rgba(0,100,130,0.08)',
-                                      }}
-                                    >
-                                      Multiple
-                                    </span>
-                                  </Tooltip>
-                                )}
-                              </div>
-                              <div className="w-24 shrink-0 py-3 pr-2 text-center">
-                                <span
-                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                                  style={{
-                                    fontSize: 14,
-                                    color: priorityCfg.color,
-                                    border: `1px solid ${priorityCfg.border}`,
-                                    background: priorityCfg.bg,
-                                  }}
-                                >
-                                  {order.priority}
-                                </span>
-                              </div>
-                              <div className="w-32 shrink-0 py-3 pr-2">
-                                <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {formatDate(order.orderedAt)}
-                                </p>
-                                <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                                  {formatTime(order.orderedAt)}
-                                </p>
-                              </div>
-                              <div className="w-52 shrink-0 py-3 pr-2 text-center">
-                                <span
-                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                                  style={{
-                                    fontSize: 14,
-                                    color: statusCfg.color,
-                                    border: `1px solid ${statusCfg.border}`,
-                                    background: statusCfg.bg,
-                                  }}
-                                >
-                                  {order.status}
-                                </span>
-                              </div>
-                              <div
-                                className="flex w-32 shrink-0 items-center justify-center py-3 pr-3"
-                                onClick={(e) => e.stopPropagation()}
+                                </Tooltip>
+                              )}
+                            </div>
+                            <div className="w-24 shrink-0 py-3 pr-2 text-center">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                                style={{
+                                  fontSize: 14,
+                                  color: priorityCfg.color,
+                                  border: `1px solid ${priorityCfg.border}`,
+                                  background: priorityCfg.bg,
+                                }}
                               >
-                                {collectible.length > 0 ? (
-                                  <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
-                                    <button
-                                      type="button"
-                                      onClick={() => setCollectTarget(order)}
-                                      className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
-                                      style={{ fontSize: 14, background: '#00B4D8' }}
-                                    >
-                                      <TestTube2 style={{ width: 14, height: 14 }} />
-                                      {order.status === 'Rejected' ? 'Recollect' : 'Collect'}
-                                    </button>
-                                  </PermissionGate>
-                                ) : (
+                                {order.priority}
+                              </span>
+                            </div>
+                            <div className="w-32 shrink-0 py-3 pr-2">
+                              <p style={{ fontSize: 14, color: '#4A7080' }}>
+                                {formatDate(order.orderedAt)}
+                              </p>
+                              <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                                {formatTime(order.orderedAt)}
+                              </p>
+                            </div>
+                            <div className="w-52 shrink-0 py-3 pr-2 text-center">
+                              <span
+                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                                style={{
+                                  fontSize: 14,
+                                  color: statusCfg.color,
+                                  border: `1px solid ${statusCfg.border}`,
+                                  background: statusCfg.bg,
+                                }}
+                              >
+                                {order.status}
+                              </span>
+                            </div>
+                            <div
+                              className="flex w-32 shrink-0 items-center justify-center py-3 pr-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {collectible.length > 0 ? (
+                                <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
                                   <button
                                     type="button"
-                                    onClick={() => openOrder(order)}
-                                    className={`flex h-9 items-center rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                                    style={{
-                                      fontSize: 14,
-                                      color: '#4A7080',
-                                      border: '1px solid rgba(0,100,130,0.18)',
-                                    }}
+                                    onClick={() => setCollectTarget(order)}
+                                    className={`flex h-9 items-center gap-1.5 rounded-[8px] px-3 font-sans font-medium text-white transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                                    style={{ fontSize: 14, background: '#00B4D8' }}
                                   >
-                                    View
+                                    <TestTube2 style={{ width: 14, height: 14 }} />
+                                    {order.status === 'Rejected' ? 'Recollect' : 'Collect'}
                                   </button>
-                                )}
-                              </div>
+                                </PermissionGate>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => openOrder(order)}
+                                  className={`flex h-9 items-center rounded-[8px] px-3 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                                  style={{
+                                    fontSize: 14,
+                                    color: '#4A7080',
+                                    border: '1px solid rgba(0,100,130,0.18)',
+                                  }}
+                                >
+                                  View
+                                </button>
+                              )}
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                          </div>
+                        );
+                      })}
+                    </ScrollableTable>
 
                     {filtered.length > 0 && (
                       <Pagination

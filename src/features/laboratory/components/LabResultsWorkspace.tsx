@@ -18,6 +18,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/useAuth';
@@ -473,14 +478,14 @@ function ResultCard({
 
       {!isPending && result.rows && result.rows.length > 0 && (
         <>
-          <div className="overflow-x-auto scroll-smooth">
-            <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 420 }}>
+          <ScrollableTable minWidth={420}>
+            <table className="w-full" style={{ borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#F8FAFC' }}>
+                <tr>
                   {['Parameter', 'Value', 'Reference', 'Flag'].map((col) => (
                     <th
                       key={col}
-                      className="font-sans font-semibold"
+                      className={`font-sans font-semibold ${TABLE_HEADER_STICKY_CLASS}`}
                       style={{
                         fontSize: 14,
                         lineHeight: '22px',
@@ -489,6 +494,7 @@ function ResultCard({
                         textAlign: 'left',
                         borderBottom: '1px solid rgba(0,100,130,0.10)',
                         whiteSpace: 'nowrap',
+                        background: TABLE_HEADER_BG,
                       }}
                     >
                       {col}
@@ -545,7 +551,7 @@ function ResultCard({
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollableTable>
 
           {result.comment && (
             <div className="px-4 py-3" style={{ background: sc.commentBg }}>

@@ -26,6 +26,11 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { StatCard } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -654,230 +659,226 @@ export function LaboratoryCriticalResultsWorkspace() {
               className="min-w-0 flex-1 rounded-[12px] bg-white"
               style={{ border: '1px solid rgba(0,100,130,0.12)' }}
             >
-              <div className="overflow-x-auto scroll-smooth">
-                <div className="min-w-[1580px]">
+              <ScrollableTable minWidth={1580} maxHeight={640}>
+                <div
+                  className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                  style={{ background: TABLE_HEADER_BG }}
+                >
                   <div
-                    className="flex items-center rounded-t-[8px]"
-                    style={{ background: 'rgba(226,237,241,0.4)' }}
+                    className="w-36 shrink-0 px-3.5 py-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
                   >
-                    <div
-                      className="w-36 shrink-0 px-3.5 py-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Sample ID
-                    </div>
-                    <div
-                      className="w-36 shrink-0 py-3 pr-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Order ID
-                    </div>
-                    <div
-                      className="w-44 shrink-0 py-3 pr-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Patient
-                    </div>
-                    <div
-                      className="min-w-0 flex-1 py-3 pr-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Test
-                    </div>
-                    <div
-                      className="w-32 shrink-0 py-3 pr-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Result
-                    </div>
-                    <div
-                      className="w-36 shrink-0 py-3 pr-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Critical Value
-                    </div>
-                    <div
-                      className="w-32 shrink-0 py-3 pr-3 font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Collected At
-                    </div>
-                    <div
-                      className="w-44 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Status
-                    </div>
-                    <div
-                      className="w-24 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Response
-                    </div>
-                    <div
-                      className="w-16 shrink-0 py-3 pr-3 text-right font-sans font-semibold"
-                      style={{ fontSize: 14, color: '#4A7080' }}
-                    >
-                      Actions
-                    </div>
+                    Sample ID
                   </div>
+                  <div
+                    className="w-36 shrink-0 py-3 pr-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Order ID
+                  </div>
+                  <div
+                    className="w-44 shrink-0 py-3 pr-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Patient
+                  </div>
+                  <div
+                    className="min-w-0 flex-1 py-3 pr-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Test
+                  </div>
+                  <div
+                    className="w-32 shrink-0 py-3 pr-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Result
+                  </div>
+                  <div
+                    className="w-36 shrink-0 py-3 pr-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Critical Value
+                  </div>
+                  <div
+                    className="w-32 shrink-0 py-3 pr-3 font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Collected At
+                  </div>
+                  <div
+                    className="w-44 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Status
+                  </div>
+                  <div
+                    className="w-24 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Response
+                  </div>
+                  <div
+                    className="w-16 shrink-0 py-3 pr-3 text-right font-sans font-semibold"
+                    style={{ fontSize: 14, color: '#4A7080' }}
+                  >
+                    Actions
+                  </div>
+                </div>
 
-                  {pageRows.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                {pageRows.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                    <div
+                      className="flex size-14 items-center justify-center rounded-full"
+                      style={{ background: 'rgba(0,180,216,0.1)' }}
+                    >
+                      <ShieldAlert style={{ width: 24, height: 24, color: '#00B4D8' }} />
+                    </div>
+                    <p
+                      className="font-display font-semibold"
+                      style={{ fontSize: 16, color: '#0D2630' }}
+                    >
+                      No critical results
+                    </p>
+                    <p style={{ fontSize: 14, color: '#4A7080' }}>
+                      {hasActiveFilters
+                        ? 'No results match your current filters.'
+                        : 'Nothing has crossed a critical threshold yet.'}
+                    </p>
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={clearFilters}
+                        className={`font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+                        style={{ fontSize: 14, color: '#00B4D8' }}
+                      >
+                        Clear all filters
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  pageRows.map((entry) => {
+                    const { order, test, status, responseTimeMs: rt } = entry;
+                    const row = findCriticalRow(test);
+                    const statusCfg = STATUS_CFG[status];
+                    const sampleId = deriveSampleId(order.groupKey, order.orderedAt);
+                    const collectedAt = test.sampleCollectedAt;
+                    return (
                       <div
-                        className="flex size-14 items-center justify-center rounded-full"
-                        style={{ background: 'rgba(0,180,216,0.1)' }}
+                        key={test.id}
+                        onClick={() => selectEntry(entry)}
+                        className={`flex cursor-pointer items-center border-t transition-colors duration-150 hover:bg-[#F5FBFD] ${selectedEntry?.test.id === test.id ? 'bg-[#F5FBFD]' : ''}`}
+                        style={{ borderColor: 'rgba(0,100,130,0.08)' }}
                       >
-                        <ShieldAlert style={{ width: 24, height: 24, color: '#00B4D8' }} />
-                      </div>
-                      <p
-                        className="font-display font-semibold"
-                        style={{ fontSize: 16, color: '#0D2630' }}
-                      >
-                        No critical results
-                      </p>
-                      <p style={{ fontSize: 14, color: '#4A7080' }}>
-                        {hasActiveFilters
-                          ? 'No results match your current filters.'
-                          : 'Nothing has crossed a critical threshold yet.'}
-                      </p>
-                      {hasActiveFilters && (
-                        <button
-                          type="button"
-                          onClick={clearFilters}
-                          className={`font-sans font-medium transition-opacity duration-150 hover:opacity-70 ${FOCUS_RING}`}
+                        <div
+                          className="w-36 shrink-0 px-3.5 py-3"
                           style={{ fontSize: 14, color: '#00B4D8' }}
                         >
-                          Clear all filters
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    pageRows.map((entry) => {
-                      const { order, test, status, responseTimeMs: rt } = entry;
-                      const row = findCriticalRow(test);
-                      const statusCfg = STATUS_CFG[status];
-                      const sampleId = deriveSampleId(order.groupKey, order.orderedAt);
-                      const collectedAt = test.sampleCollectedAt;
-                      return (
+                          {sampleId}
+                        </div>
                         <div
-                          key={test.id}
-                          onClick={() => selectEntry(entry)}
-                          className={`flex cursor-pointer items-center border-t transition-colors duration-150 hover:bg-[#F5FBFD] ${selectedEntry?.test.id === test.id ? 'bg-[#F5FBFD]' : ''}`}
-                          style={{ borderColor: 'rgba(0,100,130,0.08)' }}
+                          className="w-36 shrink-0 py-3 pr-3"
+                          style={{ fontSize: 14, color: '#00B4D8' }}
                         >
-                          <div
-                            className="w-36 shrink-0 px-3.5 py-3"
-                            style={{ fontSize: 14, color: '#00B4D8' }}
+                          {order.orderId}
+                        </div>
+                        <div className="w-44 shrink-0 py-3 pr-3">
+                          <p
+                            className="font-sans font-medium"
+                            style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            {sampleId}
-                          </div>
-                          <div
-                            className="w-36 shrink-0 py-3 pr-3"
-                            style={{ fontSize: 14, color: '#00B4D8' }}
-                          >
-                            {order.orderId}
-                          </div>
-                          <div className="w-44 shrink-0 py-3 pr-3">
+                            {order.patientName}
+                          </p>
+                          <p style={{ fontSize: 14, color: '#8A98A3' }}>
+                            {order.age !== undefined ? `${order.age} Y` : ''}
+                            {order.age !== undefined && order.gender ? ' / ' : ''}
+                            {order.gender ?? ''}
+                          </p>
+                        </div>
+                        <Tooltip content={`${row?.parameter ?? test.testName} — ${test.testName}`}>
+                          <div className="min-w-0 flex-1 py-3 pr-3">
                             <p
-                              className="font-sans font-medium"
+                              className="truncate font-sans font-semibold"
                               style={{ fontSize: 14, color: '#0D2630' }}
                             >
-                              {order.patientName}
+                              {row?.parameter ?? test.testName}
                             </p>
-                            <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                              {order.age !== undefined ? `${order.age} Y` : ''}
-                              {order.age !== undefined && order.gender ? ' / ' : ''}
-                              {order.gender ?? ''}
+                            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                              {test.testName}
                             </p>
                           </div>
-                          <Tooltip
-                            content={`${row?.parameter ?? test.testName} — ${test.testName}`}
-                          >
-                            <div className="min-w-0 flex-1 py-3 pr-3">
-                              <p
-                                className="truncate font-sans font-semibold"
-                                style={{ fontSize: 14, color: '#0D2630' }}
-                              >
-                                {row?.parameter ?? test.testName}
-                              </p>
-                              <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                                {test.testName}
-                              </p>
-                            </div>
-                          </Tooltip>
-                          <div
-                            className="w-32 shrink-0 py-3 pr-3 font-sans font-semibold"
-                            style={{ fontSize: 14, color: '#DC2626' }}
-                          >
-                            {row ? `${row.value}${row.unit ? ` ${row.unit}` : ''}` : '—'}
-                          </div>
-                          <Tooltip content={row?.reference ?? '—'}>
-                            <div
-                              className="w-36 shrink-0 truncate py-3 pr-3"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {row?.reference ?? '—'}
-                            </div>
-                          </Tooltip>
-                          <div
-                            className="w-32 shrink-0 py-3 pr-3"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {collectedAt ? (
-                              <>
-                                <p>{formatDate(collectedAt)}</p>
-                                <p style={{ color: '#8A98A3' }}>{formatTime(collectedAt)}</p>
-                              </>
-                            ) : (
-                              '—'
-                            )}
-                          </div>
-                          <div className="w-44 shrink-0 py-3 pr-3 text-center">
-                            <span
-                              className="rounded-full px-2.5 py-1 font-sans font-medium whitespace-nowrap"
-                              style={{
-                                fontSize: 14,
-                                color: statusCfg.color,
-                                border: `1px solid ${statusCfg.border}`,
-                                background: statusCfg.bg,
-                              }}
-                            >
-                              {status}
-                            </span>
-                          </div>
-                          <div
-                            className="w-24 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {rt !== undefined ? formatHrsMin(rt) : '—'}
-                          </div>
-                          <div
-                            className="flex w-16 shrink-0 items-center justify-end pr-3"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <CriticalRowMenu
-                              open={rowMenuOpenKey === test.id}
-                              onToggle={() =>
-                                setRowMenuOpenKey((k) => (k === test.id ? null : test.id))
-                              }
-                              onView={() => {
-                                selectEntry(entry);
-                                setRowMenuOpenKey(null);
-                                setReportTarget(entry);
-                              }}
-                              onAddComment={() => {
-                                setCommentTarget(entry);
-                                setRowMenuOpenKey(null);
-                              }}
-                            />
-                          </div>
+                        </Tooltip>
+                        <div
+                          className="w-32 shrink-0 py-3 pr-3 font-sans font-semibold"
+                          style={{ fontSize: 14, color: '#DC2626' }}
+                        >
+                          {row ? `${row.value}${row.unit ? ` ${row.unit}` : ''}` : '—'}
                         </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
+                        <Tooltip content={row?.reference ?? '—'}>
+                          <div
+                            className="w-36 shrink-0 truncate py-3 pr-3"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            {row?.reference ?? '—'}
+                          </div>
+                        </Tooltip>
+                        <div
+                          className="w-32 shrink-0 py-3 pr-3"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          {collectedAt ? (
+                            <>
+                              <p>{formatDate(collectedAt)}</p>
+                              <p style={{ color: '#8A98A3' }}>{formatTime(collectedAt)}</p>
+                            </>
+                          ) : (
+                            '—'
+                          )}
+                        </div>
+                        <div className="w-44 shrink-0 py-3 pr-3 text-center">
+                          <span
+                            className="rounded-full px-2.5 py-1 font-sans font-medium whitespace-nowrap"
+                            style={{
+                              fontSize: 14,
+                              color: statusCfg.color,
+                              border: `1px solid ${statusCfg.border}`,
+                              background: statusCfg.bg,
+                            }}
+                          >
+                            {status}
+                          </span>
+                        </div>
+                        <div
+                          className="w-24 shrink-0 py-3 pr-3 text-center font-sans font-semibold"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          {rt !== undefined ? formatHrsMin(rt) : '—'}
+                        </div>
+                        <div
+                          className="flex w-16 shrink-0 items-center justify-end pr-3"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <CriticalRowMenu
+                            open={rowMenuOpenKey === test.id}
+                            onToggle={() =>
+                              setRowMenuOpenKey((k) => (k === test.id ? null : test.id))
+                            }
+                            onView={() => {
+                              selectEntry(entry);
+                              setRowMenuOpenKey(null);
+                              setReportTarget(entry);
+                            }}
+                            onAddComment={() => {
+                              setCommentTarget(entry);
+                              setRowMenuOpenKey(null);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </ScrollableTable>
 
               {pageRows.length > 0 && (
                 <div className="px-4 py-3">

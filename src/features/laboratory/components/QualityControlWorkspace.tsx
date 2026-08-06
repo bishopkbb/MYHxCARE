@@ -21,6 +21,11 @@ import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Pagination } from '@components/shared/Pagination';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { RowMenuPortal } from '@components/shared/RowMenuPortal';
+import {
+  ScrollableTable,
+  TABLE_HEADER_BG,
+  TABLE_HEADER_STICKY_CLASS,
+} from '@components/shared/ScrollableTable';
 import { FilterDropdown, type FilterDef } from '@components/shared/FilterDropdown';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -821,134 +826,132 @@ export function QualityControlWorkspace() {
                   />
                 ) : (
                   <>
-                    <div className="overflow-x-auto scroll-smooth">
-                      <div style={{ minWidth: 480 }}>
-                        <div
-                          className="flex px-3 py-3"
-                          style={{
-                            background: 'rgba(226,237,241,0.4)',
-                            borderBottom: '1px solid #0064821F',
-                          }}
-                        >
-                          {[
-                            ['Run ID', 'w-[18%]'],
-                            ['Date & Time', 'w-[22%]'],
-                            ['Instrument', 'min-w-0 flex-1'],
-                            ['Status', 'w-28 shrink-0'],
-                            ['Actions', 'w-12 shrink-0'],
-                          ].map(([label, width]) => (
-                            <Tooltip key={label} content={label!}>
+                    <ScrollableTable minWidth={480} maxHeight={560}>
+                      <div
+                        className={`flex px-3 py-3 ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{
+                          background: TABLE_HEADER_BG,
+                          borderBottom: '1px solid #0064821F',
+                        }}
+                      >
+                        {[
+                          ['Run ID', 'w-[18%]'],
+                          ['Date & Time', 'w-[22%]'],
+                          ['Instrument', 'min-w-0 flex-1'],
+                          ['Status', 'w-28 shrink-0'],
+                          ['Actions', 'w-12 shrink-0'],
+                        ].map(([label, width]) => (
+                          <Tooltip key={label} content={label!}>
+                            <span
+                              className={`${width} truncate pr-3 font-sans font-bold tracking-wider uppercase`}
+                              style={{ fontSize: 14, color: '#4A7080' }}
+                            >
+                              {label}
+                            </span>
+                          </Tooltip>
+                        ))}
+                      </div>
+
+                      {paginatedRuns.map((run) => {
+                        const inst = getInstrument(run.instrumentId)!;
+                        const cfg = RUN_STATUS_CFG[run.status];
+                        const menuOpen = openRowMenuId === run.id;
+                        const active = selectedRunId === run.id;
+                        return (
+                          <div
+                            key={run.id}
+                            onClick={() => setSelectedRunId(run.id)}
+                            className={`flex cursor-pointer items-center px-3 py-3 transition-colors duration-150 ${active ? '' : 'hover:bg-[#F5FBFD]'}`}
+                            style={{
+                              borderBottom: '1px solid rgba(0,100,130,0.08)',
+                              background: active ? 'rgba(0,180,216,0.06)' : undefined,
+                            }}
+                          >
+                            <Tooltip content={run.id}>
                               <span
-                                className={`${width} truncate pr-3 font-sans font-bold tracking-wider uppercase`}
-                                style={{ fontSize: 14, color: '#4A7080' }}
+                                className="w-[18%] truncate pr-3 font-sans font-medium"
+                                style={{ fontSize: 14, color: '#00B4D8' }}
                               >
-                                {label}
+                                {run.id}
                               </span>
                             </Tooltip>
-                          ))}
-                        </div>
-
-                        {paginatedRuns.map((run) => {
-                          const inst = getInstrument(run.instrumentId)!;
-                          const cfg = RUN_STATUS_CFG[run.status];
-                          const menuOpen = openRowMenuId === run.id;
-                          const active = selectedRunId === run.id;
-                          return (
-                            <div
-                              key={run.id}
-                              onClick={() => setSelectedRunId(run.id)}
-                              className={`flex cursor-pointer items-center px-3 py-3 transition-colors duration-150 ${active ? '' : 'hover:bg-[#F5FBFD]'}`}
-                              style={{
-                                borderBottom: '1px solid rgba(0,100,130,0.08)',
-                                background: active ? 'rgba(0,180,216,0.06)' : undefined,
-                              }}
-                            >
-                              <Tooltip content={run.id}>
-                                <span
-                                  className="w-[18%] truncate pr-3 font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#00B4D8' }}
-                                >
-                                  {run.id}
-                                </span>
-                              </Tooltip>
-                              <Tooltip content={formatDateTime(run.runAt)}>
-                                <span
-                                  className="w-[22%] truncate pr-3"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {formatDateTime(run.runAt)}
-                                </span>
-                              </Tooltip>
-                              <Tooltip
-                                content={`${inst.name} — ${inst.testGroup} · ${run.qcType} · ${run.lotId} · Reviewed by ${run.reviewedBy ?? '—'}`}
-                              >
-                                <span
-                                  className="min-w-0 flex-1 truncate pr-3"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {inst.name}
-                                  <span style={{ color: '#8A98A3' }}>
-                                    {' '}
-                                    · {run.level === 'Level 1' ? 'L1' : 'L2'}
-                                  </span>
-                                </span>
-                              </Tooltip>
-                              <span className="w-28 shrink-0 pr-3">
-                                <StatusBadge status={run.status} cfg={cfg} />
-                              </span>
+                            <Tooltip content={formatDateTime(run.runAt)}>
                               <span
-                                className="flex w-12 shrink-0 items-center justify-end"
-                                onClick={(e) => e.stopPropagation()}
+                                className="w-[22%] truncate pr-3"
+                                style={{ fontSize: 14, color: '#0D2630' }}
                               >
-                                <div className="relative shrink-0">
-                                  <button
-                                    ref={getMenuRef(run.id)}
-                                    type="button"
-                                    onClick={() => setOpenRowMenuId(menuOpen ? null : run.id)}
-                                    aria-label="More actions"
-                                    className={`flex size-11 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] ${FOCUS_RING}`}
-                                  >
-                                    <MoreVertical
-                                      style={{ width: 15, height: 15, color: '#4A7080' }}
-                                    />
-                                  </button>
-                                  <RowMenuPortal
-                                    open={menuOpen}
-                                    anchorRef={getMenuRef(run.id)}
-                                    onClose={() => setOpenRowMenuId(null)}
-                                    width={180}
-                                  >
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setSelectedRunId(run.id);
-                                        setOpenRowMenuId(null);
-                                      }}
-                                      className={`flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] ${FOCUS_RING}`}
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      View Details
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        printRun(run);
-                                        setOpenRowMenuId(null);
-                                      }}
-                                      className={`flex w-full items-center gap-2 px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] ${FOCUS_RING}`}
-                                      style={{ fontSize: 14, color: '#0D2630' }}
-                                    >
-                                      <Printer style={{ width: 14, height: 14 }} />
-                                      Print
-                                    </button>
-                                  </RowMenuPortal>
-                                </div>
+                                {formatDateTime(run.runAt)}
                               </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                            </Tooltip>
+                            <Tooltip
+                              content={`${inst.name} — ${inst.testGroup} · ${run.qcType} · ${run.lotId} · Reviewed by ${run.reviewedBy ?? '—'}`}
+                            >
+                              <span
+                                className="min-w-0 flex-1 truncate pr-3"
+                                style={{ fontSize: 14, color: '#0D2630' }}
+                              >
+                                {inst.name}
+                                <span style={{ color: '#8A98A3' }}>
+                                  {' '}
+                                  · {run.level === 'Level 1' ? 'L1' : 'L2'}
+                                </span>
+                              </span>
+                            </Tooltip>
+                            <span className="w-28 shrink-0 pr-3">
+                              <StatusBadge status={run.status} cfg={cfg} />
+                            </span>
+                            <span
+                              className="flex w-12 shrink-0 items-center justify-end"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="relative shrink-0">
+                                <button
+                                  ref={getMenuRef(run.id)}
+                                  type="button"
+                                  onClick={() => setOpenRowMenuId(menuOpen ? null : run.id)}
+                                  aria-label="More actions"
+                                  className={`flex size-11 shrink-0 items-center justify-center rounded-[8px] transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] ${FOCUS_RING}`}
+                                >
+                                  <MoreVertical
+                                    style={{ width: 15, height: 15, color: '#4A7080' }}
+                                  />
+                                </button>
+                                <RowMenuPortal
+                                  open={menuOpen}
+                                  anchorRef={getMenuRef(run.id)}
+                                  onClose={() => setOpenRowMenuId(null)}
+                                  width={180}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedRunId(run.id);
+                                      setOpenRowMenuId(null);
+                                    }}
+                                    className={`flex w-full items-center px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] ${FOCUS_RING}`}
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    View Details
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      printRun(run);
+                                      setOpenRowMenuId(null);
+                                    }}
+                                    className={`flex w-full items-center gap-2 px-4 py-2 text-left font-sans transition-colors duration-150 hover:bg-[rgba(0,180,216,0.06)] ${FOCUS_RING}`}
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    <Printer style={{ width: 14, height: 14 }} />
+                                    Print
+                                  </button>
+                                </RowMenuPortal>
+                              </div>
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </ScrollableTable>
 
                     <div className="px-3">
                       <Pagination
@@ -1050,63 +1053,69 @@ export function QualityControlWorkspace() {
                       >
                         Control Results
                       </h3>
-                      <div className="mt-2 overflow-x-auto scroll-smooth">
-                        <table style={{ minWidth: 380, width: '100%', borderCollapse: 'collapse' }}>
-                          <thead>
-                            <tr style={{ borderBottom: '1px solid rgba(0,100,130,0.12)' }}>
-                              {['Test', 'Target Range', 'Observed', 'Status'].map((h) => (
-                                <th
-                                  key={h}
-                                  className="py-2 pr-2 text-left font-sans font-bold tracking-wider uppercase"
-                                  style={{ fontSize: 14, color: '#4A7080' }}
-                                >
-                                  {h}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {selectedRun.results.map((r) => (
-                              <tr
-                                key={r.test}
-                                style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
-                              >
-                                <td
-                                  className="py-2 pr-2"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  <Tooltip content={r.test}>
-                                    <span className="block max-w-[110px] truncate">{r.test}</span>
-                                  </Tooltip>
-                                </td>
-                                <td
-                                  className="py-2 pr-2 whitespace-nowrap"
-                                  style={{ fontSize: 14, color: '#4A7080' }}
-                                >
-                                  {r.targetLow}–{r.targetHigh} {r.unit}
-                                </td>
-                                <td
-                                  className="py-2 pr-2"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {r.observed ?? '—'}
-                                </td>
-                                <td className="py-2 pr-2">
-                                  <StatusBadge
-                                    status={r.status}
-                                    cfg={
-                                      r.status === 'Passed'
-                                        ? RUN_STATUS_CFG.Passed
-                                        : r.status === 'Failed'
-                                          ? RUN_STATUS_CFG.Failed
-                                          : RUN_STATUS_CFG['In Progress']
-                                    }
-                                  />
-                                </td>
+                      <div className="mt-2">
+                        <ScrollableTable minWidth={380}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                              <tr style={{ borderBottom: '1px solid rgba(0,100,130,0.12)' }}>
+                                {['Test', 'Target Range', 'Observed', 'Status'].map((h) => (
+                                  <th
+                                    key={h}
+                                    className={`py-2 pr-2 text-left font-sans font-bold tracking-wider uppercase ${TABLE_HEADER_STICKY_CLASS}`}
+                                    style={{
+                                      fontSize: 14,
+                                      color: '#4A7080',
+                                      background: TABLE_HEADER_BG,
+                                    }}
+                                  >
+                                    {h}
+                                  </th>
+                                ))}
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {selectedRun.results.map((r) => (
+                                <tr
+                                  key={r.test}
+                                  style={{ borderBottom: '1px solid rgba(0,100,130,0.06)' }}
+                                >
+                                  <td
+                                    className="py-2 pr-2"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    <Tooltip content={r.test}>
+                                      <span className="block max-w-[110px] truncate">{r.test}</span>
+                                    </Tooltip>
+                                  </td>
+                                  <td
+                                    className="py-2 pr-2 whitespace-nowrap"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
+                                  >
+                                    {r.targetLow}–{r.targetHigh} {r.unit}
+                                  </td>
+                                  <td
+                                    className="py-2 pr-2"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {r.observed ?? '—'}
+                                  </td>
+                                  <td className="py-2 pr-2">
+                                    <StatusBadge
+                                      status={r.status}
+                                      cfg={
+                                        r.status === 'Passed'
+                                          ? RUN_STATUS_CFG.Passed
+                                          : r.status === 'Failed'
+                                            ? RUN_STATUS_CFG.Failed
+                                            : RUN_STATUS_CFG['In Progress']
+                                      }
+                                    />
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </ScrollableTable>
                       </div>
 
                       <div className="mt-5 flex gap-2.5">
@@ -1230,115 +1239,113 @@ export function QualityControlWorkspace() {
                   hint="Flagged control results (warnings or rejects) will appear here."
                 />
               ) : (
-                <div className="overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 1080 }}>
-                    <div
-                      className="flex px-3 py-3"
-                      style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #0064821F',
-                      }}
-                    >
-                      {[
-                        ['Run ID', 'w-[13%]'],
-                        ['Instrument', 'w-[16%]'],
-                        ['Test', 'w-[14%]'],
-                        ['Level', 'w-[8%]'],
-                        ['Rule', 'w-[10%]'],
-                        ['Observed', 'w-[12%]'],
-                        ['Target Range', 'w-[13%]'],
-                        ['Date', 'min-w-0 flex-1'],
-                      ].map(([label, width]) => (
-                        <Tooltip key={label} content={label!}>
+                <ScrollableTable minWidth={1080} maxHeight={560}>
+                  <div
+                    className={`flex px-3 py-3 ${TABLE_HEADER_STICKY_CLASS}`}
+                    style={{
+                      background: TABLE_HEADER_BG,
+                      borderBottom: '1px solid #0064821F',
+                    }}
+                  >
+                    {[
+                      ['Run ID', 'w-[13%]'],
+                      ['Instrument', 'w-[16%]'],
+                      ['Test', 'w-[14%]'],
+                      ['Level', 'w-[8%]'],
+                      ['Rule', 'w-[10%]'],
+                      ['Observed', 'w-[12%]'],
+                      ['Target Range', 'w-[13%]'],
+                      ['Date', 'min-w-0 flex-1'],
+                    ].map(([label, width]) => (
+                      <Tooltip key={label} content={label!}>
+                        <span
+                          className={`${width} truncate pr-3 font-sans font-bold tracking-wider uppercase`}
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          {label}
+                        </span>
+                      </Tooltip>
+                    ))}
+                  </div>
+                  {westgardRows.map(({ run, result }) => {
+                    const inst = getInstrument(run.instrumentId)!;
+                    const ruleColor =
+                      result.rule === '1-3s' || result.rule === '2-2s' ? '#DC2626' : '#D97706';
+                    return (
+                      <div
+                        key={`${run.id}-${result.test}`}
+                        className="flex items-center px-3 py-3 transition-colors duration-150 hover:bg-[#F5FBFD]"
+                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                      >
+                        <Tooltip content={run.id}>
                           <span
-                            className={`${width} truncate pr-3 font-sans font-bold tracking-wider uppercase`}
-                            style={{ fontSize: 14, color: '#4A7080' }}
+                            className="w-[13%] truncate pr-3 font-sans font-medium"
+                            style={{ fontSize: 14, color: '#00B4D8' }}
                           >
-                            {label}
+                            {run.id}
                           </span>
                         </Tooltip>
-                      ))}
-                    </div>
-                    {westgardRows.map(({ run, result }) => {
-                      const inst = getInstrument(run.instrumentId)!;
-                      const ruleColor =
-                        result.rule === '1-3s' || result.rule === '2-2s' ? '#DC2626' : '#D97706';
-                      return (
-                        <div
-                          key={`${run.id}-${result.test}`}
-                          className="flex items-center px-3 py-3 transition-colors duration-150 hover:bg-[#F5FBFD]"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                        >
-                          <Tooltip content={run.id}>
-                            <span
-                              className="w-[13%] truncate pr-3 font-sans font-medium"
-                              style={{ fontSize: 14, color: '#00B4D8' }}
-                            >
-                              {run.id}
-                            </span>
-                          </Tooltip>
-                          <Tooltip content={inst.name}>
-                            <span
-                              className="w-[16%] truncate pr-3"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {inst.name}
-                            </span>
-                          </Tooltip>
-                          <Tooltip content={result.test}>
-                            <span
-                              className="w-[14%] truncate pr-3"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {result.test}
-                            </span>
-                          </Tooltip>
+                        <Tooltip content={inst.name}>
                           <span
-                            className="w-[8%] truncate pr-3"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {run.level}
-                          </span>
-                          <span className="w-[10%] shrink-0 pr-3">
-                            <span
-                              className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans font-medium"
-                              style={{
-                                fontSize: 14,
-                                color: ruleColor,
-                                border: `1px solid ${ruleColor}66`,
-                                background: `${ruleColor}14`,
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              <ShieldAlert style={{ width: 12, height: 12 }} />
-                              {result.rule}
-                            </span>
-                          </span>
-                          <span
-                            className="w-[12%] truncate pr-3"
+                            className="w-[16%] truncate pr-3"
                             style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            {result.observed} {result.unit}
+                            {inst.name}
                           </span>
+                        </Tooltip>
+                        <Tooltip content={result.test}>
                           <span
-                            className="w-[13%] truncate pr-3"
+                            className="w-[14%] truncate pr-3"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {result.test}
+                          </span>
+                        </Tooltip>
+                        <span
+                          className="w-[8%] truncate pr-3"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          {run.level}
+                        </span>
+                        <span className="w-[10%] shrink-0 pr-3">
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              color: ruleColor,
+                              border: `1px solid ${ruleColor}66`,
+                              background: `${ruleColor}14`,
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            <ShieldAlert style={{ width: 12, height: 12 }} />
+                            {result.rule}
+                          </span>
+                        </span>
+                        <span
+                          className="w-[12%] truncate pr-3"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {result.observed} {result.unit}
+                        </span>
+                        <span
+                          className="w-[13%] truncate pr-3"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          {result.targetLow}–{result.targetHigh}
+                        </span>
+                        <Tooltip content={formatDateTime(run.runAt)}>
+                          <span
+                            className="min-w-0 flex-1 truncate pr-3"
                             style={{ fontSize: 14, color: '#4A7080' }}
                           >
-                            {result.targetLow}–{result.targetHigh}
+                            {formatDateTime(run.runAt)}
                           </span>
-                          <Tooltip content={formatDateTime(run.runAt)}>
-                            <span
-                              className="min-w-0 flex-1 truncate pr-3"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {formatDateTime(run.runAt)}
-                            </span>
-                          </Tooltip>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                        </Tooltip>
+                      </div>
+                    );
+                  })}
+                </ScrollableTable>
               )}
             </div>
           )}
@@ -1359,114 +1366,112 @@ export function QualityControlWorkspace() {
                   hint="Add a control lot from QC Setup to get started."
                 />
               ) : (
-                <div className="overflow-x-auto scroll-smooth">
-                  <div style={{ minWidth: 960 }}>
-                    <div
-                      className="flex px-3 py-3"
-                      style={{
-                        background: 'rgba(226,237,241,0.4)',
-                        borderBottom: '1px solid #0064821F',
-                      }}
-                    >
-                      {[
-                        ['Lot ID', 'w-[13%]'],
-                        ['Instrument', 'w-[14%]'],
-                        ['Levels', 'w-[9%]'],
-                        ['Manufacturer', 'min-w-0 flex-1'],
-                        ['Opened', 'w-[10%]'],
-                        ['Expires', 'w-[10%]'],
-                        ['Runs', 'w-[6%]'],
-                        ['Status', 'w-28 shrink-0'],
-                        ['Actions', 'w-32 shrink-0'],
-                      ].map(([label, width]) => (
-                        <Tooltip key={label} content={label!}>
-                          <span
-                            className={`${width} truncate pr-3 font-sans font-bold tracking-wider uppercase`}
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {label}
-                          </span>
-                        </Tooltip>
-                      ))}
-                    </div>
-                    {lots.map((lot) => {
-                      const inst = getInstrument(lot.instrumentId)!;
-                      const runsCount = runs.filter((r) => r.lotId === lot.id).length;
-                      return (
-                        <div
-                          key={lot.id}
-                          className="flex items-center px-3 py-3 transition-colors duration-150 hover:bg-[#F5FBFD]"
-                          style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                <ScrollableTable minWidth={960} maxHeight={560}>
+                  <div
+                    className={`flex px-3 py-3 ${TABLE_HEADER_STICKY_CLASS}`}
+                    style={{
+                      background: TABLE_HEADER_BG,
+                      borderBottom: '1px solid #0064821F',
+                    }}
+                  >
+                    {[
+                      ['Lot ID', 'w-[13%]'],
+                      ['Instrument', 'w-[14%]'],
+                      ['Levels', 'w-[9%]'],
+                      ['Manufacturer', 'min-w-0 flex-1'],
+                      ['Opened', 'w-[10%]'],
+                      ['Expires', 'w-[10%]'],
+                      ['Runs', 'w-[6%]'],
+                      ['Status', 'w-28 shrink-0'],
+                      ['Actions', 'w-32 shrink-0'],
+                    ].map(([label, width]) => (
+                      <Tooltip key={label} content={label!}>
+                        <span
+                          className={`${width} truncate pr-3 font-sans font-bold tracking-wider uppercase`}
+                          style={{ fontSize: 14, color: '#4A7080' }}
                         >
-                          <Tooltip content={lot.id}>
-                            <span
-                              className="w-[13%] truncate pr-3 font-sans font-medium"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {lot.id}
-                            </span>
-                          </Tooltip>
-                          <Tooltip content={inst.name}>
-                            <span
-                              className="w-[14%] truncate pr-3"
-                              style={{ fontSize: 14, color: '#0D2630' }}
-                            >
-                              {inst.name}
-                            </span>
-                          </Tooltip>
+                          {label}
+                        </span>
+                      </Tooltip>
+                    ))}
+                  </div>
+                  {lots.map((lot) => {
+                    const inst = getInstrument(lot.instrumentId)!;
+                    const runsCount = runs.filter((r) => r.lotId === lot.id).length;
+                    return (
+                      <div
+                        key={lot.id}
+                        className="flex items-center px-3 py-3 transition-colors duration-150 hover:bg-[#F5FBFD]"
+                        style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                      >
+                        <Tooltip content={lot.id}>
                           <span
-                            className="w-[9%] truncate pr-3"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {lot.levels.join(', ')}
-                          </span>
-                          <Tooltip content={lot.manufacturer}>
-                            <span
-                              className="min-w-0 flex-1 truncate pr-3"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {lot.manufacturer}
-                            </span>
-                          </Tooltip>
-                          <span
-                            className="w-[10%] truncate pr-3"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {formatDate(lot.openedAt)}
-                          </span>
-                          <span
-                            className="w-[10%] truncate pr-3"
-                            style={{ fontSize: 14, color: '#4A7080' }}
-                          >
-                            {formatDate(lot.expiresAt)}
-                          </span>
-                          <span
-                            className="w-[6%] truncate pr-3"
+                            className="w-[13%] truncate pr-3 font-sans font-medium"
                             style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            {runsCount}
+                            {lot.id}
                           </span>
-                          <span className="w-28 shrink-0 pr-3">
-                            <StatusBadge status={lot.status} cfg={LOT_STATUS_CFG[lot.status]} />
+                        </Tooltip>
+                        <Tooltip content={inst.name}>
+                          <span
+                            className="w-[14%] truncate pr-3"
+                            style={{ fontSize: 14, color: '#0D2630' }}
+                          >
+                            {inst.name}
                           </span>
-                          <span className="w-32 shrink-0">
-                            <PermissionGate permission={PERMISSIONS.LAB_QC_WRITE}>
-                              <button
-                                type="button"
-                                disabled={lot.status === 'Depleted'}
-                                onClick={() => retireLot(lot)}
-                                className={`flex h-11 items-center rounded-[8px] px-3 font-sans font-medium whitespace-nowrap transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
-                                style={{ fontSize: 14, color: '#DC2626' }}
-                              >
-                                Retire Lot
-                              </button>
-                            </PermissionGate>
+                        </Tooltip>
+                        <span
+                          className="w-[9%] truncate pr-3"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          {lot.levels.join(', ')}
+                        </span>
+                        <Tooltip content={lot.manufacturer}>
+                          <span
+                            className="min-w-0 flex-1 truncate pr-3"
+                            style={{ fontSize: 14, color: '#4A7080' }}
+                          >
+                            {lot.manufacturer}
                           </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                        </Tooltip>
+                        <span
+                          className="w-[10%] truncate pr-3"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          {formatDate(lot.openedAt)}
+                        </span>
+                        <span
+                          className="w-[10%] truncate pr-3"
+                          style={{ fontSize: 14, color: '#4A7080' }}
+                        >
+                          {formatDate(lot.expiresAt)}
+                        </span>
+                        <span
+                          className="w-[6%] truncate pr-3"
+                          style={{ fontSize: 14, color: '#0D2630' }}
+                        >
+                          {runsCount}
+                        </span>
+                        <span className="w-28 shrink-0 pr-3">
+                          <StatusBadge status={lot.status} cfg={LOT_STATUS_CFG[lot.status]} />
+                        </span>
+                        <span className="w-32 shrink-0">
+                          <PermissionGate permission={PERMISSIONS.LAB_QC_WRITE}>
+                            <button
+                              type="button"
+                              disabled={lot.status === 'Depleted'}
+                              onClick={() => retireLot(lot)}
+                              className={`flex h-11 items-center rounded-[8px] px-3 font-sans font-medium whitespace-nowrap transition-colors duration-150 hover:bg-[rgba(0,180,216,0.08)] disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`}
+                              style={{ fontSize: 14, color: '#DC2626' }}
+                            >
+                              Retire Lot
+                            </button>
+                          </PermissionGate>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </ScrollableTable>
               )}
             </div>
           )}

@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Quality Control Reports' };
+import { QualityControlReportsWorkspace } from '@/features/laboratory/components/QualityControlReportsWorkspace';
 
 export default function QualityControlReportsPage() {
-  return (
-    <ComingSoon
-      title="Quality Control Reports"
-      description="Pass/fail trends and Westgard-rule violations across every QC run are on the way."
-    />
-  );
+  return <QualityControlReportsWorkspace />;
 }
