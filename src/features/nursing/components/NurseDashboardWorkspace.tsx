@@ -233,9 +233,11 @@ export function NurseDashboardWorkspace() {
     setTaskDone((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
-  const firstName = (user?.name ?? 'Chidinma')
+  const lastNameParts = (user?.name ?? 'Eze')
     .replace(/^(Dr\.|Mr\.|Mrs\.|Ms\.|Nurse)\s+/, '')
-    .split(' ')[0];
+    .trim()
+    .split(/\s+/);
+  const lastName = lastNameParts[lastNameParts.length - 1];
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -247,10 +249,10 @@ export function NurseDashboardWorkspace() {
                 className="font-display font-semibold"
                 style={{ fontSize: 26, lineHeight: '34px', color: '#0D2630' }}
               >
-                Nurse Dashboard
+                {getWATGreeting()}, Nurse {lastName}
               </h1>
               <p className="mt-0.5" style={{ fontSize: 14, lineHeight: '22px', color: '#4A7080' }}>
-                {getWATGreeting()}, Nurse {firstName}. Here&apos;s your patient care overview.
+                Here&apos;s your patient care overview.
               </p>
             </div>
             <div

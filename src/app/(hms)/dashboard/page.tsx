@@ -44,11 +44,17 @@ import { startEncounter, useEncounters } from '@/features/encounters/store/encou
 import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
 import type { Encounter } from '@/types/visit.types';
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good Morning';
-  if (hour < 17) return 'Good Afternoon';
-  return 'Good Evening';
+function getWATGreeting(): string {
+  const hour = Number(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Africa/Lagos',
+      hour: '2-digit',
+      hour12: false,
+    }).format(new Date()),
+  );
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
 }
 
 function formatClinicalDate(date: Date): string {
@@ -482,7 +488,7 @@ export default function DashboardPage() {
             className="font-display text-2xl leading-8 font-semibold"
             style={{ color: '#00B4D8' }}
           >
-            {getGreeting()}, {title} {lastName}
+            {getWATGreeting()}, {title} {lastName}
           </h1>
           <p
             className="mt-1 text-sm leading-5.5"
