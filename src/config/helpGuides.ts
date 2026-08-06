@@ -2021,6 +2021,31 @@ const LABORATORY_HISTORY_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_CLINICAL_TIMELINE_GUIDE: HelpGuide = {
+  id: 'laboratory-clinical-timeline',
+  title: 'Clinical Timeline',
+  intro:
+    'Every laboratory event for a patient, merged across all their orders into one chronological feed.',
+  sections: [
+    {
+      heading: 'Finding a patient',
+      body: 'Search by name or MRN to select a patient, same as Laboratory History. Change Patient returns to search.',
+    },
+    {
+      heading: 'Reading the timeline',
+      body: 'Each row is one real event — order created, sample collected, analysis started, result entered, verified, and published — with its timestamp and the person responsible. Rows with extra detail have a chevron to expand; Expand All opens every row at once.',
+    },
+    {
+      heading: 'Filters and pagination',
+      body: 'Narrow by Date Range, Event Type, or Department. Load More Events reveals older events without loading the entire history at once.',
+    },
+    {
+      heading: 'Right rail',
+      body: 'Patient Summary mirrors the banner; Current Order Summary and Tests cover the most recent order, with a link back to the full Laboratory History for this patient.',
+    },
+  ],
+};
+
 const LABORATORY_SAMPLE_TRACKING_GUIDE: HelpGuide = {
   id: 'laboratory-sample-tracking',
   title: 'Sample Tracking',
@@ -3146,6 +3171,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
     return LABORATORY_WORKFORCE_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/laboratory/my-schedule')) return LABORATORY_MY_SCHEDULE_GUIDE;
   if (pathname.startsWith('/laboratory/shift-handover')) return LABORATORY_SHIFT_HANDOVER_GUIDE;
+  if (pathname.startsWith('/laboratory/clinical-timeline'))
+    return LABORATORY_CLINICAL_TIMELINE_GUIDE;
   if (pathname.startsWith('/laboratory/history')) return LABORATORY_HISTORY_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;

@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Clinical Timeline' };
+import { LaboratoryClinicalTimelineWorkspace } from '@/features/laboratory/components/LaboratoryClinicalTimelineWorkspace';
 
 export default function LaboratoryClinicalTimelinePage() {
-  return (
-    <ComingSoon
-      title="Clinical Timeline"
-      description="A chronological view of a patient's lab-relevant clinical events is on the way."
-    />
-  );
+  return <LaboratoryClinicalTimelineWorkspace />;
 }

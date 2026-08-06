@@ -569,6 +569,8 @@ export function LaboratoryHistoryWorkspace() {
   const displayName = patientDetail?.name ?? patientOrders[0]?.patientName ?? selectedMrn;
   const displayGender = patientDetail?.gender ?? patientOrders[0]?.gender ?? '—';
   const displayAge = patientDetail?.age ?? '—';
+  const displayDob =
+    patientDetail?.dob && patientDetail.dob !== '—' ? formatHumanDate(patientDetail.dob) : '—';
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -677,11 +679,7 @@ export function LaboratoryHistoryWorkspace() {
                   label="Gender / Age"
                   value={`${displayGender} / ${displayAge}`}
                 />
-                <DetailField
-                  icon={Calendar}
-                  label="Date of Birth"
-                  value={patientDetail?.dob ? formatHumanDate(patientDetail.dob) : '—'}
-                />
+                <DetailField icon={Calendar} label="Date of Birth" value={displayDob} />
                 <DetailField
                   icon={Phone}
                   label="Phone Number"
