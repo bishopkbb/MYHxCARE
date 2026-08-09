@@ -2045,6 +2045,34 @@ const LABORATORY_QUALITY_CONTROL_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_INVENTORY_GUIDE: HelpGuide = {
+  id: 'laboratory-inventory',
+  title: 'Laboratory Inventory',
+  intro: 'Every reagent, kit, consumable, and supply in one place — stock, expiry, and reorders.',
+  sections: [
+    {
+      heading: 'Stat cards and filters',
+      body: 'The six cards summarize total items, stock status, and total inventory value — click Low Stock, Expiring Soon, or Expired to jump straight to the relevant tab. Narrow the Inventory Items list by Department, Category, Status, or Location, or search by item name, catalog no., or lot no.',
+    },
+    {
+      heading: 'Inventory Items and details',
+      body: 'Select a row to open its Item Details in the right column, alongside a Stock Summary donut for the whole inventory and Quick Actions to jump to Stock Alerts, add an item, generate a report, or view the reorder list.',
+    },
+    {
+      heading: 'Batch Tracking and Expiry Monitoring',
+      body: 'Batch Tracking lists every batch received against its remaining quantity. Expiry Monitoring lists everything expiring within 30 days or already expired, soonest first.',
+    },
+    {
+      heading: 'Consumption Analytics and Stock Alerts',
+      body: 'Consumption Analytics ranks the most-used items from the movement history. Stock Alerts lists everything at or below minimum stock — Create Reorder Request raises a request that appears immediately in Reorder Management.',
+    },
+    {
+      heading: 'Reorder Management and Inventory History',
+      body: 'Reorder Management tracks every request from Pending through Ordered to Received. Inventory History is the full, read-only log of every stock movement — received, consumed, adjusted, or disposed.',
+    },
+  ],
+};
+
 const LABORATORY_EQUIPMENT_MANAGEMENT_GUIDE: HelpGuide = {
   id: 'laboratory-equipment-management',
   title: 'Equipment Management',
@@ -3252,6 +3280,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/quality-control')) return LABORATORY_QUALITY_CONTROL_GUIDE;
   if (pathname.startsWith('/laboratory/equipment-management'))
     return LABORATORY_EQUIPMENT_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/laboratory/inventory')) return LABORATORY_INVENTORY_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;
