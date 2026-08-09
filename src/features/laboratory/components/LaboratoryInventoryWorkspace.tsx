@@ -805,7 +805,10 @@ export function LaboratoryInventoryWorkspace() {
                           ['Status', 'w-36'],
                           ['Location', 'w-36'],
                         ].map(([label, width]) => (
-                          <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                          <div
+                            key={label}
+                            className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                          >
                             <span
                               className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                               style={{ fontSize: 14, color: '#4A7080' }}
@@ -814,7 +817,7 @@ export function LaboratoryInventoryWorkspace() {
                             </span>
                           </div>
                         ))}
-                        <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
+                        <div className="w-24 shrink-0 py-2.5 pr-3 text-center">
                           <span
                             className="font-sans font-bold tracking-wider uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -836,7 +839,7 @@ export function LaboratoryInventoryWorkspace() {
                               background: selectedId === item.id ? '#E6F8FD' : 'transparent',
                             }}
                           >
-                            <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                            <div className="min-w-0 flex-1 py-3 pr-2 pl-3 text-center">
                               <Tooltip content={item.name}>
                                 <p
                                   className="truncate font-sans font-medium"
@@ -846,33 +849,33 @@ export function LaboratoryInventoryWorkspace() {
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="w-32 shrink-0 py-3 pr-2">
+                            <div className="w-32 shrink-0 py-3 pr-2 text-center">
                               <Tooltip content={item.catalogNo}>
                                 <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
                                   {item.catalogNo}
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="w-32 shrink-0 py-3 pr-2">
+                            <div className="w-32 shrink-0 py-3 pr-2 text-center">
                               <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                                 {item.category}
                               </p>
                             </div>
-                            <div className="w-32 shrink-0 py-3 pr-2">
+                            <div className="w-32 shrink-0 py-3 pr-2 text-center">
                               <Tooltip content={item.department}>
                                 <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                                   {item.department}
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="w-32 shrink-0 py-3 pr-2">
+                            <div className="w-32 shrink-0 py-3 pr-2 text-center">
                               <Tooltip content={item.lotBatchNo}>
                                 <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                                   {item.lotBatchNo}
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="w-40 shrink-0 py-3 pr-2">
+                            <div className="w-40 shrink-0 py-3 pr-2 text-center">
                               <p
                                 className="whitespace-nowrap"
                                 style={{ fontSize: 14, color: exp.color }}
@@ -880,16 +883,16 @@ export function LaboratoryInventoryWorkspace() {
                                 {exp.text}
                               </p>
                             </div>
-                            <div className="w-28 shrink-0 py-3 pr-2">
+                            <div className="w-28 shrink-0 py-3 pr-2 text-center">
                               <p style={{ fontSize: 14, color: '#0D2630' }}>
                                 {item.currentStock}{' '}
                                 <span style={{ color: '#8A98A3' }}>{item.unit}</span>
                               </p>
                             </div>
-                            <div className="w-36 shrink-0 py-3 pr-2">
+                            <div className="w-36 shrink-0 py-3 pr-2 text-center">
                               <StatusBadge status={st} />
                             </div>
-                            <div className="w-36 shrink-0 py-3 pr-2">
+                            <div className="w-36 shrink-0 py-3 pr-2 text-center">
                               <Tooltip content={item.location}>
                                 <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                                   {item.location}
@@ -897,7 +900,7 @@ export function LaboratoryInventoryWorkspace() {
                               </Tooltip>
                             </div>
                             <div
-                              className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3"
+                              className="flex w-24 shrink-0 items-center justify-center gap-1 py-3 pr-3"
                               onClick={(ev) => ev.stopPropagation()}
                             >
                               <button
@@ -1181,7 +1184,10 @@ export function LaboratoryInventoryWorkspace() {
                         ['Received Date', 'w-36'],
                         ['Received By', 'w-36'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                        >
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -1197,7 +1203,7 @@ export function LaboratoryInventoryWorkspace() {
                         className="flex items-center"
                         style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                       >
-                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3 text-center">
                           <Tooltip content={itemName(b.itemId)}>
                             <p
                               className="truncate font-sans font-medium"
@@ -1207,28 +1213,28 @@ export function LaboratoryInventoryWorkspace() {
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
+                        <div className="w-32 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{b.lotBatchNo}</p>
                         </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
+                        <div className="w-28 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{b.quantityReceived}</p>
                         </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
+                        <div className="w-28 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#0D2630' }}>{b.quantityRemaining}</p>
                         </div>
-                        <div className="w-52 shrink-0 py-3 pr-2">
+                        <div className="w-52 shrink-0 py-3 pr-2 text-center">
                           <Tooltip content={b.supplier}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {b.supplier}
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
+                        <div className="w-36 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>
                             {formatHumanDate(b.receivedDate)}
                           </p>
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
+                        <div className="w-36 shrink-0 py-3 pr-2 text-center">
                           <Tooltip content={b.receivedBy}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {b.receivedBy}
@@ -1276,7 +1282,10 @@ export function LaboratoryInventoryWorkspace() {
                         ['Current Stock', 'w-28'],
                         ['Status', 'w-32'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                        >
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -1295,7 +1304,7 @@ export function LaboratoryInventoryWorkspace() {
                           className="flex items-center"
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
-                          <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                          <div className="min-w-0 flex-1 py-3 pr-2 pl-3 text-center">
                             <Tooltip content={item.name}>
                               <p
                                 className="truncate font-sans font-medium"
@@ -1305,17 +1314,17 @@ export function LaboratoryInventoryWorkspace() {
                               </p>
                             </Tooltip>
                           </div>
-                          <div className="w-32 shrink-0 py-3 pr-2">
+                          <div className="w-32 shrink-0 py-3 pr-2 text-center">
                             <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
                               {item.catalogNo}
                             </p>
                           </div>
-                          <div className="w-32 shrink-0 py-3 pr-2">
+                          <div className="w-32 shrink-0 py-3 pr-2 text-center">
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {item.lotBatchNo}
                             </p>
                           </div>
-                          <div className="w-48 shrink-0 py-3 pr-2">
+                          <div className="w-48 shrink-0 py-3 pr-2 text-center">
                             <p
                               className="whitespace-nowrap"
                               style={{ fontSize: 14, color: exp.color }}
@@ -1323,13 +1332,13 @@ export function LaboratoryInventoryWorkspace() {
                               {exp.text}
                             </p>
                           </div>
-                          <div className="w-28 shrink-0 py-3 pr-2">
+                          <div className="w-28 shrink-0 py-3 pr-2 text-center">
                             <p style={{ fontSize: 14, color: '#0D2630' }}>
                               {item.currentStock}{' '}
                               <span style={{ color: '#8A98A3' }}>{item.unit}</span>
                             </p>
                           </div>
-                          <div className="w-32 shrink-0 py-3 pr-2">
+                          <div className="w-32 shrink-0 py-3 pr-2 text-center">
                             <StatusBadge status={st} />
                           </div>
                         </div>
@@ -1431,7 +1440,10 @@ export function LaboratoryInventoryWorkspace() {
                         ['Status', 'w-32'],
                         ['Location', 'w-36'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                        >
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -1440,7 +1452,7 @@ export function LaboratoryInventoryWorkspace() {
                           </span>
                         </div>
                       ))}
-                      <div className="w-44 shrink-0 py-2.5 pr-3 text-right">
+                      <div className="w-44 shrink-0 py-2.5 pr-3 text-center">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -1455,7 +1467,7 @@ export function LaboratoryInventoryWorkspace() {
                         className="flex items-center"
                         style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                       >
-                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3 text-center">
                           <Tooltip content={item.name}>
                             <p
                               className="truncate font-sans font-medium"
@@ -1465,31 +1477,31 @@ export function LaboratoryInventoryWorkspace() {
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
+                        <div className="w-32 shrink-0 py-3 pr-2 text-center">
                           <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
                             {item.catalogNo}
                           </p>
                         </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
+                        <div className="w-28 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#0D2630' }}>
                             {item.currentStock}{' '}
                             <span style={{ color: '#8A98A3' }}>{item.unit}</span>
                           </p>
                         </div>
-                        <div className="w-24 shrink-0 py-3 pr-2">
+                        <div className="w-24 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{item.minStock}</p>
                         </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
+                        <div className="w-32 shrink-0 py-3 pr-2 text-center">
                           <StatusBadge status={getInventoryStatus(item)} />
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
+                        <div className="w-36 shrink-0 py-3 pr-2 text-center">
                           <Tooltip content={item.location}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {item.location}
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="flex w-44 shrink-0 items-center justify-end py-3 pr-3">
+                        <div className="flex w-44 shrink-0 items-center justify-center py-3 pr-3">
                           <PermissionGate permission={PERMISSIONS.LAB_INVENTORY_WRITE}>
                             <button
                               type="button"
@@ -1546,7 +1558,10 @@ export function LaboratoryInventoryWorkspace() {
                         ['Requested At', 'w-36'],
                         ['Notes', 'w-64'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                        >
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -1555,7 +1570,7 @@ export function LaboratoryInventoryWorkspace() {
                           </span>
                         </div>
                       ))}
-                      <div className="w-40 shrink-0 py-2.5 pr-3 text-right">
+                      <div className="w-40 shrink-0 py-2.5 pr-3 text-center">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -1577,7 +1592,7 @@ export function LaboratoryInventoryWorkspace() {
                             className="flex items-center"
                             style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                           >
-                            <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                            <div className="min-w-0 flex-1 py-3 pr-2 pl-3 text-center">
                               <Tooltip content={itemName(r.itemId)}>
                                 <p
                                   className="truncate font-sans font-medium"
@@ -1587,12 +1602,12 @@ export function LaboratoryInventoryWorkspace() {
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="w-28 shrink-0 py-3 pr-2">
+                            <div className="w-28 shrink-0 py-3 pr-2 text-center">
                               <p style={{ fontSize: 14, color: '#0D2630' }}>
                                 {r.quantityRequested}
                               </p>
                             </div>
-                            <div className="w-28 shrink-0 py-3 pr-2">
+                            <div className="w-28 shrink-0 py-3 pr-2 text-center">
                               <span
                                 className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
                                 style={{ fontSize: 14, color: cfg.color, background: cfg.bg }}
@@ -1600,26 +1615,26 @@ export function LaboratoryInventoryWorkspace() {
                                 {r.status}
                               </span>
                             </div>
-                            <div className="w-36 shrink-0 py-3 pr-2">
+                            <div className="w-36 shrink-0 py-3 pr-2 text-center">
                               <Tooltip content={r.requestedBy}>
                                 <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                                   {r.requestedBy}
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="w-36 shrink-0 py-3 pr-2">
+                            <div className="w-36 shrink-0 py-3 pr-2 text-center">
                               <p style={{ fontSize: 14, color: '#4A7080' }}>
                                 {formatHumanDate(r.requestedAt)}
                               </p>
                             </div>
-                            <div className="w-64 shrink-0 py-3 pr-2">
+                            <div className="w-64 shrink-0 py-3 pr-2 text-center">
                               <Tooltip content={r.notes}>
                                 <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                                   {r.notes}
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="flex w-40 shrink-0 items-center justify-end gap-1.5 py-3 pr-3">
+                            <div className="flex w-40 shrink-0 items-center justify-center gap-1.5 py-3 pr-3">
                               <PermissionGate permission={PERMISSIONS.LAB_INVENTORY_WRITE}>
                                 {r.status === 'Pending' && (
                                   <button

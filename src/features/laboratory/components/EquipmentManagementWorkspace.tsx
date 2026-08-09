@@ -720,7 +720,10 @@ export function EquipmentManagementWorkspace() {
                           ['Status', 'w-40'],
                           ['Next Calibration', 'w-40'],
                         ].map(([label, width]) => (
-                          <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                          <div
+                            key={label}
+                            className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                          >
                             <span
                               className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                               style={{ fontSize: 14, color: '#4A7080' }}
@@ -729,7 +732,7 @@ export function EquipmentManagementWorkspace() {
                             </span>
                           </div>
                         ))}
-                        <div className="w-24 shrink-0 py-2.5 pr-3 text-right">
+                        <div className="w-24 shrink-0 py-2.5 pr-3 text-center">
                           <span
                             className="font-sans font-bold tracking-wider uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -750,14 +753,14 @@ export function EquipmentManagementWorkspace() {
                               background: selectedId === e.id ? '#E6F8FD' : 'transparent',
                             }}
                           >
-                            <div className="w-32 shrink-0 py-3 pr-2 pl-3">
+                            <div className="w-32 shrink-0 py-3 pr-2 pl-3 text-center">
                               <Tooltip content={e.id}>
                                 <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
                                   {e.id}
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="min-w-0 flex-1 py-3 pr-2">
+                            <div className="min-w-0 flex-1 py-3 pr-2 text-center">
                               <Tooltip content={e.name}>
                                 <p
                                   className="truncate font-sans font-medium"
@@ -767,31 +770,31 @@ export function EquipmentManagementWorkspace() {
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="w-32 shrink-0 py-3 pr-2">
+                            <div className="w-32 shrink-0 py-3 pr-2 text-center">
                               <Tooltip content={e.model}>
                                 <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                                   {e.model}
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="w-36 shrink-0 py-3 pr-2">
+                            <div className="w-36 shrink-0 py-3 pr-2 text-center">
                               <Tooltip content={e.serialNumber}>
                                 <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                                   {e.serialNumber}
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="w-36 shrink-0 py-3 pr-2">
+                            <div className="w-36 shrink-0 py-3 pr-2 text-center">
                               <Tooltip content={e.department}>
                                 <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                                   {e.department}
                                 </p>
                               </Tooltip>
                             </div>
-                            <div className="w-40 shrink-0 py-3 pr-2">
+                            <div className="w-40 shrink-0 py-3 pr-2 text-center">
                               <StatusBadge status={e.status} />
                             </div>
-                            <div className="w-40 shrink-0 py-3 pr-2">
+                            <div className="w-40 shrink-0 py-3 pr-2 text-center">
                               <p
                                 className="whitespace-nowrap"
                                 style={{ fontSize: 14, color: cal.color }}
@@ -800,7 +803,7 @@ export function EquipmentManagementWorkspace() {
                               </p>
                             </div>
                             <div
-                              className="flex w-24 shrink-0 items-center justify-end gap-1 py-3 pr-3"
+                              className="flex w-24 shrink-0 items-center justify-center gap-1 py-3 pr-3"
                               onClick={(ev) => ev.stopPropagation()}
                             >
                               <button
@@ -1056,7 +1059,10 @@ export function EquipmentManagementWorkspace() {
                         ['Next Calibration', 'w-44'],
                         ['Status', 'w-28'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                        >
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -1065,7 +1071,7 @@ export function EquipmentManagementWorkspace() {
                           </span>
                         </div>
                       ))}
-                      <div className="w-32 shrink-0 py-2.5 pr-3 text-right">
+                      <div className="w-32 shrink-0 py-2.5 pr-3 text-center">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -1083,12 +1089,12 @@ export function EquipmentManagementWorkspace() {
                           className="flex items-center"
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
-                          <div className="w-32 shrink-0 py-3 pr-2 pl-3">
+                          <div className="w-32 shrink-0 py-3 pr-2 pl-3 text-center">
                             <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
                               {e.id}
                             </p>
                           </div>
-                          <div className="min-w-0 flex-1 py-3 pr-2">
+                          <div className="min-w-0 flex-1 py-3 pr-2 text-center">
                             <Tooltip content={e.name}>
                               <p
                                 className="truncate font-sans font-medium"
@@ -1098,12 +1104,12 @@ export function EquipmentManagementWorkspace() {
                               </p>
                             </Tooltip>
                           </div>
-                          <div className="w-36 shrink-0 py-3 pr-2">
+                          <div className="w-36 shrink-0 py-3 pr-2 text-center">
                             <p style={{ fontSize: 14, color: '#4A7080' }}>
                               {e.lastCalibrationAt ? formatHumanDate(e.lastCalibrationAt) : '—'}
                             </p>
                           </div>
-                          <div className="w-44 shrink-0 py-3 pr-2">
+                          <div className="w-44 shrink-0 py-3 pr-2 text-center">
                             <p
                               className="whitespace-nowrap"
                               style={{ fontSize: 14, color: cal.color }}
@@ -1111,7 +1117,7 @@ export function EquipmentManagementWorkspace() {
                               {cal.text}
                             </p>
                           </div>
-                          <div className="w-28 shrink-0 py-3 pr-2">
+                          <div className="w-28 shrink-0 py-3 pr-2 text-center">
                             <span
                               className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
                               style={{
@@ -1130,7 +1136,7 @@ export function EquipmentManagementWorkspace() {
                               {state}
                             </span>
                           </div>
-                          <div className="flex w-32 shrink-0 items-center justify-end py-3 pr-3">
+                          <div className="flex w-32 shrink-0 items-center justify-center py-3 pr-3">
                             <PermissionGate permission={PERMISSIONS.LAB_EQUIPMENT_WRITE}>
                               <button
                                 type="button"
@@ -1187,7 +1193,10 @@ export function EquipmentManagementWorkspace() {
                         ['Assigned To', 'w-52'],
                         ['Notes', 'w-64'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                        >
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -1203,7 +1212,7 @@ export function EquipmentManagementWorkspace() {
                         className="flex items-center"
                         style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                       >
-                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3 text-center">
                           <Tooltip content={equipmentName(s.equipmentId)}>
                             <p
                               className="truncate font-sans font-medium"
@@ -1213,22 +1222,22 @@ export function EquipmentManagementWorkspace() {
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-48 shrink-0 py-3 pr-2">
+                        <div className="w-48 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{s.type}</p>
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
+                        <div className="w-36 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>
                             {formatHumanDate(s.date)}
                           </p>
                         </div>
-                        <div className="w-52 shrink-0 py-3 pr-2">
+                        <div className="w-52 shrink-0 py-3 pr-2 text-center">
                           <Tooltip content={s.performedBy}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {s.performedBy}
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-64 shrink-0 py-3 pr-3">
+                        <div className="w-64 shrink-0 py-3 pr-3 text-center">
                           <Tooltip content={s.notes}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {s.notes}
@@ -1275,7 +1284,10 @@ export function EquipmentManagementWorkspace() {
                         ['Performed By', 'w-52'],
                         ['Notes', 'w-64'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                        >
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -1291,7 +1303,7 @@ export function EquipmentManagementWorkspace() {
                         className="flex items-center"
                         style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                       >
-                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3 text-center">
                           <Tooltip content={equipmentName(s.equipmentId)}>
                             <p
                               className="truncate font-sans font-medium"
@@ -1301,22 +1313,22 @@ export function EquipmentManagementWorkspace() {
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-48 shrink-0 py-3 pr-2">
+                        <div className="w-48 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{s.type}</p>
                         </div>
-                        <div className="w-32 shrink-0 py-3 pr-2">
+                        <div className="w-32 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>
                             {formatHumanDate(s.date)}
                           </p>
                         </div>
-                        <div className="w-52 shrink-0 py-3 pr-2">
+                        <div className="w-52 shrink-0 py-3 pr-2 text-center">
                           <Tooltip content={s.performedBy}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {s.performedBy}
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-64 shrink-0 py-3 pr-3">
+                        <div className="w-64 shrink-0 py-3 pr-3 text-center">
                           <Tooltip content={s.notes}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {s.notes}
@@ -1363,7 +1375,10 @@ export function EquipmentManagementWorkspace() {
                         ['Reason', 'w-64'],
                         ['Reported By', 'w-44'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                        >
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -1379,7 +1394,7 @@ export function EquipmentManagementWorkspace() {
                         className="flex items-center"
                         style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                       >
-                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                        <div className="min-w-0 flex-1 py-3 pr-2 pl-3 text-center">
                           <Tooltip content={equipmentName(d.equipmentId)}>
                             <p
                               className="truncate font-sans font-medium"
@@ -1389,12 +1404,12 @@ export function EquipmentManagementWorkspace() {
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
+                        <div className="w-36 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>
                             {formatHumanDate(d.startAt)}
                           </p>
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2">
+                        <div className="w-36 shrink-0 py-3 pr-2 text-center">
                           {d.endAt ? (
                             <p style={{ fontSize: 14, color: '#4A7080' }}>
                               {formatHumanDate(d.endAt)}
@@ -1413,14 +1428,14 @@ export function EquipmentManagementWorkspace() {
                             </span>
                           )}
                         </div>
-                        <div className="w-64 shrink-0 py-3 pr-2">
+                        <div className="w-64 shrink-0 py-3 pr-2 text-center">
                           <Tooltip content={d.reason}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {d.reason}
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-44 shrink-0 py-3 pr-3">
+                        <div className="w-44 shrink-0 py-3 pr-3 text-center">
                           <Tooltip content={d.reportedBy}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {d.reportedBy}
@@ -1468,7 +1483,10 @@ export function EquipmentManagementWorkspace() {
                         ['Severity', 'w-28'],
                         ['Resolved', 'w-24'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                        >
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -1503,7 +1521,7 @@ export function EquipmentManagementWorkspace() {
                           className="flex items-center"
                           style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                         >
-                          <div className="min-w-0 flex-1 py-3 pr-2 pl-3">
+                          <div className="min-w-0 flex-1 py-3 pr-2 pl-3 text-center">
                             <Tooltip content={equipmentName(err.equipmentId)}>
                               <p
                                 className="truncate font-sans font-medium"
@@ -1513,22 +1531,22 @@ export function EquipmentManagementWorkspace() {
                               </p>
                             </Tooltip>
                           </div>
-                          <div className="w-40 shrink-0 py-3 pr-2">
+                          <div className="w-40 shrink-0 py-3 pr-2 text-center">
                             <p style={{ fontSize: 14, color: '#4A7080' }}>
                               {formatHumanDate(err.occurredAt)}
                             </p>
                           </div>
-                          <div className="w-28 shrink-0 py-3 pr-2">
+                          <div className="w-28 shrink-0 py-3 pr-2 text-center">
                             <p style={{ fontSize: 14, color: '#0D2630' }}>{err.errorCode}</p>
                           </div>
-                          <div className="w-64 shrink-0 py-3 pr-2">
+                          <div className="w-64 shrink-0 py-3 pr-2 text-center">
                             <Tooltip content={err.description}>
                               <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                                 {err.description}
                               </p>
                             </Tooltip>
                           </div>
-                          <div className="w-28 shrink-0 py-3 pr-2">
+                          <div className="w-28 shrink-0 py-3 pr-2 text-center">
                             <span
                               className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
                               style={{
@@ -1541,7 +1559,7 @@ export function EquipmentManagementWorkspace() {
                               {err.severity}
                             </span>
                           </div>
-                          <div className="w-24 shrink-0 py-3 pr-3">
+                          <div className="w-24 shrink-0 py-3 pr-3 text-center">
                             {err.resolved ? (
                               <CheckCircle2 style={{ width: 16, height: 16, color: '#16A34A' }} />
                             ) : (

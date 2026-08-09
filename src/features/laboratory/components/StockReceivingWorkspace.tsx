@@ -68,6 +68,11 @@ const FIELD_INPUT_STYLE = {
   border: '1px solid rgba(0,100,130,0.18)',
   color: '#0D2630',
 } as const;
+// Reserves a fixed two-line-tall box for every field label, bottom-aligned,
+// so a label that happens to wrap (e.g. "Delivery Note No. *" at narrower
+// widths) never pushes its own input out of alignment with its row-mates.
+const FIELD_LABEL_CLASS = 'mb-1.5 flex min-h-10 items-end font-sans font-medium';
+const FIELD_LABEL_STYLE = { fontSize: 14, color: '#0D2630' } as const;
 const QTY_INPUT_CLASS = `h-9 w-16 rounded-[8px] px-2 text-center font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`;
 
 const LINE_STATUS_CFG: Record<string, { color: string; bg: string; border: string }> = {
@@ -149,40 +154,40 @@ function LineRow({
 
   return (
     <div className="flex items-center" style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}>
-      <div className="w-10 shrink-0 py-3 pr-2 pl-3">
+      <div className="w-10 shrink-0 py-3 pr-2 pl-3 text-center">
         <p style={{ fontSize: 14, color: '#8A98A3' }}>{index + 1}</p>
       </div>
-      <div className="min-w-[180px] flex-1 py-3 pr-2">
+      <div className="min-w-[180px] flex-1 py-3 pr-2 text-center">
         <Tooltip content={item?.name ?? line.itemId}>
           <p className="truncate font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
             {item?.name ?? 'Unknown item'}
           </p>
         </Tooltip>
       </div>
-      <div className="w-32 shrink-0 py-3 pr-2">
+      <div className="w-32 shrink-0 py-3 pr-2 text-center">
         <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
           {item?.catalogNo ?? '—'}
         </p>
       </div>
-      <div className="w-32 shrink-0 py-3 pr-2">
+      <div className="w-32 shrink-0 py-3 pr-2 text-center">
         <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
           {line.lotBatchNo}
         </p>
       </div>
-      <div className="w-32 shrink-0 py-3 pr-2">
+      <div className="w-32 shrink-0 py-3 pr-2 text-center">
         <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
           {formatHumanDate(line.expiryDate)}
         </p>
       </div>
-      <div className="w-20 shrink-0 py-3 pr-2">
+      <div className="w-20 shrink-0 py-3 pr-2 text-center">
         <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
           {line.uom}
         </p>
       </div>
-      <div className="w-24 shrink-0 py-3 pr-2">
+      <div className="w-24 shrink-0 py-3 pr-2 text-center">
         <p style={{ fontSize: 14, color: '#4A7080' }}>{line.orderedQty}</p>
       </div>
-      <div className="w-24 shrink-0 py-3 pr-2">
+      <div className="w-24 shrink-0 py-3 pr-2 text-center">
         <input
           type="number"
           min={0}
@@ -193,7 +198,7 @@ function LineRow({
           style={FIELD_INPUT_STYLE}
         />
       </div>
-      <div className="w-24 shrink-0 py-3 pr-2">
+      <div className="w-24 shrink-0 py-3 pr-2 text-center">
         <input
           type="number"
           min={0}
@@ -204,7 +209,7 @@ function LineRow({
           style={FIELD_INPUT_STYLE}
         />
       </div>
-      <div className="w-24 shrink-0 py-3 pr-2">
+      <div className="w-24 shrink-0 py-3 pr-2 text-center">
         <input
           type="number"
           min={0}
@@ -215,7 +220,7 @@ function LineRow({
           style={FIELD_INPUT_STYLE}
         />
       </div>
-      <div className="w-28 shrink-0 py-3 pr-2">
+      <div className="w-28 shrink-0 py-3 pr-2 text-center">
         <input
           type="number"
           min={0}
@@ -226,7 +231,7 @@ function LineRow({
           style={FIELD_INPUT_STYLE}
         />
       </div>
-      <div className="w-28 shrink-0 py-3 pr-2">
+      <div className="w-28 shrink-0 py-3 pr-2 text-center">
         <p
           className="font-sans font-medium whitespace-nowrap"
           style={{ fontSize: 14, color: '#0D2630' }}
@@ -234,7 +239,7 @@ function LineRow({
           {formatCurrency(totalCost)}
         </p>
       </div>
-      <div className="w-28 shrink-0 py-3 pr-2">
+      <div className="w-28 shrink-0 py-3 pr-2 text-center">
         <span
           className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
           style={{
@@ -247,7 +252,7 @@ function LineRow({
           {status}
         </span>
       </div>
-      <div className="flex w-16 shrink-0 items-center justify-end py-3 pr-3">
+      <div className="flex w-16 shrink-0 items-center justify-center py-3 pr-3">
         <PermissionGate permission={PERMISSIONS.LAB_INVENTORY_WRITE}>
           <button
             type="button"
@@ -493,10 +498,7 @@ export function StockReceivingWorkspace() {
                     { label: 'Invoice No.', value: grnRecord.invoiceNo, key: 'invoiceNo' as const },
                   ].map((f) => (
                     <div key={f.key}>
-                      <label
-                        className="font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
+                      <label className={FIELD_LABEL_CLASS} style={FIELD_LABEL_STYLE}>
                         {f.label}
                         {f.required && <span style={{ color: '#DC2626' }}> *</span>}
                       </label>
@@ -505,48 +507,38 @@ export function StockReceivingWorkspace() {
                         value={f.value}
                         disabled={locked}
                         onChange={(e) => updateDeliveryInfo({ [f.key]: e.target.value })}
-                        className={`mt-1.5 ${FIELD_INPUT_CLASS}`}
+                        className={FIELD_INPUT_CLASS}
                         style={FIELD_INPUT_STYLE}
                       />
                     </div>
                   ))}
                   <div>
-                    <label
-                      className="font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
+                    <label className={FIELD_LABEL_CLASS} style={FIELD_LABEL_STYLE}>
                       Invoice Date
                     </label>
-                    <div className="mt-1.5">
-                      <FormDateInput
-                        value={toWATDateInput(grnRecord.invoiceDate)}
-                        disabled={locked}
-                        onChange={(e) =>
-                          updateDeliveryInfo({
-                            invoiceDate: new Date(e.target.value).toISOString(),
-                          })
-                        }
-                      />
-                    </div>
+                    <FormDateInput
+                      value={toWATDateInput(grnRecord.invoiceDate)}
+                      disabled={locked}
+                      onChange={(e) =>
+                        updateDeliveryInfo({
+                          invoiceDate: new Date(e.target.value).toISOString(),
+                        })
+                      }
+                    />
                   </div>
                   <div>
-                    <label
-                      className="font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
+                    <label className={FIELD_LABEL_CLASS} style={FIELD_LABEL_STYLE}>
                       Delivery Date<span style={{ color: '#DC2626' }}> *</span>
                     </label>
-                    <div className="mt-1.5">
-                      <FormDateInput
-                        value={toWATDateInput(grnRecord.deliveryDate)}
-                        disabled={locked}
-                        onChange={(e) =>
-                          updateDeliveryInfo({
-                            deliveryDate: new Date(e.target.value).toISOString(),
-                          })
-                        }
-                      />
-                    </div>
+                    <FormDateInput
+                      value={toWATDateInput(grnRecord.deliveryDate)}
+                      disabled={locked}
+                      onChange={(e) =>
+                        updateDeliveryInfo({
+                          deliveryDate: new Date(e.target.value).toISOString(),
+                        })
+                      }
+                    />
                   </div>
                   {[
                     { label: 'Vehicle No.', value: grnRecord.vehicleNo, key: 'vehicleNo' as const },
@@ -558,10 +550,7 @@ export function StockReceivingWorkspace() {
                     { label: 'Contact No.', value: grnRecord.contactNo, key: 'contactNo' as const },
                   ].map((f) => (
                     <div key={f.key}>
-                      <label
-                        className="font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
+                      <label className={FIELD_LABEL_CLASS} style={FIELD_LABEL_STYLE}>
                         {f.label}
                       </label>
                       <input
@@ -569,16 +558,13 @@ export function StockReceivingWorkspace() {
                         value={f.value}
                         disabled={locked}
                         onChange={(e) => updateDeliveryInfo({ [f.key]: e.target.value })}
-                        className={`mt-1.5 ${FIELD_INPUT_CLASS}`}
+                        className={FIELD_INPUT_CLASS}
                         style={FIELD_INPUT_STYLE}
                       />
                     </div>
                   ))}
                   <div>
-                    <label
-                      className="font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
+                    <label className={FIELD_LABEL_CLASS} style={FIELD_LABEL_STYLE}>
                       No. of Packages
                     </label>
                     <input
@@ -587,23 +573,18 @@ export function StockReceivingWorkspace() {
                       value={grnRecord.noOfPackages}
                       disabled={locked}
                       onChange={(e) => updateDeliveryInfo({ noOfPackages: Number(e.target.value) })}
-                      className={`mt-1.5 ${FIELD_INPUT_CLASS}`}
+                      className={FIELD_INPUT_CLASS}
                       style={FIELD_INPUT_STYLE}
                     />
                   </div>
                   <div>
-                    <div className="flex items-center gap-1">
-                      <label
-                        className="font-sans font-medium"
-                        style={{ fontSize: 14, color: '#0D2630' }}
-                      >
-                        Temperature on Arrival
-                      </label>
+                    <div className={`${FIELD_LABEL_CLASS} gap-1`}>
+                      <span style={FIELD_LABEL_STYLE}>Temperature on Arrival</span>
                       <Tooltip content="Cold-chain reagents must arrive between 2°C and 8°C.">
                         <Info style={{ width: 13, height: 13, color: '#8A98A3' }} />
                       </Tooltip>
                     </div>
-                    <div className="relative mt-1.5">
+                    <div className="relative">
                       <input
                         type="number"
                         step="0.1"
@@ -632,10 +613,7 @@ export function StockReceivingWorkspace() {
                     </span>
                   </div>
                   <div className="sm:col-span-3 xl:col-span-5">
-                    <label
-                      className="font-sans font-medium"
-                      style={{ fontSize: 14, color: '#0D2630' }}
-                    >
+                    <label className={FIELD_LABEL_CLASS} style={FIELD_LABEL_STYLE}>
                       Remarks / Notes
                     </label>
                     <textarea
@@ -644,7 +622,7 @@ export function StockReceivingWorkspace() {
                       value={grnRecord.remarks}
                       disabled={locked}
                       onChange={(e) => updateDeliveryInfo({ remarks: e.target.value })}
-                      className={`mt-1.5 w-full resize-none rounded-[10px] px-3.5 py-2.5 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+                      className={`w-full resize-none rounded-[10px] px-3.5 py-2.5 font-sans outline-none focus:ring-2 focus:ring-[#00B4D8]/40 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
                       style={FIELD_INPUT_STYLE}
                     />
                   </div>
@@ -717,7 +695,10 @@ export function StockReceivingWorkspace() {
                         ['Total Cost', 'w-28'],
                         ['Status', 'w-28'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                        >
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -726,7 +707,7 @@ export function StockReceivingWorkspace() {
                           </span>
                         </div>
                       ))}
-                      <div className="w-16 shrink-0 py-2.5 pr-3 text-right">
+                      <div className="w-16 shrink-0 py-2.5 pr-3 text-center">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
