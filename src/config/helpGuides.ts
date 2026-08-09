@@ -2070,6 +2070,30 @@ const LABORATORY_PROCUREMENT_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_SUPPLIERS_GUIDE: HelpGuide = {
+  id: 'laboratory-suppliers',
+  title: 'Suppliers',
+  intro: 'The vendor directory for every reagent, kit, equipment, and consumables supplier.',
+  sections: [
+    {
+      heading: 'Stat cards and filters',
+      body: 'The six cards summarize the whole directory — Total, Active, Preferred, Pending Evaluation, Blacklisted, and Total Spend (YTD). Click a status card to jump straight to that filter. Narrow the list further by Status, Category, Rating, or Location, or search by name, contact person, phone, or email.',
+    },
+    {
+      heading: 'Adding a supplier',
+      body: 'Add New Supplier records the vendor’s contact, location, payment terms, and credit limit. Every new supplier starts Pending Evaluation until approved from its row menu.',
+    },
+    {
+      heading: 'Supplier Details and performance',
+      body: 'Select a row to see its contact details, rating, and a Performance Summary — total orders, on-time delivery rate, quality rating, and total spend, all for the year to date — plus its most recent orders in the right-hand panel. The external-link icon or View Full Profile opens the complete profile.',
+    },
+    {
+      heading: 'Managing status',
+      body: 'A row’s menu can approve a pending supplier, mark or remove Preferred status on an active one, blacklist a supplier, or reactivate one that was blacklisted or inactive.',
+    },
+  ],
+};
+
 const LABORATORY_STOCK_RECEIVING_GUIDE: HelpGuide = {
   id: 'laboratory-stock-receiving',
   title: 'Stock Receiving',
@@ -3332,6 +3356,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/procurement-requests'))
     return LABORATORY_PROCUREMENT_REQUESTS_GUIDE;
   if (pathname.startsWith('/laboratory/stock-receiving')) return LABORATORY_STOCK_RECEIVING_GUIDE;
+  if (pathname.startsWith('/laboratory/suppliers')) return LABORATORY_SUPPLIERS_GUIDE;
   if (pathname.startsWith('/laboratory/inventory')) return LABORATORY_INVENTORY_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;

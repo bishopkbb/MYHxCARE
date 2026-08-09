@@ -165,6 +165,7 @@ export const MOCK_USERS: User[] = [
       'lab_equipment:write',
       'lab_inventory:write',
       'lab_procurement:write',
+      'lab_suppliers:write',
       'duty_roster:read',
       'duty_roster:write',
       'notifications:read',

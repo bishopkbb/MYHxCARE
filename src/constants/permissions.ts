@@ -27,6 +27,7 @@ export const PERMISSIONS = {
   LAB_EQUIPMENT_WRITE: 'lab_equipment:write',
   LAB_INVENTORY_WRITE: 'lab_inventory:write',
   LAB_PROCUREMENT_WRITE: 'lab_procurement:write',
+  LAB_SUPPLIERS_WRITE: 'lab_suppliers:write',
 
   PHARMACY_READ: 'pharmacy:read',
   PHARMACY_DISPENSE: 'pharmacy:dispense',
