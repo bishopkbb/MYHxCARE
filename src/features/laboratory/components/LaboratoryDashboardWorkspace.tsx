@@ -47,12 +47,9 @@ import { isToday, toRelativeTime } from '@/utils/datetime';
 import { useAnnouncements } from '@/features/announcements/store/announcementsStore';
 import { useLabResults } from '@/features/laboratory/store/labResultStore';
 import type { LabDepartment, LabResult } from '@/features/laboratory/__mocks__/labResultFixtures';
-import {
-  EQUIPMENT_STATUS,
-  getEquipmentOnlineSummary,
-  LAB_NOTIFICATIONS,
-  type EquipmentStatus,
-} from '@/features/laboratory/__mocks__/labDashboardFixtures';
+import { LAB_NOTIFICATIONS } from '@/features/laboratory/__mocks__/labDashboardFixtures';
+import type { EquipmentStatus } from '@/features/laboratory/__mocks__/equipmentFixtures';
+import { getEquipmentSummary, useEquipment } from '@/features/laboratory/store/equipmentStore';
 import { getMostRecentQcRunAt, getQcTodaySummary } from '@/features/laboratory/store/qcStore';
 
 type PageState = 'loading' | 'loaded' | 'error';
@@ -186,9 +183,10 @@ const FLAG_CFG: Record<string, { color: string; bg: string; border: string; labe
 };
 
 const EQUIPMENT_STATUS_CFG: Record<EquipmentStatus, { color: string; label: string }> = {
-  Online: { color: '#16A34A', label: 'Online' },
-  'Maintenance Due': { color: '#D97706', label: 'Maintenance Due' },
-  Offline: { color: '#DC2626', label: 'Offline' },
+  'In Use': { color: '#16A34A', label: 'In Use' },
+  Available: { color: '#2563EB', label: 'Available' },
+  'Under Maintenance': { color: '#D97706', label: 'Under Maintenance' },
+  'Out of Service': { color: '#DC2626', label: 'Out of Service' },
 };
 
 // ── Skeletons ──────────────────────────────────────────────────────────────
@@ -498,7 +496,8 @@ export function LaboratoryDashboardWorkspace() {
     return formatHrsMin(totalMs / withBoth.length);
   }, [results]);
 
-  const equipmentSummary = getEquipmentOnlineSummary();
+  const equipmentList = useEquipment();
+  const equipmentSummary = getEquipmentSummary();
   const qcTodaySummary = getQcTodaySummary();
 
   const workQueues = useMemo(() => {
@@ -877,12 +876,12 @@ export function LaboratoryDashboardWorkspace() {
                 <LabStatCard
                   icon={Gauge}
                   label="Active Equipment"
-                  value={`${equipmentSummary.online}/${equipmentSummary.total}`}
-                  info="Online"
+                  value={`${equipmentSummary.inUse}/${equipmentSummary.total}`}
+                  info="In Use"
                   accent="#16A34A"
                   iconBg="rgba(22,163,74,0.1)"
                   viewLabel="View Equipment"
-                  onView={() => router.push(ROUTES.laboratoryEquipmentCalibration)}
+                  onView={() => router.push(ROUTES.laboratoryEquipmentManagement)}
                 />
               </>
             )}
@@ -1346,42 +1345,49 @@ export function LaboratoryDashboardWorkspace() {
                   <Panel
                     title="Equipment Status"
                     icon={Gauge}
-                    onViewAll={() => router.push(ROUTES.laboratoryEquipmentCalibration)}
+                    onViewAll={() => router.push(ROUTES.laboratoryEquipmentManagement)}
                   >
                     <div
                       className="flex flex-col divide-y"
                       style={{ borderColor: 'rgba(0,100,130,0.08)' }}
                     >
-                      {EQUIPMENT_STATUS.slice(0, 6).map((eq) => {
-                        const cfg = EQUIPMENT_STATUS_CFG[eq.status];
-                        return (
-                          <div
-                            key={eq.name}
-                            className="flex items-center justify-between gap-2 py-2.5"
-                          >
-                            <div className="flex min-w-0 items-center gap-2">
-                              <span
-                                className="shrink-0 rounded-full"
-                                style={{ width: 8, height: 8, background: cfg.color }}
-                              />
-                              <Tooltip content={eq.name}>
-                                <span
-                                  className="truncate font-sans"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
-                                >
-                                  {eq.name}
-                                </span>
-                              </Tooltip>
-                            </div>
-                            <span
-                              className="shrink-0 font-sans font-medium whitespace-nowrap"
-                              style={{ fontSize: 14, color: cfg.color }}
+                      {[...equipmentList]
+                        .sort((a, b) => {
+                          const rank = (s: EquipmentStatus) =>
+                            s === 'Out of Service' ? 0 : s === 'Under Maintenance' ? 1 : 2;
+                          return rank(a.status) - rank(b.status);
+                        })
+                        .slice(0, 6)
+                        .map((eq) => {
+                          const cfg = EQUIPMENT_STATUS_CFG[eq.status];
+                          return (
+                            <div
+                              key={eq.id}
+                              className="flex items-center justify-between gap-2 py-2.5"
                             >
-                              {cfg.label}
-                            </span>
-                          </div>
-                        );
-                      })}
+                              <div className="flex min-w-0 items-center gap-2">
+                                <span
+                                  className="shrink-0 rounded-full"
+                                  style={{ width: 8, height: 8, background: cfg.color }}
+                                />
+                                <Tooltip content={eq.name}>
+                                  <span
+                                    className="truncate font-sans"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {eq.name}
+                                  </span>
+                                </Tooltip>
+                              </div>
+                              <span
+                                className="shrink-0 font-sans font-medium whitespace-nowrap"
+                                style={{ fontSize: 14, color: cfg.color }}
+                              >
+                                {cfg.label}
+                              </span>
+                            </div>
+                          );
+                        })}
                     </div>
                   </Panel>
                 </div>

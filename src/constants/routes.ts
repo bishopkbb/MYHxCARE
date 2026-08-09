@@ -102,8 +102,7 @@ export const ROUTES = {
   laboratoryClinicalTimeline: '/laboratory/clinical-timeline',
   // Quality Management
   laboratoryQualityControl: '/laboratory/quality-control',
-  laboratoryEquipmentCalibration: '/laboratory/equipment-calibration',
-  laboratoryInstrumentMaintenance: '/laboratory/instrument-maintenance',
+  laboratoryEquipmentManagement: '/laboratory/equipment-management',
   laboratoryReagentManagement: '/laboratory/reagent-management',
   // Inventory
   laboratoryInventory: '/laboratory/inventory',

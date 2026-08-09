@@ -5,7 +5,6 @@ import {
   ArrowLeftRight,
   BadgeCheck,
   BarChart2,
-  Beaker,
   BedDouble,
   BedSingle,
   Bell,
@@ -18,7 +17,6 @@ import {
   ClipboardList,
   Clock,
   CreditCard,
-  Droplets,
   FileCheck2,
   Files,
   FileText,
@@ -56,7 +54,6 @@ import {
   UserCheck,
   UserPlus,
   Users,
-  Wrench,
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -677,16 +674,10 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
             icon: ShieldCheck,
           },
           {
-            label: 'Equipment Calibration',
-            href: '/laboratory/equipment-calibration',
+            label: 'Equipment Management',
+            href: '/laboratory/equipment-management',
             icon: Gauge,
           },
-          {
-            label: 'Instrument Maintenance',
-            href: '/laboratory/instrument-maintenance',
-            icon: Wrench,
-          },
-          { label: 'Reagent Management', href: '/laboratory/reagent-management', icon: Beaker },
         ],
       },
       {
@@ -694,17 +685,6 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [
           { label: 'Laboratory Inventory', href: '/laboratory/inventory', icon: Package },
           { label: 'Stock Receiving', href: '/laboratory/stock-receiving', icon: Upload },
-          {
-            label: 'Reagent Consumption',
-            href: '/laboratory/reagent-consumption',
-            icon: Droplets,
-          },
-          { label: 'Batch Management', href: '/laboratory/batch-management', icon: Archive },
-          {
-            label: 'Expiry Management',
-            href: '/laboratory/expiry-management',
-            icon: CalendarClock,
-          },
           { label: 'Procurement Requests', href: '/laboratory/procurement-requests', icon: Files },
           { label: 'Suppliers', href: '/laboratory/suppliers', icon: Building2 },
         ],
@@ -734,18 +714,11 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         label: 'REPORTS',
         items: [
           { label: 'Laboratory Reports', href: '/laboratory/reports', icon: BarChart2 },
-          { label: 'Sample Reports', href: '/laboratory/reports/samples', icon: PieChart },
           {
             label: 'Turnaround Time Reports',
             href: '/laboratory/reports/turnaround-time',
             icon: Timer,
           },
-          {
-            label: 'Quality Control Reports',
-            href: '/laboratory/reports/quality-control',
-            icon: ShieldCheck,
-          },
-          { label: 'Equipment Reports', href: '/laboratory/reports/equipment', icon: Gauge },
         ],
       },
       {

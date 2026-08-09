@@ -2045,6 +2045,30 @@ const LABORATORY_QUALITY_CONTROL_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_EQUIPMENT_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'laboratory-equipment-management',
+  title: 'Equipment Management',
+  intro: 'Every analyzer and instrument in one place — status, calibration, and service history.',
+  sections: [
+    {
+      heading: 'Stat cards and filters',
+      body: 'The six cards summarize total equipment, operational status, and calibration due/overdue counts — click Due for Calibration or Overdue to jump to the Calibration tab. Narrow the Equipment List by Department, Equipment Type, Status, or Location, or search by name, ID, model, or serial number.',
+    },
+    {
+      heading: 'Equipment List and details',
+      body: 'Select a row to open its Equipment Details panel on the right, with full specs and any upcoming calibration or maintenance. View Full Profile opens the complete record, including service history, downtime, and error log for that instrument.',
+    },
+    {
+      heading: 'Calibration, Maintenance, Service History',
+      body: 'Calibration lists everything due or overdue, with a one-click Record Calibration. Maintenance shows scheduled work orders; Service History logs completed service, maintenance, and calibration events — Add Service / Maintenance from the details panel or row menu writes to whichever one applies.',
+    },
+    {
+      heading: 'Downtime Log and Error Logs',
+      body: 'Downtime Log tracks every out-of-service incident and its duration. Error Logs lists fault codes reported by equipment, with severity and resolution status.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -3226,6 +3250,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/reports/quality-control'))
     return LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE;
   if (pathname.startsWith('/laboratory/quality-control')) return LABORATORY_QUALITY_CONTROL_GUIDE;
+  if (pathname.startsWith('/laboratory/equipment-management'))
+    return LABORATORY_EQUIPMENT_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/visit-history')) return VISIT_HISTORY_GUIDE;
