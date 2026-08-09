@@ -2,15 +2,17 @@
 
 /**
  * The Laboratory Inventory store — real, shared, reactive state for stock
- * items, batch receipts, reorder requests, and the stock-movement history
- * log. Same `useSyncExternalStore` module-singleton pattern as
- * `equipmentStore.ts`: adding an item, importing a batch, adjusting stock,
- * or raising a reorder request is immediately visible everywhere else that
- * reads this store in the same session.
+ * items, batch receipts, and the stock-movement history log. Same
+ * `useSyncExternalStore` module-singleton pattern as `equipmentStore.ts`:
+ * adding an item, importing a batch, or adjusting stock is immediately
+ * visible everywhere else that reads this store in the same session.
+ * Reordering low-stock items lives in `procurementStore.ts` instead — a
+ * quick reorder and a formal procurement request are the same underlying
+ * record, not a second "please buy this" system.
  *
  * Swap out by pointing these actions at real `POST /lab/inventory` /
- * `POST /lab/inventory/reorder-requests` endpoints once that domain exists
- * on the backend.
+ * `POST /lab/inventory/batches` endpoints once that domain exists on the
+ * backend.
  */
 
 import { useSyncExternalStore } from 'react';
@@ -20,20 +22,16 @@ import {
   DEPARTMENT_STORE_SUFFIX,
   INVENTORY_ITEMS,
   INVENTORY_MOVEMENTS,
-  REORDER_REQUESTS,
   type BatchReceipt,
   type InventoryCategory,
   type InventoryItem,
   type InventoryMovement,
   type InventoryStatus,
   type MovementType,
-  type ReorderRequest,
-  type ReorderStatus,
 } from '@/features/laboratory/__mocks__/inventoryFixtures';
 
 let items: InventoryItem[] = [...INVENTORY_ITEMS];
 const batchReceipts: BatchReceipt[] = [...BATCH_RECEIPTS];
-let reorderRequests: ReorderRequest[] = [...REORDER_REQUESTS];
 let movements: InventoryMovement[] = [...INVENTORY_MOVEMENTS];
 const listeners = new Set<() => void>();
 
@@ -64,20 +62,6 @@ function getBatchReceiptsServerSnapshot(): BatchReceipt[] {
 }
 export function useBatchReceipts(): BatchReceipt[] {
   return useSyncExternalStore(subscribe, getBatchReceiptsSnapshot, getBatchReceiptsServerSnapshot);
-}
-
-function getReorderRequestsSnapshot(): ReorderRequest[] {
-  return reorderRequests;
-}
-function getReorderRequestsServerSnapshot(): ReorderRequest[] {
-  return REORDER_REQUESTS;
-}
-export function useReorderRequests(): ReorderRequest[] {
-  return useSyncExternalStore(
-    subscribe,
-    getReorderRequestsSnapshot,
-    getReorderRequestsServerSnapshot,
-  );
 }
 
 function getMovementsSnapshot(): InventoryMovement[] {
@@ -209,36 +193,6 @@ export function adjustStock(
   emit();
 }
 
-let reorderSeq = reorderRequests.length;
-
-/** Raises a reorder request from Stock Alerts — shows up immediately in
- * the Reorder Management tab. */
-export function createReorderRequest(
-  itemId: string,
-  quantityRequested: number,
-  requestedBy: string,
-  notes: string,
-): ReorderRequest {
-  reorderSeq += 1;
-  const request: ReorderRequest = {
-    id: `RRQ-${String(reorderSeq).padStart(4, '0')}`,
-    itemId,
-    quantityRequested,
-    status: 'Pending',
-    requestedBy,
-    requestedAt: new Date().toISOString(),
-    notes,
-  };
-  reorderRequests = [request, ...reorderRequests];
-  emit();
-  return request;
-}
-
-export function updateReorderStatus(id: string, status: ReorderStatus): void {
-  reorderRequests = reorderRequests.map((r) => (r.id === id ? { ...r, status } : r));
-  emit();
-}
-
 // ── Derived selectors ────────────────────────────────────────────────────
 
 export type InventorySummary = {
@@ -295,8 +249,4 @@ export function getBatchReceiptsFor(itemId: string): BatchReceipt[] {
 
 export function getMovementsFor(itemId: string): InventoryMovement[] {
   return movements.filter((m) => m.itemId === itemId);
-}
-
-export function getReorderRequestsFor(itemId: string): ReorderRequest[] {
-  return reorderRequests.filter((r) => r.itemId === itemId);
 }

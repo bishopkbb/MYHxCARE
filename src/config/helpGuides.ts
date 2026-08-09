@@ -2045,6 +2045,31 @@ const LABORATORY_QUALITY_CONTROL_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_PROCUREMENT_REQUESTS_GUIDE: HelpGuide = {
+  id: 'laboratory-procurement-requests',
+  title: 'Procurement Requests',
+  intro:
+    'Every request to buy reagents, consumables, or equipment — from raising it to receiving it.',
+  sections: [
+    {
+      heading: 'Stat cards, tabs, and filters',
+      body: 'The six cards summarize every stage of the pipeline — click one to jump to that tab. Narrow the list by Department, Status, Priority, a Request Date range, or search by request number, requester, or department.',
+    },
+    {
+      heading: 'Raising a request',
+      body: 'New Procurement Request adds as many line items as needed, each with its own category, quantity, and estimated unit cost. Every new request starts Pending Approval. A quick reorder raised from Laboratory Inventory’s Stock Alerts tab creates the same kind of request here automatically.',
+    },
+    {
+      heading: 'Request Details and the Approval Workflow',
+      body: 'Select a row to see its details, category breakdown, and approval workflow in the right-hand panel — the external-link icon or View Full Details opens the complete itemized view. Approval moves through Department Head, Laboratory Manager, and Procurement Officer in order; the last approval moves the request to Approved.',
+    },
+    {
+      heading: 'Advancing a request',
+      body: 'Once Approved, Move to Procurement and Mark as Received advance the request from its row menu. Pending requests can be rejected; Approved or In Procurement requests can be cancelled.',
+    },
+  ],
+};
+
 const LABORATORY_STOCK_RECEIVING_GUIDE: HelpGuide = {
   id: 'laboratory-stock-receiving',
   title: 'Stock Receiving',
@@ -3304,6 +3329,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/quality-control')) return LABORATORY_QUALITY_CONTROL_GUIDE;
   if (pathname.startsWith('/laboratory/equipment-management'))
     return LABORATORY_EQUIPMENT_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/laboratory/procurement-requests'))
+    return LABORATORY_PROCUREMENT_REQUESTS_GUIDE;
   if (pathname.startsWith('/laboratory/stock-receiving')) return LABORATORY_STOCK_RECEIVING_GUIDE;
   if (pathname.startsWith('/laboratory/inventory')) return LABORATORY_INVENTORY_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;

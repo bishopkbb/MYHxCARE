@@ -46,20 +46,23 @@ import { downloadCSV } from '@/utils/export';
 import {
   CATEGORY_OPTIONS,
   LOCATION_OPTIONS,
+  type InventoryCategory,
   type InventoryItem,
   type InventoryStatus,
 } from '@/features/laboratory/__mocks__/inventoryFixtures';
 import { DEPARTMENT_OPTIONS } from '@/features/laboratory/__mocks__/equipmentFixtures';
 import {
-  createReorderRequest,
   getInventoryStatus,
   getInventorySummary,
-  updateReorderStatus,
   useBatchReceipts,
   useInventoryItems,
   useInventoryMovements,
-  useReorderRequests,
 } from '@/features/laboratory/store/inventoryStore';
+import type { ProcurementCategory } from '@/features/laboratory/__mocks__/procurementFixtures';
+import {
+  createProcurementRequest,
+  useProcurementRequests,
+} from '@/features/laboratory/store/procurementStore';
 
 const AddInventoryItemModal = dynamic(
   () => import('./AddInventoryItemModal').then((m) => m.AddInventoryItemModal),
@@ -123,12 +126,25 @@ const STATUS_CFG: Record<
   },
 };
 
-const REORDER_STATUS_CFG: Record<string, { color: string; bg: string }> = {
-  Pending: { color: '#B45309', bg: 'rgba(245,158,11,0.1)' },
-  Ordered: { color: '#2563EB', bg: 'rgba(37,99,235,0.1)' },
-  Received: { color: '#16A34A', bg: 'rgba(34,197,94,0.1)' },
+const PROCUREMENT_STATUS_CFG: Record<string, { color: string; bg: string }> = {
+  'Pending Approval': { color: '#B45309', bg: 'rgba(245,158,11,0.1)' },
+  Approved: { color: '#16A34A', bg: 'rgba(34,197,94,0.1)' },
+  'In Procurement': { color: '#2563EB', bg: 'rgba(37,99,235,0.1)' },
+  Received: { color: '#0D9488', bg: 'rgba(13,148,136,0.1)' },
+  Rejected: { color: '#DC2626', bg: 'rgba(239,68,68,0.1)' },
   Cancelled: { color: '#64748B', bg: 'rgba(100,116,139,0.1)' },
 };
+
+/** Maps an inventory item's category to the broader Procurement bucket used
+ * on the Procurement Requests page — the two module's category taxonomies
+ * are deliberately different granularity, so this is the one translation
+ * point between them. */
+function toProcurementCategory(category: InventoryCategory): ProcurementCategory {
+  if (category === 'Reagent' || category === 'Control Material' || category === 'Test Kit') {
+    return 'Reagents';
+  }
+  return 'Consumables';
+}
 
 const MOVEMENT_ICON: Record<string, LucideIcon> = {
   Received: Upload,
@@ -311,7 +327,7 @@ export function LaboratoryInventoryWorkspace() {
 
   const items = useInventoryItems();
   const batchReceipts = useBatchReceipts();
-  const reorderRequests = useReorderRequests();
+  const procurementRequests = useProcurementRequests();
   const movements = useInventoryMovements();
 
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
@@ -466,13 +482,27 @@ export function LaboratoryInventoryWorkspace() {
 
   function handleReorder(item: InventoryItem) {
     const qty = Math.max(item.minStock * 2 - item.currentStock, item.minStock);
-    createReorderRequest(
-      item.id,
-      qty,
-      actorName,
-      `Requested from Stock Alerts — ${item.currentStock} ${item.unit} on hand, minimum ${item.minStock}.`,
+    const request = createProcurementRequest({
+      department: item.department,
+      requestedBy: actorName,
+      priority: item.currentStock === 0 ? 'High' : 'Medium',
+      lineItems: [
+        {
+          name: item.name,
+          category: toProcurementCategory(item.category),
+          quantity: qty,
+          estimatedUnitCost: item.unitPrice,
+          itemId: item.id,
+        },
+      ],
+      estimatedAmount: qty * item.unitPrice,
+      notes: `Requested from Stock Alerts — ${item.currentStock} ${item.unit} on hand, minimum ${item.minStock}.`,
+      origin: 'Stock Alert',
+    });
+    toast.success(
+      'Procurement request created',
+      `${request.id}: ${item.name} (${qty} ${item.unit}) requested.`,
     );
-    toast.success('Reorder request created', `${item.name}: ${qty} ${item.unit} requested.`);
   }
 
   // ── Expiry Monitoring rows ──
@@ -789,7 +819,7 @@ export function LaboratoryInventoryWorkspace() {
                       hint="Try widening your search or clearing filters."
                     />
                   ) : (
-                    <ScrollableTable minWidth={1280} maxHeight={640}>
+                    <ScrollableTable minWidth={1288} maxHeight={640}>
                       <div
                         className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
                         style={{ background: TABLE_HEADER_BG, borderBottom: '1px solid #E6F8FD' }}
@@ -801,7 +831,7 @@ export function LaboratoryInventoryWorkspace() {
                           ['Department', 'w-32'],
                           ['Lot/Batch No.', 'w-32'],
                           ['Expiry Date', 'w-40'],
-                          ['Current Stock', 'w-28'],
+                          ['Current Stock', 'w-36'],
                           ['Status', 'w-36'],
                           ['Location', 'w-36'],
                         ].map(([label, width]) => (
@@ -883,7 +913,7 @@ export function LaboratoryInventoryWorkspace() {
                                 {exp.text}
                               </p>
                             </div>
-                            <div className="w-28 shrink-0 py-3 pr-2 text-center">
+                            <div className="w-36 shrink-0 py-3 pr-2 text-center">
                               <p style={{ fontSize: 14, color: '#0D2630' }}>
                                 {item.currentStock}{' '}
                                 <span style={{ color: '#8A98A3' }}>{item.unit}</span>
@@ -1269,7 +1299,7 @@ export function LaboratoryInventoryWorkspace() {
                 />
               ) : (
                 <div className="mt-3">
-                  <ScrollableTable minWidth={900} maxHeight={640}>
+                  <ScrollableTable minWidth={950} maxHeight={640}>
                     <div
                       className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
                       style={{ background: TABLE_HEADER_BG, borderBottom: '1px solid #E6F8FD' }}
@@ -1279,7 +1309,7 @@ export function LaboratoryInventoryWorkspace() {
                         ['Catalog No.', 'w-32'],
                         ['Lot/Batch No.', 'w-32'],
                         ['Expiry Date', 'w-48'],
-                        ['Current Stock', 'w-28'],
+                        ['Current Stock', 'w-36'],
                         ['Status', 'w-32'],
                       ].map(([label, width]) => (
                         <div
@@ -1332,7 +1362,7 @@ export function LaboratoryInventoryWorkspace() {
                               {exp.text}
                             </p>
                           </div>
-                          <div className="w-28 shrink-0 py-3 pr-2 text-center">
+                          <div className="w-36 shrink-0 py-3 pr-2 text-center">
                             <p style={{ fontSize: 14, color: '#0D2630' }}>
                               {item.currentStock}{' '}
                               <span style={{ color: '#8A98A3' }}>{item.unit}</span>
@@ -1427,7 +1457,7 @@ export function LaboratoryInventoryWorkspace() {
                 />
               ) : (
                 <div className="mt-3">
-                  <ScrollableTable minWidth={900} maxHeight={640}>
+                  <ScrollableTable minWidth={950} maxHeight={640}>
                     <div
                       className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
                       style={{ background: TABLE_HEADER_BG, borderBottom: '1px solid #E6F8FD' }}
@@ -1435,8 +1465,8 @@ export function LaboratoryInventoryWorkspace() {
                       {[
                         ['Item Name', 'min-w-[160px] flex-1'],
                         ['Catalog No.', 'w-32'],
-                        ['Current Stock', 'w-28'],
-                        ['Min Stock', 'w-24'],
+                        ['Current Stock', 'w-36'],
+                        ['Min Stock', 'w-28'],
                         ['Status', 'w-32'],
                         ['Location', 'w-36'],
                       ].map(([label, width]) => (
@@ -1482,13 +1512,13 @@ export function LaboratoryInventoryWorkspace() {
                             {item.catalogNo}
                           </p>
                         </div>
-                        <div className="w-28 shrink-0 py-3 pr-2 text-center">
+                        <div className="w-36 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#0D2630' }}>
                             {item.currentStock}{' '}
                             <span style={{ color: '#8A98A3' }}>{item.unit}</span>
                           </p>
                         </div>
-                        <div className="w-24 shrink-0 py-3 pr-2 text-center">
+                        <div className="w-28 shrink-0 py-3 pr-2 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>{item.minStock}</p>
                         </div>
                         <div className="w-32 shrink-0 py-3 pr-2 text-center">
@@ -1536,154 +1566,132 @@ export function LaboratoryInventoryWorkspace() {
               }}
             >
               <p style={{ fontSize: 14, color: '#4A7080' }}>
-                Every reorder request raised, most recent first.
+                Every reorder raised from Stock Alerts, most recent first — the full approval
+                workflow for each lives in Procurement Requests.
               </p>
-              {reorderRequests.length === 0 ? (
-                <EmptyState
-                  message="No reorder requests"
-                  hint="Create one from Stock Alerts when an item runs low."
-                />
-              ) : (
-                <div className="mt-3">
-                  <ScrollableTable minWidth={960} maxHeight={640}>
-                    <div
-                      className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
-                      style={{ background: TABLE_HEADER_BG, borderBottom: '1px solid #E6F8FD' }}
-                    >
-                      {[
-                        ['Item Name', 'min-w-[160px] flex-1'],
-                        ['Qty Requested', 'w-28'],
-                        ['Status', 'w-28'],
-                        ['Requested By', 'w-36'],
-                        ['Requested At', 'w-36'],
-                        ['Notes', 'w-64'],
-                      ].map(([label, width]) => (
-                        <div
-                          key={label}
-                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
-                        >
+              {(() => {
+                const stockAlertRequests = procurementRequests.filter(
+                  (r) => r.origin === 'Stock Alert',
+                );
+                return stockAlertRequests.length === 0 ? (
+                  <EmptyState
+                    message="No reorder requests"
+                    hint="Create one from Stock Alerts when an item runs low."
+                  />
+                ) : (
+                  <div className="mt-3">
+                    <ScrollableTable minWidth={1040} maxHeight={640}>
+                      <div
+                        className={`flex items-center rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
+                        style={{ background: TABLE_HEADER_BG, borderBottom: '1px solid #E6F8FD' }}
+                      >
+                        {[
+                          ['Request No.', 'w-32'],
+                          ['Item Name', 'min-w-[160px] flex-1'],
+                          ['Qty Requested', 'w-28'],
+                          ['Status', 'w-32'],
+                          ['Requested By', 'w-36'],
+                          ['Requested At', 'w-36'],
+                        ].map(([label, width]) => (
+                          <div
+                            key={label}
+                            className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
+                          >
+                            <span
+                              className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                              style={{ fontSize: 14, color: '#4A7080' }}
+                            >
+                              {label}
+                            </span>
+                          </div>
+                        ))}
+                        <div className="w-40 shrink-0 py-2.5 pr-3 text-center">
                           <span
-                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                            className="font-sans font-bold tracking-wider uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
                           >
-                            {label}
+                            Actions
                           </span>
                         </div>
-                      ))}
-                      <div className="w-40 shrink-0 py-2.5 pr-3 text-center">
-                        <span
-                          className="font-sans font-bold tracking-wider uppercase"
-                          style={{ fontSize: 14, color: '#4A7080' }}
-                        >
-                          Actions
-                        </span>
                       </div>
-                    </div>
-                    {[...reorderRequests]
-                      .sort(
-                        (a, b) =>
-                          new Date(b.requestedAt).getTime() - new Date(a.requestedAt).getTime(),
-                      )
-                      .map((r) => {
-                        const cfg = REORDER_STATUS_CFG[r.status]!;
-                        return (
-                          <div
-                            key={r.id}
-                            className="flex items-center"
-                            style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
-                          >
-                            <div className="min-w-0 flex-1 py-3 pr-2 pl-3 text-center">
-                              <Tooltip content={itemName(r.itemId)}>
-                                <p
-                                  className="truncate font-sans font-medium"
-                                  style={{ fontSize: 14, color: '#0D2630' }}
+                      {[...stockAlertRequests]
+                        .sort(
+                          (a, b) =>
+                            new Date(b.requestDate).getTime() - new Date(a.requestDate).getTime(),
+                        )
+                        .map((r) => {
+                          const cfg = PROCUREMENT_STATUS_CFG[r.status]!;
+                          const firstLine = r.lineItems[0];
+                          return (
+                            <div
+                              key={r.id}
+                              className="flex items-center"
+                              style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
+                            >
+                              <div className="w-32 shrink-0 py-3 pr-2 pl-3 text-center">
+                                <p className="truncate" style={{ fontSize: 14, color: '#00B4D8' }}>
+                                  {r.id}
+                                </p>
+                              </div>
+                              <div className="min-w-0 flex-1 py-3 pr-2 text-center">
+                                <Tooltip content={firstLine?.name ?? '—'}>
+                                  <p
+                                    className="truncate font-sans font-medium"
+                                    style={{ fontSize: 14, color: '#0D2630' }}
+                                  >
+                                    {firstLine?.name ?? '—'}
+                                  </p>
+                                </Tooltip>
+                              </div>
+                              <div className="w-28 shrink-0 py-3 pr-2 text-center">
+                                <p style={{ fontSize: 14, color: '#0D2630' }}>
+                                  {firstLine?.quantity ?? '—'}
+                                </p>
+                              </div>
+                              <div className="w-32 shrink-0 py-3 pr-2 text-center">
+                                <span
+                                  className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
+                                  style={{ fontSize: 14, color: cfg.color, background: cfg.bg }}
                                 >
-                                  {itemName(r.itemId)}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-28 shrink-0 py-3 pr-2 text-center">
-                              <p style={{ fontSize: 14, color: '#0D2630' }}>
-                                {r.quantityRequested}
-                              </p>
-                            </div>
-                            <div className="w-28 shrink-0 py-3 pr-2 text-center">
-                              <span
-                                className="inline-block rounded-full px-2.5 py-0.5 font-sans font-medium whitespace-nowrap"
-                                style={{ fontSize: 14, color: cfg.color, background: cfg.bg }}
-                              >
-                                {r.status}
-                              </span>
-                            </div>
-                            <div className="w-36 shrink-0 py-3 pr-2 text-center">
-                              <Tooltip content={r.requestedBy}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {r.requestedBy}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="w-36 shrink-0 py-3 pr-2 text-center">
-                              <p style={{ fontSize: 14, color: '#4A7080' }}>
-                                {formatHumanDate(r.requestedAt)}
-                              </p>
-                            </div>
-                            <div className="w-64 shrink-0 py-3 pr-2 text-center">
-                              <Tooltip content={r.notes}>
-                                <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
-                                  {r.notes}
-                                </p>
-                              </Tooltip>
-                            </div>
-                            <div className="flex w-40 shrink-0 items-center justify-center gap-1.5 py-3 pr-3">
-                              <PermissionGate permission={PERMISSIONS.LAB_INVENTORY_WRITE}>
-                                {r.status === 'Pending' && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      updateReorderStatus(r.id, 'Ordered');
-                                      toast.success(
-                                        'Marked as ordered',
-                                        `${itemName(r.itemId)} reorder is now Ordered.`,
-                                      );
-                                    }}
-                                    className={`flex h-9 items-center rounded-[8px] px-3 font-sans font-medium whitespace-nowrap transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                                    style={{
-                                      fontSize: 14,
-                                      color: '#00B4D8',
-                                      border: '1px solid rgba(0,180,216,0.35)',
-                                    }}
+                                  {r.status}
+                                </span>
+                              </div>
+                              <div className="w-36 shrink-0 py-3 pr-2 text-center">
+                                <Tooltip content={r.requestedBy}>
+                                  <p
+                                    className="truncate"
+                                    style={{ fontSize: 14, color: '#4A7080' }}
                                   >
-                                    Mark Ordered
-                                  </button>
-                                )}
-                                {r.status === 'Ordered' && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      updateReorderStatus(r.id, 'Received');
-                                      toast.success(
-                                        'Marked as received',
-                                        `${itemName(r.itemId)} reorder is now Received.`,
-                                      );
-                                    }}
-                                    className={`flex h-9 items-center rounded-[8px] px-3 font-sans font-medium whitespace-nowrap transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
-                                    style={{
-                                      fontSize: 14,
-                                      color: '#16A34A',
-                                      border: '1px solid rgba(34,197,94,0.35)',
-                                    }}
-                                  >
-                                    Mark Received
-                                  </button>
-                                )}
-                              </PermissionGate>
+                                    {r.requestedBy}
+                                  </p>
+                                </Tooltip>
+                              </div>
+                              <div className="w-36 shrink-0 py-3 pr-2 text-center">
+                                <p style={{ fontSize: 14, color: '#4A7080' }}>
+                                  {formatHumanDate(r.requestDate)}
+                                </p>
+                              </div>
+                              <div className="flex w-40 shrink-0 items-center justify-center py-3 pr-3">
+                                <button
+                                  type="button"
+                                  onClick={() => router.push(ROUTES.laboratoryProcurementRequests)}
+                                  className={`flex h-9 items-center rounded-[8px] px-3 font-sans font-medium whitespace-nowrap transition-colors duration-150 hover:bg-[#E6F8FD] ${FOCUS_RING}`}
+                                  style={{
+                                    fontSize: 14,
+                                    color: '#00B4D8',
+                                    border: '1px solid rgba(0,180,216,0.35)',
+                                  }}
+                                >
+                                  View in Procurement →
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                  </ScrollableTable>
-                </div>
-              )}
+                          );
+                        })}
+                    </ScrollableTable>
+                  </div>
+                );
+              })()}
             </div>
           )}
 

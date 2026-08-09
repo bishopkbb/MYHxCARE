@@ -1,11 +1,11 @@
 /**
  * Laboratory Inventory — every reagent, kit, consumable, and supply
- * tracked across departments, plus batch receipts, reorder requests, and
- * a stock-movement history log. Status (In Stock / Low Stock / Expiring
- * Soon / Expired / Out of Stock) is always derived from stock level and
- * expiry date via `getInventoryStatus()` (in inventoryStore.ts), never
- * stored directly — so it can never drift out of sync with the numbers
- * that produced it.
+ * tracked across departments, plus batch receipts and a stock-movement
+ * history log. Status (In Stock / Low Stock / Expiring Soon / Expired /
+ * Out of Stock) is always derived from stock level and expiry date via
+ * `getInventoryStatus()` (in inventoryStore.ts), never stored directly —
+ * so it can never drift out of sync with the numbers that produced it.
+ * Reordering low-stock items lives in `procurementFixtures.ts` instead.
  */
 
 import { DEPARTMENT_OPTIONS } from '@/features/laboratory/__mocks__/equipmentFixtures';
@@ -508,41 +508,6 @@ export const BATCH_RECEIPTS: BatchReceipt[] = HERO_ITEMS.map((item, i) => ({
   receivedDate: item.receivedDate,
   receivedBy: 'Chinedu Obi',
 }));
-
-// ── Reorder requests — Create Reorder Request (Stock Alerts) writes here ───
-
-export type ReorderStatus = 'Pending' | 'Ordered' | 'Received' | 'Cancelled';
-
-export type ReorderRequest = {
-  id: string;
-  itemId: string;
-  quantityRequested: number;
-  status: ReorderStatus;
-  requestedBy: string;
-  requestedAt: string;
-  notes: string;
-};
-
-export const REORDER_REQUESTS: ReorderRequest[] = [
-  {
-    id: 'RRQ-0001',
-    itemId: 'inv-hero-003',
-    quantityRequested: 12,
-    status: 'Ordered',
-    requestedBy: 'John Okafor',
-    requestedAt: isoOffset(-3),
-    notes: 'Control Level 1 running low across two instruments.',
-  },
-  {
-    id: 'RRQ-0002',
-    itemId: 'inv-hero-006',
-    quantityRequested: 40,
-    status: 'Pending',
-    requestedBy: 'John Okafor',
-    requestedAt: isoOffset(-1),
-    notes: 'Urea Reagent below minimum, high test volume this week.',
-  },
-];
 
 // ── Inventory history — read-only stock movement log ────────────────────────
 
