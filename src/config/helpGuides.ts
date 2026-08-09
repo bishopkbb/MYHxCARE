@@ -2070,6 +2070,30 @@ const LABORATORY_PROCUREMENT_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_REPORTS_GUIDE: HelpGuide = {
+  id: 'laboratory-reports',
+  title: 'Laboratory Reports',
+  intro: 'Testing volume, department mix, TAT performance, and workload trends in one place.',
+  sections: [
+    {
+      heading: 'Stat cards and period',
+      body: 'The seven cards summarize the selected period against the one before it. Every chart and dropdown labeled with a period (This Month, Last Month, This Quarter, This Year) shares the same selection, so the whole page always tells one consistent story.',
+    },
+    {
+      heading: 'Test Volume Trend, Tests by Category, TAT Performance',
+      body: 'Hover the trend line for the exact count on any day. Tests by Category is the same department totals shown as a donut. TAT Performance shows on-time vs delayed results against the average-turnaround target.',
+    },
+    {
+      heading: 'Report Summary and Top 5 Most Ordered Tests',
+      body: 'The department table’s eye icon opens a full breakdown for that department, including its sample rejection rate. Top 5 Most Ordered Tests ranks by share of total tests for the selected period.',
+    },
+    {
+      heading: 'Generating, exporting, and scheduling',
+      body: 'Generate Report and Export both produce a CSV or PDF of the current summary. Schedule Report sets up a recurring emailed report. The other tabs across the top (Sample Reports, Published Results, and the rest) are being built next.',
+    },
+  ],
+};
+
 const LABORATORY_SUPPLIERS_GUIDE: HelpGuide = {
   id: 'laboratory-suppliers',
   title: 'Suppliers',
@@ -3350,6 +3374,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/history')) return LABORATORY_HISTORY_GUIDE;
   if (pathname.startsWith('/laboratory/reports/quality-control'))
     return LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE;
+  if (pathname.startsWith('/laboratory/reports')) return LABORATORY_REPORTS_GUIDE;
   if (pathname.startsWith('/laboratory/quality-control')) return LABORATORY_QUALITY_CONTROL_GUIDE;
   if (pathname.startsWith('/laboratory/equipment-management'))
     return LABORATORY_EQUIPMENT_MANAGEMENT_GUIDE;

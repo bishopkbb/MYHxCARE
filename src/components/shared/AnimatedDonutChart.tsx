@@ -14,11 +14,17 @@ export function AnimatedDonutChart({
   total,
   size = 120,
   ariaLabel = 'Breakdown donut chart',
+  centerValue,
+  centerLabel = 'Total',
 }: {
   breakdown: { label: string; value: number; color: string }[];
   total: number;
   size?: number;
   ariaLabel?: string;
+  /** Overrides the center number (e.g. a percentage) — defaults to `total`. */
+  centerValue?: string | number;
+  /** Overrides the center caption below the value — defaults to "Total". */
+  centerLabel?: string;
 }) {
   const safeTotal = total || 1;
   const radius = 54;
@@ -78,9 +84,9 @@ export function AnimatedDonutChart({
       </svg>
       <div className="animate-in fade-in-0 zoom-in-95 absolute flex flex-col items-center duration-500">
         <span className="font-display font-bold" style={{ fontSize: 20, color: '#0D2630' }}>
-          {total}
+          {centerValue ?? total}
         </span>
-        <span style={{ fontSize: 14, color: '#8A98A3' }}>Total</span>
+        <span style={{ fontSize: 14, color: '#8A98A3' }}>{centerLabel}</span>
       </div>
     </div>
   );
