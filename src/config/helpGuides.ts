@@ -2045,6 +2045,30 @@ const LABORATORY_QUALITY_CONTROL_GUIDE: HelpGuide = {
   ],
 };
 
+const LABORATORY_STOCK_RECEIVING_GUIDE: HelpGuide = {
+  id: 'laboratory-stock-receiving',
+  title: 'Stock Receiving',
+  intro: 'Receive a delivery and update Laboratory Inventory stock — no separate re-entry.',
+  sections: [
+    {
+      heading: 'Delivery Information',
+      body: 'Record who delivered what — supplier, delivery note, invoice, vehicle and driver details, and the temperature on arrival, which flags Within Range or Out of Range against the 2–8°C cold-chain window.',
+    },
+    {
+      heading: 'Received Items',
+      body: 'Add Item or Scan Barcode both open the same picker — search or scan a catalog number, then set lot/batch, expiry, and quantities. Received, Accepted, and Rejected quantities and Unit Cost are editable inline; Status derives automatically from them.',
+    },
+    {
+      heading: 'Completing the GRN',
+      body: 'Complete Receiving applies every accepted line to Laboratory Inventory’s live stock and logs it there as a Received movement — this is the real write, not a disconnected form. Once completed, the GRN locks and Start New Receiving opens a fresh session.',
+    },
+    {
+      heading: 'GRN Summary, Checklist, Attachments, Activity Log',
+      body: 'The right column tracks the running total (with tax), a receiving checklist you can expand for detail, delivery paperwork attachments, and a timestamped log of everything that happened on this GRN.',
+    },
+  ],
+};
+
 const LABORATORY_INVENTORY_GUIDE: HelpGuide = {
   id: 'laboratory-inventory',
   title: 'Laboratory Inventory',
@@ -3280,6 +3304,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/quality-control')) return LABORATORY_QUALITY_CONTROL_GUIDE;
   if (pathname.startsWith('/laboratory/equipment-management'))
     return LABORATORY_EQUIPMENT_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/laboratory/stock-receiving')) return LABORATORY_STOCK_RECEIVING_GUIDE;
   if (pathname.startsWith('/laboratory/inventory')) return LABORATORY_INVENTORY_GUIDE;
   if (pathname.startsWith('/laboratory')) return LABORATORY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/medical-records/dashboard')) return MEDICAL_RECORDS_DASHBOARD_GUIDE;

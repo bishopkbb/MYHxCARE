@@ -287,6 +287,25 @@ const HERO_ITEMS: InventoryItem[] = [
     location: 'Phlebotomy Store',
     description: 'EDTA vacuum blood collection tubes, 4 mL.',
   },
+  {
+    id: 'inv-hero-011',
+    name: 'Plain Tube (Red Top)',
+    catalogNo: 'VAC-PLAIN-100',
+    category: 'Consumable',
+    department: 'Hematology',
+    lotBatchNo: 'LOT250631',
+    expiryDate: isoOffset(700),
+    unit: '100 pcs',
+    currentStock: 250,
+    minStock: 150,
+    unitPrice: 3000,
+    manufacturer: 'BD Vacutainer',
+    packSize: '100 pcs',
+    receivedDate: isoOffset(-5),
+    storageCondition: 'Room Temperature',
+    location: 'Phlebotomy Store',
+    description: 'Plain (no additive) vacuum blood collection tubes for serum samples.',
+  },
 ];
 
 // ── Bulk-generated remainder — deterministic, reaches the app's standing
@@ -366,9 +385,9 @@ const NAME_TEMPLATES: NameTemplate[] = [
 
 const DEPARTMENT_LIST = [...DEPARTMENT_OPTIONS];
 
-const BULK_TOTAL = 722;
+const BULK_TOTAL = 721;
 const BULK_STATUS_PLAN: { status: InventoryStatus; count: number }[] = [
-  { status: 'In Stock', count: 528 },
+  { status: 'In Stock', count: 527 },
   { status: 'Low Stock', count: 80 },
   { status: 'Expiring Soon', count: 66 },
   { status: 'Expired', count: 8 },
