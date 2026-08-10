@@ -17,6 +17,7 @@ import {
   ClipboardList,
   Clock,
   CreditCard,
+  Eye,
   FileCheck2,
   Files,
   FileText,
@@ -46,6 +47,7 @@ import {
   ShieldCheck,
   Siren,
   Stethoscope,
+  Syringe,
   Timer,
   TrendingUp,
   Undo2,
@@ -765,18 +767,64 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
   },
 
   emergency: {
-    workspaceLabel: 'Emergency',
+    workspaceLabel: 'Emergency Department',
     homeRoute: '/emergency',
     sections: [
       {
-        items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
+        items: [{ label: 'Emergency Dashboard', href: '/emergency', icon: LayoutDashboard }],
       },
       {
-        label: 'A&E',
+        label: 'TRIAGE & PATIENT FLOW',
         items: [
-          { label: 'A&E Queue', href: '/emergency', icon: Siren },
-          { label: 'Triage', href: '/emergency', icon: Shield },
-          { label: 'Patients', href: '/patients', icon: Users },
+          { label: 'Patient Queue', href: '/emergency/patient-queue', icon: ListOrdered },
+          { label: 'Triage Assessment', href: '/emergency/triage-assessment', icon: Activity },
+          { label: 'Bed Assignment', href: '/emergency/bed-assignment', icon: BedSingle },
+          { label: 'Emergency Tracking Board', href: '/emergency/tracking-board', icon: Radar },
+          { label: 'Observation Unit', href: '/emergency/observation-unit', icon: Eye },
+        ],
+      },
+      {
+        label: 'EMERGENCY CARE',
+        items: [
+          {
+            label: 'Emergency Medication Orders',
+            href: '/emergency/medication-orders',
+            icon: Pill,
+          },
+          { label: 'Emergency Procedures', href: '/emergency/procedures', icon: Syringe },
+          { label: 'Clinical Notes', href: '/emergency/clinical-notes', icon: NotebookPen },
+        ],
+      },
+      {
+        label: 'DIAGNOSTICS',
+        items: [
+          {
+            label: 'Diagnostic Requests',
+            href: '/emergency/diagnostic-requests',
+            icon: FlaskConical,
+          },
+          { label: 'Results Review', href: '/emergency/results-review', icon: FileCheck2 },
+          { label: 'Critical Alerts', href: '/emergency/critical-alerts', icon: AlertTriangle },
+        ],
+      },
+      {
+        label: 'PATIENT RECORDS',
+        items: [
+          { label: 'Emergency Visit History', href: '/emergency/visit-history', icon: History },
+          { label: 'Clinical Timeline', href: '/emergency/clinical-timeline', icon: Clock },
+        ],
+      },
+      {
+        label: 'SCHEDULE & WORKFORCE',
+        items: [
+          {
+            label: 'Workforce Management',
+            href: '/emergency/workforce-management',
+            icon: CalendarDays,
+            permission: PERMISSIONS.DUTY_ROSTER_WRITE,
+          },
+          { label: 'My Schedule', href: '/emergency/my-schedule', icon: CalendarCheck },
+          { label: 'Shift Handover', href: '/emergency/shift-handover', icon: Share2 },
         ],
       },
       {
@@ -785,6 +833,22 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
           { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
           { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
           { label: 'Announcements', href: '/announcements', icon: Megaphone },
+        ],
+      },
+      {
+        label: 'REPORTS',
+        items: [
+          { label: 'Emergency Reports', href: '/emergency/reports', icon: BarChart2 },
+          {
+            label: 'Waiting Time Reports',
+            href: '/emergency/reports/waiting-time',
+            icon: Timer,
+          },
+          {
+            label: 'Triage Performance Reports',
+            href: '/emergency/reports/triage-performance',
+            icon: PieChart,
+          },
         ],
       },
       {

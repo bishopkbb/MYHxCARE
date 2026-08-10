@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Emergency' };
+import { EmergencyDashboardWorkspace } from '@/features/emergency/components/EmergencyDashboardWorkspace';
 
-export default function EmergencyPage() {
-  return (
-    <ComingSoon
-      title="Emergency"
-      description="Emergency triage, rapid response workflows, trauma bay management, and mass casualty protocols are being built."
-    />
-  );
+export default function EmergencyDashboardPage() {
+  return <EmergencyDashboardWorkspace />;
 }

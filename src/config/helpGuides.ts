@@ -75,6 +75,35 @@ const DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_DASHBOARD_GUIDE: HelpGuide = {
+  id: 'emergency-dashboard',
+  title: 'Emergency Dashboard',
+  intro:
+    'A real-time overview of emergency department operations — patient flow, bed status, and anything that needs immediate attention.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Patients Waiting, Occupied Beds, Critical Patients, Under Observation, Pending Results, and Discharged Today. Click any card to open the matching screen for more detail.',
+    },
+    {
+      heading: 'Quick actions',
+      body: 'One-tap shortcuts for the most frequent emergency-department tasks — registering a new patient, starting triage, assigning a bed, opening a patient chart, or ordering labs, imaging, and medications.',
+    },
+    {
+      heading: 'Live Emergency Queue',
+      body: 'Every emergency patient currently checked in, sorted by triage priority. Priority follows the standard Immediate/Urgent/Less Urgent/Non-Urgent classification.',
+    },
+    {
+      heading: 'Triage Distribution & Bed Status',
+      body: 'Donut charts summarising the current queue by priority and the department by bed status (Available, Occupied, Cleaning, Isolation, Reserved).',
+    },
+    {
+      heading: 'Observation, Orders, Admissions, and Alerts',
+      body: 'The panels below the fold track patients under observation, pending lab/radiology/medication/procedure orders, recent admissions, and any critical alerts needing immediate attention.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3375,6 +3404,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (/^\/patients\/[^/]+/.test(pathname)) return PATIENT_PROFILE_GUIDE;
   if (pathname.startsWith('/patients')) return PATIENTS_GUIDE;
   if (pathname.startsWith('/dashboard')) return DASHBOARD_GUIDE;
+  if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;
   if (pathname.startsWith('/clinical-notes')) return CLINICAL_NOTES_GUIDE;

@@ -119,6 +119,37 @@ export const ROUTES = {
   laboratoryQcReports: '/laboratory/reports/quality-control',
   laboratoryEquipmentReports: '/laboratory/reports/equipment',
 
+  // Emergency Department workspace sub-routes (Emergency Nurse/Doctor persona)
+  // Triage & Patient Flow
+  emergencyPatientQueue: '/emergency/patient-queue',
+  emergencyTriageAssessment: '/emergency/triage-assessment',
+  emergencyBedAssignment: '/emergency/bed-assignment',
+  emergencyTrackingBoard: '/emergency/tracking-board',
+  emergencyObservationUnit: '/emergency/observation-unit',
+  // Emergency Care
+  emergencyConsultation: '/emergency/consultation',
+  emergencyMedicationOrders: '/emergency/medication-orders',
+  emergencyProcedures: '/emergency/procedures',
+  emergencyOrdersManagement: '/emergency/orders-management',
+  emergencyClinicalNotes: '/emergency/clinical-notes',
+  // Diagnostics
+  emergencyDiagnosticRequests: '/emergency/diagnostic-requests',
+  emergencyResultsReview: '/emergency/results-review',
+  emergencyCriticalAlerts: '/emergency/critical-alerts',
+  // Patient Records
+  emergencyPatientSearch: '/emergency/patient-search',
+  emergencyVisitHistory: '/emergency/visit-history',
+  emergencyClinicalTimeline: '/emergency/clinical-timeline',
+  emergencyAllergiesAlerts: '/emergency/allergies-alerts',
+  // Reports
+  emergencyReports: '/emergency/reports',
+  emergencyWaitingTimeReports: '/emergency/reports/waiting-time',
+  emergencyTriagePerformanceReports: '/emergency/reports/triage-performance',
+  // Schedule & Workforce
+  emergencyWorkforceManagement: '/emergency/workforce-management',
+  emergencyMySchedule: '/emergency/my-schedule',
+  emergencyShiftHandover: '/emergency/shift-handover',
+
   // Billing sub-routes
   billingCharges: '/billing/charges',
   billingInvoices: '/billing/invoices',
