@@ -1,12 +1,17 @@
 /**
- * Emergency Dashboard fixtures — everything the Dashboard shows that isn't
- * backed by a real store yet. "Patients Waiting" / the Live Emergency Queue
- * table / the Triage Distribution donut are NOT here — those read live off
- * `registrationQueueStore.ts`'s `useQueueEntries()` (the same store the
- * already-built Emergency Registration screen writes into), enriched with
- * the deterministic per-entry priority/complaint helpers below since
- * `QueueEntry` has no triage-priority or chief-complaint field yet (that's
- * what the future Triage Assessment screen will add).
+ * Emergency module fixtures — shared across the Dashboard and Patient Queue
+ * (and any future Emergency screen that needs the same real-entry
+ * enrichment). "Patients Waiting" / the Live Emergency Queue / Patient
+ * Queue's own list / the Triage Distribution donut are NOT fixture data —
+ * those read live off `registrationQueueStore.ts`'s `useQueueEntries()`
+ * (the same store the already-built Emergency Registration screen writes
+ * into), enriched with the deterministic per-entry helpers below since
+ * `QueueEntry` has no triage-priority, chief-complaint, arrival-source, or
+ * queue-stage field yet (that's what the future Triage Assessment/Bed
+ * Assignment screens will add). Every helper is seeded off the real
+ * `entry.id`, so a given real patient always gets the same priority/
+ * complaint/source/stage on every screen that shows them — never
+ * independently re-rolled per screen.
  *
  * Everything below IS a placeholder: Occupied Beds, Critical Patients, Under
  * Observation, Pending Results, Discharged Today, the bed-status breakdown,
@@ -74,6 +79,83 @@ export function deriveComplaintForEntry(entryId: string): string {
   const rand = mulberry32(hashSeed(`${entryId}-complaint`))();
   return CHIEF_COMPLAINTS[Math.floor(rand * CHIEF_COMPLAINTS.length)]!;
 }
+
+export type ArrivalSource = 'Walk-in' | 'Ambulance' | 'Referral';
+export const ARRIVAL_SOURCES: ArrivalSource[] = ['Walk-in', 'Ambulance', 'Referral'];
+
+/** Walk-in dominates real ED arrivals; ambulance/referral are the minority. */
+export function deriveSourceForEntry(entryId: string): ArrivalSource {
+  const rand = mulberry32(hashSeed(`${entryId}-source`))();
+  if (rand < 0.65) return 'Walk-in';
+  if (rand < 0.88) return 'Ambulance';
+  return 'Referral';
+}
+
+export type QueueStage =
+  'Awaiting Triage' | 'Triage Completed' | 'In Treatment' | 'Admitted' | 'Discharged';
+export const QUEUE_STAGES: QueueStage[] = [
+  'Awaiting Triage',
+  'Triage Completed',
+  'In Treatment',
+  'Admitted',
+  'Discharged',
+];
+
+/** `QueueEntry.status` never advances past creation (SYS-level finding —
+ * stays 'Emergency' forever) so real progression through triage/treatment/
+ * disposition isn't modelled yet. This derives a stable illustrative stage
+ * per entry so Patient Queue's tabs/filters have something real to filter
+ * against, weighted toward the front of the pipeline (most ED arrivals are
+ * still waiting or in progress, few are already discharged). */
+export function deriveQueueStageForEntry(entryId: string): QueueStage {
+  const rand = mulberry32(hashSeed(`${entryId}-stage`))();
+  if (rand < 0.3) return 'Awaiting Triage';
+  if (rand < 0.5) return 'Triage Completed';
+  if (rand < 0.7) return 'In Treatment';
+  if (rand < 0.85) return 'Admitted';
+  return 'Discharged';
+}
+
+/** QueueEntry carries no phone field — Triage Assessment's Patient
+ * Identification step needs one to fill an editable form, not to display as
+ * if it were real API data. Stable per entry, Nigerian mobile format. */
+export function derivePhoneForEntry(entryId: string): string {
+  const rand = mulberry32(hashSeed(`${entryId}-phone`))();
+  const prefixes = ['0803', '0805', '0806', '0810', '0813', '0816', '0703', '0706'];
+  const prefix = prefixes[Math.floor(rand * prefixes.length)]!;
+  const rest = String(
+    Math.floor(mulberry32(hashSeed(`${entryId}-phone-rest`))() * 1_000_000),
+  ).padStart(6, '0');
+  return `${prefix} ${rest.slice(0, 3)} ${rest.slice(3)}`;
+}
+
+export const ONSET_OPTIONS = [
+  'Less than 1 hour',
+  '1–6 hours',
+  '6–24 hours',
+  'More than 24 hours',
+] as const;
+
+export const PRIMARY_CONCERN_OPTIONS = [
+  'Breathing Problem',
+  'Chest Pain',
+  'Bleeding',
+  'Trauma / Injury',
+  'Neurological',
+  'Fever / Infection',
+  'Gastrointestinal',
+  'Other',
+] as const;
+
+/** No dedicated Emergency nursing-staff directory exists yet — an on-duty
+ * triage nurse roster, same honest-placeholder treatment as everything else
+ * in this file without a backing store. */
+export const EMERGENCY_TRIAGE_NURSES = [
+  'Mary Adamu',
+  'Grace Effiong',
+  'Blessing Nkem',
+  'Fatima Suleiman',
+] as const;
 
 // ─── Bed status ──────────────────────────────────────────────────────────
 

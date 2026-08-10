@@ -104,6 +104,60 @@ const EMERGENCY_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_PATIENT_QUEUE_GUIDE: HelpGuide = {
+  id: 'emergency-patient-queue',
+  title: 'Patient Queue',
+  intro:
+    'The full, real-time list of patients waiting for triage and emergency care, with filters and a quick-view panel.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total in Queue, Longest Wait Time, Average Wait Time, and how many patients are still Awaiting Triage vs Triage Completed.',
+    },
+    {
+      heading: 'Tabs',
+      body: 'Switch between All Patients and each stage of the queue — Awaiting Triage, Triage Completed, In Treatment, Admitted, Discharged. Each tab shows a live count.',
+    },
+    {
+      heading: 'Filters and search',
+      body: 'Narrow the list by triage priority or arrival source, or search by patient name/MRN. "Clear all filters" appears whenever a filter is hiding every row.',
+    },
+    {
+      heading: 'Patient Quick View',
+      body: 'Select any row to open a docked panel with arrival details, chief complaint, and queue status — with one-tap actions to start triage or open the full patient chart.',
+    },
+  ],
+};
+
+const TRIAGE_ASSESSMENT_GUIDE: HelpGuide = {
+  id: 'emergency-triage-assessment',
+  title: 'Triage Assessment',
+  intro:
+    'A 5-step Manchester Triage assessment that assigns a clinical priority and next steps for one emergency patient.',
+  sections: [
+    {
+      heading: 'Patient Identification',
+      body: 'Demographics and arrival details are pre-filled from the queue entry. Add the chief complaint, onset, pain scale, and primary concern before continuing.',
+    },
+    {
+      heading: 'Manchester Triage Assessment',
+      body: 'Answer all 7 discriminator questions. The Manchester Triage Priority Reference in the sidebar explains each of the five clinical tiers — this app assigns one of the four standard priority levels (Immediate/Urgent/Less Urgent/Non-Urgent).',
+    },
+    {
+      heading: 'Vital Signs',
+      body: 'Record blood pressure, pulse, respiratory rate, temperature, SpO₂, and consciousness (AVPU).',
+    },
+    {
+      heading: 'Priority & Disposition',
+      body: 'Review the computed priority and recommended actions, then confirm the assigned doctor and triage nurse.',
+    },
+    {
+      heading: 'Review & Complete',
+      body: '"Save & Complete Triage" writes the result to the shared queue — Patient Queue and the Dashboard update immediately. "Proceed to Bed Assignment" carries the patient forward.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3404,6 +3458,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (/^\/patients\/[^/]+/.test(pathname)) return PATIENT_PROFILE_GUIDE;
   if (pathname.startsWith('/patients')) return PATIENTS_GUIDE;
   if (pathname.startsWith('/dashboard')) return DASHBOARD_GUIDE;
+  if (pathname.startsWith('/emergency/patient-queue')) return EMERGENCY_PATIENT_QUEUE_GUIDE;
+  if (pathname.startsWith('/emergency/triage-assessment')) return TRIAGE_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

@@ -50,7 +50,7 @@ import {
   RECENT_ADMISSIONS,
   TOTAL_BEDS,
   UNDER_OBSERVATION_COUNT,
-} from '@/features/emergency/__mocks__/emergencyDashboardFixtures';
+} from '@/features/emergency/__mocks__/emergencyFixtures';
 
 type PageState = 'loading' | 'loaded' | 'error';
 

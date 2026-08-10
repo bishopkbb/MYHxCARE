@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Patient Queue' };
+import { PatientQueueWorkspace } from '@/features/emergency/components/PatientQueueWorkspace';
 
 export default function PatientQueuePage() {
-  return (
-    <ComingSoon
-      title="Patient Queue"
-      description="Real-time emergency patient queue, sorted by arrival and priority, is on the way."
-    />
-  );
+  return <PatientQueueWorkspace />;
 }

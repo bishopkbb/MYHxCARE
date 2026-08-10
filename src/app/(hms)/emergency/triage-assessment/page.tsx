@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Triage Assessment' };
+import { TriageAssessmentWorkspace } from '@/features/emergency/components/TriageAssessmentWorkspace';
 
 export default function TriageAssessmentPage() {
-  return (
-    <ComingSoon
-      title="Triage Assessment"
-      description="Structured triage scoring and priority assignment for incoming patients is on the way."
-    />
-  );
+  return <TriageAssessmentWorkspace />;
 }
