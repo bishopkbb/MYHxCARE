@@ -23,7 +23,7 @@ import {
   Users,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 
 import { ExportMenu } from '@/components/ExportMenu';
 import { FilterDropdown } from '@components/shared/FilterDropdown';
@@ -40,11 +40,11 @@ import { StatCardCompact } from '@components/shared/StatCard';
 import { useToast } from '@/hooks/useToast';
 import { downloadCSV, downloadPDF, escapeHtml } from '@/utils/export';
 import {
-  COVERAGE_OVERVIEW,
+  computeCoverageOverview,
+  computeWorkforceStats,
   ROLE_OPTIONS,
   SHIFT_TYPE_OPTIONS,
   STATUS_OPTIONS,
-  WORKFORCE_STATS,
   type LaboratoryShift,
   type ShiftStatus,
   type ShiftType,
@@ -323,6 +323,8 @@ export function LaboratoryWorkforceManagementWorkspace() {
   const roster = useStaffShifts()
     .filter((s) => s.homeModule === 'laboratory')
     .map(toLaboratoryView);
+  const workforceStats = computeWorkforceStats(roster);
+  const coverageOverview = computeCoverageOverview(roster);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(FILTER_DEFAULTS);
   const [openFilter, setOpenFilter] = useState<FilterKey | null>(null);
@@ -388,29 +390,22 @@ export function LaboratoryWorkforceManagementWorkspace() {
   const clampedPage = Math.min(page, totalPages);
   const paginated = filtered.slice((clampedPage - 1) * pageSize, clampedPage * pageSize);
 
-  const rowMenuButtonRefs = useMemo(() => {
-    const map = new Map<string, RefObject<HTMLButtonElement | null>>();
-    for (const shift of paginated) map.set(shift.id, { current: null });
-    return map;
-  }, [paginated]);
+  const rowMenuButtonRefs = new Map<string, RefObject<HTMLButtonElement | null>>();
+  for (const shift of paginated) rowMenuButtonRefs.set(shift.id, { current: null });
 
   // Derived from the live roster (not a static PENDING_ACKNOWLEDGEMENTS
   // fixture) so acknowledging a shift actually removes it from this list.
-  const pendingAcks = useMemo(
-    () =>
-      roster
-        .filter((s) => !s.acknowledged)
-        .slice(0, 5)
-        .map((s) => ({
-          id: s.id,
-          staffName: s.staffName,
-          initials: s.initials,
-          avatarBg: s.avatarBg,
-          shiftLabel: `${SHIFT_TYPE_OPTIONS.find((o) => o.value === s.shiftType)?.label} Shift`,
-          day: 'Today',
-        })),
-    [roster],
-  );
+  const pendingAcks = roster
+    .filter((s) => !s.acknowledged)
+    .slice(0, 5)
+    .map((s) => ({
+      id: s.id,
+      staffName: s.staffName,
+      initials: s.initials,
+      avatarBg: s.avatarBg,
+      shiftLabel: `${SHIFT_TYPE_OPTIONS.find((o) => o.value === s.shiftType)?.label} Shift`,
+      day: 'Today',
+    }));
 
   function getRowMenuButtonRef(id: string) {
     return rowMenuButtonRefs.get(id) ?? { current: null };
@@ -548,7 +543,7 @@ export function LaboratoryWorkforceManagementWorkspace() {
                   iconBg="rgba(0,180,216,0.10)"
                   iconColor="#00B4D8"
                   label="Staff on Duty"
-                  value={String(WORKFORCE_STATS.onDuty)}
+                  value={String(workforceStats.onDuty)}
                   info="Currently clocked in"
                   infoColor="#22C55E"
                 />
@@ -557,7 +552,7 @@ export function LaboratoryWorkforceManagementWorkspace() {
                   iconBg="rgba(0,180,216,0.10)"
                   iconColor="#00B4D8"
                   label="Today's Shift"
-                  value={String(WORKFORCE_STATS.todaysShifts)}
+                  value={String(workforceStats.todaysShifts)}
                   info="Morning • Afternoon • Night"
                   infoColor="#4A7080"
                 />
@@ -566,7 +561,7 @@ export function LaboratoryWorkforceManagementWorkspace() {
                   iconBg="rgba(0,180,216,0.10)"
                   iconColor="#00B4D8"
                   label="On-Call Staff"
-                  value={String(WORKFORCE_STATS.onCall)}
+                  value={String(workforceStats.onCall)}
                   info="Currently Available"
                   infoColor="#4A7080"
                 />
@@ -575,7 +570,7 @@ export function LaboratoryWorkforceManagementWorkspace() {
                   iconBg="rgba(245,158,11,0.10)"
                   iconColor="#F59E0B"
                   label="Shifts Acknowledgement"
-                  value={String(WORKFORCE_STATS.pendingAck)}
+                  value={String(workforceStats.pendingAck)}
                   info="Requires attention"
                   infoColor="#F59E0B"
                 />
@@ -584,17 +579,17 @@ export function LaboratoryWorkforceManagementWorkspace() {
                   iconBg="rgba(34,197,94,0.10)"
                   iconColor="#22C55E"
                   label="Coverage Status"
-                  value={`${WORKFORCE_STATS.coveragePercent}%`}
-                  info="Departments staffed"
+                  value={`${workforceStats.coveragePercent}%`}
+                  info="On duty + on-call vs. active roster"
                   infoColor="#4A7080"
                 />
                 <StatCardCompact
                   icon={ArrowLeftRight}
                   iconBg="rgba(0,180,216,0.10)"
                   iconColor="#00B4D8"
-                  label="Shifts Changes"
-                  value={`${WORKFORCE_STATS.pendingChanges} Requests`}
-                  info="Pending approval"
+                  label="Cancelled Shifts"
+                  value={String(workforceStats.cancelledToday)}
+                  info="This session"
                   infoColor="#4A7080"
                 />
               </>
@@ -1015,7 +1010,7 @@ export function LaboratoryWorkforceManagementWorkspace() {
                 Coverage Overview
               </h2>
               <div className="mt-4 flex flex-col gap-3.5">
-                {COVERAGE_OVERVIEW.map((metric) => (
+                {coverageOverview.map((metric) => (
                   <div key={metric.label} className="flex items-center gap-3">
                     <Tooltip content={metric.label}>
                       <p

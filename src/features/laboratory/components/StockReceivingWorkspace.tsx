@@ -413,8 +413,12 @@ export function StockReceivingWorkspace() {
               icon={Package}
               label="GRN Number"
               value={grnRecord.id}
-              subLabel="Receiving Date"
-              subValue={formatHumanDate(grnRecord.deliveryDate)}
+              subLabel={grnRecord.linkedRequestId ? 'Linked Request' : 'Receiving Date'}
+              subValue={
+                grnRecord.linkedRequestId
+                  ? grnRecord.linkedRequestId
+                  : formatHumanDate(grnRecord.deliveryDate)
+              }
             />
             <InfoCard
               icon={Truck}

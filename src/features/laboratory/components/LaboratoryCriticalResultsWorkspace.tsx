@@ -69,6 +69,11 @@ const CriticalResultReportModal = dynamic(
   { ssr: false, loading: () => <ModalLoadingFallback /> },
 );
 
+const AddLabCommentModal = dynamic(
+  () => import('./AddLabCommentModal').then((m) => m.AddLabCommentModal),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
 
@@ -163,15 +168,17 @@ function CriticalRowMenu({
           <FileText style={{ width: 15, height: 15, color: '#00B4D8' }} />
           View Full Result
         </button>
-        <button
-          type="button"
-          onClick={onAddComment}
-          className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-          style={{ fontSize: 14, color: '#0D2630' }}
-        >
-          <MessageSquare style={{ width: 15, height: 15, color: '#4A7080' }} />
-          Add Comment
-        </button>
+        <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+          <button
+            type="button"
+            onClick={onAddComment}
+            className={`flex w-full items-center gap-2 px-3.5 py-2 text-left transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+            style={{ fontSize: 14, color: '#0D2630' }}
+          >
+            <MessageSquare style={{ width: 15, height: 15, color: '#4A7080' }} />
+            Add Comment
+          </button>
+        </PermissionGate>
       </RowMenuPortal>
     </div>
   );
@@ -1157,19 +1164,21 @@ export function LaboratoryCriticalResultsWorkspace() {
                           </button>
                         </PermissionGate>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => setCommentTarget(selectedEntry)}
-                        className={`mt-2 flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                        style={{
-                          fontSize: 14,
-                          color: '#0D2630',
-                          border: '1px solid rgba(0,100,130,0.2)',
-                        }}
-                      >
-                        <MessageSquare style={{ width: 15, height: 15 }} />
-                        Add Comment
-                      </button>
+                      <PermissionGate permission={PERMISSIONS.LAB_ORDERS_WRITE}>
+                        <button
+                          type="button"
+                          onClick={() => setCommentTarget(selectedEntry)}
+                          className={`mt-2 flex h-11 w-full items-center justify-center gap-1.5 rounded-[10px] font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
+                          style={{
+                            fontSize: 14,
+                            color: '#0D2630',
+                            border: '1px solid rgba(0,100,130,0.2)',
+                          }}
+                        >
+                          <MessageSquare style={{ width: 15, height: 15 }} />
+                          Add Comment
+                        </button>
+                      </PermissionGate>
                       <button
                         type="button"
                         onClick={() => setReportTarget(selectedEntry)}
@@ -1225,68 +1234,13 @@ export function LaboratoryCriticalResultsWorkspace() {
       )}
 
       {commentTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(13,38,48,0.45)' }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setCommentTarget(null);
-          }}
-        >
-          <div
-            className="flex w-full flex-col overflow-hidden bg-white"
-            style={{ maxWidth: 440, borderRadius: 16 }}
-          >
-            <div
-              className="flex shrink-0 items-start justify-between gap-3 px-6 py-5"
-              style={{ borderBottom: '1px solid rgba(0,100,130,0.12)' }}
-            >
-              <h2 className="font-display font-semibold" style={{ fontSize: 20, color: '#0D2630' }}>
-                Add Comment
-              </h2>
-              <button
-                type="button"
-                onClick={() => setCommentTarget(null)}
-                aria-label="Close"
-                className={`flex size-11 shrink-0 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[rgba(0,0,0,0.06)] ${FOCUS_RING}`}
-              >
-                <X style={{ width: 20, height: 20, color: '#4A7080' }} />
-              </button>
-            </div>
-            <div className="px-6 py-5">
-              <textarea
-                rows={4}
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Add a note about this critical result…"
-                autoFocus
-                className={`w-full resize-none rounded-[10px] px-3.5 py-2.5 font-sans outline-none placeholder:text-[#8A98A3] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.18)' }}
-              />
-            </div>
-            <div
-              className="flex shrink-0 items-center justify-end gap-2.5 px-6 py-4"
-              style={{ borderTop: '1px solid rgba(0,100,130,0.12)' }}
-            >
-              <button
-                type="button"
-                onClick={() => setCommentTarget(null)}
-                className={`flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium transition-colors duration-150 hover:bg-[#F5FBFD] ${FOCUS_RING}`}
-                style={{ fontSize: 14, color: '#0D2630', border: '1px solid rgba(0,100,130,0.2)' }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveComment}
-                disabled={!commentText.trim()}
-                className={`flex h-11 items-center gap-1.5 rounded-[10px] px-4 font-sans font-medium text-white transition-opacity duration-150 ${commentText.trim() ? 'hover:opacity-90' : 'cursor-not-allowed opacity-50'} ${FOCUS_RING}`}
-                style={{ fontSize: 14, background: '#00B4D8' }}
-              >
-                Save Comment
-              </button>
-            </div>
-          </div>
-        </div>
+        <AddLabCommentModal
+          value={commentText}
+          onChange={setCommentText}
+          onClose={() => setCommentTarget(null)}
+          onSave={handleSaveComment}
+          placeholder="Add a note about this critical result…"
+        />
       )}
     </div>
   );

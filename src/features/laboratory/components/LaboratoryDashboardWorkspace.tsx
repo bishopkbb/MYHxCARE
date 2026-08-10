@@ -280,6 +280,8 @@ function LabStatCard({
   iconBg,
   viewLabel,
   onView,
+  index,
+  animate,
 }: {
   icon: LucideIcon;
   label: string;
@@ -289,15 +291,28 @@ function LabStatCard({
   iconBg: string;
   viewLabel: string;
   onView: () => void;
+  /** Position among the stat-card grid — drives the entrance stagger delay. */
+  index: number;
+  /** Same `animateCharts` flag DepartmentBars uses, so the cards and the
+   * department chart settle in together rather than the cards popping in
+   * instantly ahead of everything else on the page. */
+  animate: boolean;
 }) {
   return (
     <div
-      className="flex h-full flex-col rounded-[12px] p-4"
+      className="flex h-full flex-col rounded-[12px] p-4 hover:-translate-y-0.5 hover:shadow-md"
       style={{
         background: '#FFFFFF',
         border: `1px solid ${accent}`,
         borderTopWidth: 3,
         boxShadow: '0px 1px 3px 0px rgba(0,0,0,0.05)',
+        opacity: animate ? 1 : 0,
+        transform: animate ? undefined : 'translateY(8px)',
+        // Two properties, two different transitions in one declaration: opacity
+        // carries the mount stagger (matches DepartmentBars' own timing/easing
+        // just below), transform stays a flat, un-delayed 150ms so the hover
+        // lift never inherits the entrance's stagger delay after mount.
+        transition: `opacity 0.5s ease ${index * 60}ms, transform 150ms ease`,
       }}
     >
       <div className="flex items-start justify-between gap-2">
@@ -812,6 +827,8 @@ export function LaboratoryDashboardWorkspace() {
                   iconBg="rgba(124,58,237,0.1)"
                   viewLabel="View Orders"
                   onView={() => router.push(ROUTES.laboratoryOrders)}
+                  index={0}
+                  animate={animateCharts}
                 />
                 <LabStatCard
                   icon={Inbox}
@@ -822,6 +839,8 @@ export function LaboratoryDashboardWorkspace() {
                   iconBg="rgba(0,180,216,0.1)"
                   viewLabel="View Collection List"
                   onView={() => router.push(ROUTES.laboratorySampleCollection)}
+                  index={1}
+                  animate={animateCharts}
                 />
                 <LabStatCard
                   icon={Package}
@@ -832,6 +851,8 @@ export function LaboratoryDashboardWorkspace() {
                   iconBg="rgba(22,163,74,0.1)"
                   viewLabel="View Received"
                   onView={() => router.push(ROUTES.laboratorySampleReception)}
+                  index={2}
+                  animate={animateCharts}
                 />
                 <LabStatCard
                   icon={NotebookPen}
@@ -842,6 +863,8 @@ export function LaboratoryDashboardWorkspace() {
                   iconBg="rgba(217,119,6,0.1)"
                   viewLabel="View Work Queue"
                   onView={() => router.push(ROUTES.laboratoryTestWorkQueue)}
+                  index={3}
+                  animate={animateCharts}
                 />
                 <LabStatCard
                   icon={BadgeCheck}
@@ -852,6 +875,8 @@ export function LaboratoryDashboardWorkspace() {
                   iconBg="rgba(139,92,246,0.1)"
                   viewLabel="View Verification"
                   onView={() => router.push(ROUTES.laboratoryResultVerification)}
+                  index={4}
+                  animate={animateCharts}
                 />
                 <LabStatCard
                   icon={AlertTriangle}
@@ -862,6 +887,8 @@ export function LaboratoryDashboardWorkspace() {
                   iconBg="rgba(220,38,38,0.1)"
                   viewLabel="View Critical"
                   onView={() => router.push(ROUTES.laboratoryCriticalResults)}
+                  index={5}
+                  animate={animateCharts}
                 />
                 <LabStatCard
                   icon={Timer}
@@ -872,6 +899,8 @@ export function LaboratoryDashboardWorkspace() {
                   iconBg="rgba(13,148,136,0.1)"
                   viewLabel="View TAT Report"
                   onView={() => router.push(ROUTES.laboratoryTatReports)}
+                  index={6}
+                  animate={animateCharts}
                 />
                 <LabStatCard
                   icon={Gauge}
@@ -882,6 +911,8 @@ export function LaboratoryDashboardWorkspace() {
                   iconBg="rgba(22,163,74,0.1)"
                   viewLabel="View Equipment"
                   onView={() => router.push(ROUTES.laboratoryEquipmentManagement)}
+                  index={7}
+                  animate={animateCharts}
                 />
               </>
             )}

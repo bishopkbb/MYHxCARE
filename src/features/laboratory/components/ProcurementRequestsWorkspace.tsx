@@ -48,6 +48,7 @@ import {
   type ProcurementRequest,
   type ProcurementStatus,
 } from '@/features/laboratory/__mocks__/procurementFixtures';
+import { startReceivingForRequest } from '@/features/laboratory/store/stockReceivingStore';
 import {
   advanceStatus,
   approveNextStep,
@@ -376,7 +377,7 @@ function RowMenu({
             className="flex w-full items-center px-4 py-2.5 text-left font-sans transition-colors duration-150 hover:bg-[#E6F8FD]"
             style={{ fontSize: 14, color: '#2F3A40' }}
           >
-            Mark as Received
+            Receive Stock
           </button>
         )}
         {canWrite && (request.status === 'Approved' || request.status === 'In Procurement') && (
@@ -550,9 +551,17 @@ export function ProcurementRequestsWorkspace() {
     toast.info('Request rejected', `${request.id} has been rejected.`);
   }
   function handleAdvance(request: ProcurementRequest) {
-    const next: ProcurementStatus = request.status === 'Approved' ? 'In Procurement' : 'Received';
-    advanceStatus(request.id, next);
-    toast.success('Status updated', `${request.id} is now ${next}.`);
+    if (request.status === 'Approved') {
+      advanceStatus(request.id, 'In Procurement');
+      toast.success('Status updated', `${request.id} is now In Procurement.`);
+      return;
+    }
+    // 'In Procurement' → real receiving session, not a direct status flip
+    // (G-LAB-01) — completeReceiving() advances the request to 'Received'
+    // once the goods are actually logged in, not before.
+    startReceivingForRequest(request, actorName);
+    toast.info('Receiving started', `A GRN linked to ${request.id} is ready in Stock Receiving.`);
+    router.push(ROUTES.laboratoryStockReceiving);
   }
   function handleCancel(request: ProcurementRequest) {
     cancelRequest(request.id, actorName);

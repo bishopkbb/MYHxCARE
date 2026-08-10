@@ -42,7 +42,7 @@ export function ReceiveSampleModal({
     if (!identityConfirmed) {
       toast.error(
         'Confirmation required',
-        "Confirm the patient's identity before receiving this specimen.",
+        "Confirm the patient's identity before collecting this specimen.",
       );
       return;
     }
@@ -70,7 +70,7 @@ export function ReceiveSampleModal({
               className="font-display font-semibold"
               style={{ fontSize: 20, lineHeight: '28px', color: '#0D2630' }}
             >
-              Receive Sample
+              Collect Sample
             </h2>
             <p className="mt-0.5" style={{ fontSize: 14, color: '#4A7080' }}>
               {orderId}
@@ -134,7 +134,7 @@ export function ReceiveSampleModal({
               />
               <span style={{ fontSize: 14, color: '#0D2630' }}>
                 I have verified this patient&apos;s identity and specimen labeling (full name and
-                MRN) before receiving into the laboratory.
+                MRN) before collecting this specimen.
               </span>
             </label>
 
@@ -144,7 +144,7 @@ export function ReceiveSampleModal({
                 className="block font-sans font-medium"
                 style={{ fontSize: 14, color: '#0D2630' }}
               >
-                Received Date &amp; Time
+                Collected Date &amp; Time
               </label>
               <input
                 id="rs-time"
@@ -177,7 +177,7 @@ export function ReceiveSampleModal({
             style={{ fontSize: 14, background: '#00B4D8' }}
           >
             <TestTube2 style={{ width: 15, height: 15 }} />
-            Confirm Receipt
+            Confirm Collection
           </button>
         </div>
       </div>

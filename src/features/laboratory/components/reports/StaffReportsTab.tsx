@@ -9,11 +9,12 @@ import {
 } from '@components/shared/ScrollableTable';
 import { Tooltip } from '@components/shared/Tooltip';
 import {
-  COVERAGE_OVERVIEW,
-  MOCK_LABORATORY_ROSTER,
+  computeCoverageOverview,
+  computeWorkforceStats,
   SHIFT_TYPE_OPTIONS,
-  WORKFORCE_STATS,
+  type LaboratoryShift,
 } from '@/features/laboratory/__mocks__/laboratoryWorkforceFixtures';
+import { useStaffShifts, type StaffShift } from '@/features/workforce/store/staffShiftStore';
 import { donutColorFor, ReportDonutCard, ReportStatCard } from './reportShared';
 
 const STATUS_COLOR: Record<string, string> = {
@@ -24,9 +25,24 @@ const STATUS_COLOR: Record<string, string> = {
   CANCELLED: '#DC2626',
 };
 
+// Same seam as LaboratoryWorkforceManagementWorkspace.tsx's own adapter —
+// this tab previously read the frozen MOCK_LABORATORY_ROSTER directly, so
+// its numbers never moved when a shift was created/cancelled/acknowledged
+// on that screen (docs/api-contracts/06-laboratory G-LAB-08).
+function toLaboratoryView(s: StaffShift): LaboratoryShift {
+  const { homeModule: _homeModule, department: _department, ...rest } = s;
+  return rest;
+}
+
 export function StaffReportsTab() {
+  const roster = useStaffShifts()
+    .filter((s) => s.homeModule === 'laboratory')
+    .map(toLaboratoryView);
+  const workforceStats = computeWorkforceStats(roster);
+  const coverageOverview = computeCoverageOverview(roster);
+
   const shiftTypeCounts = new Map<string, number>();
-  for (const shift of MOCK_LABORATORY_ROSTER) {
+  for (const shift of roster) {
     shiftTypeCounts.set(shift.shiftType, (shiftTypeCounts.get(shift.shiftType) ?? 0) + 1);
   }
   const shiftTypeBreakdown = SHIFT_TYPE_OPTIONS.map((opt, i) => ({
@@ -43,7 +59,7 @@ export function StaffReportsTab() {
           iconColor="#16A34A"
           iconBg="rgba(34,197,94,0.12)"
           label="On Duty"
-          value={WORKFORCE_STATS.onDuty}
+          value={workforceStats.onDuty}
           info="Right now"
         />
         <ReportStatCard
@@ -51,7 +67,7 @@ export function StaffReportsTab() {
           iconColor="#2563EB"
           iconBg="rgba(37,99,235,0.12)"
           label="Today's Shifts"
-          value={WORKFORCE_STATS.todaysShifts}
+          value={workforceStats.todaysShifts}
           info="Scheduled today"
         />
         <ReportStatCard
@@ -59,7 +75,7 @@ export function StaffReportsTab() {
           iconColor="#7C3AED"
           iconBg="rgba(124,58,237,0.12)"
           label="On-Call"
-          value={WORKFORCE_STATS.onCall}
+          value={workforceStats.onCall}
           info="Available if needed"
         />
         <ReportStatCard
@@ -67,9 +83,9 @@ export function StaffReportsTab() {
           iconColor="#00B4D8"
           iconBg="rgba(0,180,216,0.12)"
           label="Overall Coverage"
-          value={`${WORKFORCE_STATS.coveragePercent}%`}
-          info={`${WORKFORCE_STATS.pendingAck} shift${WORKFORCE_STATS.pendingAck !== 1 ? 's' : ''} unacknowledged`}
-          infoColor={WORKFORCE_STATS.pendingAck > 0 ? '#D97706' : '#16A34A'}
+          value={`${workforceStats.coveragePercent}%`}
+          info={`${workforceStats.pendingAck} shift${workforceStats.pendingAck !== 1 ? 's' : ''} unacknowledged`}
+          infoColor={workforceStats.pendingAck > 0 ? '#D97706' : '#16A34A'}
         />
       </div>
 
@@ -77,7 +93,7 @@ export function StaffReportsTab() {
         <ReportDonutCard
           title="Shifts by Type"
           breakdown={shiftTypeBreakdown}
-          total={MOCK_LABORATORY_ROSTER.length}
+          total={roster.length}
         />
         <div
           className="rounded-[12px] p-4"
@@ -87,7 +103,7 @@ export function StaffReportsTab() {
             Coverage Overview
           </h2>
           <div className="mt-3.5 flex flex-col gap-3.5">
-            {COVERAGE_OVERVIEW.map((c) => (
+            {coverageOverview.map((c) => (
               <div key={c.label}>
                 <div className="flex items-center justify-between gap-2">
                   <span style={{ fontSize: 14, color: '#0D2630' }}>{c.label}</span>
@@ -143,7 +159,7 @@ export function StaffReportsTab() {
                 </div>
               ))}
             </div>
-            {MOCK_LABORATORY_ROSTER.map((shift) => (
+            {roster.map((shift) => (
               <div
                 key={shift.id}
                 className="flex items-center"

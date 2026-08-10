@@ -444,7 +444,7 @@ function OrderRowMenu({
             style={{ fontSize: 14, color: '#0D2630' }}
           >
             <TestTube2 style={{ width: 15, height: 15, color: '#22C55E' }} />
-            Receive Sample
+            Collect Sample
           </button>
         )}
         <button
@@ -896,7 +896,7 @@ export function LaboratoryOrdersWorkspace() {
                             style={{ fontSize: 14, background: '#00B4D8' }}
                           >
                             <TestTube2 style={{ width: 14, height: 14 }} />
-                            Receive Sample
+                            Collect Sample
                           </button>
                         </PermissionGate>
                         <button
@@ -1542,7 +1542,7 @@ export function LaboratoryOrdersWorkspace() {
                               style={{ fontSize: 14, background: '#00B4D8' }}
                             >
                               <TestTube2 style={{ width: 15, height: 15 }} />
-                              Receive Sample
+                              Collect Sample
                             </button>
                           )}
                         </PermissionGate>

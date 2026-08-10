@@ -153,27 +153,72 @@ export const MOCK_LABORATORY_ROSTER: LaboratoryShift[] = Array.from({ length: 20
 });
 
 // ─── Stat cards ─────────────────────────────────────────────────────────────
+//
+// Computed from whatever roster is passed in — a live `StaffShift[]` (mapped
+// through `toLaboratoryView()`) from the canonical `staffShiftStore.ts` in
+// real usage, or `MOCK_LABORATORY_ROSTER` as a fallback/seed. Previously
+// these were two consts frozen at module load from `MOCK_LABORATORY_ROSTER`
+// alone, so they never moved when a shift was created/cancelled/acknowledged
+// on Workforce Management even though the roster table on the very same
+// screen was already live — see docs/api-contracts/06-laboratory G-LAB-08.
 
-export const WORKFORCE_STATS = {
-  onDuty: MOCK_LABORATORY_ROSTER.filter((s) => s.status === 'ON_DUTY').length,
-  todaysShifts: MOCK_LABORATORY_ROSTER.length,
-  onCall: MOCK_LABORATORY_ROSTER.filter((s) => s.status === 'ON_CALL').length,
-  pendingAck: MOCK_LABORATORY_ROSTER.filter((s) => !s.acknowledged).length,
-  coveragePercent: 88,
-  pendingChanges: 2,
+export type WorkforceStats = {
+  onDuty: number;
+  todaysShifts: number;
+  onCall: number;
+  pendingAck: number;
+  coveragePercent: number;
+  cancelledToday: number;
 };
+
+export function computeWorkforceStats(rows: LaboratoryShift[]): WorkforceStats {
+  const onDuty = rows.filter((s) => s.status === 'ON_DUTY').length;
+  const onCall = rows.filter((s) => s.status === 'ON_CALL').length;
+  const cancelledToday = rows.filter((s) => s.status === 'CANCELLED').length;
+  const active = rows.filter((s) => s.status !== 'CANCELLED');
+  const coveragePercent =
+    active.length === 0 ? 0 : Math.round(((onDuty + onCall) / active.length) * 100);
+  return {
+    onDuty,
+    todaysShifts: rows.length,
+    onCall,
+    pendingAck: rows.filter((s) => !s.acknowledged).length,
+    coveragePercent,
+    cancelledToday,
+  };
+}
 
 // ─── Coverage overview ──────────────────────────────────────────────────────
 
 export type CoverageMetric = { label: string; percent: number; color: string };
 
-export const COVERAGE_OVERVIEW: CoverageMetric[] = [
-  { label: 'Overall Coverage', percent: 88, color: '#00B4D8' },
-  { label: 'Morning Shift', percent: 94, color: '#22C55E' },
-  { label: 'Afternoon Shift', percent: 85, color: '#00B4D8' },
-  { label: 'Night Shift', percent: 76, color: '#F59E0B' },
-  { label: 'On-Call Coverage', percent: 100, color: '#22C55E' },
-];
+function colorForCoverage(percent: number): string {
+  if (percent >= 90) return '#22C55E';
+  if (percent >= 80) return '#00B4D8';
+  return '#F59E0B';
+}
+
+function coverageFor(rows: LaboratoryShift[], shiftType: ShiftType | null): number {
+  const scoped = shiftType ? rows.filter((s) => s.shiftType === shiftType) : rows;
+  const active = scoped.filter((s) => s.status !== 'CANCELLED');
+  if (active.length === 0) return 100; // nothing scheduled to cover, vacuously fully covered
+  const covered = active.filter((s) => s.status === 'ON_DUTY' || s.status === 'ON_CALL').length;
+  return Math.round((covered / active.length) * 100);
+}
+
+export function computeCoverageOverview(rows: LaboratoryShift[]): CoverageMetric[] {
+  const entries: [string, ShiftType | null][] = [
+    ['Overall Coverage', null],
+    ['Morning Shift', 'MORNING'],
+    ['Afternoon Shift', 'AFTERNOON'],
+    ['Night Shift', 'NIGHT'],
+    ['On-Call Coverage', 'ON_CALL'],
+  ];
+  return entries.map(([label, shiftType]) => {
+    const percent = coverageFor(rows, shiftType);
+    return { label, percent, color: colorForCoverage(percent) };
+  });
+}
 
 // ─── Pending acknowledgements ───────────────────────────────────────────────
 

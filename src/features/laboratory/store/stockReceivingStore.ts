@@ -27,6 +27,8 @@ import {
   type ReceivedLineItem,
 } from '@/features/laboratory/__mocks__/stockReceivingFixtures';
 import { adjustStock, getInventoryItemById } from '@/features/laboratory/store/inventoryStore';
+import { advanceStatus as advanceProcurementStatus } from '@/features/laboratory/store/procurementStore';
+import type { ProcurementRequest } from '@/features/laboratory/__mocks__/procurementFixtures';
 
 let grn: GoodsReceiptNote = { ...INITIAL_GRN };
 let lineItems: ReceivedLineItem[] = [...INITIAL_LINE_ITEMS];
@@ -152,7 +154,12 @@ export function updateDeliveryInfo(patch: Partial<GoodsReceiptNote>): void {
 }
 
 /** Applies every accepted line to Laboratory Inventory's live stock via
- * `adjustStock()`, marks the GRN Completed, and logs the action. */
+ * `adjustStock()`, marks the GRN Completed, and logs the action. If this GRN
+ * was started against a Procurement Request (`linkedRequestId`), also
+ * advances that request to 'Received' — closing the loop Procurement
+ * Requests' own "Receive Stock" action opens, so a request no longer sits at
+ * 'In Procurement' forever regardless of what actually happened to the
+ * goods (G-LAB-01). */
 export function completeReceiving(actorName: string): void {
   if (grn.status === 'Completed') return;
   for (const line of lineItems) {
@@ -168,6 +175,10 @@ export function completeReceiving(actorName: string): void {
   }
   grn = { ...grn, status: 'Completed' };
   log('Receiving completed', actorName);
+  if (grn.linkedRequestId) {
+    advanceProcurementStatus(grn.linkedRequestId, 'Received');
+    log(`Linked Procurement Request ${grn.linkedRequestId} marked Received`, actorName);
+  }
   emit();
 }
 
@@ -183,6 +194,62 @@ export function startNewReceiving(): void {
   lineItems = [];
   activityLog = [
     { id: `act-${Date.now()}`, label: 'GRN created', actor: grn.receivedBy, at: grn.createdAt },
+  ];
+  emit();
+}
+
+/** Starts a fresh receiving session pre-linked to and pre-filled from an
+ * 'In Procurement' Procurement Request — the real bridge Procurement
+ * Requests' "Receive Stock" action uses, replacing what used to be a
+ * disconnected client-side status flip straight to 'Received' with no
+ * receiving session behind it at all (G-LAB-01). Only line items with a
+ * real `itemId` (resolvable in Laboratory Inventory) are seeded — a
+ * service/equipment line on the request has nothing to receive against
+ * inventory and is left for the clerk to note manually. */
+export function startReceivingForRequest(request: ProcurementRequest, receivedBy: string): void {
+  const createdAt = new Date().toISOString();
+  const farExpiry = new Date(Date.now() + 180 * 86_400_000).toISOString();
+  grn = {
+    ...INITIAL_GRN,
+    id: nextGrnNumber(),
+    supplier: '',
+    deliveryNoteNo: '',
+    invoiceNo: '',
+    invoiceDate: createdAt,
+    deliveryDate: createdAt,
+    vehicleNo: '',
+    driverName: '',
+    contactNo: '',
+    noOfPackages: 0,
+    temperatureOnArrival: 0,
+    remarks: `Receiving against Procurement Request ${request.id}.`,
+    receivedBy,
+    department: request.department,
+    status: 'Receiving',
+    createdAt,
+    linkedRequestId: request.id,
+  };
+  lineItems = request.lineItems
+    .filter((li) => !!li.itemId)
+    .map((li, i) => ({
+      id: `rli-${String(i + 1).padStart(4, '0')}`,
+      itemId: li.itemId!,
+      lotBatchNo: '',
+      expiryDate: farExpiry,
+      uom: getInventoryItemById(li.itemId!)?.unit ?? '1 pc',
+      orderedQty: li.quantity,
+      receivedQty: li.quantity,
+      acceptedQty: li.quantity,
+      rejectedQty: 0,
+      unitCost: li.estimatedUnitCost,
+    }));
+  activityLog = [
+    {
+      id: `act-${Date.now()}`,
+      label: `GRN created against Procurement Request ${request.id}`,
+      actor: receivedBy,
+      at: createdAt,
+    },
   ];
   emit();
 }

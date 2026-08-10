@@ -25,6 +25,12 @@ export type GoodsReceiptNote = {
   department: string;
   status: GrnStatus;
   createdAt: string;
+  /** Set when this GRN was started from Procurement Requests' "Receive Stock"
+   * action — the real link back to the request that ordered these goods, so
+   * `completeReceiving()` can advance that request's own status instead of
+   * leaving it at 'In Procurement' forever. Undefined for a GRN started
+   * without a linked request (the general "Start New Receiving" path). */
+  linkedRequestId?: string;
 };
 
 export type LineItemStatus = 'Accepted' | 'Partial' | 'Rejected';
