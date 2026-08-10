@@ -18,6 +18,7 @@ const REPORT_TYPE_OPTIONS = [
   { value: 'Critical Results', label: 'Critical Results' },
   { value: 'Quality Control Reports', label: 'Quality Control Reports' },
   { value: 'Department Performance', label: 'Department Performance' },
+  { value: 'Turnaround Time Report', label: 'Turnaround Time Report' },
 ];
 const FREQUENCY_OPTIONS = [
   { value: 'Daily', label: 'Daily' },
@@ -41,11 +42,13 @@ export type ScheduleReportInput = {
 export function ScheduleReportModal({
   onSubmit,
   onClose,
+  defaultReportType = 'Laboratory Summary',
 }: {
   onSubmit: (input: ScheduleReportInput) => void;
   onClose: () => void;
+  defaultReportType?: string;
 }) {
-  const [reportType, setReportType] = useState('Laboratory Summary');
+  const [reportType, setReportType] = useState(defaultReportType);
   const [frequency, setFrequency] = useState('Weekly');
   const [format, setFormat] = useState('PDF');
   const [recipients, setRecipients] = useState('');

@@ -78,6 +78,7 @@ export function ReportDonutCard({
   total,
   headerSlot,
   centerLabel,
+  centerValue,
   footnote,
 }: {
   title: string;
@@ -85,6 +86,7 @@ export function ReportDonutCard({
   total: number;
   headerSlot?: React.ReactNode;
   centerLabel?: string;
+  centerValue?: string | number;
   footnote?: string;
 }) {
   return (
@@ -105,6 +107,7 @@ export function ReportDonutCard({
           size={132}
           ariaLabel={`${title} donut chart`}
           {...(centerLabel !== undefined ? { centerLabel } : {})}
+          {...(centerValue !== undefined ? { centerValue } : {})}
         />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           {breakdown.map((d) => (

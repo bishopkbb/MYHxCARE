@@ -2089,7 +2089,35 @@ const LABORATORY_REPORTS_GUIDE: HelpGuide = {
     },
     {
       heading: 'Generating, exporting, and scheduling',
-      body: 'Generate Report and Export both produce a CSV or PDF of the current summary. Schedule Report sets up a recurring emailed report. The other tabs across the top (Sample Reports, Published Results, and the rest) are being built next.',
+      body: 'Generate Report and Export both produce a CSV or PDF of the current summary. Schedule Report sets up a recurring emailed report.',
+    },
+    {
+      heading: 'The other tabs',
+      body: 'Sample Reports, Published Results, Critical Results, Rejected Samples, Quality Control, Inventory, Staff, and Department Performance each have their own dedicated view — Critical Results additionally shows a live unacknowledged queue, and Quality Control links out to its own full report.',
+    },
+  ],
+};
+
+const LABORATORY_TAT_REPORTS_GUIDE: HelpGuide = {
+  id: 'laboratory-tat-reports',
+  title: 'Turnaround Time (TAT) Reports',
+  intro: 'How long tests actually take, department by department, against their SLA target.',
+  sections: [
+    {
+      heading: 'Stat cards and period',
+      body: 'The six cards summarize the selected period — Overall Avg TAT, TAT Compliance, Within Target, Delayed Results, Longest TAT, and Total Tests. The period dropdown next to the tab strip controls the whole Overview.',
+    },
+    {
+      heading: 'Average TAT Trend and Compliance Rate',
+      body: 'Hover the trend line for the exact average TAT on any day, compared against the same day last month. The Compliance Rate donut splits every test into Within Target or Delayed.',
+    },
+    {
+      heading: 'TAT by Department and Filters',
+      body: 'The department table breaks down total tests, average TAT, compliance rate, longest TAT, and the trend versus last month. The Filters panel narrows by department, test, sample type, priority, and TAT status — Apply Filters confirms what’s showing.',
+    },
+    {
+      heading: 'TAT Targets and Quick Reports',
+      body: 'TAT Targets (SLA) shows the compliance rate against each priority’s target turnaround — STAT, Routine, and Low. Quick Reports jumps straight to the relevant tab. The other tabs across the top are being built next.',
     },
   ],
 };
@@ -3374,6 +3402,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/laboratory/history')) return LABORATORY_HISTORY_GUIDE;
   if (pathname.startsWith('/laboratory/reports/quality-control'))
     return LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE;
+  if (pathname.startsWith('/laboratory/reports/turnaround-time'))
+    return LABORATORY_TAT_REPORTS_GUIDE;
   if (pathname.startsWith('/laboratory/reports')) return LABORATORY_REPORTS_GUIDE;
   if (pathname.startsWith('/laboratory/quality-control')) return LABORATORY_QUALITY_CONTROL_GUIDE;
   if (pathname.startsWith('/laboratory/equipment-management'))
