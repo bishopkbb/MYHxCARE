@@ -541,7 +541,7 @@ export function EmergencyDashboardWorkspace() {
           />
           <QuickActionTile
             icon={Pill}
-            label="Emergency Medication Order"
+            label="Emergency Medication Orders"
             iconBg="rgba(220,38,38,0.12)"
             iconColor="#DC2626"
             onClick={() => router.push(ROUTES.emergencyMedicationOrders)}

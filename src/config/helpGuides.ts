@@ -237,6 +237,35 @@ const OBSERVATION_UNIT_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_MEDICATION_ORDERS_GUIDE: HelpGuide = {
+  id: 'emergency-medication-orders',
+  title: 'Emergency Medication Orders',
+  intro:
+    'Place, view, and manage medication orders for the current emergency patient, with real-time drug interaction and lab-result checks.',
+  sections: [
+    {
+      heading: 'Tabs and filters',
+      body: 'Switch between Active, Completed, Discontinued, and All Orders, or filter by status, type, route, and priority.',
+    },
+    {
+      heading: 'New Medication Order',
+      body: 'Search the medication catalog, set dose/route/frequency/priority, or check "STAT / One Time Dose" for an urgent single dose. Placing an order adds it to Active Orders immediately.',
+    },
+    {
+      heading: 'Order actions',
+      body: 'The eye icon expands full order details inline. The ⋮ menu lets you mark an order Completed or Discontinue it (a reason is required for audit purposes).',
+    },
+    {
+      heading: 'Safety checks',
+      body: "Drug Interactions checks the patient's active orders against known interacting pairs live. Pending Lab Results Affecting Medications flags labs relevant to safe dosing.",
+    },
+    {
+      heading: 'Nursing administration',
+      body: '"Medication Administration (Nursing)" opens the nurse\'s Medication Administration Record, where ordered medications are actually given to the patient.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3542,6 +3571,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/bed-assignment')) return BED_ASSIGNMENT_GUIDE;
   if (pathname.startsWith('/emergency/tracking-board')) return EMERGENCY_TRACKING_BOARD_GUIDE;
   if (pathname.startsWith('/emergency/observation-unit')) return OBSERVATION_UNIT_GUIDE;
+  if (pathname.startsWith('/emergency/medication-orders')) return EMERGENCY_MEDICATION_ORDERS_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

@@ -815,3 +815,85 @@ export const RECENT_ADMISSIONS: RecentAdmission[] = [
     disposition: 'Discharged',
   },
 ];
+
+// ─── Emergency Medication Orders ─────────────────────────────────────────
+// medicationOrderStore.ts owns the live orders (seeded from below); this
+// file only holds the static catalog/reference data every patient shares.
+
+export type MedicationRoute = 'IV' | 'IM' | 'Oral' | 'Subcutaneous' | 'Topical' | 'Rectal';
+export type MedicationFrequency =
+  'Once' | '4 hourly' | '6 hourly' | '8 hourly' | '12 hourly' | '24 hourly' | 'Continuous' | 'PRN';
+export type MedicationOrderPriority = 'STAT' | 'High' | 'Routine' | 'Low';
+export type MedicationOrderType = 'Injection' | 'IV Fluid' | 'Tablet' | 'Inhalation';
+
+export type MedicationCatalogEntry = {
+  name: string;
+  type: MedicationOrderType;
+  defaultDose: string;
+  defaultRoute: MedicationRoute;
+};
+
+export const MEDICATION_CATALOG: MedicationCatalogEntry[] = [
+  { name: 'Morphine Sulfate', type: 'Injection', defaultDose: '4 mg', defaultRoute: 'IV' },
+  { name: 'Ondansetron', type: 'Injection', defaultDose: '4 mg', defaultRoute: 'IV' },
+  { name: 'Paracetamol', type: 'Injection', defaultDose: '1,000 mg', defaultRoute: 'IV' },
+  { name: 'Ceftriaxone', type: 'Injection', defaultDose: '1 g', defaultRoute: 'IV' },
+  { name: 'Normal Saline 0.9%', type: 'IV Fluid', defaultDose: '500 ml', defaultRoute: 'IV' },
+  { name: "Ringer's Lactate", type: 'IV Fluid', defaultDose: '1,000 ml', defaultRoute: 'IV' },
+  { name: 'Diazepam', type: 'Injection', defaultDose: '5 mg', defaultRoute: 'IV' },
+  {
+    name: 'Adrenaline (Epinephrine)',
+    type: 'Injection',
+    defaultDose: '0.5 mg',
+    defaultRoute: 'IM',
+  },
+  { name: 'Metronidazole', type: 'Injection', defaultDose: '500 mg', defaultRoute: 'IV' },
+  { name: 'Tranexamic Acid', type: 'Injection', defaultDose: '1 g', defaultRoute: 'IV' },
+  { name: 'Hydrocortisone', type: 'Injection', defaultDose: '100 mg', defaultRoute: 'IV' },
+  { name: 'Salbutamol Nebule', type: 'Inhalation', defaultDose: '2.5 mg', defaultRoute: 'Oral' },
+  { name: 'Aspirin', type: 'Tablet', defaultDose: '300 mg', defaultRoute: 'Oral' },
+  { name: 'Warfarin', type: 'Tablet', defaultDose: '5 mg', defaultRoute: 'Oral' },
+];
+
+/** Small illustrative interaction table — checked live against whichever
+ * medications are currently Active for the selected patient, so "no
+ * interactions found" is a real (if limited) computation, not a hardcoded
+ * always-true message. */
+export const DRUG_INTERACTION_PAIRS: [string, string, string][] = [
+  ['Warfarin', 'Aspirin', 'Increased bleeding risk — avoid combination or monitor INR closely.'],
+  [
+    'Morphine Sulfate',
+    'Diazepam',
+    'Additive CNS/respiratory depression — monitor respiratory rate closely.',
+  ],
+];
+
+/** No per-patient lab-order store exists yet (Diagnostic Requests is a
+ * still-unbuilt follow-up screen) — a generic illustrative set of the labs
+ * that most commonly affect ED medication dosing. */
+export const PENDING_LABS_AFFECTING_MEDICATIONS = [
+  'Creatinine',
+  'Liver Function Test',
+  'Potassium',
+];
+
+export function deriveWeightKg(entryId: string): number {
+  return 50 + Math.floor(mulberry32(hashSeed(`${entryId}-weight`))() * 45);
+}
+
+export function deriveConsultationId(entryId: string): string {
+  const n = 1000000 + Math.floor(mulberry32(hashSeed(`${entryId}-cons`))() * 8999999);
+  return `CONS-${n}`;
+}
+
+export type LatestVitals = { bp: string; hr: number; rr: number; spo2: number };
+
+export function deriveLatestVitals(entryId: string): LatestVitals {
+  const r = mulberry32(hashSeed(`${entryId}-vitals`));
+  const systolic = 100 + Math.floor(r() * 45);
+  const diastolic = 60 + Math.floor(r() * 25);
+  const hr = 65 + Math.floor(r() * 45);
+  const rr = 14 + Math.floor(r() * 12);
+  const spo2 = 94 + Math.floor(r() * 6);
+  return { bp: `${systolic}/${diastolic}`, hr, rr, spo2 };
+}
