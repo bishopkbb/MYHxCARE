@@ -65,6 +65,7 @@ import {
 } from '@/features/emergency/__mocks__/emergencyFixtures';
 import { useTriageRecords } from '@/features/emergency/store/triageAssessmentStore';
 import { useMedicationOrders } from '@/features/emergency/store/medicationOrderStore';
+import { useLatestWorkingDiagnoses } from '@/features/emergency/store/clinicalNotesStore';
 import {
   addProcedure,
   addProcedureDocument,
@@ -385,7 +386,8 @@ export function EmergencyProceduresWorkspace() {
       (p) => p.status === 'In Progress' && (p.type === 'Airway' || p.type === 'Cardiac'),
     );
 
-  const activeDiagnoses = entry ? deriveActiveDiagnoses(entry.id) : [];
+  const realWorkingDiagnoses = useLatestWorkingDiagnoses(entry?.id);
+  const activeDiagnoses = realWorkingDiagnoses ?? (entry ? deriveActiveDiagnoses(entry.id) : []);
 
   function goToTab(tab: TabKey, procedureId?: string) {
     if (procedureId) setSelectedProcedureId(procedureId);

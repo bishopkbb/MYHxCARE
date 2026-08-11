@@ -1,12 +1,13 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Clinical Notes' };
+import { Suspense } from 'react';
 
-export default function ClinicalNotesPage() {
+import { EmergencyClinicalNotesWorkspace } from '@/features/emergency/components/EmergencyClinicalNotesWorkspace';
+
+export default function EmergencyClinicalNotesPage() {
   return (
-    <ComingSoon
-      title="Clinical Notes"
-      description="Emergency-specific clinical documentation and note templates are on the way."
-    />
+    <Suspense fallback={null}>
+      <EmergencyClinicalNotesWorkspace />
+    </Suspense>
   );
 }

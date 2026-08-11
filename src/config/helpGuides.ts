@@ -294,6 +294,34 @@ const EMERGENCY_PROCEDURES_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_CLINICAL_NOTES_GUIDE: HelpGuide = {
+  id: 'emergency-clinical-notes',
+  title: 'Clinical Notes',
+  intro: 'Document patient encounter, assessment, and plan for the current emergency patient.',
+  sections: [
+    {
+      heading: 'SOAP editor',
+      body: 'Switch between Subjective, Objective, Assessment, Plan, and Free Text sections on the left. The toolbar formats the active section; "Insert SmartText" inserts a canned phrase at the cursor.',
+    },
+    {
+      heading: 'Templates and Voice Dictation',
+      body: '"Templates" fills the SOAP sections from a starter template. "Voice Dictation" transcribes speech into the active section where the browser supports it.',
+    },
+    {
+      heading: 'Assessment & Plan',
+      body: "Working Diagnosis and Plan are structured separately from the SOAP narrative, so they can drive the patient's recorded diagnosis elsewhere (e.g. Emergency Procedures' Active Diagnoses).",
+    },
+    {
+      heading: 'Save Draft vs Sign & Save Note',
+      body: 'A draft can be edited or discarded any time. Signing locks the note — start a new note for further documentation rather than editing a signed one.',
+    },
+    {
+      heading: 'Note History and Attachments',
+      body: "Note History lists every note for this patient — click one to load it. Attachments aggregates every document attached across this patient's notes.",
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3601,6 +3629,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/observation-unit')) return OBSERVATION_UNIT_GUIDE;
   if (pathname.startsWith('/emergency/medication-orders')) return EMERGENCY_MEDICATION_ORDERS_GUIDE;
   if (pathname.startsWith('/emergency/procedures')) return EMERGENCY_PROCEDURES_GUIDE;
+  if (pathname.startsWith('/emergency/clinical-notes')) return EMERGENCY_CLINICAL_NOTES_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

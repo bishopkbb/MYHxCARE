@@ -905,27 +905,28 @@ export function deriveBloodGroup(entryId: string): string {
   return BLOOD_GROUPS[Math.floor(r * BLOOD_GROUPS.length)]!;
 }
 
-/** No real diagnosis-capture store exists yet (Clinical Notes, the screen
- * that would produce this, is a still-unbuilt follow-up) — a small
- * deterministic illustrative set, same honesty pattern as
- * PENDING_LABS_AFFECTING_MEDICATIONS above. */
-const DIAGNOSIS_POOL = [
+/** Illustrative pool — falls back to a deterministic pick when no clinical
+ * note has recorded a real Working Diagnosis yet for this patient
+ * (`clinicalNotesStore.ts`'s `useLatestWorkingDiagnoses` is the real source,
+ * checked first — safe-merge-at-read-time, same pattern as triage). */
+export const DIAGNOSIS_SUGGESTIONS = [
   'Acute Respiratory Distress',
   'Hypertensive Emergency',
   'Suspected Pneumonia',
-  'Acute Coronary Syndrome',
+  'Acute Coronary Syndrome (ACS)',
   'Sepsis',
   'Acute Abdomen',
   'Closed Head Injury',
   'Multiple Trauma',
   'Diabetic Ketoacidosis',
   'Status Epilepticus',
+  'Hypertension',
 ];
 
 export function deriveActiveDiagnoses(entryId: string): string[] {
   const r = mulberry32(hashSeed(`${entryId}-diagnoses`));
   const count = 2 + Math.floor(r() * 2);
-  const pool = [...DIAGNOSIS_POOL];
+  const pool = [...DIAGNOSIS_SUGGESTIONS];
   const picked: string[] = [];
   for (let i = 0; i < count && pool.length > 0; i++) {
     const idx = Math.floor(r() * pool.length);
@@ -933,6 +934,100 @@ export function deriveActiveDiagnoses(entryId: string): string[] {
   }
   return picked;
 }
+
+export type EmergencyContact = { name: string; relation: string; phone: string };
+
+const CONTACT_RELATIONS = [
+  'Sister',
+  'Brother',
+  'Mother',
+  'Father',
+  'Spouse',
+  'Son',
+  'Daughter',
+  'Friend',
+];
+const CONTACT_FIRST_NAMES = ['Ada', 'Ngozi', 'Chidi', 'Emeka', 'Amara', 'Tunde', 'Bisi', 'Yemi'];
+const CONTACT_LAST_NAMES = ['Onu', 'Eze', 'Okafor', 'Adeyemi', 'Balogun', 'Nwosu', 'Ibrahim'];
+
+export function deriveEmergencyContact(
+  entryId: string,
+  patientLastName?: string,
+): EmergencyContact {
+  const r = mulberry32(hashSeed(`${entryId}-contact`));
+  const relation = CONTACT_RELATIONS[Math.floor(r() * CONTACT_RELATIONS.length)]!;
+  const first = CONTACT_FIRST_NAMES[Math.floor(r() * CONTACT_FIRST_NAMES.length)]!;
+  const last = patientLastName || CONTACT_LAST_NAMES[Math.floor(r() * CONTACT_LAST_NAMES.length)]!;
+  const prefixes = ['0803', '0805', '0806', '0810', '0813', '0816', '0703', '0706'];
+  const prefix = prefixes[Math.floor(r() * prefixes.length)]!;
+  const rest = String(Math.floor(r() * 1_000_000)).padStart(6, '0');
+  return {
+    name: `${first} ${last}`,
+    relation,
+    phone: `${prefix} ${rest.slice(0, 3)} ${rest.slice(3)}`,
+  };
+}
+
+// ─── Clinical Notes ─────────────────────────────────────────────────────
+// clinicalNotesStore.ts owns the live per-patient notes; this file only
+// holds the static template/snippet catalog every author shares.
+
+export type ClinicalNoteTemplate = {
+  name: string;
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+};
+
+export const CLINICAL_NOTE_TEMPLATES: ClinicalNoteTemplate[] = [
+  {
+    name: 'Cardiac Chief Complaint',
+    subjective:
+      '<p><b>Chief complaint:</b> Chest pain and shortness of breath.</p><p><b>History of present illness:</b> Onset, character, radiation, associated symptoms.</p>',
+    objective:
+      '<p>Vitals reviewed. Cardiovascular exam: heart sounds, rhythm, peripheral pulses. Respiratory exam.</p>',
+    assessment:
+      '<p>Differential includes ACS, unstable angina, and non-cardiac causes pending workup.</p>',
+    plan: '<p>ECG, troponin, aspirin per protocol, continuous cardiac monitoring.</p>',
+  },
+  {
+    name: 'Trauma Assessment',
+    subjective: '<p><b>Mechanism of injury:</b> </p><p><b>Chief complaint:</b> </p>',
+    objective: '<p>Primary survey (ABCDE) completed. Secondary survey findings: </p>',
+    assessment: '<p>Injuries identified: </p>',
+    plan: '<p>Imaging, analgesia, and disposition per trauma protocol.</p>',
+  },
+  {
+    name: 'Respiratory Complaint',
+    subjective:
+      '<p><b>Chief complaint:</b> Shortness of breath / cough.</p><p><b>History of present illness:</b> </p>',
+    objective: '<p>Respiratory rate, SpO2, auscultation findings: </p>',
+    assessment: '<p>Differential includes asthma exacerbation, pneumonia, COPD exacerbation.</p>',
+    plan: '<p>Oxygen therapy, nebulized bronchodilator, chest X-ray.</p>',
+  },
+];
+
+export const SMART_TEXT_SNIPPETS: { label: string; text: string }[] = [
+  { label: 'No acute distress', text: 'Patient is alert, oriented, and in no acute distress. ' },
+  {
+    label: 'Normal cardiovascular exam',
+    text: 'Cardiovascular: S1/S2 normal, no murmurs, regular rhythm, pulses intact bilaterally. ',
+  },
+  {
+    label: 'Normal respiratory exam',
+    text: 'Respiratory: Chest clear to auscultation bilaterally, no wheeze or crackles. ',
+  },
+  {
+    label: 'Normal abdominal exam',
+    text: 'Abdomen: Soft, non-tender, non-distended, bowel sounds present. ',
+  },
+  {
+    label: 'Discussed plan with patient',
+    text: 'Plan discussed with patient/family; questions answered; patient agrees with plan of care. ',
+  },
+  { label: 'Will reassess', text: 'Will continue to monitor and reassess response to treatment. ' },
+];
 
 // ─── Emergency Procedures ─────────────────────────────────────────────────
 // procedureStore.ts owns the live per-patient procedure log (seeded from
