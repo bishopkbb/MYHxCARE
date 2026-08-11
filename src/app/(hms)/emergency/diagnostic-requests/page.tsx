@@ -1,12 +1,13 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Diagnostic Requests' };
+import { Suspense } from 'react';
+
+import { EmergencyDiagnosticRequestsWorkspace } from '@/features/emergency/components/EmergencyDiagnosticRequestsWorkspace';
 
 export default function DiagnosticRequestsPage() {
   return (
-    <ComingSoon
-      title="Diagnostic Requests"
-      description="Requesting lab tests and imaging studies directly from the emergency department is on the way."
-    />
+    <Suspense fallback={null}>
+      <EmergencyDiagnosticRequestsWorkspace />
+    </Suspense>
   );
 }

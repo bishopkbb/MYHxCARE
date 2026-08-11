@@ -63,6 +63,7 @@ import {
   type ProcedureCatalogEntry,
   type ProcedureType,
 } from '@/features/emergency/__mocks__/emergencyFixtures';
+import { PatientSwitcher } from '@/features/emergency/components/PatientSwitcher';
 import { useTriageRecords } from '@/features/emergency/store/triageAssessmentStore';
 import { useMedicationOrders } from '@/features/emergency/store/medicationOrderStore';
 import { useLatestWorkingDiagnoses } from '@/features/emergency/store/clinicalNotesStore';
@@ -699,6 +700,9 @@ export function EmergencyProceduresWorkspace() {
             <p className="font-sans font-medium" style={{ fontSize: 14, color: '#0D2630' }}>
               {weightKg} kg
             </p>
+          </div>
+          <div className="ml-auto">
+            <PatientSwitcher currentEntryId={entry.id} />
           </div>
         </div>
 

@@ -322,6 +322,30 @@ const EMERGENCY_CLINICAL_NOTES_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_DIAGNOSTIC_REQUESTS_GUIDE: HelpGuide = {
+  id: 'emergency-diagnostic-requests',
+  title: 'Diagnostic Requests',
+  intro: 'Request lab tests and imaging, and track results, for the current emergency patient.',
+  sections: [
+    {
+      heading: 'New Request',
+      body: 'Set a priority (STAT/Urgent/Routine), select one or more tests from the catalog, add clinical notes for the laboratory, then send. STAT tests are processed immediately.',
+    },
+    {
+      heading: 'My Requests',
+      body: 'Every requisition placed for this patient, with an overall status (as advanced as its least-progressed test). Expand a row to see each test individually.',
+    },
+    {
+      heading: 'Real, shared requests',
+      body: "Requests placed here write to the same laboratory system every other screen reads — a test ordered from Emergency appears immediately on the Laboratory workspace and the doctor's own Lab Results screen.",
+    },
+    {
+      heading: 'Reviewing results',
+      body: 'Once a test is Resulted, "Mark Reviewed" and "Verify Result" sign off on it. Critical results surface in the sidebar until reviewed.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3630,6 +3654,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/medication-orders')) return EMERGENCY_MEDICATION_ORDERS_GUIDE;
   if (pathname.startsWith('/emergency/procedures')) return EMERGENCY_PROCEDURES_GUIDE;
   if (pathname.startsWith('/emergency/clinical-notes')) return EMERGENCY_CLINICAL_NOTES_GUIDE;
+  if (pathname.startsWith('/emergency/diagnostic-requests'))
+    return EMERGENCY_DIAGNOSTIC_REQUESTS_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;
