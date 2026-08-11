@@ -183,6 +183,31 @@ const BED_ASSIGNMENT_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_TRACKING_BOARD_GUIDE: HelpGuide = {
+  id: 'emergency-tracking-board',
+  title: 'Emergency Tracking Board',
+  intro:
+    'A real-time, whiteboard-style overview of every patient currently in the emergency department, across every stage of care.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Patients, In Triage, In Treatment, Under Observation, Ready for Disposition, and Discharged Today — a live census of the department.',
+    },
+    {
+      heading: 'Filters and search',
+      body: 'Narrow the board by zone, physician, or status, search by patient name/MRN, or toggle "Alerts Only" to see patients needing attention.',
+    },
+    {
+      heading: 'The table',
+      body: 'Every row shows priority, location/bed, assigned physician, status, time in ED, and pending orders. Select a row to open its Patient Snapshot.',
+    },
+    {
+      heading: 'Patient Snapshot',
+      body: 'Chief complaint, arrival/assignment details, an Orders Summary, and Recent Notes for the selected patient, with a shortcut to open their full chart.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3486,6 +3511,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/patient-queue')) return EMERGENCY_PATIENT_QUEUE_GUIDE;
   if (pathname.startsWith('/emergency/triage-assessment')) return TRIAGE_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/emergency/bed-assignment')) return BED_ASSIGNMENT_GUIDE;
+  if (pathname.startsWith('/emergency/tracking-board')) return EMERGENCY_TRACKING_BOARD_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

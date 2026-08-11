@@ -509,6 +509,124 @@ export const PENDING_ORDERS = {
   procedures: 4,
 };
 
+// ─── Emergency Tracking Board ────────────────────────────────────────────
+// The board's population is built entirely from data this file (and the
+// live triage/bed stores) already own — every occupied bed in
+// EMERGENCY_BEDS becomes an "In Treatment" row, OBSERVATION_PATIENTS
+// becomes "Under Observation" rows, RECENT_ADMISSIONS becomes "Ready for
+// Disposition"/"Discharged" rows, and any real queue entry without a bed
+// yet becomes an "In Triage" row. No separate, disconnected patient list —
+// see BedAssignmentWorkspace.tsx / TriageAssessmentWorkspace.tsx for how
+// the live pieces are merged in at render time.
+
+export type TrackingStatus =
+  'In Triage' | 'In Treatment' | 'Under Observation' | 'Ready for Disposition' | 'Discharged';
+export const TRACKING_STATUSES: TrackingStatus[] = [
+  'In Triage',
+  'In Treatment',
+  'Under Observation',
+  'Ready for Disposition',
+  'Discharged',
+];
+
+export const TRACKING_ZONES = [...ZONES, 'Observation Unit', 'Discharge Area'] as const;
+
+export type OrdersCount = { lab: number; imaging: number; rx: number; procedures: number };
+
+const ILLUSTRATIVE_FIRST_NAMES = [
+  'Chioma',
+  'Emeka',
+  'Ngozi',
+  'Tunde',
+  'Aisha',
+  'Bayo',
+  'Funke',
+  'Chidi',
+  'Amara',
+  'Yusuf',
+  'Kemi',
+  'Segun',
+];
+const ILLUSTRATIVE_LAST_NAMES = [
+  'Adeyemi',
+  'Nwachukwu',
+  'Bello',
+  'Okonkwo',
+  'Ibe',
+  'Suleiman',
+  'Eze',
+  'Balogun',
+  'Nnamdi',
+  'Umeh',
+];
+
+/** Stable illustrative patient name for a bed/row that has no real occupant
+ * on record — e.g. an occupied bed nobody has been assigned to yet this
+ * session. Never used for a bed that already has a real occupant. */
+export function deriveIllustrativeName(key: string): string {
+  const first =
+    ILLUSTRATIVE_FIRST_NAMES[
+      Math.floor(mulberry32(hashSeed(`${key}-fn`))() * ILLUSTRATIVE_FIRST_NAMES.length)
+    ]!;
+  const last =
+    ILLUSTRATIVE_LAST_NAMES[
+      Math.floor(mulberry32(hashSeed(`${key}-ln`))() * ILLUSTRATIVE_LAST_NAMES.length)
+    ]!;
+  return `${first} ${last}`;
+}
+
+export function deriveIllustrativeMrn(key: string): string {
+  const n = 10000 + Math.floor(mulberry32(hashSeed(`${key}-mrn`))() * 89999);
+  return `MRN-2026-${n}`;
+}
+
+export function deriveIllustrativeAge(key: string): number {
+  return 5 + Math.floor(mulberry32(hashSeed(`${key}-age`))() * 75);
+}
+
+export function deriveIllustrativeGender(key: string): 'Male' | 'Female' {
+  return mulberry32(hashSeed(`${key}-gender`))() < 0.5 ? 'Male' : 'Female';
+}
+
+export function deriveIllustrativeArrivalMinutesAgo(key: string): number {
+  return 10 + Math.floor(mulberry32(hashSeed(`${key}-arrival`))() * 180);
+}
+
+export function deriveIllustrativeOrders(key: string): OrdersCount {
+  const r = mulberry32(hashSeed(`${key}-orders`));
+  return {
+    lab: Math.floor(r() * 3),
+    imaging: Math.floor(r() * 2),
+    rx: Math.floor(r() * 2),
+    procedures: Math.floor(r() * 2),
+  };
+}
+
+export function deriveIllustrativeAlert(key: string): boolean {
+  return mulberry32(hashSeed(`${key}-alert`))() < 0.12;
+}
+
+export function deriveIllustrativePhysician(key: string): string {
+  const names = ['Dr. Adeyemi', 'Dr. Okafor', 'Dr. Bello', 'Dr. Samuel Ade', 'Dr. Femi Balogun'];
+  return names[Math.floor(mulberry32(hashSeed(`${key}-doc`))() * names.length)]!;
+}
+
+/** `RecentAdmission.arrival` ("HH:MM") / `ObservationPatient.observationTime`
+ * ("HH:MM" elapsed) are display strings, not timestamps — this builds a
+ * real ISO instant for today at that clock time, so Tracking Board can
+ * compute "Time in ED" the same live way for every row. */
+export function todayAtClockTime(hhmm: string): string {
+  const [h, m] = hhmm.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h ?? 0, m ?? 0, 0, 0);
+  return d.toISOString();
+}
+
+export function minutesAgoFromDuration(hhmm: string): number {
+  const [h, m] = hhmm.split(':').map(Number);
+  return (h ?? 0) * 60 + (m ?? 0);
+}
+
 // ─── Recent Emergency Admissions ────────────────────────────────────────
 
 export type RecentAdmission = {

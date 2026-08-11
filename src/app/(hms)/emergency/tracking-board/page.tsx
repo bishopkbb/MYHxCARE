@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Emergency Tracking Board' };
+import { EmergencyTrackingBoardWorkspace } from '@/features/emergency/components/EmergencyTrackingBoardWorkspace';
 
 export default function TrackingBoardPage() {
-  return (
-    <ComingSoon
-      title="Emergency Tracking Board"
-      description="A whiteboard-style live view of every patient's location and status in the department is on the way."
-    />
-  );
+  return <EmergencyTrackingBoardWorkspace />;
 }
