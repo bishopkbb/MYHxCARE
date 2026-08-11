@@ -49,6 +49,7 @@ import {
   type QueueStage,
 } from '@/features/emergency/__mocks__/emergencyFixtures';
 import { useTriageRecords } from '@/features/emergency/store/triageAssessmentStore';
+import { useBedOverrides } from '@/features/emergency/store/bedAssignmentStore';
 
 type PageState = 'loading' | 'loaded' | 'error';
 
@@ -248,6 +249,7 @@ export function PatientQueueWorkspace() {
 
   const allQueueEntries = useQueueEntries();
   const triageRecords = useTriageRecords();
+  const bedOverrides = useBedOverrides();
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -279,15 +281,23 @@ export function PatientQueueWorkspace() {
     toast.success('Queue refreshed', 'Showing the latest emergency arrivals.');
   }
 
+  const bedAssignedEntryIds = new Set(
+    Array.from(bedOverrides.values())
+      .filter((o) => o.status === 'Occupied' && o.entryId)
+      .map((o) => o.entryId as string),
+  );
+
   // Real entries, enriched with the same deterministic per-entry helpers the
   // Dashboard uses — a given patient always shows the same priority/
   // complaint/source/stage on both screens. Once a real Triage Assessment
-  // has been completed for an entry, that record (not the placeholder
-  // derivation) is the source of truth — safe-merge-at-read-time.
+  // (and, further along, a real Bed Assignment) has been completed for an
+  // entry, that record — not the placeholder derivation — is the source of
+  // truth — safe-merge-at-read-time.
   const rows: EnrichedRow[] = allQueueEntries
     .filter((e) => e.isEmergency)
     .map((e) => {
       const record = triageRecords.get(e.id);
+      const hasBed = bedAssignedEntryIds.has(e.id);
       return {
         entryId: e.id,
         patientName: e.patientName,
@@ -299,7 +309,11 @@ export function PatientQueueWorkspace() {
         priority: record?.priority ?? derivePriorityForEntry(e.id),
         complaint: record?.chiefComplaint ?? deriveComplaintForEntry(e.id),
         source: record?.arrivalMode ?? deriveSourceForEntry(e.id),
-        stage: record ? 'Triage Completed' : deriveQueueStageForEntry(e.id),
+        stage: hasBed
+          ? 'In Treatment'
+          : record
+            ? 'Triage Completed'
+            : deriveQueueStageForEntry(e.id),
         waitMinutes: Math.max(
           0,
           Math.round((now.getTime() - new Date(e.arrivalTime).getTime()) / 60_000),

@@ -1,12 +1,13 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Bed Assignment' };
+import { Suspense } from 'react';
+
+import { BedAssignmentWorkspace } from '@/features/emergency/components/BedAssignmentWorkspace';
 
 export default function BedAssignmentPage() {
   return (
-    <ComingSoon
-      title="Bed Assignment"
-      description="Assigning patients to emergency beds and tracking bed status in real time is on the way."
-    />
+    <Suspense fallback={null}>
+      <BedAssignmentWorkspace />
+    </Suspense>
   );
 }

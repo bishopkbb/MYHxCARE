@@ -157,21 +157,277 @@ export const EMERGENCY_TRIAGE_NURSES = [
   'Fatima Suleiman',
 ] as const;
 
-// ─── Bed status ──────────────────────────────────────────────────────────
+// ─── Beds ────────────────────────────────────────────────────────────────
+// A real individual-bed inventory (id/type/zone/equipment/base status) — the
+// single source of truth Bed Assignment and the Dashboard's bed-status donut
+// both derive from, so the two screens can never disagree on how many beds
+// exist or what "Occupied" adds up to. Live status changes made on the Bed
+// Assignment screen are tracked separately, in `bedAssignmentStore.ts`, and
+// merged over this base list at read time (safe-merge-at-read-time) — this
+// is only the starting snapshot.
+
+export type BedType =
+  'Resus Bed' | 'Treatment Bed' | 'Pediatric Bed' | 'Isolation Bed' | 'Observation Bed';
+export type BedBaseStatus = 'Available' | 'Occupied' | 'Cleaning' | 'Reserved';
+export type BedEquipment =
+  'Cardiac Monitor' | 'Oxygen Outlet' | 'Defibrillator' | 'Suction' | 'Power Outlet' | 'IV Stand';
+
+export type EmergencyBedRow = {
+  id: string;
+  type: BedType;
+  zone: string;
+  baseStatus: BedBaseStatus;
+  equipment: BedEquipment[];
+  /** Only set when baseStatus is 'Occupied' in the starting snapshot — ties
+   * an already-occupied bed to the same named patient Dashboard's
+   * Observation Patients panel shows, so the two screens agree. */
+  occupantName?: string;
+};
+
+export const ZONES = [
+  'Resuscitation Bay',
+  'Main Treatment Area',
+  'Pediatric Area',
+  'Isolation Ward',
+] as const;
+
+const RESUS_EQUIPMENT: BedEquipment[] = ['Cardiac Monitor', 'Oxygen Outlet', 'Defibrillator'];
+const TREATMENT_EQUIPMENT: BedEquipment[] = ['Oxygen Outlet', 'Power Outlet'];
+const PEDIATRIC_EQUIPMENT: BedEquipment[] = ['Oxygen Outlet', 'IV Stand'];
+const ISOLATION_EQUIPMENT: BedEquipment[] = ['Oxygen Outlet', 'Suction'];
+
+export const EMERGENCY_BEDS: EmergencyBedRow[] = [
+  // Resuscitation Bay — 7 beds, 3 available
+  {
+    id: 'ER-01',
+    type: 'Resus Bed',
+    zone: 'Resuscitation Bay',
+    baseStatus: 'Available',
+    equipment: RESUS_EQUIPMENT,
+  },
+  {
+    id: 'ER-02',
+    type: 'Resus Bed',
+    zone: 'Resuscitation Bay',
+    baseStatus: 'Occupied',
+    equipment: RESUS_EQUIPMENT,
+  },
+  {
+    id: 'ER-03',
+    type: 'Resus Bed',
+    zone: 'Resuscitation Bay',
+    baseStatus: 'Occupied',
+    equipment: RESUS_EQUIPMENT,
+    occupantName: 'Ibrahim Musa',
+  },
+  {
+    id: 'ER-04',
+    type: 'Resus Bed',
+    zone: 'Resuscitation Bay',
+    baseStatus: 'Available',
+    equipment: RESUS_EQUIPMENT,
+  },
+  {
+    id: 'ER-05',
+    type: 'Resus Bed',
+    zone: 'Resuscitation Bay',
+    baseStatus: 'Occupied',
+    equipment: RESUS_EQUIPMENT,
+  },
+  {
+    id: 'ER-06',
+    type: 'Resus Bed',
+    zone: 'Resuscitation Bay',
+    baseStatus: 'Occupied',
+    equipment: RESUS_EQUIPMENT,
+  },
+  {
+    id: 'ER-07',
+    type: 'Resus Bed',
+    zone: 'Resuscitation Bay',
+    baseStatus: 'Available',
+    equipment: RESUS_EQUIPMENT,
+  },
+  // Main Treatment Area — 9 beds, 1 available, 1 cleaning
+  {
+    id: 'ED-01',
+    type: 'Treatment Bed',
+    zone: 'Main Treatment Area',
+    baseStatus: 'Occupied',
+    equipment: TREATMENT_EQUIPMENT,
+  },
+  {
+    id: 'ED-02',
+    type: 'Treatment Bed',
+    zone: 'Main Treatment Area',
+    baseStatus: 'Occupied',
+    equipment: TREATMENT_EQUIPMENT,
+  },
+  {
+    id: 'ED-03',
+    type: 'Treatment Bed',
+    zone: 'Main Treatment Area',
+    baseStatus: 'Available',
+    equipment: TREATMENT_EQUIPMENT,
+  },
+  {
+    id: 'ED-04',
+    type: 'Treatment Bed',
+    zone: 'Main Treatment Area',
+    baseStatus: 'Occupied',
+    equipment: TREATMENT_EQUIPMENT,
+  },
+  {
+    id: 'ED-05',
+    type: 'Treatment Bed',
+    zone: 'Main Treatment Area',
+    baseStatus: 'Occupied',
+    equipment: TREATMENT_EQUIPMENT,
+    occupantName: 'Chidinma Eze',
+  },
+  {
+    id: 'ED-06',
+    type: 'Treatment Bed',
+    zone: 'Main Treatment Area',
+    baseStatus: 'Occupied',
+    equipment: TREATMENT_EQUIPMENT,
+  },
+  {
+    id: 'ED-07',
+    type: 'Treatment Bed',
+    zone: 'Main Treatment Area',
+    baseStatus: 'Cleaning',
+    equipment: TREATMENT_EQUIPMENT,
+  },
+  {
+    id: 'ED-08',
+    type: 'Treatment Bed',
+    zone: 'Main Treatment Area',
+    baseStatus: 'Occupied',
+    equipment: TREATMENT_EQUIPMENT,
+    occupantName: 'Samuel Dike',
+  },
+  {
+    id: 'ED-09',
+    type: 'Treatment Bed',
+    zone: 'Main Treatment Area',
+    baseStatus: 'Occupied',
+    equipment: TREATMENT_EQUIPMENT,
+  },
+  // Pediatric Area — 2 beds, 1 available
+  {
+    id: 'PED-01',
+    type: 'Pediatric Bed',
+    zone: 'Pediatric Area',
+    baseStatus: 'Occupied',
+    equipment: PEDIATRIC_EQUIPMENT,
+  },
+  {
+    id: 'PED-02',
+    type: 'Pediatric Bed',
+    zone: 'Pediatric Area',
+    baseStatus: 'Available',
+    equipment: PEDIATRIC_EQUIPMENT,
+  },
+  // Isolation Ward — 3 beds, 2 available (matches the mockup's "3 (2 Available · 1 Occupied)")
+  {
+    id: 'ISO-01',
+    type: 'Isolation Bed',
+    zone: 'Isolation Ward',
+    baseStatus: 'Available',
+    equipment: ISOLATION_EQUIPMENT,
+  },
+  {
+    id: 'ISO-02',
+    type: 'Isolation Bed',
+    zone: 'Isolation Ward',
+    baseStatus: 'Available',
+    equipment: ISOLATION_EQUIPMENT,
+  },
+  {
+    id: 'ISO-03',
+    type: 'Isolation Bed',
+    zone: 'Isolation Ward',
+    baseStatus: 'Occupied',
+    equipment: ISOLATION_EQUIPMENT,
+  },
+  // Observation Unit — 4 beds, same occupants as the Dashboard's Observation
+  // Patients panel; not assignable from Bed Assignment (that screen only
+  // targets the 4 primary ED bed types), but still counted here so the
+  // department-wide totals reconcile with the Dashboard's stat cards.
+  {
+    id: 'OBS-1',
+    type: 'Observation Bed',
+    zone: 'Observation Unit',
+    baseStatus: 'Occupied',
+    equipment: ['Power Outlet'],
+    occupantName: 'Victoria Obi',
+  },
+  {
+    id: 'OBS-2',
+    type: 'Observation Bed',
+    zone: 'Observation Unit',
+    baseStatus: 'Occupied',
+    equipment: ['Power Outlet'],
+    occupantName: 'Ahmed Bello',
+  },
+  {
+    id: 'OBS-3',
+    type: 'Observation Bed',
+    zone: 'Observation Unit',
+    baseStatus: 'Occupied',
+    equipment: ['Power Outlet'],
+    occupantName: 'Maryam Ali',
+  },
+  {
+    id: 'OBS-4',
+    type: 'Observation Bed',
+    zone: 'Observation Unit',
+    baseStatus: 'Occupied',
+    equipment: ['Power Outlet'],
+    occupantName: 'Chukwudi N.',
+  },
+];
 
 export type BedStatusRow = { label: string; count: number; color: string };
 
-export const TOTAL_BEDS = 25;
-export const BED_STATUS: BedStatusRow[] = [
-  { label: 'Available', count: 7, color: '#16A34A' },
-  { label: 'Occupied', count: 18, color: '#00B4D8' },
-  { label: 'Cleaning', count: 1, color: '#8A98A3' },
-  { label: 'Isolation', count: 2, color: '#7C3AED' },
-  { label: 'Reserved', count: 1, color: '#94A3B8' },
-];
-export const OCCUPIED_BEDS = 18;
+export const TOTAL_BEDS = EMERGENCY_BEDS.length;
+export const OCCUPIED_BEDS = EMERGENCY_BEDS.filter((b) => b.baseStatus === 'Occupied').length;
 export const BED_OCCUPANCY_PERCENT = Math.round((OCCUPIED_BEDS / TOTAL_BEDS) * 100);
-export const BEDS_AVAILABLE = TOTAL_BEDS - OCCUPIED_BEDS;
+export const BEDS_AVAILABLE = EMERGENCY_BEDS.filter((b) => b.baseStatus === 'Available').length;
+export const BED_STATUS: BedStatusRow[] = [
+  { label: 'Available', count: BEDS_AVAILABLE, color: '#16A34A' },
+  { label: 'Occupied', count: OCCUPIED_BEDS, color: '#00B4D8' },
+  {
+    label: 'Cleaning',
+    count: EMERGENCY_BEDS.filter((b) => b.baseStatus === 'Cleaning').length,
+    color: '#8A98A3',
+  },
+  {
+    label: 'Reserved',
+    count: EMERGENCY_BEDS.filter((b) => b.baseStatus === 'Reserved').length,
+    color: '#94A3B8',
+  },
+];
+export const ISOLATION_BEDS_TOTAL = EMERGENCY_BEDS.filter((b) => b.type === 'Isolation Bed').length;
+export const ISOLATION_BEDS_AVAILABLE = EMERGENCY_BEDS.filter(
+  (b) => b.type === 'Isolation Bed' && b.baseStatus === 'Available',
+).length;
+
+/** Est. minutes to physically move a patient into a bed in this zone. */
+export const ZONE_TRANSFER_MINUTES: Record<string, number> = {
+  'Resuscitation Bay': 2,
+  'Main Treatment Area': 4,
+  'Pediatric Area': 5,
+  'Isolation Ward': 6,
+  'Observation Unit': 3,
+};
+
+/** Manchester-recommended bed type per assigned priority — a starting
+ * suggestion Bed Requirements pre-selects; staff can always override it. */
+export function recommendedBedType(priority: TriagePriority): BedType {
+  return priority === 'IMMEDIATE' ? 'Resus Bed' : 'Treatment Bed';
+}
 
 // ─── Top-row stat placeholders ──────────────────────────────────────────
 

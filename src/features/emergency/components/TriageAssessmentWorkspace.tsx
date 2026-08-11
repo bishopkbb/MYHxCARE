@@ -12,7 +12,7 @@ import {
   RefreshCw,
   Users,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import { AllergyBanner } from '@/components/clinical/AllergyBanner';
@@ -39,6 +39,7 @@ import {
   completeTriage,
   MANCHESTER_ANSWERS_DEFAULT,
   TRIAGE_VITALS_DEFAULT,
+  useTriageRecords,
   type ManchesterAnswers,
   type TriageRecord,
   type TriageVitals,
@@ -335,26 +336,36 @@ function Stepper({ currentStep }: { currentStep: StepId }) {
 export function TriageAssessmentWorkspace() {
   const router = useRouter();
   const toast = useToast();
+  // Reactive, unlike a mount-only `window.location.search` read: clicking
+  // the sidebar's "Triage Assessment" link while already on this route
+  // (e.g. right after completing one patient's triage) changes the URL
+  // without unmounting the page, so entryId must update on its own or the
+  // screen stays stuck showing whichever patient loaded first.
+  const searchParams = useSearchParams();
+  const entryId = searchParams.get('entryId');
 
   const [pageState, setPageState] = useState<PageState>('loading');
   const [currentStep, setCurrentStep] = useState<StepId>(1);
-  const [entryId, setEntryId] = useState<string | null>(null);
 
   const allEntries = useQueueEntries();
+  const triageRecords = useTriageRecords();
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      setEntryId(new URLSearchParams(window.location.search).get('entryId'));
-      setPageState('loaded');
-    }, 800);
+    const t = setTimeout(() => setPageState('loaded'), 800);
     return () => clearTimeout(t);
   }, []);
 
   const emergencyEntries = useMemo(() => allEntries.filter((e) => e.isEmergency), [allEntries]);
 
+  // An explicit ?entryId= (e.g. "Start Triage" from a specific queue row)
+  // always resolves that patient, even if already triaged — re-triage is a
+  // deliberate action. With no entryId (e.g. the sidebar link), default to
+  // the first patient who hasn't been triaged yet, not just the first
+  // patient in the queue — otherwise this screen never advances past
+  // whichever patient happens to be first once they're triaged.
   const entry: QueueEntry | undefined = entryId
     ? emergencyEntries.find((e) => e.id === entryId)
-    : emergencyEntries[0];
+    : emergencyEntries.find((e) => !triageRecords.has(e.id));
 
   // ── Step 1 — Patient Identification ──────────────────────────────────
   const [accompaniedBy, setAccompaniedBy] = useState('Self');
@@ -376,7 +387,7 @@ export function TriageAssessmentWorkspace() {
   const [assignedDoctorId, setAssignedDoctorId] = useState<string>('');
   const [triageNurse, setTriageNurse] = useState<string>(EMERGENCY_TRIAGE_NURSES[0]);
 
-  const [startedAt] = useState(() => Date.now());
+  const [startedAt, setStartedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => new Date());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
@@ -388,22 +399,42 @@ export function TriageAssessmentWorkspace() {
 
   const entryIdForPrefill = entry?.id;
 
-  // Pre-fill from the resolved entry once, on load.
+  // Reset the whole wizard and pre-fill from the resolved entry every time
+  // the patient actually changes — not just on first mount. This is what
+  // lets the screen move on to the next patient after "Save & Complete
+  // Triage", whether the user got here by navigating away and back (a real
+  // remount) or by clicking "Triage Assessment" in the sidebar again while
+  // still on this route (no remount, but entryId still changes via
+  // useSearchParams above).
   useEffect(() => {
     if (!entryIdForPrefill) return;
     const t = setTimeout(() => {
-      setChiefComplaint((prev) => prev || deriveComplaintForEntry(entryIdForPrefill));
+      setCurrentStep(1);
+      setIsComplete(false);
+      setAccompaniedBy('Self');
+      setReferredFrom('');
+      setChiefComplaint(deriveComplaintForEntry(entryIdForPrefill));
       setArrivalMode(deriveSourceForEntry(entryIdForPrefill));
+      setOnset(ONSET_OPTIONS[0]);
+      setPainScale(5);
+      setPrimaryConcern(PRIMARY_CONCERN_OPTIONS[0]);
+      setAnswers(MANCHESTER_ANSWERS_DEFAULT);
+      setNotes('');
+      setVitals(TRIAGE_VITALS_DEFAULT);
+      setTriageNurse(EMERGENCY_TRIAGE_NURSES[0]);
       const edDoctor = DOCTORS.find(
         (d) => d.department === 'Accident & Emergency' || d.department === 'Emergency Medicine',
       );
       const resolvedEntry = allEntries.find((e) => e.id === entryIdForPrefill);
-      setAssignedDoctorId(
-        (prev) => prev || resolvedEntry?.doctorId || edDoctor?.id || DOCTORS[0]!.id,
-      );
+      setAssignedDoctorId(resolvedEntry?.doctorId || edDoctor?.id || DOCTORS[0]!.id);
+      setStartedAt(Date.now());
     }, 0);
     return () => clearTimeout(t);
-  }, [entryIdForPrefill, allEntries]);
+    // Deliberately re-runs only when the patient changes, not on every
+    // allEntries update — otherwise a new walk-in registered elsewhere would
+    // silently wipe an in-progress assessment for the current patient.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entryIdForPrefill]);
 
   const priority = computeManchesterPriority(answers);
   const allergies: Allergy[] = [];

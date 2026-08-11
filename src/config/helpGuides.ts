@@ -158,6 +158,31 @@ const TRIAGE_ASSESSMENT_GUIDE: HelpGuide = {
   ],
 };
 
+const BED_ASSIGNMENT_GUIDE: HelpGuide = {
+  id: 'emergency-bed-assignment',
+  title: 'Bed Assignment',
+  intro:
+    'Assign a triaged patient to an appropriate emergency bed based on priority, clinical need, and current bed availability.',
+  sections: [
+    {
+      heading: 'Patient to Assign',
+      body: 'Shows the next triaged patient without a bed, pulled from their completed Triage Assessment — priority, chief complaint, and a warning banner for life-threatening cases.',
+    },
+    {
+      heading: 'Bed Requirements',
+      body: 'The recommended bed type and special requirements (e.g. Cardiac Monitor, Oxygen) are pre-filled from the triage assessment — adjust them as needed.',
+    },
+    {
+      heading: 'Available Beds',
+      body: 'Filter by bed type or zone, then select "Assign" on a bed to preview the assignment. The Bed Type Legend explains each bed type and equipment icon.',
+    },
+    {
+      heading: 'Confirm, Hold, or Cancel',
+      body: '"Confirm Bed Assignment" finalises the assignment and updates Patient Queue immediately. "Hold Bed" reserves a bed for 5 minutes without finalising. "Cancel" clears the current selection.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3460,6 +3485,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/dashboard')) return DASHBOARD_GUIDE;
   if (pathname.startsWith('/emergency/patient-queue')) return EMERGENCY_PATIENT_QUEUE_GUIDE;
   if (pathname.startsWith('/emergency/triage-assessment')) return TRIAGE_ASSESSMENT_GUIDE;
+  if (pathname.startsWith('/emergency/bed-assignment')) return BED_ASSIGNMENT_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;
