@@ -1,12 +1,13 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Results Review' };
+import { Suspense } from 'react';
+
+import { EmergencyResultsReviewWorkspace } from '@/features/emergency/components/EmergencyResultsReviewWorkspace';
 
 export default function ResultsReviewPage() {
   return (
-    <ComingSoon
-      title="Results Review"
-      description="Reviewing incoming lab and imaging results for emergency patients is on the way."
-    />
+    <Suspense fallback={null}>
+      <EmergencyResultsReviewWorkspace />
+    </Suspense>
   );
 }

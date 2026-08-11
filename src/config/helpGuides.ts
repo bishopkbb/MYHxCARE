@@ -346,6 +346,34 @@ const EMERGENCY_DIAGNOSTIC_REQUESTS_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_RESULTS_REVIEW_GUIDE: HelpGuide = {
+  id: 'emergency-results-review',
+  title: 'Results Review',
+  intro: 'View and review diagnostic and imaging results for the current emergency patient.',
+  sections: [
+    {
+      heading: 'Tabs and filters',
+      body: 'Switch between All Results, Laboratory, Imaging, Cardiology, and Microbiology, or filter by status, test, and date.',
+    },
+    {
+      heading: 'Latest Results and detail panel',
+      body: 'Select a result from the list to see its full detail on the right — parameter values, reference ranges, and notes once available, or its current workflow status if the result is still pending.',
+    },
+    {
+      heading: 'Result Trends and Recent Reports',
+      body: "Result Trends plots a parameter across this patient's past resulted tests. Recent Reports lists the latest imaging/cardiology/microbiology reports.",
+    },
+    {
+      heading: 'Compare Results and Print',
+      body: '"Compare Results" shows the two most recent results of the same test side by side. "Print" exports the selected result as a PDF.',
+    },
+    {
+      heading: 'Real, shared results',
+      body: 'This reads the same live laboratory data every other screen does — a test ordered from Diagnostic Requests appears here the moment it has a result.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3656,6 +3684,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/clinical-notes')) return EMERGENCY_CLINICAL_NOTES_GUIDE;
   if (pathname.startsWith('/emergency/diagnostic-requests'))
     return EMERGENCY_DIAGNOSTIC_REQUESTS_GUIDE;
+  if (pathname.startsWith('/emergency/results-review')) return EMERGENCY_RESULTS_REVIEW_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;
