@@ -700,9 +700,12 @@ export function PatientQueueWorkspace() {
                       ['Status', 'w-32'],
                       ['', 'w-14'],
                     ].map(([label, width]) => (
-                      <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-left`}>
+                      <div
+                        key={label}
+                        className={`${width} shrink-0 overflow-hidden px-2 py-2.5 text-center`}
+                      >
                         <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                          className="truncate font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
                           {label}
@@ -720,12 +723,12 @@ export function PatientQueueWorkspace() {
                         background: selectedEntryId === row.entryId ? '#F5FBFD' : undefined,
                       }}
                     >
-                      <div className="w-10 shrink-0 py-3 pr-2 pl-3">
+                      <div className="w-10 shrink-0 px-2 py-3 text-center">
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>
                           {(safePage - 1) * pageSize + i + 1}
                         </p>
                       </div>
-                      <div className="min-w-[180px] flex-1 py-3 pr-2">
+                      <div className="min-w-[180px] flex-1 px-2 py-3 text-center">
                         <Tooltip content={row.patientName}>
                           <p
                             className="truncate font-sans font-medium"
@@ -736,17 +739,17 @@ export function PatientQueueWorkspace() {
                         </Tooltip>
                         <p style={{ fontSize: 14, color: '#00B4D8' }}>MRN: {row.mrn}</p>
                       </div>
-                      <div className="w-20 shrink-0 py-3 pr-2">
+                      <div className="w-20 shrink-0 px-2 py-3 text-center">
                         <p style={{ fontSize: 14, color: '#4A7080' }}>
                           {row.age} / {row.gender.charAt(0)}
                         </p>
                       </div>
-                      <div className="w-24 shrink-0 py-3 pr-2">
+                      <div className="w-24 shrink-0 px-2 py-3 text-center">
                         <p className="whitespace-nowrap" style={{ fontSize: 14, color: '#4A7080' }}>
                           {formatTime(row.arrivalTime)}
                         </p>
                       </div>
-                      <div className="w-24 shrink-0 py-3 pr-2">
+                      <div className="w-24 shrink-0 px-2 py-3 text-center">
                         <span
                           className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
                           style={{
@@ -758,17 +761,17 @@ export function PatientQueueWorkspace() {
                           {row.source}
                         </span>
                       </div>
-                      <div className="w-28 shrink-0 py-3 pr-2">
+                      <div className="w-28 shrink-0 px-2 py-3 text-center">
                         <PriorityPill priority={row.priority} />
                       </div>
-                      <div className="min-w-[150px] flex-1 py-3 pr-2">
+                      <div className="min-w-[150px] flex-1 px-2 py-3 text-center">
                         <Tooltip content={row.complaint}>
                           <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                             {row.complaint}
                           </p>
                         </Tooltip>
                       </div>
-                      <div className="w-20 shrink-0 py-3 pr-2">
+                      <div className="w-20 shrink-0 px-2 py-3 text-center">
                         <p
                           className="font-sans font-medium whitespace-nowrap"
                           style={{
@@ -779,7 +782,7 @@ export function PatientQueueWorkspace() {
                           {formatWaitMinutes(row.waitMinutes)}
                         </p>
                       </div>
-                      <div className="w-32 shrink-0 py-3 pr-2">
+                      <div className="w-32 shrink-0 px-2 py-3 text-center">
                         <span
                           className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
                           style={{
@@ -792,7 +795,7 @@ export function PatientQueueWorkspace() {
                         </span>
                       </div>
                       <div
-                        className="flex w-14 shrink-0 items-center justify-center py-3 pr-2"
+                        className="flex w-14 shrink-0 items-center justify-center px-2 py-3"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <QueueRowMenu

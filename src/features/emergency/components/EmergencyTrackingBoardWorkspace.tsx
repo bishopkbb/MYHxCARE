@@ -54,8 +54,6 @@ import {
   deriveIllustrativePhysician,
   derivePriorityForEntry,
   EMERGENCY_BEDS,
-  minutesAgoFromDuration,
-  OBSERVATION_PATIENTS,
   RECENT_ADMISSIONS,
   todayAtClockTime,
   TRACKING_STATUSES,
@@ -65,6 +63,7 @@ import {
 } from '@/features/emergency/__mocks__/emergencyFixtures';
 import { useTriageRecords } from '@/features/emergency/store/triageAssessmentStore';
 import { useBedOverrides } from '@/features/emergency/store/bedAssignmentStore';
+import { useObservationRecords } from '@/features/emergency/store/observationStore';
 
 type PageState = 'loading' | 'loaded' | 'error';
 
@@ -185,7 +184,7 @@ function OrdersBadges({ orders }: { orders: OrdersCount }) {
   const visible = items.filter((i) => i.count > 0);
   if (visible.length === 0) return <span style={{ fontSize: 14, color: '#8A98A3' }}>—</span>;
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center justify-center gap-1.5">
       {visible.map((item) => (
         <Tooltip key={item.label} content={`${item.label}: ${item.count}`}>
           <span
@@ -314,6 +313,7 @@ export function EmergencyTrackingBoardWorkspace() {
   const allEntries = useQueueEntries();
   const triageRecords = useTriageRecords();
   const bedOverrides = useBedOverrides();
+  const observationRecords = useObservationRecords();
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -422,24 +422,22 @@ export function EmergencyTrackingBoardWorkspace() {
     });
   }
 
-  // Observation Patients -> "Under Observation" rows.
-  for (const op of OBSERVATION_PATIENTS) {
+  // Observation Unit occupancy (live store) -> "Under Observation" rows.
+  for (const op of observationRecords.values()) {
     rows.push({
       id: `obs-${op.id}`,
       patientName: op.patientName,
       mrn: deriveIllustrativeMrn(op.id),
       priority: derivePriorityForEntry(op.id),
-      age: deriveIllustrativeAge(op.id),
-      gender: deriveIllustrativeGender(op.id),
+      age: op.age,
+      gender: op.gender,
       zone: 'Observation Unit',
-      bed: op.bed,
-      physician: op.assignedTo,
+      bed: `${op.bay} / ${op.slotLabel}`,
+      physician: op.physician,
       status: 'Under Observation',
-      arrivalTime: new Date(
-        now.getTime() - minutesAgoFromDuration(op.observationTime) * 60_000,
-      ).toISOString(),
-      chiefComplaint: `Under observation — next review ${op.nextReview}`,
-      orders: deriveIllustrativeOrders(op.id),
+      arrivalTime: op.admittedAt,
+      chiefComplaint: op.reason,
+      orders: { lab: op.ordersCount, imaging: 0, rx: 0, procedures: 0 },
       hasAlert: false,
     });
   }
@@ -809,9 +807,12 @@ export function EmergencyTrackingBoardWorkspace() {
                       ['Orders', 'w-32'],
                       ['', 'w-14'],
                     ].map(([label, width]) => (
-                      <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-left`}>
+                      <div
+                        key={label}
+                        className={`${width} shrink-0 overflow-hidden px-2 py-2.5 text-center`}
+                      >
                         <span
-                          className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                          className="truncate font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
                           {label}
@@ -829,13 +830,13 @@ export function EmergencyTrackingBoardWorkspace() {
                         background: selectedRow?.id === row.id ? '#F5FBFD' : undefined,
                       }}
                     >
-                      <div className="w-10 shrink-0 py-3 pr-2 pl-3">
+                      <div className="w-10 shrink-0 px-2 py-3 text-center">
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>
                           {(safePage - 1) * pageSize + i + 1}
                         </p>
                       </div>
-                      <div className="min-w-[160px] flex-1 py-3 pr-2">
-                        <div className="flex items-center gap-1.5">
+                      <div className="min-w-[160px] flex-1 px-2 py-3 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
                           <Tooltip content={row.patientName}>
                             <p
                               className="truncate font-sans font-medium"
@@ -852,31 +853,31 @@ export function EmergencyTrackingBoardWorkspace() {
                         </div>
                         <p style={{ fontSize: 14, color: '#00B4D8' }}>MRN: {row.mrn}</p>
                       </div>
-                      <div className="w-24 shrink-0 py-3 pr-2">
+                      <div className="w-24 shrink-0 px-2 py-3 text-center">
                         <PriorityPill priority={row.priority} />
                       </div>
-                      <div className="w-20 shrink-0 py-3 pr-2">
+                      <div className="w-20 shrink-0 px-2 py-3 text-center">
                         <p style={{ fontSize: 14, color: '#4A7080' }}>
                           {row.age} / {row.gender.charAt(0)}
                         </p>
                       </div>
-                      <div className="w-32 shrink-0 py-3 pr-2">
+                      <div className="w-32 shrink-0 px-2 py-3 text-center">
                         <p className="truncate" style={{ fontSize: 14, color: '#0D2630' }}>
                           {row.zone}
                         </p>
                         <p style={{ fontSize: 14, color: '#8A98A3' }}>{row.bed}</p>
                       </div>
-                      <div className="w-28 shrink-0 py-3 pr-2">
+                      <div className="w-28 shrink-0 px-2 py-3 text-center">
                         <Tooltip content={row.physician}>
                           <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                             {row.physician}
                           </p>
                         </Tooltip>
                       </div>
-                      <div className="w-36 shrink-0 py-3 pr-2">
+                      <div className="w-36 shrink-0 px-2 py-3 text-center">
                         <StatusPill status={row.status} />
                       </div>
-                      <div className="w-24 shrink-0 py-3 pr-2">
+                      <div className="w-24 shrink-0 px-2 py-3 text-center">
                         <p
                           className="font-sans font-medium whitespace-nowrap"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -891,11 +892,11 @@ export function EmergencyTrackingBoardWorkspace() {
                           )}
                         </p>
                       </div>
-                      <div className="w-32 shrink-0 py-3 pr-2">
+                      <div className="w-32 shrink-0 px-2 py-3 text-center">
                         <OrdersBadges orders={row.orders} />
                       </div>
                       <div
-                        className="flex w-14 shrink-0 items-center justify-center py-3 pr-2"
+                        className="flex w-14 shrink-0 items-center justify-center px-2 py-3"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <BoardRowMenu

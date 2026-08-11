@@ -126,7 +126,7 @@ const SPECIAL_REQUIREMENT_OPTIONS = [
 
 function EquipmentIcons({ equipment }: { equipment: BedEquipment[] }) {
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center justify-center gap-1.5">
       {equipment.map((eq) => {
         const Icon = EQUIPMENT_ICON[eq];
         return (
@@ -793,7 +793,7 @@ export function BedAssignmentWorkspace() {
                       {['Bed', 'Type', 'Zone / Area', 'Status', 'Equipment', ''].map((h) => (
                         <th
                           key={h}
-                          className="py-2.5 pr-2 text-left font-sans font-bold tracking-wider uppercase"
+                          className="px-2 py-2.5 text-center font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
                         >
                           {h}
@@ -806,7 +806,7 @@ export function BedAssignmentWorkspace() {
                       const isSelected = selectedBedId === bed.id;
                       return (
                         <tr key={bed.id} style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}>
-                          <td className="py-3 pr-2">
+                          <td className="px-2 py-3 text-center">
                             <p
                               className="font-sans font-semibold"
                               style={{ fontSize: 14, color: '#0D2630' }}
@@ -815,18 +815,18 @@ export function BedAssignmentWorkspace() {
                             </p>
                           </td>
                           <td
-                            className="py-3 pr-2 whitespace-nowrap"
+                            className="px-2 py-3 text-center whitespace-nowrap"
                             style={{ fontSize: 14, color: '#4A7080' }}
                           >
                             {bed.type}
                           </td>
                           <td
-                            className="py-3 pr-2 whitespace-nowrap"
+                            className="px-2 py-3 text-center whitespace-nowrap"
                             style={{ fontSize: 14, color: '#4A7080' }}
                           >
                             {bed.zone}
                           </td>
-                          <td className="py-3 pr-2">
+                          <td className="px-2 py-3 text-center">
                             <span
                               className="inline-block rounded-full px-2 py-0.5 font-sans font-medium whitespace-nowrap"
                               style={{
@@ -838,15 +838,15 @@ export function BedAssignmentWorkspace() {
                               Available
                             </span>
                           </td>
-                          <td className="py-3 pr-2">
+                          <td className="px-2 py-3 text-center">
                             <EquipmentIcons equipment={bed.equipment} />
                           </td>
-                          <td className="py-3 pr-1 text-right">
+                          <td className="px-2 py-3 text-center">
                             <PermissionGate permission={PERMISSIONS.EMERGENCY_WRITE}>
                               <button
                                 type="button"
                                 onClick={() => setSelectedBedId(bed.id)}
-                                className={`flex h-9 items-center gap-1 rounded-[8px] px-3.5 font-sans font-medium whitespace-nowrap transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
+                                className={`inline-flex h-9 items-center gap-1 rounded-[8px] px-3.5 font-sans font-medium whitespace-nowrap transition-opacity duration-150 hover:opacity-90 ${FOCUS_RING}`}
                                 style={{
                                   fontSize: 14,
                                   color: isSelected ? '#0D2630' : '#FFFFFF',

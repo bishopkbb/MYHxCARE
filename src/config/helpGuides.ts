@@ -208,6 +208,35 @@ const EMERGENCY_TRACKING_BOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const OBSERVATION_UNIT_GUIDE: HelpGuide = {
+  id: 'emergency-observation-unit',
+  title: 'Observation Unit',
+  intro:
+    'Monitor and manage every patient currently held for observation, with live review timers and disposition tools.',
+  sections: [
+    {
+      heading: 'Stat cards and tabs',
+      body: 'Total in Observation, New Today, Due for Review, Overdue Review, Ready for Disposition, and Discharged from Obs update live as review times pass — a patient automatically moves from Monitoring to Due for Review to Overdue.',
+    },
+    {
+      heading: 'Add Patient to Observation',
+      body: 'Admits a patient into an available bed or seat, with a reason, observing physician, and review interval.',
+    },
+    {
+      heading: 'Selected Patient panel',
+      body: 'Select any row to see full details, a Vital Signs Trend, and Observation Tools — add a nursing note, record vitals, add an order, or discharge/transfer the patient.',
+    },
+    {
+      heading: 'Discharge / Transfer',
+      body: 'Records the disposition (discharged home, admitted to a ward, or transferred), frees the bed/seat immediately, and logs it under Recent Dispositions.',
+    },
+    {
+      heading: 'Bed / Seat Status',
+      body: 'A live map of every bay showing which beds/seats are occupied and their review status at a glance.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3512,6 +3541,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/triage-assessment')) return TRIAGE_ASSESSMENT_GUIDE;
   if (pathname.startsWith('/emergency/bed-assignment')) return BED_ASSIGNMENT_GUIDE;
   if (pathname.startsWith('/emergency/tracking-board')) return EMERGENCY_TRACKING_BOARD_GUIDE;
+  if (pathname.startsWith('/emergency/observation-unit')) return OBSERVATION_UNIT_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

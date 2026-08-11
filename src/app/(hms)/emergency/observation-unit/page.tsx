@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Observation Unit' };
+import { ObservationUnitWorkspace } from '@/features/emergency/components/ObservationUnitWorkspace';
 
 export default function ObservationUnitPage() {
-  return (
-    <ComingSoon
-      title="Observation Unit"
-      description="Monitoring patients held for observation, with review timers and reassessment reminders, is on the way."
-    />
-  );
+  return <ObservationUnitWorkspace />;
 }

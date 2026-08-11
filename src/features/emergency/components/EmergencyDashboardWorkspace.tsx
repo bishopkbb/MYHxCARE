@@ -42,15 +42,14 @@ import {
   deriveComplaintForEntry,
   derivePriorityForEntry,
   DISCHARGED_TODAY_COUNT,
-  OBSERVATION_PATIENTS,
   OCCUPIED_BEDS,
   PENDING_ORDERS,
   PENDING_RESULTS_COUNT,
   PRIORITY_TIERS,
   RECENT_ADMISSIONS,
   TOTAL_BEDS,
-  UNDER_OBSERVATION_COUNT,
 } from '@/features/emergency/__mocks__/emergencyFixtures';
+import { useObservationRecords } from '@/features/emergency/store/observationStore';
 
 type PageState = 'loading' | 'loaded' | 'error';
 
@@ -307,6 +306,8 @@ export function EmergencyDashboardWorkspace() {
 
   const allQueueEntries = useQueueEntries();
   const emergencyEntries = allQueueEntries.filter((e) => e.isEmergency);
+  const observationRecords = useObservationRecords();
+  const observationList = Array.from(observationRecords.values());
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -463,7 +464,7 @@ export function EmergencyDashboardWorkspace() {
               <StatCard
                 icon={Eye}
                 label="Under Observation"
-                value={UNDER_OBSERVATION_COUNT}
+                value={observationList.length}
                 info="Currently monitored"
                 accent="#D97706"
                 iconBg="rgba(217,119,6,0.1)"
@@ -594,9 +595,12 @@ export function EmergencyDashboardWorkspace() {
                         ['Wait Time', 'w-24'],
                         ['Assigned To', 'w-28'],
                       ].map(([label, width]) => (
-                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-left`}>
+                        <div
+                          key={label}
+                          className={`${width} shrink-0 overflow-hidden px-2 py-2.5 text-center`}
+                        >
                           <span
-                            className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
+                            className="truncate font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
                           >
                             {label}
@@ -610,7 +614,7 @@ export function EmergencyDashboardWorkspace() {
                         className="flex items-center"
                         style={{ borderBottom: '1px solid rgba(0,100,130,0.08)' }}
                       >
-                        <div className="min-w-[160px] flex-1 py-3 pr-2 pl-3">
+                        <div className="min-w-[160px] flex-1 px-2 py-3 text-center">
                           <Tooltip content={entry.patientName}>
                             <p
                               className="truncate font-sans font-medium"
@@ -621,22 +625,22 @@ export function EmergencyDashboardWorkspace() {
                           </Tooltip>
                           <p style={{ fontSize: 14, color: '#00B4D8' }}>MRN: {entry.mrn}</p>
                         </div>
-                        <div className="w-16 shrink-0 py-3 pr-2">
+                        <div className="w-16 shrink-0 px-2 py-3 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>
                             {entry.age} / {entry.gender.charAt(0)}
                           </p>
                         </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
+                        <div className="w-28 shrink-0 px-2 py-3 text-center">
                           <PriorityPill priority={priority} />
                         </div>
-                        <div className="min-w-[120px] flex-1 py-3 pr-2">
+                        <div className="min-w-[120px] flex-1 px-2 py-3 text-center">
                           <Tooltip content={complaint}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {complaint}
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-24 shrink-0 py-3 pr-2">
+                        <div className="w-24 shrink-0 px-2 py-3 text-center">
                           <p
                             className="font-sans font-medium whitespace-nowrap"
                             style={{
@@ -647,7 +651,7 @@ export function EmergencyDashboardWorkspace() {
                             {formatWaitMinutes(waitMinutes)}
                           </p>
                         </div>
-                        <div className="w-28 shrink-0 py-3 pr-2">
+                        <div className="w-28 shrink-0 px-2 py-3 text-center">
                           <Tooltip content={entry.attendingDoctor}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {entry.attendingDoctor}
@@ -689,10 +693,10 @@ export function EmergencyDashboardWorkspace() {
 
           <Panel title="Observation Patients" viewAllHref={ROUTES.emergencyObservationUnit}>
             <div className="mt-3 flex flex-col">
-              {OBSERVATION_PATIENTS.length === 0 ? (
+              {observationList.length === 0 ? (
                 <EmptyRow label="No patients under observation" />
               ) : (
-                OBSERVATION_PATIENTS.map((p) => (
+                observationList.slice(0, 4).map((p) => (
                   <div
                     key={p.id}
                     className="flex items-center justify-between gap-2 py-2.5"
@@ -708,21 +712,28 @@ export function EmergencyDashboardWorkspace() {
                         </p>
                       </Tooltip>
                       <p style={{ fontSize: 14, color: '#8A98A3' }}>
-                        {p.bed} · {p.observationTime} · {p.assignedTo}
+                        {p.bay} / {p.slotLabel} ·{' '}
+                        {formatWaitMinutes(
+                          Math.max(
+                            0,
+                            Math.round((now.getTime() - new Date(p.admittedAt).getTime()) / 60_000),
+                          ),
+                        )}{' '}
+                        · {p.physician}
                       </p>
                     </div>
                     <p
                       className="shrink-0 font-sans font-medium whitespace-nowrap"
                       style={{ fontSize: 14, color: '#4A7080' }}
                     >
-                      {p.nextReview}
+                      {formatTime(p.nextReviewAt)}
                     </p>
                   </div>
                 ))
               )}
             </div>
             <p className="mt-2" style={{ fontSize: 14, color: '#8A98A3' }}>
-              Total: {OBSERVATION_PATIENTS.length} patients under observation
+              Total: {observationList.length} patients under observation
             </p>
           </Panel>
 

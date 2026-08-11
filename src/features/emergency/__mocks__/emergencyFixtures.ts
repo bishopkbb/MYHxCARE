@@ -454,50 +454,191 @@ export const CRITICAL_ALERTS: CriticalAlert[] = [
   { id: 'ca-6', title: 'Blood Request', detail: 'O Negative — 2 Units', minutesAgo: 15 },
 ];
 
-// ─── Observation Patients ────────────────────────────────────────────────
+// ─── Observation Unit — bays, slots, and seed patients ──────────────────
+// Real bay/slot capacity (11 total across 4 bays). observationStore.ts owns
+// the LIVE occupancy (admit/discharge/vitals/notes) seeded from this list —
+// Dashboard's Observation Patients panel and Tracking Board's Under
+// Observation rows both read the store, not this static list directly, so
+// admitting or discharging a patient on the real Observation Unit screen
+// shows up on both immediately.
 
-export type ObservationPatient = {
+export type ObservationBay = { bay: string; slots: string[] };
+
+export const OBSERVATION_BAYS: ObservationBay[] = [
+  { bay: 'OBS-1', slots: ['Bed 1', 'Bed 2'] },
+  { bay: 'OBS-2', slots: ['Bed 1', 'Bed 2', 'Bed 3'] },
+  { bay: 'OBS-3', slots: ['Bed 1', 'Bed 2', 'Bed 3'] },
+  { bay: 'OBS-4', slots: ['Seat 1', 'Seat 2', 'Seat 3'] },
+];
+export const OBSERVATION_TOTAL_SLOTS = OBSERVATION_BAYS.reduce((sum, b) => sum + b.slots.length, 0);
+
+export type ObservationVitals = { bp: string; hr: number; rr: number; spo2: number };
+
+export type ObservationSeedPatient = {
   id: string;
   patientName: string;
-  bed: string;
-  observationTime: string; // "HH:MM" elapsed
-  nextReview: string; // "HH:MM"
-  assignedTo: string;
+  age: number;
+  gender: 'Male' | 'Female';
+  bay: string;
+  slotLabel: string;
+  reason: string;
+  physician: string;
+  admittedMinutesAgo: number;
+  reviewIntervalMinutes: number;
+  vitals: ObservationVitals;
 };
 
-export const OBSERVATION_PATIENTS: ObservationPatient[] = [
+/** One slot (OBS-4 / Seat 3) is deliberately left empty so "Add Patient to
+ * Observation" has somewhere real to admit into on first load, instead of
+ * opening onto an immediately-full unit. */
+export const OBSERVATION_SEED_PATIENTS: ObservationSeedPatient[] = [
   {
-    id: 'obs-1',
+    id: 'obs-victoria-obi',
     patientName: 'Victoria Obi',
-    bed: 'OBS-1',
-    observationTime: '02:15',
-    nextReview: '12:45 PM',
-    assignedTo: 'Dr. Adeyemi',
+    age: 60,
+    gender: 'Female',
+    bay: 'OBS-1',
+    slotLabel: 'Bed 1',
+    reason: 'Chest pain, R/O ACS',
+    physician: 'Dr. Adeyemi',
+    admittedMinutesAgo: 135,
+    reviewIntervalMinutes: 150,
+    vitals: { bp: '128/84', hr: 92, rr: 20, spo2: 98 },
   },
   {
-    id: 'obs-2',
-    patientName: 'Ahmed Bello',
-    bed: 'OBS-2',
-    observationTime: '01:40',
-    nextReview: '12:10 PM',
-    assignedTo: 'Dr. Okafor',
-  },
-  {
-    id: 'obs-3',
-    patientName: 'Maryam Ali',
-    bed: 'OBS-3',
-    observationTime: '01:05',
-    nextReview: '11:45 AM',
-    assignedTo: 'Dr. Bello',
-  },
-  {
-    id: 'obs-4',
+    id: 'obs-chukwudi-n',
     patientName: 'Chukwudi N.',
-    bed: 'OBS-4',
-    observationTime: '00:50',
-    nextReview: '11:30 AM',
-    assignedTo: 'Dr. Adeyemi',
+    age: 41,
+    gender: 'Male',
+    bay: 'OBS-1',
+    slotLabel: 'Bed 2',
+    reason: 'Severe headache',
+    physician: 'Dr. Okafor',
+    admittedMinutesAgo: 78,
+    reviewIntervalMinutes: 90,
+    vitals: { bp: '134/88', hr: 84, rr: 18, spo2: 99 },
   },
+  {
+    id: 'obs-ahmed-bello',
+    patientName: 'Ahmed Bello',
+    age: 52,
+    gender: 'Male',
+    bay: 'OBS-2',
+    slotLabel: 'Bed 1',
+    reason: 'Abdominal pain',
+    physician: 'Dr. Bello',
+    admittedMinutesAgo: 62,
+    reviewIntervalMinutes: 60,
+    vitals: { bp: '122/80', hr: 88, rr: 17, spo2: 97 },
+  },
+  {
+    id: 'obs-maryam-ali',
+    patientName: 'Maryam Ali',
+    age: 29,
+    gender: 'Female',
+    bay: 'OBS-2',
+    slotLabel: 'Bed 2',
+    reason: 'Fever, body pain',
+    physician: 'Dr. Okafor',
+    admittedMinutesAgo: 45,
+    reviewIntervalMinutes: 60,
+    vitals: { bp: '110/72', hr: 96, rr: 19, spo2: 98 },
+  },
+  {
+    id: 'obs-ngozi-eze',
+    patientName: 'Ngozi Eze',
+    age: 37,
+    gender: 'Female',
+    bay: 'OBS-2',
+    slotLabel: 'Bed 3',
+    reason: 'Cough, flu',
+    physician: 'Dr. Adeyemi',
+    admittedMinutesAgo: 20,
+    reviewIntervalMinutes: 45,
+    vitals: { bp: '118/76', hr: 80, rr: 16, spo2: 99 },
+  },
+  {
+    id: 'obs-tobi-adeyemi',
+    patientName: 'Tobi Adeyemi',
+    age: 45,
+    gender: 'Male',
+    bay: 'OBS-3',
+    slotLabel: 'Bed 1',
+    reason: 'Dizziness, R/O stroke',
+    physician: 'Dr. Okafor',
+    admittedMinutesAgo: 35,
+    reviewIntervalMinutes: 60,
+    vitals: { bp: '142/90', hr: 78, rr: 18, spo2: 97 },
+  },
+  {
+    id: 'obs-funmi-okafor',
+    patientName: 'Funmi Okafor',
+    age: 52,
+    gender: 'Female',
+    bay: 'OBS-3',
+    slotLabel: 'Bed 2',
+    reason: 'Hypertension',
+    physician: 'Dr. Bello',
+    admittedMinutesAgo: 27,
+    reviewIntervalMinutes: 60,
+    vitals: { bp: '150/95', hr: 82, rr: 17, spo2: 98 },
+  },
+  {
+    id: 'obs-uche-obiora',
+    patientName: 'Uche Obiora',
+    age: 29,
+    gender: 'Female',
+    bay: 'OBS-3',
+    slotLabel: 'Bed 3',
+    reason: 'Vomiting, weakness',
+    physician: 'Dr. Okafor',
+    admittedMinutesAgo: 20,
+    reviewIntervalMinutes: 45,
+    vitals: { bp: '108/68', hr: 90, rr: 18, spo2: 98 },
+  },
+  {
+    id: 'obs-halima-yusuf',
+    patientName: 'Halima Yusuf',
+    age: 37,
+    gender: 'Female',
+    bay: 'OBS-4',
+    slotLabel: 'Seat 1',
+    reason: 'Back pain',
+    physician: 'Dr. Adeyemi',
+    admittedMinutesAgo: 15,
+    reviewIntervalMinutes: 45,
+    vitals: { bp: '116/74', hr: 76, rr: 16, spo2: 99 },
+  },
+  {
+    id: 'obs-emeka-nnamdi',
+    patientName: 'Emeka Nnamdi',
+    age: 33,
+    gender: 'Male',
+    bay: 'OBS-4',
+    slotLabel: 'Seat 2',
+    reason: 'Sore throat',
+    physician: 'Dr. Bello',
+    admittedMinutesAgo: 10,
+    reviewIntervalMinutes: 45,
+    vitals: { bp: '120/78', hr: 74, rr: 16, spo2: 99 },
+  },
+];
+
+export type RecentObservationDisposition = {
+  id: string;
+  patientName: string;
+  minutesAgo: number;
+  outcome: 'Discharged' | 'Admitted' | 'Transferred';
+};
+
+export const RECENT_OBSERVATION_DISPOSITIONS: RecentObservationDisposition[] = [
+  { id: 'od-1', patientName: 'Grace Nwosu', minutesAgo: 20, outcome: 'Discharged' },
+  { id: 'od-2', patientName: 'Peter Aliyu', minutesAgo: 35, outcome: 'Discharged' },
+  { id: 'od-3', patientName: 'Ngozi Chukwu', minutesAgo: 65, outcome: 'Admitted' },
+  { id: 'od-4', patientName: 'Tunde Okoro', minutesAgo: 80, outcome: 'Transferred' },
+  { id: 'od-5', patientName: 'Rita Bassey', minutesAgo: 110, outcome: 'Discharged' },
+  { id: 'od-6', patientName: 'Femi Adekunle', minutesAgo: 150, outcome: 'Discharged' },
+  { id: 'od-7', patientName: 'Ada Obi', minutesAgo: 190, outcome: 'Admitted' },
 ];
 
 // ─── Pending Orders ──────────────────────────────────────────────────────
