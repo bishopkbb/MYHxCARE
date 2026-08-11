@@ -266,6 +266,34 @@ const EMERGENCY_MEDICATION_ORDERS_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_PROCEDURES_GUIDE: HelpGuide = {
+  id: 'emergency-procedures',
+  title: 'Emergency Procedures',
+  intro: 'Perform and document emergency procedures for the current patient.',
+  sections: [
+    {
+      heading: 'Procedure List',
+      body: 'Every procedure logged for this patient, with status, who performed it, and where. Filter by status, type, or date, or search by name.',
+    },
+    {
+      heading: 'New Procedure and templates',
+      body: '"New Procedure" logs a custom procedure. "Procedure Templates" jumps to the Common Emergency Procedures grid — tapping a template opens the same form pre-filled with its name and type.',
+    },
+    {
+      heading: 'Procedure Details',
+      body: "Shows the selected procedure's status, timing, and (for the common procedures) a reference protocol — indications, equipment, steps, and risks. Status can be advanced or the procedure cancelled from here.",
+    },
+    {
+      heading: 'Post-Procedure Orders',
+      body: 'Medication orders placed for this patient after the selected procedure started, read live from Emergency Medication Orders.',
+    },
+    {
+      heading: 'Complications & Notes, and Documents',
+      body: 'Log a note or complication against the selected procedure, or attach a document reference (e.g. a consent form) to it.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3572,6 +3600,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/tracking-board')) return EMERGENCY_TRACKING_BOARD_GUIDE;
   if (pathname.startsWith('/emergency/observation-unit')) return OBSERVATION_UNIT_GUIDE;
   if (pathname.startsWith('/emergency/medication-orders')) return EMERGENCY_MEDICATION_ORDERS_GUIDE;
+  if (pathname.startsWith('/emergency/procedures')) return EMERGENCY_PROCEDURES_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

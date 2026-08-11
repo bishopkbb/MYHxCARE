@@ -1,12 +1,13 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Emergency Procedures' };
+import { Suspense } from 'react';
+
+import { EmergencyProceduresWorkspace } from '@/features/emergency/components/EmergencyProceduresWorkspace';
 
 export default function ProceduresPage() {
   return (
-    <ComingSoon
-      title="Emergency Procedures"
-      description="Logging and tracking bedside emergency procedures is on the way."
-    />
+    <Suspense fallback={null}>
+      <EmergencyProceduresWorkspace />
+    </Suspense>
   );
 }

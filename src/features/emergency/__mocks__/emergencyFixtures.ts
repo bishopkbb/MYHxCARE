@@ -897,3 +897,207 @@ export function deriveLatestVitals(entryId: string): LatestVitals {
   const spo2 = 94 + Math.floor(r() * 6);
   return { bp: `${systolic}/${diastolic}`, hr, rr, spo2 };
 }
+
+const BLOOD_GROUPS = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'];
+
+export function deriveBloodGroup(entryId: string): string {
+  const r = mulberry32(hashSeed(`${entryId}-blood`))();
+  return BLOOD_GROUPS[Math.floor(r * BLOOD_GROUPS.length)]!;
+}
+
+/** No real diagnosis-capture store exists yet (Clinical Notes, the screen
+ * that would produce this, is a still-unbuilt follow-up) — a small
+ * deterministic illustrative set, same honesty pattern as
+ * PENDING_LABS_AFFECTING_MEDICATIONS above. */
+const DIAGNOSIS_POOL = [
+  'Acute Respiratory Distress',
+  'Hypertensive Emergency',
+  'Suspected Pneumonia',
+  'Acute Coronary Syndrome',
+  'Sepsis',
+  'Acute Abdomen',
+  'Closed Head Injury',
+  'Multiple Trauma',
+  'Diabetic Ketoacidosis',
+  'Status Epilepticus',
+];
+
+export function deriveActiveDiagnoses(entryId: string): string[] {
+  const r = mulberry32(hashSeed(`${entryId}-diagnoses`));
+  const count = 2 + Math.floor(r() * 2);
+  const pool = [...DIAGNOSIS_POOL];
+  const picked: string[] = [];
+  for (let i = 0; i < count && pool.length > 0; i++) {
+    const idx = Math.floor(r() * pool.length);
+    picked.push(pool.splice(idx, 1)[0]!);
+  }
+  return picked;
+}
+
+// ─── Emergency Procedures ─────────────────────────────────────────────────
+// procedureStore.ts owns the live per-patient procedure log (seeded from
+// below); this file only holds the static catalog/reference data every
+// patient shares.
+
+export type ProcedureType =
+  | 'Airway'
+  | 'Cardiac'
+  | 'Thoracic'
+  | 'Vascular Access'
+  | 'Minor Procedure'
+  | 'Neurological'
+  | 'Orthopedic'
+  | 'Genitourinary';
+
+export type ProcedureCatalogEntry = {
+  name: string;
+  type: ProcedureType;
+};
+
+export const COMMON_PROCEDURES: ProcedureCatalogEntry[] = [
+  { name: 'Endotracheal Intubation', type: 'Airway' },
+  { name: 'CPR', type: 'Cardiac' },
+  { name: 'Defibrillation', type: 'Cardiac' },
+  { name: 'Chest Tube Insertion', type: 'Thoracic' },
+  { name: 'Central Line Insertion', type: 'Vascular Access' },
+  { name: 'Lumbar Puncture', type: 'Neurological' },
+  { name: 'Wound Suturing', type: 'Minor Procedure' },
+  { name: 'Incision & Drainage', type: 'Minor Procedure' },
+  { name: 'Reduction of Dislocation', type: 'Orthopedic' },
+  { name: 'Urinary Catheterization', type: 'Genitourinary' },
+];
+
+export type ProcedureReference = {
+  indications: string;
+  equipment: string[];
+  steps: string[];
+  risks: string;
+};
+
+/** Reference detail for the 10 common procedures, shown on the Procedure
+ * Details tab. Procedures logged with a custom name (not in this catalog)
+ * fall back to a generic message rather than a fabricated protocol. */
+export const PROCEDURE_REFERENCE: Record<string, ProcedureReference> = {
+  'Endotracheal Intubation': {
+    indications: 'Airway protection, respiratory failure, or inability to maintain oxygenation.',
+    equipment: ['Laryngoscope', 'ET tube', 'Bag-valve mask', 'Suction', 'End-tidal CO2 detector'],
+    steps: [
+      'Pre-oxygenate the patient',
+      'Position airway (sniffing position)',
+      'Insert laryngoscope and visualize cords',
+      'Pass ET tube and inflate cuff',
+      'Confirm placement (auscultation + capnography)',
+      'Secure tube and connect to ventilator',
+    ],
+    risks: 'Esophageal intubation, dental trauma, hypoxia during attempt, aspiration.',
+  },
+  CPR: {
+    indications: 'Cardiac arrest — absence of pulse or normal breathing.',
+    equipment: ['Defibrillator/AED', 'Bag-valve mask', 'Backboard'],
+    steps: [
+      'Confirm unresponsiveness and absent pulse',
+      'Begin chest compressions at 100–120/min',
+      'Attach defibrillator and assess rhythm',
+      'Deliver shock if indicated, resume compressions',
+      'Establish airway and give rescue breaths per protocol',
+    ],
+    risks: 'Rib fracture, pneumothorax, incomplete recovery.',
+  },
+  Defibrillation: {
+    indications:
+      'Shockable rhythm — ventricular fibrillation or pulseless ventricular tachycardia.',
+    equipment: ['Defibrillator', 'Conductive gel pads', 'ECG monitor'],
+    steps: [
+      'Confirm shockable rhythm on monitor',
+      'Charge defibrillator to protocol energy level',
+      'Ensure all personnel clear of patient',
+      'Deliver shock',
+      'Resume CPR immediately, reassess rhythm in 2 minutes',
+    ],
+    risks: 'Skin burns, arrhythmia, injury to staff if contact during shock.',
+  },
+  'Chest Tube Insertion': {
+    indications: 'Pneumothorax, hemothorax, or pleural effusion requiring drainage.',
+    equipment: ['Chest tube kit', 'Local anesthetic', 'Underwater seal drain', 'Sutures'],
+    steps: [
+      'Identify insertion site (5th intercostal space, mid-axillary line)',
+      'Administer local anesthetic',
+      'Make incision and blunt-dissect to pleura',
+      'Insert tube and connect to drainage system',
+      'Suture in place and confirm with chest X-ray',
+    ],
+    risks: 'Bleeding, organ injury, infection, tube malposition.',
+  },
+  'Central Line Insertion': {
+    indications: 'Vascular access for fluids/medications when peripheral access is inadequate.',
+    equipment: ['Central line kit', 'Ultrasound', 'Sterile drapes', 'Local anesthetic'],
+    steps: [
+      'Position patient and identify landmarks (ultrasound-guided)',
+      'Sterile prep and drape the site',
+      'Cannulate vein using Seldinger technique',
+      'Advance catheter and secure',
+      'Confirm placement with chest X-ray',
+    ],
+    risks: 'Pneumothorax, arterial puncture, infection, catheter malposition.',
+  },
+  'Lumbar Puncture': {
+    indications: 'Suspected meningitis, subarachnoid hemorrhage, or CSF analysis.',
+    equipment: ['LP kit', 'Local anesthetic', 'Manometer', 'Specimen tubes'],
+    steps: [
+      'Position patient in lateral decubitus or sitting',
+      'Identify L3–L4 or L4–L5 interspace',
+      'Administer local anesthetic',
+      'Advance spinal needle, collect CSF',
+      'Measure opening pressure and label specimens',
+    ],
+    risks: 'Post-LP headache, bleeding, infection, herniation in raised ICP.',
+  },
+  'Wound Suturing': {
+    indications: 'Laceration requiring primary closure.',
+    equipment: ['Suture kit', 'Local anesthetic', 'Sterile saline', 'Dressing'],
+    steps: [
+      'Irrigate and clean the wound',
+      'Administer local anesthetic',
+      'Explore for foreign bodies/tendon involvement',
+      'Approximate wound edges and suture',
+      'Apply dressing and advise on wound care',
+    ],
+    risks: 'Infection, scarring, wound dehiscence.',
+  },
+  'Incision & Drainage': {
+    indications: 'Abscess requiring drainage.',
+    equipment: ['Scalpel', 'Local anesthetic', 'Packing gauze', 'Sterile dressing'],
+    steps: [
+      'Administer local anesthetic',
+      'Make incision over the point of maximal fluctuance',
+      'Express purulent material and break loculations',
+      'Irrigate cavity and pack if needed',
+      'Apply dressing and arrange follow-up',
+    ],
+    risks: 'Bleeding, incomplete drainage, recurrence, scarring.',
+  },
+  'Reduction of Dislocation': {
+    indications: 'Joint dislocation with neurovascular compromise or significant pain.',
+    equipment: ['Analgesia/procedural sedation', 'Sling or splint', 'Monitoring equipment'],
+    steps: [
+      'Assess and document neurovascular status',
+      'Administer analgesia or procedural sedation',
+      'Apply reduction maneuver appropriate to joint',
+      'Reassess neurovascular status post-reduction',
+      'Immobilize and obtain post-reduction imaging',
+    ],
+    risks: 'Neurovascular injury, fracture, failed reduction.',
+  },
+  'Urinary Catheterization': {
+    indications: 'Urinary retention, accurate output monitoring, or pre-operative need.',
+    equipment: ['Foley catheter kit', 'Sterile gloves', 'Lubricant', 'Drainage bag'],
+    steps: [
+      'Position patient and prep with antiseptic',
+      'Insert catheter using sterile technique',
+      'Inflate balloon once urine return confirmed',
+      'Connect to drainage bag and secure',
+      'Document residual volume',
+    ],
+    risks: 'Urethral trauma, infection, false passage.',
+  },
+};
