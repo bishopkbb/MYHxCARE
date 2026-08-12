@@ -338,3 +338,31 @@ export function findCriticalRow(test: LabResult): LabResultRow | undefined {
   if (!test.criticalValueLabel || !test.rows) return undefined;
   return test.rows.find((r) => test.criticalValueLabel!.startsWith(r.parameter));
 }
+
+// ── Report category — shared between Results Review and Critical Alerts. ────
+
+export type ResultCategory = 'Laboratory' | 'Imaging' | 'Cardiology' | 'Microbiology';
+
+/** No "Cardiology"/"Imaging" department exists on the canonical LabResult
+ * entity (`department` is a lab-bench taxonomy) — these are the real,
+ * derivable report categories, matched off the actual test name, same
+ * pattern as `deriveSampleType()` above. */
+export function deriveResultCategory(r: LabResult): ResultCategory {
+  const name = r.testName.toLowerCase();
+  if (name.includes('ecg')) return 'Cardiology';
+  if (name.includes('x-ray') || name.includes('ultrasound') || name.includes('scan'))
+    return 'Imaging';
+  if (r.department === 'Microbiology') return 'Microbiology';
+  return 'Laboratory';
+}
+
+/** The specific row that made this result an alert — critical results match
+ * via `findCriticalRow()`'s `criticalValueLabel`; abnormal (non-critical)
+ * results have no such label, so fall back to the first H/L-flagged row,
+ * else the first row. Real derivation, not a fabricated "primary finding"
+ * field — used by Critical Alerts to show one representative value per row. */
+export function findAlertRow(test: LabResult): LabResultRow | undefined {
+  const critical = findCriticalRow(test);
+  if (critical) return critical;
+  return test.rows?.find((r) => r.flag === 'H' || r.flag === 'L') ?? test.rows?.[0];
+}

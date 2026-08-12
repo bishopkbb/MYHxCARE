@@ -374,6 +374,35 @@ const EMERGENCY_RESULTS_REVIEW_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_CRITICAL_ALERTS_GUIDE: HelpGuide = {
+  id: 'emergency-critical-alerts',
+  title: 'Critical Alerts',
+  intro:
+    'Monitor and act on critical laboratory and imaging alerts across every patient currently in the Emergency Department.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Critical, High Priority, and Moderate Priority count unacknowledged alerts by severity. Acknowledged and Resolved (Today) track follow-up. Click "View Alerts" on any card to jump straight to that filter.',
+    },
+    {
+      heading: 'Alerts table',
+      body: 'Every abnormal or critical result for a patient currently in the ED, sorted unacknowledged-first by severity. Select a row (or use the ⋮ menu) to see full detail below.',
+    },
+    {
+      heading: 'Alert Details and Acknowledge',
+      body: 'The selected alert\'s full detail, including a recommended-action checklist. "Acknowledge Alert" marks it reviewed — this is the same review step used on Diagnostic Requests and Results Review.',
+    },
+    {
+      heading: 'Export and Print',
+      body: '"Export Alerts" downloads the currently filtered list as CSV. "Print Alert Summary" exports the stat counts and list as a PDF.',
+    },
+    {
+      heading: 'Real, shared alerts',
+      body: 'This reads the same live laboratory data every other Emergency diagnostics screen does — nothing here is patient-specific mock data.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3685,6 +3714,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/diagnostic-requests'))
     return EMERGENCY_DIAGNOSTIC_REQUESTS_GUIDE;
   if (pathname.startsWith('/emergency/results-review')) return EMERGENCY_RESULTS_REVIEW_GUIDE;
+  if (pathname.startsWith('/emergency/critical-alerts')) return EMERGENCY_CRITICAL_ALERTS_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

@@ -36,6 +36,7 @@ import { useQueueEntries } from '@/features/registration/store/registrationQueue
 import type { QueueEntry } from '@/features/registration/__mocks__/queueFixtures';
 import type { LabResultStatus } from '@/features/laboratory/__mocks__/labResultFixtures';
 import { useLabResults, type LabResult } from '@/features/laboratory/store/labResultStore';
+import { deriveResultCategory, type ResultCategory } from '@/features/laboratory/utils/labOrders';
 import {
   deriveBloodGroup,
   deriveEmergencyContact,
@@ -51,7 +52,6 @@ const CompareResultsModal = dynamic(
 );
 
 type PageState = 'loading' | 'loaded' | 'error';
-type ResultCategory = 'Laboratory' | 'Imaging' | 'Cardiology' | 'Microbiology';
 type TabKey = 'All' | ResultCategory;
 
 const FOCUS_RING =
@@ -78,19 +78,6 @@ const STATUS_CFG: Record<LabResultStatus, { label: string; color: string; bg: st
   VERIFIED: { label: 'Verified', color: '#16A34A', bg: 'rgba(22,163,74,0.1)' },
   REJECTED: { label: 'Rejected', color: '#DC2626', bg: 'rgba(220,38,38,0.1)' },
 };
-
-/** No "Cardiology"/"Imaging" department exists on the canonical LabResult
- * entity (`department` is a lab-bench taxonomy) — these are the real,
- * derivable report categories, matched off the actual test name, same
- * pattern as `deriveSampleType()` in `labOrders.ts`. */
-function deriveResultCategory(r: LabResult): ResultCategory {
-  const name = r.testName.toLowerCase();
-  if (name.includes('ecg')) return 'Cardiology';
-  if (name.includes('x-ray') || name.includes('ultrasound') || name.includes('scan'))
-    return 'Imaging';
-  if (r.department === 'Microbiology') return 'Microbiology';
-  return 'Laboratory';
-}
 
 function TrendIcon({ flag }: { flag?: 'H' | 'L' | 'A' | undefined }) {
   if (flag === 'H') return <TrendingUp style={{ width: 14, height: 14, color: '#DC2626' }} />;

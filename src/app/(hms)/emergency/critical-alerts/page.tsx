@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Critical Alerts' };
+import { EmergencyCriticalAlertsWorkspace } from '@/features/emergency/components/EmergencyCriticalAlertsWorkspace';
 
 export default function CriticalAlertsPage() {
-  return (
-    <ComingSoon
-      title="Critical Alerts"
-      description="A live feed of critical lab values, deteriorating vitals, and code alerts is on the way."
-    />
-  );
+  return <EmergencyCriticalAlertsWorkspace />;
 }

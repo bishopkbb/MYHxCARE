@@ -1196,3 +1196,73 @@ export const PROCEDURE_REFERENCE: Record<string, ProcedureReference> = {
     risks: 'Urethral trauma, infection, false passage.',
   },
 };
+
+// ─── Critical Alerts ───────────────────────────────────────────────────────
+// Small illustrative clinical-reference table, same honesty pattern as
+// PROCEDURE_REFERENCE above — a real recommended-action checklist for common
+// critical parameters, not fabricated per-patient data. Falls back to a
+// generic checklist for any parameter not in this small reference set.
+
+const CRITICAL_RESULT_RECOMMENDATIONS: Record<string, string[]> = {
+  potassium: [
+    'Assess patient for symptoms.',
+    'Check ECG and vital signs.',
+    'Consider potassium supplementation or correction per protocol.',
+    'Repeat test if clinically indicated.',
+  ],
+  sodium: [
+    'Assess neurological status.',
+    'Review IV fluids and medications affecting sodium.',
+    'Correct gradually per protocol — avoid rapid correction.',
+    'Repeat test to confirm trend.',
+  ],
+  hemoglobin: [
+    'Assess for active bleeding.',
+    'Check vital signs for hemodynamic instability.',
+    'Consider type and crossmatch / transfusion per protocol.',
+    'Identify and address the source.',
+  ],
+  troponin: [
+    'Obtain a 12-lead ECG immediately if not already done.',
+    'Assess for chest pain and cardiac symptoms.',
+    'Notify attending physician / cardiology as appropriate.',
+    'Repeat troponin per ACS protocol.',
+  ],
+  platelet: [
+    'Assess for bleeding or bruising.',
+    'Review medications affecting platelet count.',
+    'Consider platelet transfusion per protocol if actively bleeding.',
+    'Repeat count to confirm trend.',
+  ],
+  wbc: [
+    'Assess for signs of infection or sepsis.',
+    'Review vital signs and clinical status.',
+    'Consider blood cultures if infection suspected.',
+    'Correlate with clinical picture.',
+  ],
+  glucose: [
+    'Assess mental status and vital signs.',
+    'Treat per hypo-/hyperglycemia protocol as indicated.',
+    'Recheck glucose after intervention.',
+    'Review insulin/medication history.',
+  ],
+  creatinine: [
+    'Assess hydration status and urine output.',
+    'Review nephrotoxic medications.',
+    'Consider renal function trend and nephrology input if worsening.',
+    'Repeat test to confirm trend.',
+  ],
+};
+
+const DEFAULT_CRITICAL_RECOMMENDATION = [
+  'Assess patient clinically and correlate with symptoms.',
+  'Review vital signs.',
+  'Consider repeat testing to confirm the result.',
+  'Notify the attending physician if not already aware.',
+];
+
+export function deriveRecommendedActions(parameterName: string): string[] {
+  const name = parameterName.toLowerCase();
+  const key = Object.keys(CRITICAL_RESULT_RECOMMENDATIONS).find((k) => name.includes(k));
+  return key ? CRITICAL_RESULT_RECOMMENDATIONS[key]! : DEFAULT_CRITICAL_RECOMMENDATION;
+}
