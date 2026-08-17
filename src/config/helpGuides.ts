@@ -451,6 +451,34 @@ const EMERGENCY_CLINICAL_TIMELINE_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_REPORTS_GUIDE: HelpGuide = {
+  id: 'emergency-reports',
+  title: 'Emergency Reports',
+  intro: 'Generate, schedule, and export department-wide emergency operations reports.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total ED Visits, Admitted Patients, Left AMA, Average LOS, and Patient Satisfaction summarize department performance for the period, each with a trend vs. the prior 7 days.',
+    },
+    {
+      heading: 'Filters and Generate Report',
+      body: 'Narrow the catalog by report type, date range, location, or shift, then use Generate Report to create and download a new report from the current filters.',
+    },
+    {
+      heading: 'Available Reports table',
+      body: 'Every generated report with its author, generation time, date range, and format. The eye icon previews key metrics; the download icon exports it; the ⋮ menu also lets you delete reports you generated yourself.',
+    },
+    {
+      heading: 'Schedule Report',
+      body: 'Set up a recurring report delivered to chosen recipients on a daily, weekly, or monthly cadence.',
+    },
+    {
+      heading: 'Sidebar',
+      body: 'Report Overview and Top Metrics summarize the period at a glance; Quick Actions and Report Templates give shortcuts into common report types.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3765,6 +3793,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/critical-alerts')) return EMERGENCY_CRITICAL_ALERTS_GUIDE;
   if (pathname.startsWith('/emergency/visit-history')) return EMERGENCY_VISIT_HISTORY_GUIDE;
   if (pathname.startsWith('/emergency/clinical-timeline')) return EMERGENCY_CLINICAL_TIMELINE_GUIDE;
+  if (pathname.startsWith('/emergency/reports')) return EMERGENCY_REPORTS_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

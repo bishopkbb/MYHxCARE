@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Emergency Reports' };
+import { EmergencyReportsWorkspace } from '@/features/emergency/components/EmergencyReportsWorkspace';
 
 export default function ReportsPage() {
-  return (
-    <ComingSoon
-      title="Emergency Reports"
-      description="Department-wide emergency operations reporting is on the way."
-    />
-  );
+  return <EmergencyReportsWorkspace />;
 }
