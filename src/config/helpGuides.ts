@@ -507,6 +507,34 @@ const EMERGENCY_WAITING_TIME_REPORTS_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_TRIAGE_PERFORMANCE_REPORTS_GUIDE: HelpGuide = {
+  id: 'emergency-triage-performance-reports',
+  title: 'Triage Performance Reports',
+  intro: 'Monitor and evaluate triage activities, accuracy, and response times.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Patients Triaged, Average Triage Time, Triage Accuracy Rate, Re-triaged Patients, and Triage < 5 min, each with a trend vs. the prior 7 days.',
+    },
+    {
+      heading: 'Filters and Generate Report',
+      body: 'Narrow the analysis by date range, location, shift, triage nurse, or acuity level, then use Generate Report to download a PDF summary.',
+    },
+    {
+      heading: 'Volume, time, and accuracy by acuity',
+      body: "Three panels break down triage volume, average triage time, and accuracy rate across the department's four triage priority levels — filter to a single level from the Acuity Level dropdown to isolate it.",
+    },
+    {
+      heading: 'Triage Performance by Nurse',
+      body: "Per-nurse totals, average triage time overall and by acuity level, accuracy rate, re-triage rate, and the share triaged under 5 minutes. The eye icon and ⋮ menu open a profile or export that nurse's data.",
+    },
+    {
+      heading: 'Sidebar',
+      body: 'Insights highlights the busiest day, peak hour, and best performing nurse. Triage Accuracy Benchmark flags any level falling short of its recommended target in red.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3823,6 +3851,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/clinical-timeline')) return EMERGENCY_CLINICAL_TIMELINE_GUIDE;
   if (pathname.startsWith('/emergency/reports/waiting-time'))
     return EMERGENCY_WAITING_TIME_REPORTS_GUIDE;
+  if (pathname.startsWith('/emergency/reports/triage-performance'))
+    return EMERGENCY_TRIAGE_PERFORMANCE_REPORTS_GUIDE;
   if (pathname.startsWith('/emergency/reports')) return EMERGENCY_REPORTS_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
