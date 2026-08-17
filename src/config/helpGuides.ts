@@ -403,6 +403,30 @@ const EMERGENCY_CRITICAL_ALERTS_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_VISIT_HISTORY_GUIDE: HelpGuide = {
+  id: 'emergency-visit-history',
+  title: 'Emergency Visit History',
+  intro: "View a patient's past emergency department visits and encounter details.",
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: "Total ED Visits, Last Visit, Most Recent Diagnosis, Admissions, and Observations summarize this patient's emergency history at a glance.",
+    },
+    {
+      heading: 'Visit History table',
+      body: 'Every past ED visit with its chief complaint, diagnosis, disposition, provider, and visit ID. Filter by disposition or date range, or search by complaint, diagnosis, or visit ID.',
+    },
+    {
+      heading: 'Visit details',
+      body: 'The eye icon (or the ⋮ menu\'s "View Details") opens the full visit record, including vitals recorded at that visit.',
+    },
+    {
+      heading: 'Visit Legend',
+      body: 'Explains what each disposition badge means — Discharged, Admitted, Observation, Left AMA, or Transferred.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3715,6 +3739,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
     return EMERGENCY_DIAGNOSTIC_REQUESTS_GUIDE;
   if (pathname.startsWith('/emergency/results-review')) return EMERGENCY_RESULTS_REVIEW_GUIDE;
   if (pathname.startsWith('/emergency/critical-alerts')) return EMERGENCY_CRITICAL_ALERTS_GUIDE;
+  if (pathname.startsWith('/emergency/visit-history')) return EMERGENCY_VISIT_HISTORY_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

@@ -1,12 +1,13 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Emergency Visit History' };
+import { Suspense } from 'react';
+
+import { EmergencyVisitHistoryWorkspace } from '@/features/emergency/components/EmergencyVisitHistoryWorkspace';
 
 export default function VisitHistoryPage() {
   return (
-    <ComingSoon
-      title="Emergency Visit History"
-      description="A patient's past emergency department visits and outcomes are on the way."
-    />
+    <Suspense fallback={null}>
+      <EmergencyVisitHistoryWorkspace />
+    </Suspense>
   );
 }

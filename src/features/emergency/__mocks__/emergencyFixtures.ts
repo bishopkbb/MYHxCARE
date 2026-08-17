@@ -1266,3 +1266,106 @@ export function deriveRecommendedActions(parameterName: string): string[] {
   const key = Object.keys(CRITICAL_RESULT_RECOMMENDATIONS).find((k) => name.includes(k));
   return key ? CRITICAL_RESULT_RECOMMENDATIONS[key]! : DEFAULT_CRITICAL_RECOMMENDATION;
 }
+
+// ─── Emergency Visit History ───────────────────────────────────────────────
+// No cross-visit archival system exists anywhere in this build — QueueEntry
+// (registrationQueueStore.ts) models only the single currently-active visit,
+// and no store on either the Emergency or Medical Records side keeps a
+// multi-visit ED history for an arbitrary patient. This is a fully
+// illustrative, deterministic-per-patient history (same honesty pattern as
+// RECENT_ADMISSIONS above), not a real record — replace with a real
+// GET /patients/{id}/emergency-visits endpoint in Phase 6.
+
+export type VisitDisposition =
+  'Discharged' | 'Admitted' | 'Observation' | 'Left AMA' | 'Transferred';
+
+export type VisitHistoryEntry = {
+  id: string;
+  visitId: string;
+  dateTime: string; // ISO
+  chiefComplaint: string;
+  diagnosis: string;
+  disposition: VisitDisposition;
+  provider: string;
+};
+
+const VISIT_DIAGNOSES = [
+  'Acute Asthma Exacerbation',
+  'Acute Coronary Syndrome (ACS)',
+  'Malaria (Uncomplicated)',
+  'Gastroenteritis',
+  'Scalp Laceration',
+  'Pneumonia',
+  'Allergic Urticaria',
+  'Hypertensive Urgency',
+  'Acute Appendicitis',
+  'Migraine',
+  'Urinary Tract Infection',
+  'Closed Fracture, Forearm',
+];
+
+function pickDisposition(rand: number): VisitDisposition {
+  if (rand < 0.55) return 'Discharged';
+  if (rand < 0.75) return 'Admitted';
+  if (rand < 0.9) return 'Observation';
+  if (rand < 0.96) return 'Transferred';
+  return 'Left AMA';
+}
+
+/** Deterministic, illustrative ED visit history for this patient — see file
+ * header comment above. The most recent entry anchors to the patient's real
+ * current arrival time so "Last Visit" reads as today's visit; every field
+ * besides that timestamp is derived, matching every other per-entry
+ * `derive*` helper in this file (none of which is backed by a real form
+ * capture for an arbitrary generated patient either). */
+export function deriveVisitHistory(
+  entryId: string,
+  currentArrivalTime: string,
+): VisitHistoryEntry[] {
+  const r = mulberry32(hashSeed(`${entryId}-visithistory`));
+  const count = 4 + Math.floor(r() * 4); // 4–7 visits
+  const entries: VisitHistoryEntry[] = [];
+  let cursor = new Date(currentArrivalTime).getTime();
+
+  for (let i = 0; i < count; i++) {
+    const dateTime = new Date(cursor).toISOString();
+    const d = new Date(cursor);
+    const yymmdd = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`;
+    const seq = 1 + Math.floor(mulberry32(hashSeed(`${entryId}-visitid-${i}`))() * 9999);
+    entries.push({
+      id: `${entryId}-visit-${i}`,
+      visitId: `EV-${yymmdd}-${String(seq).padStart(4, '0')}`,
+      dateTime,
+      chiefComplaint: CHIEF_COMPLAINTS[Math.floor(r() * CHIEF_COMPLAINTS.length)]!,
+      diagnosis: VISIT_DIAGNOSES[Math.floor(r() * VISIT_DIAGNOSES.length)]!,
+      disposition: i === 0 ? 'Discharged' : pickDisposition(r()),
+      provider: deriveIllustrativePhysician(`${entryId}-visit-${i}`),
+    });
+    // Step back a variable number of weeks for the next (older) visit.
+    cursor -= (7 + Math.floor(r() * 45)) * 24 * 60 * 60 * 1000;
+  }
+
+  return entries;
+}
+
+const CHRONIC_CONDITION_POOL = [
+  'Asthma',
+  'Hypertension',
+  'Type 2 Diabetes',
+  'Hyperlipidemia',
+  'Chronic Kidney Disease (Stage 2)',
+  'Osteoarthritis',
+  'Sickle Cell Trait',
+];
+
+export function deriveChronicConditions(entryId: string): string[] {
+  const r = mulberry32(hashSeed(`${entryId}-chronic`));
+  const count = Math.floor(r() * 3); // 0–2
+  const pool = [...CHRONIC_CONDITION_POOL];
+  const picked: string[] = [];
+  for (let i = 0; i < count && pool.length > 0; i++) {
+    const idx = Math.floor(r() * pool.length);
+    picked.push(pool.splice(idx, 1)[0]!);
+  }
+  return picked;
+}
