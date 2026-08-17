@@ -479,6 +479,34 @@ const EMERGENCY_REPORTS_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_WAITING_TIME_REPORTS_GUIDE: HelpGuide = {
+  id: 'emergency-waiting-time-reports',
+  title: 'Waiting Time Reports',
+  intro: 'Analyze patient wait times across triage, treatment and discharge stages.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Average Total, Triage, Treatment and Discharge wait times, plus Total Patients Analyzed, each with a trend vs. the prior 7 days.',
+    },
+    {
+      heading: 'Filters and Generate Report',
+      body: 'Narrow the analysis by date range, location, shift, or triage acuity, then use Generate Report to download a PDF summary of the current filters.',
+    },
+    {
+      heading: 'Average Wait Time Trend',
+      body: 'Hover the chart for exact values at any point. Click a legend item to hide or show that stage, and switch between Daily and Weekly grouping.',
+    },
+    {
+      heading: 'Average Wait Time by Triage Acuity',
+      body: "A donut broken down by the department's four triage priority levels — filter to a single level from the Triage Acuity dropdown to isolate it.",
+    },
+    {
+      heading: 'Sidebar',
+      body: 'Insights highlights the busiest day, peak hours, longest wait, and week-over-week improvement. Wait Time Benchmarks flags any stage exceeding its recommended target in red.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3793,6 +3821,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/critical-alerts')) return EMERGENCY_CRITICAL_ALERTS_GUIDE;
   if (pathname.startsWith('/emergency/visit-history')) return EMERGENCY_VISIT_HISTORY_GUIDE;
   if (pathname.startsWith('/emergency/clinical-timeline')) return EMERGENCY_CLINICAL_TIMELINE_GUIDE;
+  if (pathname.startsWith('/emergency/reports/waiting-time'))
+    return EMERGENCY_WAITING_TIME_REPORTS_GUIDE;
   if (pathname.startsWith('/emergency/reports')) return EMERGENCY_REPORTS_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;

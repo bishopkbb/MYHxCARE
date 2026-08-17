@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Waiting Time Reports' };
+import { EmergencyWaitingTimeReportsWorkspace } from '@/features/emergency/components/EmergencyWaitingTimeReportsWorkspace';
 
 export default function WaitingTimeReportsPage() {
-  return (
-    <ComingSoon
-      title="Waiting Time Reports"
-      description="Reporting on patient wait times across triage, treatment, and disposition is on the way."
-    />
-  );
+  return <EmergencyWaitingTimeReportsWorkspace />;
 }
