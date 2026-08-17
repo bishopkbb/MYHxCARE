@@ -427,6 +427,30 @@ const EMERGENCY_VISIT_HISTORY_GUIDE: HelpGuide = {
   ],
 };
 
+const EMERGENCY_CLINICAL_TIMELINE_GUIDE: HelpGuide = {
+  id: 'emergency-clinical-timeline',
+  title: 'Clinical Timeline',
+  intro: "A comprehensive chronological view of a patient's emergency care journey.",
+  sections: [
+    {
+      heading: 'A real, aggregated timeline',
+      body: 'Every event — arrival, diagnoses, clinical notes, procedures, medication orders, and lab/imaging results — is pulled live from the same stores those screens write to, not a separate log.',
+    },
+    {
+      heading: 'Filters and search',
+      body: 'Filter by event type, provider, or date range, or search by title/summary. Timeline Quick Filters in the sidebar jump straight to a category.',
+    },
+    {
+      heading: 'Expanding events',
+      body: 'Events with extra detail show a chevron — click it to expand the full note text, discontinuation reason, or comment.',
+    },
+    {
+      heading: 'Print Timeline',
+      body: 'Exports the currently filtered events as a PDF via the same export helper used across Emergency.',
+    },
+  ],
+};
+
 const PATIENTS_GUIDE: HelpGuide = {
   id: 'patients',
   title: 'Patient Register',
@@ -3740,6 +3764,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency/results-review')) return EMERGENCY_RESULTS_REVIEW_GUIDE;
   if (pathname.startsWith('/emergency/critical-alerts')) return EMERGENCY_CRITICAL_ALERTS_GUIDE;
   if (pathname.startsWith('/emergency/visit-history')) return EMERGENCY_VISIT_HISTORY_GUIDE;
+  if (pathname.startsWith('/emergency/clinical-timeline')) return EMERGENCY_CLINICAL_TIMELINE_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

@@ -1,12 +1,13 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Clinical Timeline' };
+import { Suspense } from 'react';
+
+import { EmergencyClinicalTimelineWorkspace } from '@/features/emergency/components/EmergencyClinicalTimelineWorkspace';
 
 export default function ClinicalTimelinePage() {
   return (
-    <ComingSoon
-      title="Clinical Timeline"
-      description="A chronological view of every event in a patient's emergency encounter is on the way."
-    />
+    <Suspense fallback={null}>
+      <EmergencyClinicalTimelineWorkspace />
+    </Suspense>
   );
 }

@@ -1369,3 +1369,42 @@ export function deriveChronicConditions(entryId: string): string[] {
   }
   return picked;
 }
+
+// ─── Clinical Timeline ─────────────────────────────────────────────────────
+// Every other event type on the Clinical Timeline screen is a real,
+// live-computed projection over an already-built store (triage, clinical
+// notes, procedures, medication orders, lab/imaging results) — no fixture
+// needed there. The one exception: no timestamped vitals-history store
+// exists for Emergency (deriveLatestVitals is a single "latest" snapshot,
+// not a series), so "Vital Signs Recorded" checkpoints are illustrative,
+// same honesty pattern as deriveVisitHistory above.
+
+export type VitalsCheckpoint = {
+  time: string; // ISO
+  bp: string;
+  hr: number;
+  rr: number;
+  spo2: number;
+  temp: number;
+};
+
+export function deriveVitalsCheckpoints(entryId: string, arrivalTime: string): VitalsCheckpoint[] {
+  const base = new Date(arrivalTime).getTime();
+  return [0, 1].map((i) => {
+    const r = mulberry32(hashSeed(`${entryId}-vitalscheckpoint-${i}`));
+    const systolic = 100 + Math.floor(r() * 45);
+    const diastolic = 60 + Math.floor(r() * 25);
+    const hr = 65 + Math.floor(r() * 45);
+    const rr = 14 + Math.floor(r() * 12);
+    const spo2 = 94 + Math.floor(r() * 6);
+    const temp = Math.round((36.1 + r() * 2.2) * 10) / 10;
+    return {
+      time: new Date(base + (5 + i * 12) * 60_000).toISOString(),
+      bp: `${systolic}/${diastolic}`,
+      hr,
+      rr,
+      spo2,
+      temp,
+    };
+  });
+}
