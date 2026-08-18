@@ -82,36 +82,71 @@ export function AvatarProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** Approximate decoded byte size of a base64 data URL, without decoding it. */
+function estimateDataUrlBytes(dataUrl: string): number {
+  const commaIdx = dataUrl.indexOf(',');
+  const base64Length = commaIdx === -1 ? dataUrl.length : dataUrl.length - commaIdx - 1;
+  return Math.ceil((base64Length * 3) / 4);
+}
+
 /**
  * Reads an image file, crops it to a square, and downscales it to a small
  * JPEG data URL. Keeps every avatar a consistent size and comfortably under
  * localStorage's quota regardless of the source photo's resolution.
+ *
+ * When `maxBytes` is given, the (targetSize, quality) pair is only a
+ * starting point: quality is stepped down first (cheap, keeps resolution),
+ * then the target dimension (last resort), until the encoded result fits
+ * under the budget or a floor that keeps the photo recognisable is hit. This
+ * is what lets an upload always succeed regardless of the source file's
+ * size, instead of rejecting large photos outright — a 12MB phone photo and
+ * a 200KB one both end up comfortably under the limit.
  */
 export function resizeImageToDataUrl(
   file: File,
   targetSize = 256,
   quality = 0.85,
+  maxBytes?: number,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const objectUrl = URL.createObjectURL(file);
     const img = new Image();
 
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = targetSize;
-      canvas.height = targetSize;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        URL.revokeObjectURL(objectUrl);
-        reject(new Error('Canvas context unavailable'));
-        return;
+      function draw(size: number, q: number): string {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas context unavailable');
+        const scale = Math.max(size / img.width, size / img.height);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+        return canvas.toDataURL('image/jpeg', q);
       }
-      const scale = Math.max(targetSize / img.width, targetSize / img.height);
-      const w = img.width * scale;
-      const h = img.height * scale;
-      ctx.drawImage(img, (targetSize - w) / 2, (targetSize - h) / 2, w, h);
-      URL.revokeObjectURL(objectUrl);
-      resolve(canvas.toDataURL('image/jpeg', quality));
+
+      try {
+        let size = targetSize;
+        let q = quality;
+        let dataUrl = draw(size, q);
+
+        if (maxBytes) {
+          const MIN_QUALITY = 0.4;
+          const MIN_SIZE = 96;
+          while (estimateDataUrlBytes(dataUrl) > maxBytes && (q > MIN_QUALITY || size > MIN_SIZE)) {
+            if (q > MIN_QUALITY) q = Math.max(MIN_QUALITY, q - 0.1);
+            else size = Math.max(MIN_SIZE, Math.floor(size * 0.75));
+            dataUrl = draw(size, q);
+          }
+        }
+
+        URL.revokeObjectURL(objectUrl);
+        resolve(dataUrl);
+      } catch (err) {
+        URL.revokeObjectURL(objectUrl);
+        reject(err instanceof Error ? err : new Error('Could not process that image'));
+      }
     };
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);

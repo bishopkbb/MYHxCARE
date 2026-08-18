@@ -159,14 +159,13 @@ export function PatientInformationStep({
       toast.error('Invalid file', 'Please choose an image file (JPG, PNG, or WebP).');
       return;
     }
-    if (file.size > MAX_PHOTO_BYTES) {
-      toast.error('Image too large', 'Please choose an image under 2MB.');
-      return;
-    }
 
     setUploadingPhoto(true);
     try {
-      const dataUrl = await resizeImageToDataUrl(file, 400);
+      // Always resized down to fit MAX_PHOTO_BYTES regardless of the source
+      // file's size — a full-resolution phone photo and a pre-shrunk one
+      // both succeed, so there's nothing for the officer to manually resize.
+      const dataUrl = await resizeImageToDataUrl(file, 400, 0.85, MAX_PHOTO_BYTES);
       onPhotoUploaded(dataUrl);
     } catch {
       toast.error('Upload failed', 'Could not read that image. Please try another file.');
@@ -487,7 +486,7 @@ export function PatientInformationStep({
               Upload Patient Photograph
             </p>
             <p className="mt-0.5" style={{ fontSize: 14, color: '#8A98A3' }}>
-              JPG, PNG or WebP. Max size 2MB.
+              JPG, PNG or WebP — any size, we&apos;ll optimize it automatically.
             </p>
             <button
               type="button"
