@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, Camera, RefreshCw, Video, X } from 'lucide-react';
+import { AlertTriangle, Camera, RefreshCw, SwitchCamera, Video, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { FormSelect } from '@components/shared/FormSelect';
@@ -14,6 +14,7 @@ const FOCUS_RING =
 const CAPTURE_SIZE = 400;
 
 type CameraState = 'requesting' | 'live' | 'denied' | 'unavailable' | 'insecure' | 'error';
+type FacingMode = 'user' | 'environment';
 
 /** Waits for the video element to actually have a frame ready — assigning
  * `.srcObject` alone doesn't guarantee a frame is decoded yet, and calling
@@ -54,6 +55,12 @@ export function TakePhotoModal({
   const [selectedDeviceId, setSelectedDeviceId] = useState('');
   const [retryToken, setRetryToken] = useState(0);
   const [errorDetail, setErrorDetail] = useState('');
+  // Which camera was requested (drives every deviceId-less getUserMedia
+  // call) vs. which one the browser actually delivered (drives mirroring —
+  // see startStream). They can differ on a single-camera device that has no
+  // back camera to switch to at all.
+  const [facingMode, setFacingMode] = useState<FacingMode>('user');
+  const [activeFacing, setActiveFacing] = useState<FacingMode>('user');
 
   function stopCurrentStream() {
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -73,7 +80,10 @@ export function TakePhotoModal({
     if (activeDeviceId) setSelectedDeviceId(activeDeviceId);
   }
 
-  async function startStream(deviceId?: string) {
+  async function startStream(opts?: { deviceId?: string; facing?: FacingMode }) {
+    const deviceId = opts?.deviceId;
+    const facing = opts?.facing ?? facingMode;
+
     // getUserMedia is only exposed at all in a secure context (HTTPS, or
     // localhost) — on plain HTTP over a LAN IP (a common way this gets
     // tested against a second device) `navigator.mediaDevices` is simply
@@ -94,14 +104,16 @@ export function TakePhotoModal({
       let stream: MediaStream;
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: 'user' },
+          video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: facing },
           audio: false,
         });
       } catch (err) {
         // Some devices/browsers reject a `facingMode` constraint they don't
         // recognise as over-constrained rather than just ignoring it — retry
         // once with a bare `video: true` before treating this as a real
-        // failure, rather than giving up on the very first attempt.
+        // failure, rather than giving up on the very first attempt. This is
+        // also what a device with only one camera (no back camera to switch
+        // to) falls back to when `facing: 'environment'` is requested.
         const canFallback =
           !deviceId && err instanceof DOMException && err.name === 'OverconstrainedError';
         if (!canFallback) throw err;
@@ -121,7 +133,20 @@ export function TakePhotoModal({
         }
       }
       setCameraState('live');
-      const activeId = stream.getVideoTracks()[0]?.getSettings().deviceId;
+      const settings = stream.getVideoTracks()[0]?.getSettings();
+      // Mirroring should only ever apply to a front ("selfie") camera — a
+      // back camera showing the world flipped is exactly the "camera is
+      // inverted" bug. Trust the browser's own report of which physical
+      // camera it gave us when it provides one (most mobile browsers do);
+      // a deviceId-driven pick (the desktop webcam dropdown) has no facing
+      // concept at all, so default that to 'user' to keep the mirrored
+      // preview desktop webcams have always had. Otherwise trust what was
+      // requested, since nothing contradicts it.
+      const reported = settings?.facingMode;
+      setActiveFacing(
+        reported === 'environment' || reported === 'user' ? reported : deviceId ? 'user' : facing,
+      );
+      const activeId = settings?.deviceId;
       await refreshDeviceList(activeId ?? deviceId);
     } catch (err) {
       const name = err instanceof DOMException ? err.name : '';
@@ -192,11 +217,18 @@ export function TakePhotoModal({
 
   function handleDeviceChange(deviceId: string) {
     setSelectedDeviceId(deviceId);
-    startStream(deviceId);
+    startStream({ deviceId });
   }
 
   function handleRetry() {
     setRetryToken((t) => t + 1);
+  }
+
+  function handleSwitchCamera() {
+    const next: FacingMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(next);
+    setSelectedDeviceId('');
+    startStream({ facing: next });
   }
 
   function handleCapture() {
@@ -217,11 +249,17 @@ export function TakePhotoModal({
     const scale = Math.max(CAPTURE_SIZE / video.videoWidth, CAPTURE_SIZE / video.videoHeight);
     const w = video.videoWidth * scale;
     const h = video.videoHeight * scale;
-    // Mirror horizontally so the preview matches what the officer sees of
-    // themselves (or the patient) in the live feed, not a flipped capture.
-    ctx.translate(CAPTURE_SIZE, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, CAPTURE_SIZE - (CAPTURE_SIZE - w) / 2 - w, (CAPTURE_SIZE - h) / 2, w, h);
+    if (activeFacing === 'user') {
+      // Mirror horizontally so the preview matches what the officer sees of
+      // themselves (or the patient) in the live feed, not a flipped
+      // capture. A back camera shows the world as-is and must NOT be
+      // mirrored — flipping it would capture text and scenes backwards.
+      ctx.translate(CAPTURE_SIZE, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, CAPTURE_SIZE - (CAPTURE_SIZE - w) / 2 - w, (CAPTURE_SIZE - h) / 2, w, h);
+    } else {
+      ctx.drawImage(video, (CAPTURE_SIZE - w) / 2, (CAPTURE_SIZE - h) / 2, w, h);
+    }
 
     setCapturedDataUrl(canvas.toDataURL('image/jpeg', 0.85));
   }
@@ -298,7 +336,7 @@ export function TakePhotoModal({
             )}
 
             <div
-              className="flex w-full items-center justify-center overflow-hidden"
+              className="relative flex w-full items-center justify-center overflow-hidden"
               style={{
                 aspectRatio: '1 / 1',
                 borderRadius: 12,
@@ -306,6 +344,17 @@ export function TakePhotoModal({
                 maxWidth: 320,
               }}
             >
+              {cameraState === 'live' && !capturedDataUrl && (
+                <button
+                  type="button"
+                  onClick={handleSwitchCamera}
+                  aria-label="Switch camera"
+                  className={`absolute top-2.5 right-2.5 z-10 flex size-11 items-center justify-center rounded-full transition-colors duration-150 hover:bg-white/20 ${FOCUS_RING}`}
+                  style={{ background: 'rgba(13,38,48,0.55)' }}
+                >
+                  <SwitchCamera style={{ width: 18, height: 18, color: '#FFFFFF' }} />
+                </button>
+              )}
               {cameraState === 'requesting' && (
                 <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }}>
                   Requesting camera access…
@@ -349,7 +398,7 @@ export function TakePhotoModal({
                   className="size-full object-cover"
                   style={{
                     display: cameraState === 'live' ? 'block' : 'none',
-                    transform: 'scaleX(-1)',
+                    transform: activeFacing === 'user' ? 'scaleX(-1)' : 'none',
                   }}
                 />
               )}
@@ -358,7 +407,11 @@ export function TakePhotoModal({
             {cameraState === 'live' && (
               <p className="flex items-center gap-1.5" style={{ fontSize: 14, color: '#8A98A3' }}>
                 <Video style={{ width: 14, height: 14 }} />
-                {capturedDataUrl ? 'Review the photo below.' : 'Centre the face in the frame.'}
+                {capturedDataUrl
+                  ? 'Review the photo below.'
+                  : activeFacing === 'environment'
+                    ? 'Centre the subject in the frame.'
+                    : 'Centre the face in the frame.'}
               </p>
             )}
           </div>
