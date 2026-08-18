@@ -42,8 +42,16 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   {
+    // camera=(self): Registration's "Take Photo" (TakePhotoModal.tsx) calls
+    // getUserMedia for the patient/staff photo capture — an empty camera
+    // allowlist here blocks it at the browser level for every route,
+    // permanently, no matter what the user allows in their browser's own
+    // per-site camera permission. That mismatch is what "Camera access was
+    // denied... Allow camera access in your browser settings, then try
+    // again" was actually describing — the browser-settings fix it points to
+    // can never succeed while this header still says camera=().
     key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(self)',
+    value: 'camera=(self), microphone=(), geolocation=(), payment=(), usb=(), fullscreen=(self)',
   },
   // 0 = disable the legacy XSS auditor (deprecated, exploitable). CSP handles XSS.
   { key: 'X-XSS-Protection', value: '0' },
