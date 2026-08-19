@@ -132,6 +132,59 @@ const BILLING_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_ACCOUNTS_GUIDE: HelpGuide = {
+  id: 'billing-accounts',
+  title: 'Billing Accounts',
+  intro: 'Search, filter, and manage every patient financial account and balance.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Accounts, Total Billed, Total Paid, Outstanding Balance, and Overdue Accounts — all computed live from the current account list.',
+    },
+    {
+      heading: 'Search & Filter',
+      body: 'Search by patient name, MRN, phone, or a secondary ID. Narrow by Department or Account Status, or open More Filters to narrow by how long a balance has been outstanding.',
+    },
+    {
+      heading: 'Account status',
+      body: 'Paid (fully settled), Partial (a balance remains but is within 30 days), or Overdue (outstanding balance older than 30 days).',
+    },
+    {
+      heading: 'Patient Account Overview',
+      body: 'Select a row to open the account panel — billed/paid/outstanding totals, and shortcuts to Invoice History, Payment History, Refunds, Create Invoice, and Post Payment.',
+    },
+    {
+      heading: 'New Account',
+      body: 'Creates a new billing account for a patient with an optional opening balance.',
+    },
+  ],
+};
+
+const BILLING_ACCOUNT_DETAIL_GUIDE: HelpGuide = {
+  id: 'billing-account-detail',
+  title: 'Billing Account',
+  intro:
+    "A single patient's full billing account — balances, invoices, payments, adjustments, refunds, and documents.",
+  sections: [
+    {
+      heading: 'Summary',
+      body: 'Total Billed, Total Paid, and Outstanding Balance for this account, plus its active/inactive and payment status.',
+    },
+    {
+      heading: 'Invoice & Payment History',
+      body: 'Every invoice and payment on the account, each exportable as CSV independently of the other tabs.',
+    },
+    {
+      heading: 'Adjustments & Refunds',
+      body: 'Discounts, write-offs, corrections, and any refunds issued against this account.',
+    },
+    {
+      heading: 'Documents',
+      body: 'Invoices, receipts, claim forms, and statements on file — select the download icon on any row.',
+    },
+  ],
+};
+
 const EMERGENCY_PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'emergency-patient-queue',
   title: 'Patient Queue',
@@ -3883,6 +3936,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
     return EMERGENCY_TRIAGE_PERFORMANCE_REPORTS_GUIDE;
   if (pathname.startsWith('/emergency/reports')) return EMERGENCY_REPORTS_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
+  if (/^\/billing\/accounts\/[^/]+/.test(pathname)) return BILLING_ACCOUNT_DETAIL_GUIDE;
+  if (pathname.startsWith('/billing/accounts')) return BILLING_ACCOUNTS_GUIDE;
   if (pathname.startsWith('/billing')) return BILLING_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

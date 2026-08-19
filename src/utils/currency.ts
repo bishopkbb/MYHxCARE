@@ -20,6 +20,15 @@ export function formatCurrency(amount: number): string {
 }
 
 /**
+ * Formats a naira amount with no decimal places, e.g. 1234.5 → "₦1,235".
+ * Used for whole-naira summary figures (dashboards, account balances) where
+ * kobo precision isn't shown.
+ */
+export function formatCurrencyWhole(amount: number): string {
+  return `${CURRENCY_SYMBOL}${Math.round(amount).toLocaleString('en-NG')}`;
+}
+
+/**
  * Formats a naira amount compactly for tight spaces like stat cards, e.g.
  * 46970475 → "₦46.97M", 66654 → "₦66.65K". Falls back to the full amount
  * only below 1,000, where compact notation wouldn't actually save space.

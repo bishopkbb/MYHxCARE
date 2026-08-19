@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Billing Accounts' };
+import { BillingAccountsWorkspace } from '@/features/billing/components/BillingAccountsWorkspace';
 
 export default function BillingAccountsPage() {
-  return (
-    <ComingSoon
-      title="Billing Accounts"
-      description="A searchable ledger of every patient's billing account — balance, charge history, and account status — is on the way."
-    />
-  );
+  return <BillingAccountsWorkspace />;
 }

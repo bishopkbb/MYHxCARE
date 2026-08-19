@@ -25,7 +25,7 @@ import { StatCardTrend } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
-import { formatCurrencyCompact } from '@/utils/currency';
+import { formatCurrencyCompact, formatCurrencyWhole } from '@/utils/currency';
 import { formatHumanDate } from '@/utils/datetime';
 import {
   BILLING_DEPARTMENTS,
@@ -51,10 +51,6 @@ type ChartTab = 'today' | 'week' | 'month' | 'year';
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
-
-function nairaWhole(n: number): string {
-  return `₦${Math.round(n).toLocaleString('en-NG')}`;
-}
 
 function toDateInputValue(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -252,7 +248,7 @@ function RevenueAreaChart({ data }: { data: TrendPoint[] }) {
           >
             <p style={{ fontSize: 14, color: '#B8D8E0' }}>{hovered.label}</p>
             <p className="font-sans font-semibold" style={{ fontSize: 14, color: '#FFFFFF' }}>
-              {nairaWhole(hovered.value)}
+              {formatCurrencyWhole(hovered.value)}
             </p>
           </div>
         )}
@@ -570,7 +566,7 @@ export function BillingDashboardWorkspace() {
 
               <div className="mt-3 flex flex-wrap items-baseline gap-2">
                 <span className="font-display font-bold" style={{ fontSize: 28, color: '#0D2630' }}>
-                  {nairaWhole(periodTotal)}
+                  {formatCurrencyWhole(periodTotal)}
                 </span>
                 <span style={{ fontSize: 14, color: '#8A98A3' }}>{periodLabel}</span>
                 <span
@@ -742,7 +738,7 @@ export function BillingDashboardWorkspace() {
                             className="w-24 shrink-0 text-center font-sans font-medium"
                             style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            {nairaWhole(row.amount)}
+                            {formatCurrencyWhole(row.amount)}
                           </span>
                           <div className="flex w-32 shrink-0 items-center justify-center gap-1.5">
                             <div
@@ -775,7 +771,7 @@ export function BillingDashboardWorkspace() {
                           className="w-24 shrink-0 text-center font-sans font-semibold"
                           style={{ fontSize: 14, color: '#0D2630' }}
                         >
-                          {nairaWhole(outstandingTotalAmount)}
+                          {formatCurrencyWhole(outstandingTotalAmount)}
                         </span>
                         <span
                           className="w-32 shrink-0 text-center font-sans font-semibold"
@@ -820,7 +816,7 @@ export function BillingDashboardWorkspace() {
                             className="shrink-0 font-sans font-medium whitespace-nowrap"
                             style={{ fontSize: 14, color: '#0D2630' }}
                           >
-                            {nairaWhole(row.revenue)}
+                            {formatCurrencyWhole(row.revenue)}
                           </span>
                           <span
                             className="w-14 shrink-0 text-right"
@@ -841,7 +837,7 @@ export function BillingDashboardWorkspace() {
                           className="font-sans font-semibold"
                           style={{ fontSize: 14, color: '#0D2630' }}
                         >
-                          {nairaWhole(departmentsTotal)}
+                          {formatCurrencyWhole(departmentsTotal)}
                         </span>
                         <span
                           className="w-14 text-right font-sans font-semibold"
