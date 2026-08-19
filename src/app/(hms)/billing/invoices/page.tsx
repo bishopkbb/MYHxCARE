@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Invoices' };
+import { InvoicesWorkspace } from '@/features/billing/components/InvoicesWorkspace';
 
 export default function BillingInvoicesPage() {
-  return (
-    <ComingSoon
-      title="Invoices"
-      description="Invoice generation, itemized service charges, and NHIS/insurance claim invoicing are on the way."
-    />
-  );
+  return <InvoicesWorkspace />;
 }

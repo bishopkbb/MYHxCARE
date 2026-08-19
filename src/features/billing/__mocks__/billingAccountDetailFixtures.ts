@@ -9,7 +9,7 @@
  * `GET /billing/accounts/:mrn/*` endpoints in Phase 6.
  */
 
-import type { BillingAccount } from './billingAccountsFixtures';
+import { BILLING_ACCOUNTS, type BillingAccount } from './billingAccountsFixtures';
 
 function hashSeed(input: string): number {
   let h = 0;
@@ -45,13 +45,17 @@ function daysAgo(n: number): string {
   return new Date(Date.now() - n * 24 * 60 * 60 * 1000).toISOString();
 }
 
-export type InvoiceStatus = 'Paid' | 'Partial' | 'Unpaid';
+export type InvoiceStatus =
+  'Draft' | 'Issued' | 'Partially Paid' | 'Paid' | 'Overdue' | 'Cancelled';
 export type InvoiceRecord = {
   id: string;
   invoiceNumber: string;
   date: string;
+  dueDate: string;
   description: string;
+  service: string;
   amount: number;
+  paid: number;
   status: InvoiceStatus;
 };
 
@@ -108,6 +112,29 @@ const INVOICE_DESCRIPTIONS = [
   'Procedure fee',
   'Follow-up consultation',
 ];
+// One service per description above, same index — lets the Invoices screen
+// offer a "Service" filter without inventing a second, disconnected list.
+const INVOICE_SERVICES = [
+  'Consultation',
+  'Laboratory Tests',
+  'Pharmacy Dispensing',
+  'Ward Admission',
+  'Imaging',
+  'Procedures',
+  'Consultation',
+];
+const INVOICE_DUE_DAYS = 7;
+// Deduplicated, same order as first appearance in INVOICE_SERVICES — the
+// Invoices screen's Service filter options.
+export const INVOICE_SERVICE_OPTIONS = Array.from(new Set(INVOICE_SERVICES));
+export const INVOICE_STATUS_OPTIONS: InvoiceStatus[] = [
+  'Draft',
+  'Issued',
+  'Partially Paid',
+  'Paid',
+  'Overdue',
+  'Cancelled',
+];
 const PAYMENT_METHODS = ['POS', 'Bank Transfer', 'Cash', 'Card', 'Online'];
 const ADJUSTMENT_TYPES: AdjustmentType[] = ['Discount', 'Write-off', 'Correction'];
 const ADJUSTMENT_REASONS: Record<AdjustmentType, string[]> = {
@@ -133,21 +160,39 @@ export function buildAccountDetail(account: BillingAccount): AccountDetail {
 
   const invoiceCount = Math.max(1, account.invoiceCount);
   const invoiceAmounts = splitAmount(account.totalBilled, invoiceCount, rand);
+  const now = Date.now();
   let remainingPaid = account.totalPaid;
   const invoices: InvoiceRecord[] = invoiceAmounts.map((amount, i) => {
     const paidTowards = Math.min(amount, Math.max(0, remainingPaid));
     remainingPaid -= paidTowards;
-    const status: InvoiceStatus =
-      paidTowards >= amount ? 'Paid' : paidTowards > 0 ? 'Partial' : 'Unpaid';
+    const descIdx =
+      (i + Math.floor(rand() * INVOICE_DESCRIPTIONS.length)) % INVOICE_DESCRIPTIONS.length;
+    const invoiceDate = daysAgo(account.daysOutstanding + i * 6 + 2);
+    const dueDate = new Date(
+      new Date(invoiceDate).getTime() + INVOICE_DUE_DAYS * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    const isOverdue = paidTowards < amount && new Date(dueDate).getTime() < now;
+    // Small, deterministic slice of invoices sit in Draft/Cancelled instead
+    // of the payment-driven lifecycle — matches a real billing system where
+    // not every invoice is even issued yet, or gets voided outright.
+    const lifecycleRoll = rand();
+    let status: InvoiceStatus;
+    if (lifecycleRoll < 0.02) status = 'Draft';
+    else if (lifecycleRoll < 0.035) status = 'Cancelled';
+    else if (paidTowards >= amount) status = 'Paid';
+    else if (isOverdue) status = 'Overdue';
+    else if (paidTowards > 0) status = 'Partially Paid';
+    else status = 'Issued';
+
     return {
       id: `${account.id}-inv-${i + 1}`,
       invoiceNumber: `INV-${String(2400 + Math.floor(rand() * 200) + i).padStart(5, '0')}`,
-      date: daysAgo(account.daysOutstanding + i * 6 + 2),
-      description:
-        INVOICE_DESCRIPTIONS[
-          (i + Math.floor(rand() * INVOICE_DESCRIPTIONS.length)) % INVOICE_DESCRIPTIONS.length
-        ]!,
+      date: invoiceDate,
+      dueDate,
+      description: INVOICE_DESCRIPTIONS[descIdx]!,
+      service: INVOICE_SERVICES[descIdx]!,
       amount,
+      paid: status === 'Cancelled' ? 0 : paidTowards,
       status,
     };
   });
@@ -198,4 +243,33 @@ export function buildAccountDetail(account: BillingAccount): AccountDetail {
   }));
 
   return { invoices, payments, adjustments, refunds, documents };
+}
+
+export type InvoiceWithAccount = InvoiceRecord & {
+  patientName: string;
+  mrn: string;
+  secondaryId?: string | undefined;
+  department: string;
+  phone: string;
+  email: string;
+};
+
+/** Every invoice across every account, flattened for the department-wide
+ * Invoices screen. Built from the exact same `buildAccountDetail` each
+ * account's own "View Full Account" page uses — one source of truth, so an
+ * invoice never reads differently in the two places it appears. */
+export function buildAllInvoices(
+  accounts: BillingAccount[] = BILLING_ACCOUNTS,
+): InvoiceWithAccount[] {
+  return accounts.flatMap((account) =>
+    buildAccountDetail(account).invoices.map((inv) => ({
+      ...inv,
+      patientName: account.patientName,
+      mrn: account.mrn,
+      secondaryId: account.secondaryId,
+      department: account.department,
+      phone: account.phone,
+      email: account.email,
+    })),
+  );
 }

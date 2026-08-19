@@ -185,6 +185,38 @@ const BILLING_ACCOUNT_DETAIL_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_INVOICES_GUIDE: HelpGuide = {
+  id: 'billing-invoices',
+  title: 'Invoices',
+  intro: 'Create, manage, and track every patient invoice across the department.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Invoices, Total Billed, Total Paid, Outstanding, and Overdue Invoices — all computed live from the current invoice list.',
+    },
+    {
+      heading: 'Status tabs',
+      body: 'Switch between All Invoices and each lifecycle stage — Draft, Issued, Partially Paid, Paid, Overdue, Cancelled. Each tab shows a live count.',
+    },
+    {
+      heading: 'Search & Filter',
+      body: 'Search by invoice number, patient name, or MRN. Narrow by Department, Service, Status, or a date range. "Clear all filters" appears whenever a filter is hiding every row.',
+    },
+    {
+      heading: 'Invoice Details',
+      body: 'Select a row to open the invoice panel — amount/paid/balance, due date, and shortcuts to view, print, or post a payment against the invoice.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: 'Send a payment reminder, download the invoice, view its payment history, cancel it, or view its audit trail.',
+    },
+    {
+      heading: 'Create Invoice',
+      body: 'Creates a new invoice for a patient with a service, amount, and due date.',
+    },
+  ],
+};
+
 const EMERGENCY_PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'emergency-patient-queue',
   title: 'Patient Queue',
@@ -3938,6 +3970,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
   if (/^\/billing\/accounts\/[^/]+/.test(pathname)) return BILLING_ACCOUNT_DETAIL_GUIDE;
   if (pathname.startsWith('/billing/accounts')) return BILLING_ACCOUNTS_GUIDE;
+  if (pathname.startsWith('/billing/invoices')) return BILLING_INVOICES_GUIDE;
   if (pathname.startsWith('/billing')) return BILLING_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

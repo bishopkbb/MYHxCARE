@@ -26,7 +26,10 @@ import {
   deriveStatus,
   type AccountStatus,
 } from '@/features/billing/__mocks__/billingAccountsFixtures';
-import { buildAccountDetail } from '@/features/billing/__mocks__/billingAccountDetailFixtures';
+import {
+  buildAccountDetail,
+  type InvoiceStatus,
+} from '@/features/billing/__mocks__/billingAccountDetailFixtures';
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
@@ -37,10 +40,13 @@ const STATUS_CFG: Record<AccountStatus, { color: string; border: string; bg: str
   Overdue: { color: '#DC2626', border: 'rgba(220,38,38,0.35)', bg: 'rgba(220,38,38,0.08)' },
 };
 
-const INVOICE_STATUS_CFG: Record<string, { color: string; bg: string }> = {
+const INVOICE_STATUS_CFG: Record<InvoiceStatus, { color: string; bg: string }> = {
+  Draft: { color: '#4A7080', bg: 'rgba(74,112,128,0.1)' },
+  Issued: { color: '#2563EB', bg: 'rgba(37,99,235,0.1)' },
+  'Partially Paid': { color: '#D97706', bg: 'rgba(217,119,6,0.1)' },
   Paid: { color: '#16A34A', bg: 'rgba(22,163,74,0.1)' },
-  Partial: { color: '#D97706', bg: 'rgba(217,119,6,0.1)' },
-  Unpaid: { color: '#DC2626', bg: 'rgba(220,38,38,0.1)' },
+  Overdue: { color: '#DC2626', bg: 'rgba(220,38,38,0.1)' },
+  Cancelled: { color: '#8A98A3', bg: 'rgba(138,152,163,0.12)' },
 };
 const REFUND_STATUS_CFG: Record<string, { color: string; bg: string }> = {
   Pending: { color: '#D97706', bg: 'rgba(217,119,6,0.1)' },
