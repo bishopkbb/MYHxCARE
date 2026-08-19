@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Finance & Billing' };
+import { BillingDashboardWorkspace } from '@/features/billing/components/BillingDashboardWorkspace';
 
 export default function BillingPage() {
-  return (
-    <ComingSoon
-      title="Finance & Billing"
-      description="Patient billing, invoice generation, payment tracking, and insurance claim management are on the way."
-    />
-  );
+  return <BillingDashboardWorkspace />;
 }

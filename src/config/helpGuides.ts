@@ -104,6 +104,34 @@ const EMERGENCY_DASHBOARD_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_DASHBOARD_GUIDE: HelpGuide = {
+  id: 'billing-dashboard',
+  title: 'Accounts & Billing Dashboard',
+  intro: "An overview of the department's billing, payments, revenue, and outstanding accounts.",
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: "Today's Billing, Payments Received, Outstanding Invoices, and Pending Refunds, each with a trend vs. yesterday.",
+    },
+    {
+      heading: 'Revenue Overview',
+      body: 'Switch between Today, This Week, This Month, and This Year to change the chart granularity. Hover the chart for exact values. Filters narrow the total by date, department, service, or payment method.',
+    },
+    {
+      heading: 'Revenue by Payment Method',
+      body: 'A donut breakdown of collected revenue by POS, Bank Transfer, Cash, Card, and Online — filter to a single method from the filter row to isolate it.',
+    },
+    {
+      heading: 'Outstanding Invoices Summary & Top Departments',
+      body: 'Unpaid invoices grouped by age (0–30, 31–60, 61–90, 90+ days) and the departments generating the most revenue today.',
+    },
+    {
+      heading: 'Quick Actions & Recent Activity',
+      body: 'Shortcuts to create an invoice, post a payment, view a patient account, reconcile payments, or process a refund — plus a live feed of the latest billing events.',
+    },
+  ],
+};
+
 const EMERGENCY_PATIENT_QUEUE_GUIDE: HelpGuide = {
   id: 'emergency-patient-queue',
   title: 'Patient Queue',
@@ -3855,6 +3883,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
     return EMERGENCY_TRIAGE_PERFORMANCE_REPORTS_GUIDE;
   if (pathname.startsWith('/emergency/reports')) return EMERGENCY_REPORTS_GUIDE;
   if (pathname.startsWith('/emergency')) return EMERGENCY_DASHBOARD_GUIDE;
+  if (pathname.startsWith('/billing')) return BILLING_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;
   if (pathname.startsWith('/clinical-notes')) return CLINICAL_NOTES_GUIDE;
