@@ -61,11 +61,14 @@ export type InvoiceRecord = {
 
 export type PaymentRecord = {
   id: string;
+  paymentNumber: string;
   date: string;
   amount: number;
   method: string;
   reference: string;
   invoiceNumber: string;
+  postedBy: string;
+  reconciled: boolean;
 };
 
 export type AdjustmentType = 'Discount' | 'Write-off' | 'Correction';
@@ -135,14 +138,20 @@ export const INVOICE_STATUS_OPTIONS: InvoiceStatus[] = [
   'Overdue',
   'Cancelled',
 ];
-const PAYMENT_METHODS = ['POS', 'Bank Transfer', 'Cash', 'Card', 'Online'];
+export const PAYMENT_METHODS = ['POS', 'Bank Transfer', 'Cash', 'Card', 'Online'];
+const PAYMENT_STAFF = [
+  'Accountant (Finance)',
+  'Billing Officer (Finance)',
+  'Cashier (Finance)',
+  'Finance Officer (Finance)',
+];
 const ADJUSTMENT_TYPES: AdjustmentType[] = ['Discount', 'Write-off', 'Correction'];
 const ADJUSTMENT_REASONS: Record<AdjustmentType, string[]> = {
   Discount: ['Staff dependent discount', 'NHIS co-pay adjustment', 'Goodwill discount'],
   'Write-off': ['Uncollectable balance', 'Charity care write-off'],
   Correction: ['Billing error correction', 'Duplicate charge reversed'],
 };
-const REFUND_REASONS = [
+export const REFUND_REASONS = [
   'Overpayment',
   'Cancelled procedure',
   'Insurance reimbursement',
@@ -202,11 +211,14 @@ export function buildAccountDetail(account: BillingAccount): AccountDetail {
     account.totalPaid > 0 ? splitAmount(account.totalPaid, paymentCount, rand) : [];
   const payments: PaymentRecord[] = paymentAmounts.map((amount, i) => ({
     id: `${account.id}-pay-${i + 1}`,
+    paymentNumber: `PAY-2026-${String(700 + Math.floor(rand() * 300) + i).padStart(5, '0')}`,
     date: daysAgo(Math.max(0, account.daysOutstanding - i * 4)),
     amount,
     method: PAYMENT_METHODS[Math.floor(rand() * PAYMENT_METHODS.length)]!,
     reference: `PMT-${String(100000 + Math.floor(rand() * 899999))}`,
     invoiceNumber: invoices[i % Math.max(1, invoices.length)]?.invoiceNumber ?? '—',
+    postedBy: PAYMENT_STAFF[Math.floor(rand() * PAYMENT_STAFF.length)]!,
+    reconciled: rand() > 0.04,
   }));
 
   const adjustments: AdjustmentRecord[] = Array.from(
@@ -270,6 +282,72 @@ export function buildAllInvoices(
       department: account.department,
       phone: account.phone,
       email: account.email,
+    })),
+  );
+}
+
+export type PaymentStatus = 'Posted' | 'Partial';
+
+export type PaymentWithAccount = PaymentRecord & {
+  patientName: string;
+  mrn: string;
+  secondaryId?: string | undefined;
+  department: string;
+  invoiceAmount: number;
+  invoicePaid: number;
+  invoiceBalance: number;
+  invoiceStatus: InvoiceStatus;
+  status: PaymentStatus;
+};
+
+/** Every payment across every account, flattened for the department-wide
+ * Payments screen. Each payment is cross-referenced against the invoice it
+ * was posted against (from the same `buildAccountDetail` call) so its
+ * displayed invoice balance/status is always the invoice's real current
+ * balance — never a second, independently-generated number. */
+export function buildAllPayments(
+  accounts: BillingAccount[] = BILLING_ACCOUNTS,
+): PaymentWithAccount[] {
+  return accounts.flatMap((account) => {
+    const detail = buildAccountDetail(account);
+    return detail.payments.map((pay) => {
+      const invoice = detail.invoices.find((inv) => inv.invoiceNumber === pay.invoiceNumber);
+      const invoiceAmount = invoice?.amount ?? pay.amount;
+      const invoicePaid = invoice?.paid ?? pay.amount;
+      const invoiceBalance = Math.max(0, invoiceAmount - invoicePaid);
+      return {
+        ...pay,
+        patientName: account.patientName,
+        mrn: account.mrn,
+        secondaryId: account.secondaryId,
+        department: account.department,
+        invoiceAmount,
+        invoicePaid,
+        invoiceBalance,
+        invoiceStatus: invoice?.status ?? 'Issued',
+        status: invoiceBalance > 0 ? 'Partial' : 'Posted',
+      };
+    });
+  });
+}
+
+export type RefundWithAccount = RefundRecord & {
+  patientName: string;
+  mrn: string;
+  department: string;
+};
+
+/** Every refund across every account, flattened for the department-wide
+ * Payments screen's "Refunds This Month" stat. */
+export function buildAllRefunds(
+  accounts: BillingAccount[] = BILLING_ACCOUNTS,
+): RefundWithAccount[] {
+  return accounts.flatMap((account) =>
+    buildAccountDetail(account).refunds.map((refund) => ({
+      ...refund,
+      patientName: account.patientName,
+      mrn: account.mrn,
+      department: account.department,
     })),
   );
 }

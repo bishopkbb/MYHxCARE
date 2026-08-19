@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Payments' };
+import { PaymentsWorkspace } from '@/features/billing/components/PaymentsWorkspace';
 
-export default function PaymentsPage() {
-  return (
-    <ComingSoon
-      title="Payments"
-      description="Payment collection, receipt generation, outstanding balance tracking, Paystack/Flutterwave integration, and reconciliation are on the way."
-    />
-  );
+export default function BillingPaymentsPage() {
+  return <PaymentsWorkspace />;
 }

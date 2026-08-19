@@ -160,6 +160,34 @@ const BILLING_ACCOUNTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_PAYMENTS_GUIDE: HelpGuide = {
+  id: 'billing-payments',
+  title: 'Payments',
+  intro: 'Record, manage and track every payment received against a patient invoice.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Payments Today, This Week, This Month, Refunds This Month, and Unreconciled — all computed live from the current payment and refund records. "View reconciliation" jumps to Payment Reconciliation.',
+    },
+    {
+      heading: 'Payment method tabs',
+      body: 'Switch between All Payments and each method — Cash, POS, Bank Transfer, Card, Online Payment.',
+    },
+    {
+      heading: 'Search & Filter',
+      body: 'Search by invoice number, patient name, MRN, or transaction reference. Narrow by Department, Payment Method, Payment Status, or a date range.',
+    },
+    {
+      heading: 'Payment Details',
+      body: 'Select a row to open the payment panel — the invoice it was posted against, its current balance, and the payment method, reference, and staff who posted it.',
+    },
+    {
+      heading: 'Record Payment & Record Refund',
+      body: 'Post a new payment against any patient’s outstanding invoice, or record a refund against an existing payment.',
+    },
+  ],
+};
+
 const BILLING_ACCOUNT_DETAIL_GUIDE: HelpGuide = {
   id: 'billing-account-detail',
   title: 'Billing Account',
@@ -3971,6 +3999,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (/^\/billing\/accounts\/[^/]+/.test(pathname)) return BILLING_ACCOUNT_DETAIL_GUIDE;
   if (pathname.startsWith('/billing/accounts')) return BILLING_ACCOUNTS_GUIDE;
   if (pathname.startsWith('/billing/invoices')) return BILLING_INVOICES_GUIDE;
+  if (pathname.startsWith('/billing/payments')) return BILLING_PAYMENTS_GUIDE;
   if (pathname.startsWith('/billing')) return BILLING_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;
