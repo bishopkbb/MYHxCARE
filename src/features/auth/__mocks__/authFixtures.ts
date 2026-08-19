@@ -179,7 +179,14 @@ export const MOCK_USERS: User[] = [
     workspaceRole: 'BILLING_OFFICER',
     department: 'Finance Department',
     departmentId: 'dept_finance',
-    permissions: ['patients:read', 'billing:read', 'billing:write', 'notifications:read'],
+    permissions: [
+      'patients:read',
+      'billing:read',
+      'billing:write',
+      'duty_roster:read',
+      'duty_roster:write',
+      'notifications:read',
+    ],
   },
   {
     id: 'usr_008',

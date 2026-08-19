@@ -734,25 +734,76 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
   },
 
   finance: {
-    workspaceLabel: 'Finance',
+    workspaceLabel: 'Accounts & Billing',
     homeRoute: '/billing',
     sections: [
       {
-        items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
+        items: [{ label: 'Dashboard', href: '/billing', icon: LayoutDashboard }],
       },
       {
-        label: 'Finance',
+        label: 'BILLING',
         items: [
-          { label: 'Billing & Charges', href: '/billing/charges', icon: Receipt },
+          { label: 'Billing Accounts', href: '/billing/accounts', icon: Users },
+          { label: 'Invoices', href: '/billing/invoices', icon: FileText },
           { label: 'Payments', href: '/billing/payments', icon: CreditCard },
-          { label: 'Revenue', href: '/billing', icon: TrendingUp },
+          {
+            label: 'Refunds & Adjustments',
+            href: '/billing/refunds',
+            icon: Undo2,
+            permission: PERMISSIONS.BILLING_WRITE,
+          },
+        ],
+      },
+      {
+        label: 'REVENUE',
+        items: [
+          { label: 'Revenue Overview', href: '/billing/revenue', icon: BarChart2 },
+          {
+            label: 'Revenue by Department',
+            href: '/billing/revenue/by-department',
+            icon: Building2,
+          },
+          { label: 'Revenue by Service', href: '/billing/revenue/by-service', icon: PieChart },
+        ],
+      },
+      {
+        label: 'RECONCILIATION',
+        items: [
+          {
+            label: 'Payment Reconciliation',
+            href: '/billing/reconciliation',
+            icon: Repeat,
+            permission: PERMISSIONS.BILLING_WRITE,
+          },
+          { label: 'Outstanding Accounts', href: '/billing/outstanding', icon: ClipboardList },
+        ],
+      },
+      {
+        label: 'SCHEDULE & WORKFORCE',
+        items: [
+          {
+            label: 'Workforce Management',
+            href: '/billing/workforce-management',
+            icon: CalendarDays,
+            permission: PERMISSIONS.DUTY_ROSTER_WRITE,
+          },
+          { label: 'My Schedule', href: '/billing/my-schedule', icon: CalendarCheck },
+          { label: 'Shift Handover', href: '/billing/shift-handover', icon: Share2 },
+        ],
+      },
+      {
+        label: 'REPORTS',
+        items: [
+          { label: 'Billing Reports', href: '/billing/reports', icon: BarChart2 },
+          { label: 'Payment Reports', href: '/billing/reports/payments', icon: Receipt },
+          { label: 'Revenue Reports', href: '/billing/reports/revenue', icon: TrendingUp },
         ],
       },
       {
         label: 'COMMUNICATION',
         items: [
           { label: 'Messages', href: '/messages', icon: MessageSquare, badge: 3 },
-          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 8 },
+          { label: 'Notifications', href: '/notifications', icon: Bell, badge: 12 },
           { label: 'Announcements', href: '/announcements', icon: Megaphone },
         ],
       },

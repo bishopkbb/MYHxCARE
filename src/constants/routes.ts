@@ -152,8 +152,21 @@ export const ROUTES = {
 
   // Billing sub-routes
   billingCharges: '/billing/charges',
+  billingAccounts: '/billing/accounts',
   billingInvoices: '/billing/invoices',
   billingPayments: '/billing/payments',
+  billingRefunds: '/billing/refunds',
+  billingRevenue: '/billing/revenue',
+  billingRevenueByDepartment: '/billing/revenue/by-department',
+  billingRevenueByService: '/billing/revenue/by-service',
+  billingReconciliation: '/billing/reconciliation',
+  billingOutstanding: '/billing/outstanding',
+  billingReports: '/billing/reports',
+  billingReportsPayments: '/billing/reports/payments',
+  billingReportsRevenue: '/billing/reports/revenue',
+  billingWorkforceManagement: '/billing/workforce-management',
+  billingMySchedule: '/billing/my-schedule',
+  billingShiftHandover: '/billing/shift-handover',
 
   // Ward sub-routes
   wardBeds: (wardId: string) => `/wards/${wardId}/beds`,
