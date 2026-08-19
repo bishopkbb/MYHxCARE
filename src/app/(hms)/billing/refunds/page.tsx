@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Refunds & Adjustments' };
+import { RefundsAdjustmentsWorkspace } from '@/features/billing/components/RefundsAdjustmentsWorkspace';
 
 export default function BillingRefundsPage() {
-  return (
-    <ComingSoon
-      title="Refunds & Adjustments"
-      description="Processing patient refunds, write-offs, and account adjustments is on the way."
-    />
-  );
+  return <RefundsAdjustmentsWorkspace />;
 }

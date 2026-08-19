@@ -599,7 +599,7 @@ export function PaymentsWorkspace() {
                         Invoice No.
                       </span>
                     </div>
-                    <div className="min-w-[140px] flex-1 py-2.5 pr-2">
+                    <div className="max-w-[220px] min-w-[140px] flex-1 py-2.5 pr-2">
                       <span
                         className="font-sans font-bold tracking-wider uppercase"
                         style={{ fontSize: 14, color: '#4A7080' }}
@@ -720,7 +720,7 @@ export function PaymentsWorkspace() {
                             {p.invoiceNumber}
                           </button>
                         </div>
-                        <div className="min-w-[140px] flex-1 py-3 pr-2">
+                        <div className="max-w-[220px] min-w-[140px] flex-1 py-3 pr-2">
                           <Tooltip content={p.patientName}>
                             <p
                               className="truncate font-sans font-medium"

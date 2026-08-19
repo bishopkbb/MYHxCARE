@@ -29,6 +29,7 @@ import {
 import {
   buildAccountDetail,
   type InvoiceStatus,
+  type RefundStatus,
 } from '@/features/billing/__mocks__/billingAccountDetailFixtures';
 
 const FOCUS_RING =
@@ -48,10 +49,11 @@ const INVOICE_STATUS_CFG: Record<InvoiceStatus, { color: string; bg: string }> =
   Overdue: { color: '#DC2626', bg: 'rgba(220,38,38,0.1)' },
   Cancelled: { color: '#8A98A3', bg: 'rgba(138,152,163,0.12)' },
 };
-const REFUND_STATUS_CFG: Record<string, { color: string; bg: string }> = {
+const REFUND_STATUS_CFG: Record<RefundStatus, { color: string; bg: string }> = {
   Pending: { color: '#D97706', bg: 'rgba(217,119,6,0.1)' },
   Approved: { color: '#2563EB', bg: 'rgba(37,99,235,0.1)' },
-  Completed: { color: '#16A34A', bg: 'rgba(22,163,74,0.1)' },
+  Processed: { color: '#16A34A', bg: 'rgba(22,163,74,0.1)' },
+  Rejected: { color: '#DC2626', bg: 'rgba(220,38,38,0.1)' },
 };
 
 type TabKey = 'summary' | 'invoices' | 'payments' | 'adjustments' | 'refunds' | 'documents';

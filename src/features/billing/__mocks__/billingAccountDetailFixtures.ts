@@ -74,6 +74,7 @@ export type PaymentRecord = {
 export type AdjustmentType = 'Discount' | 'Write-off' | 'Correction';
 export type AdjustmentRecord = {
   id: string;
+  adjustmentNumber: string;
   date: string;
   type: AdjustmentType;
   amount: number;
@@ -81,13 +82,21 @@ export type AdjustmentRecord = {
   invoiceNumber: string;
 };
 
-export type RefundStatus = 'Pending' | 'Approved' | 'Completed';
+export type RefundStatus = 'Pending' | 'Approved' | 'Processed' | 'Rejected';
 export type RefundRecord = {
   id: string;
+  refundNumber: string;
   date: string;
   amount: number;
   reason: string;
   status: RefundStatus;
+  invoiceNumber: string;
+  requestedBy: string;
+  approvedAt?: string | undefined;
+  approvedBy?: string | undefined;
+  processedAt?: string | undefined;
+  rejectedAt?: string | undefined;
+  rejectedReason?: string | undefined;
 };
 
 export type DocumentRecord = {
@@ -145,18 +154,28 @@ const PAYMENT_STAFF = [
   'Cashier (Finance)',
   'Finance Officer (Finance)',
 ];
-const ADJUSTMENT_TYPES: AdjustmentType[] = ['Discount', 'Write-off', 'Correction'];
-const ADJUSTMENT_REASONS: Record<AdjustmentType, string[]> = {
+export const ADJUSTMENT_TYPES: AdjustmentType[] = ['Discount', 'Write-off', 'Correction'];
+export const ADJUSTMENT_REASONS: Record<AdjustmentType, string[]> = {
   Discount: ['Staff dependent discount', 'NHIS co-pay adjustment', 'Goodwill discount'],
   'Write-off': ['Uncollectable balance', 'Charity care write-off'],
   Correction: ['Billing error correction', 'Duplicate charge reversed'],
 };
 export const REFUND_REASONS = [
-  'Overpayment',
-  'Cancelled procedure',
-  'Insurance reimbursement',
-  'Service not rendered',
+  'Duplicate Payment',
+  'Patient Request',
+  'Service Not Rendered',
+  'Overcharge',
+  'Adjustment',
+  'Wrong Test Code',
+  'Discount Applied',
 ];
+const REFUND_REJECT_REASONS = [
+  'Insufficient documentation',
+  'Policy violation',
+  'Duplicate request',
+  'Refund period expired',
+];
+const FINANCE_APPROVERS = ['Finance Manager', 'Chief Accountant', 'Finance Director'];
 const DOCUMENT_TYPES = [
   'Invoice PDF',
   'Payment Receipt',
@@ -228,6 +247,7 @@ export function buildAccountDetail(account: BillingAccount): AccountDetail {
       const reasons = ADJUSTMENT_REASONS[type];
       return {
         id: `${account.id}-adj-${i + 1}`,
+        adjustmentNumber: `ADJ-2026-${String(1000 + Math.floor(rand() * 8999) + i).padStart(4, '0')}`,
         date: daysAgo(10 + i * 9),
         type,
         amount: 500 + Math.floor(rand() * 4_500),
@@ -237,14 +257,46 @@ export function buildAccountDetail(account: BillingAccount): AccountDetail {
     },
   );
 
-  const refundStatuses: RefundStatus[] = ['Pending', 'Approved', 'Completed'];
-  const refunds: RefundRecord[] = Array.from({ length: account.refundCount }, (_, i) => ({
-    id: `${account.id}-ref-${i + 1}`,
-    date: daysAgo(5 + i * 11),
-    amount: 1_000 + Math.floor(rand() * 8_000),
-    reason: REFUND_REASONS[Math.floor(rand() * REFUND_REASONS.length)]!,
-    status: refundStatuses[Math.floor(rand() * refundStatuses.length)]!,
-  }));
+  const refunds: RefundRecord[] = Array.from({ length: account.refundCount }, (_, i) => {
+    const requestedAt = daysAgo(5 + i * 11);
+    const requestedAtMs = new Date(requestedAt).getTime();
+    const lifecycleRoll = rand();
+    const requestedBy = PAYMENT_STAFF[Math.floor(rand() * PAYMENT_STAFF.length)]!;
+    const invoiceNumber = invoices[i % Math.max(1, invoices.length)]?.invoiceNumber ?? '—';
+    const base: RefundRecord = {
+      id: `${account.id}-ref-${i + 1}`,
+      refundNumber: `REF-2026-${String(1000 + Math.floor(rand() * 8999) + i).padStart(4, '0')}`,
+      date: requestedAt,
+      amount: 1_000 + Math.floor(rand() * 8_000),
+      reason: REFUND_REASONS[Math.floor(rand() * REFUND_REASONS.length)]!,
+      status: 'Pending',
+      invoiceNumber,
+      requestedBy,
+    };
+    if (lifecycleRoll < 0.1) {
+      return {
+        ...base,
+        status: 'Rejected',
+        rejectedAt: new Date(requestedAtMs + 20 * 60 * 60 * 1000).toISOString(),
+        rejectedReason: REFUND_REJECT_REASONS[Math.floor(rand() * REFUND_REJECT_REASONS.length)]!,
+      };
+    }
+    if (lifecycleRoll < 0.2) {
+      return base;
+    }
+    const approvedAt = new Date(requestedAtMs + 22 * 60 * 60 * 1000).toISOString();
+    const approvedBy = FINANCE_APPROVERS[Math.floor(rand() * FINANCE_APPROVERS.length)]!;
+    if (lifecycleRoll < 0.4) {
+      return { ...base, status: 'Approved', approvedAt, approvedBy };
+    }
+    return {
+      ...base,
+      status: 'Processed',
+      approvedAt,
+      approvedBy,
+      processedAt: new Date(new Date(approvedAt).getTime() + 26 * 60 * 60 * 1000).toISOString(),
+    };
+  });
 
   const documents: DocumentRecord[] = Array.from({ length: account.documentCount }, (_, i) => ({
     id: `${account.id}-doc-${i + 1}`,
@@ -334,11 +386,13 @@ export function buildAllPayments(
 export type RefundWithAccount = RefundRecord & {
   patientName: string;
   mrn: string;
+  secondaryId?: string | undefined;
   department: string;
 };
 
 /** Every refund across every account, flattened for the department-wide
- * Payments screen's "Refunds This Month" stat. */
+ * Payments screen's "Refunds This Month" stat and the Refunds & Adjustments
+ * screen — one source of truth for both. */
 export function buildAllRefunds(
   accounts: BillingAccount[] = BILLING_ACCOUNTS,
 ): RefundWithAccount[] {
@@ -347,6 +401,30 @@ export function buildAllRefunds(
       ...refund,
       patientName: account.patientName,
       mrn: account.mrn,
+      secondaryId: account.secondaryId,
+      department: account.department,
+    })),
+  );
+}
+
+export type AdjustmentWithAccount = AdjustmentRecord & {
+  patientName: string;
+  mrn: string;
+  secondaryId?: string | undefined;
+  department: string;
+};
+
+/** Every adjustment across every account, flattened for the Refunds &
+ * Adjustments screen's Adjustments tab. */
+export function buildAllAdjustments(
+  accounts: BillingAccount[] = BILLING_ACCOUNTS,
+): AdjustmentWithAccount[] {
+  return accounts.flatMap((account) =>
+    buildAccountDetail(account).adjustments.map((adjustment) => ({
+      ...adjustment,
+      patientName: account.patientName,
+      mrn: account.mrn,
+      secondaryId: account.secondaryId,
       department: account.department,
     })),
   );

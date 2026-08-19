@@ -510,7 +510,7 @@ export function BillingAccountsWorkspace() {
                       className={`flex rounded-t-[8px] ${TABLE_HEADER_STICKY_CLASS}`}
                       style={{ background: TABLE_HEADER_BG, borderBottom: '1px solid #E6F8FD' }}
                     >
-                      <div className="min-w-[170px] flex-1 py-2.5 pr-2 pl-3">
+                      <div className="max-w-[220px] min-w-[170px] flex-1 py-2.5 pr-2 pl-3">
                         <span
                           className="font-sans font-bold tracking-wider uppercase"
                           style={{ fontSize: 14, color: '#4A7080' }}
@@ -627,7 +627,7 @@ export function BillingAccountsWorkspace() {
                             background: selectedId === a.id ? '#E6F8FD' : 'transparent',
                           }}
                         >
-                          <div className="flex min-w-[170px] flex-1 items-center gap-2.5 py-3 pr-2 pl-3">
+                          <div className="flex max-w-[220px] min-w-[170px] flex-1 items-center gap-2.5 py-3 pr-2 pl-3">
                             <div
                               className="flex size-9 shrink-0 items-center justify-center rounded-full font-sans text-sm font-semibold text-white"
                               style={{ background: avatarColorFor(a.id) }}

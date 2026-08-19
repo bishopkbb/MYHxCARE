@@ -160,6 +160,34 @@ const BILLING_ACCOUNTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_REFUNDS_ADJUSTMENTS_GUIDE: HelpGuide = {
+  id: 'billing-refunds-adjustments',
+  title: 'Refunds & Adjustments',
+  intro: 'Manage patient refunds and financial adjustments across every account.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Pending, Approved, Processed, and Rejected Refunds — all computed live from the current refund list.',
+    },
+    {
+      heading: 'Refunds tab',
+      body: 'Every refund request, its invoice, amount, reason, and status. Select a row to open the Refund Details panel — its full Status History timeline, plus Approve, Reject, or Mark as Processed depending on where it is in its lifecycle.',
+    },
+    {
+      heading: 'Adjustments tab',
+      body: 'Discounts, write-offs, and corrections applied to invoices, with the invoice and reason each is tied to.',
+    },
+    {
+      heading: 'Search & Filter',
+      body: 'Search by invoice number, patient name, MRN, or reference. Narrow by Status/Type, Department, or a date range.',
+    },
+    {
+      heading: 'Process Refund & Add Adjustment',
+      body: 'Submit a new refund request against a paid invoice, or record a new discount, write-off, or correction against any invoice.',
+    },
+  ],
+};
+
 const BILLING_PAYMENTS_GUIDE: HelpGuide = {
   id: 'billing-payments',
   title: 'Payments',
@@ -4000,6 +4028,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/billing/accounts')) return BILLING_ACCOUNTS_GUIDE;
   if (pathname.startsWith('/billing/invoices')) return BILLING_INVOICES_GUIDE;
   if (pathname.startsWith('/billing/payments')) return BILLING_PAYMENTS_GUIDE;
+  if (pathname.startsWith('/billing/refunds')) return BILLING_REFUNDS_ADJUSTMENTS_GUIDE;
   if (pathname.startsWith('/billing')) return BILLING_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;

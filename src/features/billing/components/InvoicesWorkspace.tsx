@@ -584,7 +584,7 @@ export function InvoicesWorkspace() {
                         Invoice No.
                       </span>
                     </div>
-                    <div className="min-w-[150px] flex-1 py-2.5 pr-2">
+                    <div className="max-w-[220px] min-w-[150px] flex-1 py-2.5 pr-2">
                       <span
                         className="font-sans font-bold tracking-wider uppercase"
                         style={{ fontSize: 14, color: '#4A7080' }}
@@ -705,7 +705,7 @@ export function InvoicesWorkspace() {
                           </p>
                           <p style={{ fontSize: 14, color: '#8A98A3' }}>{inv.mrn}</p>
                         </div>
-                        <div className="min-w-[150px] flex-1 py-3 pr-2">
+                        <div className="max-w-[220px] min-w-[150px] flex-1 py-3 pr-2">
                           <Tooltip content={inv.patientName}>
                             <p
                               className="truncate font-sans font-medium"
