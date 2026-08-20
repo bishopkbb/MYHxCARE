@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Payment Reconciliation' };
+import { PaymentReconciliationWorkspace } from '@/features/billing/components/PaymentReconciliationWorkspace';
 
 export default function BillingReconciliationPage() {
-  return (
-    <ComingSoon
-      title="Payment Reconciliation"
-      description="Matching recorded payments against bank/gateway transactions and flagging unmatched entries is on the way."
-    />
-  );
+  return <PaymentReconciliationWorkspace />;
 }

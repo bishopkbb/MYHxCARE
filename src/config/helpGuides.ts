@@ -160,6 +160,34 @@ const BILLING_ACCOUNTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_PAYMENT_RECONCILIATION_GUIDE: HelpGuide = {
+  id: 'billing-payment-reconciliation',
+  title: 'Payment Reconciliation',
+  intro: 'Reconcile system payments with actual bank, POS, and online transactions.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Transactions, Matched, Unmatched, Pending, Exceptions, and Total Amount — all computed live from the current reconciliation list.',
+    },
+    {
+      heading: 'Statuses',
+      body: 'Matched (a source transaction and a system payment agree), Pending (a system payment is awaiting reconciliation), Exception (the source and system amounts disagree), and Unmatched (a bank/POS/online transaction with no corresponding system payment).',
+    },
+    {
+      heading: 'Filters & tabs',
+      body: 'Narrow by Payment Method, Source, Status, a date range, or search by reference/invoice/patient. The tabs mirror the Status filter with live counts.',
+    },
+    {
+      heading: 'Row actions',
+      body: 'View Details opens a side-by-side comparison. Mark as Matched resolves a Pending or Exception row. Flag Exception raises a Matched row for review. Link to Payment matches an Unmatched bank transaction to a Pending system payment.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: "Auto Match resolves every Pending transaction at once. Reconcile Manually resolves the rows you've checked. Import Bank Statement brings in new transactions for review.",
+    },
+  ],
+};
+
 const BILLING_REVENUE_BY_SERVICE_GUIDE: HelpGuide = {
   id: 'billing-revenue-by-service',
   title: 'Revenue by Service',
@@ -4113,6 +4141,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/billing/invoices')) return BILLING_INVOICES_GUIDE;
   if (pathname.startsWith('/billing/payments')) return BILLING_PAYMENTS_GUIDE;
   if (pathname.startsWith('/billing/refunds')) return BILLING_REFUNDS_ADJUSTMENTS_GUIDE;
+  if (pathname.startsWith('/billing/reconciliation')) return BILLING_PAYMENT_RECONCILIATION_GUIDE;
   if (pathname.startsWith('/billing/revenue/by-department'))
     return BILLING_REVENUE_BY_DEPARTMENT_GUIDE;
   if (pathname.startsWith('/billing/revenue/by-service')) return BILLING_REVENUE_BY_SERVICE_GUIDE;
