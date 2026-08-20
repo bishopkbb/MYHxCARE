@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Revenue Overview' };
+import { RevenueOverviewWorkspace } from '@/features/billing/components/RevenueOverviewWorkspace';
 
 export default function BillingRevenuePage() {
-  return (
-    <ComingSoon
-      title="Revenue Overview"
-      description="Department-wide revenue trends, payment method breakdown, and period-over-period comparisons are on the way."
-    />
-  );
+  return <RevenueOverviewWorkspace />;
 }

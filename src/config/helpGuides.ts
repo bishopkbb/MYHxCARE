@@ -160,6 +160,34 @@ const BILLING_ACCOUNTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_REVENUE_OVERVIEW_GUIDE: HelpGuide = {
+  id: 'billing-revenue-overview',
+  title: 'Revenue Overview',
+  intro: 'Track and analyze revenue performance across departments and services.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Revenue for Today, This Week, This Month, and This Year, plus Average Daily Revenue — all computed live from posted payments, with real period-over-period comparisons where enough history exists.',
+    },
+    {
+      heading: 'Revenue Trend',
+      body: 'Switch between Today, This Week, This Month, and This Year to change the chart granularity. The legend chips below the chart break the period total down by payment method.',
+    },
+    {
+      heading: 'Revenue by Department & by Payment Method',
+      body: 'Donut breakdowns of the selected period’s revenue, each with a "View Details" link into the dedicated report.',
+    },
+    {
+      heading: 'Top Services by Revenue',
+      body: 'The highest-billing services across all invoices, narrowed by the Department/Service filters above the charts.',
+    },
+    {
+      heading: 'Summary & Highlights',
+      body: 'Outstanding Invoices, Refunds & Adjustments, Payments Received, and Average Collection Time — cross-referenced from the same live invoice and payment data used across Billing.',
+    },
+  ],
+};
+
 const BILLING_REFUNDS_ADJUSTMENTS_GUIDE: HelpGuide = {
   id: 'billing-refunds-adjustments',
   title: 'Refunds & Adjustments',
@@ -4029,6 +4057,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/billing/invoices')) return BILLING_INVOICES_GUIDE;
   if (pathname.startsWith('/billing/payments')) return BILLING_PAYMENTS_GUIDE;
   if (pathname.startsWith('/billing/refunds')) return BILLING_REFUNDS_ADJUSTMENTS_GUIDE;
+  if (pathname.startsWith('/billing/revenue')) return BILLING_REVENUE_OVERVIEW_GUIDE;
   if (pathname.startsWith('/billing')) return BILLING_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
   if (pathname.startsWith('/encounters')) return ENCOUNTERS_GUIDE;
