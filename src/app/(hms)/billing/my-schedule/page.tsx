@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { BillingScheduleWorkspace } from '@/features/billing/components/BillingScheduleWorkspace';
 
 export const metadata = { title: 'My Schedule' };
 
 export default function BillingMySchedulePage() {
-  return (
-    <ComingSoon
-      title="My Schedule"
-      description="Your upcoming shifts and duty assignments are on the way."
-    />
-  );
+  return <BillingScheduleWorkspace />;
 }

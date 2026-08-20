@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Workforce Management' };
+import { BillingWorkforceManagementWorkspace } from '@/features/billing/components/BillingWorkforceManagementWorkspace';
 
 export default function BillingWorkforceManagementPage() {
-  return (
-    <ComingSoon
-      title="Workforce Management"
-      description="Duty rosters and shift assignments for the Finance Department are on the way."
-    />
-  );
+  return <BillingWorkforceManagementWorkspace />;
 }

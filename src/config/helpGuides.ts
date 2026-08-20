@@ -284,6 +284,86 @@ const BILLING_REVENUE_REPORTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_WORKFORCE_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'billing-workforce-management',
+  title: 'Workforce Management',
+  intro: 'Manage Finance Department staff schedules, duty rosters, and team coverage.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Staff on Duty, Today’s Shifts, On-Call Staff, Shift Acknowledgement, Coverage Status, and Cancelled Shifts summarize the roster at a glance.',
+    },
+    {
+      heading: "Today's Roster",
+      body: 'Search by staff name or filter by shift type, role, and status. Each row shows the team, shift time, and acknowledgement state.',
+    },
+    {
+      heading: 'Create and edit shifts',
+      body: 'Create Shift opens a form for staff name, role, team, shift type, and status. The pencil icon on a row reopens the same form pre-filled for editing.',
+    },
+    {
+      heading: 'Coverage and acknowledgement',
+      body: 'The Coverage Overview panel tracks team coverage by shift. Pending Shift Acknowledgement lists staff who haven’t confirmed their shift yet, with a one-tap reminder.',
+    },
+    {
+      heading: 'Connected to the Dashboard',
+      body: 'The Dashboard’s "Staff on Duty" card and Quick Actions read this same roster live — creating, cancelling, or acknowledging a shift here updates the Dashboard immediately.',
+    },
+  ],
+};
+
+const BILLING_MY_SCHEDULE_GUIDE: HelpGuide = {
+  id: 'billing-my-schedule',
+  title: 'My Schedule',
+  intro: 'Your personal shift calendar, upcoming assignments, and on-call rota.',
+  sections: [
+    {
+      heading: "Today's Active Shift",
+      body: 'Shows your current shift, time range, and team. Acknowledge Shift confirms you have seen it; a progress bar tracks time remaining.',
+    },
+    {
+      heading: 'This Week',
+      body: 'A day-by-day strip of your shifts for the current week, colour-coded by shift type, with an acknowledgement indicator on each day.',
+    },
+    {
+      heading: 'Upcoming Shifts',
+      body: 'Lists your next shifts with time and team. Shifts awaiting your response show Confirm Shift and Cannot Attend actions.',
+    },
+    {
+      heading: 'Finance Team On-Call Rota',
+      body: 'Shows who is covering on-call across the week, highlighting whoever is currently on duty and your own on-call slots.',
+    },
+    {
+      heading: 'Monthly Overview',
+      body: 'Totals your morning, afternoon, night, and on-call shifts for the current month.',
+    },
+  ],
+};
+
+const BILLING_SHIFT_HANDOVER_GUIDE: HelpGuide = {
+  id: 'billing-shift-handover',
+  title: 'Shift Handover',
+  intro: 'Structured shift handover notes between outgoing and incoming Finance Department staff.',
+  sections: [
+    {
+      heading: 'Billing Summary',
+      body: 'Unpaid Invoices, Pending Refund Approvals, Payments Posted Today, and Unreconciled Payments counts summarize the billing backlog at hand-off, with a preview of refunds still awaiting approval.',
+    },
+    {
+      heading: 'Outstanding Tasks and Overdue Invoices',
+      body: 'Outstanding Tasks tracks a per-shift checklist by category. Overdue Invoices lists the accounts furthest past due that the incoming officer needs to follow up on.',
+    },
+    {
+      heading: 'Unreconciled Payments',
+      body: 'Flags payments not yet matched in reconciliation, so the incoming shift knows what to investigate.',
+    },
+    {
+      heading: 'Signatures and completing handover',
+      body: 'The incoming officer signs to accept responsibility for the billing backlog and reconciliation queue. Save as Draft preserves progress; Complete Handover finalizes the transfer once signed.',
+    },
+  ],
+};
+
 const BILLING_PAYMENT_RECONCILIATION_GUIDE: HelpGuide = {
   id: 'billing-payment-reconciliation',
   title: 'Payment Reconciliation',
@@ -4267,6 +4347,10 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/billing/refunds')) return BILLING_REFUNDS_ADJUSTMENTS_GUIDE;
   if (pathname.startsWith('/billing/reconciliation')) return BILLING_PAYMENT_RECONCILIATION_GUIDE;
   if (pathname.startsWith('/billing/outstanding')) return BILLING_OUTSTANDING_ACCOUNTS_GUIDE;
+  if (pathname.startsWith('/billing/workforce-management'))
+    return BILLING_WORKFORCE_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/billing/my-schedule')) return BILLING_MY_SCHEDULE_GUIDE;
+  if (pathname.startsWith('/billing/shift-handover')) return BILLING_SHIFT_HANDOVER_GUIDE;
   if (pathname.startsWith('/billing/reports/payments')) return BILLING_PAYMENT_REPORTS_GUIDE;
   if (pathname.startsWith('/billing/reports/revenue')) return BILLING_REVENUE_REPORTS_GUIDE;
   // Exact match, not startsWith — guards against swallowing any future

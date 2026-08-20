@@ -12,6 +12,7 @@ import {
   RefreshCcw,
   RotateCcw,
   UserSearch,
+  Users,
   Wallet,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -21,12 +22,13 @@ import { AnimatedDonutChart } from '@components/shared/AnimatedDonutChart';
 import { FilterDropdown, type FilterDef } from '@components/shared/FilterDropdown';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { PermissionGate } from '@components/shared/PermissionGate';
-import { StatCardTrend } from '@components/shared/StatCard';
+import { StatCardCompact, StatCardTrend } from '@components/shared/StatCard';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PERMISSIONS } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
 import { formatCurrencyCompact, formatCurrencyWhole } from '@/utils/currency';
 import { formatHumanDate } from '@/utils/datetime';
+import { useStaffShifts } from '@/features/workforce/store/staffShiftStore';
 import {
   BILLING_DEPARTMENTS,
   BILLING_PAYMENT_METHODS,
@@ -322,6 +324,13 @@ export function BillingDashboardWorkspace() {
   const [paymentMethodFilter, setPaymentMethodFilter] = useState('ALL');
   const [openFilter, setOpenFilter] = useState<'department' | 'service' | 'method' | null>(null);
 
+  // Live from the shared staffShiftStore, not a static fixture — the same
+  // roster Workforce Management reads/writes. Creating, cancelling, or
+  // acknowledging a shift there moves this card immediately.
+  const billingRoster = useStaffShifts().filter((s) => s.homeModule === 'billing');
+  const staffOnDuty = billingRoster.filter((s) => s.status === 'ON_DUTY').length;
+  const staffOnCall = billingRoster.filter((s) => s.status === 'ON_CALL').length;
+
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
     return () => clearTimeout(t);
@@ -466,10 +475,12 @@ export function BillingDashboardWorkspace() {
         </div>
 
         {/* Stat cards */}
-        <div className="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4">
-          {pageState === 'loading'
-            ? Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)
-            : BILLING_STATS.map((s) => {
+        <div className="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-5 xl:gap-4">
+          {pageState === 'loading' ? (
+            Array.from({ length: 5 }).map((_, i) => <SkeletonStatCard key={i} />)
+          ) : (
+            <>
+              {BILLING_STATS.map((s) => {
                 const icon =
                   s.key === 'todaysBilling'
                     ? FileText
@@ -500,6 +511,23 @@ export function BillingDashboardWorkspace() {
                   />
                 );
               })}
+              <button
+                type="button"
+                onClick={() => router.push(ROUTES.billingWorkforceManagement)}
+                className={`text-left transition-[box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md ${FOCUS_RING}`}
+              >
+                <StatCardCompact
+                  icon={Users}
+                  iconBg="rgba(0,180,216,0.10)"
+                  iconColor="#00B4D8"
+                  label="Staff on Duty"
+                  value={String(staffOnDuty)}
+                  info={`${staffOnCall} on-call • View Workforce`}
+                  infoColor="#4A7080"
+                />
+              </button>
+            </>
+          )}
         </div>
 
         {/* Main grid */}
@@ -905,6 +933,14 @@ export function BillingDashboardWorkspace() {
                     onClick={() => router.push(ROUTES.billingRefunds)}
                   />
                 </PermissionGate>
+                <QuickActionRow
+                  icon={Users}
+                  label="Manage Workforce"
+                  description="Duty rosters and shift assignments"
+                  color="#00B4D8"
+                  bg="rgba(0,180,216,0.1)"
+                  onClick={() => router.push(ROUTES.billingWorkforceManagement)}
+                />
               </div>
             </Panel>
 

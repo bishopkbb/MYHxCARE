@@ -57,16 +57,26 @@ import {
   MOCK_LABORATORY_ROSTER,
   type LaboratoryShift,
 } from '@/features/laboratory/__mocks__/laboratoryWorkforceFixtures';
+import {
+  MOCK_BILLING_ROSTER,
+  type BillingShift,
+} from '@/features/billing/__mocks__/billingWorkforceFixtures';
 
 export type ShiftType = 'MORNING' | 'AFTERNOON' | 'NIGHT' | 'ON_CALL' | 'EMERGENCY';
 export type ShiftStatus = 'ON_DUTY' | 'SCHEDULED' | 'ON_CALL' | 'COMPLETED' | 'CANCELLED';
 
 /** Which workspace's roster this shift belongs to — the discriminator that
- * lets one shared store back six separately-scoped screens (a Matron's
+ * lets one shared store back seven separately-scoped screens (a Matron's
  * Nursing Workforce Management should never show a Registration officer's
  * shift, even though both now live in the same store). */
 export type StaffShiftHomeModule =
-  'registration' | 'medical-records' | 'nursing' | 'clinical' | 'pharmacy' | 'laboratory';
+  | 'registration'
+  | 'medical-records'
+  | 'nursing'
+  | 'clinical'
+  | 'pharmacy'
+  | 'laboratory'
+  | 'billing';
 
 export type StaffShift = {
   id: string;
@@ -110,6 +120,9 @@ function fromPharmacy(s: PharmacyShift): StaffShift {
 function fromLaboratory(s: LaboratoryShift): StaffShift {
   return { ...s, homeModule: 'laboratory' };
 }
+function fromBilling(s: BillingShift): StaffShift {
+  return { ...s, homeModule: 'billing' };
+}
 
 const SEED: StaffShift[] = [
   ...MOCK_REGISTRATION_ROSTER.map(fromRegistration),
@@ -118,6 +131,7 @@ const SEED: StaffShift[] = [
   ...MOCK_ROSTER.map(fromDoctor),
   ...MOCK_PHARMACY_ROSTER.map(fromPharmacy),
   ...MOCK_LABORATORY_ROSTER.map(fromLaboratory),
+  ...MOCK_BILLING_ROSTER.map(fromBilling),
 ];
 
 let shifts: StaffShift[] = [...SEED];
