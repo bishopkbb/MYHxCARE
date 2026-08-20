@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Revenue Reports' };
+import { RevenueReportsWorkspace } from '@/features/billing/components/RevenueReportsWorkspace';
 
 export default function BillingRevenueReportsPage() {
-  return (
-    <ComingSoon
-      title="Revenue Reports"
-      description="Detailed revenue analytics with export and scheduling are on the way."
-    />
-  );
+  return <RevenueReportsWorkspace />;
 }
