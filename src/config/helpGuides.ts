@@ -220,6 +220,38 @@ const BILLING_REPORTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_PAYMENT_REPORTS_GUIDE: HelpGuide = {
+  id: 'billing-payment-reports',
+  title: 'Payment Reports',
+  intro: 'Analyze payment transactions and performance metrics.',
+  sections: [
+    {
+      heading: 'Tabs',
+      body: 'Overview shows the full report below. Transactions and Reconciliation jump to their own full screens; Payment Methods, Payers, Trends, and Export History are coming soon.',
+    },
+    {
+      heading: 'Stat cards',
+      body: 'Total Payments, Successful Payments, Failed Payments, Refunds Issued, Average Payment, and Payment Success Rate for the selected period.',
+    },
+    {
+      heading: 'Filters',
+      body: 'Narrow by Report Type, Department, Payment Method, and Date Range, then select Apply Filters.',
+    },
+    {
+      heading: 'Payments Over Time & Payment Methods Breakdown',
+      body: "A 5-week rolling trend of amount collected and transaction count, and a donut breakdown of the selected period's payments by method.",
+    },
+    {
+      heading: 'Top Payment Transactions, Payments by Department & Summary',
+      body: 'The highest-value payments in the period, a breakdown by department, and totals including net payments, transaction counts, and highest/lowest payment.',
+    },
+    {
+      heading: 'Available Payment Reports',
+      body: 'Shortcuts to generate a Payment Summary, Payment Method, Payer, Daily Payment, Failed Payments, or Refunds report, plus Schedule Report and Export for the current view.',
+    },
+  ],
+};
+
 const BILLING_PAYMENT_RECONCILIATION_GUIDE: HelpGuide = {
   id: 'billing-payment-reconciliation',
   title: 'Payment Reconciliation',
@@ -4203,8 +4235,9 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/billing/refunds')) return BILLING_REFUNDS_ADJUSTMENTS_GUIDE;
   if (pathname.startsWith('/billing/reconciliation')) return BILLING_PAYMENT_RECONCILIATION_GUIDE;
   if (pathname.startsWith('/billing/outstanding')) return BILLING_OUTSTANDING_ACCOUNTS_GUIDE;
-  // Guard against swallowing the still-stub /billing/reports/payments and
-  // /billing/reports/revenue sub-routes, which don't have their own guide yet.
+  if (pathname.startsWith('/billing/reports/payments')) return BILLING_PAYMENT_REPORTS_GUIDE;
+  // Guard against swallowing the still-stub /billing/reports/revenue
+  // sub-route, which doesn't have its own guide yet.
   if (pathname === '/billing/reports' || pathname.startsWith('/billing/reports?'))
     return BILLING_REPORTS_GUIDE;
   if (pathname.startsWith('/billing/revenue/by-department'))

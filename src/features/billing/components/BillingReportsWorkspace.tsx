@@ -763,7 +763,11 @@ export function BillingReportsWorkspace() {
     toast.info('Schedule Report', 'This feature is on the roadmap and not yet available.');
   }
   function handleTabClick(tab: (typeof TABS)[number]) {
-    if (tab.href) router.push(tab.href);
+    if (tab.href) {
+      router.push(tab.href);
+      return;
+    }
+    toast.info(tab.label, 'This report view is on the roadmap and not yet available.');
   }
   function handleReportAction(
     label: string,

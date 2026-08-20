@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Payment Reports' };
+import { PaymentReportsWorkspace } from '@/features/billing/components/PaymentReportsWorkspace';
 
 export default function BillingPaymentReportsPage() {
-  return (
-    <ComingSoon
-      title="Payment Reports"
-      description="Payment collection trends and payment-method analytics are on the way."
-    />
-  );
+  return <PaymentReportsWorkspace />;
 }
