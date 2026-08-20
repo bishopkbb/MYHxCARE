@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Outstanding Accounts' };
+import { OutstandingAccountsWorkspace } from '@/features/billing/components/OutstandingAccountsWorkspace';
 
 export default function BillingOutstandingPage() {
-  return (
-    <ComingSoon
-      title="Outstanding Accounts"
-      description="A worklist of patient accounts with unpaid balances, grouped by age, is on the way."
-    />
-  );
+  return <OutstandingAccountsWorkspace />;
 }

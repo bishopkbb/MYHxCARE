@@ -160,6 +160,34 @@ const BILLING_ACCOUNTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_OUTSTANDING_ACCOUNTS_GUIDE: HelpGuide = {
+  id: 'billing-outstanding-accounts',
+  title: 'Outstanding Accounts',
+  intro: 'Track and manage unpaid invoices and patient balances.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Outstanding, the four aging buckets (0-30/31-60/61-90/90+ Days), and the number of patients with a balance due — all computed live from real unpaid invoices.',
+    },
+    {
+      heading: 'Aging tabs & filters',
+      body: 'Switch between All and each aging bucket. Narrow by Department, Service, Status (Issued/Partially Paid/Overdue), or search by patient/invoice number.',
+    },
+    {
+      heading: 'Outstanding Accounts table',
+      body: 'Every unpaid invoice with its original amount, amount paid, balance, days outstanding, and aging status. Select a row for details, or use the row menu to record a payment, send a reminder, or view the full account.',
+    },
+    {
+      heading: 'Aging Summary & Top Departments',
+      body: 'A donut breakdown of outstanding balance by age, and the departments carrying the most outstanding balance.',
+    },
+    {
+      heading: 'Quick Actions',
+      body: 'Send a payment reminder to every patient with a balance due, jump to Payments or Invoices, or export the current outstanding list.',
+    },
+  ],
+};
+
 const BILLING_PAYMENT_RECONCILIATION_GUIDE: HelpGuide = {
   id: 'billing-payment-reconciliation',
   title: 'Payment Reconciliation',
@@ -4142,6 +4170,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/billing/payments')) return BILLING_PAYMENTS_GUIDE;
   if (pathname.startsWith('/billing/refunds')) return BILLING_REFUNDS_ADJUSTMENTS_GUIDE;
   if (pathname.startsWith('/billing/reconciliation')) return BILLING_PAYMENT_RECONCILIATION_GUIDE;
+  if (pathname.startsWith('/billing/outstanding')) return BILLING_OUTSTANDING_ACCOUNTS_GUIDE;
   if (pathname.startsWith('/billing/revenue/by-department'))
     return BILLING_REVENUE_BY_DEPARTMENT_GUIDE;
   if (pathname.startsWith('/billing/revenue/by-service')) return BILLING_REVENUE_BY_SERVICE_GUIDE;
