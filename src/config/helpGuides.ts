@@ -160,6 +160,34 @@ const BILLING_ACCOUNTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_REVENUE_BY_SERVICE_GUIDE: HelpGuide = {
+  id: 'billing-revenue-by-service',
+  title: 'Revenue by Service',
+  intro: 'Analyze revenue performance across all services.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Revenue, active service count, the Top Service by revenue, Average Revenue per Service, and when the numbers were last updated — all computed live from posted payments.',
+    },
+    {
+      heading: 'Comparison Period',
+      body: 'Compare the selected date range against the previous month, the previous 3 months, or the same month last year. Real deltas fall back to "not enough data to compare" rather than a misleading percentage when the comparison period has too little volume.',
+    },
+    {
+      heading: 'Revenue by Service chart',
+      body: 'Switch between a vertical bar chart and horizontal bars. The Service Contribution donut shows each service’s share of the total.',
+    },
+    {
+      heading: 'Revenue by Service Summary',
+      body: 'This period vs. the comparison period, change, % of total, transaction count, and average revenue per transaction for every service, with its department.',
+    },
+    {
+      heading: 'Top Services by Growth & Lowest Revenue Services',
+      body: 'The fastest-growing services by percentage change, and the lowest-earning services for the selected period.',
+    },
+  ],
+};
+
 const BILLING_REVENUE_BY_DEPARTMENT_GUIDE: HelpGuide = {
   id: 'billing-revenue-by-department',
   title: 'Revenue by Department',
@@ -4087,6 +4115,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/billing/refunds')) return BILLING_REFUNDS_ADJUSTMENTS_GUIDE;
   if (pathname.startsWith('/billing/revenue/by-department'))
     return BILLING_REVENUE_BY_DEPARTMENT_GUIDE;
+  if (pathname.startsWith('/billing/revenue/by-service')) return BILLING_REVENUE_BY_SERVICE_GUIDE;
   if (pathname.startsWith('/billing/revenue')) return BILLING_REVENUE_OVERVIEW_GUIDE;
   if (pathname.startsWith('/billing')) return BILLING_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;

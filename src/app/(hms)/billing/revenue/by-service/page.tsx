@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Revenue by Service' };
+import { RevenueByServiceWorkspace } from '@/features/billing/components/RevenueByServiceWorkspace';
 
 export default function BillingRevenueByServicePage() {
-  return (
-    <ComingSoon
-      title="Revenue by Service"
-      description="A breakdown of collected revenue by clinical service line is on the way."
-    />
-  );
+  return <RevenueByServiceWorkspace />;
 }
