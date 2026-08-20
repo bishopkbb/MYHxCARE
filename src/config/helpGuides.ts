@@ -188,6 +188,38 @@ const BILLING_OUTSTANDING_ACCOUNTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_REPORTS_GUIDE: HelpGuide = {
+  id: 'billing-reports',
+  title: 'Billing Reports',
+  intro: 'Comprehensive billing and collections insights for better decision making.',
+  sections: [
+    {
+      heading: 'Tabs',
+      body: 'Overview shows the full report below. Invoices, Payments, Outstanding, Ageing, and Refunds jump to their own full screens; Collections is coming soon.',
+    },
+    {
+      heading: 'Stat cards',
+      body: 'Total Billed, Total Collected, Outstanding Amount, Overdue Amount, Collection Rate, and Average Days to Pay for the selected period, each compared against the prior period of equal length.',
+    },
+    {
+      heading: 'Filters',
+      body: 'Narrow by Report Type, Department, Service, Payment Method, and Date Range, then select Apply Filters. Report Type also filters the Recent Reports list below.',
+    },
+    {
+      heading: 'Billing Trend & Revenue by Department',
+      body: "A 5-week rolling trend of billed, collected, and outstanding amounts, and a donut breakdown of the selected period's billed revenue by department.",
+    },
+    {
+      heading: 'Top Invoices, Aging Summary & Report Summary',
+      body: 'The highest-value invoices in the period, a breakdown of outstanding balance by age, and counts of invoices/credit notes/refunds for the period.',
+    },
+    {
+      heading: 'Recent Reports',
+      body: 'Previously generated reports, with actions to view, download, email, or delete each one, plus Schedule Report and Export for the current view.',
+    },
+  ],
+};
+
 const BILLING_PAYMENT_RECONCILIATION_GUIDE: HelpGuide = {
   id: 'billing-payment-reconciliation',
   title: 'Payment Reconciliation',
@@ -4171,6 +4203,10 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/billing/refunds')) return BILLING_REFUNDS_ADJUSTMENTS_GUIDE;
   if (pathname.startsWith('/billing/reconciliation')) return BILLING_PAYMENT_RECONCILIATION_GUIDE;
   if (pathname.startsWith('/billing/outstanding')) return BILLING_OUTSTANDING_ACCOUNTS_GUIDE;
+  // Guard against swallowing the still-stub /billing/reports/payments and
+  // /billing/reports/revenue sub-routes, which don't have their own guide yet.
+  if (pathname === '/billing/reports' || pathname.startsWith('/billing/reports?'))
+    return BILLING_REPORTS_GUIDE;
   if (pathname.startsWith('/billing/revenue/by-department'))
     return BILLING_REVENUE_BY_DEPARTMENT_GUIDE;
   if (pathname.startsWith('/billing/revenue/by-service')) return BILLING_REVENUE_BY_SERVICE_GUIDE;

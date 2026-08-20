@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Billing Reports' };
+import { BillingReportsWorkspace } from '@/features/billing/components/BillingReportsWorkspace';
 
 export default function BillingReportsPage() {
-  return (
-    <ComingSoon
-      title="Billing Reports"
-      description="A catalog of generated billing reports, with export and scheduling, is on the way."
-    />
-  );
+  return <BillingReportsWorkspace />;
 }
