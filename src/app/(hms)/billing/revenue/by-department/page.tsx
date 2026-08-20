@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+'use client';
 
-export const metadata = { title: 'Revenue by Department' };
+import { RevenueByDepartmentWorkspace } from '@/features/billing/components/RevenueByDepartmentWorkspace';
 
 export default function BillingRevenueByDepartmentPage() {
-  return (
-    <ComingSoon
-      title="Revenue by Department"
-      description="A breakdown of collected revenue by hospital department is on the way."
-    />
-  );
+  return <RevenueByDepartmentWorkspace />;
 }

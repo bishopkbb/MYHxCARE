@@ -160,6 +160,34 @@ const BILLING_ACCOUNTS_GUIDE: HelpGuide = {
   ],
 };
 
+const BILLING_REVENUE_BY_DEPARTMENT_GUIDE: HelpGuide = {
+  id: 'billing-revenue-by-department',
+  title: 'Revenue by Department',
+  intro: 'Analyze revenue performance across all departments.',
+  sections: [
+    {
+      heading: 'Stat cards',
+      body: 'Total Revenue, active department count, the Top Department by revenue, Average Revenue per Department, and when the numbers were last updated — all computed live from posted payments.',
+    },
+    {
+      heading: 'Comparison Period',
+      body: 'Compare the selected date range against the previous month, the previous 3 months, or the same month last year. Real deltas fall back to "not enough data to compare" rather than a misleading percentage when the comparison period has too little volume.',
+    },
+    {
+      heading: 'Revenue by Department chart',
+      body: 'Switch between a vertical bar chart and horizontal bars. The Department Contribution donut shows each department’s share of the total.',
+    },
+    {
+      heading: 'Revenue by Department Summary',
+      body: 'This period vs. the comparison period, change, % of total, transaction count, and average revenue per day for every department.',
+    },
+    {
+      heading: 'Top & Lowest Performing Departments',
+      body: 'The highest- and lowest-earning departments for the selected period, ranked by revenue.',
+    },
+  ],
+};
+
 const BILLING_REVENUE_OVERVIEW_GUIDE: HelpGuide = {
   id: 'billing-revenue-overview',
   title: 'Revenue Overview',
@@ -4057,6 +4085,8 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/billing/invoices')) return BILLING_INVOICES_GUIDE;
   if (pathname.startsWith('/billing/payments')) return BILLING_PAYMENTS_GUIDE;
   if (pathname.startsWith('/billing/refunds')) return BILLING_REFUNDS_ADJUSTMENTS_GUIDE;
+  if (pathname.startsWith('/billing/revenue/by-department'))
+    return BILLING_REVENUE_BY_DEPARTMENT_GUIDE;
   if (pathname.startsWith('/billing/revenue')) return BILLING_REVENUE_OVERVIEW_GUIDE;
   if (pathname.startsWith('/billing')) return BILLING_DASHBOARD_GUIDE;
   if (pathname.startsWith('/encounters/prescriptions')) return PRESCRIPTIONS_GUIDE;
