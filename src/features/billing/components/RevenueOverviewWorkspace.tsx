@@ -572,28 +572,7 @@ export function RevenueOverviewWorkspace() {
           className="mt-4 rounded-[12px] p-4 sm:p-5"
           style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
         >
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <label
-                className="mb-1.5 block font-sans font-medium"
-                style={{ fontSize: 14, color: '#0D2630' }}
-              >
-                Date Range
-              </label>
-              <div className="flex items-center gap-2">
-                <FormDateInput
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  aria-label="From date"
-                />
-                <span style={{ fontSize: 14, color: '#8A98A3' }}>–</span>
-                <FormDateInput
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
-                  aria-label="To date"
-                />
-              </div>
-            </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <label
                 className="mb-1.5 block font-sans font-medium"
@@ -638,6 +617,29 @@ export function RevenueOverviewWorkspace() {
                 options={methodOptions}
                 placeholder="All Methods"
               />
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap items-end gap-2.5">
+            <div>
+              <label
+                className="mb-1.5 block font-sans font-medium"
+                style={{ fontSize: 14, color: '#0D2630' }}
+              >
+                Date Range
+              </label>
+              <div className="flex items-center gap-2">
+                <FormDateInput
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  aria-label="From date"
+                />
+                <span style={{ fontSize: 14, color: '#8A98A3' }}>–</span>
+                <FormDateInput
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  aria-label="To date"
+                />
+              </div>
             </div>
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2.5">
