@@ -23,6 +23,7 @@ import {
   type DirectoryPatient,
   type MaritalStatus,
 } from '@/features/registration/__mocks__/patientDirectoryFixtures';
+import type { LegacyRecordImage } from '@/features/registration/types/legacyRecord.types';
 
 let patients: DirectoryPatient[] = [...DIRECTORY_PATIENTS];
 const listeners = new Set<() => void>();
@@ -194,6 +195,11 @@ export type NewDirectoryPatientInput = {
   genotype?: string | undefined;
   height?: string | undefined;
   weight?: string | undefined;
+  ethnicGroup?: string | undefined;
+  /** Resolved `registerPatientOptions.RELIGION_OPTIONS` label — same
+   * pattern as `nationalityLabel`/`facultyLabel` above. */
+  religionLabel?: string | undefined;
+  nin?: string | undefined;
   mrn: string;
   patientId: string;
   /** Step 2's "Known Allergies" entries — same shape as
@@ -250,6 +256,9 @@ export function addDirectoryPatient(input: NewDirectoryPatientInput): DirectoryP
     genotype: input.genotype,
     height: input.height,
     weight: input.weight,
+    ethnicGroup: input.ethnicGroup,
+    religion: input.religionLabel,
+    nin: input.nin,
     allergies: (input.allergies ?? []).map((a, i) => ({
       id: `alg-reg-${Date.now()}-${i}`,
       substance: a.substance,
@@ -274,5 +283,39 @@ export function bulkUpdatePatients(
   patch: Partial<DirectoryPatient>,
 ): void {
   patients = patients.map((p) => (ids.has(p.id) ? { ...p, ...patch } : p));
+  emit();
+}
+
+// ── Legacy paper record images ──────────────────────────────────────────────
+
+/** Mirrors `POST /patients/{id}/legacy-records` (see `docs/api-contracts/
+ * 01-patient-registration/04-api-endpoints.md`) — a separate call from
+ * `addDirectoryPatient`, matching the real contract's shape: the patient is
+ * created first, then legacy record pages (if any) are attached to it by id.
+ * A no-op when `images` is empty, so callers can always call it unconditionally
+ * after registration without an `if (images.length > 0)` guard at every call
+ * site. Swap for the real endpoint in Phase 6 — until then this is the only
+ * place legacy record images are persisted past the registration wizard. */
+export function attachLegacyRecordImages(patientId: string, images: LegacyRecordImage[]): void {
+  if (images.length === 0) return;
+  patients = patients.map((p) =>
+    p.id === patientId
+      ? { ...p, legacyRecordImages: [...(p.legacyRecordImages ?? []), ...images] }
+      : p,
+  );
+  emit();
+}
+
+/** Mirrors a future `DELETE /patients/{id}/legacy-records/{imageId}` —
+ * removes one previously-attached legacy record page from a patient, e.g.
+ * from the Registration module's own Patient Profile Documents tab (not
+ * available during the registration wizard itself, where remove is still
+ * page-local state pre-submit). */
+export function removeLegacyRecordImage(patientId: string, imageId: string): void {
+  patients = patients.map((p) =>
+    p.id === patientId
+      ? { ...p, legacyRecordImages: (p.legacyRecordImages ?? []).filter((i) => i.id !== imageId) }
+      : p,
+  );
   emit();
 }

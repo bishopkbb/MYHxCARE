@@ -23,10 +23,12 @@ import {
   UserCheck,
   Users,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
+import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { PermissionGate } from '@components/shared/PermissionGate';
 import { Tooltip } from '@components/shared/Tooltip';
 import { UserAvatar } from '@components/shared/UserAvatar';
@@ -42,6 +44,16 @@ import {
   type PatientProfile,
 } from '@/features/registration/__mocks__/patientProfileFixtures';
 import { useDirectoryPatients } from '@/features/registration/store/patientDirectoryStore';
+import { PatientDocumentsTab } from '@/features/registration/components/PatientDocumentsTab';
+import type { LegacyRecordImage } from '@/features/registration/types/legacyRecord.types';
+
+const LegacyRecordViewerModal = dynamic(
+  () =>
+    import('@/features/registration/components/LegacyRecordViewerModal').then(
+      (m) => m.LegacyRecordViewerModal,
+    ),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
 
 const CURATED_PATIENT_ID = 'dp-001';
 
@@ -276,6 +288,8 @@ export default function PatientProfilePage() {
   const [activeTab, setActiveTab] = useState<Tab>('Overview');
   const [actionsOpen, setActionsOpen] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
+  const legacyRecordImages = directoryMatch?.legacyRecordImages ?? [];
+  const [viewingLegacyRecord, setViewingLegacyRecord] = useState<LegacyRecordImage | null>(null);
 
   useEffect(() => {
     if (!actionsOpen) return;
@@ -523,7 +537,14 @@ export default function PatientProfilePage() {
 
           {/* ── Tab content ──────────────────────────────────────────────── */}
           <div className="mt-5">
-            {activeTab !== 'Overview' ? (
+            {activeTab === 'Documents' ? (
+              <PatientDocumentsTab
+                patientId={patientId ?? CURATED_PATIENT_ID}
+                isRealPatient={!!directoryMatch}
+                legacyRecordImages={legacyRecordImages}
+                onViewLegacyRecord={setViewingLegacyRecord}
+              />
+            ) : activeTab !== 'Overview' ? (
               <ComingSoonTab tab={activeTab} />
             ) : (
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
@@ -844,6 +865,13 @@ export default function PatientProfilePage() {
           <div className="h-4" />
         </div>
       </main>
+
+      {viewingLegacyRecord && (
+        <LegacyRecordViewerModal
+          image={viewingLegacyRecord}
+          onClose={() => setViewingLegacyRecord(null)}
+        />
+      )}
     </div>
   );
 }

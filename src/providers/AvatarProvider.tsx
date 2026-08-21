@@ -82,8 +82,10 @@ export function AvatarProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** Approximate decoded byte size of a base64 data URL, without decoding it. */
-function estimateDataUrlBytes(dataUrl: string): number {
+/** Approximate decoded byte size of a base64 data URL, without decoding it.
+ * Exported for `legacyRecordImageCompression.ts`'s own byte-budget loop —
+ * same estimation, different resize algorithm (contain, not square crop). */
+export function estimateDataUrlBytes(dataUrl: string): number {
   const commaIdx = dataUrl.indexOf(',');
   const base64Length = commaIdx === -1 ? dataUrl.length : dataUrl.length - commaIdx - 1;
   return Math.ceil((base64Length * 3) / 4);

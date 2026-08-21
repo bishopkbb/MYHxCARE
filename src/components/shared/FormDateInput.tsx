@@ -17,7 +17,12 @@ export const FormDateInput = forwardRef<HTMLInputElement, FormDateInputProps>(
           {...props}
           className={cn(
             FORM_CONTROL_CLASS,
-            'pr-10 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0',
+            // The invisible picker-indicator only covers the icon's own
+            // strip on the right (not inset-0 / the full field) — covering
+            // the whole input made every click open the calendar picker,
+            // silently blocking manual keyboard entry of the date anywhere
+            // in the field.
+            'pr-10 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:top-0 [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0',
             className,
           )}
           style={{

@@ -47,11 +47,32 @@ export const patientInformationSchema = z
     maritalStatus: z.string().optional(),
     nationality: z.string().min(1, 'Nationality is required'),
     occupation: z.string().trim().optional(),
+    // UNIZIK physical-folder fields (Phase 2/3) — neither UNIZIK's 3-class
+    // spec nor the folder review marks these as mandatory, so kept optional
+    // like Occupation above.
+    ethnicGroup: z.string().trim().optional(),
+    religion: z.string().optional(),
+    // National Identification Number — general identity field for every
+    // patient type (not tied to Student/NHIA), mandatory per product
+    // decision. Exactly 11 digits, no letters/hyphens/spaces; the regex
+    // itself is what prevents silent truncation of a too-long value (a
+    // 12-digit string simply fails the /^\d{11}$/ match rather than being
+    // cut down to fit).
+    nin: z
+      .string()
+      .trim()
+      .min(1, 'National Identification Number (NIN) is required')
+      .regex(/^\d{11}$/, 'NIN must be exactly 11 digits'),
     phoneCountryCode: z.string().min(1),
     phoneNumber: phoneNumberField,
     email: z.string().trim().email('Enter a valid email address').optional().or(z.literal('')),
     address: z.string().trim().min(5, 'Enter a complete residential address'),
-    state: z.string().min(1, 'State is required'),
+    // Labelled "State of Origin" in the UI (PatientInformationStep.tsx /
+    // ReviewConfirmStep.tsx) per UNIZIK's updated spec — the paper folder's
+    // "Place of Origin" and UNIZIK's "State of Origin" are treated as the
+    // same concept, not two fields. Field name/validation unchanged; this is
+    // a display-label decision only, confirmed 2026-08-20.
+    state: z.string().min(1, 'State of Origin is required'),
     lga: z.string().min(1, 'LGA is required'),
     cityTown: z.string().trim().min(1, 'City/Town is required'),
 
@@ -119,6 +140,9 @@ export const PATIENT_INFORMATION_DEFAULTS: PatientInformationValues = {
   maritalStatus: '',
   nationality: '',
   occupation: '',
+  ethnicGroup: '',
+  religion: '',
+  nin: '',
   phoneCountryCode: '+234',
   phoneNumber: '',
   email: '',

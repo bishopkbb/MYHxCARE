@@ -20,10 +20,12 @@ import { FormSelect } from '@components/shared/FormSelect';
 import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { useToast } from '@/hooks/useToast';
 import { resizeImageToDataUrl } from '@providers/AvatarProvider';
+import { LegacyRecordUpload } from '@/features/registration/components/LegacyRecordUpload';
 import {
   computeAge,
   type PatientInformationValues,
 } from '@/features/registration/schemas/registerPatientSchema';
+import type { LegacyRecordImage } from '@/features/registration/types/legacyRecord.types';
 import {
   DEPARTMENTS_BY_FACULTY,
   FACULTY_HMO_MAP,
@@ -34,6 +36,7 @@ import {
   NATIONALITY_OPTIONS,
   NIGERIA_STATES,
   PATIENT_TYPE_OPTIONS,
+  RELIGION_OPTIONS,
   type SelectOption,
 } from '@/features/registration/__mocks__/registerPatientOptions';
 
@@ -73,8 +76,13 @@ type PatientInformationStepProps = FormProps & {
   mrn: string | null;
   patientId: string | null;
   onGenerateMrn: () => void;
+  onMrnChange: (value: string) => void;
+  onPatientIdChange: (value: string) => void;
   photoDataUrl: string | null;
   onPhotoUploaded: (dataUrl: string) => void;
+  legacyRecordImages: LegacyRecordImage[];
+  onAddLegacyRecordImages: (images: LegacyRecordImage[]) => void;
+  onRemoveLegacyRecordImage: (id: string) => void;
 };
 
 function SelectField({
@@ -131,8 +139,13 @@ export function PatientInformationStep({
   mrn,
   patientId,
   onGenerateMrn,
+  onMrnChange,
+  onPatientIdChange,
   photoDataUrl,
   onPhotoUploaded,
+  legacyRecordImages,
+  onAddLegacyRecordImages,
+  onRemoveLegacyRecordImage,
 }: PatientInformationStepProps) {
   const toast = useToast();
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -279,6 +292,47 @@ export function PatientInformationStep({
                 {...register('occupation')}
               />
             </FormField>
+            <FormField label="Ethnic Group" htmlFor="ethnicGroup">
+              <FormInput
+                id="ethnicGroup"
+                placeholder="Enter ethnic group"
+                {...register('ethnicGroup')}
+              />
+            </FormField>
+            <SelectField
+              {...formProps}
+              name="religion"
+              label="Religion"
+              placeholder="Select religion"
+              options={RELIGION_OPTIONS}
+            />
+            <FormField
+              label="NIN"
+              htmlFor="nin"
+              required
+              error={errors.nin?.message}
+              hint="National Identification Number — 11 digits."
+            >
+              <FormInput
+                id="nin"
+                inputMode="numeric"
+                placeholder="e.g. 12345678901"
+                hasError={!!errors.nin}
+                {...register('nin', {
+                  onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                    // Strips letters/hyphens/spaces only — deliberately does NOT
+                    // cap length here. A `maxLength`/`.slice(0, 11)` would silently
+                    // drop a 12th+ digit as the officer types or pastes, which is
+                    // exactly the "silent truncation" the NIN spec prohibits.
+                    // A too-long value is left intact and caught by the schema's
+                    // `/^\d{11}$/` regex instead, surfacing a real validation
+                    // error ("NIN must be exactly 11 digits") the officer can see
+                    // and act on, rather than a value quietly shortened for them.
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                  },
+                })}
+              />
+            </FormField>
 
             <div className="grid grid-cols-1 gap-4 sm:col-span-3 sm:grid-cols-2">
               <FormField
@@ -327,9 +381,9 @@ export function PatientInformationStep({
             <SelectField
               {...formProps}
               name="state"
-              label="State"
+              label="State of Origin"
               required
-              placeholder="Select state"
+              placeholder="Select state of origin"
               options={NIGERIA_STATES}
               onValueChange={() => setValue('lga', '')}
             />
@@ -438,14 +492,25 @@ export function PatientInformationStep({
           >
             <Info style={{ width: 16, height: 16, color: '#00B4D8' }} className="mt-0.5 shrink-0" />
             <p style={{ fontSize: 14, color: '#0D2630' }}>
-              MRN will be automatically generated after saving the patient information.
+              Leave blank to auto-generate an MRN and Patient ID on save, or enter an existing
+              number — e.g. when continuing a patient&apos;s legacy paper file into MyHxCare.
             </p>
           </div>
 
           <div className="mt-4">
-            <FormField label="Medical Record Number (MRN)" htmlFor="mrn">
+            <FormField
+              label="Medical Record Number (MRN)"
+              htmlFor="mrn"
+              hint="Auto-generated on save if left blank."
+            >
               <div className="flex gap-2">
-                <FormInput id="mrn" value={mrn ?? '--'} disabled readOnly className="flex-1" />
+                <FormInput
+                  id="mrn"
+                  placeholder="Auto-generated on save"
+                  value={mrn ?? ''}
+                  onChange={(e) => onMrnChange(e.target.value)}
+                  className="flex-1"
+                />
                 <button
                   type="button"
                   onClick={onGenerateMrn}
@@ -460,8 +525,17 @@ export function PatientInformationStep({
           </div>
 
           <div className="mt-4">
-            <FormField label="Patient ID" htmlFor="patientId">
-              <FormInput id="patientId" value={patientId ?? '--'} disabled readOnly />
+            <FormField
+              label="Patient ID"
+              htmlFor="patientId"
+              hint="Auto-generated on save if left blank."
+            >
+              <FormInput
+                id="patientId"
+                placeholder="Auto-generated on save"
+                value={patientId ?? ''}
+                onChange={(e) => onPatientIdChange(e.target.value)}
+              />
             </FormField>
           </div>
         </Card>
@@ -516,6 +590,12 @@ export function PatientInformationStep({
             Take Photo
           </button>
         </Card>
+
+        <LegacyRecordUpload
+          images={legacyRecordImages}
+          onAdd={onAddLegacyRecordImages}
+          onRemove={onRemoveLegacyRecordImage}
+        />
 
         <div
           className="flex items-start gap-2.5 rounded-[10px] p-3"

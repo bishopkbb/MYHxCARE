@@ -10,6 +10,7 @@ import type { LucideIcon } from 'lucide-react';
 import type { Allergy } from '@/types/patient.types';
 import type { DirectoryPatient } from '@/features/registration/__mocks__/patientDirectoryFixtures';
 import { getDirectoryPatientsSnapshot } from '@/features/registration/store/patientDirectoryStore';
+import type { LegacyRecordImage } from '@/features/registration/types/legacyRecord.types';
 import type { NursePatient } from '@/features/nursing/__mocks__/myPatientsFixtures';
 import { getEffectiveRoster } from '@/features/nursing/store/nursingWorkflowStore';
 import { getPrescriptionsForPatient } from '@/features/prescriptions/store/prescriptionStore';
@@ -409,6 +410,13 @@ export type PatientDetailMock = {
   consultations: Consultation[];
   medications: Medication[];
   labResults: LabResult[];
+  /** Reference photos/scans of the patient's pre-existing paper file, captured
+   * during registration — never a clinical entry (§UNIZIK legacy-record task).
+   * Only ever non-empty for a patient registered through
+   * `patientDirectoryStore.addDirectoryPatient()` with at least one legacy
+   * page attached (`buildPatientDetailFromDirectory` below); every other
+   * population predates the feature and has none. */
+  legacyRecordImages: LegacyRecordImage[];
   /** True only for an id that resolves to neither a curated detail record nor a
    * PatientRecord in MOCK_PATIENTS — screens should render an honest "not
    * found" state for this, not silently show blank-but-plausible-looking data. */
@@ -421,6 +429,7 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
     initials: 'NO',
     name: 'Nkechi Obiora',
     mrn: 'MRN-2024-00451',
+    legacyRecordImages: [],
     dob: '2003-05-12',
     age: '21 years',
     gender: 'Female',
@@ -622,6 +631,7 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
     initials: 'IE',
     name: 'Ifeanyi Eze',
     mrn: 'MRN-2024-00592',
+    legacyRecordImages: [],
     dob: '2004-08-20',
     age: '21 years',
     gender: 'Male',
@@ -785,6 +795,7 @@ export const MOCK_PATIENT_DETAILS: Record<string, PatientDetailMock> = {
     initials: 'NA',
     name: 'Ngozi Adeyemi',
     mrn: 'MRN-2024-00512',
+    legacyRecordImages: [],
     dob: '2001-11-15',
     age: '24 years',
     gender: 'Female',
@@ -961,6 +972,7 @@ export const FALLBACK_PATIENT_DETAIL: PatientDetailMock = {
   initials: '??',
   name: 'Unknown Patient',
   mrn: 'MRN-0000-00000',
+  legacyRecordImages: [],
   dob: '—',
   age: '—',
   gender: '—',
@@ -1042,6 +1054,7 @@ function buildPatientDetailFromRecord(record: PatientRecord): PatientDetailMock 
     consultations: [],
     medications: [],
     labResults: [],
+    legacyRecordImages: [],
   };
 }
 
@@ -1076,6 +1089,10 @@ function buildPatientDetailFromDirectory(dp: DirectoryPatient): PatientDetailMoc
     consultations: [],
     medications: [],
     labResults: [],
+    // The one population where this is ever real data — the registration
+    // wizard's "Legacy Paper Records" step (Pass 2-4 of the UNIZIK
+    // legacy-record task) is what actually populates `dp.legacyRecordImages`.
+    legacyRecordImages: dp.legacyRecordImages ?? [],
   };
 }
 
@@ -1121,6 +1138,7 @@ function buildPatientDetailFromNursePatient(np: NursePatient): PatientDetailMock
     consultations: [],
     medications: [],
     labResults: [],
+    legacyRecordImages: [],
   };
 }
 

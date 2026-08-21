@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, Pencil, ShieldCheck, User as UserIcon } from 'lucide-react';
+import { CheckCircle2, FileImage, Pencil, ShieldCheck, User as UserIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import { AllergyBanner } from '@components/clinical/AllergyBanner';
@@ -11,6 +11,7 @@ import {
   type PatientInformationValues,
 } from '@/features/registration/schemas/registerPatientSchema';
 import type { AdditionalDetailsValues } from '@/features/registration/schemas/additionalDetailsSchema';
+import type { LegacyRecordImage } from '@/features/registration/types/legacyRecord.types';
 import {
   BLOOD_GROUP_OPTIONS,
   CHRONIC_CONDITION_OPTIONS,
@@ -24,12 +25,14 @@ import {
   DEPARTMENTS_BY_FACULTY,
   FACULTY_OPTIONS,
   GENDER_OPTIONS,
+  LEGACY_RECORD_TYPE_OPTIONS,
   LGAS_BY_STATE,
   MARITAL_STATUS_OPTIONS,
   NATIONALITY_OPTIONS,
   NIGERIA_STATES,
   PATIENT_TYPE_OPTIONS,
   RELATIONSHIP_OPTIONS,
+  RELIGION_OPTIONS,
   type SelectOption,
 } from '@/features/registration/__mocks__/registerPatientOptions';
 
@@ -95,6 +98,7 @@ export function ReviewConfirmStep({
   mrn,
   patientId,
   photoDataUrl,
+  legacyRecordImages,
   registrationOfficerName,
   onEditStep,
   onBack,
@@ -106,6 +110,7 @@ export function ReviewConfirmStep({
   mrn: string | null;
   patientId: string | null;
   photoDataUrl: string | null;
+  legacyRecordImages: LegacyRecordImage[];
   registrationOfficerName: string;
   onEditStep: (step: 1 | 2) => void;
   onBack: () => void;
@@ -194,12 +199,16 @@ export function ReviewConfirmStep({
               />
               <Field label="Nationality" value={labelFor(NATIONALITY_OPTIONS, step1.nationality)} />
               <Field label="Occupation" value={step1.occupation} />
+              <Field label="Ethnic Group" value={step1.ethnicGroup} />
+              <Field label="Religion" value={labelFor(RELIGION_OPTIONS, step1.religion)} />
+              <Field label="NIN" value={step1.nin} />
               <Field label="Phone" value={`${step1.phoneCountryCode} ${step1.phoneNumber}`} />
               <Field label="Email" value={step1.email} />
               <Field
                 label="Address"
                 value={`${step1.address}, ${step1.cityTown}, ${labelFor(NIGERIA_STATES, step1.state)}`}
               />
+              <Field label="State of Origin" value={labelFor(NIGERIA_STATES, step1.state)} />
               <Field label="LGA" value={labelFor(LGAS_BY_STATE[step1.state] ?? [], step1.lga)} />
             </div>
           </SummaryCard>
@@ -320,6 +329,39 @@ export function ReviewConfirmStep({
               </div>
             </SummaryCard>
           )}
+
+          <SummaryCard title="Legacy Paper Records" onEdit={() => onEditStep(1)}>
+            {legacyRecordImages.length > 0 ? (
+              <>
+                <p className="mb-3" style={{ fontSize: 14, color: '#8A98A3' }}>
+                  {legacyRecordImages.length} page{legacyRecordImages.length === 1 ? '' : 's'}{' '}
+                  attached — reference only, not part of this patient&apos;s clinical record.
+                </p>
+                <div className="grid grid-cols-4 gap-2">
+                  {legacyRecordImages.map((img) => (
+                    <div
+                      key={img.id}
+                      className="relative overflow-hidden rounded-[8px]"
+                      style={{ aspectRatio: '1 / 1', background: '#E2EDF1' }}
+                      title={
+                        img.recordType
+                          ? `${img.fileName} — ${labelFor(LEGACY_RECORD_TYPE_OPTIONS, img.recordType)}`
+                          : img.fileName
+                      }
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={img.dataUrl} alt="" className="size-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="flex items-center gap-2" style={{ fontSize: 14, color: '#8A98A3' }}>
+                <FileImage style={{ width: 16, height: 16 }} />
+                No legacy paper records attached
+              </p>
+            )}
+          </SummaryCard>
 
           <SummaryCard title="Consent">
             <div className="flex flex-col gap-2.5">

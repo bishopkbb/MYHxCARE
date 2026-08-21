@@ -15,6 +15,7 @@ import {
 
 import type { Allergy, Gender } from '@/types/patient.types';
 import type { SelectOption } from '@/features/registration/__mocks__/registerPatientOptions';
+import type { LegacyRecordImage } from '@/features/registration/types/legacyRecord.types';
 
 export type DirectoryPatientStatus = 'Active' | 'Checked-In' | 'Waiting' | 'Inactive' | 'Emergency';
 
@@ -57,6 +58,24 @@ export type DirectoryPatient = {
   genotype?: string | undefined;
   height?: string | undefined;
   weight?: string | undefined;
+  /** UNIZIK physical-folder / updated-spec fields (Phase 2/3 reconciliation)
+   * — only set for patients registered through `addDirectoryPatient()`
+   * post-reconciliation; seeded demo rows predate them, same as the fields
+   * above. `nin` is mandatory going forward at the registration form level
+   * (see `registerPatientSchema.ts`), but stays optional here since existing
+   * seeded/legacy directory rows never captured one. */
+  ethnicGroup?: string | undefined;
+  religion?: string | undefined;
+  nin?: string | undefined;
+  /** Reference images of the patient's pre-existing paper file, captured
+   * during registration — never a clinical entry (no diagnosis/prescription/
+   * vital-sign/lab-result is ever derived from these). Attached via a
+   * separate `attachLegacyRecordImages()` call, mirroring the real backend
+   * contract's `POST /patients/{id}/legacy-records` being a distinct call
+   * from patient creation (see `docs/api-contracts/01-patient-registration/
+   * 04-api-endpoints.md`). Only set for patients registered with at least
+   * one legacy page attached; seeded demo rows never have any. */
+  legacyRecordImages?: LegacyRecordImage[] | undefined;
 };
 
 export type DirectoryStat = {

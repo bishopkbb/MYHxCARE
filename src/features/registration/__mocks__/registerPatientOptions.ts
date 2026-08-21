@@ -33,6 +33,32 @@ export const NATIONALITY_OPTIONS: SelectOption[] = [
   { value: 'other', label: 'Other' },
 ];
 
+// UNIZIK physical-folder field (Phase 2/3) — standard categories used on
+// Nigerian hospital intake forms. Free-text "Other" is intentionally not a
+// separate option here since Religion, unlike Chronic Conditions elsewhere
+// in this wizard, has no "please specify" follow-up field in the spec.
+export const RELIGION_OPTIONS: SelectOption[] = [
+  { value: 'christianity', label: 'Christianity' },
+  { value: 'islam', label: 'Islam' },
+  { value: 'traditional', label: 'Traditional / African Traditional Religion' },
+  { value: 'other', label: 'Other' },
+  { value: 'prefer-not-to-say', label: 'Prefer not to say' },
+];
+
+// What kind of paper content a Legacy Paper Record page shows — deliberately
+// a separate list from medical-records' CLINICAL_DOC_CATEGORIES (new
+// documents going forward), so a scanned page is never labelled with a
+// clinical document type and mistaken for a live entry.
+export const LEGACY_RECORD_TYPE_OPTIONS: SelectOption[] = [
+  { value: 'case-note', label: 'Case Note' },
+  { value: 'prescription', label: 'Prescription' },
+  { value: 'lab-result', label: 'Lab Result' },
+  { value: 'admission-discharge', label: 'Admission / Discharge Record' },
+  { value: 'referral-letter', label: 'Referral Letter' },
+  { value: 'consent-form', label: 'Consent Form' },
+  { value: 'other', label: 'Other' },
+];
+
 export const RELATIONSHIP_OPTIONS: SelectOption[] = [
   { value: 'spouse', label: 'Spouse' },
   { value: 'parent', label: 'Parent' },

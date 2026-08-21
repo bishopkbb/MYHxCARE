@@ -29,15 +29,18 @@ import {
   type PatientInformationValues,
   type PatientType,
 } from '@/features/registration/schemas/registerPatientSchema';
+import type { LegacyRecordImage } from '@/features/registration/types/legacyRecord.types';
 import {
   DEPARTMENTS_BY_FACULTY,
   FACULTY_OPTIONS,
   NATIONALITY_OPTIONS,
+  RELIGION_OPTIONS,
   type SelectOption,
 } from '@/features/registration/__mocks__/registerPatientOptions';
 import type { DirectoryPatient } from '@/features/registration/__mocks__/patientDirectoryFixtures';
 import {
   addDirectoryPatient,
+  attachLegacyRecordImages,
   findPotentialDuplicates,
   reserveIdentifier,
 } from '@/features/registration/store/patientDirectoryStore';
@@ -251,6 +254,7 @@ export default function RegisterPatientPage() {
   const [mrn, setMrn] = useState<string | null>(null);
   const [patientId, setPatientId] = useState<string | null>(null);
   const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
+  const [legacyRecordImages, setLegacyRecordImages] = useState<LegacyRecordImage[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [duplicateMatches, setDuplicateMatches] = useState<DirectoryPatient[]>([]);
@@ -309,12 +313,31 @@ export default function RegisterPatientPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // Fills in whichever of MRN / Patient ID is still empty — never overwrites
+  // one the officer already typed in manually (e.g. an existing MRN carried
+  // over from a patient's legacy paper file). Also the fallback
+  // `handleFinalSubmit` calls if either is still blank at submit time.
   function handleGenerateMrn() {
     const generated = reserveIdentifier();
-    setMrn(generated.mrn);
-    setPatientId(generated.patientId);
-    toast.success('MRN generated', 'A medical record number has been assigned to this patient.');
-    return generated;
+    const nextMrn = mrn || generated.mrn;
+    const nextPatientId = patientId || generated.patientId;
+    setMrn(nextMrn);
+    setPatientId(nextPatientId);
+    toast.success(
+      mrn || patientId ? 'Identifier generated' : 'MRN generated',
+      mrn || patientId
+        ? 'The missing identifier was generated; your manually entered value was kept.'
+        : 'A medical record number and patient ID have been assigned to this patient.',
+    );
+    return { mrn: nextMrn, patientId: nextPatientId };
+  }
+
+  function handleAddLegacyRecordImages(images: LegacyRecordImage[]) {
+    setLegacyRecordImages((prev) => [...prev, ...images]);
+  }
+
+  function handleRemoveLegacyRecordImage(id: string) {
+    setLegacyRecordImages((prev) => prev.filter((img) => img.id !== id));
   }
 
   function handleSaveDraft() {
@@ -342,7 +365,7 @@ export default function RegisterPatientPage() {
     // only showed a success screen with an MRN nobody else could look up.
     const departmentOptions = DEPARTMENTS_BY_FACULTY[step1Data.facultyId ?? ''] ?? [];
 
-    addDirectoryPatient({
+    const createdPatient = addDirectoryPatient({
       firstName: step1Data.firstName,
       lastName: step1Data.lastName,
       middleName: step1Data.middleName,
@@ -368,11 +391,22 @@ export default function RegisterPatientPage() {
       genotype: step2Data.genotype || undefined,
       height: step2Data.height || undefined,
       weight: step2Data.weight || undefined,
+      ethnicGroup: step1Data.ethnicGroup || undefined,
+      religionLabel: step1Data.religion
+        ? labelFor(RELIGION_OPTIONS, step1Data.religion)
+        : undefined,
+      nin: step1Data.nin || undefined,
       mrn: finalIds.mrn,
       patientId: finalIds.patientId,
       allergies: step2Data.hasNoKnownAllergies ? [] : step2Data.allergies,
       registeredByName: user?.name,
     });
+
+    // Mirrors the real contract's two-call shape (see docs/api-contracts/
+    // 01-patient-registration/04-api-endpoints.md) — legacy record pages are
+    // attached to the just-created patient by id, not folded into the patient
+    // creation payload itself.
+    attachLegacyRecordImages(createdPatient.id, legacyRecordImages);
 
     setMrn(finalIds.mrn);
     setPatientId(finalIds.patientId);
@@ -389,6 +423,7 @@ export default function RegisterPatientPage() {
     setMrn(null);
     setPatientId(null);
     setPhotoDataUrl(null);
+    setLegacyRecordImages([]);
     setIsComplete(false);
     setCurrentStep(1);
     setDuplicateMatches([]);
@@ -466,8 +501,13 @@ export default function RegisterPatientPage() {
                       mrn={mrn}
                       patientId={patientId}
                       onGenerateMrn={handleGenerateMrn}
+                      onMrnChange={setMrn}
+                      onPatientIdChange={setPatientId}
                       photoDataUrl={photoDataUrl}
                       onPhotoUploaded={setPhotoDataUrl}
+                      legacyRecordImages={legacyRecordImages}
+                      onAddLegacyRecordImages={handleAddLegacyRecordImages}
+                      onRemoveLegacyRecordImage={handleRemoveLegacyRecordImage}
                     />
                     <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                       <button
@@ -567,6 +607,7 @@ export default function RegisterPatientPage() {
                     mrn={mrn}
                     patientId={patientId}
                     photoDataUrl={photoDataUrl}
+                    legacyRecordImages={legacyRecordImages}
                     registrationOfficerName={user?.name ?? 'Registration Officer'}
                     onEditStep={handleEditStep}
                     onBack={() => setCurrentStep(2)}

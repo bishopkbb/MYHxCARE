@@ -24,6 +24,7 @@ import {
   Wind,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 
@@ -33,6 +34,7 @@ import {
   TABLE_HEADER_BG,
   TABLE_HEADER_STICKY_CLASS,
 } from '@components/shared/ScrollableTable';
+import { ModalLoadingFallback } from '@components/shared/ModalLoadingFallback';
 import { Tooltip } from '@components/shared/Tooltip';
 import { PermissionGate } from '@/components/shared/PermissionGate';
 import { PERMISSIONS } from '@/constants/permissions';
@@ -43,8 +45,23 @@ import {
   type Consultation,
   type LabResult,
 } from '@/features/patients/__mocks__/patientFixtures';
+import type { LegacyRecordImage } from '@/features/registration/types/legacyRecord.types';
+import { LEGACY_RECORD_TYPE_OPTIONS } from '@/features/registration/__mocks__/registerPatientOptions';
 import { useLabResults } from '@/features/laboratory/store/labResultStore';
 import { formatHumanDate, formatTime } from '@/utils/datetime';
+
+const LegacyRecordViewerModal = dynamic(
+  () =>
+    import('@/features/registration/components/LegacyRecordViewerModal').then(
+      (m) => m.LegacyRecordViewerModal,
+    ),
+  { ssr: false, loading: () => <ModalLoadingFallback /> },
+);
+
+function legacyRecordTypeLabel(value: string | undefined): string | null {
+  if (!value) return null;
+  return LEGACY_RECORD_TYPE_OPTIONS.find((o) => o.value === value)?.label ?? null;
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -387,6 +404,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
   }
 
   const queueBadge = QUEUE_BADGE[patient.queueStatus] ?? FALLBACK_BADGE;
+  const [viewingLegacyRecord, setViewingLegacyRecord] = useState<LegacyRecordImage | null>(null);
 
   return (
     <div className="flex min-h-screen flex-col" style={{ background: '#F5FBFD' }}>
@@ -2868,31 +2886,101 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
 
           {/* ── Attachments tab ────────────────────────────────────────── */}
           {activeTab === 'attachments' && (
-            <div
-              className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
-              style={{
-                background: 'rgba(226,237,241,0.25)',
-                border: '1px solid rgba(0,180,216,0.15)',
-              }}
-            >
-              <div
-                className="flex size-12 items-center justify-center rounded-full"
-                style={{ background: 'rgba(0,180,216,0.08)' }}
-              >
-                <Paperclip aria-hidden style={{ width: 24, height: 24, color: '#00B4D8' }} />
-              </div>
-              <div className="text-center">
-                <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
-                  No attachments on record
-                </p>
-                <p className="mt-1 max-w-xs" style={{ fontSize: 14, color: '#4A7080' }}>
-                  Patient documents, lab reports and images will appear here once uploaded.
-                </p>
-              </div>
+            <div className="flex flex-col gap-5">
+              {patient.legacyRecordImages.length > 0 && (
+                <div
+                  className="rounded-[12px] p-4 sm:p-5"
+                  style={{ background: '#FFFFFF', border: '1px solid rgba(0,100,130,0.12)' }}
+                >
+                  <h3
+                    className="font-display font-semibold"
+                    style={{ fontSize: 16, lineHeight: '24px', color: '#0D2630' }}
+                  >
+                    Legacy Paper Records
+                  </h3>
+                  <p className="mt-1" style={{ fontSize: 14, color: '#8A98A3' }}>
+                    Photos/scans of this patient&apos;s pre-existing paper file, captured at
+                    registration reference only, not part of the clinical record. Click a page to
+                    view it full size.
+                  </p>
+                  <div className="mt-3.5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
+                    {patient.legacyRecordImages.map((img) => (
+                      <div key={img.id} className="flex flex-col gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setViewingLegacyRecord(img)}
+                          className="relative overflow-hidden rounded-[10px] transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                          style={{ aspectRatio: '1 / 1', background: '#E2EDF1' }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={img.dataUrl} alt="" className="size-full object-cover" />
+                          <span
+                            className="absolute top-1.5 left-1.5 rounded-full px-2 py-0.5 font-sans font-medium"
+                            style={{
+                              fontSize: 14,
+                              color: '#FFFFFF',
+                              background: 'rgba(13,38,48,0.65)',
+                            }}
+                          >
+                            Legacy
+                          </span>
+                        </button>
+                        <Tooltip content={img.fileName}>
+                          <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+                            {img.fileName}
+                          </p>
+                        </Tooltip>
+                        {legacyRecordTypeLabel(img.recordType) && (
+                          <Tooltip content={legacyRecordTypeLabel(img.recordType) ?? ''}>
+                            <p
+                              className="truncate font-sans font-medium"
+                              style={{ fontSize: 14, color: '#4A7080' }}
+                            >
+                              {legacyRecordTypeLabel(img.recordType)}
+                            </p>
+                          </Tooltip>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {patient.legacyRecordImages.length === 0 && (
+                <div
+                  className="flex min-h-[200px] flex-col items-center justify-center gap-3 rounded-[12px]"
+                  style={{
+                    background: 'rgba(226,237,241,0.25)',
+                    border: '1px solid rgba(0,180,216,0.15)',
+                  }}
+                >
+                  <div
+                    className="flex size-12 items-center justify-center rounded-full"
+                    style={{ background: 'rgba(0,180,216,0.08)' }}
+                  >
+                    <Paperclip aria-hidden style={{ width: 24, height: 24, color: '#00B4D8' }} />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold" style={{ fontSize: 16, color: '#0D2630' }}>
+                      No attachments on record
+                    </p>
+                    <p className="mt-1 max-w-xs" style={{ fontSize: 14, color: '#4A7080' }}>
+                      Patient documents, lab reports and images will appear here once uploaded.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
+
+      {viewingLegacyRecord && (
+        <LegacyRecordViewerModal
+          image={viewingLegacyRecord}
+          onClose={() => setViewingLegacyRecord(null)}
+        />
+      )}
 
       {/* Bottom breathing room */}
       <div className="h-16" />
