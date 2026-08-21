@@ -24,5 +24,5 @@ export type LegacyRecordImage = {
    * which the UNIZIK legacy-record task explicitly prohibits. Optional —
    * images added before this field existed, or left unset by choice, have
    * no type. */
-  recordType?: string;
+  recordType?: string | undefined;
 };
