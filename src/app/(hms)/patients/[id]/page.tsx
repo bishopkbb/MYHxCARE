@@ -63,6 +63,62 @@ function legacyRecordTypeLabel(value: string | undefined): string | null {
   return LEGACY_RECORD_TYPE_OPTIONS.find((o) => o.value === value)?.label ?? null;
 }
 
+/** Read-only thumbnail grid for a patient's Legacy Paper Records — shared
+ * between the Attachments tab and the Medical History tab (the latter is
+ * where a doctor actually goes looking after an officer uploads one; see
+ * the "Legacy Paper Records" section in Medical History below). Assumes
+ * `images` is non-empty — each call site handles its own tab's empty-state
+ * convention, which already differ (Attachments uses a big centered panel,
+ * Medical History uses the same inline single-row style as its sibling
+ * history sections). */
+function LegacyRecordGallery({
+  images,
+  onView,
+}: {
+  images: LegacyRecordImage[];
+  onView: (image: LegacyRecordImage) => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
+      {images.map((img) => (
+        <div key={img.id} className="flex flex-col gap-1">
+          <button
+            type="button"
+            onClick={() => onView(img)}
+            aria-label={`View ${img.fileName} full size`}
+            className="relative overflow-hidden rounded-[10px] transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+            style={{ aspectRatio: '1 / 1', background: '#E2EDF1' }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={img.dataUrl} alt="" className="size-full object-cover" />
+            <span
+              className="absolute top-1.5 left-1.5 rounded-full px-2 py-0.5 font-sans font-medium"
+              style={{ fontSize: 14, color: '#FFFFFF', background: 'rgba(13,38,48,0.65)' }}
+            >
+              Legacy
+            </span>
+          </button>
+          <Tooltip content={img.fileName}>
+            <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
+              {img.fileName}
+            </p>
+          </Tooltip>
+          {legacyRecordTypeLabel(img.recordType) && (
+            <Tooltip content={legacyRecordTypeLabel(img.recordType) ?? ''}>
+              <p
+                className="truncate font-sans font-medium"
+                style={{ fontSize: 14, color: '#4A7080' }}
+              >
+                {legacyRecordTypeLabel(img.recordType)}
+              </p>
+            </Tooltip>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type PatientTab = {
@@ -271,6 +327,7 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
     surgicalHistory: true,
     chronicConditions: true,
     allergiesHistory: true,
+    legacyRecords: true,
   });
 
   function toggleSection(key: keyof typeof openSections) {
@@ -1943,6 +2000,58 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                       )}
                     </div>
                   </div>
+
+                  {/* ── Legacy Paper Records — full width below both columns ──── */}
+                  <div
+                    className="mt-7 rounded-[12px] bg-white"
+                    style={{ border: '1px solid rgba(37,70,77,0.2)' }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleSection('legacyRecords')}
+                      aria-expanded={openSections.legacyRecords}
+                      className="flex w-full items-center justify-between px-4 py-2 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
+                      style={{ borderBottom: '1px solid rgba(37,70,77,0.2)' }}
+                    >
+                      <h4
+                        className="font-semibold"
+                        style={{ fontSize: 16, lineHeight: '24px', color: '#000000' }}
+                      >
+                        Legacy Paper Records
+                      </h4>
+                      <ChevronsDown
+                        style={{
+                          width: 24,
+                          height: 24,
+                          color: '#00B4D8',
+                          flexShrink: 0,
+                          transform: openSections.legacyRecords ? undefined : 'rotate(180deg)',
+                          transition: 'transform 0.2s ease',
+                        }}
+                      />
+                    </button>
+                    {openSections.legacyRecords && (
+                      <div className="p-4">
+                        {patient.legacyRecordImages.length === 0 ? (
+                          <p style={{ fontSize: 14, lineHeight: '22px', color: '#2F3A40' }}>
+                            No legacy paper records on file
+                          </p>
+                        ) : (
+                          <>
+                            <p className="mb-3" style={{ fontSize: 14, color: '#8A98A3' }}>
+                              Photos/scans of this patient&apos;s pre-existing paper file, captured
+                              at registration — reference only, not part of the clinical record.
+                              Click a page to view it full size.
+                            </p>
+                            <LegacyRecordGallery
+                              images={patient.legacyRecordImages}
+                              onView={setViewingLegacyRecord}
+                            />
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </>
@@ -2900,48 +3009,14 @@ export default function PatientDetailPage({ params }: { params: Promise<{ id: st
                   </h3>
                   <p className="mt-1" style={{ fontSize: 14, color: '#8A98A3' }}>
                     Photos/scans of this patient&apos;s pre-existing paper file, captured at
-                    registration reference only, not part of the clinical record. Click a page to
+                    registration — reference only, not part of the clinical record. Click a page to
                     view it full size.
                   </p>
-                  <div className="mt-3.5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
-                    {patient.legacyRecordImages.map((img) => (
-                      <div key={img.id} className="flex flex-col gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setViewingLegacyRecord(img)}
-                          className="relative overflow-hidden rounded-[10px] transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none"
-                          style={{ aspectRatio: '1 / 1', background: '#E2EDF1' }}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={img.dataUrl} alt="" className="size-full object-cover" />
-                          <span
-                            className="absolute top-1.5 left-1.5 rounded-full px-2 py-0.5 font-sans font-medium"
-                            style={{
-                              fontSize: 14,
-                              color: '#FFFFFF',
-                              background: 'rgba(13,38,48,0.65)',
-                            }}
-                          >
-                            Legacy
-                          </span>
-                        </button>
-                        <Tooltip content={img.fileName}>
-                          <p className="truncate" style={{ fontSize: 14, color: '#8A98A3' }}>
-                            {img.fileName}
-                          </p>
-                        </Tooltip>
-                        {legacyRecordTypeLabel(img.recordType) && (
-                          <Tooltip content={legacyRecordTypeLabel(img.recordType) ?? ''}>
-                            <p
-                              className="truncate font-sans font-medium"
-                              style={{ fontSize: 14, color: '#4A7080' }}
-                            >
-                              {legacyRecordTypeLabel(img.recordType)}
-                            </p>
-                          </Tooltip>
-                        )}
-                      </div>
-                    ))}
+                  <div className="mt-3.5">
+                    <LegacyRecordGallery
+                      images={patient.legacyRecordImages}
+                      onView={setViewingLegacyRecord}
+                    />
                   </div>
                 </div>
               )}

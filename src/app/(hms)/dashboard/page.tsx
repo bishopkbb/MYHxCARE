@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ClipboardList,
   Clock,
+  FileImage,
   FlaskConical,
   MapPin,
   MessageSquare,
@@ -24,7 +25,7 @@ import type { LucideIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useAuth } from '@hooks/useAuth';
 import { ROUTES } from '@/constants/routes';
@@ -42,6 +43,7 @@ import {
 } from '@/features/encounters/store/encounterQueueStore';
 import { startEncounter, useEncounters } from '@/features/encounters/store/encounterStore';
 import { useClaimedPatients } from '@/features/nursing/store/nursingWorkflowStore';
+import { useDirectoryPatients } from '@/features/registration/store/patientDirectoryStore';
 import type { Encounter } from '@/types/visit.types';
 
 function getWATGreeting(): string {
@@ -468,6 +470,19 @@ export default function DashboardPage() {
   const baseQueueEntries = useEncounterQueueEntries();
   const encounters = useEncounters();
   const dashboardQueue = getDashboardQueue(baseQueueEntries, user?.id, encounters);
+  // Which MRNs have a Legacy Paper Record attached — joined by MRN since
+  // this queue's own patient identity doesn't share DirectoryPatient's id
+  // (same MRN-bridge convention used in patients/[id]/page.tsx's lab-result
+  // merge). Surfaced as a small icon on each queue row so a doctor notices
+  // a freshly-registered patient's legacy file before opening the chart.
+  const directoryPatients = useDirectoryPatients();
+  const legacyRecordMrns = useMemo(
+    () =>
+      new Set(
+        directoryPatients.filter((p) => (p.legacyRecordImages?.length ?? 0) > 0).map((p) => p.mrn),
+      ),
+    [directoryPatients],
+  );
 
   useEffect(() => {
     const t = setTimeout(() => setPageState('loaded'), 800);
@@ -863,9 +878,24 @@ export default function DashboardPage() {
 
                       {/* Name + symptoms */}
                       <div className="min-w-0 flex-1">
-                        <p className="text-base leading-6" style={{ color: '#00B4D8' }}>
-                          {patient.name}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="truncate text-base leading-6" style={{ color: '#00B4D8' }}>
+                            {patient.name}
+                          </p>
+                          {legacyRecordMrns.has(patient.mrn) && (
+                            <Tooltip content="Has legacy paper records on file">
+                              <span
+                                className="flex size-5 shrink-0 items-center justify-center rounded-full"
+                                style={{ background: 'rgba(74,112,128,0.12)' }}
+                              >
+                                <FileImage
+                                  aria-label="Has legacy paper records on file"
+                                  style={{ width: 12, height: 12, color: '#4A7080' }}
+                                />
+                              </span>
+                            </Tooltip>
+                          )}
+                        </div>
                         <Tooltip content={patient.symptoms}>
                           <p className="truncate text-sm leading-5.5" style={{ color: '#25464D' }}>
                             {patient.symptoms}
