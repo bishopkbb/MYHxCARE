@@ -61,6 +61,10 @@ import {
   MOCK_BILLING_ROSTER,
   type BillingShift,
 } from '@/features/billing/__mocks__/billingWorkforceFixtures';
+import {
+  MOCK_ADMIN_ROSTER,
+  type AdministrationShift,
+} from '@/features/administration/__mocks__/administrationWorkforceFixtures';
 
 export type ShiftType = 'MORNING' | 'AFTERNOON' | 'NIGHT' | 'ON_CALL' | 'EMERGENCY';
 export type ShiftStatus = 'ON_DUTY' | 'SCHEDULED' | 'ON_CALL' | 'COMPLETED' | 'CANCELLED';
@@ -76,7 +80,8 @@ export type StaffShiftHomeModule =
   | 'clinical'
   | 'pharmacy'
   | 'laboratory'
-  | 'billing';
+  | 'billing'
+  | 'administration';
 
 export type StaffShift = {
   id: string;
@@ -123,6 +128,9 @@ function fromLaboratory(s: LaboratoryShift): StaffShift {
 function fromBilling(s: BillingShift): StaffShift {
   return { ...s, homeModule: 'billing' };
 }
+function fromAdministration(s: AdministrationShift): StaffShift {
+  return { ...s, homeModule: 'administration' };
+}
 
 const SEED: StaffShift[] = [
   ...MOCK_REGISTRATION_ROSTER.map(fromRegistration),
@@ -132,6 +140,7 @@ const SEED: StaffShift[] = [
   ...MOCK_PHARMACY_ROSTER.map(fromPharmacy),
   ...MOCK_LABORATORY_ROSTER.map(fromLaboratory),
   ...MOCK_BILLING_ROSTER.map(fromBilling),
+  ...MOCK_ADMIN_ROSTER.map(fromAdministration),
 ];
 
 let shifts: StaffShift[] = [...SEED];

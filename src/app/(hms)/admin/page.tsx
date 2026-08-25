@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { AdministrationDashboardWorkspace } from '@/features/administration/components/AdministrationDashboardWorkspace';
 
 export const metadata = { title: 'Administration' };
 
 export default function AdminPage() {
-  return (
-    <ComingSoon
-      title="Administration"
-      description="System administration, user management, role configuration, and audit controls are being finalised."
-    />
-  );
+  return <AdministrationDashboardWorkspace />;
 }

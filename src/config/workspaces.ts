@@ -30,6 +30,7 @@ import {
   ListOrdered,
   Lock,
   LogOut,
+  MapPin,
   Megaphone,
   MessageSquare,
   NotebookPen,
@@ -917,13 +918,57 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
     homeRoute: '/admin',
     sections: [
       {
-        items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
+        items: [{ label: 'Dashboard', href: '/admin', icon: LayoutDashboard }],
       },
       {
-        label: 'Management',
+        label: 'USER & ACCESS MANAGEMENT',
         items: [
-          { label: 'Staff & Roles', href: '/admin', icon: Users },
-          { label: 'Duty Roster', href: '/duty-roster', icon: CalendarDays },
+          { label: 'Staff Accounts', href: '/admin/staff-accounts', icon: Users },
+          {
+            label: 'Roles & Permissions',
+            href: '/admin/roles-permissions',
+            icon: ShieldCheck,
+            permission: PERMISSIONS.ADMIN_WRITE,
+          },
+        ],
+      },
+      {
+        label: 'FACILITY MANAGEMENT',
+        items: [
+          { label: 'Department Management', href: '/admin/departments', icon: Building2 },
+          { label: 'Facilities & Campuses', href: '/admin/facilities', icon: MapPin },
+        ],
+      },
+      {
+        label: 'SYSTEM',
+        items: [
+          {
+            label: 'System Settings',
+            href: '/admin/system-settings',
+            icon: Settings,
+            permission: PERMISSIONS.ADMIN_WRITE,
+          },
+          { label: 'Audit Log', href: '/admin/audit-log', icon: History },
+        ],
+      },
+      {
+        label: 'SCHEDULE & WORKFORCE',
+        items: [
+          {
+            label: 'Workforce Management',
+            href: '/admin/workforce-management',
+            icon: CalendarDays,
+            permission: PERMISSIONS.DUTY_ROSTER_WRITE,
+          },
+          { label: 'My Schedule', href: '/admin/my-schedule', icon: CalendarCheck },
+          { label: 'Shift Handover', href: '/admin/shift-handover', icon: Share2 },
+        ],
+      },
+      {
+        label: 'REPORTS',
+        items: [
+          { label: 'System Reports', href: '/admin/reports', icon: BarChart2 },
+          { label: 'Staff Reports', href: '/admin/reports/staff', icon: PieChart },
         ],
       },
       {

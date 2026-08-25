@@ -150,6 +150,19 @@ export const ROUTES = {
   emergencyMySchedule: '/emergency/my-schedule',
   emergencyShiftHandover: '/emergency/shift-handover',
 
+  // Administration sub-routes
+  adminStaffAccounts: '/admin/staff-accounts',
+  adminRolesPermissions: '/admin/roles-permissions',
+  adminDepartments: '/admin/departments',
+  adminFacilities: '/admin/facilities',
+  adminSystemSettings: '/admin/system-settings',
+  adminAuditLog: '/admin/audit-log',
+  adminWorkforceManagement: '/admin/workforce-management',
+  adminMySchedule: '/admin/my-schedule',
+  adminShiftHandover: '/admin/shift-handover',
+  adminReports: '/admin/reports',
+  adminStaffReports: '/admin/reports/staff',
+
   // Billing sub-routes
   billingCharges: '/billing/charges',
   billingAccounts: '/billing/accounts',
