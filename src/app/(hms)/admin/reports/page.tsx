@@ -1,12 +1,12 @@
 import { ComingSoon } from '@/components/shared/ComingSoon';
 
-export const metadata = { title: 'System Reports' };
+export const metadata = { title: 'Operational Reports' };
 
-export default function AdminSystemReportsPage() {
+export default function AdminOperationalReportsPage() {
   return (
     <ComingSoon
-      title="System Reports"
-      description="Hospital-wide system usage and activity reports are being finalised."
+      title="Operational Reports"
+      description="Hospital-wide operational and activity reports are being finalised."
     />
   );
 }

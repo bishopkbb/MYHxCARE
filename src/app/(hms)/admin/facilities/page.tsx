@@ -1,12 +1,12 @@
 import { ComingSoon } from '@/components/shared/ComingSoon';
 
-export const metadata = { title: 'Facilities & Campuses' };
+export const metadata = { title: 'Facility & Resource Overview' };
 
-export default function FacilitiesCampusesPage() {
+export default function FacilityResourceOverviewPage() {
   return (
     <ComingSoon
-      title="Facilities & Campuses"
-      description="Managing UNIZIK Medical Centre's campuses, wards, and physical facilities is being finalised."
+      title="Facility & Resource Overview"
+      description="Real-time monitoring of beds, rooms, equipment, and resources across the medical centre is being finalised."
     />
   );
 }

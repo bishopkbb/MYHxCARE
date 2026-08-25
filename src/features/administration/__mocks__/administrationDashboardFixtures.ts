@@ -1,46 +1,41 @@
 /**
- * Mock fixtures for the Administration Dashboard. The workforce-related
- * stats on this dashboard are deliberately NOT here; they're computed live
- * from `staffShiftStore.ts` in `AdministrationDashboardWorkspace.tsx` itself
- * (same `computeWorkforceStats()` Workforce Management uses), so a shift
- * created/cancelled/acknowledged there is reflected here immediately. This
- * file only holds the things with no real cross-module store yet: account
- * counts, system tickets, facility reports, recent activity, and alerts.
- * Swap out by pointing hooks to real endpoints in Phase 6.
+ * Mock fixtures for the Administration Dashboard. Modelled directly on the
+ * reference mockup (`Admin Dashboard/Dashboard (2).png`). The workforce
+ * stat card is deliberately NOT here; it's computed live from
+ * `staffShiftStore.ts` in `AdministrationDashboardWorkspace.tsx` itself
+ * (same `computeWorkforceStats()` Workforce Management uses), kept even
+ * though the mockup doesn't have it since Workforce Management otherwise
+ * has no Dashboard entry point. Patients Today and Appointments Today are
+ * also computed live in the workspace component, from
+ * `registrationQueueStore.ts` / `appointmentStore.ts`, real cross-workflow
+ * counts, not fixtures. Everything else here has no real cross-module store
+ * yet (a unified staff-account directory, a system-tickets queue, per-
+ * department live operational metrics). Swap out by pointing hooks to real
+ * endpoints in Phase 6.
  */
 
 import {
-  AlertTriangle,
+  BadgeDollarSign,
   Building2,
-  CheckCircle2,
+  ClipboardCheck,
+  FileText,
   KeyRound,
   ShieldAlert,
+  Stethoscope,
+  UserCheck,
   UserPlus,
   Wrench,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-import { HOSPITAL_DEPARTMENTS } from '@/constants/departments';
 import { formatDateTime } from '@/utils/datetime';
 
-export type DashboardStat = {
-  label: string;
-  count: number;
-  info: string;
-};
-
-// Total staff accounts across every workspace: a plausible hospital-wide
-// headcount, not derived from any one workspace's own roster (no single
-// store holds every account yet; see the domain model's own note that a
-// unified Staff/User directory is Administration's future remit).
-export const TOTAL_STAFF_ACCOUNTS = 156;
-export const PENDING_STAFF_REQUESTS = 4;
-export const OPEN_SYSTEM_TICKETS = 7;
-export const FACILITY_ISSUES_REPORTED = 3;
-
-// Real, not fabricated: the same canonical department list Registration's
-// own Check-In/Insurance screens already read from.
-export const DEPARTMENT_COUNT = HOSPITAL_DEPARTMENTS.length;
+export const TOTAL_STAFF = 128;
+export const TOTAL_STAFF_DELTA = '3 new this month';
+export const ACTIVE_USERS = 114;
+export const ACTIVE_USERS_DELTA = '5 since yesterday';
+export const OUTSTANDING_TASKS = 17;
+export const SYSTEM_ALERTS_COUNT = 5;
 
 export type ActivityEntry = {
   id: string;
@@ -61,103 +56,182 @@ function hoursAgo(hours: number): string {
 export const RECENT_ACTIVITY: ActivityEntry[] = [
   {
     id: 'act-1',
-    icon: UserPlus,
+    icon: BadgeDollarSign,
     iconColor: '#22C55E',
     iconBg: 'rgba(34,197,94,0.10)',
-    title: 'New staff account created',
-    detail: 'Chidinma Obasi (HR Manager) · IT & Systems',
+    title: 'Service price updated for Malaria Test',
+    detail: '₦3,500 to ₦4,000',
     timeLabel: hoursAgo(1),
   },
   {
     id: 'act-2',
-    icon: KeyRound,
-    iconColor: '#00B4D8',
-    iconBg: 'rgba(0,180,216,0.10)',
-    title: 'Role permissions updated',
-    detail: 'BILLING_OFFICER role granted billing:write',
-    timeLabel: hoursAgo(3),
+    icon: UserCheck,
+    iconColor: '#22C55E',
+    iconBg: 'rgba(34,197,94,0.10)',
+    title: 'John Okafor (Pharmacist) account activated',
+    detail: 'Pharmacy · Awka campus',
+    timeLabel: hoursAgo(2),
   },
   {
     id: 'act-3',
-    icon: Wrench,
-    iconColor: '#F59E0B',
-    iconBg: 'rgba(245,158,11,0.10)',
-    title: 'Facility issue reported',
-    detail: 'Generator maintenance flagged at Awka campus',
-    timeLabel: hoursAgo(6),
-  },
-  {
-    id: 'act-4',
-    icon: Building2,
-    iconColor: '#8B5CF6',
-    iconBg: 'rgba(139,92,246,0.10)',
-    title: 'Department configuration updated',
-    detail: 'Laboratory department contact details revised',
+    icon: UserPlus,
+    iconColor: '#00B4D8',
+    iconBg: 'rgba(0,180,216,0.10)',
+    title: 'New staff added to Nursing department',
+    detail: 'Mary Uche · Staff Nurse',
     timeLabel: hoursAgo(9),
   },
   {
+    id: 'act-4',
+    icon: FileText,
+    iconColor: '#8B5CF6',
+    iconBg: 'rgba(139,92,246,0.10)',
+    title: 'Revenue report generated',
+    detail: 'July 2026 · Financial Reports',
+    timeLabel: hoursAgo(15),
+  },
+  {
     id: 'act-5',
-    icon: CheckCircle2,
-    iconColor: '#22C55E',
-    iconBg: 'rgba(34,197,94,0.10)',
-    title: 'System ticket resolved',
-    detail: 'Pharmacy login-timeout issue closed by IT',
-    timeLabel: hoursAgo(14),
+    icon: KeyRound,
+    iconColor: '#F59E0B',
+    iconBg: 'rgba(245,158,11,0.10)',
+    title: 'Password reset for user Grace Eze',
+    detail: 'Nursing / Wards · Chief Nursing Officer',
+    timeLabel: hoursAgo(30),
   },
 ];
 
-export type SystemAlert = {
+export type AdministrativeAlert = {
   id: string;
-  severity: 'critical' | 'warning' | 'info';
+  icon: LucideIcon;
+  iconColor: string;
+  iconBg: string;
   title: string;
   detail: string;
   timeLabel: string;
 };
 
-export const SYSTEM_ALERTS: SystemAlert[] = [
+export const ADMINISTRATIVE_ALERTS: AdministrativeAlert[] = [
   {
-    id: 'alrt-1',
-    severity: 'warning',
-    title: 'Pending staff account approvals',
-    detail: `${PENDING_STAFF_REQUESTS} new account requests awaiting review`,
-    timeLabel: hoursAgo(2),
+    id: 'aalrt-1',
+    icon: UserPlus,
+    iconColor: '#DC2626',
+    iconBg: 'rgba(220,38,38,0.1)',
+    title: '3 staff accounts awaiting activation',
+    detail: 'Pending verification and account setup',
+    timeLabel: '20m ago',
   },
   {
-    id: 'alrt-2',
-    severity: 'critical',
-    title: 'Facility issue unresolved',
-    detail: 'Nnewi campus plumbing report open for 2 days',
-    timeLabel: hoursAgo(48),
+    id: 'aalrt-2',
+    icon: BadgeDollarSign,
+    iconColor: '#D97706',
+    iconBg: 'rgba(217,119,6,0.1)',
+    title: '2 pricing changes awaiting publication',
+    detail: 'Review and publish updated service prices',
+    timeLabel: '1h ago',
   },
   {
-    id: 'alrt-3',
-    severity: 'info',
-    title: 'Scheduled maintenance window',
-    detail: 'System-wide maintenance planned for Sunday 02:00–04:00',
-    timeLabel: hoursAgo(20),
+    id: 'aalrt-3',
+    icon: Building2,
+    iconColor: '#7C3AED',
+    iconBg: 'rgba(124,58,237,0.1)',
+    title: '1 department configuration issue',
+    detail: 'Laboratory equipment maintenance alert',
+    timeLabel: '2h ago',
+  },
+  {
+    id: 'aalrt-4',
+    icon: ClipboardCheck,
+    iconColor: '#00B4D8',
+    iconBg: 'rgba(0,180,216,0.1)',
+    title: '5 pending approval requests',
+    detail: 'Leave, role access and document approvals',
+    timeLabel: '3h ago',
   },
 ];
 
-export const ALERT_SEVERITY_CFG: Record<
-  SystemAlert['severity'],
-  { icon: LucideIcon; color: string; bg: string; border: string }
-> = {
-  critical: {
-    icon: ShieldAlert,
-    color: '#EF4444',
-    bg: 'rgba(239,68,68,0.06)',
-    border: 'rgba(239,68,68,0.3)',
-  },
-  warning: {
-    icon: AlertTriangle,
-    color: '#F59E0B',
-    bg: 'rgba(245,158,11,0.06)',
-    border: 'rgba(245,158,11,0.3)',
-  },
-  info: {
-    icon: CheckCircle2,
-    color: '#00B4D8',
-    bg: 'rgba(0,180,216,0.06)',
-    border: 'rgba(0,180,216,0.3)',
-  },
+export type DepartmentStatusRow = {
+  id: string;
+  icon: LucideIcon;
+  iconColor: string;
+  iconBg: string;
+  department: string;
+  status: 'Operational' | 'Busy';
+  keyMetric: string;
+  /** Set instead of a literal keyMetric string for a Naira figure, so the
+   * component can run it through formatCurrencyWhole() rather than a
+   * hardcoded, unformatted string. */
+  keyMetricAmount?: number;
+  metricLabel: string;
+  trend: 'up' | 'down';
 };
+
+export const DEPARTMENT_STATUS: DepartmentStatusRow[] = [
+  {
+    id: 'dept-1',
+    icon: Stethoscope,
+    iconColor: '#2563EB',
+    iconBg: 'rgba(37,99,235,0.1)',
+    department: 'Clinical / Consultation',
+    status: 'Operational',
+    keyMetric: '24 Consultations',
+    metricLabel: 'Today',
+    trend: 'up',
+  },
+  {
+    id: 'dept-2',
+    icon: Building2,
+    iconColor: '#16A34A',
+    iconBg: 'rgba(22,163,74,0.1)',
+    department: 'Nursing / Wards',
+    status: 'Operational',
+    keyMetric: '18 Patients',
+    metricLabel: 'in wards',
+    trend: 'up',
+  },
+  {
+    id: 'dept-3',
+    icon: Wrench,
+    iconColor: '#7C3AED',
+    iconBg: 'rgba(124,58,237,0.1)',
+    department: 'Pharmacy',
+    status: 'Operational',
+    keyMetric: '31 Prescriptions',
+    metricLabel: 'Dispensed today',
+    trend: 'up',
+  },
+  {
+    id: 'dept-4',
+    icon: ShieldAlert,
+    iconColor: '#D97706',
+    iconBg: 'rgba(217,119,6,0.1)',
+    department: 'Laboratory',
+    status: 'Operational',
+    keyMetric: '46 Tests',
+    metricLabel: 'Processed today',
+    trend: 'up',
+  },
+  {
+    id: 'dept-5',
+    icon: ShieldAlert,
+    iconColor: '#DC2626',
+    iconBg: 'rgba(220,38,38,0.1)',
+    department: 'Emergency',
+    status: 'Busy',
+    keyMetric: '8 Active Cases',
+    metricLabel: 'In triage',
+    trend: 'up',
+  },
+  {
+    id: 'dept-6',
+    icon: BadgeDollarSign,
+    iconColor: '#00B4D8',
+    iconBg: 'rgba(0,180,216,0.1)',
+    department: 'Accounts & Billing',
+    status: 'Operational',
+    keyMetric: '',
+    keyMetricAmount: 986_000,
+    metricLabel: 'Collected today',
+    trend: 'up',
+  },
+];

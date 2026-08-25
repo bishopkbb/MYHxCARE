@@ -4,6 +4,7 @@ import {
   Archive,
   ArrowLeftRight,
   BadgeCheck,
+  BadgeDollarSign,
   BarChart2,
   BedDouble,
   BedSingle,
@@ -18,6 +19,7 @@ import {
   Clock,
   CreditCard,
   Eye,
+  FileBarChart,
   FileCheck2,
   Files,
   FileText,
@@ -25,6 +27,7 @@ import {
   Gauge,
   History,
   Inbox,
+  KeyRound,
   LayoutDashboard,
   ListChecks,
   ListOrdered,
@@ -57,6 +60,8 @@ import {
   UserCheck,
   UserPlus,
   Users,
+  Wallet,
+  Workflow,
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -921,34 +926,46 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         items: [{ label: 'Dashboard', href: '/admin', icon: LayoutDashboard }],
       },
       {
-        label: 'USER & ACCESS MANAGEMENT',
+        label: 'PEOPLE & ACCESS',
         items: [
-          { label: 'Staff Accounts', href: '/admin/staff-accounts', icon: Users },
+          { label: 'Staff Management', href: '/admin/staff-accounts', icon: Users },
           {
             label: 'Roles & Permissions',
             href: '/admin/roles-permissions',
             icon: ShieldCheck,
             permission: PERMISSIONS.ADMIN_WRITE,
           },
+          { label: 'Departments', href: '/admin/departments', icon: Building2 },
         ],
       },
       {
-        label: 'FACILITY MANAGEMENT',
-        items: [
-          { label: 'Department Management', href: '/admin/departments', icon: Building2 },
-          { label: 'Facilities & Campuses', href: '/admin/facilities', icon: MapPin },
-        ],
-      },
-      {
-        label: 'SYSTEM',
+        label: 'CONFIGURATION',
         items: [
           {
-            label: 'System Settings',
+            label: 'Service & Pricing',
+            href: '/admin/service-pricing',
+            icon: BadgeDollarSign,
+            permission: PERMISSIONS.ADMIN_WRITE,
+          },
+          {
+            label: 'Medical Centre Settings',
             href: '/admin/system-settings',
             icon: Settings,
             permission: PERMISSIONS.ADMIN_WRITE,
           },
-          { label: 'Audit Log', href: '/admin/audit-log', icon: History },
+          {
+            label: 'Workflow Settings',
+            href: '/admin/workflow-settings',
+            icon: Workflow,
+            permission: PERMISSIONS.ADMIN_WRITE,
+          },
+        ],
+      },
+      {
+        label: 'OPERATIONS',
+        items: [
+          { label: 'Department Monitoring', href: '/admin/department-monitoring', icon: Activity },
+          { label: 'Facility & Resource Overview', href: '/admin/facilities', icon: MapPin },
         ],
       },
       {
@@ -965,10 +982,25 @@ export const WORKSPACE_NAV: Record<WorkspaceId, WorkspaceNavConfig> = {
         ],
       },
       {
+        label: 'FINANCE',
+        items: [
+          { label: 'Billing Overview', href: '/admin/billing-overview', icon: Wallet },
+          { label: 'Revenue Overview', href: '/admin/revenue-overview', icon: TrendingUp },
+        ],
+      },
+      {
         label: 'REPORTS',
         items: [
-          { label: 'System Reports', href: '/admin/reports', icon: BarChart2 },
-          { label: 'Staff Reports', href: '/admin/reports/staff', icon: PieChart },
+          { label: 'Operational Reports', href: '/admin/reports', icon: BarChart2 },
+          { label: 'Financial Reports', href: '/admin/reports/financial', icon: PieChart },
+          { label: 'Department Reports', href: '/admin/reports/department', icon: FileBarChart },
+        ],
+      },
+      {
+        label: 'SECURITY & AUDIT',
+        items: [
+          { label: 'Audit Log', href: '/admin/audit-log', icon: History },
+          { label: 'Access Logs', href: '/admin/access-log', icon: KeyRound },
         ],
       },
       {
