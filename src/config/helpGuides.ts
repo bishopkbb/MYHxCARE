@@ -3211,6 +3211,30 @@ const ADMIN_ROLES_PERMISSIONS_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_DEPARTMENTS_GUIDE: HelpGuide = {
+  id: 'admin-departments',
+  title: 'Departments',
+  intro: 'Manage departments and organizational structure of the medical centre.',
+  sections: [
+    {
+      heading: 'Department List',
+      body: "Search or filter by status, then use the pencil to edit a department's head, contact info, or status, the people icon to jump straight to Staff Assignment for that department, or the row menu for operating hours and a single-department export. Export downloads the full filtered list as a CSV.",
+    },
+    {
+      heading: 'Department Heads and Staff Assignment',
+      body: "Department Heads shows each department's current head with a dropdown to reassign it from that department's own staff. Staff Assignment searches all staff and moves the selected person into a chosen department, updating their record in Staff Management immediately.",
+    },
+    {
+      heading: 'Operating Hours and Department Contacts',
+      body: 'Operating Hours lets you edit weekday and Saturday ranges, or mark a department open 24 hours. Department Contacts is a read-only directory with click-to-call and click-to-email links for each department.',
+    },
+    {
+      heading: 'Add Department',
+      body: 'The department list is administratively fixed and cannot be added to from this screen. + Add Department explains how to request a structural change.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4552,5 +4576,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/settings')) return SETTINGS_GUIDE;
   if (pathname.startsWith('/admin/staff-accounts')) return ADMIN_STAFF_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/admin/roles-permissions')) return ADMIN_ROLES_PERMISSIONS_GUIDE;
+  if (pathname.startsWith('/admin/departments')) return ADMIN_DEPARTMENTS_GUIDE;
   return GENERAL_GUIDE;
 }

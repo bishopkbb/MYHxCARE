@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { DepartmentsWorkspace } from '@/features/administration/components/DepartmentsWorkspace';
 
-export const metadata = { title: 'Department Management' };
+export const metadata = { title: 'Departments' };
 
-export default function DepartmentManagementPage() {
-  return (
-    <ComingSoon
-      title="Department Management"
-      description="Configuring hospital departments and clinical units is being finalised."
-    />
-  );
+export default function DepartmentsPage() {
+  return <DepartmentsWorkspace />;
 }
