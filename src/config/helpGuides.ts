@@ -3187,6 +3187,30 @@ const ADMIN_STAFF_MANAGEMENT_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_ROLES_PERMISSIONS_GUIDE: HelpGuide = {
+  id: 'admin-roles-permissions',
+  title: 'Roles & Permissions',
+  intro: 'Manage roles and control access permissions across modules and departments.',
+  sections: [
+    {
+      heading: 'Role List',
+      body: 'Select a role on the left to view and edit its permissions on the right. Search narrows the list; View Inactive Roles shows roles that are currently disabled.',
+    },
+    {
+      heading: 'Permission Matrix',
+      body: "Each module row has a radio selection for its access level. No Access, View (Read), Write (Edit), Approve, and Admin. Selecting a cell updates the role immediately; a lock icon marks a module that has been customized from its default. Filter by module, or toggle Show Active Only / Show Custom Only to narrow the grid. Export Matrix downloads the selected role's permissions as a CSV.",
+    },
+    {
+      heading: 'Assign Role, Department Access, Module Access',
+      body: 'Assign Role searches staff and assigns them the selected role, updating their record in Staff Management immediately. Department Access controls which departments a role can reach. Module Access is a read-only summary of the Permission Matrix.',
+    },
+    {
+      heading: 'Role Details and Add Role',
+      body: "Role Details lets you rename, describe, or activate/deactivate a role. + Add Role creates a new role, optionally copying an existing role's permissions as a starting point.",
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4527,5 +4551,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/settings/audit-log')) return AUDIT_LOG_GUIDE;
   if (pathname.startsWith('/settings')) return SETTINGS_GUIDE;
   if (pathname.startsWith('/admin/staff-accounts')) return ADMIN_STAFF_MANAGEMENT_GUIDE;
+  if (pathname.startsWith('/admin/roles-permissions')) return ADMIN_ROLES_PERMISSIONS_GUIDE;
   return GENERAL_GUIDE;
 }
