@@ -3167,6 +3167,26 @@ const LABORATORY_EQUIPMENT_MANAGEMENT_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_STAFF_MANAGEMENT_GUIDE: HelpGuide = {
+  id: 'admin-staff-management',
+  title: 'Staff Management',
+  intro: 'Every staff account across the medical centre, in one directory.',
+  sections: [
+    {
+      heading: 'Stat cards and filters',
+      body: 'The five cards summarize total, active, inactive, on-leave, and newly-added staff. Click Active Staff, Inactive Staff, or On Leave to filter the list by that status. Narrow the list further by Department, Role, or Status, or search by name, email, phone, or staff ID.',
+    },
+    {
+      heading: 'Staff list and details',
+      body: 'Select a row (or its eye icon) to open the Staff Details panel on the right, with contact info, department, role, and status. The row menu (⋮) also offers Edit Staff, Reset Password, and Deactivate/Reactivate.',
+    },
+    {
+      heading: 'Add, import, and export',
+      body: '+ Add New Staff opens a form for a single account. Import Staff bulk-adds accounts from a CSV file (Full Name, Email, Phone, Department, Role columns). Export downloads the currently filtered list as a CSV.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4506,5 +4526,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/profile')) return PROFILE_GUIDE;
   if (pathname.startsWith('/settings/audit-log')) return AUDIT_LOG_GUIDE;
   if (pathname.startsWith('/settings')) return SETTINGS_GUIDE;
+  if (pathname.startsWith('/admin/staff-accounts')) return ADMIN_STAFF_MANAGEMENT_GUIDE;
   return GENERAL_GUIDE;
 }
