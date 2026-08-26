@@ -3235,6 +3235,26 @@ const ADMIN_DEPARTMENTS_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_SERVICE_PRICING_GUIDE: HelpGuide = {
+  id: 'admin-service-pricing',
+  title: 'Service & Pricing',
+  intro: 'Manage services offered by the medical centre and their pricing.',
+  sections: [
+    {
+      heading: 'Service Catalogue',
+      body: "Search or filter by department, category, or status. The eye icon opens a service's full detail and price history, the pencil submits a new price for review (it never overwrites the live price directly), and the row menu offers price history, activate/deactivate, and a single-service export.",
+    },
+    {
+      heading: 'Price Changes Awaiting Publication',
+      body: 'Every service with an unpublished price change lands here. Publish makes the new price live immediately and logs it to Published Price History; Reject discards the change and returns the service to its prior status.',
+    },
+    {
+      heading: 'Published Price History',
+      body: 'A read-only, append-only log of every price change that has gone live, newest first. Published prices themselves are never edited, a correction is a new price change through the same review process.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4577,5 +4597,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/staff-accounts')) return ADMIN_STAFF_MANAGEMENT_GUIDE;
   if (pathname.startsWith('/admin/roles-permissions')) return ADMIN_ROLES_PERMISSIONS_GUIDE;
   if (pathname.startsWith('/admin/departments')) return ADMIN_DEPARTMENTS_GUIDE;
+  if (pathname.startsWith('/admin/service-pricing')) return ADMIN_SERVICE_PRICING_GUIDE;
   return GENERAL_GUIDE;
 }
