@@ -491,19 +491,16 @@ export function StaffManagementWorkspace() {
                       style={{ background: TABLE_HEADER_BG, borderBottom: '1px solid #E6F8FD' }}
                     >
                       {[
-                        ['Staff ID', 'w-28'],
-                        ['Full Name', 'min-w-[180px] flex-1 max-w-[220px]'],
-                        ['Department', 'w-40'],
-                        ['Role', 'w-36'],
-                        ['Email', 'w-52'],
-                        ['Phone', 'w-36'],
-                        ['Status', 'w-28'],
-                        ['Last Login', 'w-36'],
-                      ].map(([label, width]) => (
-                        <div
-                          key={label}
-                          className={`${width} shrink-0 py-2.5 pr-2 pl-3 text-center`}
-                        >
+                        ['Staff ID', 'w-28', 'text-center'],
+                        ['Full Name', 'min-w-[180px] flex-1 max-w-[220px]', 'text-left'],
+                        ['Department', 'w-40', 'text-center'],
+                        ['Role', 'w-36', 'text-center'],
+                        ['Email', 'w-52', 'text-center'],
+                        ['Phone', 'w-36', 'text-center'],
+                        ['Status', 'w-28', 'text-center'],
+                        ['Last Login', 'w-36', 'text-center'],
+                      ].map(([label, width, align]) => (
+                        <div key={label} className={`${width} shrink-0 py-2.5 pr-2 pl-3 ${align}`}>
                           <span
                             className="font-sans font-bold tracking-wider whitespace-nowrap uppercase"
                             style={{ fontSize: 14, color: '#4A7080' }}
@@ -538,8 +535,8 @@ export function StaffManagementWorkspace() {
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="max-w-[220px] min-w-0 flex-1 py-3 pr-2 text-center">
-                          <div className="flex items-center gap-2.5 text-left">
+                        <div className="max-w-[220px] min-w-0 flex-1 py-3 pr-2 pl-3 text-left">
+                          <div className="flex items-center gap-2.5">
                             <div
                               className="flex size-8 shrink-0 items-center justify-center rounded-full font-sans font-semibold text-white"
                               style={{ background: s.avatarBg, fontSize: 14 }}
@@ -563,32 +560,32 @@ export function StaffManagementWorkspace() {
                             </div>
                           </div>
                         </div>
-                        <div className="w-40 shrink-0 py-3 pr-2 text-center">
+                        <div className="w-40 shrink-0 py-3 pr-2 pl-3 text-center">
                           <Tooltip content={s.department}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {s.department}
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2 text-center">
+                        <div className="w-36 shrink-0 py-3 pr-2 pl-3 text-center">
                           <RoleBadge role={s.role} />
                         </div>
-                        <div className="w-52 shrink-0 py-3 pr-2 text-center">
+                        <div className="w-52 shrink-0 py-3 pr-2 pl-3 text-center">
                           <Tooltip content={s.email}>
                             <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                               {s.email}
                             </p>
                           </Tooltip>
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2 text-center">
+                        <div className="w-36 shrink-0 py-3 pr-2 pl-3 text-center">
                           <p className="truncate" style={{ fontSize: 14, color: '#4A7080' }}>
                             {s.phone}
                           </p>
                         </div>
-                        <div className="w-28 shrink-0 py-3 pr-2 text-center">
+                        <div className="w-28 shrink-0 py-3 pr-2 pl-3 text-center">
                           <StatusBadge status={s.status} />
                         </div>
-                        <div className="w-36 shrink-0 py-3 pr-2 text-center">
+                        <div className="w-36 shrink-0 py-3 pr-2 pl-3 text-center">
                           <p style={{ fontSize: 14, color: '#4A7080' }}>
                             {s.lastLogin ? formatDateTime(s.lastLogin) : 'Never'}
                           </p>
