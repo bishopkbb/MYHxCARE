@@ -58,3 +58,8 @@ AGENTS.md
 
 #Graphify
 /graphify-out/*
+
+# backend reference — Daniel's backend code for API consumption, and the
+# API endpoint docs, both stay local only
+/HMS-Backend-reference/
+/api-1.json
