@@ -3466,6 +3466,30 @@ const ADMIN_DEPARTMENT_REPORTS_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_AUDIT_LOG_GUIDE: HelpGuide = {
+  id: 'admin-audit-log',
+  title: 'Audit Logs',
+  intro: 'Track and review system activities and changes for security and compliance.',
+  sections: [
+    {
+      heading: 'Filters and stat cards',
+      body: 'Date Range, User, Action, Module, and Status narrow every entry, chart, and list on this page at once. Apply Filters recomputes the dashboard, Reset returns to the default range.',
+    },
+    {
+      heading: 'Audit Log Entries',
+      body: 'Every row is a recorded system event. Columns can be hidden or shown from the Columns menu, and the row menu opens the full detail for that entry. Pharmacy dispensing rows reflect real activity from this session; other modules show representative sample activity, since this system does not yet capture a shared audit trail for every module.',
+    },
+    {
+      heading: 'Actions Overview, Top Active Users, and Recent Critical Events',
+      body: 'The donut breaks the filtered entries down by action type. Top Active Users ranks staff by event count, and Recent Critical Events surfaces the latest flagged activity, such as failed logins or unauthorized access attempts.',
+    },
+    {
+      heading: 'Export Logs and Generate Report',
+      body: 'Export Logs downloads the currently filtered entries as CSV or PDF, or opens them for printing. Generate Report produces a PDF summary for a chosen date range.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4817,6 +4841,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/revenue-overview')) return ADMIN_REVENUE_OVERVIEW_GUIDE;
   if (pathname === '/admin/reports/financial') return ADMIN_FINANCIAL_REPORTS_GUIDE;
   if (pathname === '/admin/reports/department') return ADMIN_DEPARTMENT_REPORTS_GUIDE;
+  if (pathname.startsWith('/admin/audit-log')) return ADMIN_AUDIT_LOG_GUIDE;
   if (pathname === '/admin/reports') return ADMIN_OPERATIONAL_REPORTS_GUIDE;
   return GENERAL_GUIDE;
 }

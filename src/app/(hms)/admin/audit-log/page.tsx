@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { AdminAuditLogWorkspace } from '@/features/administration/components/AdminAuditLogWorkspace';
 
 export const metadata = { title: 'Audit Log' };
 
 export default function AdminAuditLogPage() {
-  return (
-    <ComingSoon
-      title="Audit Log"
-      description="A hospital-wide, cross-staff audit trail of system activity is being finalised."
-    />
-  );
+  return <AdminAuditLogWorkspace />;
 }
