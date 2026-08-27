@@ -7,13 +7,11 @@ import { FormField } from '@components/shared/FormField';
 import { FormInput } from '@components/shared/FormInput';
 import { FormSelect } from '@components/shared/FormSelect';
 import { useToast } from '@/hooks/useToast';
-import {
-  REPORT_DEFINITIONS,
-  type ReportFrequency,
-} from '@/features/administration/__mocks__/operationalReportsFixtures';
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
+
+type ReportFrequency = 'Daily' | 'Weekly' | 'Monthly';
 
 const FREQUENCY_OPTIONS: { value: ReportFrequency; label: string }[] = [
   { value: 'Daily', label: 'Daily' },
@@ -24,25 +22,27 @@ const FREQUENCY_OPTIONS: { value: ReportFrequency; label: string }[] = [
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function ScheduleReportModal({
+  reportOptions,
   defaultReportId,
   onClose,
 }: {
+  reportOptions: { id: string; name: string }[];
   defaultReportId?: string | undefined;
   onClose: () => void;
 }) {
   const toast = useToast();
-  const [reportId, setReportId] = useState(defaultReportId ?? REPORT_DEFINITIONS[0]!.id);
+  const [reportId, setReportId] = useState(defaultReportId ?? reportOptions[0]?.id ?? '');
   const [frequency, setFrequency] = useState<ReportFrequency>('Daily');
   const [recipientEmail, setRecipientEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const reportOptions = REPORT_DEFINITIONS.map((r) => ({ value: r.id, label: r.name }));
+  const selectOptions = reportOptions.map((r) => ({ value: r.id, label: r.name }));
   const emailValid = EMAIL_RE.test(recipientEmail.trim());
 
   function handleSubmit() {
     setSubmitted(true);
     if (!emailValid) return;
-    const report = REPORT_DEFINITIONS.find((r) => r.id === reportId);
+    const report = reportOptions.find((r) => r.id === reportId);
     toast.success(
       'Report scheduled',
       `${report?.name ?? 'Report'} will be sent ${frequency.toLowerCase()} to ${recipientEmail.trim()}.`,
@@ -89,7 +89,7 @@ export function ScheduleReportModal({
                 id="schedule-report-type"
                 value={reportId}
                 onChange={setReportId}
-                options={reportOptions}
+                options={selectOptions}
                 placeholder="Select report"
               />
             </FormField>

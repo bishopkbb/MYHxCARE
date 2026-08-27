@@ -591,13 +591,14 @@ export function OperationalReportsWorkspace() {
   }
 
   function handleGenerateCustomReport(params: {
-    reportType: ReportType;
+    reportId: string;
     dateFrom: string;
     dateTo: string;
   }) {
+    const reportName = REPORT_DEFINITIONS.find((r) => r.id === params.reportId)?.name ?? 'Custom';
     const rows: string[][] = [
       ['Field', 'Value'],
-      ['Report Type', params.reportType],
+      ['Report Type', reportName],
       ['From', formatHumanDate(params.dateFrom)],
       ['To', formatHumanDate(params.dateTo)],
     ];
@@ -606,8 +607,8 @@ export function OperationalReportsWorkspace() {
       return key >= params.dateFrom && key <= params.dateTo;
     });
     rows.push(['Total Patients in Range', String(patients.length)]);
-    downloadCSV(`custom-report-${params.reportType.toLowerCase()}`, rows);
-    toast.success('Custom report generated', `${params.reportType} report downloaded.`);
+    downloadCSV(`custom-report-${reportName.toLowerCase().replace(/\s+/g, '-')}`, rows);
+    toast.success('Custom report generated', `${reportName} report downloaded.`);
   }
 
   function handleDownloadReport(reportName: string) {
@@ -1144,12 +1145,14 @@ export function OperationalReportsWorkspace() {
 
       {scheduleOpen && (
         <ScheduleReportModal
+          reportOptions={REPORT_DEFINITIONS.map((r) => ({ id: r.id, name: r.name }))}
           defaultReportId={scheduleDefaultId}
           onClose={() => setScheduleOpen(false)}
         />
       )}
       {customReportOpen && (
         <CreateCustomReportModal
+          reportOptions={REPORT_DEFINITIONS.map((r) => ({ id: r.id, name: r.name }))}
           defaultDateFrom={dateFrom}
           defaultDateTo={dateTo}
           onClose={() => setCustomReportOpen(false)}

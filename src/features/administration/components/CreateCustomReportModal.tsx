@@ -6,45 +6,37 @@ import { useState } from 'react';
 import { FormDateInput } from '@components/shared/FormDateInput';
 import { FormField } from '@components/shared/FormField';
 import { FormSelect } from '@components/shared/FormSelect';
-import {
-  REPORT_DEFINITIONS,
-  type ReportType,
-} from '@/features/administration/__mocks__/operationalReportsFixtures';
 
 const FOCUS_RING =
   'focus-visible:ring-2 focus-visible:ring-[#00B4D8]/50 focus-visible:outline-none';
 
-const REPORT_TYPE_OPTIONS: { value: ReportType; label: string }[] = [
-  { value: 'Patient', label: 'Patient' },
-  { value: 'Department', label: 'Department' },
-  { value: 'Staff', label: 'Staff' },
-  { value: 'Service', label: 'Service' },
-  { value: 'Appointment', label: 'Appointment' },
-];
-
 export type CustomReportParams = {
-  reportType: ReportType;
+  reportId: string;
   dateFrom: string;
   dateTo: string;
 };
 
 export function CreateCustomReportModal({
+  reportOptions,
   defaultDateFrom,
   defaultDateTo,
   onClose,
   onGenerate,
 }: {
+  reportOptions: { id: string; name: string }[];
   defaultDateFrom: string;
   defaultDateTo: string;
   onClose: () => void;
   onGenerate: (params: CustomReportParams) => void;
 }) {
-  const [reportType, setReportType] = useState<ReportType>(REPORT_DEFINITIONS[0]!.reportType);
+  const [reportId, setReportId] = useState(reportOptions[0]?.id ?? '');
   const [dateFrom, setDateFrom] = useState(defaultDateFrom);
   const [dateTo, setDateTo] = useState(defaultDateTo);
 
+  const selectOptions = reportOptions.map((r) => ({ value: r.id, label: r.name }));
+
   function handleSubmit() {
-    onGenerate({ reportType, dateFrom, dateTo });
+    onGenerate({ reportId, dateFrom, dateTo });
     onClose();
   }
 
@@ -85,9 +77,9 @@ export function CreateCustomReportModal({
             <FormField label="Report Type" htmlFor="custom-report-type">
               <FormSelect
                 id="custom-report-type"
-                value={reportType}
-                onChange={(v) => setReportType(v as ReportType)}
-                options={REPORT_TYPE_OPTIONS}
+                value={reportId}
+                onChange={setReportId}
+                options={selectOptions}
                 placeholder="Select report type"
               />
             </FormField>

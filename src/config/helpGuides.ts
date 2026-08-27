@@ -3418,6 +3418,30 @@ const ADMIN_OPERATIONAL_REPORTS_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_FINANCIAL_REPORTS_GUIDE: HelpGuide = {
+  id: 'admin-financial-reports',
+  title: 'Financial Reports',
+  intro: 'Comprehensive financial reports and analytics for the medical centre.',
+  sections: [
+    {
+      heading: 'Filters and stat cards',
+      body: 'Date Range, Report Type, Department, and Payment Method narrow every chart and table on this page at once. Apply Filters recomputes the dashboard, Reset returns to the default range.',
+    },
+    {
+      heading: 'Revenue vs Expenses Trend, Payment Method, and Service Category',
+      body: 'Total Expenses and Net Income are estimated from real revenue, since the system does not track hospital operating costs, and are labelled accordingly. The two donuts break the same filtered period down by how it was paid and where the income came from.',
+    },
+    {
+      heading: 'Financial Summary',
+      body: 'Each row compares a financial metric across this period and the last, with a percentage change and trend line. Report Type narrows which rows are shown.',
+    },
+    {
+      heading: 'Report Insights, Quick Actions, and Recent Financial Reports',
+      body: 'Report Insights summarises the filtered period in plain language. Generate Custom Report builds and downloads a report scoped to your own parameters, Schedule New Report sets up recurring delivery by email, and Recent Financial Reports lists what has already been generated.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4767,6 +4791,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/facilities')) return ADMIN_FACILITY_RESOURCE_OVERVIEW_GUIDE;
   if (pathname.startsWith('/admin/billing-overview')) return ADMIN_BILLING_OVERVIEW_GUIDE;
   if (pathname.startsWith('/admin/revenue-overview')) return ADMIN_REVENUE_OVERVIEW_GUIDE;
+  if (pathname === '/admin/reports/financial') return ADMIN_FINANCIAL_REPORTS_GUIDE;
   if (pathname === '/admin/reports') return ADMIN_OPERATIONAL_REPORTS_GUIDE;
   return GENERAL_GUIDE;
 }
