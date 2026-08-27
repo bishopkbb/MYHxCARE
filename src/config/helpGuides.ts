@@ -3255,6 +3255,38 @@ const ADMIN_SERVICE_PRICING_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_MEDICAL_CENTRE_SETTINGS_GUIDE: HelpGuide = {
+  id: 'admin-medical-centre-settings',
+  title: 'Medical Centre Settings',
+  intro: "Configure the medical centre's information, branding, and preferences.",
+  sections: [
+    {
+      heading: 'General Information and Branding',
+      body: "Edit the medical centre's identity, registration details, and vision/mission/values on the left, then Change Logo or set Primary and Secondary Color, both update the preview cards on the right immediately.",
+    },
+    {
+      heading: 'Contact, Address, and Operating Hours',
+      body: 'Phone, email, website, physical address, and weekday/Saturday hours, plus Sunday and 24/7 emergency availability toggles, all editable and reflected live in the right-hand summary.',
+    },
+    {
+      heading: 'Departments and Service Configuration',
+      body: 'These sections show a live count from Departments and Service & Pricing and link out to those screens, they are not duplicated here.',
+    },
+    {
+      heading: 'Notifications, Documents, and Receipts',
+      body: 'Institution-wide notification preferences (email and in-app only, never SMS), plus what appears on generated documents, ID cards, and billing receipts.',
+    },
+    {
+      heading: 'System Preferences and Backup',
+      body: 'Timezone is fixed to West Africa Time across the whole application. Date and Time Format only affect generated documents and reports. Backup & Data shows the last backup time and lets you export current settings or request a new backup.',
+    },
+    {
+      heading: 'Save Changes',
+      body: 'Edits are kept as a draft until you select Save Changes, which is required before they take effect anywhere else in the application.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4598,5 +4630,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/roles-permissions')) return ADMIN_ROLES_PERMISSIONS_GUIDE;
   if (pathname.startsWith('/admin/departments')) return ADMIN_DEPARTMENTS_GUIDE;
   if (pathname.startsWith('/admin/service-pricing')) return ADMIN_SERVICE_PRICING_GUIDE;
+  if (pathname.startsWith('/admin/system-settings')) return ADMIN_MEDICAL_CENTRE_SETTINGS_GUIDE;
   return GENERAL_GUIDE;
 }

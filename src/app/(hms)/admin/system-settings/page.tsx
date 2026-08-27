@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { MedicalCentreSettingsWorkspace } from '@/features/administration/components/MedicalCentreSettingsWorkspace';
 
-export const metadata = { title: 'System Settings' };
+export const metadata = { title: 'Medical Centre Settings' };
 
 export default function SystemSettingsPage() {
-  return (
-    <ComingSoon
-      title="System Settings"
-      description="Hospital-wide system configuration is being finalised."
-    />
-  );
+  return <MedicalCentreSettingsWorkspace />;
 }
