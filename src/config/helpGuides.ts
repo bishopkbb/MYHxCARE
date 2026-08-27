@@ -3287,6 +3287,31 @@ const ADMIN_MEDICAL_CENTRE_SETTINGS_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_WORKFLOW_SETTINGS_GUIDE: HelpGuide = {
+  id: 'admin-workflow-settings',
+  title: 'Workflow Settings',
+  intro:
+    'Configure and manage operational workflows and approval processes across the medical centre.',
+  sections: [
+    {
+      heading: 'Department Workflows',
+      body: 'Select a department workflow on the left to edit its stages. Reorder stages with the up and down arrows, edit or duplicate a stage from its menu, and toggle Workflow Settings and Workflow Status below the stage list.',
+    },
+    {
+      heading: 'Queue, Appointment, Notification, and Escalation Settings',
+      body: 'These tabs set the defaults every department queue, the appointment scheduler, notification routing, and escalation rules follow. Linked rows that are actually configured on another screen show a Manage link there instead of duplicating the setting.',
+    },
+    {
+      heading: 'Approval Workflows',
+      body: 'Lists every process in the application that already requires approval before taking effect, with an editable approver role for each. Department Status Changes and Admin-Tier Role Assignment read live from Departments and Roles & Permissions.',
+    },
+    {
+      heading: 'Save Changes',
+      body: 'Every edit takes effect immediately. Save Changes marks the configuration as reviewed and updates the Last Updated stat card at the top of the screen.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4631,5 +4656,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/departments')) return ADMIN_DEPARTMENTS_GUIDE;
   if (pathname.startsWith('/admin/service-pricing')) return ADMIN_SERVICE_PRICING_GUIDE;
   if (pathname.startsWith('/admin/system-settings')) return ADMIN_MEDICAL_CENTRE_SETTINGS_GUIDE;
+  if (pathname.startsWith('/admin/workflow-settings')) return ADMIN_WORKFLOW_SETTINGS_GUIDE;
   return GENERAL_GUIDE;
 }

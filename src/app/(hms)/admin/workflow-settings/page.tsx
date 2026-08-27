@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { WorkflowSettingsWorkspace } from '@/features/administration/components/WorkflowSettingsWorkspace';
 
 export const metadata = { title: 'Workflow Settings' };
 
 export default function AdminWorkflowSettingsPage() {
-  return (
-    <ComingSoon
-      title="Workflow Settings"
-      description="Configuring operational workflows and approval processes across the medical centre is being finalised."
-    />
-  );
+  return <WorkflowSettingsWorkspace />;
 }
