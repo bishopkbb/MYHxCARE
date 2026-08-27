@@ -3374,6 +3374,26 @@ const ADMIN_BILLING_OVERVIEW_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_REVENUE_OVERVIEW_GUIDE: HelpGuide = {
+  id: 'admin-revenue-overview',
+  title: 'Revenue Overview',
+  intro: 'Track and analyze revenue performance across the medical centre.',
+  sections: [
+    {
+      heading: 'Date range and Revenue Trend',
+      body: 'Changing the date range recomputes every stat card, chart, and table on this page. The comparison strip below the trend chart shows this period against an equal-length prior period.',
+    },
+    {
+      heading: 'Revenue by Payment Method, Department, and Service Category',
+      body: 'These break the selected period down by how, where, and what revenue was collected for. The detailed department table adds a period-over-period trend for each department.',
+    },
+    {
+      heading: 'Revenue Aging and Quick Insights',
+      body: 'Revenue Aging shows outstanding balances by how overdue they are, with a direct link to the overdue invoices list. Quick Insights summarizes the period in plain language.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4722,5 +4742,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/department-monitoring')) return ADMIN_DEPARTMENT_MONITORING_GUIDE;
   if (pathname.startsWith('/admin/facilities')) return ADMIN_FACILITY_RESOURCE_OVERVIEW_GUIDE;
   if (pathname.startsWith('/admin/billing-overview')) return ADMIN_BILLING_OVERVIEW_GUIDE;
+  if (pathname.startsWith('/admin/revenue-overview')) return ADMIN_REVENUE_OVERVIEW_GUIDE;
   return GENERAL_GUIDE;
 }
