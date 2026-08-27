@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { FacilityResourceOverviewWorkspace } from '@/features/administration/components/FacilityResourceOverviewWorkspace';
 
 export const metadata = { title: 'Facility & Resource Overview' };
 
 export default function FacilityResourceOverviewPage() {
-  return (
-    <ComingSoon
-      title="Facility & Resource Overview"
-      description="Real-time monitoring of beds, rooms, equipment, and resources across the medical centre is being finalised."
-    />
-  );
+  return <FacilityResourceOverviewWorkspace />;
 }

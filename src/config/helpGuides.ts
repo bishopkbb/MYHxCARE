@@ -3333,6 +3333,26 @@ const ADMIN_DEPARTMENT_MONITORING_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_FACILITY_RESOURCE_OVERVIEW_GUIDE: HelpGuide = {
+  id: 'admin-facility-resource-overview',
+  title: 'Facility & Resource Overview',
+  intro: 'A real-time overview of facilities, equipment, and resources across the medical centre.',
+  sections: [
+    {
+      heading: 'Facility Overview',
+      body: 'Bed Occupancy, Rooms, Equipment Status, and Facility Capacity each show a utilization bar and a breakdown. Equipment Status reads live from Laboratory Equipment Management.',
+    },
+    {
+      heading: 'Resource Overview by Category',
+      body: 'Six categories cover equipment, pharmacy supplies, laboratory resources, utilities, IT systems, and safety equipment. Pharmacy & Supplies and Laboratory Resources read live from their own screens, so numbers always match what those screens show.',
+    },
+    {
+      heading: 'Resource Alerts and Recent Maintenance',
+      body: 'Resource Alerts flags equipment and facility issues by severity. Recent Maintenance is a log of completed service and inspection work. Export Report downloads every section on this page as one CSV.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4679,5 +4699,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/system-settings')) return ADMIN_MEDICAL_CENTRE_SETTINGS_GUIDE;
   if (pathname.startsWith('/admin/workflow-settings')) return ADMIN_WORKFLOW_SETTINGS_GUIDE;
   if (pathname.startsWith('/admin/department-monitoring')) return ADMIN_DEPARTMENT_MONITORING_GUIDE;
+  if (pathname.startsWith('/admin/facilities')) return ADMIN_FACILITY_RESOURCE_OVERVIEW_GUIDE;
   return GENERAL_GUIDE;
 }
