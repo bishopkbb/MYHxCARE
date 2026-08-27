@@ -3312,6 +3312,27 @@ const ADMIN_WORKFLOW_SETTINGS_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_DEPARTMENT_MONITORING_GUIDE: HelpGuide = {
+  id: 'admin-department-monitoring',
+  title: 'Department Monitoring',
+  intro:
+    'A real-time overview of all departments and key operational metrics across the medical centre.',
+  sections: [
+    {
+      heading: 'Stat row and date range',
+      body: 'The top row summarizes hospital-wide activity. Total Patients Today and the date range control are live, changing the range updates that count. Filters narrows the department cards below by status.',
+    },
+    {
+      heading: 'Department Overview',
+      body: "Each card shows a department's two key metrics and either an hourly trend, a bed or invoice comparison, or a short task list, matching how that department is best summarized. View Details opens that department's own screen.",
+    },
+    {
+      heading: 'Recent Alerts, System Notices, and Quick Actions',
+      body: "Recent Alerts mirrors the Administration Dashboard's own alert feed. System Notices shows the most recent announcements, the same ones every workspace sees. Quick Actions jumps straight to the screen for that task.",
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4657,5 +4678,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/service-pricing')) return ADMIN_SERVICE_PRICING_GUIDE;
   if (pathname.startsWith('/admin/system-settings')) return ADMIN_MEDICAL_CENTRE_SETTINGS_GUIDE;
   if (pathname.startsWith('/admin/workflow-settings')) return ADMIN_WORKFLOW_SETTINGS_GUIDE;
+  if (pathname.startsWith('/admin/department-monitoring')) return ADMIN_DEPARTMENT_MONITORING_GUIDE;
   return GENERAL_GUIDE;
 }
