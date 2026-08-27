@@ -3490,6 +3490,30 @@ const ADMIN_AUDIT_LOG_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_ACCESS_LOG_GUIDE: HelpGuide = {
+  id: 'admin-access-log',
+  title: 'Access Logs',
+  intro: 'Monitor user sign-ins, access attempts, and session activities across the system.',
+  sections: [
+    {
+      heading: 'Filters and stat cards',
+      body: 'Date Range, User, Department, Login Type, and Status narrow every entry, chart, and list on this page at once. Apply Filters recomputes the dashboard, Reset returns to the default range.',
+    },
+    {
+      heading: 'Access Log Entries',
+      body: 'Every row is a sign-in or access attempt. Columns can be hidden or shown from the Columns menu, and the row menu opens the full detail for that entry. Blocked Users counts staff with 3 or more failed attempts in the selected range, the same threshold stated on the sign-in page itself.',
+    },
+    {
+      heading: 'Login Activity Overview, Logins by Time of Day, and Top Access Locations',
+      body: 'The donut breaks logins down by success or failure. The line chart shows when logins happen across the day, and Top Access Locations ranks where sign-ins are coming from.',
+    },
+    {
+      heading: 'Quick Actions, Export Logs, and Generate Report',
+      body: 'View Blocked Users and Review Failed Attempts filter the table to the relevant entries. Security Settings opens Roles & Permissions. Export Logs downloads the currently filtered entries as CSV or PDF, or opens them for printing, and Generate Report produces a PDF summary for a chosen date range.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4842,6 +4866,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname === '/admin/reports/financial') return ADMIN_FINANCIAL_REPORTS_GUIDE;
   if (pathname === '/admin/reports/department') return ADMIN_DEPARTMENT_REPORTS_GUIDE;
   if (pathname.startsWith('/admin/audit-log')) return ADMIN_AUDIT_LOG_GUIDE;
+  if (pathname.startsWith('/admin/access-log')) return ADMIN_ACCESS_LOG_GUIDE;
   if (pathname === '/admin/reports') return ADMIN_OPERATIONAL_REPORTS_GUIDE;
   return GENERAL_GUIDE;
 }
