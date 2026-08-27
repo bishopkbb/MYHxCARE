@@ -3353,6 +3353,27 @@ const ADMIN_FACILITY_RESOURCE_OVERVIEW_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_BILLING_OVERVIEW_GUIDE: HelpGuide = {
+  id: 'admin-billing-overview',
+  title: 'Billing Overview',
+  intro:
+    'A real-time overview of billing activities and financial transactions across the medical centre.',
+  sections: [
+    {
+      heading: 'Revenue Trend, Billing Summary, and Invoices by Department',
+      body: 'The period selector on Revenue Trend switches between Today, This Week, This Month, and This Year. Billing Summary breaks down every invoice by status, and Invoices by Department shows where they come from.',
+    },
+    {
+      heading: 'Recent Invoices and Recent Payments',
+      body: 'Both tables page through the full real invoice and payment records. The eye icon on an invoice opens its full preview, with a real download action.',
+    },
+    {
+      heading: 'Aging of Outstanding Invoices and Quick Actions',
+      body: 'Aging buckets outstanding balances by how overdue they are. Quick Actions jumps straight to Invoices, Payments, or Refunds for the task at hand.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4700,5 +4721,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/workflow-settings')) return ADMIN_WORKFLOW_SETTINGS_GUIDE;
   if (pathname.startsWith('/admin/department-monitoring')) return ADMIN_DEPARTMENT_MONITORING_GUIDE;
   if (pathname.startsWith('/admin/facilities')) return ADMIN_FACILITY_RESOURCE_OVERVIEW_GUIDE;
+  if (pathname.startsWith('/admin/billing-overview')) return ADMIN_BILLING_OVERVIEW_GUIDE;
   return GENERAL_GUIDE;
 }
