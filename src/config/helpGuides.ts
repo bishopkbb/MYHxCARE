@@ -3394,6 +3394,30 @@ const ADMIN_REVENUE_OVERVIEW_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_OPERATIONAL_REPORTS_GUIDE: HelpGuide = {
+  id: 'admin-operational-reports',
+  title: 'Operational Reports',
+  intro: 'Monitor and analyze day-to-day operations across the medical centre.',
+  sections: [
+    {
+      heading: 'Filters and stat cards',
+      body: 'Date Range, Department, Service, and Report Type narrow every chart and table on this page at once. Apply Filters recomputes the dashboard, Reset returns to the default range.',
+    },
+    {
+      heading: 'Patient Volume Trend, Visits by Department, and Appointments Overview',
+      body: 'The trend chart switches between Daily, Weekly, and Monthly grouping. Both donuts break the same filtered period down by where patients were seen and how their appointments concluded.',
+    },
+    {
+      heading: 'Operational Reports catalog',
+      body: 'Each row is a report definition, not a single generated file. The eye and download icons preview or download that report using the current filters, the row menu can schedule it for recurring delivery.',
+    },
+    {
+      heading: 'Quick Actions and Recent Reports',
+      body: 'Create Custom Report builds and downloads a report scoped to your own parameters. Schedule New Report sets up recurring delivery by email. Recent Reports lists what has already been generated.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4743,5 +4767,6 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/facilities')) return ADMIN_FACILITY_RESOURCE_OVERVIEW_GUIDE;
   if (pathname.startsWith('/admin/billing-overview')) return ADMIN_BILLING_OVERVIEW_GUIDE;
   if (pathname.startsWith('/admin/revenue-overview')) return ADMIN_REVENUE_OVERVIEW_GUIDE;
+  if (pathname === '/admin/reports') return ADMIN_OPERATIONAL_REPORTS_GUIDE;
   return GENERAL_GUIDE;
 }

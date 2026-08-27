@@ -1,12 +1,7 @@
-import { ComingSoon } from '@/components/shared/ComingSoon';
+import { OperationalReportsWorkspace } from '@/features/administration/components/OperationalReportsWorkspace';
 
 export const metadata = { title: 'Operational Reports' };
 
 export default function AdminOperationalReportsPage() {
-  return (
-    <ComingSoon
-      title="Operational Reports"
-      description="Hospital-wide operational and activity reports are being finalised."
-    />
-  );
+  return <OperationalReportsWorkspace />;
 }
