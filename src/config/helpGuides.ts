@@ -3442,6 +3442,30 @@ const ADMIN_FINANCIAL_REPORTS_GUIDE: HelpGuide = {
   ],
 };
 
+const ADMIN_DEPARTMENT_REPORTS_GUIDE: HelpGuide = {
+  id: 'admin-department-reports',
+  title: 'Department Reports',
+  intro: 'Analyze performance and metrics for all departments.',
+  sections: [
+    {
+      heading: 'Filters and stat cards',
+      body: "Date Range, Department, Report Type, and Metric narrow every chart and table on this page at once. Total Departments reflects the hospital's organizational chart, while the table below groups by where patients were actually seen, a related but different breakdown. Apply Filters recomputes the dashboard, Reset returns to the default range.",
+    },
+    {
+      heading: 'Visits by Department, Revenue by Department, and Procedures by Department',
+      body: 'The Metric selector switches what the bar chart plots. Avg Waiting Time and Patient Satisfaction are estimated figures, since the system does not track either in real time yet, and are labelled accordingly.',
+    },
+    {
+      heading: 'Department Performance Summary',
+      body: "Each row compares one department's visits, revenue, procedures, waiting time, and satisfaction, with a percentage change and an eye icon to open that department in Department Monitoring.",
+    },
+    {
+      heading: 'Report Insights, Quick Actions, and Recent Department Reports',
+      body: 'Report Insights summarises the filtered period in plain language. Generate Department Report builds and downloads a report scoped to your own parameters, Compare Departments jumps to the summary table, Schedule Department Report sets up recurring delivery by email, and Recent Department Reports lists what has already been generated.',
+    },
+  ],
+};
+
 const LABORATORY_QUALITY_CONTROL_REPORTS_GUIDE: HelpGuide = {
   id: 'laboratory-quality-control-reports',
   title: 'Quality Control Reports',
@@ -4792,6 +4816,7 @@ export function resolveHelpGuide(pathname: string): HelpGuide {
   if (pathname.startsWith('/admin/billing-overview')) return ADMIN_BILLING_OVERVIEW_GUIDE;
   if (pathname.startsWith('/admin/revenue-overview')) return ADMIN_REVENUE_OVERVIEW_GUIDE;
   if (pathname === '/admin/reports/financial') return ADMIN_FINANCIAL_REPORTS_GUIDE;
+  if (pathname === '/admin/reports/department') return ADMIN_DEPARTMENT_REPORTS_GUIDE;
   if (pathname === '/admin/reports') return ADMIN_OPERATIONAL_REPORTS_GUIDE;
   return GENERAL_GUIDE;
 }
